@@ -9,7 +9,10 @@ module roguelite.engine {
 
     requires transitive java.desktop;
 
+    opens fi.jakojaannos.roguelite.engine.data.resources to roguelite.engine.ecs;
+
     exports fi.jakojaannos.roguelite.engine;
+    exports fi.jakojaannos.roguelite.engine.data.resources;
     exports fi.jakojaannos.roguelite.engine.state;
     exports fi.jakojaannos.roguelite.engine.tilemap;
     exports fi.jakojaannos.roguelite.engine.input;
