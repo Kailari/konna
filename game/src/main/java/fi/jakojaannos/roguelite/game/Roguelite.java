@@ -24,45 +24,6 @@ import java.util.Queue;
 
 @Slf4j
 public class Roguelite extends GameBase {
-    private final SystemDispatcher dispatcher;
-
-    public Roguelite() {
-        this.dispatcher = SystemDispatcher
-                .builder()
-                .withGroups(SystemGroups.values())
-                .addGroupDependencies(SystemGroups.CLEANUP, Arrays.stream(SystemGroups.values())
-                                                                  .filter(group -> group != SystemGroups.CLEANUP)
-                                                                  .toArray(SystemGroup[]::new))
-                .addGroupDependencies(SystemGroups.EARLY_TICK, SystemGroups.INPUT)
-                .addGroupDependencies(SystemGroups.CHARACTER_TICK, SystemGroups.INPUT, SystemGroups.EARLY_TICK)
-                .addGroupDependencies(SystemGroups.PHYSICS_TICK, SystemGroups.CHARACTER_TICK, SystemGroups.EARLY_TICK)
-                .addGroupDependencies(SystemGroups.COLLISION_HANDLER, SystemGroups.PHYSICS_TICK)
-                .addGroupDependencies(SystemGroups.LATE_TICK, SystemGroups.COLLISION_HANDLER, SystemGroups.PHYSICS_TICK, SystemGroups.CHARACTER_TICK)
-                .withSystem(new ColliderDataCollectorSystem())
-                .withSystem(new PlayerInputSystem())
-                .withSystem(new CharacterMovementSystem())
-                .withSystem(new CharacterAttackSystem())
-                .withSystem(new ApplyVelocitySystem())
-                .withSystem(new SnapToCursorSystem())
-                .withSystem(new CharacterAIControllerSystem())
-                .withSystem(new StalkerAIControllerSystem())
-                .withSystem(new SlimeAIControllerSystem())
-                .withSystem(new SlimeDeathHandlerSystem())
-                .withSystem(new CameraControlSystem())
-                .withSystem(new SpawnerSystem())
-                .withSystem(new ProjectileToCharacterCollisionHandlerSystem())
-                .withSystem(new DestroyProjectilesOnCollisionSystem())
-                .withSystem(new CollisionEventCleanupSystem())
-                .withSystem(new HealthUpdateSystem())
-                .withSystem(new EnemyAttackCoolDownSystem())
-                .withSystem(new EnemyToPlayerCollisionHandlerSystem())
-                .withSystem(new ReaperSystem())
-                .withSystem(new CleanUpDeadPlayersSystem())
-                .withSystem(new RotatePlayerTowardsAttackTargetSystem())
-                .withSystem(new RestartGameSystem())
-                .build();
-    }
-
     public GameState createInitialState() {
         return createInitialState(System.nanoTime());
     }
@@ -108,9 +69,7 @@ public class Roguelite extends GameBase {
             });
         }
 
-        this.dispatcher.dispatch(state.getWorld());
-        state.getWorld().getEntityManager().applyModifications();
-
+        state.tick();
         if (state.getWorld().getOrCreateResource(GameStatus.class).shouldRestart) {
             return this.createInitialState();
         }
