@@ -41,7 +41,7 @@ public class LevelRenderingSystem implements ECSSystem {
             final World world
     ) {
         val camera = world.getEntityManager()
-                          .getComponentOf(world.getResource(CameraProperties.class).cameraEntity,
+                          .getComponentOf(world.getOrCreateResource(CameraProperties.class).cameraEntity,
                                           Camera.class)
                           .orElseThrow();
 

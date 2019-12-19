@@ -1,6 +1,5 @@
 package fi.jakojaannos.roguelite.game.test.stepdefs.simulation;
 
-import fi.jakojaannos.roguelite.game.Roguelite;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.When;
@@ -12,7 +11,7 @@ import static fi.jakojaannos.roguelite.game.test.global.GlobalState.*;
 public class SimulationSteps {
     @Given("the game world just finished loading")
     public void the_game_world_just_finished_loading() {
-        state = Roguelite.createInitialState(6969);
+        state = game.createInitialState(6969);
         playerInitialPosition = getLocalPlayer().flatMap(entity -> getComponentOf(entity, Transform.class))
                                                 .map(transform -> new Vector2d(transform.position))
                                                 .orElseThrow();

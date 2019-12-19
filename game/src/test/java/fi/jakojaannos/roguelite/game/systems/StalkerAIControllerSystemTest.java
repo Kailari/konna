@@ -5,7 +5,7 @@ import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
-import fi.jakojaannos.roguelite.game.data.resources.Time;
+import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -32,14 +32,14 @@ public class StalkerAIControllerSystemTest {
         this.world = World.createNew(entityManager);
         Time time = mock(Time.class);
         when(time.getTimeStepInSeconds()).thenReturn(0.02);
-        world.getResource(Time.class).setTimeManager(time);
+        world.createResource(Time.class, time);
 
 
         Entity player = entityManager.createEntity();
         this.playerPos = new Transform();
         entityManager.addComponentTo(player, playerPos);
         entityManager.addComponentTo(player, new PlayerTag());
-        this.world.getResource(Players.class).player = player;
+        this.world.getOrCreateResource(Players.class).player = player;
 
 
         stalker = entityManager.createEntity();

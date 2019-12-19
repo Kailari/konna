@@ -35,9 +35,9 @@ public class PlayerInputSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
-        val inputs = world.getResource(Inputs.class);
-        val mouse = world.getResource(Mouse.class);
-        val camProps = world.getResource(CameraProperties.class);
+        val inputs = world.getOrCreateResource(Inputs.class);
+        val mouse = world.getOrCreateResource(Mouse.class);
+        val camProps = world.getOrCreateResource(CameraProperties.class);
         val cursorPosition = tmpCursorPos.set(0.0, 0.0);
         if (camProps.cameraEntity != null) {
             val camera = world.getEntityManager().getComponentOf(camProps.cameraEntity, Camera.class).get();

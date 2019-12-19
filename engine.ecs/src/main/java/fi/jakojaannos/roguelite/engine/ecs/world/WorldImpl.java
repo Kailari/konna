@@ -3,11 +3,13 @@ package fi.jakojaannos.roguelite.engine.ecs.world;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.Resource;
 import fi.jakojaannos.roguelite.engine.ecs.World;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 public class WorldImpl implements World {
     private final EntityManager entityManager;
     private final Map<Class<? extends Resource>, Resource> resourceStorage = new HashMap<>();
@@ -22,7 +24,17 @@ public class WorldImpl implements World {
     }
 
     @Override
-    public <TResource extends Resource> TResource getResource(Class<? extends TResource> resourceType) {
+    public <TResource extends Resource> void createResource(
+            final Class<TResource> resourceClass,
+            final TResource resource
+    ) {
+        if (this.resourceStorage.putIfAbsent(resourceClass, resource) != null) {
+            LOG.error("Could not create resource {}. Instance already exists!", resource.getClass().getSimpleName());
+        }
+    }
+
+    @Override
+    public <TResource extends Resource> TResource getOrCreateResource(Class<? extends TResource> resourceType) {
         // noinspection unchecked
         return (TResource) this.resourceStorage.computeIfAbsent(resourceType,
                                                                 rt -> {

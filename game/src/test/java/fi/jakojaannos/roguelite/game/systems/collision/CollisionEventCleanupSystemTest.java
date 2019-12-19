@@ -34,7 +34,7 @@ class CollisionEventCleanupSystemTest {
 
         entityManager = mock(EntityManager.class);
         when(world.getEntityManager()).thenReturn(entityManager);
-        when(world.getResource(eq(Collisions.class))).thenReturn(collisions);
+        when(world.getOrCreateResource(eq(Collisions.class))).thenReturn(collisions);
         when(entityManager.getComponentOf(eq(entity), eq(Collider.class))).thenReturn(Optional.of(collider));
     }
 

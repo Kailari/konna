@@ -8,10 +8,9 @@ import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.ShaderProgram;
 import fi.jakojaannos.roguelite.game.data.components.Health;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
-import fi.jakojaannos.roguelite.game.data.resources.Time;
+import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import lombok.val;
 import org.joml.Matrix4f;
-import org.joml.Vector3f;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
@@ -19,7 +18,8 @@ import java.nio.file.Path;
 import java.util.stream.Stream;
 
 import static org.lwjgl.opengl.GL15.*;
-import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
+import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 import static org.lwjgl.system.MemoryUtil.NULL;
@@ -120,7 +120,7 @@ public class HealthBarRenderingSystem implements ECSSystem {
         glBindBuffer(GL_ARRAY_BUFFER, this.vbo);
 
         val entityManager = world.getEntityManager();
-        val timeManager = world.getResource(Time.class);
+        val timeManager = world.getOrCreateResource(Time.class);
         val healthbarDurationInTicks = timeManager.convertToTicks(5.0);
 
         entities.forEach(entity -> {
@@ -128,8 +128,9 @@ public class HealthBarRenderingSystem implements ECSSystem {
             val health = entityManager.getComponentOf(entity, Health.class).orElseThrow();
 
             long ticksSinceDamaged = timeManager.getCurrentGameTime() - health.lastDamageInstanceTimeStamp;
-            if (!health.healthBarAlwaysVisible
-                    && ticksSinceDamaged >= healthbarDurationInTicks) return;
+            if (!health.healthBarAlwaysVisible && ticksSinceDamaged >= healthbarDurationInTicks) {
+                return;
+            }
 
             this.shader.setUniform1f(uniformHealth, (float) health.asPercentage());
 

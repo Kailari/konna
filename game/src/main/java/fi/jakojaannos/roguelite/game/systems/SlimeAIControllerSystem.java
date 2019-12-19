@@ -4,7 +4,7 @@ import fi.jakojaannos.roguelite.engine.ecs.*;
 import fi.jakojaannos.roguelite.game.data.archetypes.SlimeArchetype;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
-import fi.jakojaannos.roguelite.game.data.resources.Time;
+import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Vector2d;
@@ -34,9 +34,9 @@ public class SlimeAIControllerSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
-        val delta = world.getResource(Time.class).getTimeStepInSeconds();
+        val delta = world.getOrCreateResource(Time.class).getTimeStepInSeconds();
         val entityManager = world.getEntityManager();
-        val player = world.getResource(Players.class).player;
+        val player = world.getOrCreateResource(Players.class).player;
         if (player == null) {
             return;
         }

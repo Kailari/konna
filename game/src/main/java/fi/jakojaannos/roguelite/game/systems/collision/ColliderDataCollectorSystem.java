@@ -27,7 +27,7 @@ public class ColliderDataCollectorSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
-        val colliders = world.getResource(Colliders.class);
+        val colliders = world.getOrCreateResource(Colliders.class);
 
         colliders.solidForLayer.clear();
         colliders.overlapsWithLayer.clear();

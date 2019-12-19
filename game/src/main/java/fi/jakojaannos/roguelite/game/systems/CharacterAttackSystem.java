@@ -4,11 +4,10 @@ import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.state.TimeProvider;
 import fi.jakojaannos.roguelite.engine.utilities.math.CoordinateHelper;
 import fi.jakojaannos.roguelite.game.data.archetypes.BasicProjectileArchetype;
 import fi.jakojaannos.roguelite.game.data.components.*;
-import fi.jakojaannos.roguelite.game.data.resources.Time;
+import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import lombok.val;
 import org.joml.Vector2d;
 
@@ -34,7 +33,7 @@ public class CharacterAttackSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
-        val delta = world.getResource(Time.class).getTimeStepInSeconds();
+        val delta = world.getOrCreateResource(Time.class).getTimeStepInSeconds();
 
         val entityManager = world.getEntityManager();
         entities.forEach(entity -> {

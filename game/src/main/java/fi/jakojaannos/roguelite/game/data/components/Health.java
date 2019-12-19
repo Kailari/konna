@@ -14,11 +14,12 @@ public class Health implements Component {
 
     public List<DamageInstance> damageInstances = new ArrayList<>();
 
-    public double maxHealth = 100.0,
+    public double maxHealth = 100.0;
+
     /**
      * Use addDamageInstance(...) to modify this!
      */
-    currentHealth = 100.0;
+    public double currentHealth = 100.0;
 
     public long lastDamageInstanceTimeStamp = -10000L;
     public boolean healthBarAlwaysVisible = false;

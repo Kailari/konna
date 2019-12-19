@@ -33,7 +33,7 @@ public class CharacterAIControllerSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
-        val player = world.getResource(Players.class).player;
+        val player = world.getOrCreateResource(Players.class).player;
         if (player == null) {
             entities.forEach(entity -> world.getEntityManager()
                                             .getComponentOf(entity, CharacterInput.class)

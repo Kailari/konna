@@ -1,11 +1,16 @@
 package fi.jakojaannos.roguelite.engine;
 
+import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.roguelite.engine.utilities.UpdateableTimeManager;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public abstract class GameBase implements Game {
     private boolean disposed = false;
     private boolean finished = false;
+
+    private final UpdateableTimeManager timeManager = new SimpleTimeManager(20L);
 
     @Override
     public boolean isFinished() {
@@ -20,6 +25,16 @@ public abstract class GameBase implements Game {
     @Override
     public boolean isDisposed() {
         return disposed;
+    }
+
+    @Override
+    public void updateTime() {
+        this.timeManager.refresh();
+    }
+
+    @Override
+    public TimeManager getTime() {
+        return this.timeManager;
     }
 
     @Override

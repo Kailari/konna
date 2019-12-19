@@ -1,6 +1,7 @@
 package fi.jakojaannos.roguelite.game;
 
 import fi.jakojaannos.roguelite.engine.GameBase;
+import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.ecs.SystemGroup;
@@ -11,7 +12,6 @@ import fi.jakojaannos.roguelite.engine.input.InputButton;
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
-import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
 import fi.jakojaannos.roguelite.game.data.archetypes.PlayerArchetype;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import fi.jakojaannos.roguelite.game.data.resources.*;
@@ -65,24 +65,24 @@ public class Roguelite extends GameBase {
                 .build();
     }
 
-    public static GameState createInitialState() {
+    public GameState createInitialState() {
         return createInitialState(System.nanoTime());
     }
 
-    public static GameState createInitialState(long seed) {
+    public GameState createInitialState(long seed) {
         val entities = EntityManager.createNew(256, 32);
-        val state = new GameState(World.createNew(entities), new SimpleTimeManager(20L));
+        val state = new GameState(World.createNew(entities), getTime());
 
         val player = PlayerArchetype.create(entities,
                                             new Transform(0, 0));
-        state.getWorld().getResource(Players.class).player = player;
+        state.getWorld().getOrCreateResource(Players.class).player = player;
 
         val camera = entities.createEntity();
         val cameraComponent = new Camera();
         cameraComponent.followTarget = player;
         entities.addComponentTo(camera, cameraComponent);
         entities.addComponentTo(camera, new NoDrawTag());
-        state.getWorld().getResource(CameraProperties.class).cameraEntity = camera;
+        state.getWorld().getOrCreateResource(CameraProperties.class).cameraEntity = camera;
 
         val crosshair = entities.createEntity();
         entities.addComponentTo(crosshair, new Transform(-999.0, -999.0));
@@ -113,9 +113,8 @@ public class Roguelite extends GameBase {
             final GameState state,
             final Queue<InputEvent> inputEvents
     ) {
-        state.getWorld().getResource(Time.class).setTimeManager(state.getTime());
-        val inputs = state.getWorld().getResource(Inputs.class);
-        val mouse = state.getWorld().getResource(Mouse.class);
+        val inputs = state.getWorld().getOrCreateResource(Inputs.class);
+        val mouse = state.getWorld().getOrCreateResource(Mouse.class);
 
         while (!inputEvents.isEmpty()) {
             val event = inputEvents.remove();
@@ -148,8 +147,8 @@ public class Roguelite extends GameBase {
         this.dispatcher.dispatch(state.getWorld());
         state.getWorld().getEntityManager().applyModifications();
 
-        if (state.getWorld().getResource(GameStatus.class).shouldRestart) {
-            return Roguelite.createInitialState();
+        if (state.getWorld().getOrCreateResource(GameStatus.class).shouldRestart) {
+            return this.createInitialState();
         }
 
         return state;

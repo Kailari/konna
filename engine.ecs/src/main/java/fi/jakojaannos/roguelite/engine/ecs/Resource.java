@@ -8,7 +8,7 @@ package fi.jakojaannos.roguelite.engine.ecs;
  * As resources are single-instance per world, there is mostly no restrictions on what type of data
  * they should to hold.
  *
- * @see World#getResource(Class)
+ * @see World#getOrCreateResource(Class)
  * @see RequirementsBuilder#requireResource(Class)
  */
 public interface Resource {

@@ -16,11 +16,11 @@ import static org.junit.jupiter.api.Assertions.*;
 class RogueliteTest {
     @Test
     void inputsAreFalseByDefault() {
-        GameState state = Roguelite.createInitialState();
         Roguelite roguelite = new Roguelite();
+        GameState state = roguelite.createInitialState();
         roguelite.tick(state, new ArrayDeque<>());
 
-        Inputs inputs = state.getWorld().getResource(Inputs.class);
+        Inputs inputs = state.getWorld().getOrCreateResource(Inputs.class);
         assertFalse(inputs.inputLeft);
         assertFalse(inputs.inputRight);
         assertFalse(inputs.inputUp);
@@ -42,15 +42,15 @@ class RogueliteTest {
             boolean up,
             boolean down
     ) {
-        GameState state = Roguelite.createInitialState();
         Roguelite roguelite = new Roguelite();
+        GameState state = roguelite.createInitialState();
 
         Queue<InputEvent> events = new ArrayDeque<>();
         events.offer(new InputEvent(new ButtonInput(InputButton.Keyboard.valueOf(key), ButtonInput.Action.PRESS)));
 
         roguelite.tick(state, events);
 
-        Inputs inputs = state.getWorld().getResource(Inputs.class);
+        Inputs inputs = state.getWorld().getOrCreateResource(Inputs.class);
         assertEquals(inputs.inputLeft, left);
         assertEquals(inputs.inputRight, right);
         assertEquals(inputs.inputUp, up);
@@ -69,14 +69,14 @@ class RogueliteTest {
             double newPos
     ) {
         InputAxis.Mouse axisPos = horizontal ? InputAxis.Mouse.X_POS : InputAxis.Mouse.Y_POS;
-        GameState state = Roguelite.createInitialState();
-        Mouse mouse = state.getWorld().getResource(Mouse.class);
+        Roguelite roguelite = new Roguelite();
+        GameState state = roguelite.createInitialState();
+        Mouse mouse = state.getWorld().getOrCreateResource(Mouse.class);
         if (horizontal) {
             mouse.pos.x = initial;
         } else {
             mouse.pos.y = initial;
         }
-        Roguelite roguelite = new Roguelite();
 
         Queue<InputEvent> events = new ArrayDeque<>();
         events.offer(new InputEvent(new AxialInput(axisPos, newPos)));
@@ -88,22 +88,22 @@ class RogueliteTest {
 
     @Test
     void mouseButtonEventsUpdateGameState() {
-        GameState state = Roguelite.createInitialState();
         Roguelite roguelite = new Roguelite();
+        GameState state = roguelite.createInitialState();
 
         Queue<InputEvent> events = new ArrayDeque<>();
         events.offer(ButtonInput.pressed(InputButton.Mouse.button(0)));
 
         roguelite.tick(state, events);
 
-        Inputs inputs = state.getWorld().getResource(Inputs.class);
+        Inputs inputs = state.getWorld().getOrCreateResource(Inputs.class);
         assertTrue(inputs.inputAttack);
     }
 
     @Test
     void mouseButtonEventsDoNotUpdateGameStateIfButtonIsWrong() {
-        GameState state = Roguelite.createInitialState();
         Roguelite roguelite = new Roguelite();
+        GameState state = roguelite.createInitialState();
 
         Queue<InputEvent> events = new ArrayDeque<>();
         events.offer(ButtonInput.pressed(InputButton.Mouse.button(1)));
@@ -113,14 +113,14 @@ class RogueliteTest {
 
         roguelite.tick(state, events);
 
-        Inputs inputs = state.getWorld().getResource(Inputs.class);
+        Inputs inputs = state.getWorld().getOrCreateResource(Inputs.class);
         assertFalse(inputs.inputAttack);
     }
 
     @Test
     void releasingMouseButtonDisablesInput() {
-        GameState state = Roguelite.createInitialState();
         Roguelite roguelite = new Roguelite();
+        GameState state = roguelite.createInitialState();
         Queue<InputEvent> events = new ArrayDeque<>();
 
         // Pressed
@@ -131,7 +131,7 @@ class RogueliteTest {
         events.offer(ButtonInput.released(InputButton.Mouse.button(0)));
         roguelite.tick(state, events);
 
-        Inputs inputs = state.getWorld().getResource(Inputs.class);
+        Inputs inputs = state.getWorld().getOrCreateResource(Inputs.class);
         assertFalse(inputs.inputAttack);
     }
 }

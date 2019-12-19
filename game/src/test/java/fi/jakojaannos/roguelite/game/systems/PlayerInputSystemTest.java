@@ -60,7 +60,7 @@ class PlayerInputSystemTest {
             boolean up,
             boolean down
     ) {
-        Inputs inputs = this.world.getResource(Inputs.class);
+        Inputs inputs = this.world.getOrCreateResource(Inputs.class);
         inputs.inputLeft = left;
         inputs.inputRight = right;
         inputs.inputUp = up;
@@ -80,8 +80,8 @@ class PlayerInputSystemTest {
             double expectedX,
             double expectedY
     ) {
-        Mouse mouse = this.world.getResource(Mouse.class);
-        CameraProperties camBounds = this.world.getResource(CameraProperties.class);
+        Mouse mouse = this.world.getOrCreateResource(Mouse.class);
+        CameraProperties camBounds = this.world.getOrCreateResource(CameraProperties.class);
         camBounds.viewportWidthInWorldUnits = 32.0f;
         camBounds.viewportHeightInWorldUnits = 32.0f;
         mouse.pos.x = mouseX;
@@ -96,7 +96,7 @@ class PlayerInputSystemTest {
 
     @Test
     void havingInputAttackSetUpdatesAttack() {
-        Inputs inputs = this.world.getResource(Inputs.class);
+        Inputs inputs = this.world.getOrCreateResource(Inputs.class);
         inputs.inputAttack = false;
 
         system.tick(Stream.of(player), this.world);

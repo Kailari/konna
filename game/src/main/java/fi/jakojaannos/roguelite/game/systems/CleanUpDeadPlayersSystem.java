@@ -25,7 +25,7 @@ public class CleanUpDeadPlayersSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
-        val players = world.getResource(Players.class);
+        val players = world.getOrCreateResource(Players.class);
         if (players.player == null) {
             return;
         }

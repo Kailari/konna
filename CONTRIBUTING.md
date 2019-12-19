@@ -55,4 +55,32 @@ The more verbose form is always preferred, but in short loops or methods it does
 - System classes **should** be postfixed with `System`. e.g. `class ApplyVelocitySystem`
 
 
-TODO: Write more
+### Declaring multiple fields on a single line
+
+It is fine to declare multiple fields of same type on one line if they are closely related. For example, these are OK
+```java
+private final double x, y;
+private final double width, height;
+private final long someTimestamp, someDuration;
+```
+
+Do **not** do stuff like
+```java
+private final double x, length, velocityZ, someDuration, howOldIsMoominpappa;
+```
+
+Also, even if things are closely related, if one of the fields requires JDoc comments or documentation, 
+it most likely deserves its own line, too.
+```java
+// Do this:
+public double maxHealth;
+
+/** Some documentation */
+public double currentHealth;
+
+
+// NOT this:
+public double maxHealth,
+    /** Some documentation */
+    currentHealth;
+```

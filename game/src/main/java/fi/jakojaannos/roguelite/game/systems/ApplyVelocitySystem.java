@@ -1,12 +1,11 @@
 package fi.jakojaannos.roguelite.game.systems;
 
 import fi.jakojaannos.roguelite.engine.ecs.*;
-import fi.jakojaannos.roguelite.engine.state.TimeProvider;
 import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
 import fi.jakojaannos.roguelite.game.GJK2D;
 import fi.jakojaannos.roguelite.game.data.components.*;
-import fi.jakojaannos.roguelite.game.data.resources.Time;
+import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.game.data.resources.collision.Colliders;
 import fi.jakojaannos.roguelite.game.data.resources.collision.Collisions;
 import fi.jakojaannos.roguelite.game.systems.collision.Collision;
@@ -76,9 +75,9 @@ public class ApplyVelocitySystem implements ECSSystem {
             final World world
     ) {
         val entityManager = world.getEntityManager();
-        val entitiesWithCollider = world.getResource(Colliders.class);
-        val collisionEvents = world.getResource(Collisions.class);
-        val delta = world.getResource(Time.class).getTimeStepInSeconds();
+        val entitiesWithCollider = world.getOrCreateResource(Colliders.class);
+        val collisionEvents = world.getOrCreateResource(Collisions.class);
+        val delta = world.getOrCreateResource(Time.class).getTimeStepInSeconds();
 
         val tileMapLayers = getTileMapLayersWithCollision(world);
 

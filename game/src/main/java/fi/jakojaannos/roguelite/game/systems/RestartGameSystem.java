@@ -30,9 +30,9 @@ public class RestartGameSystem implements ECSSystem {
             return;
         }
 
-        val inputs = world.getResource(Inputs.class);
+        val inputs = world.getOrCreateResource(Inputs.class);
         if (inputs.inputRestart) {
-            world.getResource(GameStatus.class).shouldRestart = true;
+            world.getOrCreateResource(GameStatus.class).shouldRestart = true;
         }
     }
 }

@@ -29,7 +29,7 @@ public class DestroyProjectilesOnCollisionSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
-        val collisions = world.getResource(Collisions.class);
+        val collisions = world.getOrCreateResource(Collisions.class);
 
         entities.forEach(entity -> {
             if (collisions.getEventsFor(entity)

@@ -11,7 +11,7 @@ class RogueliteCamera extends LWJGLCamera {
     }
 
     void updateConfigurationFromState(GameState state) {
-        val camBounds = state.getWorld().getResource(CameraProperties.class);
+        val camBounds = state.getWorld().getOrCreateResource(CameraProperties.class);
         refreshTargetScreenSizeInUnits(camBounds.targetViewportSizeInWorldUnits, camBounds.targetViewportSizeRespectiveToMinorAxis);
 
         // FIXME: THIS BREAKS MVC ENCAPSULATION. Technically, we should queue task on the controller

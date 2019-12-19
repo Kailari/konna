@@ -76,14 +76,13 @@ public abstract class GameRunner<
             previousFrameTime = currentFrameTime;
 
             accumulator += frameElapsedTime;
-            while (accumulator >= state.getTime().getTimeStep()) {
+            while (accumulator >= game.getTime().getTimeStep()) {
                 state = simulateTick(state, game, inputProvider.pollEvents());
-                state.updateTime();
-                accumulator -= state.getTime().getTimeStep();
+                accumulator -= game.getTime().getTimeStep();
                 ++ticks;
             }
 
-            val partialTickAlpha = accumulator / (double) state.getTime().getTimeStep();
+            val partialTickAlpha = accumulator / (double) game.getTime().getTimeStep();
             renderer.accept(state, partialTickAlpha);
             presentGameState(state, renderer, partialTickAlpha);
             frames++;
@@ -121,7 +120,9 @@ public abstract class GameRunner<
             throw new IllegalStateException("Simulating tick for already disposed game!");
         }
 
-        return game.tick(state, inputEvents);
+        val newState = game.tick(state, inputEvents);
+        game.updateTime();
+        return newState;
     }
 
     /**

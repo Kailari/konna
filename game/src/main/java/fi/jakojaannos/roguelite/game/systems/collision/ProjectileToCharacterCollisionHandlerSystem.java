@@ -8,7 +8,7 @@ import fi.jakojaannos.roguelite.game.data.DamageInstance;
 import fi.jakojaannos.roguelite.game.data.components.Health;
 import fi.jakojaannos.roguelite.game.data.components.ProjectileStats;
 import fi.jakojaannos.roguelite.game.data.components.RecentCollisionTag;
-import fi.jakojaannos.roguelite.game.data.resources.Time;
+import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.game.data.resources.collision.Collisions;
 import fi.jakojaannos.roguelite.game.systems.SystemGroups;
 import lombok.extern.slf4j.Slf4j;
@@ -31,9 +31,9 @@ public class ProjectileToCharacterCollisionHandlerSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
-        val timeManager = world.getResource(Time.class);
+        val timeManager = world.getOrCreateResource(Time.class);
         val entityManager = world.getEntityManager();
-        val collisions = world.getResource(Collisions.class);
+        val collisions = world.getOrCreateResource(Collisions.class);
 
         entities.forEach(entity -> {
             val stats = entityManager.getComponentOf(entity, ProjectileStats.class).get();
