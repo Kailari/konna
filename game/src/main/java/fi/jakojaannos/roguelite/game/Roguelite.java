@@ -1,7 +1,6 @@
 package fi.jakojaannos.roguelite.game;
 
 import fi.jakojaannos.roguelite.engine.GameBase;
-import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.ecs.SystemGroup;
@@ -11,13 +10,12 @@ import fi.jakojaannos.roguelite.engine.input.InputAxis;
 import fi.jakojaannos.roguelite.engine.input.InputButton;
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.state.GameState;
-import fi.jakojaannos.roguelite.engine.tilemap.TileType;
-import fi.jakojaannos.roguelite.game.data.archetypes.PlayerArchetype;
-import fi.jakojaannos.roguelite.game.data.components.*;
-import fi.jakojaannos.roguelite.game.data.resources.*;
+import fi.jakojaannos.roguelite.game.data.resources.GameStatus;
+import fi.jakojaannos.roguelite.game.data.resources.Inputs;
+import fi.jakojaannos.roguelite.game.data.resources.Mouse;
+import fi.jakojaannos.roguelite.game.state.GameplayGameState;
 import fi.jakojaannos.roguelite.game.systems.*;
 import fi.jakojaannos.roguelite.game.systems.collision.*;
-import fi.jakojaannos.roguelite.game.world.WorldGenerator;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
@@ -71,41 +69,7 @@ public class Roguelite extends GameBase {
 
     public GameState createInitialState(long seed) {
         val entities = EntityManager.createNew(256, 32);
-        val state = new GameState(World.createNew(entities), getTime());
-
-        val player = PlayerArchetype.create(entities,
-                                            new Transform(0, 0));
-        state.getWorld().getOrCreateResource(Players.class).player = player;
-
-        val camera = entities.createEntity();
-        val cameraComponent = new Camera();
-        cameraComponent.followTarget = player;
-        entities.addComponentTo(camera, cameraComponent);
-        entities.addComponentTo(camera, new NoDrawTag());
-        state.getWorld().getOrCreateResource(CameraProperties.class).cameraEntity = camera;
-
-        val crosshair = entities.createEntity();
-        entities.addComponentTo(crosshair, new Transform(-999.0, -999.0));
-        entities.addComponentTo(crosshair, new CrosshairTag());
-        val crosshairCollider = new Collider(CollisionLayer.NONE);
-        crosshairCollider.width = 0.3;
-        crosshairCollider.height = 0.3;
-        crosshairCollider.origin.set(0.15);
-        entities.addComponentTo(crosshair, crosshairCollider);
-
-        val emptiness = new TileType(0, false);
-        val floor = new TileType(1, false);
-        val wall = new TileType(2, true);
-        val generator = new WorldGenerator<TileType>(emptiness);
-        generator.prepareInitialRoom(seed, state.getWorld(), floor, wall, 25, 45, 5, 5, 2);
-
-        val levelEntity = entities.createEntity();
-        val layer = new TileMapLayer(generator.getTileMap());
-        layer.collisionEnabled = true;
-        entities.addComponentTo(levelEntity, layer);
-
-        entities.applyModifications();
-        return state;
+        return new GameplayGameState(seed, World.createNew(entities), getTime());
     }
 
     @Override
