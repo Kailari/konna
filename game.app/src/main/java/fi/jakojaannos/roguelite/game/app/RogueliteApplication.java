@@ -1,9 +1,14 @@
 package fi.jakojaannos.roguelite.game.app;
 
+import fi.jakojaannos.roguelite.engine.Game;
+import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLGameRunner;
 import fi.jakojaannos.roguelite.engine.lwjgl.input.LWJGLInputProvider;
+import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.game.DebugConfig;
 import fi.jakojaannos.roguelite.game.Roguelite;
+import fi.jakojaannos.roguelite.game.state.GameplayGameState;
 import fi.jakojaannos.roguelite.game.view.RogueliteGameRenderer;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +38,7 @@ public class RogueliteApplication {
         ) {
             try (val renderer = new RogueliteGameRenderer(assetRoot, runner.getWindow())) {
                 val inputProvider = new LWJGLInputProvider(runner.getWindow(), this.enableForceClose);
-                runner.run(game::createInitialState, game, inputProvider, renderer::render);
+                runner.run(() -> createInitialState(game), game, inputProvider, renderer::render);
             }
         } catch (Exception e) {
             LOG.error("The game loop unexpectedly stopped.");
@@ -52,5 +57,13 @@ public class RogueliteApplication {
                 LOG.error("\tRun with --debugStackTraces for stack traces");
             }
         }
+    }
+
+    private GameState createInitialState(final Game game) {
+        /*return new MainMenuGameState(World.createNew(EntityManager.createNew(256, 32)),
+                                     game.getTime());*/
+        return new GameplayGameState(System.nanoTime(),
+                                     World.createNew(EntityManager.createNew(256, 32)),
+                                     game.getTime());
     }
 }

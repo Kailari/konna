@@ -17,6 +17,7 @@ import lombok.val;
 
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 public class RogueliteGameRenderer implements GameRenderer<GameState> {
@@ -54,13 +55,15 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
         this.camera.updateConfigurationFromState(state);
 
         // Snap camera to active camera
-        val cameraEntity = state.getWorld().getOrCreateResource(CameraProperties.class).cameraEntity;
-        state.getWorld().getEntityManager().getComponentOf(cameraEntity, Camera.class)
-             .ifPresent(cam -> this.camera.setPosition(cam.pos.x - this.camera.getViewportWidthInUnits() / 2.0,
-                                                       cam.pos.y - this.camera.getViewportHeightInUnits() / 2.0));
+        val world = state.getWorld();
+        val entityManager = world.getEntityManager();
+        Optional.ofNullable(world.getOrCreateResource(CameraProperties.class).cameraEntity)
+                .flatMap(cameraEntity -> entityManager.getComponentOf(cameraEntity, Camera.class))
+                .ifPresent(camera -> this.camera.setPosition(camera.pos.x - this.camera.getViewportWidthInUnits() / 2.0,
+                                                             camera.pos.y - this.camera.getViewportHeightInUnits() / 2.0));
 
-        this.stateRenderers.get(state.getClass())
-                           .render(state.getWorld());
+        Optional.ofNullable(this.stateRenderers.get(state.getClass()))
+                .ifPresent(renderer -> renderer.render(state.getWorld()));
     }
 
     @Override

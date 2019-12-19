@@ -2,8 +2,6 @@ package fi.jakojaannos.roguelite.game;
 
 import fi.jakojaannos.roguelite.engine.GameBase;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
-import fi.jakojaannos.roguelite.engine.ecs.SystemGroup;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.input.ButtonInput;
 import fi.jakojaannos.roguelite.engine.input.InputAxis;
@@ -14,20 +12,19 @@ import fi.jakojaannos.roguelite.game.data.resources.GameStatus;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
 import fi.jakojaannos.roguelite.game.data.resources.Mouse;
 import fi.jakojaannos.roguelite.game.state.GameplayGameState;
-import fi.jakojaannos.roguelite.game.systems.*;
-import fi.jakojaannos.roguelite.game.systems.collision.*;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
-import java.util.Arrays;
 import java.util.Queue;
 
 @Slf4j
 public class Roguelite extends GameBase {
+    @Deprecated
     public GameState createInitialState() {
         return createInitialState(System.nanoTime());
     }
 
+    @Deprecated
     public GameState createInitialState(long seed) {
         val entities = EntityManager.createNew(256, 32);
         return new GameplayGameState(seed, World.createNew(entities), getTime());
@@ -71,7 +68,9 @@ public class Roguelite extends GameBase {
 
         state.tick();
         if (state.getWorld().getOrCreateResource(GameStatus.class).shouldRestart) {
-            return this.createInitialState();
+            return new GameplayGameState(System.nanoTime(),
+                                         World.createNew(EntityManager.createNew(256, 32)),
+                                         getTime());
         }
 
         return state;
