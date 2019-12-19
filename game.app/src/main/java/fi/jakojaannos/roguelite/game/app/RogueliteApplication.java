@@ -28,12 +28,10 @@ public class RogueliteApplication {
     }
 
     public void run(final Path assetRoot) {
-        try (val runner = new LWJGLGameRunner<Roguelite, LWJGLInputProvider>(this.windowWidth, this.windowHeight, this.floatWindow)
+        try (val runner = new LWJGLGameRunner<Roguelite, LWJGLInputProvider>(this.windowWidth, this.windowHeight, this.floatWindow);
+             val game = new Roguelite()
         ) {
-            try (val renderer = new RogueliteGameRenderer(assetRoot,
-                                                          runner.getWindow());
-                 val game = new Roguelite()
-            ) {
+            try (val renderer = new RogueliteGameRenderer(assetRoot, runner.getWindow())) {
                 val inputProvider = new LWJGLInputProvider(runner.getWindow(), this.enableForceClose);
                 runner.run(game::createInitialState, game, inputProvider, renderer::render);
             }

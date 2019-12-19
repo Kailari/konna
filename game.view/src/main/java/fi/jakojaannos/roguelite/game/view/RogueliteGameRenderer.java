@@ -1,6 +1,5 @@
 package fi.jakojaannos.roguelite.game.view;
 
-import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLWindow;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLTexture;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text.TextRenderer;
@@ -8,24 +7,25 @@ import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.engine.view.GameRenderer;
 import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.view.content.TextureRegistry;
-import fi.jakojaannos.roguelite.game.DebugConfig;
 import fi.jakojaannos.roguelite.game.data.components.Camera;
 import fi.jakojaannos.roguelite.game.data.resources.CameraProperties;
-import fi.jakojaannos.roguelite.game.view.systems.*;
-import fi.jakojaannos.roguelite.game.view.systems.debug.EntityCollisionBoundsRenderingSystem;
-import fi.jakojaannos.roguelite.game.view.systems.debug.EntityTransformRenderingSystem;
+import fi.jakojaannos.roguelite.game.state.GameplayGameState;
+import fi.jakojaannos.roguelite.game.view.state.GameStateRenderer;
+import fi.jakojaannos.roguelite.game.view.state.GameplayGameStateRenderer;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 import java.nio.file.Path;
+import java.util.Map;
 
 @Slf4j
 public class RogueliteGameRenderer implements GameRenderer<GameState> {
-    private final SystemDispatcher rendererDispatcher;
     private final RogueliteCamera camera;
     private final TextureRegistry<LWJGLTexture> textureRegistry;
     private final SpriteRegistry<LWJGLTexture> spriteRegistry;
     private final TextRenderer textRenderer;
+
+    private final Map<Class<? extends GameState>, GameStateRenderer> stateRenderers;
 
     public RogueliteGameRenderer(final Path assetRoot, final LWJGLWindow window) {
         LOG.debug("Constructing GameRenderer...");
@@ -36,18 +36,12 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
         this.spriteRegistry = new SpriteRegistry<>(assetRoot, this.textureRegistry);
         this.textRenderer = new TextRenderer(assetRoot, this.camera);
 
-        val builder = SystemDispatcher.builder()
-                                      .withSystem(new LevelRenderingSystem(assetRoot, this.camera, this.spriteRegistry))
-                                      .withSystem(new SpriteRenderingSystem(assetRoot, this.camera, this.spriteRegistry))
-                                      .withSystem(new RenderHUDSystem(this.textRenderer))
-                                      .withSystem(new RenderGameOverSystem(this.textRenderer, this.camera))
-                                      .withSystem(new HealthBarRenderingSystem(assetRoot, this.camera));
-
-        if (DebugConfig.debugModeEnabled) {
-            builder.withSystem(new EntityCollisionBoundsRenderingSystem(assetRoot, this.camera));
-            builder.withSystem(new EntityTransformRenderingSystem(assetRoot, this.camera));
-        }
-        this.rendererDispatcher = builder.build();
+        this.stateRenderers = Map.ofEntries(
+                Map.entry(GameplayGameState.class, new GameplayGameStateRenderer(assetRoot,
+                                                                                 this.camera,
+                                                                                 this.spriteRegistry,
+                                                                                 this.textRenderer))
+        );
 
         window.addResizeCallback(this.camera::resizeViewport);
 
@@ -64,12 +58,19 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
         state.getWorld().getEntityManager().getComponentOf(cameraEntity, Camera.class)
              .ifPresent(cam -> this.camera.setPosition(cam.pos.x - this.camera.getViewportWidthInUnits() / 2.0,
                                                        cam.pos.y - this.camera.getViewportHeightInUnits() / 2.0));
-        this.rendererDispatcher.dispatch(state.getWorld());
+
+        this.stateRenderers.get(state.getClass())
+                           .render(state.getWorld());
     }
 
     @Override
     public void close() throws Exception {
-        this.rendererDispatcher.close();
+        this.stateRenderers.values().forEach(renderer -> {
+            try {
+                renderer.close();
+            } catch (Exception ignored) {
+            }
+        });
         this.textureRegistry.close();
         this.spriteRegistry.close();
         this.textRenderer.close();
