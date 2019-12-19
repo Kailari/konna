@@ -10,8 +10,10 @@ import fi.jakojaannos.roguelite.engine.view.content.TextureRegistry;
 import fi.jakojaannos.roguelite.game.data.components.Camera;
 import fi.jakojaannos.roguelite.game.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.game.state.GameplayGameState;
+import fi.jakojaannos.roguelite.game.state.MainMenuGameState;
 import fi.jakojaannos.roguelite.game.view.state.GameStateRenderer;
 import fi.jakojaannos.roguelite.game.view.state.GameplayGameStateRenderer;
+import fi.jakojaannos.roguelite.game.view.state.MainMenuGameStateRenderer;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
@@ -41,7 +43,9 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
                 Map.entry(GameplayGameState.class, new GameplayGameStateRenderer(assetRoot,
                                                                                  this.camera,
                                                                                  this.spriteRegistry,
-                                                                                 this.textRenderer))
+                                                                                 this.textRenderer)),
+                Map.entry(MainMenuGameState.class, new MainMenuGameStateRenderer(assetRoot,
+                                                                                 this.camera))
         );
 
         window.addResizeCallback(this.camera::resizeViewport);
