@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering;
+package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.shader;
 
 import java.nio.file.Path;
 import java.util.ArrayList;

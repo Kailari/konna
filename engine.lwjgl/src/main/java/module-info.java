@@ -19,5 +19,7 @@ module roguelite.engine.lwjgl {
     exports fi.jakojaannos.roguelite.engine.lwjgl.input;
     exports fi.jakojaannos.roguelite.engine.lwjgl.view;
     exports fi.jakojaannos.roguelite.engine.lwjgl.view.rendering;
+    exports fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.mesh;
+    exports fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.shader;
     exports fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text;
 }

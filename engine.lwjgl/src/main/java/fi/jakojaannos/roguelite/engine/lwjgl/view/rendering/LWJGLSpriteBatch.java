@@ -4,6 +4,7 @@ import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.mesh.Mesh;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.mesh.VertexAttribute;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.mesh.VertexFormat;
+import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.shader.ShaderProgram;
 import fi.jakojaannos.roguelite.engine.utilities.math.RotatedRectangle;
 import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatchBase;

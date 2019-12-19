@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering;
+package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.shader;
 
 import lombok.extern.slf4j.Slf4j;
 
