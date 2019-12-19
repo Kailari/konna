@@ -1,5 +1,6 @@
 package fi.jakojaannos.roguelite.game.systems;
 
+import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
@@ -7,7 +8,6 @@ import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.utilities.math.CoordinateHelper;
 import fi.jakojaannos.roguelite.game.data.archetypes.BasicProjectileArchetype;
 import fi.jakojaannos.roguelite.game.data.components.*;
-import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import lombok.val;
 import org.joml.Vector2d;
 
@@ -60,7 +60,8 @@ public class CharacterAttackSystem implements ECSSystem {
                                .perpendicular()
                                .mul((random.nextDouble() * 2.0 - 1.0) * weapon.attackSpread);
 
-                BasicProjectileArchetype.create(world, projectileX, projectileY, direction, weapon.attackProjectileSpeed, tmpSpreadOffset);
+                val noise = (random.nextDouble() * 2.0 - 1.0) * weapon.attackProjectileSpeedNoise;
+                BasicProjectileArchetype.create(world, projectileX, projectileY, direction, weapon.attackProjectileSpeed + noise, tmpSpreadOffset);
 
 
                 abilities.attackTimer = 0.0;

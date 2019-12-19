@@ -24,7 +24,7 @@ public class FollowerArchetype {
         entityManager.addComponentTo(follower, transform);
         entityManager.addComponentTo(follower, new Velocity());
         entityManager.addComponentTo(follower, new CharacterInput());
-        entityManager.addComponentTo(follower, new Health(5));
+        entityManager.addComponentTo(follower, new Health(3));
         entityManager.addComponentTo(follower, new Collider(CollisionLayer.ENEMY, 1.0, 1.0, 0.5, 0.5));
         entityManager.addComponentTo(follower, createCharacterStats());
         entityManager.addComponentTo(follower, createEnemyAI());

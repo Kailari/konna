@@ -27,7 +27,7 @@ public class SlimeArchetype {
     ) {
         val slime = entityManager.createEntity();
         entityManager.addComponentTo(slime, new Transform(x, y));
-        entityManager.addComponentTo(slime, new Health(3));
+        entityManager.addComponentTo(slime, new Health(1));
         entityManager.addComponentTo(slime, new Collider(CollisionLayer.ENEMY, 0.6, 0.6, 0.3, 0.3));
         entityManager.addComponentTo(slime, new Velocity());
         entityManager.addComponentTo(slime, new CharacterInput());
@@ -65,7 +65,7 @@ public class SlimeArchetype {
     ) {
         val slime = entityManager.createEntity();
         entityManager.addComponentTo(slime, new Transform(x, y));
-        entityManager.addComponentTo(slime, new Health(7));
+        entityManager.addComponentTo(slime, new Health(3));
         entityManager.addComponentTo(slime, new Collider(CollisionLayer.ENEMY, 1.0, 1.0, 0.5, 0.5));
         entityManager.addComponentTo(slime, new Velocity());
         entityManager.addComponentTo(slime, new CharacterInput());
@@ -101,7 +101,7 @@ public class SlimeArchetype {
     ) {
         val slime = entityManager.createEntity();
         entityManager.addComponentTo(slime, new Transform(x, y));
-        entityManager.addComponentTo(slime, new Health(15));
+        entityManager.addComponentTo(slime, new Health(5));
         entityManager.addComponentTo(slime, new Collider(CollisionLayer.ENEMY, 1.75, 1.75, 1.75 / 2, 1.75 / 2));
         entityManager.addComponentTo(slime, new Velocity());
         entityManager.addComponentTo(slime, new CharacterInput());

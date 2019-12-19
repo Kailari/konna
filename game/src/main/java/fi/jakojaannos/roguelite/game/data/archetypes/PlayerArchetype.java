@@ -49,7 +49,7 @@ public class PlayerArchetype {
 
     private static BasicWeaponStats createWeaponStats() {
         return new BasicWeaponStats(
-                20.0,
+                7.5,
                 40.0,
                 2.5
         );

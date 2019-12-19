@@ -91,9 +91,9 @@ public class WorldGenerator<TTile> {
 
             val spawnerXH = hallwayStartX + hallwaySize / 2;
             val spawnerYH = hallwayLength - 2;
-            val stalkerFrequency = 10.0;
-            val followerFrequency = 7.5;
-            val slimeFrequency = 15;
+            val stalkerFrequency = 15.0;
+            val followerFrequency = 10;
+            val slimeFrequency = 20;
 
             val followerFactory = SpawnerComponent.EntityFactory.withRandomDistance(FollowerArchetype::spawnFollower);
             val stalkerFactory = SpawnerComponent.EntityFactory.withRandomDistance(StalkerArchetype::spawnStalker);
