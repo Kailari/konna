@@ -17,6 +17,9 @@ import org.lwjgl.system.MemoryUtil;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
 
+import static org.lwjgl.opengl.GL30.glBindBufferBase;
+import static org.lwjgl.opengl.GL31.*;
+
 @Slf4j
 public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGLTexture> {
     private static final Matrix4f DEFAULT_TRANSFORM = new Matrix4f().identity();
@@ -36,8 +39,6 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGL
     private final Mesh batchMesh;
 
     private final ShaderProgram shader;
-    private final int uniformProjectionMatrix;
-    private final int uniformViewMatrix;
     private final int uniformModelMatrix;
 
     private final ByteBuffer vertexDataBuffer;
@@ -46,15 +47,17 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGL
     public LWJGLSpriteBatch(
             final Path assetRoot,
             final String shader,
-            final SpriteRegistry<LWJGLTexture> spriteRegistry
+            final SpriteRegistry<LWJGLTexture> spriteRegistry,
+            final LWJGLCamera camera
     ) {
         super(MAX_SPRITES_PER_BATCH);
 
         this.spriteRegistry = spriteRegistry;
         this.shader = createShader(assetRoot, shader);
         this.uniformModelMatrix = this.shader.getUniformLocation("model");
-        this.uniformViewMatrix = this.shader.getUniformLocation("view");
-        this.uniformProjectionMatrix = this.shader.getUniformLocation("projection");
+        int uniformCameraInfoBlock = glGetUniformBlockIndex(this.shader.getShaderProgram(), "CameraInfo");
+        glBindBufferBase(GL_UNIFORM_BUFFER, 2, camera.getCameraMatricesUbo());
+        glUniformBlockBinding(this.shader.getShaderProgram(), uniformCameraInfoBlock, 2);
 
         this.batchMesh = new Mesh(VERTEX_FORMAT);
         this.batchMesh.setElements(constructIndicesArray());
@@ -135,8 +138,8 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGL
         this.shader.use();
         texture.bind();
 
-        this.shader.setUniformMat4x4(this.uniformProjectionMatrix, camera.getProjectionMatrix());
-        this.shader.setUniformMat4x4(this.uniformViewMatrix, camera.getViewMatrix());
+        //this.shader.setUniformMat4x4(this.uniformProjectionMatrix, camera.getProjectionMatrix());
+        //this.shader.setUniformMat4x4(this.uniformViewMatrix, camera.getViewMatrix());
         this.shader.setUniformMat4x4(this.uniformModelMatrix,
                                      transformation != null
                                              ? transformation

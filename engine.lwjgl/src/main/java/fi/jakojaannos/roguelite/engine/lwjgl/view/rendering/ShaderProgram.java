@@ -1,5 +1,6 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Matrix4f;
@@ -13,7 +14,7 @@ import static org.lwjgl.opengl.GL30.glBindFragDataLocation;
 
 @Slf4j
 public class ShaderProgram implements AutoCloseable {
-    private final int shaderProgram;
+    @Getter private final int shaderProgram;
     private final Collection<Shader> shaders;
 
     public static ShaderBuilder builder() {

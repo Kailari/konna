@@ -7,11 +7,16 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Matrix4f;
 import org.joml.Vector2d;
+import org.lwjgl.system.MemoryUtil;
+
+import java.nio.ByteBuffer;
 
 import static org.lwjgl.opengl.GL11.glViewport;
+import static org.lwjgl.opengl.GL15.*;
+import static org.lwjgl.opengl.GL31.GL_UNIFORM_BUFFER;
 
 @Slf4j
-public class LWJGLCamera extends Camera {
+public class LWJGLCamera extends Camera implements AutoCloseable {
     private static final double CAMERA_MOVE_EPSILON = 0.0001;
 
     @Getter(AccessLevel.PROTECTED)
@@ -29,6 +34,9 @@ public class LWJGLCamera extends Camera {
 
     private final Matrix4f viewMatrix;
     private boolean viewMatrixDirty;
+
+    @Getter private final int cameraMatricesUbo;
+    private final ByteBuffer cameraMatricesData;
 
     public Matrix4f getViewMatrix() {
         refreshViewMatrixIfDirty();
@@ -81,7 +89,22 @@ public class LWJGLCamera extends Camera {
 
         this.viewMatrix = new Matrix4f();
         this.viewMatrixDirty = true;
+
+        this.cameraMatricesUbo = glGenBuffers();
+        this.cameraMatricesData = MemoryUtil.memAlloc(2 * 16 * 4);
+
+        this.viewMatrix.get(0, this.cameraMatricesData);
+        this.projectionMatrix.get(16 * 4, this.cameraMatricesData);
+        glBindBuffer(GL_UNIFORM_BUFFER, this.cameraMatricesUbo);
+        glBufferData(GL_UNIFORM_BUFFER, this.cameraMatricesData, GL_DYNAMIC_DRAW);
         refreshViewMatrixIfDirty();
+    }
+
+    private void refreshUniforms() {
+        this.viewMatrix.get(0, this.cameraMatricesData);
+        this.projectionMatrix.get(16 * 4, this.cameraMatricesData);
+        glBindBuffer(GL_UNIFORM_BUFFER, this.cameraMatricesUbo);
+        glBufferSubData(GL_UNIFORM_BUFFER, 0, this.cameraMatricesData);
     }
 
     private void refreshProjectionMatrixIfDirty() {
@@ -113,6 +136,7 @@ public class LWJGLCamera extends Camera {
                     0.0f);
 
             this.projectionMatrixDirty = false;
+            refreshUniforms();
         }
     }
 
@@ -125,6 +149,12 @@ public class LWJGLCamera extends Camera {
                     .invert();
 
             this.viewMatrixDirty = false;
+            refreshUniforms();
         }
+    }
+
+    @Override
+    public void close() {
+        glDeleteBuffers(this.cameraMatricesUbo);
     }
 }

@@ -32,7 +32,7 @@ public class LevelRenderingSystem implements ECSSystem {
             final SpriteRegistry<LWJGLTexture> sprites
     ) {
         this.camera = camera;
-        this.batch = new LWJGLSpriteBatch(assetRoot, "sprite", sprites);
+        this.batch = new LWJGLSpriteBatch(assetRoot, "sprite", sprites, camera);
     }
 
     @Override

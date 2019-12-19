@@ -77,5 +77,6 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
         this.textureRegistry.close();
         this.spriteRegistry.close();
         this.textRenderer.close();
+        this.camera.close();
     }
 }
