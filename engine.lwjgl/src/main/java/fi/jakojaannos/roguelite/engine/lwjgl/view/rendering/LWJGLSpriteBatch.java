@@ -1,6 +1,9 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering;
 
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
+import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.mesh.Mesh;
+import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.mesh.VertexAttribute;
+import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.mesh.VertexFormat;
 import fi.jakojaannos.roguelite.engine.utilities.math.RotatedRectangle;
 import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatchBase;
@@ -14,13 +17,6 @@ import org.lwjgl.system.MemoryUtil;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
 
-import static org.lwjgl.opengl.GL11.GL_FLOAT;
-import static org.lwjgl.opengl.GL15.*;
-import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
-import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
-import static org.lwjgl.opengl.GL30.*;
-import static org.lwjgl.system.MemoryUtil.NULL;
-
 @Slf4j
 public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGLTexture> {
     private static final Matrix4f DEFAULT_TRANSFORM = new Matrix4f().identity();
@@ -31,74 +27,49 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGL
     private final RotatedRectangle tmpRectangle = new RotatedRectangle();
     private final Vector2d tmpVertex = new Vector2d();
 
+    private static final VertexFormat VERTEX_FORMAT = new VertexFormat(
+            new VertexAttribute(VertexAttribute.Type.FLOAT, 2, false),
+            new VertexAttribute(VertexAttribute.Type.FLOAT, 2, false),
+            new VertexAttribute(VertexAttribute.Type.FLOAT, 3, false)
+    );
+
+    private final Mesh batchMesh;
+
     private final ShaderProgram shader;
     private final int uniformProjectionMatrix;
     private final int uniformViewMatrix;
     private final int uniformModelMatrix;
 
-    private final int vao;
-    private final int vbo;
-    private final int ebo;
-
     private final ByteBuffer vertexDataBuffer;
-    private final SpriteRegistry<LWJGLTexture> sprites;
+    private final SpriteRegistry<LWJGLTexture> spriteRegistry;
 
     public LWJGLSpriteBatch(
             final Path assetRoot,
             final String shader,
-            final SpriteRegistry<LWJGLTexture> sprites
+            final SpriteRegistry<LWJGLTexture> spriteRegistry
     ) {
         super(MAX_SPRITES_PER_BATCH);
-        this.sprites = sprites;
+
+        this.spriteRegistry = spriteRegistry;
         this.shader = createShader(assetRoot, shader);
         this.uniformModelMatrix = this.shader.getUniformLocation("model");
         this.uniformViewMatrix = this.shader.getUniformLocation("view");
         this.uniformProjectionMatrix = this.shader.getUniformLocation("projection");
 
-        this.vao = glGenVertexArrays();
-        glBindVertexArray(this.vao);
-
-        this.vbo = glGenBuffers();
-        this.ebo = glGenBuffers();
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this.ebo);
-        val indices = constructIndicesArray();
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
+        this.batchMesh = new Mesh(VERTEX_FORMAT);
+        this.batchMesh.setElements(constructIndicesArray());
 
         this.vertexDataBuffer = MemoryUtil.memAlloc(MAX_SPRITES_PER_BATCH * VERTICES_PER_SPRITE * SIZE_IN_BYTES);
         for (int i = 0; i < MAX_SPRITES_PER_BATCH * VERTICES_PER_SPRITE; ++i) {
             updateVertex(i * SIZE_IN_BYTES, 0, 0, 0, 0, 0, 0, 0);
         }
-
-        glBindBuffer(GL_ARRAY_BUFFER, this.vbo);
-        glBufferData(GL_ARRAY_BUFFER, this.vertexDataBuffer, GL_STATIC_DRAW);
-
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0,
-                              2,
-                              GL_FLOAT,
-                              false,
-                              SIZE_IN_BYTES,
-                              0); // offset: pos is first attribute -> 0
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1,
-                              2,
-                              GL_FLOAT,
-                              false,
-                              SIZE_IN_BYTES,
-                              2 * 4); // offset: pos = 2 * sizeof(float)
-        glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2,
-                              3,
-                              GL_FLOAT,
-                              false,
-                              SIZE_IN_BYTES,
-                              4 * 4); // offset: pos + uv = 4 * sizeof(float)
+        this.batchMesh.setVertexData(this.vertexDataBuffer);
     }
 
     @Override
     public TextureRegion<LWJGLTexture> resolveTexture(final String spriteName, int frame) {
-        return this.sprites.getByAssetName(spriteName)
-                           .getSpecificFrame("default", frame);
+        return this.spriteRegistry.getByAssetName(spriteName)
+                                  .getSpecificFrame("default", frame);
     }
 
     @Override
@@ -171,26 +142,17 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGL
                                              ? transformation
                                              : DEFAULT_TRANSFORM);
 
-        glBindVertexArray(this.vao);
-        glBindBuffer(GL_ARRAY_BUFFER, this.vbo);
-        this.vertexDataBuffer.limit(getNFrames() * VERTICES_PER_SPRITE * SIZE_IN_BYTES);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, this.vertexDataBuffer);
+        this.batchMesh.updateVertexData(this.vertexDataBuffer,
+                                        0,
+                                        getNFrames() * VERTICES_PER_SPRITE);
 
-        glDrawElements(GL_TRIANGLES,
-                       getNFrames() * 6,
-                       GL_UNSIGNED_INT,
-                       NULL);
-
-        this.vertexDataBuffer.limit(this.vertexDataBuffer.capacity());
+        this.batchMesh.draw(getNFrames() * 6);
     }
 
     @Override
     public void close() {
         MemoryUtil.memFree(this.vertexDataBuffer);
-        glDeleteVertexArrays(this.vao);
-        glDeleteBuffers(this.vbo);
-        glDeleteBuffers(this.ebo);
-
+        this.batchMesh.close();
         this.shader.close();
     }
 

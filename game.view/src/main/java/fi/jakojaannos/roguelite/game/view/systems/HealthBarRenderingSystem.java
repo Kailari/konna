@@ -116,8 +116,6 @@ public class HealthBarRenderingSystem implements ECSSystem {
         this.shader.setUniformMat4x4(uniformViewMatrix, this.camera.getViewMatrix());
 
         glBindVertexArray(this.vao);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this.ebo);
-        glBindBuffer(GL_ARRAY_BUFFER, this.vbo);
 
         val entityManager = world.getEntityManager();
         val timeManager = world.getOrCreateResource(Time.class);
@@ -134,10 +132,10 @@ public class HealthBarRenderingSystem implements ECSSystem {
 
             this.shader.setUniform1f(uniformHealth, (float) health.asPercentage());
 
-            this.shader.setUniformMat4x4(uniformModelMatrix, new Matrix4f()
-                    .translate((float) transform.position.x,
-                               (float) transform.position.y,
-                               (float) 0.0)
+            this.shader.setUniformMat4x4(uniformModelMatrix,
+                                         new Matrix4f().translate((float) transform.position.x,
+                                                                  (float) transform.position.y,
+                                                                  (float) 0.0)
             );
 
 
