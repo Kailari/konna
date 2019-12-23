@@ -12,7 +12,7 @@ import javax.annotation.Nullable;
 
 @Slf4j
 public abstract class SpriteBatchBase<TTexture extends Texture, TCamera extends Camera>
-        implements SpriteBatch<TTexture, TCamera> {
+        implements SpriteBatch<TTexture> {
     private final int maxFramesPerBatch;
 
     private boolean beginCalled;

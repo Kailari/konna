@@ -11,6 +11,8 @@ module roguelite.engine.view {
     requires roguelite.engine.utilities;
 
     exports fi.jakojaannos.roguelite.engine.view;
+    exports fi.jakojaannos.roguelite.engine.view.ui;
+    exports fi.jakojaannos.roguelite.engine.view.ui.builder;
     exports fi.jakojaannos.roguelite.engine.view.sprite;
     exports fi.jakojaannos.roguelite.engine.view.content;
     exports fi.jakojaannos.roguelite.engine.view.rendering;

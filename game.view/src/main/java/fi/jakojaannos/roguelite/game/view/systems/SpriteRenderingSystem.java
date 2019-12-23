@@ -38,7 +38,7 @@ public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
 
     private final LWJGLCamera camera;
     private final SpriteRegistry<LWJGLTexture> spriteRegistry;
-    private final SpriteBatch<LWJGLTexture, LWJGLCamera> spriteBatch;
+    private final SpriteBatch<LWJGLTexture> spriteBatch;
 
     public SpriteRenderingSystem(
             final Path assetRoot,

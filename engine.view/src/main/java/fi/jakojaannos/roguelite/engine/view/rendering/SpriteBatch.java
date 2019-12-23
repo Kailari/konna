@@ -4,7 +4,7 @@ import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.sprite.Sprite;
 import org.joml.Matrix4f;
 
-public interface SpriteBatch<TTexture extends Texture, TCamera extends Camera>
+public interface SpriteBatch<TTexture extends Texture>
         extends AutoCloseable {
     /**
      * Begins a new rendering batch. A batch must be finished using {@link #end()}, before calling

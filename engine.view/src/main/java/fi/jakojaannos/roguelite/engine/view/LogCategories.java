@@ -6,7 +6,8 @@ import org.slf4j.MarkerFactory;
 
 public enum LogCategories implements Marker {
     ANIMATION,
-    SPRITE_SERIALIZATION;
+    SPRITE_SERIALIZATION,
+    UI_BUILDER;
 
     private @Delegate final Marker wrapped;
 
