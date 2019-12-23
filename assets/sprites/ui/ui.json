@@ -1,0 +1,109 @@
+{
+  "frames": [
+    {
+      "texture": "textures/ui.png",
+      "x": 0,
+      "y": 0,
+      "w": 4,
+      "h": 4
+    },
+    {
+      "texture": "textures/ui.png",
+      "x": 4,
+      "y": 0,
+      "w": 4,
+      "h": 4
+    },
+    {
+      "texture": "textures/ui.png",
+      "x": 8,
+      "y": 0,
+      "w": 4,
+      "h": 4
+    },
+    {
+      "texture": "textures/ui.png",
+      "x": 0,
+      "y": 4,
+      "w": 4,
+      "h": 4
+    },
+    {
+      "texture": "textures/ui.png",
+      "x": 4,
+      "y": 4,
+      "w": 4,
+      "h": 4
+    },
+    {
+      "texture": "textures/ui.png",
+      "x": 8,
+      "y": 4,
+      "w": 4,
+      "h": 4
+    },
+    {
+      "texture": "textures/ui.png",
+      "x": 0,
+      "y": 8,
+      "w": 4,
+      "h": 4
+    },
+    {
+      "texture": "textures/ui.png",
+      "x": 4,
+      "y": 8,
+      "w": 4,
+      "h": 4
+    },
+    {
+      "texture": "textures/ui.png",
+      "x": 8,
+      "y": 8,
+      "w": 4,
+      "h": 4
+    }
+  ],
+  "animations": {
+    "default": {
+      "index": 0,
+      "duration": -1
+    },
+    "panel_top_left": {
+      "index": 0,
+      "duration": -1
+    },
+    "panel_top": {
+      "index": 1,
+      "duration": -1
+    },
+    "panel_top_right": {
+      "index": 2,
+      "duration": -1
+    },
+    "panel_left": {
+      "index": 3,
+      "duration": -1
+    },
+    "panel_fill": {
+      "index": 4,
+      "duration": -1
+    },
+    "panel_right": {
+      "index": 5,
+      "duration": -1
+    },
+    "panel_bottom_left": {
+      "index": 6,
+      "duration": -1
+    },
+    "panel_bottom": {
+      "index": 7,
+      "duration": -1
+    },
+    "panel_bottom_right": {
+      "index": 8,
+      "duration": -1
+    }
+  }
+}

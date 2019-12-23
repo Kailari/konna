@@ -9,6 +9,7 @@ import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLSpriteBatch;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLTexture;
 import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatch;
+import fi.jakojaannos.roguelite.engine.view.sprite.Sprite;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.SpriteInfo;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
@@ -22,7 +23,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -37,19 +37,18 @@ public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
     }
 
     private final LWJGLCamera camera;
-    private final SpriteBatch<String, LWJGLCamera> batch;
-    private final BiFunction<String, Integer, LWJGLTexture> textureResolver;
+    private final SpriteRegistry<LWJGLTexture> spriteRegistry;
+    private final SpriteBatch<LWJGLTexture, LWJGLCamera> spriteBatch;
 
     public SpriteRenderingSystem(
             final Path assetRoot,
             final LWJGLCamera camera,
-            final SpriteRegistry<LWJGLTexture> sprites
+            final SpriteRegistry<LWJGLTexture> spriteRegistry
     ) {
         this.camera = camera;
+        this.spriteRegistry = spriteRegistry;
 
-        val batch = new LWJGLSpriteBatch(assetRoot, "sprite", sprites, camera);
-        this.batch = batch;
-        this.textureResolver = (spriteName, frame) -> batch.resolveTexture(spriteName, frame).getTexture();
+        this.spriteBatch = new LWJGLSpriteBatch(assetRoot, "sprite");
     }
 
     @Override
@@ -76,7 +75,8 @@ public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
 
                     val texturesForZLayer = renderQueue.computeIfAbsent(info.zLayer,
                                                                         zLayer -> new HashMap<>());
-                    val texture = this.textureResolver.apply(info.spriteName, info.getCurrentFrame());
+                    val sprite = this.spriteRegistry.getByAssetName(info.spriteName);
+                    val texture = sprite.getSpecificFrame(info.animationName, info.getCurrentFrame()).getTexture();
                     val spritesForTexture = texturesForZLayer.computeIfAbsent(texture,
                                                                               tex -> new ArrayList<>());
 
@@ -88,7 +88,8 @@ public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
                                             .orElse(ZERO_VECTOR);
                     val position = transform.position;
 
-                    spritesForTexture.add(new SpriteRenderEntry(info.spriteName,
+                    spritesForTexture.add(new SpriteRenderEntry(sprite,
+                                                                info.animationName,
                                                                 info.getCurrentFrame(),
                                                                 info.zLayer,
                                                                 position.x,
@@ -101,33 +102,36 @@ public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
                 }
         );
 
-        this.batch.begin(this.camera);
+        this.camera.useWorldCoordinates();
+        this.spriteBatch.begin();
         renderQueue.keySet()
                    .stream()
                    .sorted()
                    .map(renderQueue::get)
                    .forEach(spritesForTexture ->
                                     spritesForTexture.forEach((texture, entries) ->
-                                                                      entries.forEach(entry -> this.batch.draw(entry.getSpriteId(),
-                                                                                                               entry.getFrame(),
-                                                                                                               entry.getX(),
-                                                                                                               entry.getY(),
-                                                                                                               entry.getOriginX(),
-                                                                                                               entry.getOriginY(),
-                                                                                                               entry.getWidth(),
-                                                                                                               entry.getHeight(),
-                                                                                                               entry.getRotation()))));
-        this.batch.end();
+                                                                      entries.forEach(entry -> this.spriteBatch.draw(entry.getSprite(),
+                                                                                                                     entry.getAnimation(),
+                                                                                                                     entry.getFrame(),
+                                                                                                                     entry.getX(),
+                                                                                                                     entry.getY(),
+                                                                                                                     entry.getOriginX(),
+                                                                                                                     entry.getOriginY(),
+                                                                                                                     entry.getWidth(),
+                                                                                                                     entry.getHeight(),
+                                                                                                                     entry.getRotation()))));
+        this.spriteBatch.end();
     }
 
     @Override
     public void close() throws Exception {
-        this.batch.close();
+        this.spriteBatch.close();
     }
 
     @RequiredArgsConstructor
     private static class SpriteRenderEntry {
-        @Getter private final String spriteId;
+        @Getter private final Sprite<LWJGLTexture> sprite;
+        @Getter private final String animation;
         @Getter private final int frame;
         @Getter private final int zLayer;
         @Getter private final double x, y;

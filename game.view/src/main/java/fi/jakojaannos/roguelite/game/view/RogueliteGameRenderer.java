@@ -45,7 +45,9 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
                                                                                  this.spriteRegistry,
                                                                                  this.textRenderer)),
                 Map.entry(MainMenuGameState.class, new MainMenuGameStateRenderer(assetRoot,
-                                                                                 this.camera))
+                                                                                 this.camera,
+                                                                                 this.textRenderer,
+                                                                                 this.spriteRegistry))
         );
 
         window.addResizeCallback(this.camera::resizeViewport);

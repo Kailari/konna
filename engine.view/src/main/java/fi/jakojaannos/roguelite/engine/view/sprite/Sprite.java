@@ -5,6 +5,7 @@ import fi.jakojaannos.roguelite.engine.view.rendering.TextureRegion;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 
 import java.util.List;
 import java.util.Map;
@@ -20,8 +21,8 @@ public final class Sprite<TTexture extends Texture> {
     }
 
     public TextureRegion<TTexture> getSpecificFrame(final String animation, final int frame) {
-        return this.frames.get(this.animations.get(animation)
-                                              .getFrameIndexOfFrame(frame));
+        val actualAnimation = this.animations.getOrDefault(animation, this.animations.get("default"));
+        return this.frames.get(actualAnimation.getFrameIndexOfFrame(frame));
     }
 
     public TextureRegion<TTexture> getFrame(final String animation, final double time) {

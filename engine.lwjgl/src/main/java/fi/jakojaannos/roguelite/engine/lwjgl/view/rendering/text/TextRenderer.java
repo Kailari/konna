@@ -112,6 +112,19 @@ public class TextRenderer implements AutoCloseable {
         draw(x, y + fontSize, fontSize, string);
     }
 
+    public void drawCenteredOnScreen(
+            final double x,
+            final double y,
+            final int fontSize,
+            final String text
+    ) {
+        val textWidth = getStringWidthInPixels(fontSize, text);
+
+        val textX = x - textWidth / 2.0;
+        val textY = y - fontSize / 2.0;
+        drawOnScreen(textX, textY, fontSize, text);
+    }
+
     public void drawInWorld(
             final double x,
             final double y,

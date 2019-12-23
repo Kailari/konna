@@ -10,6 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 public class SpriteInfo implements Component {
     public String spriteName;
+    public String animationName = "default";
     public int zLayer;
 
     public List<Integer> frames = List.of(0);

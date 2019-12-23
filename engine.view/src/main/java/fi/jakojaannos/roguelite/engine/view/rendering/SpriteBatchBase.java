@@ -1,23 +1,24 @@
 package fi.jakojaannos.roguelite.engine.view.rendering;
 
 import fi.jakojaannos.roguelite.engine.view.Camera;
+import fi.jakojaannos.roguelite.engine.view.sprite.Sprite;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Matrix4f;
 
+import javax.annotation.Nullable;
+
 @Slf4j
-public abstract class SpriteBatchBase<TSpriteID, TCamera extends Camera, TTexture extends Texture>
-        implements SpriteBatch<TSpriteID, TCamera> {
+public abstract class SpriteBatchBase<TTexture extends Texture, TCamera extends Camera>
+        implements SpriteBatch<TTexture, TCamera> {
     private final int maxFramesPerBatch;
 
     private boolean beginCalled;
-    private TCamera activeCamera;
     private Matrix4f activeTransformation;
     private TTexture activeTexture;
     @Getter(AccessLevel.PROTECTED) private int nFrames;
-    private int drawCalls;
 
     protected SpriteBatchBase(int maxFramesPerBatch) {
         this.maxFramesPerBatch = maxFramesPerBatch;
@@ -27,25 +28,12 @@ public abstract class SpriteBatchBase<TSpriteID, TCamera extends Camera, TTextur
      * Flushes the currently queued sprites.
      *
      * @param texture        texture to use
-     * @param camera         current rendering context
      * @param transformation global transformations to apply
      */
     protected abstract void flush(
             TTexture texture,
-            TCamera camera,
-            Matrix4f transformation
+            @Nullable Matrix4f transformation
     );
-
-    /**
-     * Resolves the given sprite identifier into a texture.
-     *
-     * @param sprite identifier of the sprite to resolve
-     * @param frame  current frame for the sprite to resolve
-     *
-     * @return texture which can be used to render the sprite
-     */
-
-    public abstract TextureRegion<TTexture> resolveTexture(TSpriteID sprite, int frame);
 
     /**
      * Queues a new sprite animation frame for rendering. Passing in -1 as the frame renders the
@@ -69,8 +57,7 @@ public abstract class SpriteBatchBase<TSpriteID, TCamera extends Camera, TTextur
     );
 
     @Override
-    public void begin(TCamera camera, Matrix4f transformation) {
-        this.activeCamera = camera;
+    public void begin(@Nullable Matrix4f transformation) {
         this.activeTransformation = transformation;
         if (this.beginCalled) {
             LOG.error("SpriteBatch.begin() called without calling .end() first!");
@@ -87,32 +74,28 @@ public abstract class SpriteBatchBase<TSpriteID, TCamera extends Camera, TTextur
             return;
         }
         if (this.nFrames > 0) {
-            flush(this.activeTexture, this.activeCamera, this.activeTransformation);
-            ++this.drawCalls;
+            flush(this.activeTexture, this.activeTransformation);
         }
         this.nFrames = 0;
         this.activeTexture = null;
-        this.activeCamera = null;
         this.activeTransformation = null;
         this.beginCalled = false;
-
-        //LOG.debug("{} drawcalls", this.drawCalls);
-        this.drawCalls = 0;
     }
 
     @Override
     public void draw(
-            final TSpriteID sprite,
-            final int frame,
-            final double x,
-            final double y,
-            final double originX,
-            final double originY,
-            final double width,
-            final double height,
-            final double rotation
+            Sprite<TTexture> sprite,
+            String animation,
+            int frame,
+            double x,
+            double y,
+            double originX,
+            double originY,
+            double width,
+            double height,
+            double rotation
     ) {
-        val textureRegion = resolveTexture(sprite, frame);
+        val textureRegion = sprite.getSpecificFrame(animation, frame);
         if (this.activeTexture == null) {
             this.activeTexture = textureRegion.getTexture();
         }
@@ -120,10 +103,9 @@ public abstract class SpriteBatchBase<TSpriteID, TCamera extends Camera, TTextur
         val needToChangeTexture = !textureRegion.getTexture().equals(this.activeTexture);
         val batchIsFull = this.nFrames >= this.maxFramesPerBatch - 1;
         if (needToChangeTexture || batchIsFull) {
-            flush(this.activeTexture, this.activeCamera, this.activeTransformation);
+            flush(this.activeTexture, this.activeTransformation);
             this.nFrames = 0;
             this.activeTexture = textureRegion.getTexture();
-            ++this.drawCalls;
         }
 
         queueFrame(textureRegion, x, y, originX, originY, width, height, rotation);

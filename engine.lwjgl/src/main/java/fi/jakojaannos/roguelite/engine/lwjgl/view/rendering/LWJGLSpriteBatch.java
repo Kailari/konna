@@ -6,7 +6,6 @@ import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.mesh.VertexAttribute
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.mesh.VertexFormat;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.shader.ShaderProgram;
 import fi.jakojaannos.roguelite.engine.utilities.math.RotatedRectangle;
-import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatchBase;
 import fi.jakojaannos.roguelite.engine.view.rendering.TextureRegion;
 import lombok.extern.slf4j.Slf4j;
@@ -15,14 +14,15 @@ import org.joml.Matrix4f;
 import org.joml.Vector2d;
 import org.lwjgl.system.MemoryUtil;
 
+import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
 
-import static org.lwjgl.opengl.GL30.glBindBufferBase;
-import static org.lwjgl.opengl.GL31.*;
+import static org.lwjgl.opengl.GL31.glGetUniformBlockIndex;
+import static org.lwjgl.opengl.GL31.glUniformBlockBinding;
 
 @Slf4j
-public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGLTexture> {
+public class LWJGLSpriteBatch extends SpriteBatchBase<LWJGLTexture, LWJGLCamera> {
     private static final Matrix4f DEFAULT_TRANSFORM = new Matrix4f().identity();
     private static final int MAX_SPRITES_PER_BATCH = 4096;
     private static final int VERTICES_PER_SPRITE = 4;
@@ -43,22 +43,17 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGL
     private final int uniformModelMatrix;
 
     private final ByteBuffer vertexDataBuffer;
-    private final SpriteRegistry<LWJGLTexture> spriteRegistry;
 
     public LWJGLSpriteBatch(
             final Path assetRoot,
-            final String shader,
-            final SpriteRegistry<LWJGLTexture> spriteRegistry,
-            final LWJGLCamera camera
+            final String shader
     ) {
         super(MAX_SPRITES_PER_BATCH);
 
-        this.spriteRegistry = spriteRegistry;
         this.shader = createShader(assetRoot, shader);
         this.uniformModelMatrix = this.shader.getUniformLocation("model");
         int uniformCameraInfoBlock = glGetUniformBlockIndex(this.shader.getShaderProgram(), "CameraInfo");
-        glBindBufferBase(GL_UNIFORM_BUFFER, 2, camera.getCameraMatricesUbo());
-        glUniformBlockBinding(this.shader.getShaderProgram(), uniformCameraInfoBlock, 2);
+        glUniformBlockBinding(this.shader.getShaderProgram(), uniformCameraInfoBlock, UniformBufferObjectIndices.CAMERA);
 
         this.batchMesh = new Mesh(VERTEX_FORMAT);
         this.batchMesh.setElements(constructIndicesArray());
@@ -68,12 +63,6 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGL
             updateVertex(i * SIZE_IN_BYTES, 0, 0, 0, 0, 0, 0, 0);
         }
         this.batchMesh.setVertexData(this.vertexDataBuffer);
-    }
-
-    @Override
-    public TextureRegion<LWJGLTexture> resolveTexture(final String spriteName, int frame) {
-        return this.spriteRegistry.getByAssetName(spriteName)
-                                  .getSpecificFrame("default", frame);
     }
 
     @Override
@@ -132,15 +121,13 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<String, LWJGLCamera, LWJGL
 
     @Override
     protected void flush(
-            LWJGLTexture texture,
-            LWJGLCamera camera,
-            Matrix4f transformation
+            final LWJGLTexture texture,
+            @Nullable final Matrix4f transformation
     ) {
         this.shader.use();
         texture.bind();
-
-        //this.shader.setUniformMat4x4(this.uniformProjectionMatrix, camera.getProjectionMatrix());
-        //this.shader.setUniformMat4x4(this.uniformViewMatrix, camera.getViewMatrix());
+        int uniformCameraInfoBlock = glGetUniformBlockIndex(this.shader.getShaderProgram(), "CameraInfo");
+        glUniformBlockBinding(this.shader.getShaderProgram(), uniformCameraInfoBlock, UniformBufferObjectIndices.CAMERA);
         this.shader.setUniformMat4x4(this.uniformModelMatrix,
                                      transformation != null
                                              ? transformation

@@ -24,15 +24,17 @@ public class LevelRenderingSystem implements ECSSystem {
     }
 
     private final LWJGLCamera camera;
-    private final SpriteBatch<String, LWJGLCamera> batch;
+    private final SpriteRegistry<LWJGLTexture> spriteRegistry;
+    private final SpriteBatch<LWJGLTexture, LWJGLCamera> batch;
 
     public LevelRenderingSystem(
             final Path assetRoot,
             final LWJGLCamera camera,
-            final SpriteRegistry<LWJGLTexture> sprites
+            final SpriteRegistry<LWJGLTexture> spritesRegistry
     ) {
         this.camera = camera;
-        this.batch = new LWJGLSpriteBatch(assetRoot, "sprite", sprites, camera);
+        spriteRegistry = spritesRegistry;
+        this.batch = new LWJGLSpriteBatch(assetRoot, "sprite");
     }
 
     @Override
@@ -50,7 +52,9 @@ public class LevelRenderingSystem implements ECSSystem {
         val regionW = (int) Math.ceil(this.camera.getViewportWidthInUnits()) + 1;
         val regionH = (int) Math.ceil(this.camera.getViewportHeightInUnits()) + 1;
 
-        this.batch.begin(this.camera);
+        this.camera.useWorldCoordinates();
+        this.batch.begin();
+        val sprite = this.spriteRegistry.getByAssetName("sprites/tileset");
         entities.forEach(entity -> {
             val level = world.getEntityManager().getComponentOf(entity, TileMapLayer.class).orElseThrow();
 
@@ -58,7 +62,8 @@ public class LevelRenderingSystem implements ECSSystem {
             for (int x = regionX; x < regionX + regionW; ++x) {
                 for (int y = regionY; y < regionY + regionH; ++y) {
                     val tile = level.tileMap.getTile(x, y);
-                    this.batch.draw("sprites/tileset",
+                    this.batch.draw(sprite,
+                                    "default",
                                     tile.getTypeIndex(),
                                     x * tileSize,
                                     y * tileSize,
