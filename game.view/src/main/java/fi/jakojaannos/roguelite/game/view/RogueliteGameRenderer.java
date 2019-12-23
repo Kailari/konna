@@ -2,7 +2,7 @@ package fi.jakojaannos.roguelite.game.view;
 
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLWindow;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLTexture;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text.TextRenderer;
+import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text.LWJGLTextRenderer;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.engine.view.GameRenderer;
 import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
@@ -26,7 +26,7 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
     private final RogueliteCamera camera;
     private final TextureRegistry<LWJGLTexture> textureRegistry;
     private final SpriteRegistry<LWJGLTexture> spriteRegistry;
-    private final TextRenderer textRenderer;
+    private final LWJGLTextRenderer textRenderer;
 
     private final Map<Class<? extends GameState>, GameStateRenderer> stateRenderers;
 
@@ -37,7 +37,7 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
         this.camera = new RogueliteCamera(window.getWidth(), window.getHeight());
         this.textureRegistry = new TextureRegistry<>(assetRoot, LWJGLTexture::new);
         this.spriteRegistry = new SpriteRegistry<>(assetRoot, this.textureRegistry);
-        this.textRenderer = new TextRenderer(assetRoot, this.camera);
+        this.textRenderer = new LWJGLTextRenderer(assetRoot, this.camera);
 
         this.stateRenderers = Map.ofEntries(
                 Map.entry(GameplayGameState.class, new GameplayGameStateRenderer(assetRoot,

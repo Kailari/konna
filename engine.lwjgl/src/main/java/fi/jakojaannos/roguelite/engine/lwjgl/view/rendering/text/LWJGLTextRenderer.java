@@ -2,6 +2,7 @@ package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text;
 
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.shader.ShaderProgram;
+import fi.jakojaannos.roguelite.engine.view.text.TextRenderer;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Matrix4f;
@@ -22,7 +23,7 @@ import static org.lwjgl.stb.STBTruetype.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 @Slf4j
-public class TextRenderer implements AutoCloseable {
+public class LWJGLTextRenderer implements AutoCloseable, TextRenderer {
     private static final int SIZE_IN_BYTES = (2 + 2 + 3) * 4;
 
     private final boolean kerningEnabled = false;
@@ -39,7 +40,7 @@ public class TextRenderer implements AutoCloseable {
     private final LWJGLCamera camera;
     private final Font font;
 
-    public TextRenderer(
+    public LWJGLTextRenderer(
             final Path assetRoot,
             final LWJGLCamera camera
     ) {
@@ -66,6 +67,7 @@ public class TextRenderer implements AutoCloseable {
         this.vertexDataBuffer = MemoryUtil.memAlloc(4 * SIZE_IN_BYTES);
     }
 
+    @Override
     public double getStringWidthInPixels(int fontSize, String string) {
         int width = 0;
         try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -93,6 +95,7 @@ public class TextRenderer implements AutoCloseable {
         return width * stbtt_ScaleForPixelHeight(this.font.getFontInfo(), fontSize);
     }
 
+    @Override
     public void drawOnScreen(
             final double x,
             final double y,

@@ -4,7 +4,7 @@ import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text.TextRenderer;
+import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text.LWJGLTextRenderer;
 
 import java.util.stream.Stream;
 
@@ -14,9 +14,9 @@ public class RenderHUDSystem implements ECSSystem {
         requirements.tickAfter(SpriteRenderingSystem.class);
     }
 
-    private final TextRenderer textRenderer;
+    private final LWJGLTextRenderer textRenderer;
 
-    public RenderHUDSystem(final TextRenderer textRenderer) {
+    public RenderHUDSystem(final LWJGLTextRenderer textRenderer) {
         this.textRenderer = textRenderer;
     }
 

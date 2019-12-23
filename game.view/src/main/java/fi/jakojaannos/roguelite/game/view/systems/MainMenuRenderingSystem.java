@@ -6,7 +6,7 @@ import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLTexture;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text.TextRenderer;
+import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text.LWJGLTextRenderer;
 import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatch;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
@@ -30,7 +30,7 @@ public class MainMenuRenderingSystem implements ECSSystem, AutoCloseable {
     public void declareRequirements(final RequirementsBuilder requirements) {
     }
 
-    private final TextRenderer textRenderer;
+    private final LWJGLTextRenderer textRenderer;
     private final LWJGLCamera camera;
 
     private final int screenCameraUbo;
@@ -39,7 +39,7 @@ public class MainMenuRenderingSystem implements ECSSystem, AutoCloseable {
     private List<UIElement> uiRoots;
 
     public MainMenuRenderingSystem(
-            TextRenderer textRenderer,
+            LWJGLTextRenderer textRenderer,
             LWJGLCamera camera,
             SpriteRegistry<LWJGLTexture> spriteRegistry,
             SpriteBatch<LWJGLTexture> spriteBatch
@@ -66,17 +66,19 @@ public class MainMenuRenderingSystem implements ECSSystem, AutoCloseable {
                                      .size(width, height)
                                      .borderSize(borderSize)
                                      .sprite(sprite, spriteBatch)
-                                     .child(UILabel.builder("play_button_label")
+                                     .child(UILabel.builder("play_button_label", this.textRenderer)
                                                    .anchor(0.5, 0.5)
                                                    .origin(0.5, 0.5)
+                                                   .position(0, 20)
                                                    .text("Play")
                                                    .fontSize(24)
                                                    .build())
                                      //.onClick((element, event) -> LOG.info("Play clicked!"))
                                      .build())
-                .withElement(UILabel.builder("title_label")
+                .withElement(UILabel.builder("title_label", this.textRenderer)
                                     .anchor(0.5, 0.25)
                                     .origin(0.5, 1.0)
+                                    .position(0, 0)
                                     .text("Konna")
                                     .fontSize(48)
                                     .build())
