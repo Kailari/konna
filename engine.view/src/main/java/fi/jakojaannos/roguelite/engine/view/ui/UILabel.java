@@ -8,12 +8,12 @@ public class UILabel extends UIElement {
 
     protected UILabel(
             final String name,
-            final SizeConstraints sizeConstraints,
+            final ElementBoundaries bounds,
             final List<UIElement> children,
             final String text,
             final int fontSize
     ) {
-        super(name, children, sizeConstraints);
+        super(name, children, bounds);
         this.text = text;
         this.fontSize = fontSize;
     }
@@ -47,7 +47,7 @@ public class UILabel extends UIElement {
 
         @Override
         public UILabel build() {
-            return new UILabel(this.name, buildSizeConstraints(), this.children, this.text, this.fontSize);
+            return new UILabel(this.name, this.bounds, this.children, this.text, this.fontSize);
         }
     }
 }

@@ -14,13 +14,13 @@ public final class UIPanel<TTexture extends Texture> extends UIElement {
 
     private UIPanel(
             final String name,
-            final SizeConstraints sizeConstraints,
+            final ElementBoundaries bounds,
             final List<UIElement> children,
             final int borderSize,
             final Sprite<TTexture> sprite,
             final SpriteBatch<TTexture> spriteBatch
     ) {
-        super(name, children, sizeConstraints);
+        super(name, children, bounds);
         this.borderSize = borderSize;
         this.sprite = sprite;
         this.spriteBatch = spriteBatch;
@@ -89,7 +89,7 @@ public final class UIPanel<TTexture extends Texture> extends UIElement {
         @Override
         public UIPanel<TTexture> build() {
             return new UIPanel<>(this.name,
-                                 buildSizeConstraints(),
+                                 this.bounds,
                                  this.children,
                                  this.borderSize,
                                  this.sprite,
