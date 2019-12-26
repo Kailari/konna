@@ -5,12 +5,14 @@ import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.data.components.EngineUIComponentGroups;
+import fi.jakojaannos.roguelite.engine.view.data.resources.RenderPass;
 import fi.jakojaannos.roguelite.engine.view.data.resources.internal.UIHierarchy;
 import fi.jakojaannos.roguelite.engine.view.data.resources.internal.UIRoot;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatch;
 import fi.jakojaannos.roguelite.engine.view.systems.ui.*;
 import fi.jakojaannos.roguelite.engine.view.text.TextRenderer;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
+import lombok.val;
 
 /**
  * The interface used to interact with the game.
@@ -39,6 +41,7 @@ public class UserInterfaceImpl implements UserInterface {
 
         this.uiWorld.createResource(UIRoot.class, new UIRoot(viewport));
         this.uiWorld.createResource(UIHierarchy.class, new UIHierarchy());
+        this.uiWorld.createResource(RenderPass.class, new RenderPass());
     }
 
     public EntityManager getEntityManager() {
@@ -47,6 +50,10 @@ public class UserInterfaceImpl implements UserInterface {
 
     @Override
     public void render() {
-        this.uiDispatcher.dispatch(this.uiWorld);
+        val renderPass = this.uiWorld.getOrCreateResource(RenderPass.class);
+
+        for (renderPass.value = 0; renderPass.value < renderPass.maxHierarchyDepth; ++renderPass.value) {
+            this.uiDispatcher.dispatch(this.uiWorld);
+        }
     }
 }

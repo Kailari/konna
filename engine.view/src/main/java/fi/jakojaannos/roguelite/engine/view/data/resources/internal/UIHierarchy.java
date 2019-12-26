@@ -37,4 +37,9 @@ public class UIHierarchy implements Resource {
             return 0;
         }
     }
+
+    public int getLevelOf(final Entity entity) {
+        return getParentOf(entity).map(parent -> getLevelOf(parent) + 1)
+                                  .orElse(0);
+    }
 }

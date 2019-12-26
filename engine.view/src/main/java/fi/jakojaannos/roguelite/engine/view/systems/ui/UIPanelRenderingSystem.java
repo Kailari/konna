@@ -7,6 +7,8 @@ import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.view.data.components.ui.ElementBoundaries;
 import fi.jakojaannos.roguelite.engine.view.data.components.ui.internal.panel.BorderSize;
 import fi.jakojaannos.roguelite.engine.view.data.components.ui.internal.panel.PanelSprite;
+import fi.jakojaannos.roguelite.engine.view.data.resources.RenderPass;
+import fi.jakojaannos.roguelite.engine.view.data.resources.internal.UIHierarchy;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatch;
 import fi.jakojaannos.roguelite.engine.view.sprite.Sprite;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,8 @@ public class UIPanelRenderingSystem implements ECSSystem {
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.addToGroup(UISystemGroups.RENDERING)
+                    .requireResource(UIHierarchy.class)
+                    .requireResource(RenderPass.class)
                     .withComponent(ElementBoundaries.class)
                     .withComponent(PanelSprite.class);
     }
@@ -32,25 +36,29 @@ public class UIPanelRenderingSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
+        val hierarchy = world.getOrCreateResource(UIHierarchy.class);
+        val renderPass = world.getOrCreateResource(RenderPass.class);
+
         val entityManager = world.getEntityManager();
         this.spriteBatch.begin();
-        entities.forEach(entity -> {
-            val sprite = entityManager.getComponentOf(entity, PanelSprite.class)
-                                      .orElseThrow().sprite;
-            int borderSize = entityManager.getComponentOf(entity, BorderSize.class)
-                                          .map(bs -> bs.value)
-                                          .orElse(DEFAULT_BORDER_SIZE);
+        entities.filter(entity -> hierarchy.getLevelOf(entity) == renderPass.value)
+                .forEach(entity -> {
+                    val sprite = entityManager.getComponentOf(entity, PanelSprite.class)
+                                              .orElseThrow().sprite;
+                    int borderSize = entityManager.getComponentOf(entity, BorderSize.class)
+                                                  .map(bs -> bs.value)
+                                                  .orElse(DEFAULT_BORDER_SIZE);
 
-            val boundaries = entityManager.getComponentOf(entity, ElementBoundaries.class).orElseThrow();
-            val x = boundaries.minX;
-            val y = boundaries.minY;
-            val width = boundaries.width;
-            val height = boundaries.height;
+                    val boundaries = entityManager.getComponentOf(entity, ElementBoundaries.class).orElseThrow();
+                    val x = boundaries.minX;
+                    val y = boundaries.minY;
+                    val width = boundaries.width;
+                    val height = boundaries.height;
 
-            drawPanelRow(sprite, 0, x, y, width, borderSize, borderSize);
-            drawPanelRow(sprite, 1, x, y + borderSize, width, height - 2 * borderSize, borderSize);
-            drawPanelRow(sprite, 2, x, y + height - borderSize, width, borderSize, borderSize);
-        });
+                    drawPanelRow(sprite, 0, x, y, width, borderSize, borderSize);
+                    drawPanelRow(sprite, 1, x, y + borderSize, width, height - 2 * borderSize, borderSize);
+                    drawPanelRow(sprite, 2, x, y + height - borderSize, width, borderSize, borderSize);
+                });
         this.spriteBatch.end();
     }
 
