@@ -9,6 +9,7 @@ import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLTexture;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text.LWJGLTextRenderer;
 import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatch;
+import fi.jakojaannos.roguelite.engine.view.rendering.Texture;
 import fi.jakojaannos.roguelite.engine.view.sprite.Sprite;
 import fi.jakojaannos.roguelite.engine.view.ui.ProportionValue;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
@@ -39,15 +40,15 @@ public class MainMenuRenderingSystem implements ECSSystem, AutoCloseable {
     public MainMenuRenderingSystem(
             final LWJGLTextRenderer textRenderer,
             final LWJGLCamera camera,
-            final SpriteRegistry<LWJGLTexture> spriteRegistry,
-            final SpriteBatch<LWJGLTexture> spriteBatch
+            final SpriteRegistry<?> spriteRegistry,
+            final SpriteBatch spriteBatch
     ) {
         this.camera = camera;
 
         this.screenCameraUbo = glGenBuffers();
         this.cameraMatricesData = MemoryUtil.memAlloc(2 * 16 * 4);
 
-        Sprite<LWJGLTexture> sprite = spriteRegistry.getByAssetName("sprites/ui/ui");
+        Sprite sprite = spriteRegistry.getByAssetName("sprites/ui/ui");
 
         val width = 600;
         val height = 100;

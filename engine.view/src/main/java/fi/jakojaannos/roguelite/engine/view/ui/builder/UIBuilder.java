@@ -3,7 +3,6 @@ package fi.jakojaannos.roguelite.engine.view.ui.builder;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatch;
-import fi.jakojaannos.roguelite.engine.view.rendering.Texture;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElementBuilder;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
@@ -11,18 +10,18 @@ import lombok.val;
 
 import java.util.function.Consumer;
 
-public class UIBuilder<TTexture extends Texture> {
-    private final UserInterfaceImpl<TTexture> userInterface;
+public class UIBuilder {
+    private final UserInterfaceImpl userInterface;
 
     public UIBuilder(
             final Viewport viewport,
-            final SpriteBatch<TTexture> spriteBatch,
-            final SpriteRegistry<TTexture> spriteRegistry
+            final SpriteBatch spriteBatch,
+            final SpriteRegistry<?> spriteRegistry
     ) {
-        this.userInterface = new UserInterfaceImpl<>(viewport, spriteBatch, spriteRegistry);
+        this.userInterface = new UserInterfaceImpl(viewport, spriteBatch, spriteRegistry);
     }
 
-    public <T extends UIElementType<TBuilder>, TBuilder extends UIElementBuilder<TBuilder>> UIBuilder<TTexture> element(
+    public <T extends UIElementType<TBuilder>, TBuilder extends UIElementBuilder<TBuilder>> UIBuilder element(
             final String name,
             final T elementType,
             final Consumer<TBuilder> factory
@@ -33,7 +32,7 @@ public class UIBuilder<TTexture extends Texture> {
         return this;
     }
 
-    public UserInterface<TTexture> build() {
+    public UserInterface build() {
         this.userInterface.getEntityManager().applyModifications();
         return this.userInterface;
     }

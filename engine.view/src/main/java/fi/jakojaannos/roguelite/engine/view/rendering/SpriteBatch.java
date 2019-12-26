@@ -1,15 +1,15 @@
 package fi.jakojaannos.roguelite.engine.view.rendering;
 
-import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.sprite.Sprite;
 import org.joml.Matrix4f;
 
-public interface SpriteBatch<TTexture extends Texture>
+import javax.annotation.Nullable;
+
+public interface SpriteBatch
         extends AutoCloseable {
     /**
      * Begins a new rendering batch. A batch must be finished using {@link #end()}, before calling
      * {@link #begin} again.
-     *
      */
     default void begin() {
         begin(null);
@@ -21,7 +21,7 @@ public interface SpriteBatch<TTexture extends Texture>
      *
      * @param transformation additional global transformation to apply. May be <code>null</code>
      */
-    void begin(Matrix4f transformation);
+    void begin(@Nullable Matrix4f transformation);
 
     /**
      * Renders the sprite at given coordinates with given size. Uses the default animation and first
@@ -33,7 +33,7 @@ public interface SpriteBatch<TTexture extends Texture>
      * @param width  horizontal size of the sprite in world units
      * @param height vertical size of the sprite in world units
      */
-    default void draw(Sprite<TTexture> sprite, double x, double y, double width, double height) {
+    default void draw(Sprite sprite, double x, double y, double width, double height) {
         draw(sprite, "default", 0, x, y, width, height);
     }
 
@@ -50,7 +50,7 @@ public interface SpriteBatch<TTexture extends Texture>
      * @param height    vertical size of the sprite in world units
      */
     default void draw(
-            Sprite<TTexture> sprite,
+            Sprite sprite,
             String animation,
             int frame,
             double x,
@@ -77,7 +77,7 @@ public interface SpriteBatch<TTexture extends Texture>
      * @param rotation  rotation, in radians, counter-clockwise
      */
     void draw(
-            Sprite<TTexture> sprite,
+            Sprite sprite,
             String animation,
             int frame,
             double x,

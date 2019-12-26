@@ -1,6 +1,5 @@
 package fi.jakojaannos.roguelite.engine.view.rendering;
 
-import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.sprite.Sprite;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -11,13 +10,13 @@ import org.joml.Matrix4f;
 import javax.annotation.Nullable;
 
 @Slf4j
-public abstract class SpriteBatchBase<TTexture extends Texture, TCamera extends Camera>
-        implements SpriteBatch<TTexture> {
+public abstract class SpriteBatchBase
+        implements SpriteBatch {
     private final int maxFramesPerBatch;
 
     private boolean beginCalled;
     private Matrix4f activeTransformation;
-    private TTexture activeTexture;
+    private Texture activeTexture;
     @Getter(AccessLevel.PROTECTED) private int nFrames;
 
     protected SpriteBatchBase(int maxFramesPerBatch) {
@@ -31,7 +30,7 @@ public abstract class SpriteBatchBase<TTexture extends Texture, TCamera extends 
      * @param transformation global transformations to apply
      */
     protected abstract void flush(
-            TTexture texture,
+            Texture texture,
             @Nullable Matrix4f transformation
     );
 
@@ -46,7 +45,7 @@ public abstract class SpriteBatchBase<TTexture extends Texture, TCamera extends 
      * @param height  vertical size of the sprite in world units
      */
     protected abstract void queueFrame(
-            TextureRegion<TTexture> texture,
+            TextureRegion texture,
             double x,
             double y,
             double originX,
@@ -84,7 +83,7 @@ public abstract class SpriteBatchBase<TTexture extends Texture, TCamera extends 
 
     @Override
     public void draw(
-            Sprite<TTexture> sprite,
+            Sprite sprite,
             String animation,
             int frame,
             double x,

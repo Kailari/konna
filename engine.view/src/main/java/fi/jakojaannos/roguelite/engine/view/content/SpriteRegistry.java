@@ -24,11 +24,11 @@ import java.util.Optional;
  */
 @Slf4j
 public class SpriteRegistry<TTexture extends Texture>
-        extends AbstractAssetRegistry<Sprite<TTexture>> {
+        extends AbstractAssetRegistry<Sprite> {
     private final Path assetRoot;
 
     private final TextureRegistry<TTexture> textures;
-    private final Sprite<TTexture> defaultSprite;
+    private final Sprite defaultSprite;
 
     public SpriteRegistry(
             final Path assetRoot,
@@ -37,18 +37,18 @@ public class SpriteRegistry<TTexture extends Texture>
         this.assetRoot = assetRoot;
         this.textures = textures;
 
-        this.defaultSprite = Sprite.ofSingleFrame(new TextureRegion<>(textures.getDefault(),
-                                                                      0, 0,
-                                                                      1, 1));
+        this.defaultSprite = Sprite.ofSingleFrame(new TextureRegion(textures.getDefault(),
+                                                                    0, 0,
+                                                                    1, 1));
     }
 
     @Override
-    protected Sprite<TTexture> getDefault() {
+    protected Sprite getDefault() {
         return this.defaultSprite;
     }
 
     @Override
-    protected Optional<Sprite<TTexture>> loadAsset(final AssetHandle handle) {
+    protected Optional<Sprite> loadAsset(final AssetHandle handle) {
         Gson gson = new GsonBuilder()
                 .registerTypeAdapter(Sprite.class, new SpriteDeserializer<>(textures))
                 .create();
@@ -56,7 +56,6 @@ public class SpriteRegistry<TTexture extends Texture>
         try (val reader = new InputStreamReader(Files.newInputStream(path, StandardOpenOption.READ))) {
             LOG.trace(LogCategories.SPRITE_SERIALIZATION,
                       "Loading sprite {}", path.toString());
-            // noinspection unchecked
             return Optional.ofNullable(gson.fromJson(reader, Sprite.class));
         } catch (IOException e) {
             LOG.error("Reading sprite \"{}\" failed!", handle);

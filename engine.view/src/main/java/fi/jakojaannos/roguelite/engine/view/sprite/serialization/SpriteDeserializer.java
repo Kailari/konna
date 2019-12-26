@@ -20,7 +20,7 @@ import java.util.Map;
 
 @Slf4j
 public class SpriteDeserializer<TTexture extends Texture>
-        implements JsonDeserializer<Sprite<TTexture>> {
+        implements JsonDeserializer<Sprite> {
 
     private final AssetRegistry<TTexture> textures;
 
@@ -29,26 +29,26 @@ public class SpriteDeserializer<TTexture extends Texture>
     }
 
     @Override
-    public Sprite<TTexture> deserialize(
+    public Sprite deserialize(
             final JsonElement json,
             final Type typeOfT,
             final JsonDeserializationContext context
     ) throws JsonParseException {
         val jsonObject = json.getAsJsonObject();
 
-        val frames = new ArrayList<TextureRegion<TTexture>>();
+        List<TextureRegion> frames = new ArrayList<>();
         deserializeFrames(jsonObject, frames);
 
         val animationsJson = jsonObject.getAsJsonObject("animations");
-        val animations = new HashMap<String, Animation>();
+        Map<String, Animation> animations = new HashMap<>();
         deserializeAnimations(animationsJson, frames.size(), animations);
 
-        return new Sprite<>(List.copyOf(frames), Map.copyOf(animations));
+        return new Sprite(List.copyOf(frames), Map.copyOf(animations));
     }
 
     private void deserializeFrames(
             final JsonObject root,
-            final ArrayList<TextureRegion<TTexture>> outFrames
+            final List<TextureRegion> outFrames
     ) {
         val framesElement = root.get("frames");
         if (framesElement == null) {
@@ -70,9 +70,9 @@ public class SpriteDeserializer<TTexture extends Texture>
                     val v0 = row * frameV;
                     val u1 = (column + 1) * frameU;
                     val v1 = (row + 1) * frameV;
-                    outFrames.add(new TextureRegion<>(texture,
-                                                      u0, v0,
-                                                      u1, v1));
+                    outFrames.add(new TextureRegion(texture,
+                                                    u0, v0,
+                                                    u1, v1));
                 }
             }
         } else {
@@ -84,7 +84,7 @@ public class SpriteDeserializer<TTexture extends Texture>
     }
 
     private void deserializeSingleFrame(
-            final ArrayList<TextureRegion<TTexture>> outFrames,
+            final List<TextureRegion> outFrames,
             final JsonElement frameElement
     ) {
         val frameJson = frameElement.getAsJsonObject();
@@ -102,7 +102,7 @@ public class SpriteDeserializer<TTexture extends Texture>
         val v0 = y / texture.getHeight();
         val u1 = u0 + w / texture.getWidth();
         val v1 = v0 + h / texture.getHeight();
-        outFrames.add(new TextureRegion<>(texture, u0, v0, u1, v1));
+        outFrames.add(new TextureRegion(texture, u0, v0, u1, v1));
     }
 
     private void deserializeAnimations(

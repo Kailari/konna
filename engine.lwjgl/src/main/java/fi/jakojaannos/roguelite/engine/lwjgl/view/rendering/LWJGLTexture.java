@@ -47,7 +47,8 @@ public class LWJGLTexture implements Texture, AutoCloseable {
         LOG.debug("Done loading texture! {}×{}", width, height);
     }
 
-    void bind() {
+    @Override
+    public void use() {
         glBindTexture(GL_TEXTURE_2D, this.texture);
     }
 

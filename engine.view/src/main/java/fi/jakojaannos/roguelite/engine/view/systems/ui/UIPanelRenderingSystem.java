@@ -9,7 +9,6 @@ import fi.jakojaannos.roguelite.engine.view.data.components.ui.ElementBoundaries
 import fi.jakojaannos.roguelite.engine.view.data.components.ui.internal.panel.BorderSize;
 import fi.jakojaannos.roguelite.engine.view.data.components.ui.internal.panel.PanelSprite;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatch;
-import fi.jakojaannos.roguelite.engine.view.rendering.Texture;
 import fi.jakojaannos.roguelite.engine.view.sprite.Sprite;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -17,7 +16,7 @@ import lombok.val;
 import java.util.stream.Stream;
 
 @RequiredArgsConstructor
-public class UIPanelRenderingSystem<TTexture extends Texture> implements ECSSystem {
+public class UIPanelRenderingSystem implements ECSSystem {
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.addToGroup(UISystemGroups.RENDERING)
@@ -27,8 +26,8 @@ public class UIPanelRenderingSystem<TTexture extends Texture> implements ECSSyst
 
     private static final int DEFAULT_BORDER_SIZE = 5;
 
-    private final SpriteBatch<TTexture> spriteBatch;
-    private final SpriteRegistry<TTexture> spriteRegistry;
+    private final SpriteBatch spriteBatch;
+    private final SpriteRegistry<?> spriteRegistry;
 
     @Override
     public void tick(
@@ -59,7 +58,7 @@ public class UIPanelRenderingSystem<TTexture extends Texture> implements ECSSyst
     }
 
     private void drawPanelRow(
-            final Sprite<TTexture> sprite,
+            final Sprite sprite,
             final int row,
             final double x,
             final double y,

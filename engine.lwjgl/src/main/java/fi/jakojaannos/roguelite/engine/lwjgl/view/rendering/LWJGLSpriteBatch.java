@@ -1,12 +1,12 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering;
 
-import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.mesh.Mesh;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.mesh.VertexAttribute;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.mesh.VertexFormat;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.shader.ShaderProgram;
 import fi.jakojaannos.roguelite.engine.utilities.math.RotatedRectangle;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatchBase;
+import fi.jakojaannos.roguelite.engine.view.rendering.Texture;
 import fi.jakojaannos.roguelite.engine.view.rendering.TextureRegion;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -22,7 +22,7 @@ import static org.lwjgl.opengl.GL31.glGetUniformBlockIndex;
 import static org.lwjgl.opengl.GL31.glUniformBlockBinding;
 
 @Slf4j
-public class LWJGLSpriteBatch extends SpriteBatchBase<LWJGLTexture, LWJGLCamera> {
+public class LWJGLSpriteBatch extends SpriteBatchBase {
     private static final Matrix4f DEFAULT_TRANSFORM = new Matrix4f().identity();
     private static final int MAX_SPRITES_PER_BATCH = 4096;
     private static final int VERTICES_PER_SPRITE = 4;
@@ -67,7 +67,7 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<LWJGLTexture, LWJGLCamera>
 
     @Override
     protected void queueFrame(
-            final TextureRegion<LWJGLTexture> region,
+            final TextureRegion region,
             final double x,
             final double y,
             final double originX,
@@ -121,11 +121,12 @@ public class LWJGLSpriteBatch extends SpriteBatchBase<LWJGLTexture, LWJGLCamera>
 
     @Override
     protected void flush(
-            final LWJGLTexture texture,
+            final Texture texture,
             @Nullable final Matrix4f transformation
     ) {
         this.shader.use();
-        texture.bind();
+        texture.use();
+
         int uniformCameraInfoBlock = glGetUniformBlockIndex(this.shader.getShaderProgram(), "CameraInfo");
         glUniformBlockBinding(this.shader.getShaderProgram(), uniformCameraInfoBlock, UniformBufferObjectIndices.CAMERA);
         this.shader.setUniformMat4x4(this.uniformModelMatrix,

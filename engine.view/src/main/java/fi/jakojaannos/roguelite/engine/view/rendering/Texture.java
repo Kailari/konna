@@ -4,4 +4,6 @@ public interface Texture extends AutoCloseable {
     int getWidth();
 
     int getHeight();
+
+    void use();
 }

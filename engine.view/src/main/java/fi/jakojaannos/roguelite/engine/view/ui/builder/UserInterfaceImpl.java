@@ -19,14 +19,14 @@ import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 /**
  * The interface used to interact with the game.
  */
-public class UserInterfaceImpl<TTexture extends Texture> implements UserInterface<TTexture> {
+public class UserInterfaceImpl implements UserInterface {
     private final World uiWorld;
     private final SystemDispatcher uiDispatcher;
 
     public UserInterfaceImpl(
             final Viewport viewport,
-            final SpriteBatch<TTexture> spriteBatch,
-            final SpriteRegistry<TTexture> spriteRegistry
+            final SpriteBatch spriteBatch,
+            final SpriteRegistry<?> spriteRegistry
     ) {
         this.uiWorld = World.createNew(EntityManager.createNew(256, 32));
         this.uiWorld.getEntityManager().registerComponentGroup(EngineUIComponentGroups.ELEMENT_BOUND);
@@ -36,7 +36,7 @@ public class UserInterfaceImpl<TTexture extends Texture> implements UserInterfac
                                             .addGroupDependency(UISystemGroups.RENDERING, UISystemGroups.PREPARATIONS)
                                             .withSystem(new UIHierarchySystem())
                                             .withSystem(new UIElementBoundaryCalculationSystem())
-                                            .withSystems(new UIPanelRenderingSystem<>(spriteBatch, spriteRegistry))
+                                            .withSystems(new UIPanelRenderingSystem(spriteBatch, spriteRegistry))
                                             .build();
 
         this.uiWorld.createResource(UIRoot.class, new UIRoot(viewport));

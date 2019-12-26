@@ -9,6 +9,7 @@ import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLSpriteBatch;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLTexture;
 import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatch;
+import fi.jakojaannos.roguelite.engine.view.rendering.Texture;
 import fi.jakojaannos.roguelite.engine.view.sprite.Sprite;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.SpriteInfo;
@@ -38,7 +39,7 @@ public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
 
     private final LWJGLCamera camera;
     private final SpriteRegistry<LWJGLTexture> spriteRegistry;
-    private final SpriteBatch<LWJGLTexture> spriteBatch;
+    private final SpriteBatch spriteBatch;
 
     public SpriteRenderingSystem(
             final Path assetRoot,
@@ -67,7 +68,7 @@ public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
         //
         // Current implementation is quick 'n dumb unholy mess of streams and hash maps, which in
         // turn is, most likely very, very inefficient, both memory- and CPU -wise.
-        val renderQueue = new HashMap<Integer, HashMap<LWJGLTexture, List<SpriteRenderEntry>>>();
+        val renderQueue = new HashMap<Integer, HashMap<Texture, List<SpriteRenderEntry>>>();
         entities.forEach(
                 entity -> {
                     val transform = world.getEntityManager().getComponentOf(entity, Transform.class).orElseThrow();
@@ -130,7 +131,7 @@ public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
 
     @RequiredArgsConstructor
     private static class SpriteRenderEntry {
-        @Getter private final Sprite<LWJGLTexture> sprite;
+        @Getter private final Sprite sprite;
         @Getter private final String animation;
         @Getter private final int frame;
         @Getter private final int zLayer;
