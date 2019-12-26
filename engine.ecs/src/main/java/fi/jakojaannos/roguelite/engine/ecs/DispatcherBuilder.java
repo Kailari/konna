@@ -74,6 +74,20 @@ public interface DispatcherBuilder {
     DispatcherBuilder withSystem(ECSSystem system);
 
     /**
+     * Registers all listed system instances to this dispatcher.
+     *
+     * @param systems system instances to add
+     *
+     * @return the builder for chaining
+     */
+    default DispatcherBuilder withSystems(ECSSystem... systems) {
+        for (val system : systems) {
+            withSystem(system);
+        }
+        return this;
+    }
+
+    /**
      * Finalizes the construction process and outputs a fully operational {@link SystemDispatcher}
      * instance.
      *

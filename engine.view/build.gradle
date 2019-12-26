@@ -1,5 +1,6 @@
 dependencies {
     implementation project(":engine")
+    implementation project(":engine.ecs")
     implementation project(":engine.utilities")
 
     // Google Gson

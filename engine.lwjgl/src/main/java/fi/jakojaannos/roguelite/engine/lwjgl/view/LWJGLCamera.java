@@ -2,6 +2,7 @@ package fi.jakojaannos.roguelite.engine.lwjgl.view;
 
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.UniformBufferObjectIndices;
 import fi.jakojaannos.roguelite.engine.view.Camera;
+import fi.jakojaannos.roguelite.engine.view.Viewport;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +19,7 @@ import static org.lwjgl.opengl.GL30.glBindBufferBase;
 import static org.lwjgl.opengl.GL31.GL_UNIFORM_BUFFER;
 
 @Slf4j
-public class LWJGLCamera extends Camera implements AutoCloseable {
+public class LWJGLCamera extends Camera implements AutoCloseable, Viewport {
     private static final double CAMERA_MOVE_EPSILON = 0.0001;
 
     @Getter(AccessLevel.PROTECTED)
@@ -28,8 +29,9 @@ public class LWJGLCamera extends Camera implements AutoCloseable {
     @Getter private double viewportWidthInUnits;
     @Getter private double viewportHeightInUnits;
 
-    @Getter private int viewportWidthInPixels;
-    @Getter private int viewportHeightInPixels;
+    // FIXME: Separate viewport from the camera
+    @Getter @Deprecated private int viewportWidthInPixels;
+    @Getter @Deprecated private int viewportHeightInPixels;
 
     private final Matrix4f projectionMatrix;
     private final Matrix4f screenProjectionMatrix;
@@ -41,6 +43,16 @@ public class LWJGLCamera extends Camera implements AutoCloseable {
     private final int worldCameraMatricesUbo;
     private final int screenCameraMatricesUbo;
     private final ByteBuffer cameraMatricesData;
+
+    @Override
+    public int getWidthInPixels() {
+        return this.getViewportWidthInPixels();
+    }
+
+    @Override
+    public int getHeightInPixels() {
+        return this.getViewportHeightInPixels();
+    }
 
     public Matrix4f getViewMatrix() {
         refreshViewMatrixIfDirty();

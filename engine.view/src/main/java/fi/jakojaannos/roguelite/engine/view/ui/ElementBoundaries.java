@@ -12,7 +12,6 @@ public class ElementBoundaries {
     @Nullable private Integer y = null, top = null;
     @Nullable private Integer height = null, bottom = null;
 
-    @Getter @Setter private double anchorX, anchorY;
     @Getter @Setter private double originX, originY;
 
     public void setX(final int x) {
@@ -63,9 +62,8 @@ public class ElementBoundaries {
     }
 
     public int getMinX(final int parentX, final int parentWidth) {
-        val anchorOffset = this.x != null ? parentWidth * this.anchorX : 0;
         val originOffset = this.x != null ? getWidth(parentWidth) * this.originX : 0;
-        return parentX + getMinOffset(this.left, this.x, this.right, this.width) + (int) (anchorOffset - originOffset);
+        return parentX + getMinOffset(this.left, this.x, this.right, this.width) - (int) originOffset;
     }
 
     public int getWidth(final int parentWidth) {
@@ -76,9 +74,8 @@ public class ElementBoundaries {
 
 
     public int getMinY(final int parentY, final int parentHeight) {
-        val anchorOffset = this.y != null ? parentHeight * this.anchorX : 0;
         val originOffset = this.y != null ? getHeight(parentHeight) * this.originX : 0;
-        return parentY + getMinOffset(this.top, this.y, this.bottom, this.height) + (int) (anchorOffset - originOffset);
+        return parentY + getMinOffset(this.top, this.y, this.bottom, this.height) - (int) originOffset;
     }
 
     public int getHeight(final int parentHeight) {

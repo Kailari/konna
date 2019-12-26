@@ -104,6 +104,11 @@
     "panel_bottom_right": {
       "index": 8,
       "duration": -1
+    },
+    "panel_normal": {
+      "first": 0,
+      "last": 8,
+      "totalDuration": -1
     }
   }
 }
