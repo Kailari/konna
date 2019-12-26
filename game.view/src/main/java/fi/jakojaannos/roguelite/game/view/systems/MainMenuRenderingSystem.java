@@ -52,16 +52,24 @@ public class MainMenuRenderingSystem implements ECSSystem, AutoCloseable {
         val height = 100;
         val borderSize = 25;
         this.userInterface = UserInterface
-                .builder(camera, spriteBatch)
+                .builder(camera, spriteBatch, textRenderer)
                 .element("play_button",
                          UIElementType.PANEL,
-                         builder -> builder.anchorX(ProportionValue.percent(0.5))
-                                           .left(ProportionValue.absolute(-width / 2))
-                                           .top(ProportionValue.absolute(300))
+                         builder -> builder.anchorX(ProportionValue.percentOf().parentWidth(0.5))
+                                           .left(ProportionValue.percentOf().ownWidth(-0.5))
+                                           .top(ProportionValue.percentOf().parentHeight(0.3))
                                            .width(ProportionValue.absolute(width))
                                            .height(ProportionValue.absolute(height))
                                            .borderSize(borderSize)
                                            .sprite(sprite))
+                .element("title_label",
+                         UIElementType.LABEL,
+                         builder -> builder.anchorX(ProportionValue.percentOf().parentWidth(0.5))
+                                           .anchorY(ProportionValue.percentOf().parentHeight(0.25))
+                                           .left(ProportionValue.percentOf().ownWidth(-0.5))
+                                           .top(ProportionValue.percentOf().ownHeight(-1.0))
+                                           .text("Konna")
+                                           .fontSize(48))
                 /*.element(UIPanel.<LWJGLTexture>builder("play_button")
                                  .anchor(0.5, 0.25)
                                  .origin(0.5, 0.0)

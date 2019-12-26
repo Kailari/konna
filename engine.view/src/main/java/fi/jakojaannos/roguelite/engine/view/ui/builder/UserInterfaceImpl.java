@@ -4,16 +4,12 @@ import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
-import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.view.data.components.EngineUIComponentGroups;
 import fi.jakojaannos.roguelite.engine.view.data.resources.internal.UIHierarchy;
 import fi.jakojaannos.roguelite.engine.view.data.resources.internal.UIRoot;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatch;
-import fi.jakojaannos.roguelite.engine.view.rendering.Texture;
-import fi.jakojaannos.roguelite.engine.view.systems.ui.UIElementBoundaryCalculationSystem;
-import fi.jakojaannos.roguelite.engine.view.systems.ui.UIHierarchySystem;
-import fi.jakojaannos.roguelite.engine.view.systems.ui.UIPanelRenderingSystem;
-import fi.jakojaannos.roguelite.engine.view.systems.ui.UISystemGroups;
+import fi.jakojaannos.roguelite.engine.view.systems.ui.*;
+import fi.jakojaannos.roguelite.engine.view.text.TextRenderer;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 
 /**
@@ -25,7 +21,8 @@ public class UserInterfaceImpl implements UserInterface {
 
     public UserInterfaceImpl(
             final Viewport viewport,
-            final SpriteBatch spriteBatch
+            final SpriteBatch spriteBatch,
+            final TextRenderer textRenderer
     ) {
         this.uiWorld = World.createNew(EntityManager.createNew(256, 32));
         this.uiWorld.getEntityManager().registerComponentGroup(EngineUIComponentGroups.ELEMENT_BOUND);
@@ -34,8 +31,10 @@ public class UserInterfaceImpl implements UserInterface {
                                             .withGroups(UISystemGroups.values())
                                             .addGroupDependency(UISystemGroups.RENDERING, UISystemGroups.PREPARATIONS)
                                             .withSystem(new UIHierarchySystem())
+                                            .withSystem(new UILabelAutomaticSizeCalculationSystem(textRenderer))
                                             .withSystem(new UIElementBoundaryCalculationSystem())
                                             .withSystems(new UIPanelRenderingSystem(spriteBatch))
+                                            .withSystems(new UILabelRenderingSystem(textRenderer))
                                             .build();
 
         this.uiWorld.createResource(UIRoot.class, new UIRoot(viewport));

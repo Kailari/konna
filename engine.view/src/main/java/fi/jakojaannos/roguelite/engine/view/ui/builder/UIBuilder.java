@@ -2,6 +2,7 @@ package fi.jakojaannos.roguelite.engine.view.ui.builder;
 
 import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatch;
+import fi.jakojaannos.roguelite.engine.view.text.TextRenderer;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElementBuilder;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
@@ -14,9 +15,10 @@ public class UIBuilder {
 
     public UIBuilder(
             final Viewport viewport,
-            final SpriteBatch spriteBatch
+            final SpriteBatch spriteBatch,
+            final TextRenderer textRenderer
     ) {
-        this.userInterface = new UserInterfaceImpl(viewport, spriteBatch);
+        this.userInterface = new UserInterfaceImpl(viewport, spriteBatch, textRenderer);
     }
 
     public <T extends UIElementType<TBuilder>, TBuilder extends UIElementBuilder<TBuilder>> UIBuilder element(

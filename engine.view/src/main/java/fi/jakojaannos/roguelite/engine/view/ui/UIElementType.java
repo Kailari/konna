@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class UIElementType<TBuilder extends UIElementBuilder<TBuilder>> {
     public static final UIElementType<UIPanelBuilder> PANEL = new UIElementType<>(UIPanelBuilder::new);
+    public static final UIElementType<UILabelBuilder> LABEL = new UIElementType<>(UILabelBuilder::new);
 
     private final BiFunction<String, Consumer<Component>, TBuilder> builderFactory;
 

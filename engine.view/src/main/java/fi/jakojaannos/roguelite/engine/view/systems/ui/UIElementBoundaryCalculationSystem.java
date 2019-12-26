@@ -58,6 +58,13 @@ public class UIElementBoundaryCalculationSystem implements ECSSystem {
                                                 .orElseGet(uiRoot::getBoundaries);
 
                     val bounds = entityManager.getComponentOf(entity, ElementBoundaries.class).orElseThrow();
+                    bounds.minX = ElementBoundaries.INVALID_VALUE;
+                    bounds.maxX = ElementBoundaries.INVALID_VALUE;
+                    bounds.minY = ElementBoundaries.INVALID_VALUE;
+                    bounds.maxY = ElementBoundaries.INVALID_VALUE;
+                    bounds.width = ElementBoundaries.INVALID_VALUE;
+                    bounds.height = ElementBoundaries.INVALID_VALUE;
+
                     val fontSize = entityManager.getComponentOf(entity, FontSize.class)
                                                 .map(fs -> fs.value)
                                                 .orElseGet(() -> hierarchy.getParentOf(entity)
@@ -65,29 +72,29 @@ public class UIElementBoundaryCalculationSystem implements ECSSystem {
                                                                           .orElseGet(uiRoot::getFontSize));
                     boundaryLookup.put(entity, bounds);
                     fontSizeLookup.put(entity, fontSize);
+                    val context = new ProportionValue.Context(fontSize, parentBounds, bounds);
 
                     Optional<ProportionValue> leftValue, rightValue, widthValue;
                     leftValue = entityManager.getComponentOf(entity, BoundLeft.class).map(bound -> bound.value);
                     rightValue = entityManager.getComponentOf(entity, BoundRight.class).map(bound -> bound.value);
                     widthValue = entityManager.getComponentOf(entity, BoundWidth.class).map(bound -> bound.value);
-                    val horizontalContext = new ProportionValue.Context(fontSize, parentBounds.width);
                     if (leftValue.isPresent() && rightValue.isPresent()) {
-                        bounds.minX = leftValue.get().getValue(horizontalContext);
-                        bounds.maxX = rightValue.get().getValue(horizontalContext);
+                        bounds.minX = leftValue.get().getValue(context);
+                        bounds.maxX = rightValue.get().getValue(context);
                         bounds.width = bounds.maxX - bounds.minX;
 
                         if (widthValue.isPresent()) {
                             throw new IllegalStateException("Width must not be defined if both Left and Right are defined!");
                         }
                     } else if (widthValue.isEmpty()) {
-                        throw new IllegalStateException("You must define Width if Left and Right are not both defined!");
+                        throw new IllegalStateException("You must define Width if Left and Right are both undefined!");
                     } else if (leftValue.isPresent()) {
-                        bounds.minX = leftValue.get().getValue(horizontalContext);
-                        bounds.width = widthValue.get().getValue(horizontalContext);
+                        bounds.width = widthValue.get().getValue(context);
+                        bounds.minX = leftValue.get().getValue(context);
                         bounds.maxX = bounds.minX + bounds.width;
                     } else if (rightValue.isPresent()) {
-                        bounds.maxX = rightValue.get().getValue(horizontalContext);
-                        bounds.width = widthValue.get().getValue(horizontalContext);
+                        bounds.width = widthValue.get().getValue(context);
+                        bounds.maxX = rightValue.get().getValue(context);
                         bounds.minX = bounds.maxX - bounds.width;
                     } else {
                         throw new IllegalStateException("Exactly two of Left, Right and/or Width must be defined!");
@@ -97,45 +104,46 @@ public class UIElementBoundaryCalculationSystem implements ECSSystem {
                     topValue = entityManager.getComponentOf(entity, BoundTop.class).map(bound -> bound.value);
                     bottomValue = entityManager.getComponentOf(entity, BoundBottom.class).map(bound -> bound.value);
                     heightValue = entityManager.getComponentOf(entity, BoundHeight.class).map(bound -> bound.value);
-                    val verticalContext = new ProportionValue.Context(fontSize, parentBounds.height);
                     if (topValue.isPresent() && bottomValue.isPresent()) {
-                        bounds.minY = topValue.get().getValue(verticalContext);
-                        bounds.maxY = bottomValue.get().getValue(verticalContext);
+                        bounds.minY = topValue.get().getValue(context);
+                        bounds.maxY = bottomValue.get().getValue(context);
                         bounds.height = bounds.maxY - bounds.minY;
 
                         if (heightValue.isPresent()) {
                             throw new IllegalStateException("Height must not be defined if both Top and Bottom are defined!");
                         }
                     } else if (heightValue.isEmpty()) {
-                        throw new IllegalStateException("You must define Height if Top and Bottom are not both defined!");
+                        throw new IllegalStateException("You must define Height if Top and Bottom are both undefined!");
                     } else if (topValue.isPresent()) {
-                        bounds.minY = topValue.get().getValue(verticalContext);
-                        bounds.height = heightValue.get().getValue(verticalContext);
+                        bounds.height = heightValue.get().getValue(context);
+                        bounds.minY = topValue.get().getValue(context);
                         bounds.maxY = bounds.minY + bounds.height;
                     } else if (bottomValue.isPresent()) {
-                        bounds.maxY = bottomValue.get().getValue(verticalContext);
-                        bounds.height = heightValue.get().getValue(verticalContext);
+                        bounds.height = heightValue.get().getValue(context);
+                        bounds.maxY = bottomValue.get().getValue(context);
                         bounds.minY = bounds.maxY - bounds.height;
                     } else {
                         throw new IllegalStateException("Exactly two of Top, Bottom and/or Height must be defined!");
                     }
 
-                    bounds.minX += parentBounds.minX;
-                    bounds.maxX += parentBounds.minX;
-                    bounds.minY += parentBounds.minY;
-                    bounds.maxY += parentBounds.minY;
+                    int xOffset = parentBounds.minX;
+                    int yOffset = parentBounds.minY;
+                    bounds.minX += xOffset;
+                    bounds.maxX += xOffset;
+                    bounds.minY += yOffset;
+                    bounds.maxY += yOffset;
 
                     entityManager.getComponentOf(entity, BoundAnchorX.class)
                                  .map(boundAnchorX -> boundAnchorX.value)
                                  .ifPresent(anchorX -> {
-                                     val anchorOffset = anchorX.getValue(horizontalContext);
+                                     val anchorOffset = anchorX.getValue(context);
                                      bounds.minX += anchorOffset;
                                      bounds.maxX += anchorOffset;
                                  });
                     entityManager.getComponentOf(entity, BoundAnchorY.class)
                                  .map(boundAnchorY -> boundAnchorY.value)
                                  .ifPresent(anchorY -> {
-                                     val anchorOffset = anchorY.getValue(verticalContext);
+                                     val anchorOffset = anchorY.getValue(context);
                                      bounds.minY += anchorOffset;
                                      bounds.maxY += anchorOffset;
                                  });

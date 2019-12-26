@@ -34,6 +34,11 @@ public class UIElementBuilder<TBuilder extends UIElementBuilder<TBuilder>> {
         return (TBuilder) this;
     }
 
+    public TBuilder anchorY(final ProportionValue value) {
+        this.componentConsumer.accept(new BoundAnchorY(value));
+        return (TBuilder) this;
+    }
+
     public TBuilder height(final ProportionValue value) {
         this.componentConsumer.accept(new BoundHeight(value));
         return (TBuilder) this;

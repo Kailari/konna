@@ -10,6 +10,8 @@ import fi.jakojaannos.roguelite.engine.ecs.Component;
  * <code>BoundXXX</code> components.
  */
 public class ElementBoundaries implements Component {
+    public static int INVALID_VALUE = Integer.MIN_VALUE;
+
     public int minX, maxX;
     public int minY, maxY;
     public int width, height;
