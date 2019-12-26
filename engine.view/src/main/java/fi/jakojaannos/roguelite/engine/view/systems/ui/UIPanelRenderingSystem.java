@@ -4,7 +4,6 @@ import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.view.data.components.ui.ElementBoundaries;
 import fi.jakojaannos.roguelite.engine.view.data.components.ui.internal.panel.BorderSize;
 import fi.jakojaannos.roguelite.engine.view.data.components.ui.internal.panel.PanelSprite;
@@ -27,7 +26,6 @@ public class UIPanelRenderingSystem implements ECSSystem {
     private static final int DEFAULT_BORDER_SIZE = 5;
 
     private final SpriteBatch spriteBatch;
-    private final SpriteRegistry<?> spriteRegistry;
 
     @Override
     public void tick(
@@ -38,8 +36,7 @@ public class UIPanelRenderingSystem implements ECSSystem {
         this.spriteBatch.begin();
         entities.forEach(entity -> {
             val sprite = entityManager.getComponentOf(entity, PanelSprite.class)
-                                      .map(panelSprite -> this.spriteRegistry.getByAssetName(panelSprite.sprite))
-                                      .orElseThrow();
+                                      .orElseThrow().sprite;
             int borderSize = entityManager.getComponentOf(entity, BorderSize.class)
                                           .map(bs -> bs.value)
                                           .orElse(DEFAULT_BORDER_SIZE);

@@ -5,11 +5,9 @@ import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLTexture;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text.LWJGLTextRenderer;
 import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatch;
-import fi.jakojaannos.roguelite.engine.view.rendering.Texture;
 import fi.jakojaannos.roguelite.engine.view.sprite.Sprite;
 import fi.jakojaannos.roguelite.engine.view.ui.ProportionValue;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
@@ -54,7 +52,7 @@ public class MainMenuRenderingSystem implements ECSSystem, AutoCloseable {
         val height = 100;
         val borderSize = 25;
         this.userInterface = UserInterface
-                .builder(camera, spriteBatch, spriteRegistry)
+                .builder(camera, spriteBatch)
                 .element("play_button",
                          UIElementType.PANEL,
                          builder -> builder.anchorX(ProportionValue.percent(0.5))
@@ -63,7 +61,7 @@ public class MainMenuRenderingSystem implements ECSSystem, AutoCloseable {
                                            .width(ProportionValue.absolute(width))
                                            .height(ProportionValue.absolute(height))
                                            .borderSize(borderSize)
-                                           .sprite("sprites/ui/ui"))
+                                           .sprite(sprite))
                 /*.element(UIPanel.<LWJGLTexture>builder("play_button")
                                  .anchor(0.5, 0.25)
                                  .origin(0.5, 0.0)

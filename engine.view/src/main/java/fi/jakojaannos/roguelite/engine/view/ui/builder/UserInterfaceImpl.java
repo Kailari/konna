@@ -25,8 +25,7 @@ public class UserInterfaceImpl implements UserInterface {
 
     public UserInterfaceImpl(
             final Viewport viewport,
-            final SpriteBatch spriteBatch,
-            final SpriteRegistry<?> spriteRegistry
+            final SpriteBatch spriteBatch
     ) {
         this.uiWorld = World.createNew(EntityManager.createNew(256, 32));
         this.uiWorld.getEntityManager().registerComponentGroup(EngineUIComponentGroups.ELEMENT_BOUND);
@@ -36,7 +35,7 @@ public class UserInterfaceImpl implements UserInterface {
                                             .addGroupDependency(UISystemGroups.RENDERING, UISystemGroups.PREPARATIONS)
                                             .withSystem(new UIHierarchySystem())
                                             .withSystem(new UIElementBoundaryCalculationSystem())
-                                            .withSystems(new UIPanelRenderingSystem(spriteBatch, spriteRegistry))
+                                            .withSystems(new UIPanelRenderingSystem(spriteBatch))
                                             .build();
 
         this.uiWorld.createResource(UIRoot.class, new UIRoot(viewport));

@@ -3,6 +3,7 @@ package fi.jakojaannos.roguelite.engine.view.ui;
 import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.view.data.components.ui.internal.panel.BorderSize;
 import fi.jakojaannos.roguelite.engine.view.data.components.ui.internal.panel.PanelSprite;
+import fi.jakojaannos.roguelite.engine.view.sprite.Sprite;
 
 import java.util.function.Consumer;
 
@@ -16,7 +17,7 @@ public final class UIPanelBuilder extends UIElementBuilder<UIPanelBuilder> {
         return this;
     }
 
-    public UIPanelBuilder sprite(final String sprite) {
+    public UIPanelBuilder sprite(final Sprite sprite) {
         this.componentConsumer.accept(new PanelSprite(sprite));
         return this;
     }
