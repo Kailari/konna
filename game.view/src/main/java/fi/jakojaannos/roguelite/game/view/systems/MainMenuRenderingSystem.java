@@ -61,7 +61,16 @@ public class MainMenuRenderingSystem implements ECSSystem, AutoCloseable {
                                            .width(ProportionValue.absolute(width))
                                            .height(ProportionValue.absolute(height))
                                            .borderSize(borderSize)
-                                           .sprite(sprite))
+                                           .sprite(sprite)
+                                           .child("play_button_label",
+                                                  UIElementType.LABEL,
+                                                  labelBuilder -> labelBuilder
+                                                          .anchorX(ProportionValue.percentOf().parentWidth(0.5))
+                                                          .anchorY(ProportionValue.percentOf().parentHeight(0.5))
+                                                          .left(ProportionValue.percentOf().ownWidth(-0.5))
+                                                          .top(ProportionValue.absolute(0))
+                                                          .text("Play")
+                                                          .fontSize(24)))
                 .element("title_label",
                          UIElementType.LABEL,
                          builder -> builder.anchorX(ProportionValue.percentOf().parentWidth(0.5))
@@ -70,32 +79,6 @@ public class MainMenuRenderingSystem implements ECSSystem, AutoCloseable {
                                            .top(ProportionValue.percentOf().ownHeight(-1.0))
                                            .text("Konna")
                                            .fontSize(48))
-                /*.element(UIPanel.<LWJGLTexture>builder("play_button")
-                                 .anchor(0.5, 0.25)
-                                 .origin(0.5, 0.0)
-                                 .position(ProportionValue.absolute(0),
-                                           ProportionValue.absolute(0))
-                                 .size(width, height)
-                                 .borderSize(borderSize)
-                                 .sprite(sprite, spriteBatch)
-                                 .child(UILabel.builder("play_button_label", textRenderer)
-                                               .anchor(0.5, 0.5)
-                                               .origin(0.5, 0.5)
-                                               .position(ProportionValue.absolute(0),
-                                                         ProportionValue.percent(0.5))
-                                               .text("Play")
-                                               .fontSize(24)
-                                               .build())
-                                 //.onClick((element, event) -> LOG.info("Play clicked!"))
-                                 .build())
-                .element(UILabel.builder("title_label", textRenderer)
-                                .anchor(0.5, 0.25)
-                                .origin(0.5, 1.0)
-                                .position(ProportionValue.absolute(0),
-                                          ProportionValue.absolute(0))
-                                .text("Konna")
-                                .fontSize(48)
-                                .build())*/
                 .build();
     }
 

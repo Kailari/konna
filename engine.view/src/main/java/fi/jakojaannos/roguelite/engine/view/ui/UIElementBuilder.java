@@ -1,19 +1,27 @@
 package fi.jakojaannos.roguelite.engine.view.ui;
 
 import fi.jakojaannos.roguelite.engine.ecs.Component;
+import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.view.data.components.ui.ElementBoundaries;
 import fi.jakojaannos.roguelite.engine.view.data.components.ui.internal.*;
+import fi.jakojaannos.roguelite.engine.view.ui.builder.UIBuilder;
 
 import java.util.function.Consumer;
 
 @SuppressWarnings("unchecked")
 public class UIElementBuilder<TBuilder extends UIElementBuilder<TBuilder>> {
+    private final UIBuilder uiBuilder;
+    private final Entity entity;
     protected final Consumer<Component> componentConsumer;
 
     public UIElementBuilder(
+            final UIBuilder uiBuilder,
+            final Entity entity,
             final String name,
             final Consumer<Component> componentConsumer
     ) {
+        this.uiBuilder = uiBuilder;
+        this.entity = entity;
         this.componentConsumer = componentConsumer;
         this.componentConsumer.accept(new Name(name));
         this.componentConsumer.accept(new ElementBoundaries());
@@ -46,6 +54,16 @@ public class UIElementBuilder<TBuilder extends UIElementBuilder<TBuilder>> {
 
     public TBuilder top(final ProportionValue value) {
         this.componentConsumer.accept(new BoundTop(value));
+        return (TBuilder) this;
+    }
+
+    public <TChildElement extends UIElementType<TChildBuilder>, TChildBuilder extends UIElementBuilder<TChildBuilder>>
+    TBuilder child(
+            final String name,
+            final TChildElement childType,
+            final Consumer<TChildBuilder> builderConsumer
+    ) {
+        this.uiBuilder.element(name, childType, builderConsumer.andThen(builder -> builder.componentConsumer.accept(new Parent(this.entity))));
         return (TBuilder) this;
     }
 }

@@ -27,7 +27,10 @@ public class UIBuilder {
             final Consumer<TBuilder> factory
     ) {
         val elementEntity = this.userInterface.getEntityManager().createEntity();
-        val builder = elementType.getBuilder(name, component -> this.userInterface.getEntityManager().addComponentTo(elementEntity, component));
+        val builder = elementType.getBuilder(this,
+                                             elementEntity,
+                                             name,
+                                             component -> this.userInterface.getEntityManager().addComponentTo(elementEntity, component));
         factory.accept(builder);
         return this;
     }
