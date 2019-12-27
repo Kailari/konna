@@ -25,7 +25,6 @@ public class RogueliteApplication {
     @Setter private boolean debugStackTraces = false;
     @Setter private int windowWidth = -1;
     @Setter private int windowHeight = -1;
-    @Setter private boolean floatWindow = false;
 
     public void setDebugMode(boolean state) {
         setEnableForceClose(state);
@@ -34,7 +33,7 @@ public class RogueliteApplication {
     }
 
     public void run(final Path assetRoot) {
-        try (val runner = new LWJGLGameRunner<Roguelite, LWJGLInputProvider>(this.windowWidth, this.windowHeight, this.floatWindow);
+        try (val runner = new LWJGLGameRunner<Roguelite, LWJGLInputProvider>(this.windowWidth, this.windowHeight);
              val game = new Roguelite()
         ) {
             try (val renderer = new RogueliteGameRenderer(assetRoot, runner.getWindow())) {
@@ -61,10 +60,10 @@ public class RogueliteApplication {
     }
 
     private GameState createInitialState(final Game game) {
-        return new MainMenuGameState(World.createNew(EntityManager.createNew(256, 32)),
-                                     game.getTime());
-        //return new GameplayGameState(System.nanoTime(),
-        //                             World.createNew(EntityManager.createNew(256, 32)),
+        //return new MainMenuGameState(World.createNew(EntityManager.createNew(256, 32)),
         //                             game.getTime());
+        return new GameplayGameState(System.nanoTime(),
+                                     World.createNew(EntityManager.createNew(256, 32)),
+                                     game.getTime());
     }
 }

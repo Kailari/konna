@@ -66,8 +66,6 @@ public class RogueliteLauncher {
                                    .withAction(params -> this.application.setDebugStackTraces(true)))
                      .with(Argument.withName("debug")
                                    .withAction(params -> this.setDebug(true)))
-                     .with(Argument.withName("float")
-                                   .withAction(params -> this.application.setFloatWindow(true)))
                      .ignoreUnknown()
                      .consume(args);
         } catch (ArgumentParsingException e) {

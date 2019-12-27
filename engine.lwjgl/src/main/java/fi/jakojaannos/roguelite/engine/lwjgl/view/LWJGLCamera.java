@@ -19,7 +19,7 @@ import static org.lwjgl.opengl.GL30.glBindBufferBase;
 import static org.lwjgl.opengl.GL31.GL_UNIFORM_BUFFER;
 
 @Slf4j
-public class LWJGLCamera extends Camera implements AutoCloseable, Viewport {
+public class LWJGLCamera extends Camera implements AutoCloseable {
     private static final double CAMERA_MOVE_EPSILON = 0.0001;
 
     @Getter(AccessLevel.PROTECTED)
@@ -43,16 +43,6 @@ public class LWJGLCamera extends Camera implements AutoCloseable, Viewport {
     private final int worldCameraMatricesUbo;
     private final int screenCameraMatricesUbo;
     private final ByteBuffer cameraMatricesData;
-
-    @Override
-    public int getWidthInPixels() {
-        return this.getViewportWidthInPixels();
-    }
-
-    @Override
-    public int getHeightInPixels() {
-        return this.getViewportHeightInPixels();
-    }
 
     public Matrix4f getViewMatrix() {
         refreshViewMatrixIfDirty();

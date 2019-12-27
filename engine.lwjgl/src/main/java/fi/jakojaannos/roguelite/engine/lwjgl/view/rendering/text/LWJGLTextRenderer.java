@@ -1,7 +1,7 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text;
 
-import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.shader.ShaderProgram;
+import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.text.TextRenderer;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -37,14 +37,14 @@ public class LWJGLTextRenderer implements AutoCloseable, TextRenderer {
     private final int vao;
     private final int vbo;
     private final int ebo;
-    private final LWJGLCamera camera;
+    private final Viewport viewport;
     private final Font font;
 
     public LWJGLTextRenderer(
             final Path assetRoot,
-            final LWJGLCamera camera
+            final Viewport viewport
     ) {
-        this.camera = camera;
+        this.viewport = viewport;
         this.font = new Font(assetRoot, 1.0f, 1.0f);
 
         this.shader = createShader(assetRoot);
@@ -105,8 +105,8 @@ public class LWJGLTextRenderer implements AutoCloseable, TextRenderer {
         this.shader.use();
         this.shader.setUniformMat4x4(this.uniformProjectionMatrix, new Matrix4f()
                 .ortho(0,
-                       this.camera.getViewportWidthInPixels(),
-                       this.camera.getViewportHeightInPixels(),
+                       this.viewport.getWidthInPixels(),
+                       this.viewport.getHeightInPixels(),
                        0,
                        0,
                        100));
@@ -134,20 +134,10 @@ public class LWJGLTextRenderer implements AutoCloseable, TextRenderer {
             final int fontSize,
             final String string
     ) {
-        val pixelsPerUnitVertical = this.camera.getViewportHeightInPixels() / this.camera.getViewportHeightInUnits();
-        val pixelsPerUnitHorizontal = this.camera.getViewportWidthInPixels() / this.camera.getViewportWidthInUnits();
-
         this.shader.use();
-        this.shader.setUniformMat4x4(this.uniformProjectionMatrix, this.camera.getProjectionMatrix());
-        this.shader.setUniformMat4x4(this.uniformViewMatrix, this.camera.getViewMatrix());
-        this.shader.setUniformMat4x4(this.uniformModelMatrix, new Matrix4f().identity()
-                                                                            .translate((float) x, (float) y, 0.0f)
-                                                                            .scale((float) (1.0 / pixelsPerUnitHorizontal),
-                                                                                   (float) (1.0 / pixelsPerUnitVertical),
-                                                                                   1.0f)
-        );
+        this.shader.setUniformMat4x4(this.uniformModelMatrix, new Matrix4f().identity());
 
-        draw(0, 0, fontSize, string);
+        draw(x, y, fontSize, string);
     }
 
     private void draw(

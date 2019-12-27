@@ -1,10 +1,12 @@
 package fi.jakojaannos.roguelite.game.view;
 
+import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLViewport;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLWindow;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLTexture;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text.LWJGLTextRenderer;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.engine.view.GameRenderer;
+import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.view.content.TextureRegistry;
 import fi.jakojaannos.roguelite.game.data.components.Camera;
@@ -24,6 +26,7 @@ import java.util.Optional;
 @Slf4j
 public class RogueliteGameRenderer implements GameRenderer<GameState> {
     private final RogueliteCamera camera;
+    private final Viewport viewport;
     private final TextureRegistry textureRegistry;
     private final SpriteRegistry spriteRegistry;
     private final LWJGLTextRenderer textRenderer;
@@ -35,9 +38,10 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
         LOG.debug("asset root: {}", assetRoot);
 
         this.camera = new RogueliteCamera(window.getWidth(), window.getHeight());
+        this.viewport = new LWJGLViewport(window.getWidth(), window.getHeight());
         this.textureRegistry = new TextureRegistry(assetRoot, LWJGLTexture::new);
         this.spriteRegistry = new SpriteRegistry(assetRoot, this.textureRegistry);
-        this.textRenderer = new LWJGLTextRenderer(assetRoot, this.camera);
+        this.textRenderer = new LWJGLTextRenderer(assetRoot, this.viewport);
 
         this.stateRenderers = Map.ofEntries(
                 Map.entry(GameplayGameState.class, new GameplayGameStateRenderer(assetRoot,
@@ -46,11 +50,13 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
                                                                                  this.textRenderer)),
                 Map.entry(MainMenuGameState.class, new MainMenuGameStateRenderer(assetRoot,
                                                                                  this.camera,
+                                                                                 this.viewport,
                                                                                  this.textRenderer,
                                                                                  this.spriteRegistry))
         );
 
         window.addResizeCallback(this.camera::resizeViewport);
+        window.addResizeCallback(this.viewport::resize);
 
         LOG.info("GameRenderer initialization finished.");
     }
