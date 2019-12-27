@@ -142,7 +142,7 @@ public class LWJGLTextRenderer implements AutoCloseable, TextRenderer {
                                                                                    (float) scaleFactor,
                                                                                    1.0f));
 
-        draw(x, y, fontSize, string);
+        draw(x / scaleFactor, y / scaleFactor, fontSize, string);
     }
 
     private void draw(

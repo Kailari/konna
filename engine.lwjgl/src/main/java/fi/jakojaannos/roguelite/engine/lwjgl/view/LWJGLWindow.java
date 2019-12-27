@@ -16,7 +16,6 @@ import java.util.Optional;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.glViewport;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 @Slf4j
@@ -47,7 +46,6 @@ public class LWJGLWindow implements Window, AutoCloseable {
                         {
                             this.width = newWidth;
                             this.height = newHeight;
-                            glViewport(0, 0, newWidth, newHeight);
                             this.resizeCallbacks.stream()
                                                 .filter(Objects::nonNull)
                                                 .forEach(cb -> cb.call(newWidth, newHeight));

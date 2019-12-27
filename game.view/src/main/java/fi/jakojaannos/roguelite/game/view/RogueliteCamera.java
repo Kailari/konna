@@ -2,12 +2,13 @@ package fi.jakojaannos.roguelite.game.view;
 
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.state.GameState;
+import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.game.data.resources.CameraProperties;
 import lombok.val;
 
 class RogueliteCamera extends LWJGLCamera {
-    public RogueliteCamera(int viewportWidth, int viewportHeight) {
-        super(viewportWidth, viewportHeight);
+    public RogueliteCamera(final Viewport viewport) {
+        super(viewport);
     }
 
     void updateConfigurationFromState(GameState state) {

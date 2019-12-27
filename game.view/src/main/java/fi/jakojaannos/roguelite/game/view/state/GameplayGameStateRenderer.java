@@ -2,8 +2,8 @@ package fi.jakojaannos.roguelite.game.view.state;
 
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLTexture;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text.LWJGLTextRenderer;
+import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.game.DebugConfig;
 import fi.jakojaannos.roguelite.game.view.systems.*;
@@ -17,15 +17,17 @@ public class GameplayGameStateRenderer extends GameStateRenderer {
     public GameplayGameStateRenderer(
             final Path assetRoot,
             final LWJGLCamera camera,
+            final Viewport viewport,
             final SpriteRegistry spriteRegistry,
             final LWJGLTextRenderer textRenderer
     ) {
-        super(createDispatcher(assetRoot, camera, spriteRegistry, textRenderer));
+        super(createDispatcher(assetRoot, camera, viewport, spriteRegistry, textRenderer));
     }
 
     private static SystemDispatcher createDispatcher(
             final Path assetRoot,
             final LWJGLCamera camera,
+            final Viewport viewport,
             final SpriteRegistry spriteRegistry,
             final LWJGLTextRenderer textRenderer
     ) {
@@ -33,7 +35,7 @@ public class GameplayGameStateRenderer extends GameStateRenderer {
                                       .withSystem(new LevelRenderingSystem(assetRoot, camera, spriteRegistry))
                                       .withSystem(new SpriteRenderingSystem(assetRoot, camera, spriteRegistry))
                                       .withSystem(new RenderHUDSystem(textRenderer))
-                                      .withSystem(new RenderGameOverSystem(textRenderer, camera))
+                                      .withSystem(new RenderGameOverSystem(textRenderer, camera, viewport))
                                       .withSystem(new HealthBarRenderingSystem(assetRoot, camera));
 
         if (DebugConfig.debugModeEnabled) {

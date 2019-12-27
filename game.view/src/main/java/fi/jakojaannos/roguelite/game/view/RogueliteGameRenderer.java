@@ -37,8 +37,8 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
         LOG.debug("Constructing GameRenderer...");
         LOG.debug("asset root: {}", assetRoot);
 
-        this.camera = new RogueliteCamera(window.getWidth(), window.getHeight());
         this.viewport = new LWJGLViewport(window.getWidth(), window.getHeight());
+        this.camera = new RogueliteCamera(this.viewport);
         this.textureRegistry = new TextureRegistry(assetRoot, LWJGLTexture::new);
         this.spriteRegistry = new SpriteRegistry(assetRoot, this.textureRegistry);
         this.textRenderer = new LWJGLTextRenderer(assetRoot, this.viewport, this.camera);
@@ -46,6 +46,7 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
         this.stateRenderers = Map.ofEntries(
                 Map.entry(GameplayGameState.class, new GameplayGameStateRenderer(assetRoot,
                                                                                  this.camera,
+                                                                                 this.viewport,
                                                                                  this.spriteRegistry,
                                                                                  this.textRenderer)),
                 Map.entry(MainMenuGameState.class, new MainMenuGameStateRenderer(assetRoot,
@@ -55,8 +56,10 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
                                                                                  this.spriteRegistry))
         );
 
-        window.addResizeCallback(this.camera::resizeViewport);
         window.addResizeCallback(this.viewport::resize);
+        window.addResizeCallback((w, h) -> this.camera.markProjectionMatrixDirty());
+        this.viewport.resize(window.getWidth(), window.getHeight());
+        this.camera.markProjectionMatrixDirty();
 
         LOG.info("GameRenderer initialization finished.");
     }

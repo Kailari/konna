@@ -6,6 +6,7 @@ import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text.LWJGLTextRenderer;
+import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.game.data.components.PlayerTag;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -25,6 +26,7 @@ public class RenderGameOverSystem implements ECSSystem {
 
     private final LWJGLTextRenderer textRenderer;
     private final LWJGLCamera camera;
+    private final Viewport viewport;
 
     @Override
     public void tick(
@@ -36,19 +38,10 @@ public class RenderGameOverSystem implements ECSSystem {
             return;
         }
 
-        val halfScreenWidth = this.camera.getViewportWidthInPixels() / 2.0;
-        val halfScreenHeight = this.camera.getViewportHeightInPixels() / 2.0;
+        camera.useScreenCoordinates();
+        val halfScreenWidth = this.viewport.getWidthInPixels() / 2.0;
+        val halfScreenHeight = this.viewport.getHeightInPixels() / 2.0;
         this.textRenderer.drawCenteredOnScreen(halfScreenWidth, halfScreenHeight, 48, GAME_OVER_MESSAGE);
         this.textRenderer.drawCenteredOnScreen(halfScreenWidth, halfScreenHeight + 50, 24, HELP_TEXT);
-    }
-
-    private void renderCentered(final double yOffset, final int fontSize, final String text) {
-        val screenWidth = this.camera.getViewportWidthInPixels();
-        val screenHeight = this.camera.getViewportHeightInPixels();
-        val textWidth = this.textRenderer.getStringWidthInPixels(fontSize, text);
-
-        val textX = (screenWidth - textWidth) / 2;
-        val textY = (screenHeight - fontSize) / 2;
-        this.textRenderer.drawOnScreen(textX, textY + yOffset, fontSize, text);
     }
 }
