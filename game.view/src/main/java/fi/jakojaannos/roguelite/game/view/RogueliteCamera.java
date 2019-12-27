@@ -17,7 +17,7 @@ class RogueliteCamera extends LWJGLCamera {
 
         // FIXME: THIS BREAKS MVC ENCAPSULATION. Technically, we should queue task on the controller
         //  to make the change as we NEVER should mutate state on the view.
-        camBounds.viewportWidthInWorldUnits = getViewportWidthInUnits();
-        camBounds.viewportHeightInWorldUnits = getViewportHeightInUnits();
+        camBounds.viewportWidthInWorldUnits = getVisibleAreaWidth();
+        camBounds.viewportHeightInWorldUnits = getVisibleAreaHeight();
     }
 }

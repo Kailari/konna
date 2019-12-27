@@ -75,8 +75,8 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
         val entityManager = world.getEntityManager();
         Optional.ofNullable(world.getOrCreateResource(CameraProperties.class).cameraEntity)
                 .flatMap(cameraEntity -> entityManager.getComponentOf(cameraEntity, Camera.class))
-                .ifPresent(camera -> this.camera.setPosition(camera.pos.x - this.camera.getViewportWidthInUnits() / 2.0,
-                                                             camera.pos.y - this.camera.getViewportHeightInUnits() / 2.0));
+                .ifPresent(camera -> this.camera.setPosition(camera.pos.x - this.camera.getVisibleAreaWidth() / 2.0,
+                                                             camera.pos.y - this.camera.getVisibleAreaHeight() / 2.0));
 
         Optional.ofNullable(this.stateRenderers.get(state.getClass()))
                 .ifPresent(renderer -> renderer.render(state.getWorld()));

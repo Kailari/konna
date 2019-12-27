@@ -31,11 +31,11 @@ public class LWJGLCamera extends Camera implements AutoCloseable {
     private double viewportWidthInUnits;
     private double viewportHeightInUnits;
 
-    public double getViewportWidthInUnits() {
+    public double getVisibleAreaWidth() {
         return viewportWidthInUnits;
     }
 
-    public double getViewportHeightInUnits() {
+    public double getVisibleAreaHeight() {
         return viewportHeightInUnits;
     }
 
@@ -137,8 +137,6 @@ public class LWJGLCamera extends Camera implements AutoCloseable {
 
     private void refreshProjectionMatrixIfDirty() {
         if (this.projectionMatrixDirty) {
-            LOG.trace("Refreshing projection matrix");
-
             val horizontalMajor = this.viewport.getWidthInPixels() > this.viewport.getHeightInPixels();
             double major = horizontalMajor ? this.viewport.getWidthInPixels() : this.viewport.getHeightInPixels();
             double minor = horizontalMajor ? this.viewport.getHeightInPixels() : this.viewport.getWidthInPixels();
@@ -151,12 +149,12 @@ public class LWJGLCamera extends Camera implements AutoCloseable {
                     : this.viewport.getHeightInPixels() / realTargetSize;
 
             val ratio = major / minor;
-            this.viewportWidthInUnits = (float) (horizontalMajor
-                    ? ratio * realTargetSize
-                    : realTargetSize);
-            this.viewportHeightInUnits = (float) (horizontalMajor
-                    ? realTargetSize
-                    : ratio * realTargetSize);
+            this.viewportWidthInUnits = (float) Math.ceil(horizontalMajor
+                                                                  ? ratio * realTargetSize
+                                                                  : realTargetSize);
+            this.viewportHeightInUnits = (float) Math.ceil(horizontalMajor
+                                                                   ? realTargetSize
+                                                                   : ratio * realTargetSize);
             this.projectionMatrix.setOrtho2D(
                     0.0f,
                     (float) viewportWidthInUnits,
@@ -167,6 +165,7 @@ public class LWJGLCamera extends Camera implements AutoCloseable {
                                                    this.viewport.getHeightInPixels(),
                                                    0.0f);
 
+            LOG.trace("Refreshing projection matrix. New visible area size: {}×{}", this.viewportWidthInUnits, this.viewportHeightInUnits);
             this.projectionMatrixDirty = false;
             refreshUniforms();
         }

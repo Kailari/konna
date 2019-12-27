@@ -6,7 +6,6 @@ import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLSpriteBatch;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLTexture;
 import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatch;
 import fi.jakojaannos.roguelite.game.data.components.Camera;
@@ -47,10 +46,10 @@ public class LevelRenderingSystem implements ECSSystem {
                                           Camera.class)
                           .orElseThrow();
 
-        val regionX = (int) Math.floor(camera.pos.x - this.camera.getViewportWidthInUnits() / 2.0);
-        val regionY = (int) Math.floor(camera.pos.y - this.camera.getViewportHeightInUnits() / 2.0);
-        val regionW = (int) Math.ceil(this.camera.getViewportWidthInUnits()) + 1;
-        val regionH = (int) Math.ceil(this.camera.getViewportHeightInUnits()) + 1;
+        val regionX = (int) Math.floor(camera.pos.x - this.camera.getVisibleAreaWidth() / 2.0);
+        val regionY = (int) Math.floor(camera.pos.y - this.camera.getVisibleAreaHeight() / 2.0);
+        val regionW = (int) Math.ceil(this.camera.getVisibleAreaWidth()) + 1;
+        val regionH = (int) Math.ceil(this.camera.getVisibleAreaHeight()) + 1;
 
         this.camera.useWorldCoordinates();
         this.batch.begin();
