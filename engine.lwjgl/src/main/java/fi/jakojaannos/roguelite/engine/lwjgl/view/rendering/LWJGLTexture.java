@@ -14,6 +14,7 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_CLAMP_TO_BORDER;
 
 // TODO: Get rid of the BufferedImage to get rid of the java.desktop module read
+//  stb provides some image loading functionality, use that
 
 @Slf4j
 @EqualsAndHashCode

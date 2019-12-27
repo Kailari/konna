@@ -17,7 +17,7 @@ public class GameplayGameStateRenderer extends GameStateRenderer {
     public GameplayGameStateRenderer(
             final Path assetRoot,
             final LWJGLCamera camera,
-            final SpriteRegistry<LWJGLTexture> spriteRegistry,
+            final SpriteRegistry spriteRegistry,
             final LWJGLTextRenderer textRenderer
     ) {
         super(createDispatcher(assetRoot, camera, spriteRegistry, textRenderer));
@@ -26,7 +26,7 @@ public class GameplayGameStateRenderer extends GameStateRenderer {
     private static SystemDispatcher createDispatcher(
             final Path assetRoot,
             final LWJGLCamera camera,
-            final SpriteRegistry<LWJGLTexture> spriteRegistry,
+            final SpriteRegistry spriteRegistry,
             final LWJGLTextRenderer textRenderer
     ) {
         val builder = SystemDispatcher.builder()

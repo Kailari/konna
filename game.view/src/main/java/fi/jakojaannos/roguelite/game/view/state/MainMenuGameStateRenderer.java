@@ -3,7 +3,6 @@ package fi.jakojaannos.roguelite.game.view.state;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLSpriteBatch;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLTexture;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text.LWJGLTextRenderer;
 import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.game.view.systems.MainMenuRenderingSystem;
@@ -16,7 +15,7 @@ public class MainMenuGameStateRenderer extends GameStateRenderer {
             final Path assetRoot,
             final LWJGLCamera camera,
             final LWJGLTextRenderer textRenderer,
-            final SpriteRegistry<LWJGLTexture> spriteRegistry
+            final SpriteRegistry spriteRegistry
     ) {
         super(createDispatcher(assetRoot, textRenderer, camera, spriteRegistry));
     }
@@ -25,7 +24,7 @@ public class MainMenuGameStateRenderer extends GameStateRenderer {
             final Path assetRoot,
             final LWJGLTextRenderer textRenderer,
             final LWJGLCamera camera,
-            final SpriteRegistry<LWJGLTexture> spriteRegistry
+            final SpriteRegistry spriteRegistry
     ) {
         val builder = SystemDispatcher.builder()
                                       .withSystem(new MainMenuRenderingSystem(textRenderer,

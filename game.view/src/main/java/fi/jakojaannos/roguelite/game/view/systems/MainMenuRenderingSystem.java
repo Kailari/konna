@@ -38,7 +38,7 @@ public class MainMenuRenderingSystem implements ECSSystem, AutoCloseable {
     public MainMenuRenderingSystem(
             final LWJGLTextRenderer textRenderer,
             final LWJGLCamera camera,
-            final SpriteRegistry<?> spriteRegistry,
+            final SpriteRegistry spriteRegistry,
             final SpriteBatch spriteBatch
     ) {
         this.camera = camera;

@@ -24,8 +24,8 @@ import java.util.Optional;
 @Slf4j
 public class RogueliteGameRenderer implements GameRenderer<GameState> {
     private final RogueliteCamera camera;
-    private final TextureRegistry<LWJGLTexture> textureRegistry;
-    private final SpriteRegistry<LWJGLTexture> spriteRegistry;
+    private final TextureRegistry textureRegistry;
+    private final SpriteRegistry spriteRegistry;
     private final LWJGLTextRenderer textRenderer;
 
     private final Map<Class<? extends GameState>, GameStateRenderer> stateRenderers;
@@ -35,8 +35,8 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
         LOG.debug("asset root: {}", assetRoot);
 
         this.camera = new RogueliteCamera(window.getWidth(), window.getHeight());
-        this.textureRegistry = new TextureRegistry<>(assetRoot, LWJGLTexture::new);
-        this.spriteRegistry = new SpriteRegistry<>(assetRoot, this.textureRegistry);
+        this.textureRegistry = new TextureRegistry(assetRoot, LWJGLTexture::new);
+        this.spriteRegistry = new SpriteRegistry(assetRoot, this.textureRegistry);
         this.textRenderer = new LWJGLTextRenderer(assetRoot, this.camera);
 
         this.stateRenderers = Map.ofEntries(

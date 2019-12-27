@@ -14,25 +14,24 @@ import java.nio.file.Path;
 import java.util.Optional;
 
 @Slf4j
-public class TextureRegistry<TTexture extends Texture>
-        extends AbstractAssetRegistry<TTexture> {
+public class TextureRegistry extends AbstractAssetRegistry<Texture> {
     private final Path assetRoot;
-    private final TextureLoader<TTexture> textureLoader;
-    private final TTexture defaultTexture;
+    private final TextureLoader<Texture> textureLoader;
+    private final Texture defaultTexture;
 
-    public TextureRegistry(final Path assetRoot, TextureLoader<TTexture> textureLoader) {
+    public TextureRegistry(final Path assetRoot, TextureLoader<Texture> textureLoader) {
         this.assetRoot = assetRoot;
         this.textureLoader = textureLoader;
         this.defaultTexture = getByAssetName("textures/sheep.png");
     }
 
     @Override
-    protected TTexture getDefault() {
+    protected Texture getDefault() {
         return this.defaultTexture;
     }
 
     @Override
-    protected Optional<TTexture> loadAsset(AssetHandle handle) {
+    protected Optional<Texture> loadAsset(AssetHandle handle) {
         val path = assetRoot.resolve(handle.getName());
         try (val inputStream = Files.newInputStream(path)) {
             val image = ImageIO.read(inputStream);

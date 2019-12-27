@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder;
 import fi.jakojaannos.roguelite.engine.content.AbstractAssetRegistry;
 import fi.jakojaannos.roguelite.engine.content.AssetHandle;
 import fi.jakojaannos.roguelite.engine.view.LogCategories;
-import fi.jakojaannos.roguelite.engine.view.rendering.Texture;
 import fi.jakojaannos.roguelite.engine.view.rendering.TextureRegion;
 import fi.jakojaannos.roguelite.engine.view.sprite.Sprite;
 import fi.jakojaannos.roguelite.engine.view.sprite.serialization.SpriteDeserializer;
@@ -23,16 +22,15 @@ import java.util.Optional;
  * Handles loading sprites from assets-directory.
  */
 @Slf4j
-public class SpriteRegistry<TTexture extends Texture>
-        extends AbstractAssetRegistry<Sprite> {
+public class SpriteRegistry extends AbstractAssetRegistry<Sprite> {
     private final Path assetRoot;
 
-    private final TextureRegistry<TTexture> textures;
+    private final TextureRegistry textures;
     private final Sprite defaultSprite;
 
     public SpriteRegistry(
             final Path assetRoot,
-            final TextureRegistry<TTexture> textures
+            final TextureRegistry textures
     ) {
         this.assetRoot = assetRoot;
         this.textures = textures;

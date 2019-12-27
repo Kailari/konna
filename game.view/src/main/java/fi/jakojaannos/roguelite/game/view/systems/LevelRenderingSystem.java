@@ -24,13 +24,13 @@ public class LevelRenderingSystem implements ECSSystem {
     }
 
     private final LWJGLCamera camera;
-    private final SpriteRegistry<LWJGLTexture> spriteRegistry;
+    private final SpriteRegistry spriteRegistry;
     private final SpriteBatch batch;
 
     public LevelRenderingSystem(
             final Path assetRoot,
             final LWJGLCamera camera,
-            final SpriteRegistry<LWJGLTexture> spritesRegistry
+            final SpriteRegistry spritesRegistry
     ) {
         this.camera = camera;
         spriteRegistry = spritesRegistry;

@@ -6,7 +6,6 @@ import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLSpriteBatch;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLTexture;
 import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatch;
 import fi.jakojaannos.roguelite.engine.view.rendering.Texture;
@@ -38,13 +37,13 @@ public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
     }
 
     private final LWJGLCamera camera;
-    private final SpriteRegistry<LWJGLTexture> spriteRegistry;
+    private final SpriteRegistry spriteRegistry;
     private final SpriteBatch spriteBatch;
 
     public SpriteRenderingSystem(
             final Path assetRoot,
             final LWJGLCamera camera,
-            final SpriteRegistry<LWJGLTexture> spriteRegistry
+            final SpriteRegistry spriteRegistry
     ) {
         this.camera = camera;
         this.spriteRegistry = spriteRegistry;
