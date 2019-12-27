@@ -1,6 +1,7 @@
 package fi.jakojaannos.roguelite.game;
 
 import fi.jakojaannos.roguelite.engine.GameBase;
+import fi.jakojaannos.roguelite.engine.data.resources.GameStateManager;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.input.ButtonInput;
@@ -67,12 +68,13 @@ public class Roguelite extends GameBase {
         }
 
         state.tick();
+        val stateManager = state.getWorld().getOrCreateResource(GameStateManager.class);
         if (state.getWorld().getOrCreateResource(GameStatus.class).shouldRestart) {
-            return new GameplayGameState(System.nanoTime(),
-                                         World.createNew(EntityManager.createNew(256, 32)),
-                                         getTime());
+            stateManager.queueStateChange(new GameplayGameState(System.nanoTime(),
+                                                                World.createNew(EntityManager.createNew(256, 32)),
+                                                                getTime()));
         }
 
-        return state;
+        return stateManager.getNextState(state);
     }
 }

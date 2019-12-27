@@ -3,8 +3,11 @@ package fi.jakojaannos.roguelite.engine.view.ui.builder;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.ui.UIEvent;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.data.components.EngineUIComponentGroups;
+import fi.jakojaannos.roguelite.engine.view.data.components.ui.ElementBoundaries;
+import fi.jakojaannos.roguelite.engine.view.data.components.ui.internal.Name;
 import fi.jakojaannos.roguelite.engine.view.data.resources.RenderPass;
 import fi.jakojaannos.roguelite.engine.view.data.resources.internal.UIHierarchy;
 import fi.jakojaannos.roguelite.engine.view.data.resources.internal.UIRoot;
@@ -13,6 +16,10 @@ import fi.jakojaannos.roguelite.engine.view.systems.ui.*;
 import fi.jakojaannos.roguelite.engine.view.text.TextRenderer;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import lombok.val;
+import org.joml.Vector2d;
+
+import java.util.ArrayDeque;
+import java.util.Queue;
 
 /**
  * The interface used to interact with the game.
@@ -31,7 +38,8 @@ public class UserInterfaceImpl implements UserInterface {
 
         this.uiDispatcher = SystemDispatcher.builder()
                                             .withGroups(UISystemGroups.values())
-                                            .addGroupDependency(UISystemGroups.RENDERING, UISystemGroups.PREPARATIONS)
+                                            .addGroupDependency(UISystemGroups.EVENTS, UISystemGroups.PREPARATIONS)
+                                            .addGroupDependencies(UISystemGroups.RENDERING, UISystemGroups.PREPARATIONS, UISystemGroups.EVENTS)
                                             .withSystem(new UIHierarchySystem())
                                             .withSystem(new UILabelAutomaticSizeCalculationSystem(textRenderer))
                                             .withSystem(new UIElementBoundaryCalculationSystem())
@@ -46,6 +54,25 @@ public class UserInterfaceImpl implements UserInterface {
 
     public EntityManager getEntityManager() {
         return this.uiWorld.getEntityManager();
+    }
+
+    @Override
+    public Queue<UIEvent> pollEvents(final Vector2d mousePos, boolean mouseClicked) {
+        Queue<UIEvent> events = new ArrayDeque<>();
+        this.uiWorld.getEntityManager()
+                    .getEntitiesWith(ElementBoundaries.class)
+                    .forEach(pair -> {
+                        val name = this.uiWorld.getEntityManager()
+                                               .getComponentOf(pair.getEntity(), Name.class)
+                                               .orElseThrow().value;
+                        val bounds = pair.getComponent();
+                        if (mousePos.x > bounds.minX && mousePos.x < bounds.maxX && mousePos.y > bounds.minY && mousePos.y < bounds.maxY) {
+                            if (mouseClicked) {
+                                events.offer(new UIEvent(name, UIEvent.Type.CLICK));
+                            }
+                        }
+                    });
+        return events;
     }
 
     @Override

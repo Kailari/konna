@@ -8,7 +8,6 @@ import fi.jakojaannos.roguelite.engine.lwjgl.input.LWJGLInputProvider;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.game.DebugConfig;
 import fi.jakojaannos.roguelite.game.Roguelite;
-import fi.jakojaannos.roguelite.game.state.GameplayGameState;
 import fi.jakojaannos.roguelite.game.state.MainMenuGameState;
 import fi.jakojaannos.roguelite.game.view.RogueliteGameRenderer;
 import lombok.Setter;
@@ -60,10 +59,7 @@ public class RogueliteApplication {
     }
 
     private GameState createInitialState(final Game game) {
-        //return new MainMenuGameState(World.createNew(EntityManager.createNew(256, 32)),
-        //                             game.getTime());
-        return new GameplayGameState(System.nanoTime(),
-                                     World.createNew(EntityManager.createNew(256, 32)),
+        return new MainMenuGameState(World.createNew(EntityManager.createNew(256, 32)),
                                      game.getTime());
     }
 }
