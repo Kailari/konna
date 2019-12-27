@@ -22,20 +22,20 @@ public class LWJGLInputProvider implements InputProvider {
     private double mouseX, mouseY;
     private boolean justResized;
 
-    public LWJGLInputProvider(LWJGLWindow lwjglWindow, boolean enableForceClose) {
+    public LWJGLInputProvider(final LWJGLWindow window, boolean enableForceClose) {
         this.inputEvents = new ArrayDeque<>();
 
-        this.viewportWidth = 1;
-        this.viewportHeight = 1;
-        lwjglWindow.addResizeCallback((width, height) -> {
+        this.viewportWidth = window.getWidth();
+        this.viewportHeight = window.getHeight();
+        window.addResizeCallback((width, height) -> {
             this.viewportWidth = width;
             this.viewportHeight = height;
             this.justResized = true;
         });
 
-        glfwSetKeyCallback(lwjglWindow.getId(), keyCallback(enableForceClose));
-        glfwSetMouseButtonCallback(lwjglWindow.getId(), this::mouseButtonCallback);
-        glfwSetCursorPosCallback(lwjglWindow.getId(), this::cursorPositionCallback);
+        glfwSetKeyCallback(window.getId(), keyCallback(enableForceClose));
+        glfwSetMouseButtonCallback(window.getId(), this::mouseButtonCallback);
+        glfwSetCursorPosCallback(window.getId(), this::cursorPositionCallback);
     }
 
     private void cursorPositionCallback(long window, double x, double y) {
