@@ -41,7 +41,7 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
         this.viewport = new LWJGLViewport(window.getWidth(), window.getHeight());
         this.textureRegistry = new TextureRegistry(assetRoot, LWJGLTexture::new);
         this.spriteRegistry = new SpriteRegistry(assetRoot, this.textureRegistry);
-        this.textRenderer = new LWJGLTextRenderer(assetRoot, this.viewport);
+        this.textRenderer = new LWJGLTextRenderer(assetRoot, this.viewport, this.camera);
 
         this.stateRenderers = Map.ofEntries(
                 Map.entry(GameplayGameState.class, new GameplayGameStateRenderer(assetRoot,
@@ -65,6 +65,7 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
     public void render(GameState state, double partialTickAlpha) {
         // Make sure that the camera configuration matches the current state
         this.camera.updateConfigurationFromState(state);
+        this.camera.refreshMatricesIfDirty();
 
         // Snap camera to active camera
         val world = state.getWorld();

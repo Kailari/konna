@@ -1,5 +1,7 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text;
 
+import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
+import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.UniformBufferObjectIndices;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.shader.ShaderProgram;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.text.TextRenderer;
@@ -19,6 +21,8 @@ import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.*;
+import static org.lwjgl.opengl.GL31.glGetUniformBlockIndex;
+import static org.lwjgl.opengl.GL31.glUniformBlockBinding;
 import static org.lwjgl.stb.STBTruetype.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
@@ -29,9 +33,8 @@ public class LWJGLTextRenderer implements AutoCloseable, TextRenderer {
     private final boolean kerningEnabled = false;
 
     private final ShaderProgram shader;
+    private final LWJGLCamera camera;
     private final int uniformModelMatrix;
-    private final int uniformViewMatrix;
-    private final int uniformProjectionMatrix;
 
     private final ByteBuffer vertexDataBuffer;
     private final int vao;
@@ -42,15 +45,18 @@ public class LWJGLTextRenderer implements AutoCloseable, TextRenderer {
 
     public LWJGLTextRenderer(
             final Path assetRoot,
-            final Viewport viewport
+            final Viewport viewport,
+            final LWJGLCamera camera
     ) {
         this.viewport = viewport;
+        this.camera = camera;
+
         this.font = new Font(assetRoot, 1.0f, 1.0f);
 
         this.shader = createShader(assetRoot);
         this.uniformModelMatrix = this.shader.getUniformLocation("model");
-        this.uniformViewMatrix = this.shader.getUniformLocation("view");
-        this.uniformProjectionMatrix = this.shader.getUniformLocation("projection");
+        int uniformCameraInfoBlock = glGetUniformBlockIndex(this.shader.getShaderProgram(), "CameraInfo");
+        glUniformBlockBinding(this.shader.getShaderProgram(), uniformCameraInfoBlock, UniformBufferObjectIndices.CAMERA);
 
         this.vao = glGenVertexArrays();
         glBindVertexArray(this.vao);
@@ -102,15 +108,8 @@ public class LWJGLTextRenderer implements AutoCloseable, TextRenderer {
             final int fontSize,
             final String string
     ) {
+        this.camera.useScreenCoordinates();
         this.shader.use();
-        this.shader.setUniformMat4x4(this.uniformProjectionMatrix, new Matrix4f()
-                .ortho(0,
-                       this.viewport.getWidthInPixels(),
-                       this.viewport.getHeightInPixels(),
-                       0,
-                       0,
-                       100));
-        this.shader.setUniformMat4x4(this.uniformViewMatrix, new Matrix4f().identity());
         this.shader.setUniformMat4x4(this.uniformModelMatrix, new Matrix4f().identity());
         draw(x, y + fontSize, fontSize, string);
     }
@@ -134,8 +133,14 @@ public class LWJGLTextRenderer implements AutoCloseable, TextRenderer {
             final int fontSize,
             final String string
     ) {
+        this.camera.useWorldCoordinates();
         this.shader.use();
-        this.shader.setUniformMat4x4(this.uniformModelMatrix, new Matrix4f().identity());
+
+        val scaleFactor = 1.0 / this.camera.getTargetScreenSizeInUnits();
+        this.shader.setUniformMat4x4(this.uniformModelMatrix, new Matrix4f().identity()
+                                                                            .scale((float) scaleFactor,
+                                                                                   (float) scaleFactor,
+                                                                                   1.0f));
 
         draw(x, y, fontSize, string);
     }

@@ -3,14 +3,18 @@
 in vec2 in_pos;
 in float in_percent;
 
-uniform mat4 projection;
+layout (std140) uniform CameraInfo
+{
+    mat4 view;
+    mat4 projection;
+} camera_info;
+
 uniform mat4 model;
-uniform mat4 view;
 
 out float v_percent;
 
 void main(void) {
-    mat4 mvp = projection * view * model;
+    mat4 mvp = camera_info.projection * camera_info.view * model;
     gl_Position = mvp * vec4(in_pos.x, in_pos.y, 0.0, 1.0);
     v_percent = in_percent;
 }

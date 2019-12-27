@@ -1,14 +1,15 @@
 package fi.jakojaannos.roguelite.game.view.systems;
 
+import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
+import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.UniformBufferObjectIndices;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.shader.ShaderProgram;
 import fi.jakojaannos.roguelite.game.data.components.Health;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import lombok.val;
 import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryUtil;
@@ -20,14 +21,17 @@ import java.util.stream.Stream;
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
-import static org.lwjgl.opengl.GL30.glBindVertexArray;
-import static org.lwjgl.opengl.GL30.glGenVertexArrays;
+import static org.lwjgl.opengl.GL30.*;
+import static org.lwjgl.opengl.GL31.glGetUniformBlockIndex;
+import static org.lwjgl.opengl.GL31.glUniformBlockBinding;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
-public class HealthBarRenderingSystem implements ECSSystem {
+public class HealthBarRenderingSystem implements ECSSystem, AutoCloseable {
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.tickBefore(RenderHUDSystem.class)
+                    .tickAfter(LevelRenderingSystem.class)
+                    .tickAfter(SpriteRenderingSystem.class)
                     .withComponent(Health.class)
                     .withComponent(Transform.class);
     }
@@ -37,8 +41,6 @@ public class HealthBarRenderingSystem implements ECSSystem {
     private final LWJGLCamera camera;
     private final ShaderProgram shader;
     private final int uniformModelMatrix;
-    private final int uniformViewMatrix;
-    private final int uniformProjectionMatrix;
     private final int uniformHealth;
 
     private final ByteBuffer vertexDataBuffer;
@@ -56,10 +58,11 @@ public class HealthBarRenderingSystem implements ECSSystem {
                                    .fragmentDataLocation(0, "out_fragColor")
                                    .build();
 
-        this.uniformModelMatrix = this.shader.getUniformLocation("model");
-        this.uniformViewMatrix = this.shader.getUniformLocation("view");
-        this.uniformProjectionMatrix = this.shader.getUniformLocation("projection");
         this.uniformHealth = this.shader.getUniformLocation("health");
+        this.uniformModelMatrix = this.shader.getUniformLocation("model");
+        int uniformCameraInfoBlock = glGetUniformBlockIndex(this.shader.getShaderProgram(), "CameraInfo");
+        glUniformBlockBinding(this.shader.getShaderProgram(), uniformCameraInfoBlock, UniformBufferObjectIndices.CAMERA);
+
 
         this.vertexDataBuffer = MemoryUtil.memAlloc(4 * SIZE_IN_BYTES);
         this.vao = glGenVertexArrays();
@@ -112,8 +115,7 @@ public class HealthBarRenderingSystem implements ECSSystem {
             final World world
     ) {
         this.shader.use();
-        this.shader.setUniformMat4x4(uniformProjectionMatrix, this.camera.getProjectionMatrix());
-        this.shader.setUniformMat4x4(uniformViewMatrix, this.camera.getViewMatrix());
+        this.camera.useWorldCoordinates();
 
         glBindVertexArray(this.vao);
 
@@ -156,4 +158,12 @@ public class HealthBarRenderingSystem implements ECSSystem {
         this.vertexDataBuffer.putFloat(offset + 8, (float) percent);
     }
 
+    @Override
+    public void close() {
+        glDeleteBuffers(this.vbo);
+        glDeleteBuffers(this.ebo);
+        glDeleteVertexArrays(this.vao);
+        this.shader.close();
+        MemoryUtil.memFree(this.vertexDataBuffer);
+    }
 }

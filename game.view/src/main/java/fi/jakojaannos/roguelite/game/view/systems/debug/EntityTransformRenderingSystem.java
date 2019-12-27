@@ -5,6 +5,7 @@ import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
+import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.UniformBufferObjectIndices;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.shader.ShaderProgram;
 import fi.jakojaannos.roguelite.game.DebugConfig;
 import fi.jakojaannos.roguelite.game.data.components.NoDrawTag;
@@ -20,6 +21,8 @@ import java.util.stream.Stream;
 
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
+import static org.lwjgl.opengl.GL31.glGetUniformBlockIndex;
+import static org.lwjgl.opengl.GL31.glUniformBlockBinding;
 
 @Slf4j
 public class EntityTransformRenderingSystem implements ECSSystem, AutoCloseable {
@@ -31,8 +34,6 @@ public class EntityTransformRenderingSystem implements ECSSystem, AutoCloseable 
 
     private final LWJGLCamera camera;
     private final ShaderProgram shader;
-    private final int uniformProjectionMatrix;
-    private final int uniformViewMatrix;
     private final int uniformModelMatrix;
 
     private int vao;
@@ -52,8 +53,8 @@ public class EntityTransformRenderingSystem implements ECSSystem, AutoCloseable 
                                    .build();
 
         this.uniformModelMatrix = this.shader.getUniformLocation("model");
-        this.uniformViewMatrix = this.shader.getUniformLocation("view");
-        this.uniformProjectionMatrix = this.shader.getUniformLocation("projection");
+        int uniformCameraInfoBlock = glGetUniformBlockIndex(this.shader.getShaderProgram(), "CameraInfo");
+        glUniformBlockBinding(this.shader.getShaderProgram(), uniformCameraInfoBlock, UniformBufferObjectIndices.CAMERA);
 
         this.vao = glGenVertexArrays();
         glBindVertexArray(this.vao);
@@ -79,8 +80,7 @@ public class EntityTransformRenderingSystem implements ECSSystem, AutoCloseable 
             final World world
     ) {
         this.shader.use();
-        this.shader.setUniformMat4x4(this.uniformProjectionMatrix, this.camera.getProjectionMatrix());
-        this.shader.setUniformMat4x4(this.uniformViewMatrix, this.camera.getViewMatrix());
+        this.camera.useWorldCoordinates();
 
         glBindVertexArray(this.vao);
         glPointSize(5.0f);

@@ -11,10 +11,6 @@ class RogueliteCamera extends LWJGLCamera {
     }
 
     void updateConfigurationFromState(GameState state) {
-        // Ensure matrices are updated
-        getProjectionMatrix();
-        getViewMatrix();
-
         val camBounds = state.getWorld().getOrCreateResource(CameraProperties.class);
         refreshTargetScreenSizeInUnits(camBounds.targetViewportSizeInWorldUnits, camBounds.targetViewportSizeRespectiveToMinorAxis);
 

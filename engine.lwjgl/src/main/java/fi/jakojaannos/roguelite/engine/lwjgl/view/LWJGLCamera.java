@@ -2,8 +2,6 @@ package fi.jakojaannos.roguelite.engine.lwjgl.view;
 
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.UniformBufferObjectIndices;
 import fi.jakojaannos.roguelite.engine.view.Camera;
-import fi.jakojaannos.roguelite.engine.view.Viewport;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -22,8 +20,7 @@ import static org.lwjgl.opengl.GL31.GL_UNIFORM_BUFFER;
 public class LWJGLCamera extends Camera implements AutoCloseable {
     private static final double CAMERA_MOVE_EPSILON = 0.0001;
 
-    @Getter(AccessLevel.PROTECTED)
-    private double targetScreenSizeInUnits = 32.0;
+    @Getter private double targetScreenSizeInUnits = 32.0;
     private boolean targetSizeIsRespectiveToMinorAxis;
 
     @Getter private double viewportWidthInUnits;
@@ -44,14 +41,9 @@ public class LWJGLCamera extends Camera implements AutoCloseable {
     private final int screenCameraMatricesUbo;
     private final ByteBuffer cameraMatricesData;
 
-    public Matrix4f getViewMatrix() {
+    public void refreshMatricesIfDirty() {
         refreshViewMatrixIfDirty();
-        return viewMatrix;
-    }
-
-    public Matrix4f getProjectionMatrix() {
         refreshProjectionMatrixIfDirty();
-        return projectionMatrix;
     }
 
     protected void refreshTargetScreenSizeInUnits(
