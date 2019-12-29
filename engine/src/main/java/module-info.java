@@ -14,6 +14,8 @@ module roguelite.engine {
 
     exports fi.jakojaannos.roguelite.engine;
     exports fi.jakojaannos.roguelite.engine.ui;
+    exports fi.jakojaannos.roguelite.engine.ui.builder;
+    exports fi.jakojaannos.roguelite.engine.data.components.ui;
     exports fi.jakojaannos.roguelite.engine.data.resources;
     exports fi.jakojaannos.roguelite.engine.state;
     exports fi.jakojaannos.roguelite.engine.tilemap;

@@ -1,9 +1,7 @@
 package fi.jakojaannos.roguelite.engine.view;
 
-public interface Viewport {
-    int getWidthInPixels();
+import fi.jakojaannos.roguelite.engine.ui.UserInterface;
 
-    int getHeightInPixels();
-
+public interface Viewport extends UserInterface.ViewportSizeProvider {
     void resize(int width, int height);
 }

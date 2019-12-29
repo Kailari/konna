@@ -1,22 +1,17 @@
 package fi.jakojaannos.roguelite.engine.view.text;
 
+import fi.jakojaannos.roguelite.engine.ui.TextSizeProvider;
 import lombok.val;
 
 import java.nio.IntBuffer;
 
-public interface Font {
-    double getStringWidthInPixels(int fontSize, String string);
-
+public interface Font extends TextSizeProvider {
     FontTexture getTextureForSize(int fontSize);
 
     float getLineOffset();
 
     default boolean isKerningEnabled() {
         return false;
-    }
-
-    default double getStringHeightInPixels(int fontSize, String string) {
-        return fontSize;
     }
 
     static int getCP(

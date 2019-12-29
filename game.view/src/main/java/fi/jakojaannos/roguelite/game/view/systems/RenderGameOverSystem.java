@@ -7,6 +7,7 @@ import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text.LWJGLTextRenderer;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
+import fi.jakojaannos.roguelite.engine.view.text.Font;
 import fi.jakojaannos.roguelite.game.data.components.PlayerTag;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -17,7 +18,6 @@ import java.util.stream.Stream;
 public class RenderGameOverSystem implements ECSSystem {
     private static final String GAME_OVER_MESSAGE = "You Suck.";
     private static final String HELP_TEXT = "Press <SPACE> to restart";
-
     @Override
     public void declareRequirements(RequirementsBuilder requirements) {
         requirements.tickAfter(SpriteRenderingSystem.class)
@@ -27,6 +27,7 @@ public class RenderGameOverSystem implements ECSSystem {
     private final LWJGLTextRenderer textRenderer;
     private final LWJGLCamera camera;
     private final Viewport viewport;
+    private final Font font;
 
     @Override
     public void tick(
@@ -41,7 +42,7 @@ public class RenderGameOverSystem implements ECSSystem {
         camera.useScreenCoordinates();
         val halfScreenWidth = this.viewport.getWidthInPixels() / 2.0;
         val halfScreenHeight = this.viewport.getHeightInPixels() / 2.0;
-        this.textRenderer.drawCenteredOnScreen(halfScreenWidth, halfScreenHeight, 48, GAME_OVER_MESSAGE);
-        this.textRenderer.drawCenteredOnScreen(halfScreenWidth, halfScreenHeight + 50, 24, HELP_TEXT);
+        this.textRenderer.drawCenteredOnScreen(halfScreenWidth, halfScreenHeight, 48, font, GAME_OVER_MESSAGE);
+        this.textRenderer.drawCenteredOnScreen(halfScreenWidth, halfScreenHeight + 50, 24, font, HELP_TEXT);
     }
 }

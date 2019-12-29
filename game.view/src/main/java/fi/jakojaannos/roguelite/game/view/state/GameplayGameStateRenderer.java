@@ -2,6 +2,7 @@ package fi.jakojaannos.roguelite.game.view.state;
 
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
+import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text.LWJGLFont;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text.LWJGLTextRenderer;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
@@ -31,11 +32,12 @@ public class GameplayGameStateRenderer extends GameStateRenderer {
             final SpriteRegistry spriteRegistry,
             final LWJGLTextRenderer textRenderer
     ) {
+        val font = new LWJGLFont(assetRoot, 1.0f, 1.0f);
         val builder = SystemDispatcher.builder()
                                       .withSystem(new LevelRenderingSystem(assetRoot, camera, spriteRegistry))
                                       .withSystem(new SpriteRenderingSystem(assetRoot, camera, spriteRegistry))
-                                      .withSystem(new RenderHUDSystem(textRenderer))
-                                      .withSystem(new RenderGameOverSystem(textRenderer, camera, viewport))
+                                      .withSystem(new RenderHUDSystem(textRenderer, font))
+                                      .withSystem(new RenderGameOverSystem(textRenderer, camera, viewport, font))
                                       .withSystem(new HealthBarRenderingSystem(assetRoot, camera));
 
         if (DebugConfig.debugModeEnabled) {

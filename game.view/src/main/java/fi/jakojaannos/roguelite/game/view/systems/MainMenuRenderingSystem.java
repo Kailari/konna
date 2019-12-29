@@ -5,15 +5,15 @@ import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.*;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text.LWJGLFont;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text.LWJGLTextRenderer;
+import fi.jakojaannos.roguelite.engine.ui.ProportionValue;
+import fi.jakojaannos.roguelite.engine.ui.UIElementType;
 import fi.jakojaannos.roguelite.engine.ui.UIEvent;
+import fi.jakojaannos.roguelite.engine.ui.UserInterface;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatch;
-import fi.jakojaannos.roguelite.engine.view.sprite.Sprite;
-import fi.jakojaannos.roguelite.engine.view.ui.ProportionValue;
-import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
-import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
+import fi.jakojaannos.roguelite.engine.view.text.TextRenderer;
+import fi.jakojaannos.roguelite.engine.view.ui.UserInterfaceRenderer;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
 import fi.jakojaannos.roguelite.game.data.resources.Mouse;
 import fi.jakojaannos.roguelite.game.state.GameplayGameState;
@@ -43,28 +43,29 @@ public class MainMenuRenderingSystem implements ECSSystem, AutoCloseable {
     private final ByteBuffer cameraMatricesData;
 
     private final UserInterface userInterface;
+    private final UserInterfaceRenderer userInterfaceRenderer;
 
     public MainMenuRenderingSystem(
             final Path assetRoot,
-            final LWJGLTextRenderer textRenderer,
             final LWJGLCamera camera,
             final Viewport viewport,
             final SpriteRegistry spriteRegistry,
-            final SpriteBatch spriteBatch
+            final SpriteBatch spriteBatch,
+            final TextRenderer textRenderer
     ) {
         this.camera = camera;
 
         this.screenCameraUbo = glGenBuffers();
         this.cameraMatricesData = MemoryUtil.memAlloc(2 * 16 * 4);
 
-        Sprite sprite = spriteRegistry.getByAssetName("sprites/ui/ui");
-
         val width = 600;
         val height = 100;
         val borderSize = 25;
         this.font = new LWJGLFont(assetRoot, 1.0f, 1.0f);
+        this.userInterfaceRenderer = new UserInterfaceRenderer(spriteBatch, spriteRegistry, textRenderer, this.font);
+
         this.userInterface = UserInterface
-                .builder(viewport, spriteBatch, textRenderer)
+                .builder(viewport, this.font)
                 .element("play_button",
                          UIElementType.PANEL,
                          builder -> builder.anchorX(ProportionValue.percentOf().parentWidth(0.5))
@@ -73,7 +74,8 @@ public class MainMenuRenderingSystem implements ECSSystem, AutoCloseable {
                                            .width(ProportionValue.absolute(width))
                                            .height(ProportionValue.absolute(height))
                                            .borderSize(borderSize)
-                                           .sprite(sprite)
+                                           .sprite("sprites/ui/ui")
+                                           // TODO: panelAnimationName
                                            .child("play_button_label",
                                                   UIElementType.LABEL,
                                                   labelBuilder -> labelBuilder
@@ -81,7 +83,7 @@ public class MainMenuRenderingSystem implements ECSSystem, AutoCloseable {
                                                           .anchorY(ProportionValue.percentOf().parentHeight(0.5))
                                                           .left(ProportionValue.percentOf().ownWidth(-0.5))
                                                           .top(ProportionValue.absolute(0))
-                                                          .text("Play", font)
+                                                          .text("Play")
                                                           .fontSize(24)))
                 .element("title_label",
                          UIElementType.LABEL,
@@ -89,7 +91,7 @@ public class MainMenuRenderingSystem implements ECSSystem, AutoCloseable {
                                            .anchorY(ProportionValue.percentOf().parentHeight(0.25))
                                            .left(ProportionValue.percentOf().ownWidth(-0.5))
                                            .top(ProportionValue.percentOf().ownHeight(-1.0))
-                                           .text("Konna", font)
+                                           .text("Konna")
                                            .fontSize(48))
                 .build();
     }
@@ -99,16 +101,13 @@ public class MainMenuRenderingSystem implements ECSSystem, AutoCloseable {
             final Stream<Entity> entities,
             final World world
     ) {
-        this.camera.useScreenCoordinates();
-        this.userInterface.render();
-
         val mouse = world.getOrCreateResource(Mouse.class);
         val viewport = this.camera.getViewport();
         val mousePos = mouse.pos.mul(viewport.getWidthInPixels(),
                                      viewport.getHeightInPixels(),
                                      new Vector2d());
-        val events = this.userInterface.pollEvents(mousePos,
-                                                   world.getOrCreateResource(Inputs.class).inputAttack);
+        val events = this.userInterface.update(mousePos,
+                                               world.getOrCreateResource(Inputs.class).inputAttack);
         while (!events.isEmpty()) {
             val event = events.remove();
             if (event.getElement().equalsIgnoreCase("play_button") && event.getType() == UIEvent.Type.CLICK) {
@@ -118,6 +117,9 @@ public class MainMenuRenderingSystem implements ECSSystem, AutoCloseable {
                                                              world.getOrCreateResource(Time.class).getTimeManager()));
             }
         }
+
+        this.camera.useScreenCoordinates();
+        this.userInterfaceRenderer.render(this.userInterface);
     }
 
     @Override

@@ -31,11 +31,11 @@ public class MainMenuGameStateRenderer extends GameStateRenderer {
     ) {
         val builder = SystemDispatcher.builder()
                                       .withSystem(new MainMenuRenderingSystem(assetRoot,
-                                                                              textRenderer,
                                                                               camera,
                                                                               viewport,
                                                                               spriteRegistry,
-                                                                              new LWJGLSpriteBatch(assetRoot, "sprite")));
+                                                                              new LWJGLSpriteBatch(assetRoot, "sprite"),
+                                                                              textRenderer));
 
         // FIXME: Make rendering systems use groups so that no hard dependencies are required.
         //  registering the debug rendering systems fails as they depend on other systems not present.
