@@ -8,7 +8,6 @@ import fi.jakojaannos.roguelite.engine.view.data.components.ui.internal.FontSize
 import fi.jakojaannos.roguelite.engine.view.data.components.ui.internal.label.Text;
 import fi.jakojaannos.roguelite.engine.view.data.resources.internal.UIHierarchy;
 import fi.jakojaannos.roguelite.engine.view.data.resources.internal.UIRoot;
-import fi.jakojaannos.roguelite.engine.view.text.TextRenderer;
 import fi.jakojaannos.roguelite.engine.view.ui.ProportionValue;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -27,8 +26,6 @@ public class UILabelAutomaticSizeCalculationSystem implements ECSSystem {
                     .withComponent(Text.class);
     }
 
-    private final TextRenderer textRenderer;
-
     @Override
     public void tick(
             final Stream<Entity> entities,
@@ -40,17 +37,19 @@ public class UILabelAutomaticSizeCalculationSystem implements ECSSystem {
         val entityManager = world.getEntityManager();
         entities.forEach(entity -> {
             val fontSize = getFontSize(entityManager, entity, hierarchy, uiRoot);
-            val text = entityManager.getComponentOf(entity, Text.class)
-                                    .orElseThrow().text;
+            val textComponent = entityManager.getComponentOf(entity, Text.class)
+                                             .orElseThrow();
+            val text = textComponent.text;
+            val font = textComponent.font;
 
             entityManager.addComponentIfAbsent(entity, new BoundWidth(ProportionValue.absolute(0)));
             entityManager.addComponentIfAbsent(entity, new BoundHeight(ProportionValue.absolute(0)));
 
-            int width = (int) textRenderer.getStringWidthInPixels(fontSize, text);
+            int width = (int) font.getStringWidthInPixels(fontSize, text);
             val widthBound = entityManager.getComponentOf(entity, BoundWidth.class).orElseThrow();
             widthBound.value = ProportionValue.absolute(width);
 
-            int height = (int) textRenderer.getStringHeightInPixels(fontSize, text);
+            int height = (int) font.getStringHeightInPixels(fontSize, text);
             val heightBound = entityManager.getComponentOf(entity, BoundHeight.class).orElseThrow();
             heightBound.value = ProportionValue.absolute(height);
         });

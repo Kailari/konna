@@ -41,7 +41,7 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
         this.camera = new RogueliteCamera(this.viewport);
         this.textureRegistry = new TextureRegistry(assetRoot, LWJGLTexture::new);
         this.spriteRegistry = new SpriteRegistry(assetRoot, this.textureRegistry);
-        this.textRenderer = new LWJGLTextRenderer(assetRoot, this.viewport, this.camera);
+        this.textRenderer = new LWJGLTextRenderer(assetRoot, this.camera);
 
         this.stateRenderers = Map.ofEntries(
                 Map.entry(GameplayGameState.class, new GameplayGameStateRenderer(assetRoot,

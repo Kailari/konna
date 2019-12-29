@@ -1,5 +1,6 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text;
 
+import fi.jakojaannos.roguelite.engine.view.text.FontTexture;
 import lombok.Getter;
 import lombok.val;
 import org.lwjgl.BufferUtils;
@@ -13,7 +14,7 @@ import java.nio.FloatBuffer;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.stb.STBTruetype.*;
 
-public class FontTexture implements AutoCloseable {
+public class LWJGLFontTexture implements AutoCloseable, FontTexture {
     private static final int FIRST_CHAR = 32;
 
     @Getter private final float contentScaleX, contentScaleY;
@@ -25,7 +26,7 @@ public class FontTexture implements AutoCloseable {
     private final int textureId;
     private final int scaledBitmapW, scaledBitmapH;
 
-    public FontTexture(
+    public LWJGLFontTexture(
             final ByteBuffer ttf,
             final STBTTFontinfo fontInfo,
             final int fontHeight,
@@ -62,7 +63,8 @@ public class FontTexture implements AutoCloseable {
         return cdata;
     }
 
-    public void bind() {
+    @Override
+    public void use() {
         glBindTexture(GL_TEXTURE_2D, this.textureId);
     }
 

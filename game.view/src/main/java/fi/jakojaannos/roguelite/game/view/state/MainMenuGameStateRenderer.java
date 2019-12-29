@@ -30,7 +30,8 @@ public class MainMenuGameStateRenderer extends GameStateRenderer {
             final SpriteRegistry spriteRegistry
     ) {
         val builder = SystemDispatcher.builder()
-                                      .withSystem(new MainMenuRenderingSystem(textRenderer,
+                                      .withSystem(new MainMenuRenderingSystem(assetRoot,
+                                                                              textRenderer,
                                                                               camera,
                                                                               viewport,
                                                                               spriteRegistry,

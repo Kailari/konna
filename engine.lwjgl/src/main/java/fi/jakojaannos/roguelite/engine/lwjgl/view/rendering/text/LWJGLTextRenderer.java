@@ -3,7 +3,7 @@ package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.UniformBufferObjectIndices;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.shader.ShaderProgram;
-import fi.jakojaannos.roguelite.engine.view.Viewport;
+import fi.jakojaannos.roguelite.engine.view.text.Font;
 import fi.jakojaannos.roguelite.engine.view.text.TextRenderer;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -13,7 +13,6 @@ import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
 import java.nio.file.Path;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -23,14 +22,12 @@ import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.opengl.GL31.glGetUniformBlockIndex;
 import static org.lwjgl.opengl.GL31.glUniformBlockBinding;
-import static org.lwjgl.stb.STBTruetype.*;
+import static org.lwjgl.stb.STBTruetype.stbtt_GetCodepointKernAdvance;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 @Slf4j
 public class LWJGLTextRenderer implements AutoCloseable, TextRenderer {
     private static final int SIZE_IN_BYTES = (2 + 2 + 3) * 4;
-
-    private final boolean kerningEnabled = false;
 
     private final ShaderProgram shader;
     private final LWJGLCamera camera;
@@ -40,18 +37,12 @@ public class LWJGLTextRenderer implements AutoCloseable, TextRenderer {
     private final int vao;
     private final int vbo;
     private final int ebo;
-    private final Viewport viewport;
-    private final Font font;
 
     public LWJGLTextRenderer(
             final Path assetRoot,
-            final Viewport viewport,
             final LWJGLCamera camera
     ) {
-        this.viewport = viewport;
         this.camera = camera;
-
-        this.font = new Font(assetRoot, 1.0f, 1.0f);
 
         this.shader = createShader(assetRoot);
         this.uniformModelMatrix = this.shader.getUniformLocation("model");
@@ -74,63 +65,38 @@ public class LWJGLTextRenderer implements AutoCloseable, TextRenderer {
     }
 
     @Override
-    public double getStringWidthInPixels(int fontSize, String string) {
-        int width = 0;
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            IntBuffer pCodePoint = stack.mallocInt(1);
-            IntBuffer pAdvancedWidth = stack.mallocInt(1);
-            IntBuffer pLeftSideBearing = stack.mallocInt(1);
-
-            val from = 0;
-            val to = string.length();
-            int i = from;
-            while (i < to) {
-                i += getCP(string, to, i, pCodePoint);
-                int cp = pCodePoint.get(0);
-
-                stbtt_GetCodepointHMetrics(this.font.getFontInfo(), cp, pAdvancedWidth, pLeftSideBearing);
-                width += pAdvancedWidth.get(0);
-
-                if (this.kerningEnabled && i < to) {
-                    getCP(string, to, i, pCodePoint);
-                    width += stbtt_GetCodepointKernAdvance(this.font.getFontInfo(), cp, pCodePoint.get(0));
-                }
-            }
-        }
-
-        return width * stbtt_ScaleForPixelHeight(this.font.getFontInfo(), fontSize);
-    }
-
-    @Override
     public void drawOnScreen(
             final double x,
             final double y,
             final int fontSize,
+            final Font font,
             final String string
     ) {
         this.camera.useScreenCoordinates();
         this.shader.use();
         this.shader.setUniformMat4x4(this.uniformModelMatrix, new Matrix4f().identity());
-        draw(x, y + fontSize, fontSize, string);
+        draw(x, y + fontSize, fontSize, font, string);
     }
 
     public void drawCenteredOnScreen(
             final double x,
             final double y,
             final int fontSize,
+            final Font font,
             final String text
     ) {
-        val textWidth = getStringWidthInPixels(fontSize, text);
+        val textWidth = font.getStringWidthInPixels(fontSize, text);
 
         val textX = x - textWidth / 2.0;
         val textY = y - fontSize / 2.0;
-        drawOnScreen(textX, textY, fontSize, text);
+        drawOnScreen(textX, textY, fontSize, font, text);
     }
 
     public void drawInWorld(
             final double x,
             final double y,
             final int fontSize,
+            final Font font,
             final String string
     ) {
         this.camera.useWorldCoordinates();
@@ -142,21 +108,22 @@ public class LWJGLTextRenderer implements AutoCloseable, TextRenderer {
                                                                                    (float) scaleFactor,
                                                                                    1.0f));
 
-        draw(x / scaleFactor, y / scaleFactor, fontSize, string);
+        draw(x / scaleFactor, y / scaleFactor, fontSize, font, string);
     }
 
     private void draw(
             final double x,
             final double y,
             final int fontSize,
+            final Font font,
             final String string
     ) {
         glBindVertexArray(this.vao);
         glBindBuffer(GL_ARRAY_BUFFER, this.vbo);
-        val fontTexture = this.font.getTextureForSize(fontSize);
+        val fontTexture = font.getTextureForSize(fontSize);
         val fontPixelHeightScale = fontTexture.getPixelHeightScale();
 
-        fontTexture.bind();
+        fontTexture.use();
         try (val stack = MemoryStack.stackPush()) {
             val pCodePoint = stack.mallocInt(1);
 
@@ -172,13 +139,13 @@ public class LWJGLTextRenderer implements AutoCloseable, TextRenderer {
             var lineY = 0.0f;
 
             for (int i = 0, to = string.length(); i < to; ) {
-                i += getCP(string, to, i, pCodePoint);
+                i += Font.getCP(string, to, i, pCodePoint);
 
                 val cp = pCodePoint.get(0);
                 if (cp == '\n') {
                     pX.put(0, 0.0f);
 
-                    val lineOffset = this.font.getLineOffset() * fontPixelHeightScale;
+                    val lineOffset = font.getLineOffset() * fontPixelHeightScale;
                     val nextLineY = pY.get(0) + lineOffset;
                     pY.put(0, nextLineY);
                     lineY = nextLineY;
@@ -190,11 +157,11 @@ public class LWJGLTextRenderer implements AutoCloseable, TextRenderer {
                 }
 
                 val cpX = pX.get(0);
-                fontTexture.getNextCharacterToQuad(cp, pX, pY, alignedQuad);
+                ((LWJGLFontTexture) fontTexture).getNextCharacterToQuad(cp, pX, pY, alignedQuad);
                 pX.put(0, (float) scale(cpX, pX.get(0), factorX));
-                if (this.kerningEnabled && i < to) {
-                    getCP(string, to, i, pCodePoint);
-                    pX.put(0, pX.get(0) + stbtt_GetCodepointKernAdvance(this.font.getFontInfo(), cp, pCodePoint.get(0)) * fontPixelHeightScale);
+                if (font.isKerningEnabled() && i < to) {
+                    Font.getCP(string, to, i, pCodePoint);
+                    pX.put(0, pX.get(0) + stbtt_GetCodepointKernAdvance(((LWJGLFont) font).getFontInfo(), cp, pCodePoint.get(0)) * fontPixelHeightScale);
                 }
 
                 val x0 = x + scale(cpX, alignedQuad.x0(), factorX);
@@ -262,25 +229,6 @@ public class LWJGLTextRenderer implements AutoCloseable, TextRenderer {
         this.vertexDataBuffer.putFloat(offset + 24, b);
     }
 
-    private static int getCP(
-            final String string,
-            final int to,
-            final int i,
-            final IntBuffer outCodePoint
-    ) {
-        val charA = string.charAt(i);
-        if (Character.isHighSurrogate(charA) && i + 1 < to) {
-            val charB = string.charAt(i + 1);
-            if (Character.isLowSurrogate(charB)) {
-                outCodePoint.put(0, Character.toCodePoint(charA, charB));
-                return 2;
-            }
-        }
-
-        outCodePoint.put(0, charA);
-        return 1;
-    }
-
     private double scale(
             final double center,
             final double offset,
@@ -302,8 +250,6 @@ public class LWJGLTextRenderer implements AutoCloseable, TextRenderer {
 
     @Override
     public void close() {
-        this.font.close();
-
         MemoryUtil.memFree(this.vertexDataBuffer);
         glDeleteVertexArrays(this.vao);
         glDeleteBuffers(this.vbo);

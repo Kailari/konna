@@ -41,7 +41,7 @@ public class UserInterfaceImpl implements UserInterface {
                                             .addGroupDependency(UISystemGroups.EVENTS, UISystemGroups.PREPARATIONS)
                                             .addGroupDependencies(UISystemGroups.RENDERING, UISystemGroups.PREPARATIONS, UISystemGroups.EVENTS)
                                             .withSystem(new UIHierarchySystem())
-                                            .withSystem(new UILabelAutomaticSizeCalculationSystem(textRenderer))
+                                            .withSystem(new UILabelAutomaticSizeCalculationSystem())
                                             .withSystem(new UIElementBoundaryCalculationSystem())
                                             .withSystems(new UIPanelRenderingSystem(spriteBatch))
                                             .withSystems(new UILabelRenderingSystem(textRenderer))

@@ -4,6 +4,7 @@ import fi.jakojaannos.roguelite.engine.data.resources.GameStateManager;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.*;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
+import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text.LWJGLFont;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text.LWJGLTextRenderer;
 import fi.jakojaannos.roguelite.engine.ui.UIEvent;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
@@ -22,6 +23,7 @@ import org.joml.Vector2d;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
+import java.nio.file.Path;
 import java.util.stream.Stream;
 
 import static org.lwjgl.opengl.GL15.glDeleteBuffers;
@@ -33,6 +35,8 @@ public class MainMenuRenderingSystem implements ECSSystem, AutoCloseable {
     public void declareRequirements(final RequirementsBuilder requirements) {
     }
 
+    private final LWJGLFont font;
+
     private final LWJGLCamera camera;
 
     private final int screenCameraUbo;
@@ -41,6 +45,7 @@ public class MainMenuRenderingSystem implements ECSSystem, AutoCloseable {
     private final UserInterface userInterface;
 
     public MainMenuRenderingSystem(
+            final Path assetRoot,
             final LWJGLTextRenderer textRenderer,
             final LWJGLCamera camera,
             final Viewport viewport,
@@ -57,6 +62,7 @@ public class MainMenuRenderingSystem implements ECSSystem, AutoCloseable {
         val width = 600;
         val height = 100;
         val borderSize = 25;
+        this.font = new LWJGLFont(assetRoot, 1.0f, 1.0f);
         this.userInterface = UserInterface
                 .builder(viewport, spriteBatch, textRenderer)
                 .element("play_button",
@@ -75,7 +81,7 @@ public class MainMenuRenderingSystem implements ECSSystem, AutoCloseable {
                                                           .anchorY(ProportionValue.percentOf().parentHeight(0.5))
                                                           .left(ProportionValue.percentOf().ownWidth(-0.5))
                                                           .top(ProportionValue.absolute(0))
-                                                          .text("Play")
+                                                          .text("Play", font)
                                                           .fontSize(24)))
                 .element("title_label",
                          UIElementType.LABEL,
@@ -83,7 +89,7 @@ public class MainMenuRenderingSystem implements ECSSystem, AutoCloseable {
                                            .anchorY(ProportionValue.percentOf().parentHeight(0.25))
                                            .left(ProportionValue.percentOf().ownWidth(-0.5))
                                            .top(ProportionValue.percentOf().ownHeight(-1.0))
-                                           .text("Konna")
+                                           .text("Konna", font)
                                            .fontSize(48))
                 .build();
     }
@@ -118,5 +124,6 @@ public class MainMenuRenderingSystem implements ECSSystem, AutoCloseable {
     public void close() {
         MemoryUtil.memFree(this.cameraMatricesData);
         glDeleteBuffers(this.screenCameraUbo);
+        this.font.close();
     }
 }
