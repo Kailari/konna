@@ -5,6 +5,8 @@ import fi.jakojaannos.roguelite.engine.ecs.SystemGroup;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
+import fi.jakojaannos.roguelite.engine.ui.TextSizeProvider;
+import fi.jakojaannos.roguelite.engine.ui.UserInterface;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.archetypes.PlayerArchetype;
 import fi.jakojaannos.roguelite.game.data.components.*;
@@ -21,9 +23,11 @@ public class GameplayGameState extends GameState {
     public GameplayGameState(
             final long seed,
             final World world,
-            final TimeManager timeManager
+            final TimeManager timeManager,
+            final UserInterface.ViewportSizeProvider viewportSizeProvider,
+            final TextSizeProvider textSizeProvider
     ) {
-        super(world, timeManager);
+        super(world, timeManager, viewportSizeProvider, textSizeProvider);
 
         val entityManager = world.getEntityManager();
 
@@ -59,6 +63,15 @@ public class GameplayGameState extends GameState {
         entityManager.addComponentTo(levelEntity, layer);
 
         entityManager.applyModifications();
+    }
+
+    @Override
+    protected UserInterface createUserInterface(
+            final UserInterface.ViewportSizeProvider viewportSizeProvider,
+            final TextSizeProvider textSizeProvider
+    ) {
+        return UserInterface.builder(viewportSizeProvider, textSizeProvider)
+                            .build();
     }
 
     @Override

@@ -37,7 +37,7 @@ public class RogueliteApplication {
         ) {
             try (val renderer = new RogueliteGameRenderer(assetRoot, runner.getWindow())) {
                 val inputProvider = new LWJGLInputProvider(runner.getWindow(), this.enableForceClose);
-                runner.run(() -> createInitialState(game), game, inputProvider, renderer::render);
+                runner.run(() -> createInitialState(game, renderer), game, inputProvider, renderer::render);
             }
         } catch (Exception e) {
             LOG.error("The game loop unexpectedly stopped.");
@@ -58,8 +58,13 @@ public class RogueliteApplication {
         }
     }
 
-    private GameState createInitialState(final Game game) {
+    private GameState createInitialState(
+            final Game game,
+            final RogueliteGameRenderer renderer
+    ) {
         return new MainMenuGameState(World.createNew(EntityManager.createNew(256, 32)),
-                                     game.getTime());
+                                     game.getTime(),
+                                     renderer.getViewport(),
+                                     renderer.getFont());
     }
 }

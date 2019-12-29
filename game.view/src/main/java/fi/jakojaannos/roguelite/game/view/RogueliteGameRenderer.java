@@ -3,6 +3,7 @@ package fi.jakojaannos.roguelite.game.view;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLViewport;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLWindow;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLTexture;
+import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text.LWJGLFont;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text.LWJGLTextRenderer;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.engine.view.GameRenderer;
@@ -16,6 +17,7 @@ import fi.jakojaannos.roguelite.game.state.MainMenuGameState;
 import fi.jakojaannos.roguelite.game.view.state.GameStateRenderer;
 import fi.jakojaannos.roguelite.game.view.state.GameplayGameStateRenderer;
 import fi.jakojaannos.roguelite.game.view.state.MainMenuGameStateRenderer;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
@@ -26,10 +28,11 @@ import java.util.Optional;
 @Slf4j
 public class RogueliteGameRenderer implements GameRenderer<GameState> {
     private final RogueliteCamera camera;
-    private final Viewport viewport;
+    @Getter private final Viewport viewport;
     private final TextureRegistry textureRegistry;
     private final SpriteRegistry spriteRegistry;
-    private final LWJGLTextRenderer textRenderer;
+    @Getter private final LWJGLTextRenderer textRenderer;
+    @Getter private final LWJGLFont font;
 
     private final Map<Class<? extends GameState>, GameStateRenderer> stateRenderers;
 
@@ -39,6 +42,7 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
 
         this.viewport = new LWJGLViewport(window.getWidth(), window.getHeight());
         this.camera = new RogueliteCamera(this.viewport);
+        this.font = new LWJGLFont(assetRoot, 1.0f, 1.0f);
         this.textureRegistry = new TextureRegistry(assetRoot, LWJGLTexture::new);
         this.spriteRegistry = new SpriteRegistry(assetRoot, this.textureRegistry);
         this.textRenderer = new LWJGLTextRenderer(assetRoot, this.camera);
@@ -90,6 +94,7 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
             } catch (Exception ignored) {
             }
         });
+        this.font.close();
         this.textureRegistry.close();
         this.spriteRegistry.close();
         this.textRenderer.close();

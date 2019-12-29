@@ -20,17 +20,6 @@ import java.util.Queue;
 
 @Slf4j
 public class Roguelite extends GameBase {
-    @Deprecated
-    public GameState createInitialState() {
-        return createInitialState(System.nanoTime());
-    }
-
-    @Deprecated
-    public GameState createInitialState(long seed) {
-        val entities = EntityManager.createNew(256, 32);
-        return new GameplayGameState(seed, World.createNew(entities), getTime());
-    }
-
     @Override
     public GameState tick(
             final GameState state,
@@ -72,7 +61,9 @@ public class Roguelite extends GameBase {
         if (state.getWorld().getOrCreateResource(GameStatus.class).shouldRestart) {
             stateManager.queueStateChange(new GameplayGameState(System.nanoTime(),
                                                                 World.createNew(EntityManager.createNew(256, 32)),
-                                                                getTime()));
+                                                                getTime(),
+                                                                state.getUserInterface().getViewportSizeProvider(),
+                                                                state.getUserInterface().getTextSizeProvider()));
         }
 
         return stateManager.getNextState(state);

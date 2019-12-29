@@ -35,6 +35,10 @@ class SpriteDeserializerTest {
             }
 
             @Override
+            public void use() {
+            }
+
+            @Override
             public void close() {
             }
         });

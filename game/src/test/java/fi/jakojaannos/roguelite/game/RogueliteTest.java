@@ -1,9 +1,16 @@
 package fi.jakojaannos.roguelite.game;
 
+import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.input.*;
 import fi.jakojaannos.roguelite.engine.state.GameState;
+import fi.jakojaannos.roguelite.engine.ui.TextSizeProvider;
+import fi.jakojaannos.roguelite.engine.ui.UserInterface;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
 import fi.jakojaannos.roguelite.game.data.resources.Mouse;
+import fi.jakojaannos.roguelite.game.state.GameplayGameState;
+import lombok.val;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -12,12 +19,24 @@ import java.util.ArrayDeque;
 import java.util.Queue;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 class RogueliteTest {
+    private Roguelite roguelite;
+    private GameState state;
+
+    @BeforeEach
+    void beforeEach() {
+        roguelite = new Roguelite();
+        state = new GameplayGameState(6969,
+                                      World.createNew(EntityManager.createNew(256, 32)),
+                                      roguelite.getTime(),
+                                      mock(UserInterface.ViewportSizeProvider.class),
+                                      mock(TextSizeProvider.class));
+    }
+
     @Test
     void inputsAreFalseByDefault() {
-        Roguelite roguelite = new Roguelite();
-        GameState state = roguelite.createInitialState();
         roguelite.tick(state, new ArrayDeque<>());
 
         Inputs inputs = state.getWorld().getOrCreateResource(Inputs.class);
@@ -42,9 +61,6 @@ class RogueliteTest {
             boolean up,
             boolean down
     ) {
-        Roguelite roguelite = new Roguelite();
-        GameState state = roguelite.createInitialState();
-
         Queue<InputEvent> events = new ArrayDeque<>();
         events.offer(new InputEvent(new ButtonInput(InputButton.Keyboard.valueOf(key), ButtonInput.Action.PRESS)));
 
@@ -69,8 +85,6 @@ class RogueliteTest {
             double newPos
     ) {
         InputAxis.Mouse axisPos = horizontal ? InputAxis.Mouse.X_POS : InputAxis.Mouse.Y_POS;
-        Roguelite roguelite = new Roguelite();
-        GameState state = roguelite.createInitialState();
         Mouse mouse = state.getWorld().getOrCreateResource(Mouse.class);
         if (horizontal) {
             mouse.pos.x = initial;
@@ -88,9 +102,6 @@ class RogueliteTest {
 
     @Test
     void mouseButtonEventsUpdateGameState() {
-        Roguelite roguelite = new Roguelite();
-        GameState state = roguelite.createInitialState();
-
         Queue<InputEvent> events = new ArrayDeque<>();
         events.offer(ButtonInput.pressed(InputButton.Mouse.button(0)));
 
@@ -102,9 +113,6 @@ class RogueliteTest {
 
     @Test
     void mouseButtonEventsDoNotUpdateGameStateIfButtonIsWrong() {
-        Roguelite roguelite = new Roguelite();
-        GameState state = roguelite.createInitialState();
-
         Queue<InputEvent> events = new ArrayDeque<>();
         events.offer(ButtonInput.pressed(InputButton.Mouse.button(1)));
         events.offer(ButtonInput.pressed(InputButton.Mouse.button(2)));
@@ -119,8 +127,6 @@ class RogueliteTest {
 
     @Test
     void releasingMouseButtonDisablesInput() {
-        Roguelite roguelite = new Roguelite();
-        GameState state = roguelite.createInitialState();
         Queue<InputEvent> events = new ArrayDeque<>();
 
         // Pressed

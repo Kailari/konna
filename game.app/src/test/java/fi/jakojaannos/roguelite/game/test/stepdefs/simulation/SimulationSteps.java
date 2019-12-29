@@ -1,6 +1,10 @@
 package fi.jakojaannos.roguelite.game.test.stepdefs.simulation;
 
+import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
+import fi.jakojaannos.roguelite.game.state.GameplayGameState;
+import fi.jakojaannos.roguelite.game.test.global.TestRenderingBackend;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.When;
 import org.joml.Vector2d;
@@ -11,7 +15,12 @@ import static fi.jakojaannos.roguelite.game.test.global.GlobalState.*;
 public class SimulationSteps {
     @Given("the game world just finished loading")
     public void the_game_world_just_finished_loading() {
-        state = game.createInitialState(6969);
+        state = new GameplayGameState(6969,
+                                      World.createNew(EntityManager.createNew(256, 32)),
+                                      game.getTime(),
+                                      TestRenderingBackend.VIEWPORT_SIZE_PROVIDER,
+                                      TestRenderingBackend.TEXT_SIZE_PROVIDER);
+
         playerInitialPosition = getLocalPlayer().flatMap(entity -> getComponentOf(entity, Transform.class))
                                                 .map(transform -> new Vector2d(transform.position))
                                                 .orElseThrow();
