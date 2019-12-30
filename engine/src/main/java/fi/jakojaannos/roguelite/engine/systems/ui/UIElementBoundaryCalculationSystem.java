@@ -9,10 +9,13 @@ import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ui.ProportionValue;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
@@ -27,6 +30,7 @@ import java.util.stream.Stream;
  * In another words: if we know two of "min", "max" and "size", we can easily calculate the third.
  * If more than two are defined, there is a high risk of contradiction.
  */
+@Slf4j
 public class UIElementBoundaryCalculationSystem implements ECSSystem {
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
@@ -71,57 +75,36 @@ public class UIElementBoundaryCalculationSystem implements ECSSystem {
                     fontSizeLookup.put(entity, fontSize);
                     val context = new ProportionValue.Context(fontSize, parentBounds, bounds);
 
-                    Optional<ProportionValue> leftValue, rightValue, widthValue;
-                    leftValue = entityManager.getComponentOf(entity, BoundLeft.class).map(bound -> bound.value);
-                    rightValue = entityManager.getComponentOf(entity, BoundRight.class).map(bound -> bound.value);
-                    widthValue = entityManager.getComponentOf(entity, BoundWidth.class).map(bound -> bound.value);
-                    if (leftValue.isPresent() && rightValue.isPresent()) {
-                        bounds.minX = leftValue.get().getValue(context);
-                        bounds.maxX = rightValue.get().getValue(context);
-                        bounds.width = bounds.maxX - bounds.minX;
-
-                        if (widthValue.isPresent()) {
-                            throw new IllegalStateException("Width must not be defined if both Left and Right are defined!");
-                        }
-                    } else if (widthValue.isEmpty()) {
-                        throw new IllegalStateException("You must define Width if Left and Right are both undefined!");
-                    } else if (leftValue.isPresent()) {
-                        bounds.width = widthValue.get().getValue(context);
-                        bounds.minX = leftValue.get().getValue(context);
-                        bounds.maxX = bounds.minX + bounds.width;
-                    } else if (rightValue.isPresent()) {
-                        bounds.width = widthValue.get().getValue(context);
-                        bounds.maxX = rightValue.get().getValue(context);
-                        bounds.minX = bounds.maxX - bounds.width;
-                    } else {
-                        throw new IllegalStateException("Exactly two of Left, Right and/or Width must be defined!");
+                    Optional<Integer> leftValue, rightValue, widthValue;
+                    leftValue = entityManager.getComponentOf(entity, BoundLeft.class).map(bound -> bound.value.getValue(context));
+                    rightValue = entityManager.getComponentOf(entity, BoundRight.class).map(bound -> bound.value.getValue(context));
+                    widthValue = entityManager.getComponentOf(entity, BoundWidth.class).map(bound -> bound.value.getValue(context));
+                    if (leftValue.isPresent() && rightValue.isPresent() && widthValue.isPresent()) {
+                        LOG.warn("Width must not be defined if both Left and Right are defined! Removing the width component...");
+                        entityManager.removeComponentFrom(entity, BoundWidth.class);
                     }
 
-                    Optional<ProportionValue> topValue, bottomValue, heightValue;
-                    topValue = entityManager.getComponentOf(entity, BoundTop.class).map(bound -> bound.value);
-                    bottomValue = entityManager.getComponentOf(entity, BoundBottom.class).map(bound -> bound.value);
-                    heightValue = entityManager.getComponentOf(entity, BoundHeight.class).map(bound -> bound.value);
-                    if (topValue.isPresent() && bottomValue.isPresent()) {
-                        bounds.minY = topValue.get().getValue(context);
-                        bounds.maxY = bottomValue.get().getValue(context);
-                        bounds.height = bounds.maxY - bounds.minY;
+                    bounds.minX = leftValue.or(getAppliedValueIfBothPresent(rightValue, widthValue, (right, width) -> right - width))
+                                           .orElse(parentBounds.minX);
+                    bounds.maxX = rightValue.or(getAppliedValueIfBothPresent(leftValue, widthValue, Integer::sum))
+                                            .orElse(parentBounds.maxX);
+                    bounds.width = bounds.maxX - bounds.minX;
 
-                        if (heightValue.isPresent()) {
-                            throw new IllegalStateException("Height must not be defined if both Top and Bottom are defined!");
-                        }
-                    } else if (heightValue.isEmpty()) {
-                        throw new IllegalStateException("You must define Height if Top and Bottom are both undefined!");
-                    } else if (topValue.isPresent()) {
-                        bounds.height = heightValue.get().getValue(context);
-                        bounds.minY = topValue.get().getValue(context);
-                        bounds.maxY = bounds.minY + bounds.height;
-                    } else if (bottomValue.isPresent()) {
-                        bounds.height = heightValue.get().getValue(context);
-                        bounds.maxY = bottomValue.get().getValue(context);
-                        bounds.minY = bounds.maxY - bounds.height;
-                    } else {
-                        throw new IllegalStateException("Exactly two of Top, Bottom and/or Height must be defined!");
+                    Optional<Integer> topValue, bottomValue, heightValue;
+                    topValue = entityManager.getComponentOf(entity, BoundTop.class).map(bound -> bound.value.getValue(context));
+                    bottomValue = entityManager.getComponentOf(entity, BoundBottom.class).map(bound -> bound.value.getValue(context));
+                    heightValue = entityManager.getComponentOf(entity, BoundHeight.class).map(bound -> bound.value.getValue(context));
+                    if (leftValue.isPresent() && rightValue.isPresent() && widthValue.isPresent()) {
+                        LOG.warn("Height must not be defined if both Top and Bottom are defined! Removing the height component...");
+                        entityManager.removeComponentFrom(entity, BoundWidth.class);
                     }
+
+                    bounds.minY = topValue.or(getAppliedValueIfBothPresent(bottomValue, heightValue, (bottom, height) -> bottom - height))
+                                          .orElse(parentBounds.minY);
+                    bounds.maxY = bottomValue.or(getAppliedValueIfBothPresent(topValue, heightValue, Integer::sum))
+                                             .orElse(parentBounds.maxY);
+                    bounds.height = bounds.maxY - bounds.minY;
+
 
                     int xOffset = parentBounds.minX;
                     int yOffset = parentBounds.minY;
@@ -145,5 +128,25 @@ public class UIElementBoundaryCalculationSystem implements ECSSystem {
                                      bounds.maxY += anchorOffset;
                                  });
                 });
+    }
+
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private static <T, R> Optional<R> applyIfBothPresent(
+            final Optional<T> a,
+            final Optional<T> b,
+            final BiFunction<T, T, R> operator
+    ) {
+        return (a.isPresent() && b.isPresent())
+                ? Optional.ofNullable(operator.apply(a.get(), b.get()))
+                : Optional.empty();
+    }
+
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private static <T, R> Supplier<Optional<R>> getAppliedValueIfBothPresent(
+            final Optional<T> a,
+            final Optional<T> b,
+            final BiFunction<T, T, R> operator
+    ) {
+        return () -> applyIfBothPresent(a, b, operator);
     }
 }
