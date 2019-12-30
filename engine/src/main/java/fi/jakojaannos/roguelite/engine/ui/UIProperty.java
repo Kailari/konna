@@ -8,11 +8,6 @@ import fi.jakojaannos.roguelite.engine.data.components.internal.ui.panel.PanelSp
 import fi.jakojaannos.roguelite.engine.data.components.ui.ElementBoundaries;
 import fi.jakojaannos.roguelite.engine.ui.internal.ComponentBackedUIProperty;
 
-import java.lang.reflect.Modifier;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.stream.Collectors;
-
 public interface UIProperty<T> {
     // Generic
     UIProperty<String> NAME = new ComponentBackedUIProperty<>("name", Name.class, name -> name.value);
@@ -30,23 +25,6 @@ public interface UIProperty<T> {
     // Label
     UIProperty<String> TEXT = new ComponentBackedUIProperty<>("text", Text.class, text -> text.text);
     UIProperty<Integer> FONT_SIZE = new ComponentBackedUIProperty<>("fontSize", FontSize.class, fontSize -> fontSize.value);
-
-    // "Black Magic"
-    @SuppressWarnings("rawtypes")
-    Collection<UIProperty> ALL = Arrays.stream(UIProperty.class.getFields())
-                                       .filter(field -> Modifier.isPublic(field.getModifiers())
-                                               && Modifier.isStatic(field.getModifiers())
-                                               && Modifier.isFinal(field.getModifiers()))
-                                       .filter(field -> UIProperty.class.isAssignableFrom(field.getType()))
-                                       .map(field -> {
-                                           try {
-                                               return field.get(null); // field.get(static)
-                                           } catch (IllegalAccessException e) {
-                                               throw new IllegalStateException("Could not get UI Property constant \"" + field.getName() + "\" value!");
-                                           }
-                                       })
-                                       .map(UIProperty.class::cast)
-                                       .collect(Collectors.toList());
 
     String getName();
 }

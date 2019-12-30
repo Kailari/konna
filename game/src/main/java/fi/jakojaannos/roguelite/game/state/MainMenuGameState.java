@@ -53,7 +53,7 @@ public class MainMenuGameState extends GameState {
                                                           .anchorX(ProportionValue.percentOf().parentWidth(0.5))
                                                           .anchorY(ProportionValue.percentOf().parentHeight(0.5))
                                                           .left(ProportionValue.percentOf().ownWidth(-0.5))
-                                                          .top(ProportionValue.absolute(0))
+                                                          .top(ProportionValue.percentOf().ownHeight(-0.5))
                                                           .text("Play")
                                                           .fontSize(24)))
                 .element("title_label",

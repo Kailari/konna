@@ -75,43 +75,53 @@ public class UIElementBoundaryCalculationSystem implements ECSSystem {
                     fontSizeLookup.put(entity, fontSize);
                     val context = new ProportionValue.Context(fontSize, parentBounds, bounds);
 
-                    Optional<Integer> leftValue, rightValue, widthValue;
-                    leftValue = entityManager.getComponentOf(entity, BoundLeft.class).map(bound -> bound.value.getValue(context));
-                    rightValue = entityManager.getComponentOf(entity, BoundRight.class).map(bound -> bound.value.getValue(context));
+                    Optional<Integer> widthValue, heightValue;
                     widthValue = entityManager.getComponentOf(entity, BoundWidth.class).map(bound -> bound.value.getValue(context));
+                    heightValue = entityManager.getComponentOf(entity, BoundHeight.class).map(bound -> bound.value.getValue(context));
+                    widthValue.ifPresent(bounds::setWidth);
+                    heightValue.ifPresent(bounds::setHeight);
+
+                    Optional<Integer> leftValue = entityManager.getComponentOf(entity, BoundLeft.class)
+                                                               .map(bound -> bound.value.getValue(context));
+                    Optional<Integer> rightValue = entityManager.getComponentOf(entity, BoundRight.class)
+                                                                .map(bound -> bound.value.getValue(context));
                     if (leftValue.isPresent() && rightValue.isPresent() && widthValue.isPresent()) {
                         LOG.warn("Width must not be defined if both Left and Right are defined! Removing the width component...");
                         entityManager.removeComponentFrom(entity, BoundWidth.class);
                     }
 
-                    bounds.minX = leftValue.or(getAppliedValueIfBothPresent(rightValue, widthValue, (right, width) -> right - width))
+                    bounds.minX = leftValue.map(value -> parentBounds.minX + value)
+                                           .or(getAppliedValueIfBothPresent(rightValue.map(value -> parentBounds.maxX - value),
+                                                                            widthValue,
+                                                                            (right, width) -> right - width))
                                            .orElse(parentBounds.minX);
-                    bounds.maxX = rightValue.or(getAppliedValueIfBothPresent(leftValue, widthValue, Integer::sum))
+                    bounds.maxX = rightValue.map(value -> parentBounds.maxX - value)
+                                            .or(getAppliedValueIfBothPresent(leftValue.map(value -> parentBounds.minX + value),
+                                                                             widthValue,
+                                                                             Integer::sum))
                                             .orElse(parentBounds.maxX);
                     bounds.width = bounds.maxX - bounds.minX;
 
-                    Optional<Integer> topValue, bottomValue, heightValue;
-                    topValue = entityManager.getComponentOf(entity, BoundTop.class).map(bound -> bound.value.getValue(context));
-                    bottomValue = entityManager.getComponentOf(entity, BoundBottom.class).map(bound -> bound.value.getValue(context));
-                    heightValue = entityManager.getComponentOf(entity, BoundHeight.class).map(bound -> bound.value.getValue(context));
-                    if (leftValue.isPresent() && rightValue.isPresent() && widthValue.isPresent()) {
+                    Optional<Integer> topValue = entityManager.getComponentOf(entity, BoundTop.class)
+                                                              .map(bound -> bound.value.getValue(context));
+                    Optional<Integer> bottomValue = entityManager.getComponentOf(entity, BoundBottom.class)
+                                                                 .map(bound -> bound.value.getValue(context));
+                    if (topValue.isPresent() && bottomValue.isPresent() && heightValue.isPresent()) {
                         LOG.warn("Height must not be defined if both Top and Bottom are defined! Removing the height component...");
-                        entityManager.removeComponentFrom(entity, BoundWidth.class);
+                        entityManager.removeComponentFrom(entity, BoundHeight.class);
                     }
 
-                    bounds.minY = topValue.or(getAppliedValueIfBothPresent(bottomValue, heightValue, (bottom, height) -> bottom - height))
+                    bounds.minY = topValue.map(value -> parentBounds.minY + value)
+                                          .or(getAppliedValueIfBothPresent(bottomValue.map(value -> parentBounds.maxY - value),
+                                                                           heightValue,
+                                                                           (bottom, height) -> bottom - height))
                                           .orElse(parentBounds.minY);
-                    bounds.maxY = bottomValue.or(getAppliedValueIfBothPresent(topValue, heightValue, Integer::sum))
+                    bounds.maxY = bottomValue.map(value -> parentBounds.maxY - value)
+                                             .or(getAppliedValueIfBothPresent(topValue.map(value -> parentBounds.minY + value),
+                                                                              heightValue,
+                                                                              Integer::sum))
                                              .orElse(parentBounds.maxY);
                     bounds.height = bounds.maxY - bounds.minY;
-
-
-                    int xOffset = parentBounds.minX;
-                    int yOffset = parentBounds.minY;
-                    bounds.minX += xOffset;
-                    bounds.maxX += xOffset;
-                    bounds.minY += yOffset;
-                    bounds.maxY += yOffset;
 
                     entityManager.getComponentOf(entity, BoundAnchorX.class)
                                  .map(boundAnchorX -> boundAnchorX.value)

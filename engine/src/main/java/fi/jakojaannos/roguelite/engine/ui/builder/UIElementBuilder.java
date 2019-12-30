@@ -28,16 +28,6 @@ public class UIElementBuilder<TBuilder extends UIElementBuilder<TBuilder>> {
         this.componentConsumer.accept(new ElementBoundaries());
     }
 
-    public TBuilder left(final ProportionValue value) {
-        this.componentConsumer.accept(new BoundLeft(value));
-        return (TBuilder) this;
-    }
-
-    public TBuilder width(final ProportionValue value) {
-        this.componentConsumer.accept(new BoundWidth(value));
-        return (TBuilder) this;
-    }
-
     public TBuilder anchorX(final ProportionValue value) {
         this.componentConsumer.accept(new BoundAnchorX(value));
         return (TBuilder) this;
@@ -48,13 +38,33 @@ public class UIElementBuilder<TBuilder extends UIElementBuilder<TBuilder>> {
         return (TBuilder) this;
     }
 
-    public TBuilder height(final ProportionValue value) {
-        this.componentConsumer.accept(new BoundHeight(value));
+    public TBuilder left(final ProportionValue value) {
+        this.componentConsumer.accept(new BoundLeft(value));
+        return (TBuilder) this;
+    }
+
+    public TBuilder right(final ProportionValue value) {
+        this.componentConsumer.accept(new BoundRight(value));
+        return (TBuilder) this;
+    }
+
+    public TBuilder width(final ProportionValue value) {
+        this.componentConsumer.accept(new BoundWidth(value));
         return (TBuilder) this;
     }
 
     public TBuilder top(final ProportionValue value) {
         this.componentConsumer.accept(new BoundTop(value));
+        return (TBuilder) this;
+    }
+
+    public TBuilder bottom(final ProportionValue value) {
+        this.componentConsumer.accept(new BoundBottom(value));
+        return (TBuilder) this;
+    }
+
+    public TBuilder height(final ProportionValue value) {
+        this.componentConsumer.accept(new BoundHeight(value));
         return (TBuilder) this;
     }
 
