@@ -17,4 +17,13 @@ public class ElementBoundaries implements Component {
     @Getter @Setter public int minX, maxX;
     @Getter @Setter public int minY, maxY;
     @Getter @Setter public int width, height;
+
+    public void invalidate() {
+        this.minX = ElementBoundaries.INVALID_VALUE;
+        this.maxX = ElementBoundaries.INVALID_VALUE;
+        this.minY = ElementBoundaries.INVALID_VALUE;
+        this.maxY = ElementBoundaries.INVALID_VALUE;
+        this.width = ElementBoundaries.INVALID_VALUE;
+        this.height = ElementBoundaries.INVALID_VALUE;
+    }
 }
