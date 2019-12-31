@@ -7,24 +7,32 @@ import fi.jakojaannos.roguelite.engine.data.components.internal.ui.panel.BorderS
 import fi.jakojaannos.roguelite.engine.data.components.internal.ui.panel.PanelSprite;
 import fi.jakojaannos.roguelite.engine.data.components.ui.ElementBoundaries;
 import fi.jakojaannos.roguelite.engine.ui.internal.ComponentBackedUIProperty;
+import fi.jakojaannos.roguelite.engine.ui.internal.InstanceMappedUIProperty;
+
+import java.util.Optional;
 
 public interface UIProperty<T> {
     // Generic
-    UIProperty<String> NAME = new ComponentBackedUIProperty<>("name", Name.class, name -> name.value);
-    UIProperty<Integer> MIN_X = new ComponentBackedUIProperty<>("minX", ElementBoundaries.class, bounds -> bounds.minX);
-    UIProperty<Integer> MAX_X = new ComponentBackedUIProperty<>("maxX", ElementBoundaries.class, bounds -> bounds.maxX);
-    UIProperty<Integer> MIN_Y = new ComponentBackedUIProperty<>("minY", ElementBoundaries.class, bounds -> bounds.minY);
-    UIProperty<Integer> MAX_Y = new ComponentBackedUIProperty<>("maxY", ElementBoundaries.class, bounds -> bounds.maxY);
-    UIProperty<Integer> WIDTH = new ComponentBackedUIProperty<>("width", ElementBoundaries.class, bounds -> bounds.width);
-    UIProperty<Integer> HEIGHT = new ComponentBackedUIProperty<>("height", ElementBoundaries.class, bounds -> bounds.height);
+    UIProperty<String> NAME = new ComponentBackedUIProperty<>("name", Name.class, Name::getValue, Name::setValue);
+    UIProperty<Boolean> HIDDEN = new InstanceMappedUIProperty<>("hidden", false);
+    UIProperty<Integer> MIN_X = new ComponentBackedUIProperty<>("minX", ElementBoundaries.class, ElementBoundaries::getMinX, ElementBoundaries::setMinX);
+    UIProperty<Integer> MAX_X = new ComponentBackedUIProperty<>("maxX", ElementBoundaries.class, ElementBoundaries::getMaxX, ElementBoundaries::setMaxX);
+    UIProperty<Integer> MIN_Y = new ComponentBackedUIProperty<>("minY", ElementBoundaries.class, ElementBoundaries::getMinY, ElementBoundaries::setMinY);
+    UIProperty<Integer> MAX_Y = new ComponentBackedUIProperty<>("maxY", ElementBoundaries.class, ElementBoundaries::getMaxY, ElementBoundaries::setMaxY);
+    UIProperty<Integer> WIDTH = new ComponentBackedUIProperty<>("width", ElementBoundaries.class, ElementBoundaries::getWidth, ElementBoundaries::setWidth);
+    UIProperty<Integer> HEIGHT = new ComponentBackedUIProperty<>("height", ElementBoundaries.class, ElementBoundaries::getHeight, ElementBoundaries::setHeight);
 
     // Panel
-    UIProperty<String> SPRITE = new ComponentBackedUIProperty<>("sprite", PanelSprite.class, panelSprite -> panelSprite.sprite);
-    UIProperty<Integer> BORDER_SIZE = new ComponentBackedUIProperty<>("borderSize", BorderSize.class, borderSize -> borderSize.value);
+    UIProperty<String> SPRITE = new ComponentBackedUIProperty<>("sprite", PanelSprite.class, PanelSprite::getSprite, PanelSprite::setSprite);
+    UIProperty<Integer> BORDER_SIZE = new ComponentBackedUIProperty<>("borderSize", BorderSize.class, BorderSize::getValue, BorderSize::setValue);
 
     // Label
-    UIProperty<String> TEXT = new ComponentBackedUIProperty<>("text", Text.class, text -> text.text);
-    UIProperty<Integer> FONT_SIZE = new ComponentBackedUIProperty<>("fontSize", FontSize.class, fontSize -> fontSize.value);
+    UIProperty<String> TEXT = new ComponentBackedUIProperty<>("text", Text.class, Text::getText, Text::setText);
+    UIProperty<Integer> FONT_SIZE = new ComponentBackedUIProperty<>("fontSize", FontSize.class, FontSize::getValue, FontSize::setValue);
 
     String getName();
+
+    Optional<T> getFor(UIElement uiElement);
+
+    void set(UIElement uiElement, T value);
 }

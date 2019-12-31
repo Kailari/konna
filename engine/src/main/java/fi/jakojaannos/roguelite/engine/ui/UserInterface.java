@@ -1,14 +1,15 @@
 package fi.jakojaannos.roguelite.engine.ui;
 
-import fi.jakojaannos.roguelite.engine.ecs.Resource;
 import fi.jakojaannos.roguelite.engine.ui.builder.UIBuilder;
+import fi.jakojaannos.roguelite.engine.ui.builder.UIElementBuilder;
 import org.joml.Vector2d;
 
 import java.util.Queue;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public interface UserInterface extends Resource {
+public interface UserInterface {
     static UIBuilder builder(
             final ViewportSizeProvider viewportSizeProvider,
             final TextSizeProvider fontSizeProvider
@@ -45,6 +46,12 @@ public interface UserInterface extends Resource {
 
         element.getChildren().forEach(child -> addIfMatching(property, matcher, streamBuilder, child));
     }
+
+    <T extends UIElementType<TBuilder>, TBuilder extends UIElementBuilder<TBuilder>> UIElement addElement(
+            final String name,
+            final T elementType,
+            final Consumer<TBuilder> factory
+    );
 
     interface ViewportSizeProvider {
         int getWidthInPixels();

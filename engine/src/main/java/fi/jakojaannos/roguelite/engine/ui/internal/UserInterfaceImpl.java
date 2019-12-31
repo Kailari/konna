@@ -11,16 +11,16 @@ import fi.jakojaannos.roguelite.engine.systems.ui.UIElementBoundaryCalculationSy
 import fi.jakojaannos.roguelite.engine.systems.ui.UIHierarchySystem;
 import fi.jakojaannos.roguelite.engine.systems.ui.UILabelAutomaticSizeCalculationSystem;
 import fi.jakojaannos.roguelite.engine.systems.ui.UISystemGroups;
-import fi.jakojaannos.roguelite.engine.ui.TextSizeProvider;
-import fi.jakojaannos.roguelite.engine.ui.UIElement;
-import fi.jakojaannos.roguelite.engine.ui.UIEvent;
-import fi.jakojaannos.roguelite.engine.ui.UserInterface;
+import fi.jakojaannos.roguelite.engine.ui.*;
+import fi.jakojaannos.roguelite.engine.ui.builder.UIBuilder;
+import fi.jakojaannos.roguelite.engine.ui.builder.UIElementBuilder;
 import lombok.Getter;
 import lombok.val;
 import org.joml.Vector2d;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 /**
@@ -54,6 +54,19 @@ public class UserInterfaceImpl implements UserInterface {
 
     public EntityManager getEntityManager() {
         return this.uiWorld.getEntityManager();
+    }
+
+    @Override
+    public <T extends UIElementType<TBuilder>, TBuilder extends UIElementBuilder<TBuilder>> UIElement addElement(
+            final String name, final T elementType, final Consumer<TBuilder> factory
+    ) {
+        val elementEntity = this.uiWorld.getEntityManager().createEntity();
+        val builder = elementType.getBuilder(this,
+                                             elementEntity,
+                                             name,
+                                             component -> this.uiWorld.getEntityManager().addComponentTo(elementEntity, component));
+        factory.accept(builder);
+        return this.uiWorld.getOrCreateResource(UIHierarchy.class).getOrCreateElementFor(elementEntity, this.uiWorld.getEntityManager());
     }
 
     @Override

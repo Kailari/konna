@@ -4,7 +4,7 @@ import fi.jakojaannos.roguelite.engine.ui.TextSizeProvider;
 import fi.jakojaannos.roguelite.engine.ui.UIElementType;
 import fi.jakojaannos.roguelite.engine.ui.UserInterface;
 import fi.jakojaannos.roguelite.engine.ui.internal.UserInterfaceImpl;
-import lombok.val;
+import org.joml.Vector2d;
 
 import java.util.function.Consumer;
 
@@ -23,17 +23,13 @@ public class UIBuilder {
             final T elementType,
             final Consumer<TBuilder> factory
     ) {
-        val elementEntity = this.userInterface.getEntityManager().createEntity();
-        val builder = elementType.getBuilder(this,
-                                             elementEntity,
-                                             name,
-                                             component -> this.userInterface.getEntityManager().addComponentTo(elementEntity, component));
-        factory.accept(builder);
+        this.userInterface.addElement(name, elementType, factory);
         return this;
     }
 
     public UserInterface build() {
         this.userInterface.getEntityManager().applyModifications();
+        this.userInterface.update(new Vector2d(-999.0), false);
         return this.userInterface;
     }
 }

@@ -2,7 +2,6 @@ package fi.jakojaannos.roguelite.engine.ui;
 
 import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.engine.ui.builder.UIBuilder;
 import fi.jakojaannos.roguelite.engine.ui.builder.UIElementBuilder;
 import fi.jakojaannos.roguelite.engine.ui.builder.UILabelBuilder;
 import fi.jakojaannos.roguelite.engine.ui.builder.UIPanelBuilder;
@@ -19,17 +18,17 @@ public final class UIElementType<TBuilder extends UIElementBuilder<TBuilder>> {
     private final BuilderFactory<TBuilder> builderFactory;
 
     public TBuilder getBuilder(
-            final UIBuilder uiBuilder,
+            final UserInterface userInterface,
             final Entity entity,
             final String name,
             final Consumer<Component> componentConsumer
     ) {
-        return this.builderFactory.apply(uiBuilder, entity, name, componentConsumer);
+        return this.builderFactory.apply(userInterface, entity, name, componentConsumer);
     }
 
     public interface BuilderFactory<TBuilder> {
         TBuilder apply(
-                UIBuilder uiBuilder,
+                UserInterface userInterface,
                 Entity entity,
                 String name,
                 Consumer<Component> componentConsumer

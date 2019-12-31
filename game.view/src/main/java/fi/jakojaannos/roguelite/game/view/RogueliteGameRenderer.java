@@ -56,7 +56,6 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
                                                                                  this.textRenderer)),
                 Map.entry(MainMenuGameState.class, new MainMenuGameStateRenderer(assetRoot,
                                                                                  this.camera,
-                                                                                 this.viewport,
                                                                                  this.textRenderer,
                                                                                  this.spriteRegistry))
         );

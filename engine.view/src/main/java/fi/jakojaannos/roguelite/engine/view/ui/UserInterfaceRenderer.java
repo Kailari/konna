@@ -29,6 +29,10 @@ public class UserInterfaceRenderer {
     }
 
     private void renderElement(final UIElement uiElement) {
+        if (uiElement.getProperty(UIProperty.HIDDEN)
+                     .orElse(false)) {
+            return;
+        }
         uiElement.getProperty(UIProperty.SPRITE)
                  .ifPresent(spriteId -> renderPanelBackground(uiElement, spriteId));
         uiElement.getProperty(UIProperty.TEXT)

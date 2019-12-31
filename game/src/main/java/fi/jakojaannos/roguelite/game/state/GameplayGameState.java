@@ -5,13 +5,12 @@ import fi.jakojaannos.roguelite.engine.ecs.SystemGroup;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
-import fi.jakojaannos.roguelite.engine.ui.TextSizeProvider;
-import fi.jakojaannos.roguelite.engine.ui.UserInterface;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.archetypes.PlayerArchetype;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import fi.jakojaannos.roguelite.game.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
+import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
 import fi.jakojaannos.roguelite.game.systems.*;
 import fi.jakojaannos.roguelite.game.systems.collision.*;
 import fi.jakojaannos.roguelite.game.world.WorldGenerator;
@@ -23,11 +22,9 @@ public class GameplayGameState extends GameState {
     public GameplayGameState(
             final long seed,
             final World world,
-            final TimeManager timeManager,
-            final UserInterface.ViewportSizeProvider viewportSizeProvider,
-            final TextSizeProvider textSizeProvider
+            final TimeManager timeManager
     ) {
-        super(world, timeManager, viewportSizeProvider, textSizeProvider);
+        super(world, timeManager);
 
         val entityManager = world.getEntityManager();
 
@@ -62,16 +59,10 @@ public class GameplayGameState extends GameState {
         layer.collisionEnabled = true;
         entityManager.addComponentTo(levelEntity, layer);
 
-        entityManager.applyModifications();
-    }
+        val sessionStats = world.getOrCreateResource(SessionStats.class);
+        sessionStats.endTimeStamp = sessionStats.beginTimeStamp = timeManager.getCurrentGameTime();
 
-    @Override
-    protected UserInterface createUserInterface(
-            final UserInterface.ViewportSizeProvider viewportSizeProvider,
-            final TextSizeProvider textSizeProvider
-    ) {
-        return UserInterface.builder(viewportSizeProvider, textSizeProvider)
-                            .build();
+        entityManager.applyModifications();
     }
 
     @Override
@@ -109,6 +100,7 @@ public class GameplayGameState extends GameState {
                 .withSystem(new CleanUpDeadPlayersSystem())
                 .withSystem(new RotatePlayerTowardsAttackTargetSystem())
                 .withSystem(new RestartGameSystem())
+                .withSystem(new UpdateSessionTimerSystem())
                 .build();
     }
 }

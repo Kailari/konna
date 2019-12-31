@@ -9,7 +9,7 @@ import fi.jakojaannos.roguelite.engine.input.ButtonInput;
 import fi.jakojaannos.roguelite.engine.input.InputAxis;
 import fi.jakojaannos.roguelite.engine.input.InputButton;
 import fi.jakojaannos.roguelite.engine.state.GameState;
-import fi.jakojaannos.roguelite.game.data.resources.GameStatus;
+import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
 import fi.jakojaannos.roguelite.game.data.resources.Mouse;
 import fi.jakojaannos.roguelite.game.state.GameplayGameState;
@@ -56,13 +56,12 @@ public class Roguelite extends GameBase {
         }
 
         state.tick();
+
         val stateManager = state.getWorld().getOrCreateResource(GameStateManager.class);
-        if (state.getWorld().getOrCreateResource(GameStatus.class).shouldRestart) {
+        if (state.getWorld().getOrCreateResource(SessionStats.class).shouldRestart) {
             stateManager.queueStateChange(new GameplayGameState(System.nanoTime(),
                                                                 World.createNew(EntityManager.createNew(256, 32)),
-                                                                getTime(),
-                                                                state.getUserInterface().getViewportSizeProvider(),
-                                                                state.getUserInterface().getTextSizeProvider()));
+                                                                getTime()));
         }
 
         return stateManager.getNextState(state);

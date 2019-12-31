@@ -25,7 +25,6 @@ public class UIHierarchy implements Resource {
     public void clear() {
         this.children.clear();
         this.parents.clear();
-        this.elements.clear();
         this.roots.clear();
     }
 
@@ -48,7 +47,7 @@ public class UIHierarchy implements Resource {
         }
     }
 
-    private EntityBackedUIElement getOrCreateElementFor(
+    public EntityBackedUIElement getOrCreateElementFor(
             final Entity entity,
             final EntityManager entityManager
     ) {

@@ -6,22 +6,23 @@ import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ui.ProportionValue;
 import fi.jakojaannos.roguelite.engine.ui.UIElementType;
+import fi.jakojaannos.roguelite.engine.ui.UserInterface;
 
 import java.util.function.Consumer;
 
 @SuppressWarnings("unchecked")
 public class UIElementBuilder<TBuilder extends UIElementBuilder<TBuilder>> {
-    private final UIBuilder uiBuilder;
+    private final UserInterface userInterface;
     private final Entity entity;
     protected final Consumer<Component> componentConsumer;
 
     public UIElementBuilder(
-            final UIBuilder uiBuilder,
+            final UserInterface userInterface,
             final Entity entity,
             final String name,
             final Consumer<Component> componentConsumer
     ) {
-        this.uiBuilder = uiBuilder;
+        this.userInterface = userInterface;
         this.entity = entity;
         this.componentConsumer = componentConsumer;
         this.componentConsumer.accept(new Name(name));
@@ -74,7 +75,7 @@ public class UIElementBuilder<TBuilder extends UIElementBuilder<TBuilder>> {
             final TChildElement childType,
             final Consumer<TChildBuilder> builderConsumer
     ) {
-        this.uiBuilder.element(name, childType, builderConsumer.andThen(builder -> builder.componentConsumer.accept(new Parent(this.entity))));
+        this.userInterface.addElement(name, childType, builderConsumer.andThen(builder -> builder.componentConsumer.accept(new Parent(this.entity))));
         return (TBuilder) this;
     }
 }

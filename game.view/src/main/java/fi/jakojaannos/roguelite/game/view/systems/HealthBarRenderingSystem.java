@@ -29,7 +29,7 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 public class HealthBarRenderingSystem implements ECSSystem, AutoCloseable {
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
-        requirements.tickBefore(RenderHUDSystem.class)
+        requirements.tickBefore(UpdateHUDSystem.class)
                     .tickAfter(LevelRenderingSystem.class)
                     .tickAfter(SpriteRenderingSystem.class)
                     .withComponent(Health.class)
