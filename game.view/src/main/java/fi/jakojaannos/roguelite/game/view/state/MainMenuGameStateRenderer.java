@@ -1,13 +1,14 @@
 package fi.jakojaannos.roguelite.game.view.state;
 
+import fi.jakojaannos.roguelite.engine.content.AssetRegistry;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.ui.ProportionValue;
 import fi.jakojaannos.roguelite.engine.ui.UIElementType;
 import fi.jakojaannos.roguelite.engine.ui.UserInterface;
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
-import fi.jakojaannos.roguelite.engine.view.content.FontRegistry;
-import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
+import fi.jakojaannos.roguelite.engine.view.sprite.Sprite;
+import fi.jakojaannos.roguelite.engine.view.text.Font;
 import fi.jakojaannos.roguelite.engine.view.text.TextRenderer;
 import fi.jakojaannos.roguelite.game.view.systems.UserInterfaceRenderingSystem;
 import lombok.val;
@@ -19,15 +20,15 @@ public class MainMenuGameStateRenderer extends GameStateRenderer {
             final Path assetRoot,
             final Camera camera,
             final TextRenderer textRenderer,
-            final SpriteRegistry spriteRegistry,
-            final FontRegistry fontRegistry,
+            final AssetRegistry<Sprite> spriteRegistry,
+            final AssetRegistry<Font> fontRegistry,
             final RenderingBackend backend
     ) {
         super(createDispatcher(assetRoot, createUserInterface(fontRegistry, camera.getViewport()), textRenderer, camera, spriteRegistry, fontRegistry, backend));
     }
 
     private static UserInterface createUserInterface(
-            final FontRegistry fontRegistry,
+            final AssetRegistry<Font> fontRegistry,
             final UserInterface.ViewportSizeProvider viewportSizeProvider
     ) {
         val font = fontRegistry.getByAssetName("fonts/VCR_OSD_MONO.ttf");
@@ -71,8 +72,8 @@ public class MainMenuGameStateRenderer extends GameStateRenderer {
             final UserInterface userInterface,
             final TextRenderer textRenderer,
             final Camera camera,
-            final SpriteRegistry spriteRegistry,
-            final FontRegistry fontRegistry,
+            final AssetRegistry<Sprite> spriteRegistry,
+            final AssetRegistry<Font> fontRegistry,
             final RenderingBackend backend
     ) {
         val builder = SystemDispatcher.builder()

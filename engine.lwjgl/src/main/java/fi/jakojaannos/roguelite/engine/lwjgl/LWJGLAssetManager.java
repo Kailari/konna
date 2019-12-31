@@ -1,0 +1,46 @@
+package fi.jakojaannos.roguelite.engine.lwjgl;
+
+import fi.jakojaannos.roguelite.engine.content.AssetManager;
+import fi.jakojaannos.roguelite.engine.content.AssetRegistry;
+import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLTexture;
+import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text.LWJGLFont;
+import fi.jakojaannos.roguelite.engine.view.content.FontRegistry;
+import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
+import fi.jakojaannos.roguelite.engine.view.content.TextureRegistry;
+import fi.jakojaannos.roguelite.engine.view.rendering.Texture;
+import fi.jakojaannos.roguelite.engine.view.sprite.Sprite;
+import fi.jakojaannos.roguelite.engine.view.text.Font;
+import lombok.val;
+
+import java.nio.file.Path;
+import java.util.Map;
+
+public class LWJGLAssetManager implements AssetManager {
+    private final Map<Class<?>, AssetRegistry<?>> registries;
+
+    public LWJGLAssetManager(final Path assetRoot) {
+        val textureRegistry = new TextureRegistry(assetRoot, LWJGLTexture::new);
+        this.registries = Map.ofEntries(
+                Map.entry(Texture.class, textureRegistry),
+                Map.entry(Sprite.class, new SpriteRegistry(assetRoot, textureRegistry)),
+                Map.entry(Font.class, new FontRegistry(assetRoot, LWJGLFont::new))
+        );
+    }
+
+    @Override
+    public <TAsset> AssetRegistry<TAsset> getAssetRegistry(final Class<TAsset> assetClass) {
+        if (!this.registries.containsKey(assetClass)) {
+            throw new IllegalStateException("Unknown asset type: " + assetClass.getSimpleName());
+        }
+
+        //noinspection unchecked
+        return (AssetRegistry<TAsset>) this.registries.get(assetClass);
+    }
+
+    @Override
+    public void close() {
+        this.registries.values().forEach(assetRegistry -> {
+            try { assetRegistry.close(); } catch (Exception ignored) {}
+        });
+    }
+}

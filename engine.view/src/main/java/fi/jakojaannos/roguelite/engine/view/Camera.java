@@ -1,5 +1,6 @@
 package fi.jakojaannos.roguelite.engine.view;
 
+import fi.jakojaannos.roguelite.engine.state.GameState;
 import lombok.Getter;
 import org.joml.Vector2d;
 
@@ -42,4 +43,6 @@ public abstract class Camera {
     public abstract double getVisibleAreaWidth();
 
     public abstract double getVisibleAreaHeight();
+
+    public abstract void updateConfigurationFromState(GameState state);
 }

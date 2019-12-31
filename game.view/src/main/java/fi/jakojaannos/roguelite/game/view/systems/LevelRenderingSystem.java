@@ -1,14 +1,15 @@
 package fi.jakojaannos.roguelite.game.view.systems;
 
+import fi.jakojaannos.roguelite.engine.content.AssetRegistry;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLSpriteBatch;
 import fi.jakojaannos.roguelite.engine.view.Camera;
-import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
+import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatch;
+import fi.jakojaannos.roguelite.engine.view.sprite.Sprite;
 import fi.jakojaannos.roguelite.game.data.components.TileMapLayer;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
 import lombok.val;
@@ -23,17 +24,18 @@ public class LevelRenderingSystem implements ECSSystem {
     }
 
     private final Camera camera;
-    private final SpriteRegistry spriteRegistry;
+    private final AssetRegistry<Sprite> spriteRegistry;
     private final SpriteBatch batch;
 
     public LevelRenderingSystem(
             final Path assetRoot,
             final Camera camera,
-            final SpriteRegistry spritesRegistry
+            final AssetRegistry<Sprite> spritesRegistry,
+            final RenderingBackend backend
     ) {
         this.camera = camera;
         this.spriteRegistry = spritesRegistry;
-        this.batch = new LWJGLSpriteBatch(assetRoot, "sprite");
+        this.batch = backend.createSpriteBatch(assetRoot, "sprite");
     }
 
     @Override

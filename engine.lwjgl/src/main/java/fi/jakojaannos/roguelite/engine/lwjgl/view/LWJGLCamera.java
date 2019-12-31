@@ -1,8 +1,8 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view;
 
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
-import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.UniformBufferObjectIndices;
+import fi.jakojaannos.roguelite.engine.lwjgl.UniformBufferObjectIndices;
+import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
 import lombok.Getter;
@@ -62,8 +62,8 @@ public class LWJGLCamera extends Camera implements AutoCloseable {
     }
 
     protected void refreshTargetScreenSizeInUnits(
-            double targetScreenSizeInUnits,
-            boolean targetSizeIsRespectiveToMinorAxis
+            final double targetScreenSizeInUnits,
+            final boolean targetSizeIsRespectiveToMinorAxis
     ) {
         if (this.targetScreenSizeInUnits != targetScreenSizeInUnits || this.targetSizeIsRespectiveToMinorAxis != targetSizeIsRespectiveToMinorAxis) {
             this.projectionMatrixDirty = true;
@@ -130,14 +130,18 @@ public class LWJGLCamera extends Camera implements AutoCloseable {
         useWorldCoordinates();
     }
 
-    public void updateConfigurationFromState(final World world) {
-        val camBounds = world.getOrCreateResource(CameraProperties.class);
-        refreshTargetScreenSizeInUnits(camBounds.targetViewportSizeInWorldUnits, camBounds.targetViewportSizeRespectiveToMinorAxis);
+    @Override
+    public void updateConfigurationFromState(final GameState state) {
+        val world = state.getWorld();
+        val cameraProperties = world.getOrCreateResource(CameraProperties.class);
+        refreshTargetScreenSizeInUnits(cameraProperties.targetViewportSizeInWorldUnits, cameraProperties.targetViewportSizeRespectiveToMinorAxis);
 
         // FIXME: THIS BREAKS MVC ENCAPSULATION. Technically, we should queue task on the controller
         //  to make the change as we NEVER should mutate state on the view.
-        camBounds.viewportWidthInWorldUnits = getVisibleAreaWidth();
-        camBounds.viewportHeightInWorldUnits = getVisibleAreaHeight();
+        cameraProperties.viewportWidthInWorldUnits = getVisibleAreaWidth();
+        cameraProperties.viewportHeightInWorldUnits = getVisibleAreaHeight();
+
+        refreshMatricesIfDirty();
     }
 
     private void refreshUniforms() {

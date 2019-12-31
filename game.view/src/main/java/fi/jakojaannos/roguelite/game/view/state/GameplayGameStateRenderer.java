@@ -1,5 +1,6 @@
 package fi.jakojaannos.roguelite.game.view.state;
 
+import fi.jakojaannos.roguelite.engine.content.AssetRegistry;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.ui.UIElementType;
 import fi.jakojaannos.roguelite.engine.ui.UserInterface;
@@ -7,8 +8,8 @@ import fi.jakojaannos.roguelite.engine.ui.builder.UILabelBuilder;
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
-import fi.jakojaannos.roguelite.engine.view.content.FontRegistry;
-import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
+import fi.jakojaannos.roguelite.engine.view.sprite.Sprite;
+import fi.jakojaannos.roguelite.engine.view.text.Font;
 import fi.jakojaannos.roguelite.engine.view.text.TextRenderer;
 import fi.jakojaannos.roguelite.game.DebugConfig;
 import fi.jakojaannos.roguelite.game.view.systems.*;
@@ -26,8 +27,8 @@ public class GameplayGameStateRenderer extends GameStateRenderer {
             final Path assetRoot,
             final Camera camera,
             final Viewport viewport,
-            final SpriteRegistry spriteRegistry,
-            final FontRegistry fontRegistry,
+            final AssetRegistry<Sprite> spriteRegistry,
+            final AssetRegistry<Font> fontRegistry,
             final TextRenderer textRenderer,
             final RenderingBackend backend
     ) {
@@ -46,14 +47,14 @@ public class GameplayGameStateRenderer extends GameStateRenderer {
             final UserInterface userInterface,
             final Camera camera,
             final Viewport viewport,
-            final SpriteRegistry spriteRegistry,
-            final FontRegistry fontRegistry,
+            final AssetRegistry<Sprite> spriteRegistry,
+            final AssetRegistry<Font> fontRegistry,
             final TextRenderer textRenderer,
             final RenderingBackend backend
     ) {
         val font = fontRegistry.getByAssetName("fonts/VCR_OSD_MONO.ttf");
         val builder = SystemDispatcher.builder()
-                                      .withSystem(new LevelRenderingSystem(assetRoot, camera, spriteRegistry))
+                                      .withSystem(new LevelRenderingSystem(assetRoot, camera, spriteRegistry, backend))
                                       .withSystem(new SpriteRenderingSystem(assetRoot, camera, spriteRegistry, backend))
                                       .withSystem(new UserInterfaceRenderingSystem(camera,
                                                                                    fontRegistry,
@@ -75,7 +76,7 @@ public class GameplayGameStateRenderer extends GameStateRenderer {
 
     private static UserInterface createUserInterface(
             final Viewport viewport,
-            final FontRegistry fontRegistry
+            final AssetRegistry<Font> fontRegistry
     ) {
         val font = fontRegistry.getByAssetName("fonts/VCR_OSD_MONO.ttf");
         return UserInterface.builder(viewport, font)

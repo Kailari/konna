@@ -1,12 +1,12 @@
 package fi.jakojaannos.roguelite.game.view.systems;
 
+import fi.jakojaannos.roguelite.engine.content.AssetRegistry;
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
-import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatch;
 import fi.jakojaannos.roguelite.engine.view.rendering.Texture;
 import fi.jakojaannos.roguelite.engine.view.sprite.Sprite;
@@ -37,13 +37,13 @@ public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
     }
 
     private final Camera camera;
-    private final SpriteRegistry spriteRegistry;
+    private final AssetRegistry<Sprite> spriteRegistry;
     private final SpriteBatch spriteBatch;
 
     public SpriteRenderingSystem(
             final Path assetRoot,
             final Camera camera,
-            final SpriteRegistry spriteRegistry,
+            final AssetRegistry<Sprite> spriteRegistry,
             final RenderingBackend backend
     ) {
         this.camera = camera;

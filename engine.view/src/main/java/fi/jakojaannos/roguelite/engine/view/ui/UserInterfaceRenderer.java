@@ -1,15 +1,13 @@
 package fi.jakojaannos.roguelite.engine.view.ui;
 
+import fi.jakojaannos.roguelite.engine.content.AssetRegistry;
 import fi.jakojaannos.roguelite.engine.ui.UIElement;
 import fi.jakojaannos.roguelite.engine.ui.UIProperty;
 import fi.jakojaannos.roguelite.engine.ui.UserInterface;
-import fi.jakojaannos.roguelite.engine.view.content.FontRegistry;
-import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatch;
 import fi.jakojaannos.roguelite.engine.view.sprite.Sprite;
 import fi.jakojaannos.roguelite.engine.view.text.Font;
 import fi.jakojaannos.roguelite.engine.view.text.TextRenderer;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
@@ -19,15 +17,15 @@ public class UserInterfaceRenderer {
     private static final int ROOT_FONT_SIZE = 12;
 
     private final SpriteBatch spriteBatch;
-    private final SpriteRegistry spriteRegistry;
+    private final AssetRegistry<Sprite> spriteRegistry;
     private final TextRenderer textRenderer;
     private final Font font;
 
     public UserInterfaceRenderer(
             final SpriteBatch spriteBatch,
-            final SpriteRegistry spriteRegistry,
+            final AssetRegistry<Sprite> spriteRegistry,
             final TextRenderer textRenderer,
-            final FontRegistry fontRegistry
+            final AssetRegistry<Font> fontRegistry
     ) {
         this.spriteBatch = spriteBatch;
         this.spriteRegistry = spriteRegistry;

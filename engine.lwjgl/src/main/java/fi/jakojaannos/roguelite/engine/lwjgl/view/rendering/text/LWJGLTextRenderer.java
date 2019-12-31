@@ -1,7 +1,7 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text;
 
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.UniformBufferObjectIndices;
+import fi.jakojaannos.roguelite.engine.lwjgl.UniformBufferObjectIndices;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.shader.ShaderProgram;
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.text.Font;
@@ -27,7 +27,7 @@ import static org.lwjgl.stb.STBTruetype.stbtt_GetCodepointKernAdvance;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 @Slf4j
-public class LWJGLTextRenderer implements AutoCloseable, TextRenderer {
+public class LWJGLTextRenderer implements TextRenderer {
     private static final int SIZE_IN_BYTES = (2 + 2 + 3) * 4;
 
     private final ShaderProgram shader;

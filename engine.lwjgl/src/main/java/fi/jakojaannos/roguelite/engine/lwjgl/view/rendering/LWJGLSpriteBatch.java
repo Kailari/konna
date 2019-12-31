@@ -1,5 +1,6 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering;
 
+import fi.jakojaannos.roguelite.engine.lwjgl.UniformBufferObjectIndices;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.mesh.Mesh;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.mesh.VertexAttribute;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.mesh.VertexFormat;

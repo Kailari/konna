@@ -3,9 +3,10 @@ package fi.jakojaannos.roguelite.game.app;
 import fi.jakojaannos.roguelite.engine.Game;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLAssetManager;
 import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLGameRunner;
-import fi.jakojaannos.roguelite.engine.lwjgl.input.LWJGLInputProvider;
 import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLRenderingBackend;
+import fi.jakojaannos.roguelite.engine.lwjgl.input.LWJGLInputProvider;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.game.DebugConfig;
 import fi.jakojaannos.roguelite.game.Roguelite;
@@ -34,9 +35,10 @@ public class RogueliteApplication {
 
     public void run(final Path assetRoot) {
         try (val runner = new LWJGLGameRunner<Roguelite, LWJGLInputProvider>(this.windowWidth, this.windowHeight);
+             val assetManager = new LWJGLAssetManager(assetRoot);
              val game = new Roguelite()
         ) {
-            try (val renderer = new RogueliteGameRenderer(assetRoot, runner.getWindow(), new LWJGLRenderingBackend())) {
+            try (val renderer = new RogueliteGameRenderer(assetRoot, runner.getWindow(), new LWJGLRenderingBackend(), assetManager)) {
                 val inputProvider = new LWJGLInputProvider(runner.getWindow(), this.enableForceClose);
                 runner.run(() -> createInitialState(game), game, inputProvider, renderer::render);
             }

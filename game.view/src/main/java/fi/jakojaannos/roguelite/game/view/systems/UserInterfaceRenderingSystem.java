@@ -1,14 +1,15 @@
 package fi.jakojaannos.roguelite.game.view.systems;
 
+import fi.jakojaannos.roguelite.engine.content.AssetRegistry;
 import fi.jakojaannos.roguelite.engine.data.resources.GameStateManager;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.*;
 import fi.jakojaannos.roguelite.engine.ui.UIEvent;
 import fi.jakojaannos.roguelite.engine.ui.UserInterface;
 import fi.jakojaannos.roguelite.engine.view.Camera;
-import fi.jakojaannos.roguelite.engine.view.content.FontRegistry;
-import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatch;
+import fi.jakojaannos.roguelite.engine.view.sprite.Sprite;
+import fi.jakojaannos.roguelite.engine.view.text.Font;
 import fi.jakojaannos.roguelite.engine.view.text.TextRenderer;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterfaceRenderer;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
@@ -33,8 +34,8 @@ public class UserInterfaceRenderingSystem implements ECSSystem {
 
     public UserInterfaceRenderingSystem(
             final Camera camera,
-            final FontRegistry fontRegistry,
-            final SpriteRegistry spriteRegistry,
+            final AssetRegistry<Font> fontRegistry,
+            final AssetRegistry<Sprite> spriteRegistry,
             final SpriteBatch spriteBatch,
             final TextRenderer textRenderer,
             final UserInterface userInterface

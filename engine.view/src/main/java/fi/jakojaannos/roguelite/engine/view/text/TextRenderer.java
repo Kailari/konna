@@ -1,6 +1,6 @@
 package fi.jakojaannos.roguelite.engine.view.text;
 
-public interface TextRenderer {
+public interface TextRenderer extends AutoCloseable {
     void drawOnScreen(
             double x,
             double y,
