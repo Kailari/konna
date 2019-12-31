@@ -154,6 +154,54 @@ public class UIElementBoundaryCalculationSystemTest_SelfRelativeProportions {
     }
 
     @Test
+    void buildingUIElementWithLeftRelativeToOwnWidthDoesNotThrow() {
+        UserInterface userInterface = uiBuilder
+                .element("a",
+                         UIElementType.PANEL,
+                         builder -> builder.width(absolute(200))
+                                           .left(percentOf().ownWidth(0.5)))
+                .build();
+
+        assertDoesNotThrow(() -> userInterface.update(new Vector2d(0), false));
+    }
+
+    @Test
+    void buildingUIElementWithRightRelativeToOwnWidthDoesNotThrow() {
+        UserInterface userInterface = uiBuilder
+                .element("a",
+                         UIElementType.PANEL,
+                         builder -> builder.width(absolute(200))
+                                           .right(percentOf().ownWidth(0.5)))
+                .build();
+
+        assertDoesNotThrow(() -> userInterface.update(new Vector2d(0), false));
+    }
+
+    @Test
+    void buildingUIElementWithTopRelativeToOwnHeightDoesNotThrow() {
+        UserInterface userInterface = uiBuilder
+                .element("a",
+                         UIElementType.PANEL,
+                         builder -> builder.height(absolute(200))
+                                           .top(percentOf().ownWidth(0.5)))
+                .build();
+
+        assertDoesNotThrow(() -> userInterface.update(new Vector2d(0), false));
+    }
+
+    @Test
+    void buildingUIElementWithBottomRelativeToOwnHeightDoesNotThrow() {
+        UserInterface userInterface = uiBuilder
+                .element("a",
+                         UIElementType.PANEL,
+                         builder -> builder.height(absolute(200))
+                                           .bottom(percentOf().ownWidth(0.5)))
+                .build();
+
+        assertDoesNotThrow(() -> userInterface.update(new Vector2d(0), false));
+    }
+
+    @Test
     void buildingUIElementWithLeftAndRightRelativeToOwnHeightWithoutSettingHeightDoesNotThrow() {
         UserInterface userInterface = uiBuilder
                 .element("a",
