@@ -2,6 +2,7 @@ package fi.jakojaannos.roguelite.game.test.global;
 
 import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.game.Roguelite;
@@ -18,11 +19,13 @@ import java.util.Queue;
 public class GlobalState {
     public static Roguelite game;
     public static GameState state;
+    public static Events events;
     public static Queue<InputEvent> inputEvents;
 
     @Before
     public void before() {
         game = new Roguelite();
+        events = new Events();
         inputEvents = new ArrayDeque<>();
     }
 
@@ -36,7 +39,8 @@ public class GlobalState {
     }
 
     public static void simulateTick() {
-        game.tick(state, inputEvents);
+        inputEvents.forEach(events.getInput()::fire);
+        game.tick(state, events);
         game.updateTime();
         inputEvents.clear();
     }

@@ -85,7 +85,6 @@ public abstract class GameRunner<
             }
 
             val partialTickAlpha = accumulator / (double) game.getTime().getTimeStep();
-            renderer.render(state, partialTickAlpha, events);
             presentGameState(state, renderer, partialTickAlpha, events);
             frames++;
         }

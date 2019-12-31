@@ -73,7 +73,6 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
     public void render(final GameState state, final double partialTickAlpha, final Events events) {
         // Make sure that the camera configuration matches the current state
         this.camera.updateConfigurationFromState(state);
-        this.camera.refreshMatricesIfDirty();
 
         // Snap camera to active camera
         val world = state.getWorld();
@@ -82,6 +81,7 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
                 .flatMap(cameraEntity -> entityManager.getComponentOf(cameraEntity, Camera.class))
                 .ifPresent(camera -> this.camera.setPosition(camera.pos.x - this.camera.getVisibleAreaWidth() / 2.0,
                                                              camera.pos.y - this.camera.getVisibleAreaHeight() / 2.0));
+        this.camera.refreshMatricesIfDirty();
 
         Optional.ofNullable(this.stateRenderers.get(state.getClass()))
                 .ifPresent(renderer -> renderer.render(state.getWorld()));

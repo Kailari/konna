@@ -2,6 +2,7 @@ package fi.jakojaannos.roguelite.game;
 
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.input.*;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.engine.ui.TextSizeProvider;
@@ -9,14 +10,10 @@ import fi.jakojaannos.roguelite.engine.ui.UserInterface;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
 import fi.jakojaannos.roguelite.game.data.resources.Mouse;
 import fi.jakojaannos.roguelite.game.state.GameplayGameState;
-import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-
-import java.util.ArrayDeque;
-import java.util.Queue;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
@@ -37,7 +34,7 @@ class RogueliteTest {
 
     @Test
     void inputsAreFalseByDefault() {
-        roguelite.tick(state, new ArrayDeque<>());
+        roguelite.tick(state, new Events());
 
         Inputs inputs = state.getWorld().getOrCreateResource(Inputs.class);
         assertFalse(inputs.inputLeft);
@@ -61,8 +58,8 @@ class RogueliteTest {
             boolean up,
             boolean down
     ) {
-        Queue<InputEvent> events = new ArrayDeque<>();
-        events.offer(new InputEvent(new ButtonInput(InputButton.Keyboard.valueOf(key), ButtonInput.Action.PRESS)));
+        Events events = new Events();
+        events.getInput().fire(new InputEvent(new ButtonInput(InputButton.Keyboard.valueOf(key), ButtonInput.Action.PRESS)));
 
         roguelite.tick(state, events);
 
@@ -92,8 +89,8 @@ class RogueliteTest {
             mouse.pos.y = initial;
         }
 
-        Queue<InputEvent> events = new ArrayDeque<>();
-        events.offer(new InputEvent(new AxialInput(axisPos, newPos)));
+        Events events = new Events();
+        events.getInput().fire(new InputEvent(new AxialInput(axisPos, newPos)));
 
         roguelite.tick(state, events);
 
@@ -102,8 +99,8 @@ class RogueliteTest {
 
     @Test
     void mouseButtonEventsUpdateGameState() {
-        Queue<InputEvent> events = new ArrayDeque<>();
-        events.offer(ButtonInput.pressed(InputButton.Mouse.button(0)));
+        Events events = new Events();
+        events.getInput().fire(ButtonInput.pressed(InputButton.Mouse.button(0)));
 
         roguelite.tick(state, events);
 
@@ -113,11 +110,11 @@ class RogueliteTest {
 
     @Test
     void mouseButtonEventsDoNotUpdateGameStateIfButtonIsWrong() {
-        Queue<InputEvent> events = new ArrayDeque<>();
-        events.offer(ButtonInput.pressed(InputButton.Mouse.button(1)));
-        events.offer(ButtonInput.pressed(InputButton.Mouse.button(2)));
-        events.offer(ButtonInput.pressed(InputButton.Mouse.button(3)));
-        events.offer(ButtonInput.pressed(InputButton.Mouse.button(4)));
+        Events events = new Events();
+        events.getInput().fire(ButtonInput.pressed(InputButton.Mouse.button(1)));
+        events.getInput().fire(ButtonInput.pressed(InputButton.Mouse.button(2)));
+        events.getInput().fire(ButtonInput.pressed(InputButton.Mouse.button(3)));
+        events.getInput().fire(ButtonInput.pressed(InputButton.Mouse.button(4)));
 
         roguelite.tick(state, events);
 
@@ -127,14 +124,14 @@ class RogueliteTest {
 
     @Test
     void releasingMouseButtonDisablesInput() {
-        Queue<InputEvent> events = new ArrayDeque<>();
+        Events events = new Events();
 
         // Pressed
-        events.offer(ButtonInput.pressed(InputButton.Mouse.button(0)));
+        events.getInput().fire(ButtonInput.pressed(InputButton.Mouse.button(0)));
         roguelite.tick(state, events);
 
         // Released
-        events.offer(ButtonInput.released(InputButton.Mouse.button(0)));
+        events.getInput().fire(ButtonInput.released(InputButton.Mouse.button(0)));
         roguelite.tick(state, events);
 
         Inputs inputs = state.getWorld().getOrCreateResource(Inputs.class);
