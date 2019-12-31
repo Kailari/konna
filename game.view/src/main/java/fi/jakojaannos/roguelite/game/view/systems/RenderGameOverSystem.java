@@ -8,6 +8,7 @@ import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text.LWJGLTextRenderer;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.text.Font;
+import fi.jakojaannos.roguelite.engine.view.text.TextRenderer;
 import fi.jakojaannos.roguelite.game.data.components.PlayerTag;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -24,7 +25,7 @@ public class RenderGameOverSystem implements ECSSystem {
                     .withComponent(PlayerTag.class);
     }
 
-    private final LWJGLTextRenderer textRenderer;
+    private final TextRenderer textRenderer;
     private final LWJGLCamera camera;
     private final Viewport viewport;
     private final Font font;

@@ -1,11 +1,12 @@
 package fi.jakojaannos.roguelite.game.systems;
 
+import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
+import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.game.data.components.Camera;
+import fi.jakojaannos.roguelite.game.data.components.CameraFollowTargetTag;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import org.joml.Vector2d;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +22,7 @@ class CameraControlSystemTest {
     private CameraControlSystem system;
     private World world;
     private Entity cameraEntity;
-    private Camera camera;
+    private Transform cameraTransform;
 
     @BeforeEach
     void beforeEach() {
@@ -33,32 +34,32 @@ class CameraControlSystemTest {
         world.createResource(Time.class, time);
 
         cameraEntity = world.getEntityManager().createEntity();
-        camera = new Camera();
-        world.getEntityManager().addComponentTo(cameraEntity, camera);
+        world.getEntityManager().addComponentTo(cameraEntity, cameraTransform = new Transform());
 
+        world.getOrCreateResource(CameraProperties.class).cameraEntity = cameraEntity;
         world.getEntityManager().applyModifications();
     }
 
     @Test
-    void doesNothingIfFollowTargetIsNotSet() {
-        camera.pos.set(42, 69);
-        system.tick(Stream.of(cameraEntity), world);
+    void doesNothingIfFollowTargetDoesNotExist() {
+        cameraTransform.position.set(42, 69);
+        system.tick(Stream.of(), world);
 
-        assertEquals(new Vector2d(42, 69), camera.pos);
+        assertEquals(new Vector2d(42, 69), cameraTransform.position);
     }
 
     @Test
     void isRelativelyCloseToTargetAfterFiveSecondsWhenFollowingFromAfar() {
         Entity target = world.getEntityManager().createEntity();
         world.getEntityManager().addComponentTo(target, new Transform(10, 20));
-        camera.pos.set(42000, 69000);
-        camera.followTarget = target;
+        world.getEntityManager().addComponentTo(target, new CameraFollowTargetTag());
+        cameraTransform.position.set(42000, 69000);
         world.getEntityManager().applyModifications();
 
         for (int i = 0; i < 5 / 0.02; ++i) {
-            system.tick(Stream.of(cameraEntity), world);
+            system.tick(Stream.of(target), world);
         }
 
-        assertTrue(camera.pos.distance(10, 20) < 24.0);
+        assertTrue(cameraTransform.position.distance(10, 20) < 24.0);
     }
 }

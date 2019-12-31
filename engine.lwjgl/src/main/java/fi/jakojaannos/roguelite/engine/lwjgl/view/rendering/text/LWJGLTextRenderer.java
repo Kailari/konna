@@ -3,6 +3,7 @@ package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.UniformBufferObjectIndices;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.shader.ShaderProgram;
+import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.text.Font;
 import fi.jakojaannos.roguelite.engine.view.text.TextRenderer;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +31,7 @@ public class LWJGLTextRenderer implements AutoCloseable, TextRenderer {
     private static final int SIZE_IN_BYTES = (2 + 2 + 3) * 4;
 
     private final ShaderProgram shader;
-    private final LWJGLCamera camera;
+    private final Camera camera;
     private final int uniformModelMatrix;
 
     private final ByteBuffer vertexDataBuffer;
@@ -40,7 +41,7 @@ public class LWJGLTextRenderer implements AutoCloseable, TextRenderer {
 
     public LWJGLTextRenderer(
             final Path assetRoot,
-            final LWJGLCamera camera
+            final Camera camera
     ) {
         this.camera = camera;
 
@@ -102,7 +103,9 @@ public class LWJGLTextRenderer implements AutoCloseable, TextRenderer {
         this.camera.useWorldCoordinates();
         this.shader.use();
 
-        val scaleFactor = 1.0 / this.camera.getTargetScreenSizeInUnits();
+        // FIXME: Remove cast by moving screen unit size handling somewhere more sensible or
+        //  abstracting it to something more generic
+        val scaleFactor = 1.0 / ((LWJGLCamera) this.camera).getTargetScreenSizeInUnits();
         this.shader.setUniformMat4x4(this.uniformModelMatrix, new Matrix4f().identity()
                                                                             .scale((float) scaleFactor,
                                                                                    (float) scaleFactor,

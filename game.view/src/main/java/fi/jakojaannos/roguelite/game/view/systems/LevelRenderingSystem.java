@@ -1,16 +1,16 @@
 package fi.jakojaannos.roguelite.game.view.systems;
 
+import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLSpriteBatch;
+import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatch;
-import fi.jakojaannos.roguelite.game.data.components.Camera;
 import fi.jakojaannos.roguelite.game.data.components.TileMapLayer;
-import fi.jakojaannos.roguelite.game.data.resources.CameraProperties;
+import fi.jakojaannos.roguelite.game.data.components.Transform;
 import lombok.val;
 
 import java.nio.file.Path;
@@ -22,17 +22,17 @@ public class LevelRenderingSystem implements ECSSystem {
         requirements.withComponent(TileMapLayer.class);
     }
 
-    private final LWJGLCamera camera;
+    private final Camera camera;
     private final SpriteRegistry spriteRegistry;
     private final SpriteBatch batch;
 
     public LevelRenderingSystem(
             final Path assetRoot,
-            final LWJGLCamera camera,
+            final Camera camera,
             final SpriteRegistry spritesRegistry
     ) {
         this.camera = camera;
-        spriteRegistry = spritesRegistry;
+        this.spriteRegistry = spritesRegistry;
         this.batch = new LWJGLSpriteBatch(assetRoot, "sprite");
     }
 
@@ -41,13 +41,13 @@ public class LevelRenderingSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
-        val camera = world.getEntityManager()
-                          .getComponentOf(world.getOrCreateResource(CameraProperties.class).cameraEntity,
-                                          Camera.class)
-                          .orElseThrow();
+        val cameraTransform = world.getEntityManager()
+                                   .getComponentOf(world.getOrCreateResource(CameraProperties.class).cameraEntity,
+                                                   Transform.class)
+                                   .orElseThrow();
 
-        val regionX = (int) Math.floor(camera.pos.x - this.camera.getVisibleAreaWidth() / 2.0);
-        val regionY = (int) Math.floor(camera.pos.y - this.camera.getVisibleAreaHeight() / 2.0);
+        val regionX = (int) Math.floor(cameraTransform.position.x - this.camera.getVisibleAreaWidth() / 2.0);
+        val regionY = (int) Math.floor(cameraTransform.position.y - this.camera.getVisibleAreaHeight() / 2.0);
         val regionW = (int) Math.ceil(this.camera.getVisibleAreaWidth()) + 1;
         val regionH = (int) Math.ceil(this.camera.getVisibleAreaHeight()) + 1;
 

@@ -5,8 +5,6 @@ import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.input.*;
 import fi.jakojaannos.roguelite.engine.state.GameState;
-import fi.jakojaannos.roguelite.engine.ui.TextSizeProvider;
-import fi.jakojaannos.roguelite.engine.ui.UserInterface;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
 import fi.jakojaannos.roguelite.game.data.resources.Mouse;
 import fi.jakojaannos.roguelite.game.state.GameplayGameState;
@@ -16,7 +14,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
 
 class RogueliteTest {
     private Roguelite roguelite;
@@ -27,9 +24,7 @@ class RogueliteTest {
         roguelite = new Roguelite();
         state = new GameplayGameState(6969,
                                       World.createNew(EntityManager.createNew(256, 32)),
-                                      roguelite.getTime(),
-                                      mock(UserInterface.ViewportSizeProvider.class),
-                                      mock(TextSizeProvider.class));
+                                      roguelite.getTime());
     }
 
     @Test

@@ -7,6 +7,10 @@ public interface Window {
         Borderless,
     }
 
+    int getWidth();
+
+    int getHeight();
+
     void addResizeCallback(ResizeCallback callback);
 
     interface ResizeCallback {

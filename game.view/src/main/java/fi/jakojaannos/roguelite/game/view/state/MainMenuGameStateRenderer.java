@@ -9,6 +9,7 @@ import fi.jakojaannos.roguelite.engine.ui.ProportionValue;
 import fi.jakojaannos.roguelite.engine.ui.UIElementType;
 import fi.jakojaannos.roguelite.engine.ui.UserInterface;
 import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
+import fi.jakojaannos.roguelite.engine.view.text.TextRenderer;
 import fi.jakojaannos.roguelite.game.view.systems.UserInterfaceRenderingSystem;
 import lombok.val;
 
@@ -18,7 +19,7 @@ public class MainMenuGameStateRenderer extends GameStateRenderer {
     public MainMenuGameStateRenderer(
             final Path assetRoot,
             final LWJGLCamera camera,
-            final LWJGLTextRenderer textRenderer,
+            final TextRenderer textRenderer,
             final SpriteRegistry spriteRegistry
     ) {
         super(createDispatcher(assetRoot, createUserInterface(assetRoot, camera.getViewport()), textRenderer, camera, spriteRegistry));
@@ -67,7 +68,7 @@ public class MainMenuGameStateRenderer extends GameStateRenderer {
     private static SystemDispatcher createDispatcher(
             final Path assetRoot,
             final UserInterface userInterface,
-            final LWJGLTextRenderer textRenderer,
+            final TextRenderer textRenderer,
             final LWJGLCamera camera,
             final SpriteRegistry spriteRegistry
     ) {

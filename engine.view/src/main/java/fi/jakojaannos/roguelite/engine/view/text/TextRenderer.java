@@ -8,4 +8,6 @@ public interface TextRenderer {
             Font font,
             String string
     );
+
+    void drawCenteredOnScreen(double x, double y, int fontSize, Font font, String gameOverMessage);
 }

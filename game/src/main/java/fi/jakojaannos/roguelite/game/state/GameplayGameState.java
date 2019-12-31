@@ -1,5 +1,6 @@
 package fi.jakojaannos.roguelite.game.state;
 
+import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.ecs.SystemGroup;
 import fi.jakojaannos.roguelite.engine.ecs.World;
@@ -8,7 +9,6 @@ import fi.jakojaannos.roguelite.engine.tilemap.TileType;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.archetypes.PlayerArchetype;
 import fi.jakojaannos.roguelite.game.data.components.*;
-import fi.jakojaannos.roguelite.game.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
 import fi.jakojaannos.roguelite.game.systems.*;
@@ -31,11 +31,10 @@ public class GameplayGameState extends GameState {
         val player = PlayerArchetype.create(entityManager,
                                             new Transform(0, 0));
         world.getOrCreateResource(Players.class).player = player;
+        entityManager.addComponentTo(player, new CameraFollowTargetTag());
 
         val camera = entityManager.createEntity();
-        val cameraComponent = new Camera();
-        cameraComponent.followTarget = player;
-        entityManager.addComponentTo(camera, cameraComponent);
+        entityManager.addComponentTo(camera, new Transform());
         entityManager.addComponentTo(camera, new NoDrawTag());
         world.getOrCreateResource(CameraProperties.class).cameraEntity = camera;
 

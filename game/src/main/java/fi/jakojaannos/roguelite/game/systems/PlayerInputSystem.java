@@ -1,14 +1,14 @@
 package fi.jakojaannos.roguelite.game.systems;
 
+import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.game.data.components.Camera;
 import fi.jakojaannos.roguelite.game.data.components.CharacterAbilities;
 import fi.jakojaannos.roguelite.game.data.components.CharacterInput;
 import fi.jakojaannos.roguelite.game.data.components.PlayerTag;
-import fi.jakojaannos.roguelite.game.data.resources.CameraProperties;
+import fi.jakojaannos.roguelite.game.data.components.Transform;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
 import fi.jakojaannos.roguelite.game.data.resources.Mouse;
 import lombok.val;
@@ -40,8 +40,8 @@ public class PlayerInputSystem implements ECSSystem {
         val camProps = world.getOrCreateResource(CameraProperties.class);
         val cursorPosition = tmpCursorPos.set(0.0, 0.0);
         if (camProps.cameraEntity != null) {
-            val camera = world.getEntityManager().getComponentOf(camProps.cameraEntity, Camera.class).get();
-            mouse.calculateCursorPositionRelativeToCamera(camera, camProps, tmpCursorPos);
+            val cameraTransform = world.getEntityManager().getComponentOf(camProps.cameraEntity, Transform.class).orElseThrow();
+            mouse.calculateCursorPositionRelativeToCamera(cameraTransform, camProps, tmpCursorPos);
         } else {
             cursorPosition.set(mouse.pos.x * camProps.viewportWidthInWorldUnits,
                                mouse.pos.y * camProps.viewportHeightInWorldUnits);

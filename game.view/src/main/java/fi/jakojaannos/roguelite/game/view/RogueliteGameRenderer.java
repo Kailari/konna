@@ -1,18 +1,16 @@
 package fi.jakojaannos.roguelite.game.view;
 
+import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.engine.event.Events;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLViewport;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLWindow;
+import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLTexture;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text.LWJGLFont;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text.LWJGLTextRenderer;
 import fi.jakojaannos.roguelite.engine.state.GameState;
-import fi.jakojaannos.roguelite.engine.view.GameRenderer;
-import fi.jakojaannos.roguelite.engine.view.Viewport;
+import fi.jakojaannos.roguelite.engine.view.*;
 import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.view.content.TextureRegistry;
-import fi.jakojaannos.roguelite.game.data.components.Camera;
-import fi.jakojaannos.roguelite.game.data.resources.CameraProperties;
+import fi.jakojaannos.roguelite.engine.view.text.TextRenderer;
+import fi.jakojaannos.roguelite.game.data.components.Transform;
 import fi.jakojaannos.roguelite.game.state.GameplayGameState;
 import fi.jakojaannos.roguelite.game.state.MainMenuGameState;
 import fi.jakojaannos.roguelite.game.view.state.GameStateRenderer;
@@ -28,25 +26,29 @@ import java.util.Optional;
 
 @Slf4j
 public class RogueliteGameRenderer implements GameRenderer<GameState> {
-    private final RogueliteCamera camera;
+    private final Camera camera;
     @Getter private final Viewport viewport;
     private final TextureRegistry textureRegistry;
     private final SpriteRegistry spriteRegistry;
-    @Getter private final LWJGLTextRenderer textRenderer;
+    @Getter private final TextRenderer textRenderer;
     @Getter private final LWJGLFont font;
 
     private final Map<Class<? extends GameState>, GameStateRenderer> stateRenderers;
 
-    public RogueliteGameRenderer(final Path assetRoot, final LWJGLWindow window) {
+    public RogueliteGameRenderer(
+            final Path assetRoot,
+            final Window window,
+            final RenderingBackend backend
+    ) {
         LOG.debug("Constructing GameRenderer...");
         LOG.debug("asset root: {}", assetRoot);
 
-        this.viewport = new LWJGLViewport(window.getWidth(), window.getHeight());
-        this.camera = new RogueliteCamera(this.viewport);
-        this.font = new LWJGLFont(assetRoot, 1.0f, 1.0f);
+        this.viewport = backend.createViewport(window);
+        this.camera = backend.getCamera(this.viewport);
         this.textureRegistry = new TextureRegistry(assetRoot, LWJGLTexture::new);
         this.spriteRegistry = new SpriteRegistry(assetRoot, this.textureRegistry);
-        this.textRenderer = new LWJGLTextRenderer(assetRoot, this.camera);
+        this.font = new LWJGLFont(assetRoot, 1.0f, 1.0f);
+        this.textRenderer = backend.getTextRenderer(assetRoot, this.camera);
 
         this.stateRenderers = Map.ofEntries(
                 Map.entry(GameplayGameState.class, new GameplayGameStateRenderer(assetRoot,
@@ -55,32 +57,33 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
                                                                                  this.spriteRegistry,
                                                                                  this.textRenderer)),
                 Map.entry(MainMenuGameState.class, new MainMenuGameStateRenderer(assetRoot,
-                                                                                 this.camera,
+                                                                                 (LWJGLCamera) this.camera,
                                                                                  this.textRenderer,
                                                                                  this.spriteRegistry))
         );
 
         window.addResizeCallback(this.viewport::resize);
-        window.addResizeCallback((w, h) -> this.camera.markProjectionMatrixDirty());
+        window.addResizeCallback((w, h) -> ((LWJGLCamera) this.camera).markProjectionMatrixDirty());
         this.viewport.resize(window.getWidth(), window.getHeight());
-        this.camera.markProjectionMatrixDirty();
+        ((LWJGLCamera) this.camera).markProjectionMatrixDirty();
 
         LOG.info("GameRenderer initialization finished.");
     }
 
     @Override
     public void render(final GameState state, final double partialTickAlpha, final Events events) {
-        // Make sure that the camera configuration matches the current state
-        this.camera.updateConfigurationFromState(state);
-
         // Snap camera to active camera
         val world = state.getWorld();
         val entityManager = world.getEntityManager();
         Optional.ofNullable(world.getOrCreateResource(CameraProperties.class).cameraEntity)
-                .flatMap(cameraEntity -> entityManager.getComponentOf(cameraEntity, Camera.class))
-                .ifPresent(camera -> this.camera.setPosition(camera.pos.x - this.camera.getVisibleAreaWidth() / 2.0,
-                                                             camera.pos.y - this.camera.getVisibleAreaHeight() / 2.0));
-        this.camera.refreshMatricesIfDirty();
+                .flatMap(cameraEntity -> entityManager.getComponentOf(cameraEntity, Transform.class))
+                .ifPresent(cameraTransform -> this.camera.setPosition(cameraTransform.position.x - this.camera.getVisibleAreaWidth() / 2.0,
+                                                                      cameraTransform.position.y - this.camera.getVisibleAreaHeight() / 2.0));
+
+        // Make sure that the camera configuration matches the current state
+        // TODO: Move to some Camera.refresh() -method or sth.
+        ((LWJGLCamera) this.camera).updateConfigurationFromState(state.getWorld());
+        ((LWJGLCamera) this.camera).refreshMatricesIfDirty();
 
         Optional.ofNullable(this.stateRenderers.get(state.getClass()))
                 .ifPresent(renderer -> renderer.render(state.getWorld()));
@@ -97,7 +100,6 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
         this.font.close();
         this.textureRegistry.close();
         this.spriteRegistry.close();
-        this.textRenderer.close();
-        this.camera.close();
+        //this.camera.close();
     }
 }

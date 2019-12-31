@@ -37,36 +37,33 @@ public class UIElementBoundaryCalculationSystemTest_SelfRelativeProportions {
 
     @Test
     void buildingUIElementWithWidthRelativeToSelfThrows() {
-        UserInterface userInterface = uiBuilder
+        assertThrows(IllegalStateException.class, () -> uiBuilder
                 .element("a",
                          UIElementType.PANEL,
                          builder -> builder.width(percentOf().ownWidth(0.1)))
-                .build();
-
-        assertThrows(IllegalStateException.class, () -> userInterface.update(new Vector2d(0), false));
+                .build()
+                .update(new Vector2d(0), false));
     }
 
     @Test
     void buildingUIElementWithHeightRelativeToSelfThrows() {
-        UserInterface userInterface = uiBuilder
+        assertThrows(IllegalStateException.class, () -> uiBuilder
                 .element("a",
                          UIElementType.PANEL,
                          builder -> builder.height(percentOf().ownHeight(0.1)))
-                .build();
-
-        assertThrows(IllegalStateException.class, () -> userInterface.update(new Vector2d(0), false));
+                .build()
+                .update(new Vector2d(0), false));
     }
 
     @Test
     void buildingUIElementWithWidthAndHeightRelativeToEachOtherThrows() {
-        UserInterface userInterface = uiBuilder
+        assertThrows(IllegalStateException.class, () -> uiBuilder
                 .element("a",
                          UIElementType.PANEL,
                          builder -> builder.width(percentOf().ownHeight(0.1))
                                            .height(percentOf().ownWidth(0.1)))
-                .build();
-
-        assertThrows(IllegalStateException.class, () -> userInterface.update(new Vector2d(0), false));
+                .build()
+                .update(new Vector2d(0), false));
     }
 
     @Test
@@ -143,14 +140,13 @@ public class UIElementBoundaryCalculationSystemTest_SelfRelativeProportions {
 
     @Test
     void buildingUIElementWithLeftAndRightRelativeToOwnWidthThrows() {
-        UserInterface userInterface = uiBuilder
+        assertThrows(IllegalStateException.class, () -> uiBuilder
                 .element("a",
                          UIElementType.PANEL,
                          builder -> builder.left(percentOf().ownWidth(0.1))
                                            .right(percentOf().ownWidth(0.05)))
-                .build();
-
-        assertThrows(IllegalStateException.class, () -> userInterface.update(new Vector2d(0), false));
+                .build()
+                .update(new Vector2d(0), false));
     }
 
     @Test

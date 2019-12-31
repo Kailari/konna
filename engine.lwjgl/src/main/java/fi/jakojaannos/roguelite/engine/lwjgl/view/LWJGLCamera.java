@@ -1,5 +1,7 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view;
 
+import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.UniformBufferObjectIndices;
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
@@ -31,10 +33,12 @@ public class LWJGLCamera extends Camera implements AutoCloseable {
     private double viewportWidthInUnits;
     private double viewportHeightInUnits;
 
+    @Override
     public double getVisibleAreaWidth() {
         return viewportWidthInUnits;
     }
 
+    @Override
     public double getVisibleAreaHeight() {
         return viewportHeightInUnits;
     }
@@ -72,10 +76,12 @@ public class LWJGLCamera extends Camera implements AutoCloseable {
         this.projectionMatrixDirty = true;
     }
 
+    @Override
     public void useWorldCoordinates() {
         glBindBufferBase(GL_UNIFORM_BUFFER, UniformBufferObjectIndices.CAMERA, this.worldCameraMatricesUbo);
     }
 
+    @Override
     public void useScreenCoordinates() {
         glBindBufferBase(GL_UNIFORM_BUFFER, UniformBufferObjectIndices.CAMERA, this.screenCameraMatricesUbo);
     }
@@ -121,6 +127,16 @@ public class LWJGLCamera extends Camera implements AutoCloseable {
 
         refreshViewMatrixIfDirty();
         useWorldCoordinates();
+    }
+
+    public void updateConfigurationFromState(final World world) {
+        val camBounds = world.getOrCreateResource(CameraProperties.class);
+        refreshTargetScreenSizeInUnits(camBounds.targetViewportSizeInWorldUnits, camBounds.targetViewportSizeRespectiveToMinorAxis);
+
+        // FIXME: THIS BREAKS MVC ENCAPSULATION. Technically, we should queue task on the controller
+        //  to make the change as we NEVER should mutate state on the view.
+        camBounds.viewportWidthInWorldUnits = getVisibleAreaWidth();
+        camBounds.viewportHeightInWorldUnits = getVisibleAreaHeight();
     }
 
     private void refreshUniforms() {

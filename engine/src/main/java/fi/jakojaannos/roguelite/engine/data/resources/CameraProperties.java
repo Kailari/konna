@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.game.data.resources;
+package fi.jakojaannos.roguelite.engine.data.resources;
 
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.Resource;
