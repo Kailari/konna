@@ -1,5 +1,6 @@
 package fi.jakojaannos.roguelite.game.view;
 
+import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLViewport;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLWindow;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLTexture;
@@ -69,7 +70,7 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
     }
 
     @Override
-    public void render(GameState state, double partialTickAlpha) {
+    public void render(final GameState state, final double partialTickAlpha, final Events events) {
         // Make sure that the camera configuration matches the current state
         this.camera.updateConfigurationFromState(state);
         this.camera.refreshMatricesIfDirty();

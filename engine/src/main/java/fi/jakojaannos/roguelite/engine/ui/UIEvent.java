@@ -9,6 +9,9 @@ public final class UIEvent {
     @Getter private final Type type;
 
     public enum Type {
-        CLICK
+        CLICK,
+        HOVER,
+        PRESS,
+        RELEASE
     }
 }

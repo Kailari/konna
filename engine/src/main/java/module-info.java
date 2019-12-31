@@ -13,6 +13,7 @@ module roguelite.engine {
     opens fi.jakojaannos.roguelite.engine.data.resources to roguelite.engine.ecs;
 
     exports fi.jakojaannos.roguelite.engine;
+    exports fi.jakojaannos.roguelite.engine.event;
     exports fi.jakojaannos.roguelite.engine.ui;
     exports fi.jakojaannos.roguelite.engine.ui.builder;
     exports fi.jakojaannos.roguelite.engine.data.components.ui;

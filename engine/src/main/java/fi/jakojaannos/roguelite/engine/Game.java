@@ -1,5 +1,6 @@
 package fi.jakojaannos.roguelite.engine;
 
+import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.engine.state.TimeProvider;
@@ -17,5 +18,5 @@ public interface Game extends WritableTimeProvider, AutoCloseable {
 
     boolean isDisposed();
 
-    GameState tick(GameState state, Queue<InputEvent> inputEvents);
+    GameState tick(GameState state, Events events);
 }

@@ -1,14 +1,12 @@
 package fi.jakojaannos.roguelite.engine;
 
-import fi.jakojaannos.roguelite.engine.input.InputEvent;
+import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.input.InputProvider;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
-import java.util.Queue;
-import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 /**
@@ -48,7 +46,7 @@ public abstract class GameRunner<
             final Supplier<GameState> defaultStateSupplier,
             final TGame game,
             final TInput inputProvider,
-            final BiConsumer<GameState, Double> renderer
+            final RendererFunction renderer
     ) {
         if (game.isDisposed()) {
             throw new IllegalStateException("Tried running an already disposed game!");
@@ -65,6 +63,7 @@ public abstract class GameRunner<
         var frames = 0;
 
         LOG.info("Entering main loop");
+        val events = new Events();
         while (shouldContinueLoop(game)) {
             val currentFrameTime = System.currentTimeMillis();
             var frameElapsedTime = currentFrameTime - previousFrameTime;
@@ -77,14 +76,17 @@ public abstract class GameRunner<
 
             accumulator += frameElapsedTime;
             while (accumulator >= game.getTime().getTimeStep()) {
-                state = simulateTick(state, game, inputProvider.pollEvents());
+                inputProvider.pollEvents()
+                             .forEach(events.getInput()::fire);
+
+                state = simulateTick(state, game, events);
                 accumulator -= game.getTime().getTimeStep();
                 ++ticks;
             }
 
             val partialTickAlpha = accumulator / (double) game.getTime().getTimeStep();
-            renderer.accept(state, partialTickAlpha);
-            presentGameState(state, renderer, partialTickAlpha);
+            renderer.render(state, partialTickAlpha, events);
+            presentGameState(state, renderer, partialTickAlpha, events);
             frames++;
         }
 
@@ -108,19 +110,19 @@ public abstract class GameRunner<
     /**
      * Simulates the game for a single tick.
      *
-     * @param game        Game to simulate
-     * @param inputEvents Input events to process during this tick
+     * @param game   Game to simulate
+     * @param events Events to process during this tick
      */
     public GameState simulateTick(
             final GameState state,
             final TGame game,
-            final Queue<InputEvent> inputEvents
+            final Events events
     ) {
         if (game.isDisposed()) {
             throw new IllegalStateException("Simulating tick for already disposed game!");
         }
 
-        val newState = game.tick(state, inputEvents);
+        val newState = game.tick(state, events);
         game.updateTime();
         return newState;
     }
@@ -132,10 +134,15 @@ public abstract class GameRunner<
      * @param partialTickAlpha Time blending factor between the last two frames we should render at
      */
     public void presentGameState(
-            GameState state,
-            BiConsumer<GameState, Double> renderer,
-            double partialTickAlpha
+            final GameState state,
+            final RendererFunction renderer,
+            final double partialTickAlpha,
+            final Events events
     ) {
-        renderer.accept(state, partialTickAlpha);
+        renderer.render(state, partialTickAlpha, events);
+    }
+
+    public interface RendererFunction {
+        void render(GameState state, double partialTickAlpha, Events events);
     }
 }

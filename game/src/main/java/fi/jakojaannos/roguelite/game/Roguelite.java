@@ -4,10 +4,10 @@ import fi.jakojaannos.roguelite.engine.GameBase;
 import fi.jakojaannos.roguelite.engine.data.resources.GameStateManager;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.input.ButtonInput;
 import fi.jakojaannos.roguelite.engine.input.InputAxis;
 import fi.jakojaannos.roguelite.engine.input.InputButton;
-import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.game.data.resources.GameStatus;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
@@ -16,20 +16,19 @@ import fi.jakojaannos.roguelite.game.state.GameplayGameState;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
-import java.util.Queue;
-
 @Slf4j
 public class Roguelite extends GameBase {
     @Override
     public GameState tick(
             final GameState state,
-            final Queue<InputEvent> inputEvents
+            final Events events
     ) {
         val inputs = state.getWorld().getOrCreateResource(Inputs.class);
         val mouse = state.getWorld().getOrCreateResource(Mouse.class);
+        val inputEvents = events.getInput();
 
-        while (!inputEvents.isEmpty()) {
-            val event = inputEvents.remove();
+        while (inputEvents.hasEvents()) {
+            val event = inputEvents.pollEvent();
 
             event.getAxis().ifPresent(input -> {
                 if (input.getAxis() == InputAxis.Mouse.X_POS) {

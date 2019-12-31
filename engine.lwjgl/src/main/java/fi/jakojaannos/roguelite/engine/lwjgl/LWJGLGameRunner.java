@@ -2,14 +2,13 @@ package fi.jakojaannos.roguelite.engine.lwjgl;
 
 import fi.jakojaannos.roguelite.engine.Game;
 import fi.jakojaannos.roguelite.engine.GameRunner;
+import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.input.InputProvider;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLWindow;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import lombok.Getter;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
-
-import java.util.function.BiConsumer;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -47,13 +46,14 @@ public class LWJGLGameRunner<TGame extends Game, TInput extends InputProvider>
 
     @Override
     public void presentGameState(
-            GameState state,
-            BiConsumer<GameState, Double> renderer,
-            double partialTickAlpha
+            final GameState state,
+            final RendererFunction renderer,
+            final double partialTickAlpha,
+            final Events events
     ) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        super.presentGameState(state, renderer, partialTickAlpha);
+        super.presentGameState(state, renderer, partialTickAlpha, events);
 
         glfwSwapBuffers(this.window.getId());
         glfwPollEvents();
