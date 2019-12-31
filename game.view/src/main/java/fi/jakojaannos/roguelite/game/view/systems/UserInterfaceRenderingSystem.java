@@ -3,10 +3,10 @@ package fi.jakojaannos.roguelite.game.view.systems;
 import fi.jakojaannos.roguelite.engine.data.resources.GameStateManager;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.*;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text.LWJGLFont;
 import fi.jakojaannos.roguelite.engine.ui.UIEvent;
 import fi.jakojaannos.roguelite.engine.ui.UserInterface;
+import fi.jakojaannos.roguelite.engine.view.Camera;
+import fi.jakojaannos.roguelite.engine.view.content.FontRegistry;
 import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatch;
 import fi.jakojaannos.roguelite.engine.view.text.TextRenderer;
@@ -18,24 +18,22 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Vector2d;
 
-import java.nio.file.Path;
 import java.util.stream.Stream;
 
 @Slf4j
-public class UserInterfaceRenderingSystem implements ECSSystem, AutoCloseable {
+public class UserInterfaceRenderingSystem implements ECSSystem {
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
     }
 
     private final UserInterface userInterface;
 
-    private final LWJGLFont font;
-    private final LWJGLCamera camera;
+    private final Camera camera;
     private final UserInterfaceRenderer userInterfaceRenderer;
 
     public UserInterfaceRenderingSystem(
-            final Path assetRoot,
-            final LWJGLCamera camera,
+            final Camera camera,
+            final FontRegistry fontRegistry,
             final SpriteRegistry spriteRegistry,
             final SpriteBatch spriteBatch,
             final TextRenderer textRenderer,
@@ -43,8 +41,7 @@ public class UserInterfaceRenderingSystem implements ECSSystem, AutoCloseable {
     ) {
         this.userInterface = userInterface;
         this.camera = camera;
-        this.font = new LWJGLFont(assetRoot, 1.0f, 1.0f);
-        this.userInterfaceRenderer = new UserInterfaceRenderer(spriteBatch, spriteRegistry, textRenderer, this.font);
+        this.userInterfaceRenderer = new UserInterfaceRenderer(spriteBatch, spriteRegistry, textRenderer, fontRegistry);
     }
 
     @Override
@@ -72,10 +69,5 @@ public class UserInterfaceRenderingSystem implements ECSSystem, AutoCloseable {
 
         this.camera.useScreenCoordinates();
         this.userInterfaceRenderer.render(this.userInterface);
-    }
-
-    @Override
-    public void close() {
-        this.font.close();
     }
 }

@@ -1,9 +1,12 @@
 package fi.jakojaannos.roguelite.engine.view;
 
+import lombok.Getter;
 import org.joml.Vector2d;
+
 
 public abstract class Camera {
     private final Vector2d position;
+    @Getter private final Viewport viewport;
 
     public final double getX() {
         return this.position.x;
@@ -25,9 +28,12 @@ public abstract class Camera {
         this.position.set(x, y);
     }
 
-    public Camera(Vector2d position) {
+    public Camera(final Vector2d position, final Viewport viewport) {
         this.position = new Vector2d(position);
+        this.viewport = viewport;
     }
+
+    public abstract void resize(int width, int height);
 
     public abstract void useWorldCoordinates();
 

@@ -5,9 +5,9 @@ import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.UniformBufferObjectIndices;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.shader.ShaderProgram;
+import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.game.data.components.Health;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
 import lombok.val;
@@ -38,7 +38,7 @@ public class HealthBarRenderingSystem implements ECSSystem, AutoCloseable {
 
     private static final int SIZE_IN_BYTES = (2 + 1) * 4;
 
-    private final LWJGLCamera camera;
+    private final Camera camera;
     private final ShaderProgram shader;
     private final int uniformModelMatrix;
     private final int uniformHealth;
@@ -48,7 +48,7 @@ public class HealthBarRenderingSystem implements ECSSystem, AutoCloseable {
     private final int vbo;
     private final int ebo;
 
-    public HealthBarRenderingSystem(final Path assetRoot, final LWJGLCamera camera) {
+    public HealthBarRenderingSystem(final Path assetRoot, final Camera camera) {
         this.camera = camera;
         this.shader = ShaderProgram.builder()
                                    .vertexShader(assetRoot.resolve("shaders/healthbar.vert"))

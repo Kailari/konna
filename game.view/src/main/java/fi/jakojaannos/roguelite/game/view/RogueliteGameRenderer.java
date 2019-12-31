@@ -7,6 +7,7 @@ import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLTexture;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text.LWJGLFont;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.engine.view.*;
+import fi.jakojaannos.roguelite.engine.view.content.FontRegistry;
 import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.view.content.TextureRegistry;
 import fi.jakojaannos.roguelite.engine.view.text.TextRenderer;
@@ -30,8 +31,8 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
     @Getter private final Viewport viewport;
     private final TextureRegistry textureRegistry;
     private final SpriteRegistry spriteRegistry;
+    private final FontRegistry fontRegistry;
     @Getter private final TextRenderer textRenderer;
-    @Getter private final LWJGLFont font;
 
     private final Map<Class<? extends GameState>, GameStateRenderer> stateRenderers;
 
@@ -43,11 +44,13 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
         LOG.debug("Constructing GameRenderer...");
         LOG.debug("asset root: {}", assetRoot);
 
-        this.viewport = backend.createViewport(window);
-        this.camera = backend.getCamera(this.viewport);
+        // TODO: Extract to "AssetManager"
         this.textureRegistry = new TextureRegistry(assetRoot, LWJGLTexture::new);
         this.spriteRegistry = new SpriteRegistry(assetRoot, this.textureRegistry);
-        this.font = new LWJGLFont(assetRoot, 1.0f, 1.0f);
+        this.fontRegistry = new FontRegistry(assetRoot, LWJGLFont::new);
+
+        this.viewport = backend.createViewport(window);
+        this.camera = backend.getCamera(this.viewport);
         this.textRenderer = backend.getTextRenderer(assetRoot, this.camera);
 
         this.stateRenderers = Map.ofEntries(
@@ -55,17 +58,21 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
                                                                                  this.camera,
                                                                                  this.viewport,
                                                                                  this.spriteRegistry,
-                                                                                 this.textRenderer)),
-                Map.entry(MainMenuGameState.class, new MainMenuGameStateRenderer(assetRoot,
-                                                                                 (LWJGLCamera) this.camera,
+                                                                                 this.fontRegistry,
                                                                                  this.textRenderer,
-                                                                                 this.spriteRegistry))
+                                                                                 backend)),
+                Map.entry(MainMenuGameState.class, new MainMenuGameStateRenderer(assetRoot,
+                                                                                 this.camera,
+                                                                                 this.textRenderer,
+                                                                                 this.spriteRegistry,
+                                                                                 this.fontRegistry,
+                                                                                 backend))
         );
 
         window.addResizeCallback(this.viewport::resize);
-        window.addResizeCallback((w, h) -> ((LWJGLCamera) this.camera).markProjectionMatrixDirty());
+        window.addResizeCallback(this.camera::resize);
         this.viewport.resize(window.getWidth(), window.getHeight());
-        ((LWJGLCamera) this.camera).markProjectionMatrixDirty();
+        this.camera.resize(window.getWidth(), window.getHeight());
 
         LOG.info("GameRenderer initialization finished.");
     }
@@ -97,9 +104,9 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
             } catch (Exception ignored) {
             }
         });
-        this.font.close();
         this.textureRegistry.close();
         this.spriteRegistry.close();
+        this.fontRegistry.close();
         //this.camera.close();
     }
 }

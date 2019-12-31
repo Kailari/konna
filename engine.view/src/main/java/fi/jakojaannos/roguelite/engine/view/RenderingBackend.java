@@ -1,5 +1,6 @@
 package fi.jakojaannos.roguelite.engine.view;
 
+import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatch;
 import fi.jakojaannos.roguelite.engine.view.text.TextRenderer;
 
 import java.nio.file.Path;
@@ -10,4 +11,6 @@ public interface RenderingBackend {
     Camera getCamera(Viewport viewport);
 
     TextRenderer getTextRenderer(Path assetRoot, Camera camera);
+
+    SpriteBatch createSpriteBatch(Path assetRoot, String shader);
 }

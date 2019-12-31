@@ -4,8 +4,7 @@ import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text.LWJGLTextRenderer;
+import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.text.Font;
 import fi.jakojaannos.roguelite.engine.view.text.TextRenderer;
@@ -19,6 +18,7 @@ import java.util.stream.Stream;
 public class RenderGameOverSystem implements ECSSystem {
     private static final String GAME_OVER_MESSAGE = "You Suck.";
     private static final String HELP_TEXT = "Press <SPACE> to restart";
+
     @Override
     public void declareRequirements(RequirementsBuilder requirements) {
         requirements.tickAfter(SpriteRenderingSystem.class)
@@ -26,7 +26,7 @@ public class RenderGameOverSystem implements ECSSystem {
     }
 
     private final TextRenderer textRenderer;
-    private final LWJGLCamera camera;
+    private final Camera camera;
     private final Viewport viewport;
     private final Font font;
 

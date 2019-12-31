@@ -33,21 +33,20 @@ public class LWJGLFont implements AutoCloseable, Font {
     private final int lineGap;
 
     public LWJGLFont(
-            final Path assetRoot,
+            final Path assetPath,
             final float contentScaleX,
             final float contentScaleY
     ) {
         this.contentScaleX = contentScaleX;
         this.contentScaleY = contentScaleY;
 
-        val path = assetRoot.resolve("fonts/VCR_OSD_MONO.ttf");
-        try (SeekableByteChannel fc = Files.newByteChannel(path)) {
+        try (SeekableByteChannel fc = Files.newByteChannel(assetPath)) {
             this.ttf = BufferUtils.createByteBuffer((int) fc.size() + 1);
             //noinspection StatementWithEmptyBody
             while (fc.read(this.ttf) != -1) ;
             this.ttf.flip();
         } catch (IOException e) {
-            throw new IllegalStateException(String.format("Could not load font from %s!", path.toString()));
+            throw new IllegalStateException(String.format("Could not load font from %s!", assetPath.toString()));
         }
 
         this.fontInfo = STBTTFontinfo.create();

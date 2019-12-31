@@ -5,7 +5,7 @@ import lombok.val;
 
 import java.nio.IntBuffer;
 
-public interface Font extends TextSizeProvider {
+public interface Font extends TextSizeProvider, AutoCloseable {
     FontTexture getTextureForSize(int fontSize);
 
     float getLineOffset();

@@ -3,6 +3,7 @@ package fi.jakojaannos.roguelite.engine.view.ui;
 import fi.jakojaannos.roguelite.engine.ui.UIElement;
 import fi.jakojaannos.roguelite.engine.ui.UIProperty;
 import fi.jakojaannos.roguelite.engine.ui.UserInterface;
+import fi.jakojaannos.roguelite.engine.view.content.FontRegistry;
 import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatch;
 import fi.jakojaannos.roguelite.engine.view.sprite.Sprite;
@@ -13,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 @Slf4j
-@RequiredArgsConstructor
 public class UserInterfaceRenderer {
     private static final int DEFAULT_BORDER_SIZE = 5;
     private static final int ROOT_FONT_SIZE = 12;
@@ -22,6 +22,18 @@ public class UserInterfaceRenderer {
     private final SpriteRegistry spriteRegistry;
     private final TextRenderer textRenderer;
     private final Font font;
+
+    public UserInterfaceRenderer(
+            final SpriteBatch spriteBatch,
+            final SpriteRegistry spriteRegistry,
+            final TextRenderer textRenderer,
+            final FontRegistry fontRegistry
+    ) {
+        this.spriteBatch = spriteBatch;
+        this.spriteRegistry = spriteRegistry;
+        this.textRenderer = textRenderer;
+        this.font = fontRegistry.getByAssetName("fonts/VCR_OSD_MONO.ttf");
+    }
 
     public void render(final UserInterface userInterface) {
         userInterface.getRoots()

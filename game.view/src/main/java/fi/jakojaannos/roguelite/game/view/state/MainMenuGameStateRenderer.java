@@ -1,13 +1,12 @@
 package fi.jakojaannos.roguelite.game.view.state;
 
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLSpriteBatch;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text.LWJGLFont;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text.LWJGLTextRenderer;
 import fi.jakojaannos.roguelite.engine.ui.ProportionValue;
 import fi.jakojaannos.roguelite.engine.ui.UIElementType;
 import fi.jakojaannos.roguelite.engine.ui.UserInterface;
+import fi.jakojaannos.roguelite.engine.view.Camera;
+import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
+import fi.jakojaannos.roguelite.engine.view.content.FontRegistry;
 import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.view.text.TextRenderer;
 import fi.jakojaannos.roguelite.game.view.systems.UserInterfaceRenderingSystem;
@@ -18,18 +17,20 @@ import java.nio.file.Path;
 public class MainMenuGameStateRenderer extends GameStateRenderer {
     public MainMenuGameStateRenderer(
             final Path assetRoot,
-            final LWJGLCamera camera,
+            final Camera camera,
             final TextRenderer textRenderer,
-            final SpriteRegistry spriteRegistry
+            final SpriteRegistry spriteRegistry,
+            final FontRegistry fontRegistry,
+            final RenderingBackend backend
     ) {
-        super(createDispatcher(assetRoot, createUserInterface(assetRoot, camera.getViewport()), textRenderer, camera, spriteRegistry));
+        super(createDispatcher(assetRoot, createUserInterface(fontRegistry, camera.getViewport()), textRenderer, camera, spriteRegistry, fontRegistry, backend));
     }
 
     private static UserInterface createUserInterface(
-            final Path assetRoot,
+            final FontRegistry fontRegistry,
             final UserInterface.ViewportSizeProvider viewportSizeProvider
     ) {
-        val font = new LWJGLFont(assetRoot, 1.0f, 1.0f);
+        val font = fontRegistry.getByAssetName("fonts/VCR_OSD_MONO.ttf");
         val width = 600;
         val height = 100;
         val borderSize = 25;
@@ -69,14 +70,16 @@ public class MainMenuGameStateRenderer extends GameStateRenderer {
             final Path assetRoot,
             final UserInterface userInterface,
             final TextRenderer textRenderer,
-            final LWJGLCamera camera,
-            final SpriteRegistry spriteRegistry
+            final Camera camera,
+            final SpriteRegistry spriteRegistry,
+            final FontRegistry fontRegistry,
+            final RenderingBackend backend
     ) {
         val builder = SystemDispatcher.builder()
-                                      .withSystem(new UserInterfaceRenderingSystem(assetRoot,
-                                                                                   camera,
+                                      .withSystem(new UserInterfaceRenderingSystem(camera,
+                                                                                   fontRegistry,
                                                                                    spriteRegistry,
-                                                                                   new LWJGLSpriteBatch(assetRoot, "sprite"),
+                                                                                   backend.createSpriteBatch(assetRoot, "sprite"),
                                                                                    textRenderer,
                                                                                    userInterface));
 

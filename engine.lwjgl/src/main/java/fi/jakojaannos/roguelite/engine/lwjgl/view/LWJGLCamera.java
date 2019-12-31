@@ -72,7 +72,8 @@ public class LWJGLCamera extends Camera implements AutoCloseable {
         }
     }
 
-    public void markProjectionMatrixDirty() {
+    @Override
+    public void resize(final int width, final int height) {
         this.projectionMatrixDirty = true;
     }
 
@@ -97,7 +98,7 @@ public class LWJGLCamera extends Camera implements AutoCloseable {
     }
 
     public LWJGLCamera(final Viewport viewport) {
-        super(new Vector2d(0.0, 0.0));
+        super(new Vector2d(0.0, 0.0), viewport);
         this.viewport = viewport;
 
         this.projectionMatrix = new Matrix4f().identity();

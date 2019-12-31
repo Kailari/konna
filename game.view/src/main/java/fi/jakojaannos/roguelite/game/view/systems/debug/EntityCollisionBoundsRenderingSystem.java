@@ -4,9 +4,9 @@ import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.UniformBufferObjectIndices;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.shader.ShaderProgram;
+import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.game.DebugConfig;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.NoDrawTag;
@@ -34,7 +34,7 @@ public class EntityCollisionBoundsRenderingSystem implements ECSSystem, AutoClos
                     .withComponent(Collider.class);
     }
 
-    private final LWJGLCamera camera;
+    private final Camera camera;
     private final ShaderProgram shader;
     private final int uniformModelMatrix;
 
@@ -46,7 +46,7 @@ public class EntityCollisionBoundsRenderingSystem implements ECSSystem, AutoClos
 
     public EntityCollisionBoundsRenderingSystem(
             final Path assetRoot,
-            final LWJGLCamera camera
+            final Camera camera
     ) {
         this.camera = camera;
         this.shader = ShaderProgram.builder()

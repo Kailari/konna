@@ -1,16 +1,14 @@
 package fi.jakojaannos.roguelite.game.view.state;
 
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLSpriteBatch;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text.LWJGLFont;
 import fi.jakojaannos.roguelite.engine.ui.UIElementType;
 import fi.jakojaannos.roguelite.engine.ui.UserInterface;
 import fi.jakojaannos.roguelite.engine.ui.builder.UILabelBuilder;
 import fi.jakojaannos.roguelite.engine.view.Camera;
+import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
+import fi.jakojaannos.roguelite.engine.view.content.FontRegistry;
 import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
-import fi.jakojaannos.roguelite.engine.view.text.Font;
 import fi.jakojaannos.roguelite.engine.view.text.TextRenderer;
 import fi.jakojaannos.roguelite.game.DebugConfig;
 import fi.jakojaannos.roguelite.game.view.systems.*;
@@ -29,14 +27,18 @@ public class GameplayGameStateRenderer extends GameStateRenderer {
             final Camera camera,
             final Viewport viewport,
             final SpriteRegistry spriteRegistry,
-            final TextRenderer textRenderer
+            final FontRegistry fontRegistry,
+            final TextRenderer textRenderer,
+            final RenderingBackend backend
     ) {
         super(createDispatcher(assetRoot,
-                               createUserInterface(viewport, new LWJGLFont(assetRoot, 1.0f, 1.0f)),
+                               createUserInterface(viewport, fontRegistry),
                                camera,
                                viewport,
                                spriteRegistry,
-                               textRenderer));
+                               fontRegistry,
+                               textRenderer,
+                               backend));
     }
 
     private static SystemDispatcher createDispatcher(
@@ -45,31 +47,37 @@ public class GameplayGameStateRenderer extends GameStateRenderer {
             final Camera camera,
             final Viewport viewport,
             final SpriteRegistry spriteRegistry,
-            final TextRenderer textRenderer
+            final FontRegistry fontRegistry,
+            final TextRenderer textRenderer,
+            final RenderingBackend backend
     ) {
-        val font = new LWJGLFont(assetRoot, 1.0f, 1.0f);
+        val font = fontRegistry.getByAssetName("fonts/VCR_OSD_MONO.ttf");
         val builder = SystemDispatcher.builder()
                                       .withSystem(new LevelRenderingSystem(assetRoot, camera, spriteRegistry))
-                                      .withSystem(new SpriteRenderingSystem(assetRoot, (LWJGLCamera) camera, spriteRegistry))
-                                      .withSystem(new UserInterfaceRenderingSystem(assetRoot,
-                                                                                   (LWJGLCamera) camera,
+                                      .withSystem(new SpriteRenderingSystem(assetRoot, camera, spriteRegistry, backend))
+                                      .withSystem(new UserInterfaceRenderingSystem(camera,
+                                                                                   fontRegistry,
                                                                                    spriteRegistry,
-                                                                                   new LWJGLSpriteBatch(assetRoot, "sprite"),
+                                                                                   backend.createSpriteBatch(assetRoot, "sprite"),
                                                                                    textRenderer,
                                                                                    userInterface))
                                       .withSystem(new UpdateHUDSystem(userInterface))
-                                      .withSystem(new RenderGameOverSystem(textRenderer, (LWJGLCamera) camera, viewport, font))
-                                      .withSystem(new HealthBarRenderingSystem(assetRoot, (LWJGLCamera) camera));
+                                      .withSystem(new RenderGameOverSystem(textRenderer, camera, viewport, font))
+                                      .withSystem(new HealthBarRenderingSystem(assetRoot, camera));
 
         if (DebugConfig.debugModeEnabled) {
-            builder.withSystem(new EntityCollisionBoundsRenderingSystem(assetRoot, (LWJGLCamera) camera));
-            builder.withSystem(new EntityTransformRenderingSystem(assetRoot, (LWJGLCamera) camera));
+            builder.withSystem(new EntityCollisionBoundsRenderingSystem(assetRoot, camera));
+            builder.withSystem(new EntityTransformRenderingSystem(assetRoot, camera));
         }
 
         return builder.build();
     }
 
-    private static UserInterface createUserInterface(final Viewport viewport, final Font font) {
+    private static UserInterface createUserInterface(
+            final Viewport viewport,
+            final FontRegistry fontRegistry
+    ) {
+        val font = fontRegistry.getByAssetName("fonts/VCR_OSD_MONO.ttf");
         return UserInterface.builder(viewport, font)
                             .element("time-played-timer",
                                      UIElementType.LABEL,
