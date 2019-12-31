@@ -9,12 +9,19 @@ import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ui.ProportionValue;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
+import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -75,53 +82,160 @@ public class UIElementBoundaryCalculationSystem implements ECSSystem {
                     fontSizeLookup.put(entity, fontSize);
                     val context = new ProportionValue.Context(fontSize, parentBounds, bounds);
 
-                    Optional<Integer> widthValue, heightValue;
-                    widthValue = entityManager.getComponentOf(entity, BoundWidth.class).map(bound -> bound.value.getValue(context));
-                    heightValue = entityManager.getComponentOf(entity, BoundHeight.class).map(bound -> bound.value.getValue(context));
-                    widthValue.ifPresent(bounds::setWidth);
-                    heightValue.ifPresent(bounds::setHeight);
+                    val maybeLeft = entityManager.getComponentOf(entity, BoundLeft.class).map(ProportionalValueComponent::getValue);
+                    val maybeRight = entityManager.getComponentOf(entity, BoundRight.class).map(ProportionalValueComponent::getValue);
+                    val maybeWidth = entityManager.getComponentOf(entity, BoundWidth.class)
+                                                  .filter(ignored -> maybeLeft.isEmpty() || maybeRight.isEmpty())
+                                                  .map(ProportionalValueComponent::getValue);
 
-                    Optional<Integer> leftValue = entityManager.getComponentOf(entity, BoundLeft.class)
-                                                               .map(bound -> bound.value.getValue(context));
-                    Optional<Integer> rightValue = entityManager.getComponentOf(entity, BoundRight.class)
-                                                                .map(bound -> bound.value.getValue(context));
-                    if (leftValue.isPresent() && rightValue.isPresent() && widthValue.isPresent()) {
-                        LOG.warn("Width must not be defined if both Left and Right are defined! Removing the width component...");
-                        entityManager.removeComponentFrom(entity, BoundWidth.class);
+                    val maybeTop = entityManager.getComponentOf(entity, BoundTop.class).map(ProportionalValueComponent::getValue);
+                    val maybeBottom = entityManager.getComponentOf(entity, BoundBottom.class).map(ProportionalValueComponent::getValue);
+                    val maybeHeight = entityManager.getComponentOf(entity, BoundHeight.class)
+                                                   .filter(ignored -> maybeTop.isEmpty() || maybeBottom.isEmpty())
+                                                   .map(ProportionalValueComponent::getValue);
+
+                    if (maybeWidth.isPresent() && maybeHeight.isPresent()) {
+                        val widthProportion = maybeWidth.get();
+                        val heightProportion = maybeHeight.get();
+                        if (widthProportion instanceof ProportionValue.PercentOfSelf && heightProportion instanceof ProportionValue.PercentOfSelf) {
+                            val selfProportionalWidth = (ProportionValue.PercentOfSelf) widthProportion;
+                            val selfProportionalHeight = (ProportionValue.PercentOfSelf) heightProportion;
+                            if (selfProportionalHeight.isHorizontal() && !selfProportionalWidth.isHorizontal()) {
+                                throw new IllegalStateException("Width and height cannot cyclically depend on each other!");
+                            }
+                        }
                     }
 
-                    bounds.minX = leftValue.map(value -> parentBounds.minX + value)
-                                           .or(getAppliedValueIfBothPresent(rightValue.map(value -> parentBounds.maxX - value),
-                                                                            widthValue,
-                                                                            (right, width) -> right - width))
-                                           .orElse(parentBounds.minX);
-                    bounds.maxX = rightValue.map(value -> parentBounds.maxX - value)
-                                            .or(getAppliedValueIfBothPresent(leftValue.map(value -> parentBounds.minX + value),
-                                                                             widthValue,
-                                                                             Integer::sum))
-                                            .orElse(parentBounds.maxX);
-                    bounds.width = bounds.maxX - bounds.minX;
+                    ((maybeLeft.isPresent() && maybeRight.isPresent())
+                            ? Stream.of(maybeWidth, maybeLeft, maybeRight)
+                            : Stream.of(maybeWidth))
+                            .filter(Optional::isPresent)
+                            .map(Optional::get)
+                            .filter(proportion -> ProportionValue.PercentOfSelf.class.isAssignableFrom(proportion.getClass()))
+                            .map(ProportionValue.PercentOfSelf.class::cast)
+                            .filter(ProportionValue.PercentOfSelf::isHorizontal)
+                            .findAny()
+                            .ifPresent(invalidProportion -> {
+                                throw new IllegalStateException("Width-related properties cannot be proportional to width!");
+                            });
 
-                    Optional<Integer> topValue = entityManager.getComponentOf(entity, BoundTop.class)
-                                                              .map(bound -> bound.value.getValue(context));
-                    Optional<Integer> bottomValue = entityManager.getComponentOf(entity, BoundBottom.class)
-                                                                 .map(bound -> bound.value.getValue(context));
-                    if (topValue.isPresent() && bottomValue.isPresent() && heightValue.isPresent()) {
-                        LOG.warn("Height must not be defined if both Top and Bottom are defined! Removing the height component...");
-                        entityManager.removeComponentFrom(entity, BoundHeight.class);
+                    ((maybeTop.isPresent() && maybeBottom.isPresent())
+                            ? Stream.of(maybeHeight, maybeTop, maybeBottom)
+                            : Stream.of(maybeHeight))
+                            .filter(Optional::isPresent)
+                            .map(Optional::get)
+                            .filter(proportion -> ProportionValue.PercentOfSelf.class.isAssignableFrom(proportion.getClass()))
+                            .map(ProportionValue.PercentOfSelf.class::cast)
+                            .filter(proportion -> !proportion.isHorizontal())
+                            .findAny()
+                            .ifPresent(invalidProportion -> {
+                                throw new IllegalStateException("Height-related properties cannot be proportional to height!");
+                            });
+
+
+                    LazyComputableWithFallback<Integer> computedLeft = new LazyComputableWithFallback<>(bounds::setMinX);
+                    LazyComputableWithFallback<Integer> computedRight = new LazyComputableWithFallback<>(bounds::setMaxX);
+                    LazyComputableWithFallback<Integer> computedWidth = new LazyComputableWithFallback<>(bounds::setWidth);
+
+                    LazyComputableWithFallback<Integer> computedTop = new LazyComputableWithFallback<>(bounds::setMinY);
+                    LazyComputableWithFallback<Integer> computedBottom = new LazyComputableWithFallback<>(bounds::setMaxY);
+                    LazyComputableWithFallback<Integer> computedHeight = new LazyComputableWithFallback<>(bounds::setHeight);
+
+                    // Width/Height
+                    if ((maybeRight.isEmpty() || maybeLeft.isEmpty()) && maybeWidth.isEmpty() && !(maybeLeft.isEmpty() && maybeRight.isEmpty())) {
+                        if (maybeRight.isEmpty()) {
+                            computedRight.setValue(parentBounds.maxX);
+                        } else if (maybeLeft.isEmpty()) {
+                            computedLeft.setValue(parentBounds.minX);
+                        }
+                    }
+                    if ((maybeTop.isEmpty() || maybeBottom.isEmpty()) && maybeHeight.isEmpty() && !(maybeTop.isEmpty() && maybeBottom.isEmpty())) {
+                        if (maybeTop.isEmpty()) {
+                            computedTop.setValue(parentBounds.minY);
+                        } else if (maybeBottom.isEmpty()) {
+                            computedBottom.setValue(parentBounds.maxY);
+                        }
                     }
 
-                    bounds.minY = topValue.map(value -> parentBounds.minY + value)
-                                          .or(getAppliedValueIfBothPresent(bottomValue.map(value -> parentBounds.maxY - value),
-                                                                           heightValue,
-                                                                           (bottom, height) -> bottom - height))
-                                          .orElse(parentBounds.minY);
-                    bounds.maxY = bottomValue.map(value -> parentBounds.maxY - value)
-                                             .or(getAppliedValueIfBothPresent(topValue.map(value -> parentBounds.minY + value),
-                                                                              heightValue,
-                                                                              Integer::sum))
-                                             .orElse(parentBounds.maxY);
-                    bounds.height = bounds.maxY - bounds.minY;
+                    computedWidth.addSupplier(() -> maybeWidth.flatMap(proportion -> computeWidth(proportion, computedHeight, context)));
+                    computedWidth.addSupplier(() -> applyIfBothArePresent(computedRight.tryGet(),
+                                                                          computedLeft.tryGet(),
+                                                                          (right, left) -> right - left));
+                    computedWidth.addFallback(() -> parentBounds.width);
+
+                    computedHeight.addSupplier(() -> maybeHeight.flatMap(proportion -> {
+                        if (proportion instanceof ProportionValue.PercentOfSelf) {
+                            if (!((ProportionValue.PercentOfSelf) proportion).isHorizontal()
+                                    || computedWidth.isComputing()) {
+                                return Optional.<Integer>empty();
+                            } else {
+                                computedWidth.compute();
+                            }
+                        }
+
+                        return Optional.of(proportion.getValue(context));
+                    }));
+                    computedHeight.addSupplier(() -> applyIfBothArePresent(computedBottom.tryGet(),
+                                                                           computedTop.tryGet(),
+                                                                           (bottom, top) -> bottom - top));
+                    computedHeight.addFallback(() -> parentBounds.height);
+
+                    // Left/Right
+                    computedLeft.addSupplier(() -> maybeLeft.flatMap(proportion -> {
+                        if (ensureDependenciesAreReady(proportion, computedWidth, computedHeight)) {
+                            return Optional.<Integer>empty();
+                        }
+
+                        return Optional.of(parentBounds.minX + proportion.getValue(context));
+                    }));
+                    computedLeft.addSupplier(() -> applyIfBothArePresent(computedRight.tryGet(),
+                                                                         computedWidth.tryGet(),
+                                                                         (right, width) -> right - width));
+                    computedLeft.addFallback(parentBounds::getMinX);
+
+                    computedRight.addSupplier(() -> maybeRight.flatMap(proportion -> {
+                        if (ensureDependenciesAreReady(proportion, computedWidth, computedHeight)) {
+                            return Optional.<Integer>empty();
+                        }
+
+                        return Optional.of(parentBounds.maxX - proportion.getValue(context));
+                    }));
+                    computedRight.addSupplier(() -> applyIfBothArePresent(computedLeft.tryGet(),
+                                                                          computedWidth.tryGet(),
+                                                                          (left, width) -> left + width));
+                    computedRight.addFallback(parentBounds::getMaxX);
+
+                    // Top/Bottom
+                    computedTop.addSupplier(() -> maybeTop.flatMap(proportion -> {
+                        if (ensureDependenciesAreReady(proportion, computedWidth, computedHeight)) {
+                            return Optional.<Integer>empty();
+                        }
+
+                        return Optional.of(parentBounds.minY + proportion.getValue(context));
+                    }));
+                    computedTop.addSupplier(() -> applyIfBothArePresent(computedBottom.tryGet(),
+                                                                        computedHeight.tryGet(),
+                                                                        (bottom, height) -> bottom - height));
+                    computedTop.addFallback(parentBounds::getMinY);
+
+                    computedBottom.addSupplier(() -> maybeBottom.flatMap(proportion -> {
+                        if (ensureDependenciesAreReady(proportion, computedWidth, computedHeight)) {
+                            return Optional.<Integer>empty();
+                        }
+
+                        return Optional.of(parentBounds.maxY - proportion.getValue(context));
+                    }));
+                    computedBottom.addSupplier(() -> applyIfBothArePresent(computedTop.tryGet(),
+                                                                           computedHeight.tryGet(),
+                                                                           (top, height) -> top + height));
+                    computedBottom.addFallback(parentBounds::getMaxY);
+
+                    bounds.minX = computedLeft.get();
+                    bounds.maxX = computedRight.get();
+                    bounds.minY = computedTop.get();
+                    bounds.maxY = computedBottom.get();
+                    bounds.width = computedWidth.get();
+                    bounds.height = computedHeight.get();
 
                     entityManager.getComponentOf(entity, BoundAnchorX.class)
                                  .map(boundAnchorX -> boundAnchorX.value)
@@ -140,8 +254,47 @@ public class UIElementBoundaryCalculationSystem implements ECSSystem {
                 });
     }
 
+    public Optional<Integer> computeWidth(
+            final ProportionValue proportion,
+            final LazyComputableWithFallback<Integer> computedHeight,
+            final ProportionValue.Context context
+    ) {
+        if (proportion instanceof ProportionValue.PercentOfSelf) {
+            if (((ProportionValue.PercentOfSelf) proportion).isHorizontal() || computedHeight.isComputing()) {
+                return Optional.<Integer>empty();
+            } else {
+                computedHeight.compute();
+            }
+        }
+
+        return Optional.of(proportion.getValue(context));
+    }
+
+    public boolean ensureDependenciesAreReady(
+            final ProportionValue proportion,
+            final LazyComputableWithFallback<Integer> computedWidth,
+            final LazyComputableWithFallback<Integer> computedHeight
+    ) {
+        if (proportion instanceof ProportionValue.PercentOfSelf) {
+            if (((ProportionValue.PercentOfSelf) proportion).isHorizontal()) {
+                if (computedWidth.isComputing()) {
+                    return true;
+                } else {
+                    computedWidth.compute();
+                }
+            } else {
+                if (computedHeight.isComputing()) {
+                    return true;
+                } else {
+                    computedHeight.compute();
+                }
+            }
+        }
+        return false;
+    }
+
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private static <T, R> Optional<R> applyIfBothPresent(
+    private static <T, R> Optional<R> applyIfBothArePresent(
             final Optional<T> a,
             final Optional<T> b,
             final BiFunction<T, T, R> operator
@@ -151,12 +304,57 @@ public class UIElementBoundaryCalculationSystem implements ECSSystem {
                 : Optional.empty();
     }
 
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private static <T, R> Supplier<Optional<R>> getAppliedValueIfBothPresent(
-            final Optional<T> a,
-            final Optional<T> b,
-            final BiFunction<T, T, R> operator
-    ) {
-        return () -> applyIfBothPresent(a, b, operator);
+    @RequiredArgsConstructor
+    private static class LazyComputableWithFallback<T> {
+        @Getter private boolean computing = false;
+        @Setter @Nullable private T value;
+        private final Consumer<T> valueSetter;
+        private List<Supplier<Optional<T>>> suppliers = new ArrayList<>();
+
+        public void addFallback(final Supplier<T> supplier) {
+            addSupplier(() -> Optional.of(supplier.get()));
+        }
+
+        public void addSupplier(final Supplier<Optional<T>> supplier) {
+            this.suppliers.add(supplier);
+        }
+
+        public Optional<T> tryGet() {
+            if (this.computing) {
+                return Optional.empty();
+            }
+
+            compute();
+            return Optional.ofNullable(this.value);
+        }
+
+        public T get() {
+            if (this.computing) {
+                throw new IllegalStateException("Tried to compute value of a Lazy wrapper while computation was already in progress! Check for cyclic dependencies!");
+            }
+
+            compute();
+            if (this.value == null) {
+                throw new IllegalStateException("Could not compute the value!");
+            }
+            return this.value;
+        }
+
+        public void compute() {
+            if (this.value != null) {
+                return;
+            }
+
+            this.computing = true;
+            for (val supplier : this.suppliers) {
+                val computedValue = supplier.get();
+                if (computedValue.isPresent()) {
+                    this.value = computedValue.get();
+                    this.valueSetter.accept(this.value);
+                    break;
+                }
+            }
+            this.computing = false;
+        }
     }
 }

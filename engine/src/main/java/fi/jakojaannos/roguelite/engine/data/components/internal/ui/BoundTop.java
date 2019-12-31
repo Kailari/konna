@@ -1,10 +1,11 @@
 package fi.jakojaannos.roguelite.engine.data.components.internal.ui;
 
-import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.ui.ProportionValue;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 @AllArgsConstructor
-public class BoundTop implements Component {
-    public ProportionValue value;
+public class BoundTop implements ProportionalValueComponent {
+    @Getter @Setter public ProportionValue value;
 }

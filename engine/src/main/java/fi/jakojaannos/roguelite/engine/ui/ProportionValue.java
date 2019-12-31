@@ -1,6 +1,10 @@
 package fi.jakojaannos.roguelite.engine.ui;
 
+import fi.jakojaannos.roguelite.engine.data.components.internal.ui.BoundHeight;
+import fi.jakojaannos.roguelite.engine.data.components.internal.ui.BoundWidth;
+import fi.jakojaannos.roguelite.engine.data.components.internal.ui.ProportionalValueComponent;
 import fi.jakojaannos.roguelite.engine.data.components.ui.ElementBoundaries;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -35,9 +39,10 @@ public abstract class ProportionValue {
         }
     }
 
-    @RequiredArgsConstructor
-    private static final class PercentOfSelf extends ProportionValue {
+    @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+    public static final class PercentOfSelf extends ProportionValue {
         private final double value;
+        @Getter private final boolean horizontal;
         private final Function<Context, Integer> sizeFunction;
 
         @Override
@@ -50,7 +55,7 @@ public abstract class ProportionValue {
         }
     }
 
-    @RequiredArgsConstructor
+    @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
     private static class Absolute extends ProportionValue {
         private final int value;
 
@@ -77,11 +82,11 @@ public abstract class ProportionValue {
         }
 
         public ProportionValue ownWidth(final double value) {
-            return new PercentOfSelf(value, context -> context.ownBounds.width);
+            return new PercentOfSelf(value, true, context -> context.ownBounds.width);
         }
 
         public ProportionValue ownHeight(final double value) {
-            return new PercentOfSelf(value, context -> context.ownBounds.height);
+            return new PercentOfSelf(value, false, context -> context.ownBounds.height);
         }
     }
 }

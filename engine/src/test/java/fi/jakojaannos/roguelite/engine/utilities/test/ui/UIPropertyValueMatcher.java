@@ -21,10 +21,8 @@ public class UIPropertyValueMatcher<T> {
 
     public UIElementMatcher equalTo(final T value) {
         assertEquals(value, this.propertyValue,
-                     String.format("Expected property \"%s\" to have value \"%s\", but value was \"%s\"",
-                                   this.property.getName(),
-                                   value,
-                                   this.propertyValue));
+                     String.format("Unexpected property \"%s\" value",
+                                   this.property.getName()));
         return this.parent;
     }
 }
