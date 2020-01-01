@@ -64,7 +64,7 @@ public class GameplayGameStateRenderer extends GameStateRenderer {
                                                                                    userInterface))
                                       .withSystem(new UpdateHUDSystem(userInterface))
                                       .withSystem(new RenderGameOverSystem(textRenderer, camera, viewport, font))
-                                      .withSystem(new HealthBarRenderingSystem(assetRoot, camera));
+                                      .withSystem(new HealthBarRenderingSystem(assetRoot, camera, backend));
 
         if (DebugConfig.debugModeEnabled) {
             builder.withSystem(new EntityCollisionBoundsRenderingSystem(assetRoot, camera));

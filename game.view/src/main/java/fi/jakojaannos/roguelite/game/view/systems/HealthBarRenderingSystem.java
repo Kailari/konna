@@ -8,6 +8,9 @@ import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.lwjgl.UniformBufferObjectIndices;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.shader.ShaderProgram;
 import fi.jakojaannos.roguelite.engine.view.Camera;
+import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
+import fi.jakojaannos.roguelite.engine.view.rendering.mesh.Mesh;
+import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexAttribute;
 import fi.jakojaannos.roguelite.game.data.components.Health;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
 import lombok.val;
@@ -18,13 +21,8 @@ import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.util.stream.Stream;
 
-import static org.lwjgl.opengl.GL15.*;
-import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
-import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
-import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.opengl.GL31.glGetUniformBlockIndex;
 import static org.lwjgl.opengl.GL31.glUniformBlockBinding;
-import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class HealthBarRenderingSystem implements ECSSystem, AutoCloseable {
     @Override
@@ -44,11 +42,13 @@ public class HealthBarRenderingSystem implements ECSSystem, AutoCloseable {
     private final int uniformHealth;
 
     private final ByteBuffer vertexDataBuffer;
-    private final int vao;
-    private final int vbo;
-    private final int ebo;
+    private final Mesh mesh;
 
-    public HealthBarRenderingSystem(final Path assetRoot, final Camera camera) {
+    public HealthBarRenderingSystem(
+            final Path assetRoot,
+            final Camera camera,
+            final RenderingBackend backend
+    ) {
         this.camera = camera;
         this.shader = ShaderProgram.builder()
                                    .vertexShader(assetRoot.resolve("shaders/healthbar.vert"))
@@ -64,48 +64,24 @@ public class HealthBarRenderingSystem implements ECSSystem, AutoCloseable {
         glUniformBlockBinding(this.shader.getShaderProgram(), uniformCameraInfoBlock, UniformBufferObjectIndices.CAMERA);
 
 
+        val vertexFormat = backend.getVertexFormat()
+                                  .withAttribute(VertexAttribute.Type.FLOAT, 2, false)
+                                  .withAttribute(VertexAttribute.Type.FLOAT, 1, false)
+                                  .build();
+        this.mesh = backend.createMesh(vertexFormat);
         this.vertexDataBuffer = MemoryUtil.memAlloc(4 * SIZE_IN_BYTES);
-        this.vao = glGenVertexArrays();
-        glBindVertexArray(this.vao);
-
-        this.ebo = glGenBuffers();
-        val indices = new int[]{
-                0, 1, 2,
-                3, 0, 2,
-        };
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this.ebo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
-
-        this.vbo = glGenBuffers();
+        this.mesh.setElements(0, 1, 2,
+                              3, 0, 2);
 
         val width = 1.5;
         val height = 0.25;
         val offsetX = -width / 2;
         val offsetY = 0.85;
-
         updateVertex(0, offsetX, offsetY, 0.0);
         updateVertex(SIZE_IN_BYTES, offsetX + width, offsetY, 1.0);
         updateVertex(2 * SIZE_IN_BYTES, offsetX + width, offsetY + height, 1.0);
         updateVertex(3 * SIZE_IN_BYTES, offsetX, offsetY + height, 0.0);
-
-        glBindBuffer(GL_ARRAY_BUFFER, this.vbo);
-        glBufferData(GL_ARRAY_BUFFER, this.vertexDataBuffer, GL_STATIC_DRAW);
-
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0,
-                              2,
-                              GL_FLOAT,
-                              false,
-                              SIZE_IN_BYTES,
-                              0);
-
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1,
-                              1,
-                              GL_FLOAT,
-                              false,
-                              SIZE_IN_BYTES,
-                              2 * 4);
+        this.mesh.setVertexData(this.vertexDataBuffer);
     }
 
 
@@ -117,12 +93,9 @@ public class HealthBarRenderingSystem implements ECSSystem, AutoCloseable {
         this.shader.use();
         this.camera.useWorldCoordinates();
 
-        glBindVertexArray(this.vao);
-
         val entityManager = world.getEntityManager();
         val timeManager = world.getOrCreateResource(Time.class);
         val healthbarDurationInTicks = timeManager.convertToTicks(5.0);
-
         entities.forEach(entity -> {
             val transform = entityManager.getComponentOf(entity, Transform.class).orElseThrow();
             val health = entityManager.getComponentOf(entity, Health.class).orElseThrow();
@@ -140,8 +113,7 @@ public class HealthBarRenderingSystem implements ECSSystem, AutoCloseable {
                                                                   (float) 0.0)
             );
 
-
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
+            this.mesh.draw(6);
         });
 
     }
@@ -159,10 +131,8 @@ public class HealthBarRenderingSystem implements ECSSystem, AutoCloseable {
     }
 
     @Override
-    public void close() {
-        glDeleteBuffers(this.vbo);
-        glDeleteBuffers(this.ebo);
-        glDeleteVertexArrays(this.vao);
+    public void close() throws Exception {
+        this.mesh.close();
         this.shader.close();
         MemoryUtil.memFree(this.vertexDataBuffer);
     }
