@@ -18,4 +18,8 @@ public interface Mesh extends AutoCloseable {
     }
 
     void draw(int nIndices);
+
+    void drawAsPoints(int nIndices);
+
+    void startDrawing();
 }

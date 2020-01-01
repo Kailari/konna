@@ -4,9 +4,12 @@ import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.lwjgl.UniformBufferObjectIndices;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.shader.ShaderProgram;
 import fi.jakojaannos.roguelite.engine.view.Camera;
+import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
+import fi.jakojaannos.roguelite.engine.view.rendering.mesh.Mesh;
+import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexAttribute;
+import fi.jakojaannos.roguelite.engine.view.rendering.shader.EngineUniformBufferObjectIndices;
+import fi.jakojaannos.roguelite.engine.view.rendering.shader.ShaderProgram;
 import fi.jakojaannos.roguelite.game.DebugConfig;
 import fi.jakojaannos.roguelite.game.data.components.NoDrawTag;
 import fi.jakojaannos.roguelite.game.data.components.SpriteInfo;
@@ -15,14 +18,12 @@ import fi.jakojaannos.roguelite.game.view.systems.SpriteRenderingSystem;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Matrix4f;
+import org.lwjgl.system.MemoryStack;
 
 import java.nio.file.Path;
 import java.util.stream.Stream;
 
-import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL30.*;
-import static org.lwjgl.opengl.GL31.glGetUniformBlockIndex;
-import static org.lwjgl.opengl.GL31.glUniformBlockBinding;
+import static org.lwjgl.opengl.GL20.glPointSize;
 
 @Slf4j
 public class EntityTransformRenderingSystem implements ECSSystem, AutoCloseable {
@@ -34,44 +35,35 @@ public class EntityTransformRenderingSystem implements ECSSystem, AutoCloseable 
 
     private final Camera camera;
     private final ShaderProgram shader;
-    private final int uniformModelMatrix;
 
-    private int vao;
-    private int vbo;
-    private int ebo;
+    private final Mesh mesh;
 
     private final Matrix4f modelMatrix = new Matrix4f();
 
     public EntityTransformRenderingSystem(
             final Path assetRoot,
-            final Camera camera
+            final Camera camera,
+            final RenderingBackend backend
     ) {
         this.camera = camera;
-        this.shader = ShaderProgram.builder()
-                                   .vertexShader(assetRoot.resolve("shaders/passthrough.vert"))
-                                   .attributeLocation(0, "in_pos")
-                                   .build();
+        this.shader = backend.createShaderProgram()
+                             .vertexShader(assetRoot.resolve("shaders/passthrough.vert"))
+                             .attributeLocation(0, "in_pos")
+                             .build();
 
-        this.uniformModelMatrix = this.shader.getUniformLocation("model");
-        int uniformCameraInfoBlock = glGetUniformBlockIndex(this.shader.getShaderProgram(), "CameraInfo");
-        glUniformBlockBinding(this.shader.getShaderProgram(), uniformCameraInfoBlock, UniformBufferObjectIndices.CAMERA);
+        this.shader.bindUniformBlock("CameraInfo", EngineUniformBufferObjectIndices.CAMERA);
 
-        this.vao = glGenVertexArrays();
-        glBindVertexArray(this.vao);
-
-        val vertices = new float[]{0.0f, 0.0f};
-        this.vbo = glGenBuffers();
-        this.ebo = glGenBuffers();
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this.ebo);
-        val indices = new int[]{0};
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
-
-        glBindVertexArray(this.vao);
-        glBindBuffer(GL_ARRAY_BUFFER, this.vbo);
-        glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
-
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 2, GL_FLOAT, false, 4 * 2, 0);
+        val vertexFormat = backend.getVertexFormat()
+                                  .withAttribute(VertexAttribute.Type.FLOAT, 2, false)
+                                  .build();
+        this.mesh = backend.createMesh(vertexFormat);
+        this.mesh.setElements(0);
+        try (val stack = MemoryStack.stackPush()) {
+            val vertexData = stack.malloc(2 * 4);
+            vertexData.putFloat(0, 0.0f);
+            vertexData.putFloat(4, 0.0f);
+            this.mesh.setVertexData(vertexData);
+        }
     }
 
     @Override
@@ -82,7 +74,7 @@ public class EntityTransformRenderingSystem implements ECSSystem, AutoCloseable 
         this.shader.use();
         this.camera.useWorldCoordinates();
 
-        glBindVertexArray(this.vao);
+        this.mesh.startDrawing();
         glPointSize(5.0f);
         entities.forEach(
                 entity -> {
@@ -91,22 +83,19 @@ public class EntityTransformRenderingSystem implements ECSSystem, AutoCloseable 
                     }
 
                     Transform transform = world.getEntityManager().getComponentOf(entity, Transform.class).orElseThrow();
-                    this.shader.setUniformMat4x4(this.uniformModelMatrix,
+                    this.shader.setUniformMat4x4("model",
                                                  modelMatrix.identity()
                                                             .translate((float) transform.position.x,
                                                                        (float) transform.position.y, 0.0f)
                     );
-                    glDrawElements(GL_POINTS, 1, GL_UNSIGNED_INT, 0);
+                    this.mesh.drawAsPoints(1);
                 }
         );
     }
 
     @Override
-    public void close() {
-        glDeleteVertexArrays(this.vao);
-        glDeleteBuffers(this.vbo);
-        glDeleteBuffers(this.ebo);
-
+    public void close() throws Exception {
+        this.mesh.close();
         this.shader.close();
     }
 }

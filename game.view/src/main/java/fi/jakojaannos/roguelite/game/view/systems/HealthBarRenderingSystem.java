@@ -5,12 +5,12 @@ import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.lwjgl.UniformBufferObjectIndices;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.shader.ShaderProgram;
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.Mesh;
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexAttribute;
+import fi.jakojaannos.roguelite.engine.view.rendering.shader.EngineUniformBufferObjectIndices;
+import fi.jakojaannos.roguelite.engine.view.rendering.shader.ShaderProgram;
 import fi.jakojaannos.roguelite.game.data.components.Health;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
 import lombok.val;
@@ -20,9 +20,6 @@ import org.lwjgl.system.MemoryUtil;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.util.stream.Stream;
-
-import static org.lwjgl.opengl.GL31.glGetUniformBlockIndex;
-import static org.lwjgl.opengl.GL31.glUniformBlockBinding;
 
 public class HealthBarRenderingSystem implements ECSSystem, AutoCloseable {
     @Override
@@ -38,8 +35,6 @@ public class HealthBarRenderingSystem implements ECSSystem, AutoCloseable {
 
     private final Camera camera;
     private final ShaderProgram shader;
-    private final int uniformModelMatrix;
-    private final int uniformHealth;
 
     private final ByteBuffer vertexDataBuffer;
     private final Mesh mesh;
@@ -50,18 +45,15 @@ public class HealthBarRenderingSystem implements ECSSystem, AutoCloseable {
             final RenderingBackend backend
     ) {
         this.camera = camera;
-        this.shader = ShaderProgram.builder()
-                                   .vertexShader(assetRoot.resolve("shaders/healthbar.vert"))
-                                   .attributeLocation(0, "in_pos")
-                                   .attributeLocation(1, "in_percent")
-                                   .fragmentShader(assetRoot.resolve("shaders/healthbar.frag"))
-                                   .fragmentDataLocation(0, "out_fragColor")
-                                   .build();
+        this.shader = backend.createShaderProgram()
+                             .vertexShader(assetRoot.resolve("shaders/healthbar.vert"))
+                             .attributeLocation(0, "in_pos")
+                             .attributeLocation(1, "in_percent")
+                             .fragmentShader(assetRoot.resolve("shaders/healthbar.frag"))
+                             .fragmentDataLocation(0, "out_fragColor")
+                             .build();
 
-        this.uniformHealth = this.shader.getUniformLocation("health");
-        this.uniformModelMatrix = this.shader.getUniformLocation("model");
-        int uniformCameraInfoBlock = glGetUniformBlockIndex(this.shader.getShaderProgram(), "CameraInfo");
-        glUniformBlockBinding(this.shader.getShaderProgram(), uniformCameraInfoBlock, UniformBufferObjectIndices.CAMERA);
+        this.shader.bindUniformBlock("CameraInfo", EngineUniformBufferObjectIndices.CAMERA);
 
 
         val vertexFormat = backend.getVertexFormat()
@@ -96,6 +88,8 @@ public class HealthBarRenderingSystem implements ECSSystem, AutoCloseable {
         val entityManager = world.getEntityManager();
         val timeManager = world.getOrCreateResource(Time.class);
         val healthbarDurationInTicks = timeManager.convertToTicks(5.0);
+
+        this.mesh.startDrawing();
         entities.forEach(entity -> {
             val transform = entityManager.getComponentOf(entity, Transform.class).orElseThrow();
             val health = entityManager.getComponentOf(entity, Health.class).orElseThrow();
@@ -105,9 +99,9 @@ public class HealthBarRenderingSystem implements ECSSystem, AutoCloseable {
                 return;
             }
 
-            this.shader.setUniform1f(uniformHealth, (float) health.asPercentage());
+            this.shader.setUniform1f("health", (float) health.asPercentage());
 
-            this.shader.setUniformMat4x4(uniformModelMatrix,
+            this.shader.setUniformMat4x4("model",
                                          new Matrix4f().translate((float) transform.position.x,
                                                                   (float) transform.position.y,
                                                                   (float) 0.0)

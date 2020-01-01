@@ -1,7 +1,7 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view;
 
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
-import fi.jakojaannos.roguelite.engine.lwjgl.UniformBufferObjectIndices;
+import fi.jakojaannos.roguelite.engine.view.rendering.shader.EngineUniformBufferObjectIndices;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
@@ -79,12 +79,12 @@ public class LWJGLCamera extends Camera implements AutoCloseable {
 
     @Override
     public void useWorldCoordinates() {
-        glBindBufferBase(GL_UNIFORM_BUFFER, UniformBufferObjectIndices.CAMERA, this.worldCameraMatricesUbo);
+        glBindBufferBase(GL_UNIFORM_BUFFER, EngineUniformBufferObjectIndices.CAMERA, this.worldCameraMatricesUbo);
     }
 
     @Override
     public void useScreenCoordinates() {
-        glBindBufferBase(GL_UNIFORM_BUFFER, UniformBufferObjectIndices.CAMERA, this.screenCameraMatricesUbo);
+        glBindBufferBase(GL_UNIFORM_BUFFER, EngineUniformBufferObjectIndices.CAMERA, this.screenCameraMatricesUbo);
     }
 
     @Override

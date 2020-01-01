@@ -1,5 +1,6 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.shader;
 
+import fi.jakojaannos.roguelite.engine.view.rendering.shader.ShaderProgram;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -7,21 +8,21 @@ import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryStack;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.glBindFragDataLocation;
+import static org.lwjgl.opengl.GL31.glGetUniformBlockIndex;
+import static org.lwjgl.opengl.GL31.glUniformBlockBinding;
 
 @Slf4j
-public class ShaderProgram implements AutoCloseable {
+class LWJGLShaderProgram implements AutoCloseable, ShaderProgram {
     @Getter private final int shaderProgram;
     private final Collection<Shader> shaders;
+    private Map<String, Integer> uniformLocations = new HashMap<>();
 
-    public static ShaderBuilder builder() {
-        return new ShaderBuilder();
-    }
-
-    ShaderProgram(
+    LWJGLShaderProgram(
             final int programPtr,
             final Collection<Shader> shaders,
             final Map<Integer, String> attributeLocations,
@@ -40,28 +41,42 @@ public class ShaderProgram implements AutoCloseable {
         }
     }
 
+    @Override
     public void use() {
         glUseProgram(this.shaderProgram);
     }
 
-    public void setUniformMat4x4(final int uniformLocation, final Matrix4f matrix) {
+    @Override
+    public void bindUniformBlock(final String blockName, final int uniformObjectIndex) {
+        int blockIndex = glGetUniformBlockIndex(this.shaderProgram, blockName);
+        glUniformBlockBinding(this.shaderProgram, blockIndex, uniformObjectIndex);
+    }
+
+    @Override
+    public void setUniformMat4x4(final String uniformName, final Matrix4f matrix) {
         try (val stack = MemoryStack.stackPush()) {
-            glUniformMatrix4fv(uniformLocation, false, matrix.get(stack.mallocFloat(16)));
+            glUniformMatrix4fv(this.uniformLocations.computeIfAbsent(uniformName,
+                                                                     this::getUniformLocation),
+                               false,
+                               matrix.get(stack.mallocFloat(16)));
         }
     }
 
-    public void setUniform1f(final int uniformLocation, final float value) {
-        glUniform1f(uniformLocation, value);
+    @Override
+    public void setUniform1f(final String uniformName, final float value) {
+        glUniform1f(this.uniformLocations.computeIfAbsent(uniformName,
+                                                          this::getUniformLocation),
+                    value);
     }
 
     public int getUniformLocation(final String name) {
-        return glGetUniformLocation(shaderProgram, name);
+        return glGetUniformLocation(this.shaderProgram, name);
     }
 
     @Override
     public void close() {
+        this.uniformLocations.clear();
         this.shaders.forEach(Shader::close);
-
         glDeleteProgram(this.shaderProgram);
     }
 }

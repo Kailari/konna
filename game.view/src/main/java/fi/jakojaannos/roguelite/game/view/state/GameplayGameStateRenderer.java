@@ -67,8 +67,8 @@ public class GameplayGameStateRenderer extends GameStateRenderer {
                                       .withSystem(new HealthBarRenderingSystem(assetRoot, camera, backend));
 
         if (DebugConfig.debugModeEnabled) {
-            builder.withSystem(new EntityCollisionBoundsRenderingSystem(assetRoot, camera));
-            builder.withSystem(new EntityTransformRenderingSystem(assetRoot, camera));
+            builder.withSystem(new EntityCollisionBoundsRenderingSystem(assetRoot, camera, backend));
+            builder.withSystem(new EntityTransformRenderingSystem(assetRoot, camera, backend));
         }
 
         return builder.build();

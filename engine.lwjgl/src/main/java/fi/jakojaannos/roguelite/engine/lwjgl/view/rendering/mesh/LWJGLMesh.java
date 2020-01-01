@@ -31,10 +31,6 @@ public class LWJGLMesh implements AutoCloseable, Mesh {
 
     @Override
     public void setElements(final int... indices) {
-        if (indices.length % 3 != 0) {
-            throw new IllegalArgumentException("Number of indices must by divisible by 3!");
-        }
-
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this.ebo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
     }
@@ -62,9 +58,18 @@ public class LWJGLMesh implements AutoCloseable, Mesh {
     }
 
     @Override
-    public void draw(final int nIndices) {
+    public void startDrawing() {
         glBindVertexArray(this.vao);
+    }
+
+    @Override
+    public void draw(final int nIndices) {
         glDrawElements(GL_TRIANGLES, nIndices, GL_UNSIGNED_INT, NULL);
+    }
+
+    @Override
+    public void drawAsPoints(final int nIndices) {
+        glDrawElements(GL_POINTS, nIndices, GL_UNSIGNED_INT, NULL);
     }
 
     @Override

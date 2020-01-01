@@ -1,9 +1,10 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text;
 
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
-import fi.jakojaannos.roguelite.engine.lwjgl.UniformBufferObjectIndices;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.shader.ShaderProgram;
 import fi.jakojaannos.roguelite.engine.view.Camera;
+import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
+import fi.jakojaannos.roguelite.engine.view.rendering.shader.EngineUniformBufferObjectIndices;
+import fi.jakojaannos.roguelite.engine.view.rendering.shader.ShaderProgram;
 import fi.jakojaannos.roguelite.engine.view.text.Font;
 import fi.jakojaannos.roguelite.engine.view.text.TextRenderer;
 import lombok.extern.slf4j.Slf4j;
@@ -21,8 +22,6 @@ import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.*;
-import static org.lwjgl.opengl.GL31.glGetUniformBlockIndex;
-import static org.lwjgl.opengl.GL31.glUniformBlockBinding;
 import static org.lwjgl.stb.STBTruetype.stbtt_GetCodepointKernAdvance;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
@@ -32,7 +31,6 @@ public class LWJGLTextRenderer implements TextRenderer {
 
     private final ShaderProgram shader;
     private final Camera camera;
-    private final int uniformModelMatrix;
 
     private final ByteBuffer vertexDataBuffer;
     private final int vao;
@@ -41,14 +39,13 @@ public class LWJGLTextRenderer implements TextRenderer {
 
     public LWJGLTextRenderer(
             final Path assetRoot,
-            final Camera camera
+            final Camera camera,
+            final RenderingBackend backend
     ) {
         this.camera = camera;
 
-        this.shader = createShader(assetRoot);
-        this.uniformModelMatrix = this.shader.getUniformLocation("model");
-        int uniformCameraInfoBlock = glGetUniformBlockIndex(this.shader.getShaderProgram(), "CameraInfo");
-        glUniformBlockBinding(this.shader.getShaderProgram(), uniformCameraInfoBlock, UniformBufferObjectIndices.CAMERA);
+        this.shader = createShader(assetRoot, backend);
+        this.shader.bindUniformBlock("CameraInfo", EngineUniformBufferObjectIndices.CAMERA);
 
         this.vao = glGenVertexArrays();
         glBindVertexArray(this.vao);
@@ -75,7 +72,7 @@ public class LWJGLTextRenderer implements TextRenderer {
     ) {
         this.camera.useScreenCoordinates();
         this.shader.use();
-        this.shader.setUniformMat4x4(this.uniformModelMatrix, new Matrix4f().identity());
+        this.shader.setUniformMat4x4("model", new Matrix4f().identity());
         draw(x, y + fontSize, fontSize, font, string);
     }
 
@@ -106,10 +103,10 @@ public class LWJGLTextRenderer implements TextRenderer {
         // FIXME: Remove cast by moving screen unit size handling somewhere more sensible or
         //  abstracting it to something more generic
         val scaleFactor = 1.0 / ((LWJGLCamera) this.camera).getTargetScreenSizeInUnits();
-        this.shader.setUniformMat4x4(this.uniformModelMatrix, new Matrix4f().identity()
-                                                                            .scale((float) scaleFactor,
-                                                                                   (float) scaleFactor,
-                                                                                   1.0f));
+        this.shader.setUniformMat4x4("model", new Matrix4f().identity()
+                                                            .scale((float) scaleFactor,
+                                                                   (float) scaleFactor,
+                                                                   1.0f));
 
         draw(x / scaleFactor, y / scaleFactor, fontSize, font, string);
     }
@@ -240,19 +237,22 @@ public class LWJGLTextRenderer implements TextRenderer {
         return (offset - center) * factor + center;
     }
 
-    private static ShaderProgram createShader(final Path assetRoot) {
-        return ShaderProgram.builder()
-                            .vertexShader(assetRoot.resolve("shaders").resolve("text.vert"))
-                            .fragmentShader(assetRoot.resolve("shaders").resolve("text.frag"))
-                            .attributeLocation(0, "in_pos")
-                            .attributeLocation(1, "in_uv")
-                            .attributeLocation(2, "in_tint")
-                            .fragmentDataLocation(0, "out_fragColor")
-                            .build();
+    private static ShaderProgram createShader(
+            final Path assetRoot,
+            final RenderingBackend backend
+    ) {
+        return backend.createShaderProgram()
+                      .vertexShader(assetRoot.resolve("shaders/text.vert"))
+                      .fragmentShader(assetRoot.resolve("shaders/text.frag"))
+                      .attributeLocation(0, "in_pos")
+                      .attributeLocation(1, "in_uv")
+                      .attributeLocation(2, "in_tint")
+                      .fragmentDataLocation(0, "out_fragColor")
+                      .build();
     }
 
     @Override
-    public void close() {
+    public void close() throws Exception {
         MemoryUtil.memFree(this.vertexDataBuffer);
         glDeleteVertexArrays(this.vao);
         glDeleteBuffers(this.vbo);

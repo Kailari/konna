@@ -4,9 +4,10 @@ import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.lwjgl.UniformBufferObjectIndices;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.shader.ShaderProgram;
 import fi.jakojaannos.roguelite.engine.view.Camera;
+import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
+import fi.jakojaannos.roguelite.engine.view.rendering.shader.EngineUniformBufferObjectIndices;
+import fi.jakojaannos.roguelite.engine.view.rendering.shader.ShaderProgram;
 import fi.jakojaannos.roguelite.game.DebugConfig;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.NoDrawTag;
@@ -22,8 +23,6 @@ import java.util.stream.Stream;
 
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
-import static org.lwjgl.opengl.GL31.glGetUniformBlockIndex;
-import static org.lwjgl.opengl.GL31.glUniformBlockBinding;
 
 @Slf4j
 public class EntityCollisionBoundsRenderingSystem implements ECSSystem, AutoCloseable {
@@ -36,7 +35,6 @@ public class EntityCollisionBoundsRenderingSystem implements ECSSystem, AutoClos
 
     private final Camera camera;
     private final ShaderProgram shader;
-    private final int uniformModelMatrix;
 
     private int vao;
     private int vbo;
@@ -46,19 +44,18 @@ public class EntityCollisionBoundsRenderingSystem implements ECSSystem, AutoClos
 
     public EntityCollisionBoundsRenderingSystem(
             final Path assetRoot,
-            final Camera camera
+            final Camera camera,
+            final RenderingBackend backend
     ) {
         this.camera = camera;
-        this.shader = ShaderProgram.builder()
-                                   .vertexShader(assetRoot.resolve("shaders/passthrough.vert"))
-                                   .fragmentShader(assetRoot.resolve("shaders/bounds.frag"))
-                                   .attributeLocation(0, "in_pos")
-                                   .fragmentDataLocation(0, "out_fragColor")
-                                   .build();
+        this.shader = backend.createShaderProgram()
+                             .vertexShader(assetRoot.resolve("shaders/passthrough.vert"))
+                             .fragmentShader(assetRoot.resolve("shaders/bounds.frag"))
+                             .attributeLocation(0, "in_pos")
+                             .fragmentDataLocation(0, "out_fragColor")
+                             .build();
 
-        this.uniformModelMatrix = this.shader.getUniformLocation("model");
-        int uniformCameraInfoBlock = glGetUniformBlockIndex(this.shader.getShaderProgram(), "CameraInfo");
-        glUniformBlockBinding(this.shader.getShaderProgram(), uniformCameraInfoBlock, UniformBufferObjectIndices.CAMERA);
+        this.shader.bindUniformBlock("CameraInfo", EngineUniformBufferObjectIndices.CAMERA);
 
         this.vao = glGenVertexArrays();
         glBindVertexArray(this.vao);
@@ -105,7 +102,7 @@ public class EntityCollisionBoundsRenderingSystem implements ECSSystem, AutoClos
 
                     Transform transform = world.getEntityManager().getComponentOf(entity, Transform.class).orElseThrow();
                     Collider collider = world.getEntityManager().getComponentOf(entity, Collider.class).orElseThrow();
-                    this.shader.setUniformMat4x4(this.uniformModelMatrix,
+                    this.shader.setUniformMat4x4("model",
                                                  modelMatrix.identity()
                                                             .translate((float) transform.position.x,
                                                                        (float) transform.position.y, 0.0f));
@@ -126,7 +123,7 @@ public class EntityCollisionBoundsRenderingSystem implements ECSSystem, AutoClos
     }
 
     @Override
-    public void close() {
+    public void close() throws Exception {
         glDeleteVertexArrays(this.vao);
         glDeleteBuffers(this.vbo);
         glDeleteBuffers(this.ebo);

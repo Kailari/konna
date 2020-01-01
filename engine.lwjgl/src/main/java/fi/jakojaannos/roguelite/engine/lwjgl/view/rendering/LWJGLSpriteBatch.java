@@ -1,7 +1,5 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering;
 
-import fi.jakojaannos.roguelite.engine.lwjgl.UniformBufferObjectIndices;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.shader.ShaderProgram;
 import fi.jakojaannos.roguelite.engine.utilities.math.RotatedRectangle;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatchBase;
@@ -10,6 +8,8 @@ import fi.jakojaannos.roguelite.engine.view.rendering.TextureRegion;
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.Mesh;
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexAttribute;
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexFormat;
+import fi.jakojaannos.roguelite.engine.view.rendering.shader.EngineUniformBufferObjectIndices;
+import fi.jakojaannos.roguelite.engine.view.rendering.shader.ShaderProgram;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Matrix4f;
@@ -19,9 +19,6 @@ import org.lwjgl.system.MemoryUtil;
 import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
-
-import static org.lwjgl.opengl.GL31.glGetUniformBlockIndex;
-import static org.lwjgl.opengl.GL31.glUniformBlockBinding;
 
 @Slf4j
 public class LWJGLSpriteBatch extends SpriteBatchBase {
@@ -35,7 +32,6 @@ public class LWJGLSpriteBatch extends SpriteBatchBase {
 
     private final Mesh batchMesh;
     private final ShaderProgram shader;
-    private final int uniformModelMatrix;
 
     private final ByteBuffer vertexDataBuffer;
 
@@ -52,10 +48,8 @@ public class LWJGLSpriteBatch extends SpriteBatchBase {
                                                  .withAttribute(VertexAttribute.Type.FLOAT, 3, false)
                                                  .build();
 
-        this.shader = createShader(assetRoot, shader);
-        this.uniformModelMatrix = this.shader.getUniformLocation("model");
-        int uniformCameraInfoBlock = glGetUniformBlockIndex(this.shader.getShaderProgram(), "CameraInfo");
-        glUniformBlockBinding(this.shader.getShaderProgram(), uniformCameraInfoBlock, UniformBufferObjectIndices.CAMERA);
+        this.shader = createShader(assetRoot, shader, backend);
+        this.shader.bindUniformBlock("CameraInfo", EngineUniformBufferObjectIndices.CAMERA);
 
         this.batchMesh = backend.createMesh(vertexFormat);
         this.batchMesh.setElements(constructIndicesArray());
@@ -128,10 +122,9 @@ public class LWJGLSpriteBatch extends SpriteBatchBase {
     ) {
         this.shader.use();
         texture.use();
+        this.batchMesh.startDrawing();
 
-        int uniformCameraInfoBlock = glGetUniformBlockIndex(this.shader.getShaderProgram(), "CameraInfo");
-        glUniformBlockBinding(this.shader.getShaderProgram(), uniformCameraInfoBlock, UniformBufferObjectIndices.CAMERA);
-        this.shader.setUniformMat4x4(this.uniformModelMatrix,
+        this.shader.setUniformMat4x4("model",
                                      transformation != null
                                              ? transformation
                                              : DEFAULT_TRANSFORM);
@@ -163,14 +156,18 @@ public class LWJGLSpriteBatch extends SpriteBatchBase {
         return indices;
     }
 
-    private static ShaderProgram createShader(final Path assetRoot, final String shader) {
-        return ShaderProgram.builder()
-                            .vertexShader(assetRoot.resolve("shaders").resolve(shader + ".vert"))
-                            .fragmentShader(assetRoot.resolve("shaders").resolve(shader + ".frag"))
-                            .attributeLocation(0, "in_pos")
-                            .attributeLocation(1, "in_uv")
-                            .attributeLocation(2, "in_tint")
-                            .fragmentDataLocation(0, "out_fragColor")
-                            .build();
+    private static ShaderProgram createShader(
+            final Path assetRoot,
+            final String shader,
+            final RenderingBackend backend
+    ) {
+        return backend.createShaderProgram()
+                      .vertexShader(assetRoot.resolve("shaders").resolve(shader + ".vert"))
+                      .fragmentShader(assetRoot.resolve("shaders").resolve(shader + ".frag"))
+                      .attributeLocation(0, "in_pos")
+                      .attributeLocation(1, "in_uv")
+                      .attributeLocation(2, "in_tint")
+                      .fragmentDataLocation(0, "out_fragColor")
+                      .build();
     }
 }
