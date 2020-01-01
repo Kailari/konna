@@ -2,6 +2,7 @@ package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.mesh;
 
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.Mesh;
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexFormat;
+import lombok.Setter;
 import lombok.val;
 
 import java.nio.ByteBuffer;
@@ -15,6 +16,7 @@ public class LWJGLMesh implements AutoCloseable, Mesh {
     private final int ebo;
     private final int vbo;
     private final VertexFormat vertexFormat;
+    @Setter private float pointSize = 1.0f;
 
     public LWJGLMesh(final VertexFormat vertexFormat) {
         this.vertexFormat = vertexFormat;
@@ -59,6 +61,7 @@ public class LWJGLMesh implements AutoCloseable, Mesh {
 
     @Override
     public void startDrawing() {
+        glPointSize(this.pointSize);
         glBindVertexArray(this.vao);
     }
 
@@ -70,6 +73,11 @@ public class LWJGLMesh implements AutoCloseable, Mesh {
     @Override
     public void drawAsPoints(final int nIndices) {
         glDrawElements(GL_POINTS, nIndices, GL_UNSIGNED_INT, NULL);
+    }
+
+    @Override
+    public void drawAsLineLoop(final int nIndices) {
+        glDrawElements(GL_LINE_LOOP, nIndices, GL_UNSIGNED_INT, NULL);
     }
 
     @Override

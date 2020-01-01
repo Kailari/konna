@@ -13,13 +13,13 @@ public interface Mesh extends AutoCloseable {
             int vertexCount
     );
 
-    default void updateVertexData(final ByteBuffer vertexData) {
-        updateVertexData(vertexData, 0, vertexData.limit());
-    }
-
     void draw(int nIndices);
 
     void drawAsPoints(int nIndices);
 
+    void drawAsLineLoop(int nIndices);
+
     void startDrawing();
+
+    void setPointSize(float value);
 }

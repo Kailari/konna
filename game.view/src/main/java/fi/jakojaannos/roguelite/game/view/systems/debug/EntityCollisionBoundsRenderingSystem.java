@@ -6,6 +6,8 @@ import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
+import fi.jakojaannos.roguelite.engine.view.rendering.mesh.Mesh;
+import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexAttribute;
 import fi.jakojaannos.roguelite.engine.view.rendering.shader.EngineUniformBufferObjectIndices;
 import fi.jakojaannos.roguelite.engine.view.rendering.shader.ShaderProgram;
 import fi.jakojaannos.roguelite.game.DebugConfig;
@@ -17,12 +19,10 @@ import fi.jakojaannos.roguelite.game.view.systems.SpriteRenderingSystem;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Matrix4f;
+import org.lwjgl.system.MemoryStack;
 
 import java.nio.file.Path;
 import java.util.stream.Stream;
-
-import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL30.*;
 
 @Slf4j
 public class EntityCollisionBoundsRenderingSystem implements ECSSystem, AutoCloseable {
@@ -35,10 +35,7 @@ public class EntityCollisionBoundsRenderingSystem implements ECSSystem, AutoClos
 
     private final Camera camera;
     private final ShaderProgram shader;
-
-    private int vao;
-    private int vbo;
-    private int ebo;
+    private final Mesh mesh;
 
     private final Matrix4f modelMatrix = new Matrix4f();
 
@@ -57,31 +54,31 @@ public class EntityCollisionBoundsRenderingSystem implements ECSSystem, AutoClos
 
         this.shader.bindUniformBlock("CameraInfo", EngineUniformBufferObjectIndices.CAMERA);
 
-        this.vao = glGenVertexArrays();
-        glBindVertexArray(this.vao);
-
+        val vertexFormat = backend.getVertexFormat()
+                                  .withAttribute(VertexAttribute.Type.FLOAT, 2, false)
+                                  .build();
+        this.mesh = backend.createMesh(vertexFormat);
         val posX = 0.0f;
         val posY = 0.0f;
         val width = 1.0f;
         val height = 1.0f;
-        val vertices = new float[]{
-                posX, posY,
-                posX + width, posY,
-                posX + width, posY + height,
-                posX, posY + height,
-        };
-        this.vbo = glGenBuffers();
-        this.ebo = glGenBuffers();
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this.ebo);
-        val indices = new int[]{0, 1, 3, 2,};
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
+        try (val stack = MemoryStack.stackPush()) {
+            val vertexData = stack.malloc(8 * 4);
+            vertexData.putFloat(0, posX);
+            vertexData.putFloat(4, posY);
 
-        glBindVertexArray(this.vao);
-        glBindBuffer(GL_ARRAY_BUFFER, this.vbo);
-        glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
+            vertexData.putFloat(8, posX + width);
+            vertexData.putFloat(12, posY);
 
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 2, GL_FLOAT, false, 4 * 2, 0);
+            vertexData.putFloat(16, posX + width);
+            vertexData.putFloat(20, posY + height);
+
+            vertexData.putFloat(24, posX);
+            vertexData.putFloat(28, posY + height);
+
+            this.mesh.setVertexData(vertexData);
+        }
+        this.mesh.setElements(0, 1, 3, 2);
     }
 
     @Override
@@ -92,8 +89,7 @@ public class EntityCollisionBoundsRenderingSystem implements ECSSystem, AutoClos
         this.shader.use();
         this.camera.useWorldCoordinates();
 
-        glBindVertexArray(this.vao);
-        glBindBuffer(GL_ARRAY_BUFFER, this.vbo);
+        this.mesh.startDrawing();
         entities.forEach(
                 entity -> {
                     if (world.getEntityManager().hasComponent(entity, NoDrawTag.class) || (!DebugConfig.renderBounds && world.getEntityManager().hasComponent(entity, SpriteInfo.class))) {
@@ -107,27 +103,23 @@ public class EntityCollisionBoundsRenderingSystem implements ECSSystem, AutoClos
                                                             .translate((float) transform.position.x,
                                                                        (float) transform.position.y, 0.0f));
                     val vertices = collider.getVerticesInLocalSpace(transform);
-                    val vertexArray = new float[8];
-                    for (int i = 0, j = 0; i < 4; ++i, j += 2) {
-                        vertexArray[j] = (float) vertices[i].x;
-                        vertexArray[j + 1] = (float) vertices[i].y;
+                    try (val stack = MemoryStack.stackPush()) {
+                        val vertexData = stack.malloc(8 * 4);
+                        for (int i = 0, j = 0; i < 4; ++i, j += 2) {
+                            vertexData.putFloat(j * 4, (float) vertices[i].x);
+                            vertexData.putFloat((j + 1) * 4, (float) vertices[i].y);
+                        }
+                        this.mesh.updateVertexData(vertexData, 0, 4);
                     }
 
-                    glBufferData(GL_ARRAY_BUFFER, vertexArray, GL_STATIC_DRAW);
-                    glEnableVertexAttribArray(0);
-                    glVertexAttribPointer(0, 2, GL_FLOAT, false, 4 * 2, 0);
-
-                    glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_INT, 0);
+                    this.mesh.drawAsLineLoop(4);
                 }
         );
     }
 
     @Override
     public void close() throws Exception {
-        glDeleteVertexArrays(this.vao);
-        glDeleteBuffers(this.vbo);
-        glDeleteBuffers(this.ebo);
-
+        this.mesh.close();
         this.shader.close();
     }
 }

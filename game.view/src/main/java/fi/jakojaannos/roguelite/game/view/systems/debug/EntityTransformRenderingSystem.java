@@ -23,8 +23,6 @@ import org.lwjgl.system.MemoryStack;
 import java.nio.file.Path;
 import java.util.stream.Stream;
 
-import static org.lwjgl.opengl.GL20.glPointSize;
-
 @Slf4j
 public class EntityTransformRenderingSystem implements ECSSystem, AutoCloseable {
     @Override
@@ -75,7 +73,7 @@ public class EntityTransformRenderingSystem implements ECSSystem, AutoCloseable 
         this.camera.useWorldCoordinates();
 
         this.mesh.startDrawing();
-        glPointSize(5.0f);
+        this.mesh.setPointSize(5.0f);
         entities.forEach(
                 entity -> {
                     if (world.getEntityManager().hasComponent(entity, NoDrawTag.class) || (!DebugConfig.renderTransform && world.getEntityManager().hasComponent(entity, SpriteInfo.class))) {
