@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.mesh;
+package fi.jakojaannos.roguelite.engine.view.rendering.mesh;
 
 import lombok.Getter;
 import lombok.val;

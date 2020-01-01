@@ -1,5 +1,7 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.mesh;
 
+import fi.jakojaannos.roguelite.engine.view.rendering.mesh.Mesh;
+import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexFormat;
 import lombok.val;
 
 import java.nio.ByteBuffer;
@@ -8,13 +10,13 @@ import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
-public class Mesh implements AutoCloseable {
+public class LWJGLMesh implements AutoCloseable, Mesh {
     private final int vao;
     private final int ebo;
     private final int vbo;
     private final VertexFormat vertexFormat;
 
-    public Mesh(final VertexFormat vertexFormat) {
+    public LWJGLMesh(final VertexFormat vertexFormat) {
         this.vertexFormat = vertexFormat;
 
         this.vao = glGenVertexArrays();
@@ -27,6 +29,7 @@ public class Mesh implements AutoCloseable {
         vertexFormat.apply();
     }
 
+    @Override
     public void setElements(final int... indices) {
         if (indices.length % 3 != 0) {
             throw new IllegalArgumentException("Number of indices must by divisible by 3!");
@@ -36,6 +39,7 @@ public class Mesh implements AutoCloseable {
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
     }
 
+    @Override
     public void setVertexData(final ByteBuffer vertexData) {
         glBindVertexArray(this.vao);
         glBindBuffer(GL_ARRAY_BUFFER, this.vbo);
@@ -43,10 +47,7 @@ public class Mesh implements AutoCloseable {
         this.vertexFormat.apply();
     }
 
-    public void updateVertexData(final ByteBuffer vertexData) {
-        updateVertexData(vertexData, 0, vertexData.limit());
-    }
-
+    @Override
     public void updateVertexData(
             final ByteBuffer vertexData,
             final int destOffsetInBytes,
@@ -60,6 +61,7 @@ public class Mesh implements AutoCloseable {
         vertexData.limit(limitBefore);
     }
 
+    @Override
     public void draw(final int nIndices) {
         glBindVertexArray(this.vao);
         glDrawElements(GL_TRIANGLES, nIndices, GL_UNSIGNED_INT, NULL);

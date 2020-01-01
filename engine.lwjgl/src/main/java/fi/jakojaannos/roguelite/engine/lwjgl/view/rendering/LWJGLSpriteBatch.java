@@ -1,14 +1,15 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering;
 
 import fi.jakojaannos.roguelite.engine.lwjgl.UniformBufferObjectIndices;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.mesh.Mesh;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.mesh.VertexAttribute;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.mesh.VertexFormat;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.shader.ShaderProgram;
 import fi.jakojaannos.roguelite.engine.utilities.math.RotatedRectangle;
+import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatchBase;
 import fi.jakojaannos.roguelite.engine.view.rendering.Texture;
 import fi.jakojaannos.roguelite.engine.view.rendering.TextureRegion;
+import fi.jakojaannos.roguelite.engine.view.rendering.mesh.Mesh;
+import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexAttribute;
+import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexFormat;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Matrix4f;
@@ -32,14 +33,7 @@ public class LWJGLSpriteBatch extends SpriteBatchBase {
     private final RotatedRectangle tmpRectangle = new RotatedRectangle();
     private final Vector2d tmpVertex = new Vector2d();
 
-    private static final VertexFormat VERTEX_FORMAT = new VertexFormat(
-            new VertexAttribute(VertexAttribute.Type.FLOAT, 2, false),
-            new VertexAttribute(VertexAttribute.Type.FLOAT, 2, false),
-            new VertexAttribute(VertexAttribute.Type.FLOAT, 3, false)
-    );
-
     private final Mesh batchMesh;
-
     private final ShaderProgram shader;
     private final int uniformModelMatrix;
 
@@ -47,16 +41,23 @@ public class LWJGLSpriteBatch extends SpriteBatchBase {
 
     public LWJGLSpriteBatch(
             final Path assetRoot,
-            final String shader
+            final String shader,
+            final RenderingBackend backend
     ) {
         super(MAX_SPRITES_PER_BATCH);
+
+        final VertexFormat vertexFormat = backend.getVertexFormat()
+                                                 .withAttribute(VertexAttribute.Type.FLOAT, 2, false)
+                                                 .withAttribute(VertexAttribute.Type.FLOAT, 2, false)
+                                                 .withAttribute(VertexAttribute.Type.FLOAT, 3, false)
+                                                 .build();
 
         this.shader = createShader(assetRoot, shader);
         this.uniformModelMatrix = this.shader.getUniformLocation("model");
         int uniformCameraInfoBlock = glGetUniformBlockIndex(this.shader.getShaderProgram(), "CameraInfo");
         glUniformBlockBinding(this.shader.getShaderProgram(), uniformCameraInfoBlock, UniformBufferObjectIndices.CAMERA);
 
-        this.batchMesh = new Mesh(VERTEX_FORMAT);
+        this.batchMesh = backend.createMesh(vertexFormat);
         this.batchMesh.setElements(constructIndicesArray());
 
         this.vertexDataBuffer = MemoryUtil.memAlloc(MAX_SPRITES_PER_BATCH * VERTICES_PER_SPRITE * SIZE_IN_BYTES);
@@ -143,7 +144,7 @@ public class LWJGLSpriteBatch extends SpriteBatchBase {
     }
 
     @Override
-    public void close() {
+    public void close() throws Exception {
         MemoryUtil.memFree(this.vertexDataBuffer);
         this.batchMesh.close();
         this.shader.close();
