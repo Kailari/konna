@@ -9,15 +9,22 @@ import fi.jakojaannos.roguelite.engine.input.ButtonInput;
 import fi.jakojaannos.roguelite.engine.input.InputAxis;
 import fi.jakojaannos.roguelite.engine.input.InputButton;
 import fi.jakojaannos.roguelite.engine.state.GameState;
+import fi.jakojaannos.roguelite.engine.utilities.UpdateableTimeManager;
 import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
 import fi.jakojaannos.roguelite.game.data.resources.Mouse;
 import fi.jakojaannos.roguelite.game.state.GameplayGameState;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 @Slf4j
+@NoArgsConstructor
 public class Roguelite extends GameBase {
+    public Roguelite(final UpdateableTimeManager timeManager) {
+        super(timeManager);
+    }
+
     @Override
     public GameState tick(
             final GameState state,

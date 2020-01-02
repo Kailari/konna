@@ -5,15 +5,14 @@ import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.UIBuilder;
+import lombok.val;
 import org.joml.Vector2d;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static fi.jakojaannos.roguelite.engine.view.test.utilities.ui.AssertUI.assertUI;
 import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.absolute;
 import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.percentOf;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class UIElementBoundaryCalculationSystemTest_SelfRelativeProportions {
     private static final int VIEWPORT_WIDTH = 800;
@@ -212,10 +211,10 @@ public class UIElementBoundaryCalculationSystemTest_SelfRelativeProportions {
                 .build();
         userInterface.update(new Vector2d(0), false);
 
-        assertUI(userInterface)
-                .hasExactlyOneElementWithName("a")
-                .with(UIProperty.MIN_X).equalTo(50)
-                .with(UIProperty.MAX_X).equalTo(VIEWPORT_WIDTH - 20)
-                .with(UIProperty.WIDTH).equalTo(VIEWPORT_WIDTH - (50 + 20));
+        val element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
+                                   .findFirst().orElseThrow();
+        assertEquals(50, element.getProperty(UIProperty.MIN_X).orElseThrow());
+        assertEquals(VIEWPORT_WIDTH - 20, element.getProperty(UIProperty.MAX_X).orElseThrow());
+        assertEquals(VIEWPORT_WIDTH - (50 + 20), element.getProperty(UIProperty.WIDTH).orElseThrow());
     }
 }

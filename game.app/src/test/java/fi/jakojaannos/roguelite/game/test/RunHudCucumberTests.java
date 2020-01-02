@@ -9,7 +9,8 @@ import org.junit.runner.RunWith;
                  features = "src/test/resources/hud",
                  glue = {
                          "fi.jakojaannos.roguelite.game.test.global",
-                         "fi.jakojaannos.roguelite.game.test.stepdefs.world",
+                         "fi.jakojaannos.roguelite.game.test.stepdefs.simulation",
+                         "fi.jakojaannos.roguelite.game.test.stepdefs.render",
                  }
                  //,tags = {"@problem"}
                  )

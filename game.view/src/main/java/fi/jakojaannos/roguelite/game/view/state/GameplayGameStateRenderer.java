@@ -21,6 +21,8 @@ import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.absolute;
 import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.percentOf;
 
 public class GameplayGameStateRenderer extends GameStateRenderer {
+    public static final String TIME_PLAYED_LABEL_NAME = "time-played-timer";
+
     public GameplayGameStateRenderer(
             final Path assetRoot,
             final Camera camera,
@@ -73,7 +75,7 @@ public class GameplayGameStateRenderer extends GameStateRenderer {
 
         val font = fontRegistry.getByAssetName("fonts/VCR_OSD_MONO.ttf");
         return UserInterface.builder(camera.getViewport(), font)
-                            .element("time-played-timer",
+                            .element(TIME_PLAYED_LABEL_NAME,
                                      UIElementType.LABEL,
                                      GameplayGameStateRenderer::buildTimePlayedTimer)
                             .build();

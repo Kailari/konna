@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.engine.view.test.utilities.ui;
+package fi.jakojaannos.roguelite.engine.utilities.assertions.ui;
 
 import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
@@ -20,12 +20,14 @@ public class AssertUI {
         this.userInterface = userInterface;
     }
 
-    public UIElementMatcher hasExactlyOneElementWithName(final String name) {
-        List<UIElement> elements = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, value -> value.equals(name))
-                                                .collect(Collectors.toList());
+    public UIElementMatcher hasExactlyOneElementWithName(
+            final String name
+    ) {
+        List<UIElement> elements = this.userInterface.findElementsWithMatchingProperty(UIProperty.NAME, value -> value.equals(name))
+                                                     .collect(Collectors.toList());
 
         assertEquals(1, elements.size(), "Expected there to be exactly one element with name \"" + name + "\"");
-        return new UIElementMatcher(elements.get(0));
+        return new UIElementMatcher(elements.get(0), this.userInterface.getWidth(), this.userInterface.getHeight());
     }
 
 }

@@ -5,12 +5,13 @@ import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.UIBuilder;
+import lombok.val;
 import org.joml.Vector2d;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static fi.jakojaannos.roguelite.engine.view.test.utilities.ui.AssertUI.assertUI;
 import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.absolute;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
     private static final int VIEWPORT_WIDTH = 800;
@@ -33,12 +34,12 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
                 .build();
         userInterface.update(new Vector2d(0), false);
 
-        assertUI(userInterface)
-                .hasExactlyOneElementWithName("a")
-                .with(UIProperty.MIN_X).equalTo(0)
-                .with(UIProperty.MAX_X).equalTo(VIEWPORT_WIDTH)
-                .with(UIProperty.MIN_Y).equalTo(0)
-                .with(UIProperty.MAX_Y).equalTo(VIEWPORT_HEIGHT);
+        val element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
+                                   .findFirst().orElseThrow();
+        assertEquals(0, element.getProperty(UIProperty.MIN_X).orElseThrow());
+        assertEquals(VIEWPORT_WIDTH, element.getProperty(UIProperty.MAX_X).orElseThrow());
+        assertEquals(0, element.getProperty(UIProperty.MIN_Y).orElseThrow());
+        assertEquals(VIEWPORT_HEIGHT, element.getProperty(UIProperty.MAX_Y).orElseThrow());
     }
 
     @Test
@@ -51,12 +52,12 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
                 .build();
         userInterface.update(new Vector2d(0), false);
 
-        assertUI(userInterface)
-                .hasExactlyOneElementWithName("a")
-                .with(UIProperty.MIN_X).equalTo(10)
-                .with(UIProperty.MAX_X).equalTo(VIEWPORT_WIDTH)
-                .with(UIProperty.MIN_Y).equalTo(0)
-                .with(UIProperty.MAX_Y).equalTo(VIEWPORT_HEIGHT - 100);
+        val element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
+                                   .findFirst().orElseThrow();
+        assertEquals(10, element.getProperty(UIProperty.MIN_X).orElseThrow());
+        assertEquals(VIEWPORT_WIDTH, element.getProperty(UIProperty.MAX_X).orElseThrow());
+        assertEquals(0, element.getProperty(UIProperty.MIN_Y).orElseThrow());
+        assertEquals(VIEWPORT_HEIGHT - 100, element.getProperty(UIProperty.MAX_Y).orElseThrow());
     }
 
     @Test
@@ -69,9 +70,9 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
                 .build();
         userInterface.update(new Vector2d(0), false);
 
-        assertUI(userInterface)
-                .hasExactlyOneElementWithName("a")
-                .with(UIProperty.WIDTH).equalTo(VIEWPORT_WIDTH - (10 + 100));
+        val element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
+                                   .findFirst().orElseThrow();
+        assertEquals(VIEWPORT_WIDTH - (10 + 100), element.getProperty(UIProperty.WIDTH).orElseThrow());
     }
 
     @Test
@@ -84,9 +85,9 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
                 .build();
         userInterface.update(new Vector2d(0), false);
 
-        assertUI(userInterface)
-                .hasExactlyOneElementWithName("a")
-                .with(UIProperty.HEIGHT).equalTo(VIEWPORT_HEIGHT - (42 + 24));
+        val element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
+                                   .findFirst().orElseThrow();
+        assertEquals(VIEWPORT_HEIGHT - (42 + 24), element.getProperty(UIProperty.HEIGHT).orElseThrow());
     }
 
     @Test
@@ -99,10 +100,10 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
                 .build();
         userInterface.update(new Vector2d(0), false);
 
-        assertUI(userInterface)
-                .hasExactlyOneElementWithName("a")
-                .with(UIProperty.MIN_X).equalTo(24)
-                .with(UIProperty.MAX_X).equalTo(66);
+        val element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
+                                   .findFirst().orElseThrow();
+        assertEquals(24, element.getProperty(UIProperty.MIN_X).orElseThrow());
+        assertEquals(66, element.getProperty(UIProperty.MAX_X).orElseThrow());
     }
 
     @Test
@@ -115,10 +116,11 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
                 .build();
         userInterface.update(new Vector2d(0), false);
 
-        assertUI(userInterface)
-                .hasExactlyOneElementWithName("a")
-                .with(UIProperty.MIN_X).equalTo(VIEWPORT_WIDTH - 66)
-                .with(UIProperty.MAX_X).equalTo(VIEWPORT_WIDTH - 24);
+
+        val element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
+                                   .findFirst().orElseThrow();
+        assertEquals(VIEWPORT_WIDTH - 66, element.getProperty(UIProperty.MIN_X).orElseThrow());
+        assertEquals(VIEWPORT_WIDTH - 24, element.getProperty(UIProperty.MAX_X).orElseThrow());
     }
 
     @Test
@@ -131,10 +133,10 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
                 .build();
         userInterface.update(new Vector2d(0), false);
 
-        assertUI(userInterface)
-                .hasExactlyOneElementWithName("a")
-                .with(UIProperty.MIN_Y).equalTo(24)
-                .with(UIProperty.MAX_Y).equalTo(66);
+        val element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
+                                   .findFirst().orElseThrow();
+        assertEquals(24, element.getProperty(UIProperty.MIN_Y).orElseThrow());
+        assertEquals(66, element.getProperty(UIProperty.MAX_Y).orElseThrow());
     }
 
     @Test
@@ -147,10 +149,10 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
                 .build();
         userInterface.update(new Vector2d(0), false);
 
-        assertUI(userInterface)
-                .hasExactlyOneElementWithName("a")
-                .with(UIProperty.MIN_Y).equalTo(VIEWPORT_HEIGHT - 66)
-                .with(UIProperty.MAX_Y).equalTo(VIEWPORT_HEIGHT - 24);
+        val element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
+                                   .findFirst().orElseThrow();
+        assertEquals(VIEWPORT_HEIGHT - 66, element.getProperty(UIProperty.MIN_Y).orElseThrow());
+        assertEquals(VIEWPORT_HEIGHT - 24, element.getProperty(UIProperty.MAX_Y).orElseThrow());
     }
 
     @Test
@@ -164,11 +166,11 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
                 .build();
         userInterface.update(new Vector2d(0), false);
 
-        assertUI(userInterface)
-                .hasExactlyOneElementWithName("a")
-                .with(UIProperty.MIN_X).equalTo(100)
-                .with(UIProperty.MAX_X).equalTo(VIEWPORT_WIDTH - 200)
-                .with(UIProperty.WIDTH).equalTo(VIEWPORT_WIDTH - (100 + 200));
+        val element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
+                                   .findFirst().orElseThrow();
+        assertEquals(100, element.getProperty(UIProperty.MIN_X).orElseThrow());
+        assertEquals(VIEWPORT_WIDTH - 200, element.getProperty(UIProperty.MAX_X).orElseThrow());
+        assertEquals(VIEWPORT_WIDTH - (100 + 200), element.getProperty(UIProperty.WIDTH).orElseThrow());
     }
 
     @Test
@@ -182,11 +184,11 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
                 .build();
         userInterface.update(new Vector2d(0), false);
 
-        assertUI(userInterface)
-                .hasExactlyOneElementWithName("a")
-                .with(UIProperty.MIN_Y).equalTo(100)
-                .with(UIProperty.MAX_Y).equalTo(VIEWPORT_HEIGHT - 200)
-                .with(UIProperty.HEIGHT).equalTo(VIEWPORT_HEIGHT - (100 + 200));
+        val element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
+                                   .findFirst().orElseThrow();
+        assertEquals(100, element.getProperty(UIProperty.MIN_Y).orElseThrow());
+        assertEquals(VIEWPORT_HEIGHT - 200, element.getProperty(UIProperty.MAX_Y).orElseThrow());
+        assertEquals(VIEWPORT_HEIGHT - (100 + 200), element.getProperty(UIProperty.HEIGHT).orElseThrow());
     }
 
     @Test
@@ -199,9 +201,9 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
                 .build();
         userInterface.update(new Vector2d(0), false);
 
-        assertUI(userInterface)
-                .hasExactlyOneElementWithName("a")
-                .with(UIProperty.MIN_X).equalTo(300);
+        val element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
+                                   .findFirst().orElseThrow();
+        assertEquals(300, element.getProperty(UIProperty.MIN_X).orElseThrow());
     }
 
     @Test
@@ -214,8 +216,8 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
                 .build();
         userInterface.update(new Vector2d(0), false);
 
-        assertUI(userInterface)
-                .hasExactlyOneElementWithName("a")
-                .with(UIProperty.MIN_Y).equalTo(300);
+        val element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
+                                   .findFirst().orElseThrow();
+        assertEquals(300, element.getProperty(UIProperty.MIN_Y).orElseThrow());
     }
 }

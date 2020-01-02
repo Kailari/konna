@@ -8,7 +8,6 @@ import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLAssetManager;
 import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLRenderingBackend;
 import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLWindow;
 import fi.jakojaannos.roguelite.engine.state.GameState;
-import fi.jakojaannos.roguelite.engine.view.GameRenderer;
 import fi.jakojaannos.roguelite.engine.view.Window;
 import fi.jakojaannos.roguelite.game.Roguelite;
 import fi.jakojaannos.roguelite.game.test.content.TestAssetManager;
@@ -37,12 +36,14 @@ public class GlobalState {
     public static GameState state;
     public static Events events;
     public static Queue<InputEvent> inputEvents;
-    public static GameRenderer gameRenderer;
+    public static RogueliteGameRenderer gameRenderer;
     public static Window window;
+    public static TestTimeManager timeManager;
 
     @Before
     public void before() {
-        game = new Roguelite();
+        timeManager = new TestTimeManager(20L);
+        game = new Roguelite(timeManager);
         Path assetRoot = Paths.get("../assets");
         gameRenderer = Optional.ofNullable(System.getenv("VISUALIZE_TESTS"))
                                .map(Boolean::valueOf)
@@ -99,7 +100,7 @@ public class GlobalState {
         inputEvents.clear();
     }
 
-    private static void renderTick() {
+    public static void renderTick() {
         if (window instanceof LWJGLWindow) {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }

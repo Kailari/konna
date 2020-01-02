@@ -1,5 +1,8 @@
 --add-modules
-    org.junit.jupiter.api,org.junit.jupiter.params,org.lwjgl.glfw,org.lwjgl.opengl
+    org.junit.jupiter.api,org.junit.jupiter.params,org.lwjgl.glfw,org.lwjgl.opengl,roguelite.engine.assertions
 
 --add-reads
-    roguelite.game.app=org.junit.jupiter.api,org.junit.jupiter.params,org.lwjgl.glfw,org.lwjgl.opengl
+    roguelite.game.app=org.junit.jupiter.api,org.junit.jupiter.params,org.lwjgl.glfw,org.lwjgl.opengl,roguelite.engine.assertions
+
+--add-exports
+    roguelite.game.view/fi.jakojaannos.roguelite.game.view.state=roguelite.game.app

@@ -8,6 +8,7 @@ import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.GameRenderer;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.Window;
+import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
 import fi.jakojaannos.roguelite.game.state.GameplayGameState;
 import fi.jakojaannos.roguelite.game.state.MainMenuGameState;
@@ -71,6 +72,12 @@ public class RogueliteGameRenderer implements GameRenderer {
 
         Optional.ofNullable(this.stateRenderers.get(state.getClass()))
                 .ifPresent(renderer -> renderer.render(state.getWorld()));
+    }
+
+    public UserInterface getUserInterfaceForState(final GameState state) {
+        return Optional.ofNullable(this.stateRenderers.get(state.getClass()))
+                       .map(GameStateRenderer::getUserInterface)
+                       .orElseThrow();
     }
 
     @Override

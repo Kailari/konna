@@ -20,6 +20,10 @@ public interface UserInterface {
         return new UIBuilder(viewport, fontSizeProvider);
     }
 
+    int getHeight();
+
+    int getWidth();
+
     Queue<UIEvent> update(Vector2d mousePos, boolean mouseClicked);
 
     Stream<UIElement> getRoots();

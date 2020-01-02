@@ -24,6 +24,11 @@ public class SimulationSteps {
         playerPositionBeforeRun = new Vector2d(playerInitialPosition);
     }
 
+    @Given("the current game time is at {double} seconds")
+    public void theCurrentGameTimeIsAtSeconds(double seconds) {
+        timeManager.setCurrentTickAsSeconds(seconds);
+    }
+
     @Given("the game has run for {double} seconds")
     public void the_game_has_run_for_seconds(double seconds) {
         updatePlayerPositionBeforeRun();

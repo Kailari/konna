@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.game.test.stepdefs.ui;
+package fi.jakojaannos.roguelite.game.test.stepdefs.render;
 
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -11,11 +11,6 @@ public class MenuSteps {
     @Given("the main menu has just loaded")
     public void the_main_menu_has_just_loaded() {
         state = null;
-        throw new io.cucumber.java.PendingException();
-    }
-
-    @When("the game is rendered")
-    public void the_game_is_rendered() {
         throw new io.cucumber.java.PendingException();
     }
 

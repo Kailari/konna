@@ -10,6 +10,10 @@ public interface TimeManager {
      */
     long getCurrentGameTime();
 
+    default double getTicksPerSecond() {
+        return 1000.0 / getTimeStep();
+    }
+
     /**
      * Converts the seconds to number of <strong>whole</strong> ticks in that timespan.
      *
@@ -18,7 +22,7 @@ public interface TimeManager {
      * @return the number of ticks the time lasts based on current {@link #getTimeStep() timestep}
      */
     default long convertToTicks(final double seconds) {
-        return (long) Math.floor(seconds * 1000.0 / getTimeStep());
+        return (long) Math.floor(seconds * getTicksPerSecond());
     }
 
     /**
@@ -29,6 +33,6 @@ public interface TimeManager {
      * @return the time in seconds the ticks take with the current {@link #getTimeStep() timestep}
      */
     default double convertToSeconds(final long ticks) {
-        return ticks / (double) getTimeStep();
+        return ticks / getTicksPerSecond();
     }
 }

@@ -13,6 +13,7 @@ import java.util.Optional;
 
 public interface UIProperty<T> {
     // Generic
+    UIProperty<UIElementType<?>> TYPE = new InstanceMappedUIProperty<>("type", UIElementType.NONE);
     UIProperty<String> NAME = new ComponentBackedUIProperty<>("name", Name.class, Name::getValue, Name::setValue);
     UIProperty<Boolean> HIDDEN = new InstanceMappedUIProperty<>("hidden", false);
     UIProperty<Integer> MIN_X = new ComponentBackedUIProperty<>("minX", ElementBoundaries.class, ElementBoundaries::getMinX, ElementBoundaries::setMinX);

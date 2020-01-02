@@ -9,7 +9,7 @@ import org.junit.runner.RunWith;
                  features = "src/test/resources/menus",
                  glue = {
                          "fi.jakojaannos.roguelite.game.test.global",
-                         "fi.jakojaannos.roguelite.game.test.stepdefs.ui",
+                         "fi.jakojaannos.roguelite.game.test.stepdefs.render",
                  }
                  //,tags = {"@problem"}
                  )

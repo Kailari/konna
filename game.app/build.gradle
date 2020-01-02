@@ -25,6 +25,7 @@ dependencies {
     implementation project(':engine.utilities')
     implementation project(':engine.view')
     implementation project(':engine.lwjgl')
+    testImplementation project(':engine.assert')
 
     implementation project(':game')
     implementation project(':game.view')

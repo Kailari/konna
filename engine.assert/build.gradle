@@ -1,0 +1,12 @@
+dependencies {
+    implementation project(":engine.utilities")
+    implementation project(":engine.view")
+
+    implementation "org.junit.jupiter:junit-jupiter-api:${jUnitVersion}"
+}
+
+test {
+    moduleOptions {
+        runOnClasspath = true
+    }
+}
