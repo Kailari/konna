@@ -4,7 +4,6 @@ import fi.jakojaannos.roguelite.engine.Game;
 import fi.jakojaannos.roguelite.engine.GameRunner;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.input.InputProvider;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLWindow;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import lombok.Getter;
 import org.lwjgl.glfw.GLFWErrorCallback;

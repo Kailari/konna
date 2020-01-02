@@ -31,8 +31,14 @@ dependencies {
 
     implementation "org.joml:joml:${jomlVersion}"
 
-    // Required for MemoryUtil and MemoryStack
-    testRuntimeOnly "org.lwjgl:lwjgl::${lwjglNatives}"
+    // "org.lwjgl:lwjgl" is required for MemoryUtil and MemoryStack
+    // other lwjgl modules are there just for running tests with the full renderer
+    implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
+    implementation "org.lwjgl:lwjgl"
+    for (lwjglModule in ["", "-assimp", "-glfw", "-openal", "-opengl", "-stb", "-opengl"]) {
+        testImplementation "org.lwjgl:lwjgl${lwjglModule}"
+        testRuntime "org.lwjgl:lwjgl${lwjglModule}::${lwjglNatives}"
+    }
 
     // Cucumber for fancy tests
     testImplementation "io.cucumber:cucumber-java:${cucumberVersion}"

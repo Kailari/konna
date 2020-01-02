@@ -34,6 +34,9 @@ public class RogueliteApplication {
     }
 
     public void run(final Path assetRoot) {
+        LOG.trace("Running application");
+        LOG.debug("asset root: {}", assetRoot);
+
         try (val runner = new LWJGLGameRunner<Roguelite, LWJGLInputProvider>(this.windowWidth, this.windowHeight);
              val assetManager = new LWJGLAssetManager(assetRoot);
              val game = new Roguelite()

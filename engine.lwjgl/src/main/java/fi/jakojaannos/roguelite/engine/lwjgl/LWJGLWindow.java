@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.engine.lwjgl.view;
+package fi.jakojaannos.roguelite.engine.lwjgl;
 
 import fi.jakojaannos.roguelite.engine.view.Window;
 import lombok.Getter;
@@ -96,6 +96,7 @@ public class LWJGLWindow implements Window, AutoCloseable {
         glfwSwapInterval(1);
     }
 
+    @Override
     public void show() {
         glfwShowWindow(this.id);
     }

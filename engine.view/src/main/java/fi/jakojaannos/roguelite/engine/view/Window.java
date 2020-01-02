@@ -1,6 +1,8 @@
 package fi.jakojaannos.roguelite.engine.view;
 
-public interface Window {
+public interface Window extends AutoCloseable {
+    void show();
+
     enum Mode {
         Windowed,
         FullScreen,

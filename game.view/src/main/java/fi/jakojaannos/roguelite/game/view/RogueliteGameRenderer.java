@@ -39,8 +39,7 @@ public class RogueliteGameRenderer implements GameRenderer {
             final RenderingBackend backend,
             final AssetManager assetManager
     ) {
-        LOG.debug("Constructing GameRenderer...");
-        LOG.debug("asset root: {}", assetRoot);
+        LOG.trace("Constructing GameRenderer...");
 
         this.assetManager = assetManager;
         val spriteRegistry = assetManager.getAssetRegistry(Sprite.class);
@@ -71,7 +70,7 @@ public class RogueliteGameRenderer implements GameRenderer {
         viewport.resize(window.getWidth(), window.getHeight());
         this.camera.resize(window.getWidth(), window.getHeight());
 
-        LOG.info("GameRenderer initialization finished.");
+        LOG.trace("GameRenderer initialization finished.");
     }
 
     @Override

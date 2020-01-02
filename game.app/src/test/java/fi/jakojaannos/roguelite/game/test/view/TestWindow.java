@@ -20,7 +20,15 @@ public class TestWindow implements Window {
     }
 
     @Override
+    public void show() {
+    }
+
+    @Override
     public void addResizeCallback(final ResizeCallback callback) {
         this.resizeCallbacks.add(callback);
+    }
+
+    @Override
+    public void close() {
     }
 }

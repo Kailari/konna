@@ -1,5 +1,5 @@
 --add-modules
-    org.junit.jupiter.api,org.junit.jupiter.params
+    org.junit.jupiter.api,org.junit.jupiter.params,org.lwjgl.glfw,org.lwjgl.opengl
 
 --add-reads
-    roguelite.game.app=org.junit.jupiter.api,org.junit.jupiter.params
+    roguelite.game.app=org.junit.jupiter.api,org.junit.jupiter.params,org.lwjgl.glfw,org.lwjgl.opengl

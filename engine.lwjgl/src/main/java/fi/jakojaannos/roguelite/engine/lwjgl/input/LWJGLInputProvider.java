@@ -1,7 +1,7 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.input;
 
 import fi.jakojaannos.roguelite.engine.input.*;
-import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLWindow;
+import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLWindow;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.lwjgl.glfw.GLFWKeyCallbackI;
