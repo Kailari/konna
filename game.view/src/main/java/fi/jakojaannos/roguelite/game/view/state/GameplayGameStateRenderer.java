@@ -2,13 +2,13 @@ package fi.jakojaannos.roguelite.game.view.state;
 
 import fi.jakojaannos.roguelite.engine.content.AssetManager;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
-import fi.jakojaannos.roguelite.engine.ui.UIElementType;
-import fi.jakojaannos.roguelite.engine.ui.UserInterface;
-import fi.jakojaannos.roguelite.engine.ui.builder.UILabelBuilder;
+import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
+import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
+import fi.jakojaannos.roguelite.engine.view.ui.builder.UILabelBuilder;
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
-import fi.jakojaannos.roguelite.engine.view.sprite.Sprite;
-import fi.jakojaannos.roguelite.engine.view.text.Font;
+import fi.jakojaannos.roguelite.engine.view.rendering.sprite.Sprite;
+import fi.jakojaannos.roguelite.engine.view.rendering.text.Font;
 import fi.jakojaannos.roguelite.game.DebugConfig;
 import fi.jakojaannos.roguelite.game.view.systems.*;
 import fi.jakojaannos.roguelite.game.view.systems.debug.EntityCollisionBoundsRenderingSystem;
@@ -17,8 +17,8 @@ import lombok.val;
 
 import java.nio.file.Path;
 
-import static fi.jakojaannos.roguelite.engine.ui.ProportionValue.absolute;
-import static fi.jakojaannos.roguelite.engine.ui.ProportionValue.percentOf;
+import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.absolute;
+import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.percentOf;
 
 public class GameplayGameStateRenderer extends GameStateRenderer {
     public GameplayGameStateRenderer(

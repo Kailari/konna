@@ -2,7 +2,7 @@ package fi.jakojaannos.roguelite.engine.view.content;
 
 import fi.jakojaannos.roguelite.engine.content.AbstractAssetRegistry;
 import fi.jakojaannos.roguelite.engine.content.AssetHandle;
-import fi.jakojaannos.roguelite.engine.view.text.Font;
+import fi.jakojaannos.roguelite.engine.view.rendering.text.Font;
 import lombok.val;
 
 import java.nio.file.Path;

@@ -5,9 +5,9 @@ import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.ui.UIElement;
-import fi.jakojaannos.roguelite.engine.ui.UIProperty;
-import fi.jakojaannos.roguelite.engine.ui.UserInterface;
+import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
+import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
+import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
 import lombok.val;
 

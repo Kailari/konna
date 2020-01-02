@@ -8,8 +8,8 @@ import fi.jakojaannos.roguelite.engine.view.content.FontRegistry;
 import fi.jakojaannos.roguelite.engine.view.content.SpriteRegistry;
 import fi.jakojaannos.roguelite.engine.view.content.TextureRegistry;
 import fi.jakojaannos.roguelite.engine.view.rendering.Texture;
-import fi.jakojaannos.roguelite.engine.view.sprite.Sprite;
-import fi.jakojaannos.roguelite.engine.view.text.Font;
+import fi.jakojaannos.roguelite.engine.view.rendering.sprite.Sprite;
+import fi.jakojaannos.roguelite.engine.view.rendering.text.Font;
 import lombok.val;
 
 import java.nio.file.Path;

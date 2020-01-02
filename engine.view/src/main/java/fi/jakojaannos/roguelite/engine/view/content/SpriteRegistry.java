@@ -6,8 +6,8 @@ import fi.jakojaannos.roguelite.engine.content.AbstractAssetRegistry;
 import fi.jakojaannos.roguelite.engine.content.AssetHandle;
 import fi.jakojaannos.roguelite.engine.view.LogCategories;
 import fi.jakojaannos.roguelite.engine.view.rendering.TextureRegion;
-import fi.jakojaannos.roguelite.engine.view.sprite.Sprite;
-import fi.jakojaannos.roguelite.engine.view.sprite.serialization.SpriteDeserializer;
+import fi.jakojaannos.roguelite.engine.view.rendering.sprite.Sprite;
+import fi.jakojaannos.roguelite.engine.view.rendering.sprite.serialization.SpriteDeserializer;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 

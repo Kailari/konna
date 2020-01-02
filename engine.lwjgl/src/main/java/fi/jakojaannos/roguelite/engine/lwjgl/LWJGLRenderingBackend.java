@@ -11,12 +11,12 @@ import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.Window;
-import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatch;
+import fi.jakojaannos.roguelite.engine.view.rendering.sprite.SpriteBatch;
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.Mesh;
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexFormat;
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexFormatBuilder;
 import fi.jakojaannos.roguelite.engine.view.rendering.shader.ShaderBuilder;
-import fi.jakojaannos.roguelite.engine.view.text.TextRenderer;
+import fi.jakojaannos.roguelite.engine.view.rendering.text.TextRenderer;
 
 import java.nio.file.Path;
 

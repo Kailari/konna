@@ -2,7 +2,7 @@ package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering;
 
 import fi.jakojaannos.roguelite.engine.utilities.math.RotatedRectangle;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
-import fi.jakojaannos.roguelite.engine.view.rendering.SpriteBatchBase;
+import fi.jakojaannos.roguelite.engine.view.rendering.sprite.SpriteBatchBase;
 import fi.jakojaannos.roguelite.engine.view.rendering.Texture;
 import fi.jakojaannos.roguelite.engine.view.rendering.TextureRegion;
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.Mesh;

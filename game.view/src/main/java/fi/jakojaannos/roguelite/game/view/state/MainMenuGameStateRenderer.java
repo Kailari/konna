@@ -2,13 +2,13 @@ package fi.jakojaannos.roguelite.game.view.state;
 
 import fi.jakojaannos.roguelite.engine.content.AssetManager;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
-import fi.jakojaannos.roguelite.engine.ui.ProportionValue;
-import fi.jakojaannos.roguelite.engine.ui.UIElementType;
-import fi.jakojaannos.roguelite.engine.ui.UserInterface;
+import fi.jakojaannos.roguelite.engine.view.ui.ProportionValue;
+import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
+import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
-import fi.jakojaannos.roguelite.engine.view.sprite.Sprite;
-import fi.jakojaannos.roguelite.engine.view.text.Font;
+import fi.jakojaannos.roguelite.engine.view.rendering.sprite.Sprite;
+import fi.jakojaannos.roguelite.engine.view.rendering.text.Font;
 import fi.jakojaannos.roguelite.game.view.systems.UserInterfaceRenderingSystem;
 import lombok.val;
 

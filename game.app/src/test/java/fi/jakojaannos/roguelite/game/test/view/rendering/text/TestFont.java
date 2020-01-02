@@ -1,7 +1,7 @@
 package fi.jakojaannos.roguelite.game.test.view.rendering.text;
 
-import fi.jakojaannos.roguelite.engine.view.text.Font;
-import fi.jakojaannos.roguelite.engine.view.text.FontTexture;
+import fi.jakojaannos.roguelite.engine.view.rendering.text.Font;
+import fi.jakojaannos.roguelite.engine.view.rendering.text.FontTexture;
 
 import java.nio.file.Path;
 

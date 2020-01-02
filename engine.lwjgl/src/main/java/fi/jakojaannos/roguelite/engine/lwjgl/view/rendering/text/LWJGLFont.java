@@ -1,6 +1,6 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text;
 
-import fi.jakojaannos.roguelite.engine.view.text.Font;
+import fi.jakojaannos.roguelite.engine.view.rendering.text.Font;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.val;
