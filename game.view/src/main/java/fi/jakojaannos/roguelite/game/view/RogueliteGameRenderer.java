@@ -42,9 +42,6 @@ public class RogueliteGameRenderer implements GameRenderer {
         LOG.trace("Constructing GameRenderer...");
 
         this.assetManager = assetManager;
-        val spriteRegistry = assetManager.getAssetRegistry(Sprite.class);
-        val fontRegistry = assetManager.getAssetRegistry(Font.class);
-
         val viewport = backend.getViewport(window);
         this.camera = backend.getCamera(viewport);
         this.textRenderer = backend.getTextRenderer(assetRoot, this.camera);
@@ -52,16 +49,11 @@ public class RogueliteGameRenderer implements GameRenderer {
         this.stateRenderers = Map.ofEntries(
                 Map.entry(GameplayGameState.class, new GameplayGameStateRenderer(assetRoot,
                                                                                  this.camera,
-                                                                                 viewport,
-                                                                                 spriteRegistry,
-                                                                                 fontRegistry,
-                                                                                 this.textRenderer,
+                                                                                 assetManager,
                                                                                  backend)),
                 Map.entry(MainMenuGameState.class, new MainMenuGameStateRenderer(assetRoot,
                                                                                  this.camera,
-                                                                                 this.textRenderer,
-                                                                                 spriteRegistry,
-                                                                                 fontRegistry,
+                                                                                 assetManager,
                                                                                  backend))
         );
 

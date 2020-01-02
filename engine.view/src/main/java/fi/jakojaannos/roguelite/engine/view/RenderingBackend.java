@@ -14,6 +14,8 @@ public interface RenderingBackend {
 
     Camera getCamera(Viewport viewport);
 
+    // TODO: Make the text renderer use sensible coordinate systems and remove the camera parameter
+    //  (Handle on-screen/in-world rendering with camera matrix UBOs instead of manually)
     TextRenderer getTextRenderer(Path assetRoot, Camera camera);
 
     SpriteBatch createSpriteBatch(Path assetRoot, String shader);

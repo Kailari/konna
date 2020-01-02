@@ -5,7 +5,6 @@ import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.view.Camera;
-import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.text.Font;
 import fi.jakojaannos.roguelite.engine.view.text.TextRenderer;
 import fi.jakojaannos.roguelite.game.data.components.PlayerTag;
@@ -13,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 
 import java.util.stream.Stream;
+
+// TODO: Use UI
 
 @RequiredArgsConstructor
 public class RenderGameOverSystem implements ECSSystem {
@@ -27,7 +28,6 @@ public class RenderGameOverSystem implements ECSSystem {
 
     private final TextRenderer textRenderer;
     private final Camera camera;
-    private final Viewport viewport;
     private final Font font;
 
     @Override
@@ -40,9 +40,9 @@ public class RenderGameOverSystem implements ECSSystem {
             return;
         }
 
-        camera.useScreenCoordinates();
-        val halfScreenWidth = this.viewport.getWidthInPixels() / 2.0;
-        val halfScreenHeight = this.viewport.getHeightInPixels() / 2.0;
+        this.camera.useScreenCoordinates();
+        val halfScreenWidth = this.camera.getViewport().getWidthInPixels() / 2.0;
+        val halfScreenHeight = this.camera.getViewport().getHeightInPixels() / 2.0;
         this.textRenderer.drawCenteredOnScreen(halfScreenWidth, halfScreenHeight, 48, font, GAME_OVER_MESSAGE);
         this.textRenderer.drawCenteredOnScreen(halfScreenWidth, halfScreenHeight + 50, 24, font, HELP_TEXT);
     }

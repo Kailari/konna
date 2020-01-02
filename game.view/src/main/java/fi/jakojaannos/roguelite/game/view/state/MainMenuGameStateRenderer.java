@@ -1,6 +1,6 @@
 package fi.jakojaannos.roguelite.game.view.state;
 
-import fi.jakojaannos.roguelite.engine.content.AssetRegistry;
+import fi.jakojaannos.roguelite.engine.content.AssetManager;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.ui.ProportionValue;
 import fi.jakojaannos.roguelite.engine.ui.UIElementType;
@@ -9,7 +9,6 @@ import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.sprite.Sprite;
 import fi.jakojaannos.roguelite.engine.view.text.Font;
-import fi.jakojaannos.roguelite.engine.view.text.TextRenderer;
 import fi.jakojaannos.roguelite.game.view.systems.UserInterfaceRenderingSystem;
 import lombok.val;
 
@@ -19,24 +18,55 @@ public class MainMenuGameStateRenderer extends GameStateRenderer {
     public MainMenuGameStateRenderer(
             final Path assetRoot,
             final Camera camera,
-            final TextRenderer textRenderer,
-            final AssetRegistry<Sprite> spriteRegistry,
-            final AssetRegistry<Font> fontRegistry,
+            final AssetManager assetManager,
             final RenderingBackend backend
     ) {
-        super(createDispatcher(assetRoot, createUserInterface(fontRegistry, camera.getViewport()), textRenderer, camera, spriteRegistry, fontRegistry, backend));
+        super(assetRoot, camera, assetManager, backend);
     }
 
-    private static UserInterface createUserInterface(
-            final AssetRegistry<Font> fontRegistry,
-            final UserInterface.ViewportSizeProvider viewportSizeProvider
+    @Override
+    protected SystemDispatcher createRenderDispatcher(
+            final UserInterface userInterface,
+            final Path assetRoot,
+            final Camera camera,
+            final AssetManager assetManager,
+            final RenderingBackend backend
     ) {
+        val fontRegistry = assetManager.getAssetRegistry(Font.class);
+        val spriteRegistry = assetManager.getAssetRegistry(Sprite.class);
+
+        val textRenderer = backend.getTextRenderer(assetRoot, camera);
+
+        val builder = SystemDispatcher.builder()
+                                      .withSystem(new UserInterfaceRenderingSystem(camera,
+                                                                                   fontRegistry,
+                                                                                   spriteRegistry,
+                                                                                   backend.createSpriteBatch(assetRoot, "sprite"),
+                                                                                   textRenderer,
+                                                                                   userInterface));
+
+        // FIXME: Make rendering systems use groups so that no hard dependencies are required.
+        //  registering the debug rendering systems fails as they depend on other systems not present.
+        //if (DebugConfig.debugModeEnabled) {
+        //    builder.withSystem(new EntityTransformRenderingSystem(assetRoot, camera));
+        //}
+
+        return builder.build();
+    }
+
+    @Override
+    protected UserInterface createUserInterface(
+            final Camera camera,
+            final AssetManager assetManager
+    ) {
+        val fontRegistry = assetManager.getAssetRegistry(Font.class);
+
         val font = fontRegistry.getByAssetName("fonts/VCR_OSD_MONO.ttf");
         val width = 600;
         val height = 100;
         val borderSize = 25;
         return UserInterface
-                .builder(viewportSizeProvider, font)
+                .builder(camera.getViewport(), font)
                 .element("play_button",
                          UIElementType.PANEL,
                          builder -> builder.anchorX(ProportionValue.percentOf().parentWidth(0.5))
@@ -65,31 +95,5 @@ public class MainMenuGameStateRenderer extends GameStateRenderer {
                                            .text("Konna")
                                            .fontSize(48))
                 .build();
-    }
-
-    private static SystemDispatcher createDispatcher(
-            final Path assetRoot,
-            final UserInterface userInterface,
-            final TextRenderer textRenderer,
-            final Camera camera,
-            final AssetRegistry<Sprite> spriteRegistry,
-            final AssetRegistry<Font> fontRegistry,
-            final RenderingBackend backend
-    ) {
-        val builder = SystemDispatcher.builder()
-                                      .withSystem(new UserInterfaceRenderingSystem(camera,
-                                                                                   fontRegistry,
-                                                                                   spriteRegistry,
-                                                                                   backend.createSpriteBatch(assetRoot, "sprite"),
-                                                                                   textRenderer,
-                                                                                   userInterface));
-
-        // FIXME: Make rendering systems use groups so that no hard dependencies are required.
-        //  registering the debug rendering systems fails as they depend on other systems not present.
-        //if (DebugConfig.debugModeEnabled) {
-        //    builder.withSystem(new EntityTransformRenderingSystem(assetRoot, camera));
-        //}
-
-        return builder.build();
     }
 }
