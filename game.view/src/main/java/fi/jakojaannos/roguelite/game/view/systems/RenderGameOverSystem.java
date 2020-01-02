@@ -43,7 +43,7 @@ public class RenderGameOverSystem implements ECSSystem {
         this.camera.useScreenCoordinates();
         val halfScreenWidth = this.camera.getViewport().getWidthInPixels() / 2.0;
         val halfScreenHeight = this.camera.getViewport().getHeightInPixels() / 2.0;
-        this.textRenderer.drawCenteredOnScreen(halfScreenWidth, halfScreenHeight, 48, font, GAME_OVER_MESSAGE);
-        this.textRenderer.drawCenteredOnScreen(halfScreenWidth, halfScreenHeight + 50, 24, font, HELP_TEXT);
+        this.textRenderer.drawCentered(halfScreenWidth, halfScreenHeight, 48, font, GAME_OVER_MESSAGE);
+        this.textRenderer.drawCentered(halfScreenWidth, halfScreenHeight + 50, 24, font, HELP_TEXT);
     }
 }

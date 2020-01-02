@@ -1,6 +1,5 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text;
 
-import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.rendering.shader.EngineUniformBufferObjectIndices;
@@ -63,7 +62,7 @@ public class LWJGLTextRenderer implements TextRenderer {
     }
 
     @Override
-    public void drawOnScreen(
+    public void draw(
             final double x,
             final double y,
             final int fontSize,
@@ -73,10 +72,10 @@ public class LWJGLTextRenderer implements TextRenderer {
         this.camera.useScreenCoordinates();
         this.shader.use();
         this.shader.setUniformMat4x4("model", new Matrix4f().identity());
-        draw(x, y + fontSize, fontSize, font, string);
+        drawInternal(x, y + fontSize, fontSize, font, string);
     }
 
-    public void drawCenteredOnScreen(
+    public void drawCentered(
             final double x,
             final double y,
             final int fontSize,
@@ -87,31 +86,10 @@ public class LWJGLTextRenderer implements TextRenderer {
 
         val textX = x - textWidth / 2.0;
         val textY = y - fontSize / 2.0;
-        drawOnScreen(textX, textY, fontSize, font, text);
+        this.draw(textX, textY, fontSize, font, text);
     }
 
-    public void drawInWorld(
-            final double x,
-            final double y,
-            final int fontSize,
-            final Font font,
-            final String string
-    ) {
-        this.camera.useWorldCoordinates();
-        this.shader.use();
-
-        // FIXME: Remove cast by moving screen unit size handling somewhere more sensible or
-        //  abstracting it to something more generic
-        val scaleFactor = 1.0 / ((LWJGLCamera) this.camera).getTargetScreenSizeInUnits();
-        this.shader.setUniformMat4x4("model", new Matrix4f().identity()
-                                                            .scale((float) scaleFactor,
-                                                                   (float) scaleFactor,
-                                                                   1.0f));
-
-        draw(x / scaleFactor, y / scaleFactor, fontSize, font, string);
-    }
-
-    private void draw(
+    private void drawInternal(
             final double x,
             final double y,
             final int fontSize,

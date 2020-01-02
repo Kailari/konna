@@ -1,7 +1,7 @@
 package fi.jakojaannos.roguelite.engine.view.text;
 
 public interface TextRenderer extends AutoCloseable {
-    void drawOnScreen(
+    void draw(
             double x,
             double y,
             int fontSize,
@@ -9,5 +9,5 @@ public interface TextRenderer extends AutoCloseable {
             String string
     );
 
-    void drawCenteredOnScreen(double x, double y, int fontSize, Font font, String gameOverMessage);
+    void drawCentered(double x, double y, int fontSize, Font font, String gameOverMessage);
 }

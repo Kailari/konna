@@ -56,7 +56,7 @@ public class UserInterfaceRenderer {
         val fontSize = getFontSizeFor(uiElement);
         val x = uiElement.getProperty(UIProperty.MIN_X).orElseThrow();
         val y = uiElement.getProperty(UIProperty.MIN_Y).orElseThrow();
-        this.textRenderer.drawOnScreen(x, y, fontSize, this.font, text);
+        this.textRenderer.draw(x, y, fontSize, this.font, text);
     }
 
     private static int getFontSizeFor(final UIElement uiElement) {
