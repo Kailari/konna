@@ -6,29 +6,15 @@ import lombok.extern.slf4j.Slf4j;
 import static org.lwjgl.opengl.GL11.glViewport;
 
 @Slf4j
-public class LWJGLViewport implements Viewport {
-    private int width;
-    private int height;
-
+public class LWJGLViewport extends Viewport {
     public LWJGLViewport(final int width, final int height) {
-        resize(width, height);
-    }
-
-    @Override
-    public int getWidthInPixels() {
-        return this.width;
-    }
-
-    @Override
-    public int getHeightInPixels() {
-        return this.height;
+        super(width, height);
     }
 
     @Override
     public void resize(final int width, final int height) {
-        this.width = width;
-        this.height = height;
-        glViewport(0, 0, this.width, this.height);
-        LOG.info("Resizing viewport: {}x{}", this.width, this.height);
+        super.resize(width, height);
+        glViewport(0, 0, width, height);
+        LOG.info("Resizing viewport: {}x{}", width, height);
     }
 }

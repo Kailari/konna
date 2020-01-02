@@ -4,6 +4,7 @@ import fi.jakojaannos.roguelite.engine.state.GameState;
 import lombok.Getter;
 import org.joml.Vector2d;
 
+// TODO: Move anything that can be abstracted from LWJGLCamera here (allows better testing matrices etc. producing correct coordinates)
 
 public abstract class Camera {
     private final Vector2d position;

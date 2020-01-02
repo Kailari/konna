@@ -56,7 +56,7 @@ public class HealthBarRenderingSystem implements ECSSystem, AutoCloseable {
         this.shader.bindUniformBlock("CameraInfo", EngineUniformBufferObjectIndices.CAMERA);
 
 
-        val vertexFormat = backend.getVertexFormat()
+        val vertexFormat = backend.createVertexFormat()
                                   .withAttribute(VertexAttribute.Type.FLOAT, 2, false)
                                   .withAttribute(VertexAttribute.Type.FLOAT, 1, false)
                                   .build();

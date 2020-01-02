@@ -51,7 +51,7 @@ public class EntityTransformRenderingSystem implements ECSSystem, AutoCloseable 
 
         this.shader.bindUniformBlock("CameraInfo", EngineUniformBufferObjectIndices.CAMERA);
 
-        val vertexFormat = backend.getVertexFormat()
+        val vertexFormat = backend.createVertexFormat()
                                   .withAttribute(VertexAttribute.Type.FLOAT, 2, false)
                                   .build();
         this.mesh = backend.createMesh(vertexFormat);

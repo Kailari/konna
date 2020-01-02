@@ -10,7 +10,7 @@ import fi.jakojaannos.roguelite.engine.view.text.TextRenderer;
 import java.nio.file.Path;
 
 public interface RenderingBackend {
-    Viewport createViewport(Window window);
+    Viewport getViewport(Window window);
 
     Camera getCamera(Viewport viewport);
 
@@ -20,7 +20,7 @@ public interface RenderingBackend {
 
     Mesh createMesh(VertexFormat vertexFormat);
 
-    VertexFormatBuilder getVertexFormat();
+    VertexFormatBuilder createVertexFormat();
 
     ShaderBuilder createShaderProgram();
 }

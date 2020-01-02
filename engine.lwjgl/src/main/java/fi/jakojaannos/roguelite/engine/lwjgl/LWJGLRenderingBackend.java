@@ -27,7 +27,7 @@ public class LWJGLRenderingBackend implements RenderingBackend {
     }
 
     @Override
-    public Viewport createViewport(final Window window) {
+    public Viewport getViewport(final Window window) {
         return new LWJGLViewport(window.getWidth(), window.getHeight());
     }
 
@@ -42,7 +42,7 @@ public class LWJGLRenderingBackend implements RenderingBackend {
     }
 
     @Override
-    public VertexFormatBuilder getVertexFormat() {
+    public VertexFormatBuilder createVertexFormat() {
         return new LWJGLVertexFormatBuilder();
     }
 

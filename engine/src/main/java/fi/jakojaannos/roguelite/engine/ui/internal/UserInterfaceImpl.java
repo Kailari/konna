@@ -12,9 +12,7 @@ import fi.jakojaannos.roguelite.engine.systems.ui.UIHierarchySystem;
 import fi.jakojaannos.roguelite.engine.systems.ui.UILabelAutomaticSizeCalculationSystem;
 import fi.jakojaannos.roguelite.engine.systems.ui.UISystemGroups;
 import fi.jakojaannos.roguelite.engine.ui.*;
-import fi.jakojaannos.roguelite.engine.ui.builder.UIBuilder;
 import fi.jakojaannos.roguelite.engine.ui.builder.UIElementBuilder;
-import lombok.Getter;
 import lombok.val;
 import org.joml.Vector2d;
 
@@ -29,15 +27,11 @@ import java.util.stream.Stream;
 public class UserInterfaceImpl implements UserInterface {
     private final World uiWorld;
     private final SystemDispatcher uiDispatcher;
-    @Getter private final ViewportSizeProvider viewportSizeProvider;
-    @Getter private final TextSizeProvider textSizeProvider;
 
     public UserInterfaceImpl(
             final ViewportSizeProvider viewportSizeProvider,
             final TextSizeProvider textSizeProvider
     ) {
-        this.viewportSizeProvider = viewportSizeProvider;
-        this.textSizeProvider = textSizeProvider;
         this.uiWorld = World.createNew(EntityManager.createNew(256, 32));
 
         this.uiDispatcher = SystemDispatcher.builder()

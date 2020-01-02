@@ -42,7 +42,7 @@ public class LWJGLSpriteBatch extends SpriteBatchBase {
     ) {
         super(MAX_SPRITES_PER_BATCH);
 
-        final VertexFormat vertexFormat = backend.getVertexFormat()
+        final VertexFormat vertexFormat = backend.createVertexFormat()
                                                  .withAttribute(VertexAttribute.Type.FLOAT, 2, false)
                                                  .withAttribute(VertexAttribute.Type.FLOAT, 2, false)
                                                  .withAttribute(VertexAttribute.Type.FLOAT, 3, false)

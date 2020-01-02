@@ -21,10 +21,6 @@ public interface UserInterface {
 
     Stream<UIElement> getRoots();
 
-    ViewportSizeProvider getViewportSizeProvider();
-
-    TextSizeProvider getTextSizeProvider();
-
     default <T> Stream<UIElement> findElementsWithMatchingProperty(
             final UIProperty<T> property,
             final Predicate<T> matcher

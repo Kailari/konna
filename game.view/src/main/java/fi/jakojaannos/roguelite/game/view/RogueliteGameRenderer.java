@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
-public class RogueliteGameRenderer implements GameRenderer<GameState> {
+public class RogueliteGameRenderer implements GameRenderer {
     private final Camera camera;
     private final AssetManager assetManager;
 
@@ -46,7 +46,7 @@ public class RogueliteGameRenderer implements GameRenderer<GameState> {
         val spriteRegistry = assetManager.getAssetRegistry(Sprite.class);
         val fontRegistry = assetManager.getAssetRegistry(Font.class);
 
-        val viewport = backend.createViewport(window);
+        val viewport = backend.getViewport(window);
         this.camera = backend.getCamera(viewport);
         this.textRenderer = backend.getTextRenderer(assetRoot, this.camera);
 
