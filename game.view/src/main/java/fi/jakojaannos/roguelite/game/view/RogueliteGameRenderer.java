@@ -8,9 +8,6 @@ import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.GameRenderer;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.Window;
-import fi.jakojaannos.roguelite.engine.view.sprite.Sprite;
-import fi.jakojaannos.roguelite.engine.view.text.Font;
-import fi.jakojaannos.roguelite.engine.view.text.TextRenderer;
 import fi.jakojaannos.roguelite.game.data.components.Transform;
 import fi.jakojaannos.roguelite.game.state.GameplayGameState;
 import fi.jakojaannos.roguelite.game.state.MainMenuGameState;
@@ -27,9 +24,6 @@ import java.util.Optional;
 @Slf4j
 public class RogueliteGameRenderer implements GameRenderer {
     private final Camera camera;
-    private final AssetManager assetManager;
-
-    private final TextRenderer textRenderer;
 
     private final Map<Class<? extends GameState>, GameStateRenderer> stateRenderers;
 
@@ -41,10 +35,12 @@ public class RogueliteGameRenderer implements GameRenderer {
     ) {
         LOG.trace("Constructing GameRenderer...");
 
-        this.assetManager = assetManager;
         val viewport = backend.getViewport(window);
-        this.camera = backend.getCamera(viewport);
-        this.textRenderer = backend.getTextRenderer(assetRoot, this.camera);
+        this.camera = backend.createCamera(viewport);
+        window.addResizeCallback(viewport::resize);
+        window.addResizeCallback(this.camera::resize);
+        viewport.resize(window.getWidth(), window.getHeight());
+        this.camera.resize(window.getWidth(), window.getHeight());
 
         this.stateRenderers = Map.ofEntries(
                 Map.entry(GameplayGameState.class, new GameplayGameStateRenderer(assetRoot,
@@ -56,11 +52,6 @@ public class RogueliteGameRenderer implements GameRenderer {
                                                                                  assetManager,
                                                                                  backend))
         );
-
-        window.addResizeCallback(viewport::resize);
-        window.addResizeCallback(this.camera::resize);
-        viewport.resize(window.getWidth(), window.getHeight());
-        this.camera.resize(window.getWidth(), window.getHeight());
 
         LOG.trace("GameRenderer initialization finished.");
     }
@@ -90,8 +81,6 @@ public class RogueliteGameRenderer implements GameRenderer {
             } catch (Exception ignored) {
             }
         });
-        this.assetManager.close();
-        this.textRenderer.close();
-        //this.camera.close();
+        this.camera.close();
     }
 }

@@ -12,11 +12,9 @@ import java.nio.file.Path;
 public interface RenderingBackend {
     Viewport getViewport(Window window);
 
-    Camera getCamera(Viewport viewport);
+    Camera createCamera(Viewport viewport);
 
-    // TODO: Make the text renderer use sensible coordinate systems and remove the camera parameter
-    //  (Handle on-screen/in-world rendering with camera matrix UBOs instead of manually)
-    TextRenderer getTextRenderer(Path assetRoot, Camera camera);
+    TextRenderer getTextRenderer();
 
     SpriteBatch createSpriteBatch(Path assetRoot, String shader);
 

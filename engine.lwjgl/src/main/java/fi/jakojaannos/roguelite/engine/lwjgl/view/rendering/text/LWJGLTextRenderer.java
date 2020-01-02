@@ -1,6 +1,5 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text;
 
-import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.rendering.shader.EngineUniformBufferObjectIndices;
 import fi.jakojaannos.roguelite.engine.view.rendering.shader.ShaderProgram;
@@ -29,7 +28,6 @@ public class LWJGLTextRenderer implements TextRenderer {
     private static final int SIZE_IN_BYTES = (2 + 2 + 3) * 4;
 
     private final ShaderProgram shader;
-    private final Camera camera;
 
     private final ByteBuffer vertexDataBuffer;
     private final int vao;
@@ -38,10 +36,8 @@ public class LWJGLTextRenderer implements TextRenderer {
 
     public LWJGLTextRenderer(
             final Path assetRoot,
-            final Camera camera,
             final RenderingBackend backend
     ) {
-        this.camera = camera;
 
         this.shader = createShader(assetRoot, backend);
         this.shader.bindUniformBlock("CameraInfo", EngineUniformBufferObjectIndices.CAMERA);
@@ -69,7 +65,6 @@ public class LWJGLTextRenderer implements TextRenderer {
             final Font font,
             final String string
     ) {
-        this.camera.useScreenCoordinates();
         this.shader.use();
         this.shader.setUniformMat4x4("model", new Matrix4f().identity());
         drawInternal(x, y + fontSize, fontSize, font, string);

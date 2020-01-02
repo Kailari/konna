@@ -39,4 +39,8 @@ public class TestCamera extends Camera {
     public void updateConfigurationFromState(final GameState state) {
 
     }
+
+    @Override
+    public void close() {
+    }
 }

@@ -35,7 +35,7 @@ public class MainMenuGameStateRenderer extends GameStateRenderer {
         val fontRegistry = assetManager.getAssetRegistry(Font.class);
         val spriteRegistry = assetManager.getAssetRegistry(Sprite.class);
 
-        val textRenderer = backend.getTextRenderer(assetRoot, camera);
+        val textRenderer = backend.getTextRenderer();
 
         val builder = SystemDispatcher.builder()
                                       .withSystem(new UserInterfaceRenderingSystem(camera,

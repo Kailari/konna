@@ -20,10 +20,11 @@ import fi.jakojaannos.roguelite.engine.view.text.TextRenderer;
 
 import java.nio.file.Path;
 
-public class LWJGLRenderingBackend implements RenderingBackend {
-    @Override
-    public Camera getCamera(final Viewport viewport) {
-        return new LWJGLCamera(viewport);
+public class LWJGLRenderingBackend implements RenderingBackend, AutoCloseable {
+    private final LWJGLTextRenderer textRenderer;
+
+    public LWJGLRenderingBackend(final Path assetRoot) {
+        this.textRenderer = new LWJGLTextRenderer(assetRoot, this);
     }
 
     @Override
@@ -32,8 +33,13 @@ public class LWJGLRenderingBackend implements RenderingBackend {
     }
 
     @Override
-    public TextRenderer getTextRenderer(final Path assetRoot, final Camera camera) {
-        return new LWJGLTextRenderer(assetRoot, camera, this);
+    public TextRenderer getTextRenderer() {
+        return this.textRenderer;
+    }
+
+    @Override
+    public Camera createCamera(final Viewport viewport) {
+        return new LWJGLCamera(viewport);
     }
 
     @Override
@@ -54,5 +60,10 @@ public class LWJGLRenderingBackend implements RenderingBackend {
     @Override
     public ShaderBuilder createShaderProgram() {
         return new LWJGLShaderBuilder();
+    }
+
+    @Override
+    public void close() throws Exception {
+        this.textRenderer.close();
     }
 }

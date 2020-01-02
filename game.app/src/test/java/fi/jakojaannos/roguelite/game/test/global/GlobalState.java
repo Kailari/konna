@@ -57,7 +57,7 @@ public class GlobalState {
                                    glfwSwapInterval(0);
                                    return new RogueliteGameRenderer(assetRoot,
                                                                     window,
-                                                                    new LWJGLRenderingBackend(),
+                                                                    new LWJGLRenderingBackend(assetRoot),
                                                                     new LWJGLAssetManager(assetRoot));
                                })
                                .orElseGet(() -> new RogueliteGameRenderer(assetRoot,

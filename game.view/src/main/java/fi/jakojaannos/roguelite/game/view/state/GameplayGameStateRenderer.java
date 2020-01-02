@@ -40,7 +40,7 @@ public class GameplayGameStateRenderer extends GameStateRenderer {
     ) {
         val fontRegistry = assetManager.getAssetRegistry(Font.class);
         val spriteRegistry = assetManager.getAssetRegistry(Sprite.class);
-        val textRenderer = backend.getTextRenderer(assetRoot, camera);
+        val textRenderer = backend.getTextRenderer();
 
         val font = fontRegistry.getByAssetName("fonts/VCR_OSD_MONO.ttf");
         val builder = SystemDispatcher.builder()

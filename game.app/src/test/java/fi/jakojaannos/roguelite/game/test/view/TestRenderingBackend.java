@@ -22,14 +22,12 @@ public class TestRenderingBackend implements RenderingBackend {
     }
 
     @Override
-    public Camera getCamera(final Viewport viewport) {
+    public Camera createCamera(final Viewport viewport) {
         return new TestCamera(viewport);
     }
 
     @Override
     public TextRenderer getTextRenderer(
-            final Path assetRoot,
-            final Camera camera
     ) {
         return mock(TextRenderer.class);
     }

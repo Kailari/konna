@@ -41,7 +41,9 @@ public class RogueliteApplication {
              val assetManager = new LWJGLAssetManager(assetRoot);
              val game = new Roguelite()
         ) {
-            try (val renderer = new RogueliteGameRenderer(assetRoot, runner.getWindow(), new LWJGLRenderingBackend(), assetManager)) {
+            try (val backend = new LWJGLRenderingBackend(assetRoot);
+                 val renderer = new RogueliteGameRenderer(assetRoot, runner.getWindow(), backend, assetManager)
+            ) {
                 val inputProvider = new LWJGLInputProvider(runner.getWindow(), this.enableForceClose);
                 runner.run(() -> createInitialState(game), game, inputProvider, renderer::render);
             }

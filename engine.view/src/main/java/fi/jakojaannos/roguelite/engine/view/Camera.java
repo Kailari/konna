@@ -6,7 +6,7 @@ import org.joml.Vector2d;
 
 // TODO: Move anything that can be abstracted from LWJGLCamera here (allows better testing matrices etc. producing correct coordinates)
 
-public abstract class Camera {
+public abstract class Camera implements AutoCloseable {
     private final Vector2d position;
     @Getter private final Viewport viewport;
 
