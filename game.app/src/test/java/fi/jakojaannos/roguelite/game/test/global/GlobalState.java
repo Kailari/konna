@@ -71,6 +71,15 @@ public class GlobalState {
 
     @After
     public void after() {
+        if (window instanceof LWJGLWindow) {
+            renderTick();
+            try {
+                Thread.sleep(500L);
+            } catch (InterruptedException ignored) {
+            }
+        }
+
+
         try {
             gameRenderer.close();
             window.close();

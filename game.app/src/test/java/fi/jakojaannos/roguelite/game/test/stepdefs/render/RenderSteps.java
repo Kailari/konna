@@ -9,6 +9,4 @@ public class RenderSteps {
     public void the_game_is_rendered() {
         renderTick();
     }
-
-
 }
