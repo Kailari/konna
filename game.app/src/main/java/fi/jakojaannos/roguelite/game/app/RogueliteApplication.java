@@ -22,13 +22,11 @@ import java.util.Optional;
 
 @Slf4j
 public class RogueliteApplication {
-    @Setter private boolean enableForceClose = false;
     @Setter private boolean debugStackTraces = false;
     @Setter private int windowWidth = -1;
     @Setter private int windowHeight = -1;
 
     public void setDebugMode(boolean state) {
-        setEnableForceClose(state);
         setDebugStackTraces(state);
         DebugConfig.debugModeEnabled = state;
     }
@@ -44,7 +42,7 @@ public class RogueliteApplication {
             try (val backend = new LWJGLRenderingBackend(assetRoot);
                  val renderer = new RogueliteGameRenderer(assetRoot, runner.getWindow(), backend, assetManager)
             ) {
-                val inputProvider = new LWJGLInputProvider(runner.getWindow(), this.enableForceClose);
+                val inputProvider = new LWJGLInputProvider(runner.getWindow());
                 runner.run(() -> createInitialState(game), game, inputProvider, renderer::render);
             }
         } catch (Exception e) {

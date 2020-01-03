@@ -4,7 +4,6 @@ import fi.jakojaannos.roguelite.engine.input.*;
 import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLWindow;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.lwjgl.glfw.GLFWKeyCallbackI;
 
 import java.util.ArrayDeque;
 import java.util.Optional;
@@ -22,7 +21,7 @@ public class LWJGLInputProvider implements InputProvider {
     private double mouseX, mouseY;
     private boolean justResized;
 
-    public LWJGLInputProvider(final LWJGLWindow window, boolean enableForceClose) {
+    public LWJGLInputProvider(final LWJGLWindow window) {
         this.inputEvents = new ArrayDeque<>();
 
         this.viewportWidth = window.getWidth();
@@ -33,7 +32,7 @@ public class LWJGLInputProvider implements InputProvider {
             this.justResized = true;
         });
 
-        glfwSetKeyCallback(window.getId(), keyCallback(enableForceClose));
+        glfwSetKeyCallback(window.getId(), this::keyCallback);
         glfwSetMouseButtonCallback(window.getId(), this::mouseButtonCallback);
         glfwSetCursorPosCallback(window.getId(), this::cursorPositionCallback);
     }
@@ -67,25 +66,22 @@ public class LWJGLInputProvider implements InputProvider {
         }
     }
 
-    private GLFWKeyCallbackI keyCallback(boolean enableForceClose) {
-        return (window, key, scancode, action, mods) -> {
-            mapAction(action).ifPresent(inputAction -> this.inputEvents.offer(
-                    ButtonInput.event(InputButton.Keyboard.get(key)
-                                                          .orElse(InputButton.Keyboard.KEY_UNKNOWN),
-                                      inputAction)));
-
-
-            if (enableForceClose && key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
-                LOG.info("Received force close signal. Sending WindowShouldClose notify.");
-                glfwSetWindowShouldClose(window, true);
-            }
-        };
+    private void keyCallback(
+            final long window,
+            final int key,
+            final int scancode,
+            final int action,
+            final int mods
+    ) {
+        mapAction(action).ifPresent(inputAction -> this.inputEvents.offer(ButtonInput.event(InputButton.Keyboard.get(key)
+                                                                                                                .orElse(InputButton.Keyboard.KEY_UNKNOWN),
+                                                                                            inputAction)));
     }
 
     private void mouseButtonCallback(long window, int button, int action, int mods) {
         mapAction(action)
-                .ifPresent(ia -> this.inputEvents.offer(ButtonInput.event(InputButton.Mouse.button(button),
-                                                                          ia)));
+                .ifPresent(inputAction -> this.inputEvents.offer(ButtonInput.event(InputButton.Mouse.button(button),
+                                                                                   inputAction)));
     }
 
     private Optional<ButtonInput.Action> mapAction(int action) {

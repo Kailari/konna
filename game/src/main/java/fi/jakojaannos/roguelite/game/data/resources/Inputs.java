@@ -10,4 +10,8 @@ public class Inputs implements Resource {
     public boolean inputAttack = false;
 
     public boolean inputRestart = false;
+    public boolean inputMenu = false;
+
+    public boolean inputForceCloseA;
+    public boolean inputForceCloseB;
 }

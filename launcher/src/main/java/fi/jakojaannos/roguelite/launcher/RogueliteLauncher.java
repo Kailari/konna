@@ -60,8 +60,6 @@ public class RogueliteLauncher {
                                    .withAction(params -> this.setEnableLWJGLDebug(true)))
                      .with(Argument.withName("enableLWJGLLibraryLoaderDebug")
                                    .withAction(params -> this.setEnableLWJGLLibraryLoaderDebug(true)))
-                     .with(Argument.withName("enableForceClose")
-                                   .withAction(params -> this.application.setEnableForceClose(true)))
                      .with(Argument.withName("debugStackTraces")
                                    .withAction(params -> this.application.setDebugStackTraces(true)))
                      .with(Argument.withName("debug")
