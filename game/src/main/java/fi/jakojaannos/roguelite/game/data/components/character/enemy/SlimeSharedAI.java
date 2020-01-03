@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.game.data.components;
+package fi.jakojaannos.roguelite.game.data.components.character.enemy;
 
 import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;

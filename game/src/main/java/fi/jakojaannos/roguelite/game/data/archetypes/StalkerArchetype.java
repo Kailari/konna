@@ -3,7 +3,14 @@ package fi.jakojaannos.roguelite.game.data.archetypes;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
+import fi.jakojaannos.roguelite.game.data.DamageSource;
 import fi.jakojaannos.roguelite.game.data.components.*;
+import fi.jakojaannos.roguelite.game.data.components.character.CharacterAbilities;
+import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
+import fi.jakojaannos.roguelite.game.data.components.character.CharacterStats;
+import fi.jakojaannos.roguelite.game.data.components.character.Health;
+import fi.jakojaannos.roguelite.game.data.components.character.enemy.EnemyTag;
+import fi.jakojaannos.roguelite.game.data.components.character.enemy.StalkerAI;
 import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
 import lombok.val;
 
@@ -42,7 +49,7 @@ public class StalkerArchetype {
         entityManager.addComponentTo(stalker, createStalkerAi());
         entityManager.addComponentTo(stalker, createSpriteInfo());
         entityManager.addComponentTo(stalker, new EnemyTag());
-        entityManager.addComponentTo(stalker, new CharacterAbilities());
+        entityManager.addComponentTo(stalker, new CharacterAbilities(new DamageSource.Entity(stalker)));
         entityManager.addComponentTo(stalker, new EnemyMeleeWeaponStats());
 
         return stalker;

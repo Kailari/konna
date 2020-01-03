@@ -1,7 +1,8 @@
-package fi.jakojaannos.roguelite.game.data.components;
+package fi.jakojaannos.roguelite.game.data.components.character;
 
 import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.input.MouseInfo;
+import fi.jakojaannos.roguelite.game.data.DamageSource;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.joml.Vector2d;

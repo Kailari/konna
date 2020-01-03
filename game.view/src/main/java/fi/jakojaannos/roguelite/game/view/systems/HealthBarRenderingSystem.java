@@ -12,7 +12,7 @@ import fi.jakojaannos.roguelite.engine.view.rendering.mesh.Mesh;
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexAttribute;
 import fi.jakojaannos.roguelite.engine.view.rendering.shader.EngineUniformBufferObjectIndices;
 import fi.jakojaannos.roguelite.engine.view.rendering.shader.ShaderProgram;
-import fi.jakojaannos.roguelite.game.data.components.Health;
+import fi.jakojaannos.roguelite.game.data.components.character.Health;
 import lombok.val;
 import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryUtil;

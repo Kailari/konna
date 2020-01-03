@@ -1,7 +1,7 @@
 package fi.jakojaannos.roguelite.game.test.stepdefs.gameplay;
 
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.game.data.components.CharacterStats;
+import fi.jakojaannos.roguelite.game.data.components.character.CharacterStats;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.game.test.global.GlobalGameState;
 import io.cucumber.java.en.Given;

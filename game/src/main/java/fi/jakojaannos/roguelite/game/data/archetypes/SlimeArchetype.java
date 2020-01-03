@@ -3,7 +3,14 @@ package fi.jakojaannos.roguelite.game.data.archetypes;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
+import fi.jakojaannos.roguelite.game.data.DamageSource;
 import fi.jakojaannos.roguelite.game.data.components.*;
+import fi.jakojaannos.roguelite.game.data.components.character.CharacterAbilities;
+import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
+import fi.jakojaannos.roguelite.game.data.components.character.CharacterStats;
+import fi.jakojaannos.roguelite.game.data.components.character.Health;
+import fi.jakojaannos.roguelite.game.data.components.character.enemy.EnemyTag;
+import fi.jakojaannos.roguelite.game.data.components.character.enemy.SlimeAI;
 import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
 import lombok.val;
 import org.joml.Vector2d;
@@ -33,7 +40,7 @@ public class SlimeArchetype {
         entityManager.addComponentTo(slime, new Velocity());
         entityManager.addComponentTo(slime, new CharacterInput());
         entityManager.addComponentTo(slime, new EnemyTag());
-        entityManager.addComponentTo(slime, new CharacterAbilities());
+        entityManager.addComponentTo(slime, new CharacterAbilities(new DamageSource.Entity(slime)));
         entityManager.addComponentTo(slime, new EnemyMeleeWeaponStats());
         val slimeAi = new SlimeAI(
                 0.2,
@@ -71,7 +78,7 @@ public class SlimeArchetype {
         entityManager.addComponentTo(slime, new Velocity());
         entityManager.addComponentTo(slime, new CharacterInput());
         entityManager.addComponentTo(slime, new EnemyTag());
-        entityManager.addComponentTo(slime, new CharacterAbilities());
+        entityManager.addComponentTo(slime, new CharacterAbilities(new DamageSource.Entity(slime)));
         entityManager.addComponentTo(slime, new EnemyMeleeWeaponStats());
         val slimeAi = new SlimeAI(
                 0.3,
@@ -107,7 +114,7 @@ public class SlimeArchetype {
         entityManager.addComponentTo(slime, new Velocity());
         entityManager.addComponentTo(slime, new CharacterInput());
         entityManager.addComponentTo(slime, new EnemyTag());
-        entityManager.addComponentTo(slime, new CharacterAbilities());
+        entityManager.addComponentTo(slime, new CharacterAbilities(new DamageSource.Entity(slime)));
         entityManager.addComponentTo(slime, new EnemyMeleeWeaponStats());
         entityManager.addComponentTo(slime, new SlimeAI(
                 0.6,

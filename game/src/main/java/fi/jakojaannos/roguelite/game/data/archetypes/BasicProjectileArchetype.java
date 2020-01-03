@@ -3,17 +3,20 @@ package fi.jakojaannos.roguelite.game.data.archetypes;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.game.data.DamageSource;
+import fi.jakojaannos.roguelite.game.data.components.Collider;
+import fi.jakojaannos.roguelite.game.data.components.weapon.ProjectileStats;
+import fi.jakojaannos.roguelite.game.data.components.SpriteInfo;
+import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
-import fi.jakojaannos.roguelite.game.data.components.*;
 import lombok.val;
 import org.joml.Vector2d;
 
 import javax.annotation.Nonnull;
 
 public class BasicProjectileArchetype {
-
-
     public static Entity create(
+            final DamageSource<?> source,
             final World world,
             final double projectileX,
             final double projectileY,
@@ -24,22 +27,21 @@ public class BasicProjectileArchetype {
         return create(world,
                       new Transform(projectileX, projectileY),
                       new Velocity(direction.normalize(projectileSpeed, new Vector2d())
-                                            .add(spreadOffset)
-                      ));
+                                            .add(spreadOffset)),
+                      source);
     }
 
 
     public static Entity create(
             final World world,
             final Transform transform,
-            final Velocity velocity
+            final Velocity velocity,
+            final DamageSource<?> source
     ) {
         val entities = world.getEntityManager();
 
         val projectile = entities.createEntity();
-        val projectileStats = createProjectileStats();
-
-        entities.addComponentTo(projectile, projectileStats);
+        entities.addComponentTo(projectile, createProjectileStats(source));
         entities.addComponentTo(projectile, createCollider());
         entities.addComponentTo(projectile, transform);
         entities.addComponentTo(projectile, velocity);
@@ -57,8 +59,8 @@ public class BasicProjectileArchetype {
         return collider;
     }
 
-    private static ProjectileStats createProjectileStats() {
-        return new ProjectileStats(1.0);
+    private static ProjectileStats createProjectileStats(final DamageSource<?> source) {
+        return new ProjectileStats(1.0, source);
     }
 
 

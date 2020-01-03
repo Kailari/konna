@@ -3,6 +3,9 @@ package fi.jakojaannos.roguelite.game.data.archetypes;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
+import fi.jakojaannos.roguelite.game.data.DamageSource;
+import fi.jakojaannos.roguelite.game.data.components.character.*;
+import fi.jakojaannos.roguelite.game.data.components.weapon.BasicWeaponStats;
 import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import lombok.val;
@@ -19,7 +22,7 @@ public class PlayerArchetype {
         entityManager.addComponentTo(player, transform);
         entityManager.addComponentTo(player, new Velocity());
         entityManager.addComponentTo(player, new CharacterInput());
-        entityManager.addComponentTo(player, new CharacterAbilities());
+        entityManager.addComponentTo(player, new CharacterAbilities(new DamageSource.Entity(player)));
         entityManager.addComponentTo(player, createCollider());
         entityManager.addComponentTo(player, new PlayerTag());
         entityManager.addComponentTo(player, createCharacterStats());

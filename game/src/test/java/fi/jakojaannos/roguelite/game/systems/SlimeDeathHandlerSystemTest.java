@@ -4,9 +4,9 @@ import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.archetypes.SlimeArchetype;
-import fi.jakojaannos.roguelite.game.data.components.DeadTag;
-import fi.jakojaannos.roguelite.game.data.components.SlimeAI;
-import fi.jakojaannos.roguelite.game.data.components.SlimeSharedAI;
+import fi.jakojaannos.roguelite.game.data.components.character.DeadTag;
+import fi.jakojaannos.roguelite.game.data.components.character.enemy.SlimeAI;
+import fi.jakojaannos.roguelite.game.data.components.character.enemy.SlimeSharedAI;
 import org.joml.Vector2d;
 import org.junit.jupiter.api.Test;
 

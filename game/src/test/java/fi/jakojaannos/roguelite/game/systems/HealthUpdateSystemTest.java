@@ -4,8 +4,9 @@ import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.DamageInstance;
-import fi.jakojaannos.roguelite.game.data.components.DeadTag;
-import fi.jakojaannos.roguelite.game.data.components.Health;
+import fi.jakojaannos.roguelite.game.data.DamageSource;
+import fi.jakojaannos.roguelite.game.data.components.character.DeadTag;
+import fi.jakojaannos.roguelite.game.data.components.character.Health;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -35,7 +36,7 @@ public class HealthUpdateSystemTest {
         Entity entity = entityManager.createEntity();
         Health hp = new Health(maxHp, currentHp);
         entityManager.addComponentTo(entity, hp);
-        hp.addDamageInstance(new DamageInstance(damage), 0);
+        hp.addDamageInstance(new DamageInstance(damage, DamageSource.Generic.UNDEFINED), 0);
 
         system.tick(Stream.of(entity), world);
 

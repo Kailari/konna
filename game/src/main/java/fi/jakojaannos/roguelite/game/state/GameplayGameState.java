@@ -13,6 +13,8 @@ import fi.jakojaannos.roguelite.game.data.components.*;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
 import fi.jakojaannos.roguelite.game.systems.*;
+import fi.jakojaannos.roguelite.game.systems.cleanup.CleanUpDeadPlayersSystem;
+import fi.jakojaannos.roguelite.game.systems.cleanup.ReaperSystem;
 import fi.jakojaannos.roguelite.game.systems.collision.*;
 import fi.jakojaannos.roguelite.game.world.WorldGenerator;
 import lombok.val;

@@ -1,11 +1,12 @@
-package fi.jakojaannos.roguelite.game.systems;
+package fi.jakojaannos.roguelite.game.systems.cleanup;
 
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.LogCategories;
-import fi.jakojaannos.roguelite.game.data.components.DeadTag;
+import fi.jakojaannos.roguelite.game.data.components.character.DeadTag;
+import fi.jakojaannos.roguelite.game.systems.SystemGroups;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
