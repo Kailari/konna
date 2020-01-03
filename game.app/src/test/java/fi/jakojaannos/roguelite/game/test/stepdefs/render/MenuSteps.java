@@ -13,6 +13,7 @@ import lombok.val;
 
 import static fi.jakojaannos.roguelite.engine.utilities.assertions.ui.AssertUI.assertUI;
 import static fi.jakojaannos.roguelite.game.test.global.GlobalState.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MenuSteps {
@@ -69,5 +70,17 @@ public class MenuSteps {
     public void the_game_should_start() {
         simulateTick();
         assertTrue(state instanceof GameplayGameState);
+    }
+
+    @Then("the game is not in the main menu")
+    public void theGameIsNotInTheMainMenu() {
+        simulateTick();
+        assertFalse(state instanceof MainMenuGameState);
+    }
+
+    @Then("the game is now in the main menu")
+    public void theGameIsNowInTheMainMenu() {
+        simulateTick();
+        assertTrue(state instanceof MainMenuGameState);
     }
 }
