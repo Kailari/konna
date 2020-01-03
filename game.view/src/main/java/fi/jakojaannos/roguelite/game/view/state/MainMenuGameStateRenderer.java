@@ -81,8 +81,9 @@ public class MainMenuGameStateRenderer extends GameStateRenderer {
                 .element("play_button",
                          UIElementType.PANEL,
                          builder -> builder.anchorX(ProportionValue.percentOf().parentWidth(0.5))
+                                           .anchorY(ProportionValue.percentOf().parentHeight(0.3))
                                            .left(ProportionValue.percentOf().ownWidth(-0.5))
-                                           .top(ProportionValue.percentOf().parentHeight(0.3))
+                                           .top(ProportionValue.absolute(0))
                                            .width(ProportionValue.absolute(width))
                                            .height(ProportionValue.absolute(height))
                                            .borderSize(borderSize)
@@ -100,8 +101,9 @@ public class MainMenuGameStateRenderer extends GameStateRenderer {
                 .element("quit_button",
                          UIElementType.PANEL,
                          builder -> builder.anchorX(ProportionValue.percentOf().parentWidth(0.5))
+                                           .anchorY(ProportionValue.percentOf().parentHeight(0.3))
                                            .left(ProportionValue.percentOf().ownWidth(-0.5))
-                                           .top(ProportionValue.percentOf().parentHeight(0.6))
+                                           .top(ProportionValue.percentOf().ownHeight(1.1))
                                            .width(ProportionValue.absolute(width))
                                            .height(ProportionValue.absolute(height))
                                            .borderSize(borderSize)
