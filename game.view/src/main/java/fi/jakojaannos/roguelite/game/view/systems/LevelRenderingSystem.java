@@ -20,7 +20,8 @@ import java.util.stream.Stream;
 public class LevelRenderingSystem implements ECSSystem {
     @Override
     public void declareRequirements(RequirementsBuilder requirements) {
-        requirements.withComponent(TileMapLayer.class);
+        requirements.addToGroup(RenderSystemGroups.LEVEL)
+                    .withComponent(TileMapLayer.class);
     }
 
     private final Camera camera;

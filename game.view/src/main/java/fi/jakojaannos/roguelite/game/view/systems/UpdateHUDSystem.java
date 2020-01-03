@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 public class UpdateHUDSystem implements ECSSystem {
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
-        requirements.tickAfter(SpriteRenderingSystem.class)
+        requirements.addToGroup(RenderSystemGroups.UI)
                     .tickBefore(UserInterfaceRenderingSystem.class)
                     .requireResource(Time.class);
     }

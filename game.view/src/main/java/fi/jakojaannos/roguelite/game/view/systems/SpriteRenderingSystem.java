@@ -1,18 +1,18 @@
 package fi.jakojaannos.roguelite.game.view.systems;
 
 import fi.jakojaannos.roguelite.engine.content.AssetRegistry;
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
-import fi.jakojaannos.roguelite.engine.view.rendering.sprite.SpriteBatch;
 import fi.jakojaannos.roguelite.engine.view.rendering.Texture;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.Sprite;
+import fi.jakojaannos.roguelite.engine.view.rendering.sprite.SpriteBatch;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.SpriteInfo;
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +31,7 @@ public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
 
     @Override
     public void declareRequirements(RequirementsBuilder requirements) {
-        requirements.tickAfter(LevelRenderingSystem.class)
+        requirements.addToGroup(RenderSystemGroups.ENTITIES)
                     .withComponent(Transform.class)
                     .withComponent(SpriteInfo.class);
     }

@@ -1,12 +1,13 @@
 package fi.jakojaannos.roguelite.game.view.systems;
 
 import fi.jakojaannos.roguelite.engine.content.AssetRegistry;
-import fi.jakojaannos.roguelite.engine.data.resources.GameStateManager;
 import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
-import fi.jakojaannos.roguelite.engine.ecs.*;
+import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
+import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.event.Events;
-import fi.jakojaannos.roguelite.engine.ui.UIEvent;
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.rendering.UserInterfaceRenderer;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.Sprite;
@@ -14,7 +15,6 @@ import fi.jakojaannos.roguelite.engine.view.rendering.sprite.SpriteBatch;
 import fi.jakojaannos.roguelite.engine.view.rendering.text.Font;
 import fi.jakojaannos.roguelite.engine.view.rendering.text.TextRenderer;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
-import fi.jakojaannos.roguelite.game.state.GameplayGameState;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
@@ -24,6 +24,10 @@ import java.util.stream.Stream;
 public class UserInterfaceRenderingSystem implements ECSSystem {
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
+        requirements.addToGroup(RenderSystemGroups.UI)
+                    .requireResource(Mouse.class)
+                    .requireResource(Events.class)
+                    .requireResource(Time.class);
     }
 
     private final UserInterface userInterface;
@@ -59,23 +63,6 @@ public class UserInterfaceRenderingSystem implements ECSSystem {
         this.userInterface.update(world.getOrCreateResource(Time.class).getTimeManager(),
                                   mouse,
                                   events);
-
-        // FIXME: Handle UI events on the controller, not view
-        val uiEvents = events.getUi();
-        while (uiEvents.hasEvents()) {
-            val event = uiEvents.pollEvent();
-            if (event.getType() == UIEvent.Type.CLICK) {
-                if (event.getElement().equalsIgnoreCase("play_button")) {
-                    world.getOrCreateResource(GameStateManager.class)
-                         .queueStateChange(new GameplayGameState(System.nanoTime(),
-                                                                 World.createNew(EntityManager.createNew(256, 32)),
-                                                                 world.getOrCreateResource(Time.class).getTimeManager()));
-                } else if (event.getElement().equalsIgnoreCase("quit_button")) {
-                    world.getOrCreateResource(GameStateManager.class)
-                         .quitGame();
-                }
-            }
-        }
 
         this.camera.useScreenCoordinates();
         this.userInterfaceRenderer.render(this.userInterface);

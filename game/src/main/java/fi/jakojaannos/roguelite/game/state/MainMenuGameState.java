@@ -4,6 +4,7 @@ import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.roguelite.game.systems.menu.HandleMainMenuUIEventsSystem;
 
 public class MainMenuGameState extends GameState {
     public MainMenuGameState(
@@ -16,7 +17,7 @@ public class MainMenuGameState extends GameState {
     @Override
     protected SystemDispatcher createDispatcher() {
         return SystemDispatcher.builder()
-                               // TODO: Move logic from renderers to systems ":D"
+                               .withSystem(new HandleMainMenuUIEventsSystem())
                                .build();
     }
 

@@ -1,5 +1,6 @@
 package fi.jakojaannos.roguelite.game.view.systems.debug;
 
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
@@ -14,8 +15,7 @@ import fi.jakojaannos.roguelite.game.DebugConfig;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.NoDrawTag;
 import fi.jakojaannos.roguelite.game.data.components.SpriteInfo;
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.game.view.systems.SpriteRenderingSystem;
+import fi.jakojaannos.roguelite.game.view.systems.RenderSystemGroups;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Matrix4f;
@@ -27,8 +27,8 @@ import java.util.stream.Stream;
 @Slf4j
 public class EntityCollisionBoundsRenderingSystem implements ECSSystem, AutoCloseable {
     @Override
-    public void declareRequirements(RequirementsBuilder requirements) {
-        requirements.tickAfter(SpriteRenderingSystem.class)
+    public void declareRequirements(final RequirementsBuilder requirements) {
+        requirements.addToGroup(RenderSystemGroups.DEBUG)
                     .withComponent(Transform.class)
                     .withComponent(Collider.class);
     }

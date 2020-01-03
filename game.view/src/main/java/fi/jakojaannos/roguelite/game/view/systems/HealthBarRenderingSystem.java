@@ -1,5 +1,6 @@
 package fi.jakojaannos.roguelite.game.view.systems;
 
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
@@ -12,7 +13,6 @@ import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexAttribute;
 import fi.jakojaannos.roguelite.engine.view.rendering.shader.EngineUniformBufferObjectIndices;
 import fi.jakojaannos.roguelite.engine.view.rendering.shader.ShaderProgram;
 import fi.jakojaannos.roguelite.game.data.components.Health;
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import lombok.val;
 import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryUtil;
@@ -24,9 +24,7 @@ import java.util.stream.Stream;
 public class HealthBarRenderingSystem implements ECSSystem, AutoCloseable {
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
-        requirements.tickBefore(UpdateHUDSystem.class)
-                    .tickAfter(LevelRenderingSystem.class)
-                    .tickAfter(SpriteRenderingSystem.class)
+        requirements.addToGroup(RenderSystemGroups.UI)
                     .withComponent(Health.class)
                     .withComponent(Transform.class);
     }

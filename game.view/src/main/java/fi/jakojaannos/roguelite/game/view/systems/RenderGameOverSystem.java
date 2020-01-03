@@ -21,8 +21,9 @@ public class RenderGameOverSystem implements ECSSystem {
     private static final String HELP_TEXT = "Press <SPACE> to restart";
 
     @Override
-    public void declareRequirements(RequirementsBuilder requirements) {
-        requirements.tickAfter(SpriteRenderingSystem.class)
+    public void declareRequirements(final RequirementsBuilder requirements) {
+        requirements.addToGroup(RenderSystemGroups.UI)
+                    .tickBefore(UserInterfaceRenderingSystem.class)
                     .withComponent(PlayerTag.class);
     }
 

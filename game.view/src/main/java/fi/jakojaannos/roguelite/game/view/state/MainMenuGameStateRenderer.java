@@ -2,14 +2,18 @@ package fi.jakojaannos.roguelite.game.view.state;
 
 import fi.jakojaannos.roguelite.engine.content.AssetManager;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
-import fi.jakojaannos.roguelite.engine.view.ui.ProportionValue;
-import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
-import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.Sprite;
 import fi.jakojaannos.roguelite.engine.view.rendering.text.Font;
+import fi.jakojaannos.roguelite.engine.view.ui.ProportionValue;
+import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
+import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
+import fi.jakojaannos.roguelite.game.DebugConfig;
+import fi.jakojaannos.roguelite.game.view.systems.RenderSystemGroups;
 import fi.jakojaannos.roguelite.game.view.systems.UserInterfaceRenderingSystem;
+import fi.jakojaannos.roguelite.game.view.systems.debug.EntityCollisionBoundsRenderingSystem;
+import fi.jakojaannos.roguelite.game.view.systems.debug.EntityTransformRenderingSystem;
 import lombok.val;
 
 import java.nio.file.Path;
@@ -41,6 +45,11 @@ public class MainMenuGameStateRenderer extends GameStateRenderer {
         val textRenderer = backend.getTextRenderer();
 
         val builder = SystemDispatcher.builder()
+                                      .withGroups(RenderSystemGroups.values())
+                                      .addGroupDependencies(RenderSystemGroups.DEBUG, RenderSystemGroups.UI, RenderSystemGroups.OVERLAY, RenderSystemGroups.ENTITIES, RenderSystemGroups.LEVEL)
+                                      .addGroupDependencies(RenderSystemGroups.UI, RenderSystemGroups.OVERLAY, RenderSystemGroups.ENTITIES, RenderSystemGroups.LEVEL)
+                                      .addGroupDependencies(RenderSystemGroups.OVERLAY, RenderSystemGroups.ENTITIES, RenderSystemGroups.LEVEL)
+                                      .addGroupDependencies(RenderSystemGroups.ENTITIES, RenderSystemGroups.LEVEL)
                                       .withSystem(new UserInterfaceRenderingSystem(camera,
                                                                                    fontRegistry,
                                                                                    spriteRegistry,
@@ -48,11 +57,10 @@ public class MainMenuGameStateRenderer extends GameStateRenderer {
                                                                                    textRenderer,
                                                                                    userInterface));
 
-        // FIXME: Make rendering systems use groups so that no hard dependencies are required.
-        //  registering the debug rendering systems fails as they depend on other systems not present.
-        //if (DebugConfig.debugModeEnabled) {
-        //    builder.withSystem(new EntityTransformRenderingSystem(assetRoot, camera));
-        //}
+        if (DebugConfig.debugModeEnabled) {
+            builder.withSystem(new EntityTransformRenderingSystem(assetRoot, camera, backend));
+            builder.withSystem(new EntityCollisionBoundsRenderingSystem(assetRoot, camera, backend));
+        }
 
         return builder.build();
     }

@@ -46,6 +46,11 @@ public class GameplayGameStateRenderer extends GameStateRenderer {
 
         val font = fontRegistry.getByAssetName("fonts/VCR_OSD_MONO.ttf");
         val builder = SystemDispatcher.builder()
+                                      .withGroups(RenderSystemGroups.values())
+                                      .addGroupDependencies(RenderSystemGroups.DEBUG, RenderSystemGroups.UI, RenderSystemGroups.OVERLAY, RenderSystemGroups.ENTITIES, RenderSystemGroups.LEVEL)
+                                      .addGroupDependencies(RenderSystemGroups.UI, RenderSystemGroups.OVERLAY, RenderSystemGroups.ENTITIES, RenderSystemGroups.LEVEL)
+                                      .addGroupDependencies(RenderSystemGroups.OVERLAY, RenderSystemGroups.ENTITIES, RenderSystemGroups.LEVEL)
+                                      .addGroupDependencies(RenderSystemGroups.ENTITIES, RenderSystemGroups.LEVEL)
                                       .withSystem(new LevelRenderingSystem(assetRoot, camera, spriteRegistry, backend))
                                       .withSystem(new SpriteRenderingSystem(assetRoot, camera, spriteRegistry, backend))
                                       .withSystem(new UserInterfaceRenderingSystem(camera,
