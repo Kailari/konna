@@ -67,7 +67,7 @@ public class LWJGLFont implements AutoCloseable, Font {
     }
 
     public LWJGLFontTexture getTextureForSize(final int fontSize) {
-        return this.sizes.computeIfAbsent(fontSize, key -> new LWJGLFontTexture(this.ttf, this.fontInfo, key, this.contentScaleX, this.contentScaleY));
+        return this.sizes.computeIfAbsent(fontSize, key -> new LWJGLFontTexture(this.ttf, this, key, this.contentScaleX, this.contentScaleY));
     }
 
     @Override

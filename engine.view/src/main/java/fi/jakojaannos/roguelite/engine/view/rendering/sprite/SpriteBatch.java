@@ -1,5 +1,6 @@
 package fi.jakojaannos.roguelite.engine.view.rendering.sprite;
 
+import fi.jakojaannos.roguelite.engine.view.rendering.TextureRegion;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.Sprite;
 import org.joml.Matrix4f;
 
@@ -87,6 +88,17 @@ public interface SpriteBatch
             double width,
             double height,
             double rotation
+    );
+
+    void draw(
+            TextureRegion region,
+            double x0,
+            double y0,
+            double x1,
+            double y1,
+            double r,
+            double g,
+            double b
     );
 
     void end();

@@ -2,7 +2,6 @@ package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering;
 
 import fi.jakojaannos.roguelite.engine.utilities.math.RotatedRectangle;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
-import fi.jakojaannos.roguelite.engine.view.rendering.sprite.SpriteBatchBase;
 import fi.jakojaannos.roguelite.engine.view.rendering.Texture;
 import fi.jakojaannos.roguelite.engine.view.rendering.TextureRegion;
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.Mesh;
@@ -10,6 +9,7 @@ import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexAttribute;
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexFormat;
 import fi.jakojaannos.roguelite.engine.view.rendering.shader.EngineUniformBufferObjectIndices;
 import fi.jakojaannos.roguelite.engine.view.rendering.shader.ShaderProgram;
+import fi.jakojaannos.roguelite.engine.view.rendering.sprite.SpriteBatchBase;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Matrix4f;
@@ -96,23 +96,53 @@ public class LWJGLSpriteBatch extends SpriteBatchBase {
                      1.0f, 1.0f, 1.0f);
     }
 
+    @Override
+    protected void queueFrameUnrotated(
+            final TextureRegion textureRegion,
+            final double x0,
+            final double y0,
+            final double x1,
+            final double y1,
+            final double r,
+            final double g,
+            final double b
+    ) {
+        val offset = getNFrames() * VERTICES_PER_SPRITE * SIZE_IN_BYTES;
+        updateVertex(offset,
+                     x0, y0,
+                     textureRegion.getU0(), textureRegion.getV0(),
+                     r, g, b);
+        updateVertex(offset + SIZE_IN_BYTES,
+                     x1, y0,
+                     textureRegion.getU1(), textureRegion.getV0(),
+                     r, g, b);
+        updateVertex(offset + (2 * SIZE_IN_BYTES),
+                     x1, y1,
+                     textureRegion.getU1(), textureRegion.getV1(),
+                     r, g, b);
+        updateVertex(offset + (3 * SIZE_IN_BYTES),
+                     x0, y1,
+                     textureRegion.getU0(), textureRegion.getV1(),
+                     r, g, b);
+    }
+
     private void updateVertex(
             int offset,
             double x,
             double y,
             double u,
             double v,
-            float r,
-            float g,
-            float b
+            double r,
+            double g,
+            double b
     ) {
         this.vertexDataBuffer.putFloat(offset, (float) x);
         this.vertexDataBuffer.putFloat(offset + 4, (float) y);
         this.vertexDataBuffer.putFloat(offset + 8, (float) u);
         this.vertexDataBuffer.putFloat(offset + 12, (float) v);
-        this.vertexDataBuffer.putFloat(offset + 16, r);
-        this.vertexDataBuffer.putFloat(offset + 20, g);
-        this.vertexDataBuffer.putFloat(offset + 24, b);
+        this.vertexDataBuffer.putFloat(offset + 16, (float) r);
+        this.vertexDataBuffer.putFloat(offset + 20, (float) g);
+        this.vertexDataBuffer.putFloat(offset + 24, (float) b);
     }
 
     @Override

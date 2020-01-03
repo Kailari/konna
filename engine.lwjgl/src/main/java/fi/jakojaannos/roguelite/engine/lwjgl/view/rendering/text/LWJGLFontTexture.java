@@ -1,38 +1,48 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text;
 
+import fi.jakojaannos.roguelite.engine.view.rendering.Texture;
+import fi.jakojaannos.roguelite.engine.view.rendering.TextureRegion;
+import fi.jakojaannos.roguelite.engine.view.rendering.text.Font;
 import fi.jakojaannos.roguelite.engine.view.rendering.text.FontTexture;
+import fi.jakojaannos.roguelite.engine.view.rendering.text.RenderableCharacter;
 import lombok.Getter;
 import lombok.val;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.stb.STBTTAlignedQuad;
 import org.lwjgl.stb.STBTTBakedChar;
-import org.lwjgl.stb.STBTTFontinfo;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.stb.STBTruetype.*;
 
-public class LWJGLFontTexture implements AutoCloseable, FontTexture {
+public class LWJGLFontTexture implements AutoCloseable, FontTexture, Texture {
     private static final int FIRST_CHAR = 32;
 
     @Getter private final float contentScaleX, contentScaleY;
     @Getter private final float pixelHeightScale;
 
     private final int fontHeight;
+    private final LWJGLFont font;
     private final STBTTBakedChar.Buffer bakedCharacters;
+    private final STBTTAlignedQuad alignedQuad;
 
     private final int textureId;
     private final int scaledBitmapW, scaledBitmapH;
+    private Map<Integer, TextureRegion> textureRegions = new HashMap<>();
 
     public LWJGLFontTexture(
             final ByteBuffer ttf,
-            final STBTTFontinfo fontInfo,
+            final LWJGLFont font,
             final int fontHeight,
             final float contentScaleX,
             final float contentScaleY
     ) {
+        this.font = font;
         this.fontHeight = fontHeight;
         this.contentScaleX = contentScaleX;
         this.contentScaleY = contentScaleY;
@@ -41,7 +51,8 @@ public class LWJGLFontTexture implements AutoCloseable, FontTexture {
 
         this.textureId = glGenTextures();
         this.bakedCharacters = bakeFontToBitmap(ttf);
-        this.pixelHeightScale = stbtt_ScaleForPixelHeight(fontInfo, this.fontHeight);
+        this.pixelHeightScale = stbtt_ScaleForPixelHeight(font.getFontInfo(), this.fontHeight);
+        this.alignedQuad = STBTTAlignedQuad.malloc();
     }
 
     private STBTTBakedChar.Buffer bakeFontToBitmap(ByteBuffer ttf) {
@@ -64,29 +75,69 @@ public class LWJGLFontTexture implements AutoCloseable, FontTexture {
     }
 
     @Override
+    public int getWidth() {
+        return this.scaledBitmapW;
+    }
+
+    @Override
+    public int getHeight() {
+        return this.scaledBitmapH;
+    }
+
+    @Override
     public void use() {
         glBindTexture(GL_TEXTURE_2D, this.textureId);
     }
 
-    public void getNextCharacterToQuad(
+    @Override
+    public RenderableCharacter getNextCharacterAndAdvance(
             final int codePoint,
+            final IntBuffer pCodePoint,
             final FloatBuffer pX,
             final FloatBuffer pY,
-            final STBTTAlignedQuad alignedQuad
+            final int i,
+            final int to,
+            final String string,
+            final float factorX
     ) {
+        val cpX = pX.get(0);
+        this.alignedQuad.clear();
         stbtt_GetBakedQuad(this.bakedCharacters,
                            this.scaledBitmapW,
                            this.scaledBitmapH,
                            codePoint - FIRST_CHAR,
                            pX,
                            pY,
-                           alignedQuad,
+                           this.alignedQuad,
                            true);
+        pX.put(0, (float) scale(cpX, pX.get(0), factorX));
+        if (this.font.isKerningEnabled() && i < to) {
+            Font.getCP(string, to, i, pCodePoint);
+            pX.put(0, pX.get(0) + stbtt_GetCodepointKernAdvance(this.font.getFontInfo(), codePoint, pCodePoint.get(0)) * this.pixelHeightScale);
+        }
+
+        return new LWJGLRenderableCharacter(this.alignedQuad.x0(), this.alignedQuad.x1(),
+                                            this.alignedQuad.y0(), this.alignedQuad.y1(),
+                                            this.textureRegions.computeIfAbsent(codePoint,
+                                                                                key -> new TextureRegion(this,
+                                                                                                         this.alignedQuad.s0(),
+                                                                                                         this.alignedQuad.t0(),
+                                                                                                         this.alignedQuad.s1(),
+                                                                                                         this.alignedQuad.t1())));
+    }
+
+    private double scale(
+            final double center,
+            final double offset,
+            final double factor
+    ) {
+        return (offset - center) * factor + center;
     }
 
     @Override
     public void close() {
         this.bakedCharacters.close();
+        this.alignedQuad.close();
         glDeleteTextures(this.textureId);
     }
 }

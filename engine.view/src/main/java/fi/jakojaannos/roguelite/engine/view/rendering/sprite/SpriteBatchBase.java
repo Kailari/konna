@@ -24,6 +24,17 @@ public abstract class SpriteBatchBase
         this.maxFramesPerBatch = maxFramesPerBatch;
     }
 
+    protected abstract void queueFrameUnrotated(
+            TextureRegion textureRegion,
+            double x0,
+            double y0,
+            double x1,
+            double y1,
+            double r,
+            double g,
+            double b
+    );
+
     /**
      * Flushes the currently queued sprites.
      *
@@ -96,6 +107,28 @@ public abstract class SpriteBatchBase
             double rotation
     ) {
         val textureRegion = sprite.getSpecificFrame(animation, frame);
+        updateTextureAndFlushIfNeeded(textureRegion);
+        queueFrame(textureRegion, x, y, originX, originY, width, height, rotation);
+        this.nFrames += 1;
+    }
+
+    @Override
+    public void draw(
+            final TextureRegion textureRegion,
+            final double x0,
+            final double y0,
+            final double x1,
+            final double y1,
+            final double r,
+            final double g,
+            final double b
+    ) {
+        updateTextureAndFlushIfNeeded(textureRegion);
+        queueFrameUnrotated(textureRegion, x0, y0, x1, y1, r, g, b);
+        this.nFrames += 1;
+    }
+
+    protected void updateTextureAndFlushIfNeeded(final TextureRegion textureRegion) {
         if (this.activeTexture == null) {
             this.activeTexture = textureRegion.getTexture();
         }
@@ -107,8 +140,5 @@ public abstract class SpriteBatchBase
             this.nFrames = 0;
             this.activeTexture = textureRegion.getTexture();
         }
-
-        queueFrame(textureRegion, x, y, originX, originY, width, height, rotation);
-        this.nFrames += 1;
     }
 }

@@ -2,8 +2,13 @@ package fi.jakojaannos.roguelite.game.test.view.rendering.text;
 
 import fi.jakojaannos.roguelite.engine.view.rendering.text.Font;
 import fi.jakojaannos.roguelite.engine.view.rendering.text.FontTexture;
+import fi.jakojaannos.roguelite.engine.view.rendering.text.RenderableCharacter;
 
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.nio.file.Path;
+
+import static org.mockito.Mockito.mock;
 
 public class TestFont implements Font {
     public TestFont(final Path path, final float contentScaleX, final float contentScaleY) {
@@ -19,6 +24,20 @@ public class TestFont implements Font {
             @Override
             public float getPixelHeightScale() {
                 return fontSize;
+            }
+
+            @Override
+            public RenderableCharacter getNextCharacterAndAdvance(
+                    final int codePoint,
+                    final IntBuffer pCodePoint,
+                    final FloatBuffer pX,
+                    final FloatBuffer pY,
+                    final int i,
+                    final int to,
+                    final String string,
+                    final float factorX
+            ) {
+                return mock(RenderableCharacter.class);
             }
 
             @Override
