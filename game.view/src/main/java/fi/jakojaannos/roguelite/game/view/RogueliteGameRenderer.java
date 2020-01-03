@@ -9,7 +9,7 @@ import fi.jakojaannos.roguelite.engine.view.GameRenderer;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.Window;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
-import fi.jakojaannos.roguelite.game.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.game.state.GameplayGameState;
 import fi.jakojaannos.roguelite.game.state.MainMenuGameState;
 import fi.jakojaannos.roguelite.game.view.state.GameStateRenderer;

@@ -1,7 +1,7 @@
 package fi.jakojaannos.roguelite.game.test.global;
 
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.game.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 import org.joml.Vector2d;
 

@@ -6,7 +6,7 @@ import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.CameraFollowTargetTag;
-import fi.jakojaannos.roguelite.game.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import lombok.val;
 
 import java.util.stream.Stream;

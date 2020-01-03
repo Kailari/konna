@@ -45,8 +45,8 @@ public class UILabelAutomaticSizeCalculationSystem implements ECSSystem {
             val text = textComponent.text;
             val font = this.font; // TODO: Get font from hierarchy like the font size is get
 
-            entityManager.addComponentIfAbsent(entity, new BoundWidth(ProportionValue.absolute(0)));
-            entityManager.addComponentIfAbsent(entity, new BoundHeight(ProportionValue.absolute(0)));
+            entityManager.addComponentIfAbsent(entity, BoundWidth.class, () -> new BoundWidth(ProportionValue.absolute(0)));
+            entityManager.addComponentIfAbsent(entity, BoundHeight.class, () -> new BoundHeight(ProportionValue.absolute(0)));
 
             int width = (int) font.getStringWidthInPixels(fontSize, text);
             val widthBound = entityManager.getComponentOf(entity, BoundWidth.class).orElseThrow();

@@ -6,7 +6,7 @@ import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.CharacterInput;
 import fi.jakojaannos.roguelite.game.data.components.FollowerEnemyAI;
 import fi.jakojaannos.roguelite.game.data.components.PlayerTag;
-import fi.jakojaannos.roguelite.game.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;

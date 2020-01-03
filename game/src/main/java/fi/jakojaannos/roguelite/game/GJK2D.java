@@ -1,7 +1,7 @@
 package fi.jakojaannos.roguelite.game;
 
 import fi.jakojaannos.roguelite.game.data.components.Shape;
-import fi.jakojaannos.roguelite.game.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import lombok.val;
 import org.joml.Vector2d;
 

@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.game.data.components;
+package fi.jakojaannos.roguelite.engine.data.components;
 
 import fi.jakojaannos.roguelite.engine.ecs.Component;
 import lombok.NoArgsConstructor;

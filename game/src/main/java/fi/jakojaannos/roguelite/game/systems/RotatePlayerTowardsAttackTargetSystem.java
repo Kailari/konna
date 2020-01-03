@@ -6,7 +6,7 @@ import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.CharacterAbilities;
 import fi.jakojaannos.roguelite.game.data.components.PlayerTag;
-import fi.jakojaannos.roguelite.game.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import lombok.val;
 import org.joml.Vector2d;
 import org.joml.Vector2dc;

@@ -7,7 +7,7 @@ import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.CharacterInput;
 import fi.jakojaannos.roguelite.game.data.components.CharacterStats;
 import fi.jakojaannos.roguelite.game.data.components.StalkerAI;
-import fi.jakojaannos.roguelite.game.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import lombok.extern.slf4j.Slf4j;

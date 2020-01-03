@@ -16,7 +16,7 @@ public abstract class GameState implements WorldProvider {
             final TimeManager timeManager
     ) {
         this.world = world;
-        this.world.createResource(Time.class, new Time(timeManager));
+        this.world.createOrReplaceResource(Time.class, new Time(timeManager));
 
         this.dispatcher = createDispatcher();
     }

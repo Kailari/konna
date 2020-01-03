@@ -49,6 +49,11 @@ public class EntityManagerImpl implements EntityManager {
     }
 
     @Override
+    public Stream<Entity> getAllEntities() {
+        return this.entityStorage.stream().map(Entity.class::cast);
+    }
+
+    @Override
     public void registerComponentGroup(final ComponentGroup group) {
         this.componentStorage.registerGroup(group);
     }
@@ -83,11 +88,12 @@ public class EntityManagerImpl implements EntityManager {
     }
 
     @Override
-    public <TComponent extends Component> void addComponentTo(
+    public <TComponent extends Component> TComponent addComponentTo(
             final Entity entity,
             final TComponent component
     ) {
         this.componentStorage.add((EntityImpl) entity, component);
+        return component;
     }
 
     @Override

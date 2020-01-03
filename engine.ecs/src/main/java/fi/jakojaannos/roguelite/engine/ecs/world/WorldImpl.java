@@ -24,13 +24,11 @@ public class WorldImpl implements World {
     }
 
     @Override
-    public <TResource extends Resource> void createResource(
+    public <TResource extends Resource> void createOrReplaceResource(
             final Class<TResource> resourceClass,
             final TResource resource
     ) {
-        if (this.resourceStorage.putIfAbsent(resourceClass, resource) != null) {
-            LOG.error("Could not create resource {}. Instance already exists!", resource.getClass().getSimpleName());
-        }
+        this.resourceStorage.put(resourceClass, resource);
     }
 
     @Override

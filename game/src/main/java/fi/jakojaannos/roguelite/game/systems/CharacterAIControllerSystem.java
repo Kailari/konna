@@ -6,7 +6,7 @@ import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.CharacterInput;
 import fi.jakojaannos.roguelite.game.data.components.FollowerEnemyAI;
-import fi.jakojaannos.roguelite.game.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;

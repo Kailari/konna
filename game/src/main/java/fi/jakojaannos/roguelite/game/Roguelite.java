@@ -12,7 +12,7 @@ import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.engine.utilities.UpdateableTimeManager;
 import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
-import fi.jakojaannos.roguelite.game.data.resources.Mouse;
+import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
 import fi.jakojaannos.roguelite.game.state.GameplayGameState;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,9 +39,9 @@ public class Roguelite extends GameBase {
 
             event.getAxis().ifPresent(input -> {
                 if (input.getAxis() == InputAxis.Mouse.X_POS) {
-                    mouse.pos.x = input.getValue();
+                    mouse.position.x = input.getValue();
                 } else if (input.getAxis() == InputAxis.Mouse.Y_POS) {
-                    mouse.pos.y = input.getValue();
+                    mouse.position.y = input.getValue();
                 }
             });
 
@@ -56,6 +56,7 @@ public class Roguelite extends GameBase {
                     inputs.inputDown = input.getAction() != ButtonInput.Action.RELEASE;
                 } else if (input.getButton() == InputButton.Mouse.button(0)) {
                     inputs.inputAttack = input.getAction() != ButtonInput.Action.RELEASE;
+                    mouse.clicked = input.getAction() != ButtonInput.Action.RELEASE;
                 } else if (input.getButton() == InputButton.Keyboard.KEY_SPACE) {
                     inputs.inputRestart = input.getAction() != ButtonInput.Action.RELEASE;
                 }

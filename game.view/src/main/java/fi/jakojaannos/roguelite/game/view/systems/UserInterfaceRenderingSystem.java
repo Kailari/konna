@@ -2,22 +2,21 @@ package fi.jakojaannos.roguelite.game.view.systems;
 
 import fi.jakojaannos.roguelite.engine.content.AssetRegistry;
 import fi.jakojaannos.roguelite.engine.data.resources.GameStateManager;
+import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.*;
+import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.ui.UIEvent;
-import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.engine.view.Camera;
-import fi.jakojaannos.roguelite.engine.view.rendering.sprite.SpriteBatch;
+import fi.jakojaannos.roguelite.engine.view.rendering.UserInterfaceRenderer;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.Sprite;
+import fi.jakojaannos.roguelite.engine.view.rendering.sprite.SpriteBatch;
 import fi.jakojaannos.roguelite.engine.view.rendering.text.Font;
 import fi.jakojaannos.roguelite.engine.view.rendering.text.TextRenderer;
-import fi.jakojaannos.roguelite.engine.view.rendering.UserInterfaceRenderer;
-import fi.jakojaannos.roguelite.game.data.resources.Inputs;
-import fi.jakojaannos.roguelite.game.data.resources.Mouse;
+import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.game.state.GameplayGameState;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.joml.Vector2d;
 
 import java.util.stream.Stream;
 
@@ -50,16 +49,19 @@ public class UserInterfaceRenderingSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
-        val mouse = world.getOrCreateResource(Mouse.class);
-        val viewport = this.camera.getViewport();
-        val mousePos = mouse.pos.mul(viewport.getWidthInPixels(),
-                                     viewport.getHeightInPixels(),
-                                     new Vector2d());
-        // FIXME: Updating should not happen in the renderer
-        val events = this.userInterface.update(mousePos,
-                                               world.getOrCreateResource(Inputs.class).inputAttack);
-        while (!events.isEmpty()) {
-            val event = events.remove();
+        val rawMouse = world.getOrCreateResource(Mouse.class);
+        val mouse = new Mouse();
+        mouse.clicked = rawMouse.clicked;
+        mouse.position.set(rawMouse.position)
+                      .mul(this.camera.getViewport().getWidthInPixels(),
+                           this.camera.getViewport().getHeightInPixels());
+        val events = world.getOrCreateResource(Events.class);
+        this.userInterface.update(world.getOrCreateResource(Time.class).getTimeManager(),
+                                  mouse,
+                                  events);
+        val uiEvents = events.getUi();
+        while (uiEvents.hasEvents()) {
+            val event = uiEvents.pollEvent();
             if (event.getElement().equalsIgnoreCase("play_button") && event.getType() == UIEvent.Type.CLICK) {
                 world.getOrCreateResource(GameStateManager.class)
                      .queueStateChange(new GameplayGameState(System.nanoTime(),

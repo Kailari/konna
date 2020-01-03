@@ -1,14 +1,13 @@
 package fi.jakojaannos.roguelite.game.systems;
 
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
+import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.game.data.components.CameraFollowTargetTag;
 import fi.jakojaannos.roguelite.game.data.components.CrosshairTag;
-import fi.jakojaannos.roguelite.game.data.components.Transform;
-import fi.jakojaannos.roguelite.game.data.resources.Mouse;
 import lombok.val;
 import org.joml.Vector2d;
 
@@ -37,7 +36,7 @@ public class SnapToCursorSystem implements ECSSystem {
 
         val cursorPosition = Optional.ofNullable(camProps.cameraEntity)
                                      .flatMap(cameraEntity -> world.getEntityManager().getComponentOf(cameraEntity, Transform.class))
-                                     .map(cameraTransform -> mouse.calculateCursorPositionRelativeToCamera(cameraTransform, camProps, tmpCamPos))
+                                     .map(cameraTransform -> mouse.calculateCursorPositionRelativeToCamera(cameraTransform.position, camProps, tmpCamPos))
                                      .orElseGet(() -> tmpCamPos.set(0.0, 0.0));
 
         entities.forEach(entity -> {

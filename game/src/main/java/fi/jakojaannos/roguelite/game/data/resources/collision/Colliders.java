@@ -3,7 +3,7 @@ package fi.jakojaannos.roguelite.game.data.resources.collision;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.Resource;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
-import fi.jakojaannos.roguelite.game.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.game.systems.ApplyVelocitySystem;
 import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
 import lombok.RequiredArgsConstructor;

@@ -6,7 +6,7 @@ import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.input.*;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
-import fi.jakojaannos.roguelite.game.data.resources.Mouse;
+import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
 import fi.jakojaannos.roguelite.game.state.GameplayGameState;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -79,9 +79,9 @@ class RogueliteTest {
         InputAxis.Mouse axisPos = horizontal ? InputAxis.Mouse.X_POS : InputAxis.Mouse.Y_POS;
         Mouse mouse = state.getWorld().getOrCreateResource(Mouse.class);
         if (horizontal) {
-            mouse.pos.x = initial;
+            mouse.position.x = initial;
         } else {
-            mouse.pos.y = initial;
+            mouse.position.y = initial;
         }
 
         Events events = new Events();
@@ -89,7 +89,7 @@ class RogueliteTest {
 
         roguelite.tick(state, events);
 
-        assertEquals(newPos, horizontal ? mouse.pos.x : mouse.pos.y);
+        assertEquals(newPos, horizontal ? mouse.position.x : mouse.position.y);
     }
 
     @Test

@@ -5,7 +5,6 @@ import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.engine.view.ui.internal.UserInterfaceImpl;
-import org.joml.Vector2d;
 
 import java.util.function.Consumer;
 
@@ -30,7 +29,7 @@ public class UIBuilder {
 
     public UserInterface build() {
         this.userInterface.getEntityManager().applyModifications();
-        this.userInterface.update(new Vector2d(-999.0), false);
+        this.userInterface.updateHierarchy();
         return this.userInterface;
     }
 }

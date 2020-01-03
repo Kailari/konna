@@ -10,8 +10,9 @@ public final class UIEvent {
 
     public enum Type {
         CLICK,
-        HOVER,
+        START_HOVER,
         PRESS,
-        RELEASE
+        RELEASE,
+        END_HOVER
     }
 }

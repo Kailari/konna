@@ -2,7 +2,7 @@ package fi.jakojaannos.roguelite.game.systems;
 
 import fi.jakojaannos.roguelite.engine.ecs.*;
 import fi.jakojaannos.roguelite.game.data.components.SpawnerComponent;
-import fi.jakojaannos.roguelite.game.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;

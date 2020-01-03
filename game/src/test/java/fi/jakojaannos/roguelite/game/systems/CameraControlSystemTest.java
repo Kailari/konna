@@ -6,7 +6,7 @@ import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.CameraFollowTargetTag;
-import fi.jakojaannos.roguelite.game.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import org.joml.Vector2d;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,7 +31,7 @@ class CameraControlSystemTest {
 
         Time time = mock(Time.class);
         when(time.getTimeStepInSeconds()).thenReturn(0.02);
-        world.createResource(Time.class, time);
+        world.createOrReplaceResource(Time.class, time);
 
         cameraEntity = world.getEntityManager().createEntity();
         world.getEntityManager().addComponentTo(cameraEntity, cameraTransform = new Transform());

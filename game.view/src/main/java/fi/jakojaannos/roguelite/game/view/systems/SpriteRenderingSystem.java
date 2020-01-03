@@ -12,7 +12,7 @@ import fi.jakojaannos.roguelite.engine.view.rendering.Texture;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.Sprite;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.SpriteInfo;
-import fi.jakojaannos.roguelite.game.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

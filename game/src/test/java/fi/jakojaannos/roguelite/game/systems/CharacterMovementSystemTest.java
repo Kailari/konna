@@ -5,7 +5,7 @@ import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.CharacterInput;
 import fi.jakojaannos.roguelite.game.data.components.CharacterStats;
-import fi.jakojaannos.roguelite.game.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,7 +40,7 @@ class CharacterMovementSystemTest {
 
         Time time = mock(Time.class);
         when(time.getTimeStepInSeconds()).thenReturn(0.02);
-        world.createResource(Time.class, time);
+        world.createOrReplaceResource(Time.class, time);
 
         entity = entityManager.createEntity();
         this.characterInput = new CharacterInput();

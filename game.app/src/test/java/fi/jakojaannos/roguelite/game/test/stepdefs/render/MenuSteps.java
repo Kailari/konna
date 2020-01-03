@@ -1,17 +1,22 @@
 package fi.jakojaannos.roguelite.game.test.stepdefs.render;
 
+import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.game.state.GameplayGameState;
+import fi.jakojaannos.roguelite.game.state.MainMenuGameState;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
-import static fi.jakojaannos.roguelite.game.test.global.GlobalState.state;
+import static fi.jakojaannos.roguelite.game.test.global.GlobalState.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MenuSteps {
 
     @Given("the main menu has just loaded")
     public void the_main_menu_has_just_loaded() {
-        state = null;
-        throw new io.cucumber.java.PendingException();
+        state = new MainMenuGameState(World.createNew(EntityManager.createNew(256, 32)),
+                                      game.getTime());
     }
 
     @When("the player clicks the {string} button")
@@ -34,13 +39,13 @@ public class MenuSteps {
 
     @Then("the game should close")
     public void the_game_should_close() {
-        // Write code here that turns the phrase above into concrete actions
-        throw new io.cucumber.java.PendingException();
+        simulateTick();
+        assertTrue(game.isFinished());
     }
 
     @Then("the game should start")
     public void the_game_should_start() {
-        // Write code here that turns the phrase above into concrete actions
-        throw new io.cucumber.java.PendingException();
+        simulateTick();
+        assertTrue(state instanceof GameplayGameState);
     }
 }

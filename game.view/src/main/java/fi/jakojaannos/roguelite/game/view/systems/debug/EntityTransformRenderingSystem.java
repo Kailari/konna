@@ -13,7 +13,7 @@ import fi.jakojaannos.roguelite.engine.view.rendering.shader.ShaderProgram;
 import fi.jakojaannos.roguelite.game.DebugConfig;
 import fi.jakojaannos.roguelite.game.data.components.NoDrawTag;
 import fi.jakojaannos.roguelite.game.data.components.SpriteInfo;
-import fi.jakojaannos.roguelite.game.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.game.view.systems.SpriteRenderingSystem;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;

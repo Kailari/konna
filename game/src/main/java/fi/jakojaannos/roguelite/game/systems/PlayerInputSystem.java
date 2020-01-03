@@ -8,9 +8,9 @@ import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.CharacterAbilities;
 import fi.jakojaannos.roguelite.game.data.components.CharacterInput;
 import fi.jakojaannos.roguelite.game.data.components.PlayerTag;
-import fi.jakojaannos.roguelite.game.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
-import fi.jakojaannos.roguelite.game.data.resources.Mouse;
+import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
 import lombok.val;
 import org.joml.Vector2d;
 
@@ -41,10 +41,10 @@ public class PlayerInputSystem implements ECSSystem {
         val cursorPosition = tmpCursorPos.set(0.0, 0.0);
         if (camProps.cameraEntity != null) {
             val cameraTransform = world.getEntityManager().getComponentOf(camProps.cameraEntity, Transform.class).orElseThrow();
-            mouse.calculateCursorPositionRelativeToCamera(cameraTransform, camProps, tmpCursorPos);
+            mouse.calculateCursorPositionRelativeToCamera(cameraTransform.position, camProps, tmpCursorPos);
         } else {
-            cursorPosition.set(mouse.pos.x * camProps.viewportWidthInWorldUnits,
-                               mouse.pos.y * camProps.viewportHeightInWorldUnits);
+            cursorPosition.set(mouse.position.x * camProps.viewportWidthInWorldUnits,
+                               mouse.position.y * camProps.viewportHeightInWorldUnits);
         }
 
         val inputHorizontal = (inputs.inputRight ? 1 : 0) - (inputs.inputLeft ? 1 : 0);

@@ -8,7 +8,7 @@ import fi.jakojaannos.roguelite.game.data.archetypes.ObstacleArchetype;
 import fi.jakojaannos.roguelite.game.data.archetypes.SlimeArchetype;
 import fi.jakojaannos.roguelite.game.data.archetypes.StalkerArchetype;
 import fi.jakojaannos.roguelite.game.data.components.SpawnerComponent;
-import fi.jakojaannos.roguelite.game.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import lombok.val;
 import org.joml.Vector2d;
 

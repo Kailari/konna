@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
@@ -52,8 +53,10 @@ public interface EntityManager {
      * @param entity       Entity to add the component to
      * @param component    Component to add
      * @param <TComponent> Type of the component
+     *
+     * @return The added component
      */
-    <TComponent extends Component> void addComponentTo(Entity entity, TComponent component);
+    <TComponent extends Component> TComponent addComponentTo(Entity entity, TComponent component);
 
 
     /**
@@ -177,22 +180,20 @@ public interface EntityManager {
      * Adds the component to the entity if it does not already have a component of the given type.
      * In other words, ensures the entity has a component of given type.
      *
-     * @param entity       Entity to add the component to
-     * @param component    Component to add
-     * @param <TComponent> Type of the component
+     * @param entity            Entity to add the component to
+     * @param componentSupplier Supplier used to get a component to add
+     * @param <TComponent>      Type of the component
      *
-     * @return <code>true</code> if the component was added, <code>false</code> otherwise
+     * @return The existing component for the entity or the added if the entity did not have
+     * component of given type yet
      */
-    default <TComponent extends Component> boolean addComponentIfAbsent(
+    default <TComponent extends Component> TComponent addComponentIfAbsent(
             final Entity entity,
-            final TComponent component
+            final Class<TComponent> componentClass,
+            final Supplier<TComponent> componentSupplier
     ) {
-        if (hasComponent(entity, component.getClass())) {
-            return false;
-        }
-
-        addComponentTo(entity, component);
-        return true;
+        return this.getComponentOf(entity, componentClass)
+                   .orElseGet(() -> addComponentTo(entity, componentSupplier.get()));
     }
 
     /**
@@ -217,6 +218,8 @@ public interface EntityManager {
     }
 
     int entityCount();
+
+    Stream<Entity> getAllEntities();
 
     @RequiredArgsConstructor
     class EntityComponentPair<TComponent extends Component> {

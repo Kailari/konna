@@ -29,7 +29,7 @@ public class HealthUpdateSystem implements ECSSystem {
         val entityManager = world.getEntityManager();
 
         entities.forEach(entity -> {
-            val health = entityManager.getComponentOf(entity, Health.class).get();
+            val health = entityManager.getComponentOf(entity, Health.class).orElseThrow();
 
             val damageInstances = health.damageInstances;
             for (val instance : damageInstances) {
@@ -41,7 +41,7 @@ public class HealthUpdateSystem implements ECSSystem {
 
             if (health.currentHealth <= 0.0f) {
                 LOG.debug(LogCategories.HEALTH, "Entity {} health less than or equal to zero. Marking as dead.", entity.getId());
-                entityManager.addComponentIfAbsent(entity, new DeadTag());
+                entityManager.addComponentIfAbsent(entity, DeadTag.class, DeadTag::new);
             }
         });
     }

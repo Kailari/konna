@@ -1,5 +1,6 @@
 package fi.jakojaannos.roguelite.game.systems;
 
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
@@ -31,7 +32,7 @@ class CharacterAttackSystemTest {
 
         Time time = mock(Time.class);
         when(time.getTimeStepInSeconds()).thenReturn(0.02);
-        world.createResource(Time.class, time);
+        world.createOrReplaceResource(Time.class, time);
 
         entity = entityManager.createEntity();
         this.characterInput = new CharacterInput();

@@ -1,17 +1,21 @@
 package fi.jakojaannos.roguelite.engine.view.systems.ui;
 
+import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
+import fi.jakojaannos.roguelite.engine.data.resources.Time;
+import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.UIBuilder;
 import lombok.val;
-import org.joml.Vector2d;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.absolute;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
     private static final int VIEWPORT_WIDTH = 800;
@@ -32,7 +36,7 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
                          UIElementType.PANEL,
                          builder -> { })
                 .build();
-        userInterface.update(new Vector2d(0), false);
+        userInterface.update(mock(Time.class), new Mouse(), mock(Events.class));
 
         val element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
                                    .findFirst().orElseThrow();
@@ -50,7 +54,7 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
                          builder -> builder.left(absolute(10))
                                            .bottom(absolute(100)))
                 .build();
-        userInterface.update(new Vector2d(0), false);
+        userInterface.update(mock(Time.class), new Mouse(), mock(Events.class));
 
         val element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
                                    .findFirst().orElseThrow();
@@ -68,7 +72,7 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
                          builder -> builder.left(absolute(10))
                                            .right(absolute(100)))
                 .build();
-        userInterface.update(new Vector2d(0), false);
+        userInterface.update(mock(Time.class), new Mouse(), mock(Events.class));
 
         val element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
                                    .findFirst().orElseThrow();
@@ -83,7 +87,7 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
                          builder -> builder.top(absolute(42))
                                            .bottom(absolute(24)))
                 .build();
-        userInterface.update(new Vector2d(0), false);
+        userInterface.update(mock(Time.class), new Mouse(), mock(Events.class));
 
         val element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
                                    .findFirst().orElseThrow();
@@ -98,7 +102,7 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
                          builder -> builder.left(absolute(24))
                                            .width(absolute(42)))
                 .build();
-        userInterface.update(new Vector2d(0), false);
+        userInterface.update(mock(Time.class), new Mouse(), mock(Events.class));
 
         val element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
                                    .findFirst().orElseThrow();
@@ -114,7 +118,7 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
                          builder -> builder.right(absolute(24))
                                            .width(absolute(42)))
                 .build();
-        userInterface.update(new Vector2d(0), false);
+        userInterface.update(mock(Time.class), new Mouse(), mock(Events.class));
 
 
         val element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
@@ -131,7 +135,7 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
                          builder -> builder.top(absolute(24))
                                            .height(absolute(42)))
                 .build();
-        userInterface.update(new Vector2d(0), false);
+        userInterface.update(mock(Time.class), new Mouse(), mock(Events.class));
 
         val element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
                                    .findFirst().orElseThrow();
@@ -147,7 +151,7 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
                          builder -> builder.bottom(absolute(24))
                                            .height(absolute(42)))
                 .build();
-        userInterface.update(new Vector2d(0), false);
+        userInterface.update(mock(Time.class), new Mouse(), mock(Events.class));
 
         val element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
                                    .findFirst().orElseThrow();
@@ -164,7 +168,7 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
                                            .right(absolute(200))
                                            .width(absolute(20_000_000)))
                 .build();
-        userInterface.update(new Vector2d(0), false);
+        userInterface.update(mock(Time.class), new Mouse(), mock(Events.class));
 
         val element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
                                    .findFirst().orElseThrow();
@@ -182,7 +186,7 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
                                            .bottom(absolute(200))
                                            .height(absolute(20_000_000)))
                 .build();
-        userInterface.update(new Vector2d(0), false);
+        userInterface.update(mock(Time.class), new Mouse(), mock(Events.class));
 
         val element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
                                    .findFirst().orElseThrow();
@@ -199,7 +203,7 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
                          builder -> builder.anchorX(absolute(100))
                                            .left(absolute(200)))
                 .build();
-        userInterface.update(new Vector2d(0), false);
+        userInterface.update(mock(Time.class), new Mouse(), mock(Events.class));
 
         val element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
                                    .findFirst().orElseThrow();
@@ -214,7 +218,7 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
                          builder -> builder.anchorY(absolute(100))
                                            .top(absolute(200)))
                 .build();
-        userInterface.update(new Vector2d(0), false);
+        userInterface.update(mock(Time.class), new Mouse(), mock(Events.class));
 
         val element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
                                    .findFirst().orElseThrow();

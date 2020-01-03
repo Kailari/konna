@@ -30,7 +30,7 @@ public interface World {
      * @param resourceClass type of the resource to create
      * @param resource      resource to create
      */
-    <TResource extends Resource> void createResource(
+    <TResource extends Resource> void createOrReplaceResource(
             Class<TResource> resourceClass,
             TResource resource
     );

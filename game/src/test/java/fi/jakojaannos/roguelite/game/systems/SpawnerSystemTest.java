@@ -6,7 +6,7 @@ import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.FollowerEnemyAI;
 import fi.jakojaannos.roguelite.game.data.components.SpawnerComponent;
-import fi.jakojaannos.roguelite.game.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,7 +31,7 @@ public class SpawnerSystemTest {
 
         Time time = mock(Time.class);
         when(time.getTimeStepInSeconds()).thenReturn(0.02);
-        world.createResource(Time.class, time);
+        world.createOrReplaceResource(Time.class, time);
 
         entityManager.applyModifications();
     }

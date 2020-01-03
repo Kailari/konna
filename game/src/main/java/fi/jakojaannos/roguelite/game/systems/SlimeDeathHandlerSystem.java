@@ -8,7 +8,7 @@ import fi.jakojaannos.roguelite.game.data.archetypes.SlimeArchetype;
 import fi.jakojaannos.roguelite.game.data.components.DeadTag;
 import fi.jakojaannos.roguelite.game.data.components.SlimeAI;
 import fi.jakojaannos.roguelite.game.data.components.SlimeSharedAI;
-import fi.jakojaannos.roguelite.game.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import lombok.val;
 import org.joml.Vector2d;
 

@@ -1,11 +1,12 @@
 package fi.jakojaannos.roguelite.game.systems;
 
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.*;
 import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
 import fi.jakojaannos.roguelite.game.GJK2D;
 import fi.jakojaannos.roguelite.game.data.components.*;
-import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.game.data.resources.collision.Colliders;
 import fi.jakojaannos.roguelite.game.data.resources.collision.Collisions;
 import fi.jakojaannos.roguelite.game.systems.collision.Collision;
@@ -392,10 +393,10 @@ public class ApplyVelocitySystem implements ECSSystem {
             collisions.fireCollisionEvent(candidate.entity.entity, new CollisionEvent(Collision.entity(mode,
                                                                                                        entity)));
 
-            world.getEntityManager().addComponentIfAbsent(candidate.entity.entity, new RecentCollisionTag());
+            world.getEntityManager().addComponentIfAbsent(candidate.entity.entity, RecentCollisionTag.class, RecentCollisionTag::new);
         }
 
-        world.getEntityManager().addComponentIfAbsent(entity, new RecentCollisionTag());
+        world.getEntityManager().addComponentIfAbsent(entity, RecentCollisionTag.class, RecentCollisionTag::new);
     }
 
     private void moveWithoutCollision(

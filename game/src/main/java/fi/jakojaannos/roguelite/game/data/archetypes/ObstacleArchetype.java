@@ -5,7 +5,7 @@ import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.ObstacleTag;
 import fi.jakojaannos.roguelite.game.data.components.SpriteInfo;
-import fi.jakojaannos.roguelite.game.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
 import lombok.val;
 

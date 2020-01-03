@@ -4,6 +4,7 @@ import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.components.ComponentStorage;
+import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -47,18 +48,16 @@ class EntityManagerTest {
     void addingComponentsToNonAppliedEntitiesWorks() {
         Entity entity = entityManager.createEntity();
         ComponentA component = new ComponentA();
-        entityManager.addComponentTo(entity, component);
-
-        assertEquals(component, entityManager.getComponentOf(entity, ComponentA.class).get());
+        val added = entityManager.addComponentTo(entity, component);
+        assertEquals(component, added);
     }
 
     @Test
     void gettingComponentsOfNonAppliedEntitiesWorks() {
         Entity entity = entityManager.createEntity();
         ComponentA component = new ComponentA();
-        entityManager.addComponentTo(entity, component);
-
-        assertEquals(component, entityManager.getComponentOf(entity, ComponentA.class).get());
+        val added = entityManager.addComponentTo(entity, component);
+        assertEquals(component, added);
     }
 
     @Test
@@ -230,18 +229,11 @@ class EntityManagerTest {
     }
 
     @Test
-    void addComponentIfAbsentReturnsFalseIfComponentIsPresent() {
-        Entity entity = entityManager.createEntity();
-        entityManager.addComponentTo(entity, new ComponentA());
-
-        assertFalse(entityManager.addComponentIfAbsent(entity, new ComponentA()));
-    }
-
-    @Test
-    void addComponentIfAbsentReturnsTrueIfComponentIsAdded() {
+    void addComponentIfAbsentReturnsAddedComponentIfComponentIsAdded() {
         Entity entity = entityManager.createEntity();
 
-        assertTrue(entityManager.addComponentIfAbsent(entity, new ComponentA()));
+        ComponentA newComponent = new ComponentA();
+        assertEquals(newComponent, entityManager.addComponentIfAbsent(entity, ComponentA.class, () -> newComponent));
     }
 
     @Test
@@ -250,8 +242,8 @@ class EntityManagerTest {
         ComponentA component = new ComponentA();
         entityManager.addComponentTo(entity, component);
 
-        entityManager.addComponentIfAbsent(entity, new ComponentA());
-        assertEquals(component, entityManager.getComponentOf(entity, ComponentA.class).get());
+        val added = entityManager.addComponentIfAbsent(entity, ComponentA.class, ComponentA::new);
+        assertEquals(component, added);
     }
 
     @Test

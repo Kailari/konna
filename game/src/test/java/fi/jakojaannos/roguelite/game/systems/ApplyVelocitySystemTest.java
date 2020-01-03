@@ -7,7 +7,7 @@ import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.TileMapLayer;
-import fi.jakojaannos.roguelite.game.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.game.systems.collision.ColliderDataCollectorSystem;
@@ -40,7 +40,7 @@ class ApplyVelocitySystemTest {
 
         Time time = mock(Time.class);
         when(time.getTimeStepInSeconds()).thenReturn(0.02);
-        world.createResource(Time.class, time);
+        world.createOrReplaceResource(Time.class, time);
 
         entity = entityManager.createEntity();
         entityManager.addComponentTo(entity, velocity = new Velocity());
@@ -85,7 +85,7 @@ class ApplyVelocitySystemTest {
 
         Time time = mock(Time.class);
         when(time.getTimeStepInSeconds()).thenReturn(0.02);
-        world.createResource(Time.class, time);
+        world.createOrReplaceResource(Time.class, time);
 
         Entity entity = entityManager.createEntity();
         entityManager.addComponentTo(entity, velocity = new Velocity());
@@ -106,7 +106,7 @@ class ApplyVelocitySystemTest {
 
         Time time = mock(Time.class);
         when(time.getTimeStepInSeconds()).thenReturn(0.02);
-        world.createResource(Time.class, time);
+        world.createOrReplaceResource(Time.class, time);
 
         Entity entity = entityManager.createEntity();
         entityManager.addComponentTo(entity, velocity = new Velocity());

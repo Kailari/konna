@@ -7,7 +7,7 @@ import fi.jakojaannos.roguelite.game.data.archetypes.PlayerArchetype;
 import fi.jakojaannos.roguelite.game.data.archetypes.SlimeArchetype;
 import fi.jakojaannos.roguelite.game.data.components.SlimeAI;
 import fi.jakojaannos.roguelite.game.data.components.SlimeSharedAI;
-import fi.jakojaannos.roguelite.game.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import org.joml.Vector2d;
@@ -32,7 +32,7 @@ public class SlimeAIControllerSystemTest {
 
         Time time = mock(Time.class);
         when(time.getTimeStepInSeconds()).thenReturn(0.02);
-        world.createResource(Time.class, time);
+        world.createOrReplaceResource(Time.class, time);
 
         world.getOrCreateResource(Players.class).player =
                 PlayerArchetype.create(entityManager, new Transform(100, 100));

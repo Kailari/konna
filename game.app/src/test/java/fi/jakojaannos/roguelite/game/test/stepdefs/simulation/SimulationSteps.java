@@ -2,7 +2,7 @@ package fi.jakojaannos.roguelite.game.test.stepdefs.simulation;
 
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.game.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.game.state.GameplayGameState;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.When;

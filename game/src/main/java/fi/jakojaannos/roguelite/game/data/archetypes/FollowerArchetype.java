@@ -1,5 +1,6 @@
 package fi.jakojaannos.roguelite.game.data.archetypes;
 
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.game.data.components.*;
