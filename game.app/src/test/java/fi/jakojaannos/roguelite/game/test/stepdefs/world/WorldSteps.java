@@ -4,7 +4,10 @@ import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.game.data.archetypes.FollowerArchetype;
-import fi.jakojaannos.roguelite.game.data.components.*;
+import fi.jakojaannos.roguelite.game.data.components.Health;
+import fi.jakojaannos.roguelite.game.data.components.ObstacleTag;
+import fi.jakojaannos.roguelite.game.data.components.PlayerTag;
+import fi.jakojaannos.roguelite.game.data.components.SpawnerComponent;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import org.joml.Vector2d;
@@ -23,6 +26,13 @@ public class WorldSteps {
     public void theWorldIsBlankWithEnemiesScatteredAbout(int numberOfEnemies) {
         // Write code here that turns the phrase above into concrete actions
         throw new io.cucumber.java.PendingException();
+    }
+
+    @Given("the player has {int} health")
+    public void thePlayerHasHealth(int health) {
+        getComponentOf(getLocalPlayer().orElseThrow(), Health.class)
+                .orElseThrow()
+                .currentHealth = health;
     }
 
     @Given("the player is surrounded by follower enemies")

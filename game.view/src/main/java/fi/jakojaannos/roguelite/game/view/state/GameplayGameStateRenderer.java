@@ -24,7 +24,7 @@ import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.percentOf;
 public class GameplayGameStateRenderer extends GameStateRenderer {
     public static final String TIME_PLAYED_LABEL_NAME = "time-played-timer";
 
-    private static final String GAME_OVER_MESSAGE = "You Suck.";
+    private static final String GAME_OVER_MESSAGE = "Game Over";
     private static final String GAME_OVER_HELP_TEXT = "Press <SPACE> to restart, <ESC> to return to menu";
 
     public GameplayGameStateRenderer(
@@ -89,12 +89,6 @@ public class GameplayGameStateRenderer extends GameStateRenderer {
     }
 
     private static void buildGameOverSplash(final GenericUIElementBuilder builder) {
-        /*builder.anchorX(percentOf().parentWidth(0.5))
-               .anchorY(percentOf().parentHeight(0.5))
-               .left(percentOf().ownWidth(-0.5))
-               .top(percentOf().ownHeight(-1.1))
-               .text(GAME_OVER_MESSAGE)
-               .fontSize(48);*/
         builder.anchorY(percentOf().parentHeight(0.5))
                .height(absolute(70))
                .left(absolute(0))

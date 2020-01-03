@@ -5,6 +5,7 @@ import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -64,5 +65,30 @@ public class UIElementMatcher {
                                  .filter(UIElementType.LABEL::equals)
                                  .isPresent());
         return new UILabelMatcher(this.uiElement, this.uiWidth, this.uiHeight);
+    }
+
+    public UIElementMatcher isHidden() {
+        assertTrue(this.uiElement.getProperty(UIProperty.HIDDEN)
+                                 .orElse(false));
+        return this;
+    }
+
+    public UIElementMatcher isVisible() {
+        assertFalse(this.uiElement.getProperty(UIProperty.HIDDEN)
+                                  .orElse(false));
+        return this;
+    }
+
+    public UIElementMatcher hasChildMatching(final Consumer<UIElementMatcher> matcher) {
+        assertTrue(this.uiElement.getChildren().stream().anyMatch(child -> {
+            try {
+                matcher.accept(new UIElementMatcher(child, uiWidth, uiHeight));
+                return true;
+            } catch (AssertionError ignored) {
+                return false;
+            }
+        }));
+
+        return this;
     }
 }

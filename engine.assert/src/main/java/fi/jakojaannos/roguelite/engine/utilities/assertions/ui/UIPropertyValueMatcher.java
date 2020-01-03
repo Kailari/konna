@@ -6,8 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class UIPropertyValueMatcher<T, TParent extends UIElementMatcher> {
     private final UIProperty<T> property;
-    private final T propertyValue;
-    private final TParent parent;
+    protected final T propertyValue;
+    protected final TParent parent;
 
     UIPropertyValueMatcher(
             final UIProperty<T> property,
