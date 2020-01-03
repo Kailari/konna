@@ -1,7 +1,6 @@
 package fi.jakojaannos.roguelite.engine.view.ui;
 
 import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
-import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.ui.TextSizeProvider;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
@@ -9,7 +8,6 @@ import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.UIBuilder;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.UIElementBuilder;
 
-import java.util.Locale;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;

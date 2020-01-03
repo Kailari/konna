@@ -110,7 +110,7 @@ public class ComponentStorage {
 
         val componentStorage = componentTypes.get(componentTypeIndex);
         // noinspection unchecked
-        return (Optional<TComponent>) Optional.of(componentStorage.getComponent(entity));
+        return (Optional<TComponent>) Optional.ofNullable(componentStorage.getComponent(entity));
     }
 
     public boolean exists(

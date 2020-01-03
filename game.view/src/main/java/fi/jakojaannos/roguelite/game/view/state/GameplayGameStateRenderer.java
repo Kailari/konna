@@ -2,13 +2,14 @@ package fi.jakojaannos.roguelite.game.view.state;
 
 import fi.jakojaannos.roguelite.engine.content.AssetManager;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
-import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
-import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
-import fi.jakojaannos.roguelite.engine.view.ui.builder.UILabelBuilder;
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.Sprite;
 import fi.jakojaannos.roguelite.engine.view.rendering.text.Font;
+import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
+import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
+import fi.jakojaannos.roguelite.engine.view.ui.builder.GenericUIElementBuilder;
+import fi.jakojaannos.roguelite.engine.view.ui.builder.UILabelBuilder;
 import fi.jakojaannos.roguelite.game.DebugConfig;
 import fi.jakojaannos.roguelite.game.view.systems.*;
 import fi.jakojaannos.roguelite.game.view.systems.debug.EntityCollisionBoundsRenderingSystem;
@@ -22,6 +23,9 @@ import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.percentOf;
 
 public class GameplayGameStateRenderer extends GameStateRenderer {
     public static final String TIME_PLAYED_LABEL_NAME = "time-played-timer";
+
+    private static final String GAME_OVER_MESSAGE = "You Suck.";
+    private static final String GAME_OVER_HELP_TEXT = "Press <SPACE> to restart, <ESC> to return to menu";
 
     public GameplayGameStateRenderer(
             final Path assetRoot,
@@ -44,7 +48,6 @@ public class GameplayGameStateRenderer extends GameStateRenderer {
         val spriteRegistry = assetManager.getAssetRegistry(Sprite.class);
         val textRenderer = backend.getTextRenderer();
 
-        val font = fontRegistry.getByAssetName("fonts/VCR_OSD_MONO.ttf");
         val builder = SystemDispatcher.builder()
                                       .withGroups(RenderSystemGroups.values())
                                       .addGroupDependencies(RenderSystemGroups.DEBUG, RenderSystemGroups.UI, RenderSystemGroups.OVERLAY, RenderSystemGroups.ENTITIES, RenderSystemGroups.LEVEL)
@@ -53,15 +56,15 @@ public class GameplayGameStateRenderer extends GameStateRenderer {
                                       .addGroupDependencies(RenderSystemGroups.ENTITIES, RenderSystemGroups.LEVEL)
                                       .withSystem(new LevelRenderingSystem(assetRoot, camera, spriteRegistry, backend))
                                       .withSystem(new SpriteRenderingSystem(assetRoot, camera, spriteRegistry, backend))
+                                      .withSystem(new UpdateHUDSystem(userInterface))
+                                      .withSystem(new UpdateGameOverSplashSystem(userInterface))
+                                      .withSystem(new HealthBarRenderingSystem(assetRoot, camera, backend))
                                       .withSystem(new UserInterfaceRenderingSystem(camera,
                                                                                    fontRegistry,
                                                                                    spriteRegistry,
                                                                                    backend.createSpriteBatch(assetRoot, "sprite"),
                                                                                    textRenderer,
-                                                                                   userInterface))
-                                      .withSystem(new UpdateHUDSystem(userInterface))
-                                      .withSystem(new RenderGameOverSystem(textRenderer, camera, font))
-                                      .withSystem(new HealthBarRenderingSystem(assetRoot, camera, backend));
+                                                                                   userInterface));
 
         if (DebugConfig.debugModeEnabled) {
             builder.withSystem(new EntityCollisionBoundsRenderingSystem(assetRoot, camera, backend));
@@ -80,10 +83,37 @@ public class GameplayGameStateRenderer extends GameStateRenderer {
 
         val font = fontRegistry.getByAssetName("fonts/VCR_OSD_MONO.ttf");
         return UserInterface.builder(camera.getViewport(), font)
-                            .element(TIME_PLAYED_LABEL_NAME,
-                                     UIElementType.LABEL,
-                                     GameplayGameStateRenderer::buildTimePlayedTimer)
+                            .element(TIME_PLAYED_LABEL_NAME, UIElementType.LABEL, GameplayGameStateRenderer::buildTimePlayedTimer)
+                            .element("game-over-container", UIElementType.NONE, GameplayGameStateRenderer::buildGameOverSplash)
                             .build();
+    }
+
+    private static void buildGameOverSplash(final GenericUIElementBuilder builder) {
+        /*builder.anchorX(percentOf().parentWidth(0.5))
+               .anchorY(percentOf().parentHeight(0.5))
+               .left(percentOf().ownWidth(-0.5))
+               .top(percentOf().ownHeight(-1.1))
+               .text(GAME_OVER_MESSAGE)
+               .fontSize(48);*/
+        builder.anchorY(percentOf().parentHeight(0.5))
+               .height(absolute(70))
+               .left(absolute(0))
+               .top(absolute(0))
+               .width(percentOf().parentWidth(1.0))
+               .child("game-over-label",
+                      UIElementType.LABEL,
+                      label -> label.anchorX(percentOf().parentWidth(0.5))
+                                    .top(absolute(0))
+                                    .left(percentOf().ownWidth(-0.5))
+                                    .text(GAME_OVER_MESSAGE)
+                                    .fontSize(48))
+               .child("game-over-help-label",
+                      UIElementType.LABEL,
+                      label -> label.anchorX(percentOf().parentWidth(0.5))
+                                    .bottom(absolute(0))
+                                    .left(percentOf().ownWidth(-0.5))
+                                    .text(GAME_OVER_HELP_TEXT)
+                                    .fontSize(24));
     }
 
     private static void buildTimePlayedTimer(final UILabelBuilder builder) {
