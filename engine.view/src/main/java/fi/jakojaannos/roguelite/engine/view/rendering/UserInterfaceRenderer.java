@@ -1,13 +1,13 @@
 package fi.jakojaannos.roguelite.engine.view.rendering;
 
 import fi.jakojaannos.roguelite.engine.content.AssetRegistry;
-import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
-import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
-import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.Sprite;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.SpriteBatch;
 import fi.jakojaannos.roguelite.engine.view.rendering.text.Font;
 import fi.jakojaannos.roguelite.engine.view.rendering.text.TextRenderer;
+import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
+import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
+import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 

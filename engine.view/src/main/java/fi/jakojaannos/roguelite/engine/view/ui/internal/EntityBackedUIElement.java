@@ -7,10 +7,10 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 @RequiredArgsConstructor
 public class EntityBackedUIElement implements UIElement {
@@ -18,7 +18,7 @@ public class EntityBackedUIElement implements UIElement {
     @Getter private final EntityManager entityManager;
 
     @Nullable private UIElement parent;
-    private final List<UIElement> children = new ArrayList<>();
+    private final Set<UIElement> children = new HashSet<>();
 
     @Override
     public Optional<UIElement> getParent() {
