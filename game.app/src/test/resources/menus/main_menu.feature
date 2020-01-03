@@ -2,7 +2,7 @@ Feature: When the game initially starts, player is greeted with a Title Screen.
 
   The title screen has buttons for accessing the game itself and exiting the application.
 
-  Scenario: The looks at the main menu. There are buttons for playing the game, shutting down the game and a title.
+  Scenario: The user looks at the main menu. There are buttons for playing the game, shutting down the game and a title.
     Given the main menu has just loaded
     When the game is rendered
     Then there is a title with text "Konna"

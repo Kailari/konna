@@ -5,6 +5,7 @@ import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,4 +31,20 @@ public class AssertUI {
         return new UIElementMatcher(elements.get(0), this.userInterface.getWidth(), this.userInterface.getHeight());
     }
 
+    public UIElementMatcher hasExactlyOneElementWithMatchingChild(
+            final Consumer<UIElementMatcher> matcher
+    ) {
+        List<UIElement> elements = this.userInterface.allElements()
+                                                     .filter(element -> element.getChildren().stream().anyMatch(child -> {
+                                                         try {
+                                                             matcher.accept(new UIElementMatcher(child, this.userInterface.getWidth(), this.userInterface.getHeight()));
+                                                             return true;
+                                                         } catch (AssertionError ignored) {
+                                                             return false;
+                                                         }
+                                                     })).collect(Collectors.toList());
+
+        assertEquals(1, elements.size(), "Expected there to be exactly one element with matching child!");
+        return new UIElementMatcher(elements.get(0), this.userInterface.getWidth(), this.userInterface.getHeight());
+    }
 }

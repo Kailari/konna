@@ -22,6 +22,12 @@ public class UIHierarchy implements Resource {
         return this.roots.stream();
     }
 
+    public Stream<UIElement> getElements() {
+        return this.elements.values()
+                            .stream()
+                            .map(UIElement.class::cast);
+    }
+
     public void clear() {
         this.children.clear();
         this.parents.clear();

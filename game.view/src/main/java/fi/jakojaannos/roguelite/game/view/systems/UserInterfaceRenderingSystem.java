@@ -59,14 +59,21 @@ public class UserInterfaceRenderingSystem implements ECSSystem {
         this.userInterface.update(world.getOrCreateResource(Time.class).getTimeManager(),
                                   mouse,
                                   events);
+
+        // FIXME: Handle UI events on the controller, not view
         val uiEvents = events.getUi();
         while (uiEvents.hasEvents()) {
             val event = uiEvents.pollEvent();
-            if (event.getElement().equalsIgnoreCase("play_button") && event.getType() == UIEvent.Type.CLICK) {
-                world.getOrCreateResource(GameStateManager.class)
-                     .queueStateChange(new GameplayGameState(System.nanoTime(),
-                                                             World.createNew(EntityManager.createNew(256, 32)),
-                                                             world.getOrCreateResource(Time.class).getTimeManager()));
+            if (event.getType() == UIEvent.Type.CLICK) {
+                if (event.getElement().equalsIgnoreCase("play_button")) {
+                    world.getOrCreateResource(GameStateManager.class)
+                         .queueStateChange(new GameplayGameState(System.nanoTime(),
+                                                                 World.createNew(EntityManager.createNew(256, 32)),
+                                                                 world.getOrCreateResource(Time.class).getTimeManager()));
+                } else if (event.getElement().equalsIgnoreCase("quit_button")) {
+                    world.getOrCreateResource(GameStateManager.class)
+                         .quitGame();
+                }
             }
         }
 

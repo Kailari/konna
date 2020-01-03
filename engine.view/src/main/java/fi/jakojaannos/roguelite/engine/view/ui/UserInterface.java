@@ -9,6 +9,7 @@ import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.UIBuilder;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.UIElementBuilder;
 
+import java.util.Locale;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -28,6 +29,8 @@ public interface UserInterface {
     void update(final TimeManager time, final Mouse mouse, final Events events);
 
     Stream<UIElement> getRoots();
+
+    Stream<UIElement> allElements();
 
     default <T> Stream<UIElement> findElementsWithMatchingProperty(
             final UIProperty<T> property,

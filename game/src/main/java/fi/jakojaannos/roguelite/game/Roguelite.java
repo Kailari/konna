@@ -2,6 +2,7 @@ package fi.jakojaannos.roguelite.game;
 
 import fi.jakojaannos.roguelite.engine.GameBase;
 import fi.jakojaannos.roguelite.engine.data.resources.GameStateManager;
+import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.event.Events;
@@ -10,9 +11,8 @@ import fi.jakojaannos.roguelite.engine.input.InputAxis;
 import fi.jakojaannos.roguelite.engine.input.InputButton;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.engine.utilities.UpdateableTimeManager;
-import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
-import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
+import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
 import fi.jakojaannos.roguelite.game.state.GameplayGameState;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -70,6 +70,10 @@ public class Roguelite extends GameBase {
             stateManager.queueStateChange(new GameplayGameState(System.nanoTime(),
                                                                 World.createNew(EntityManager.createNew(256, 32)),
                                                                 getTime()));
+        }
+
+        if (stateManager.isGameShouldClose()) {
+            this.setFinished(true);
         }
 
         return stateManager.getNextState(state);

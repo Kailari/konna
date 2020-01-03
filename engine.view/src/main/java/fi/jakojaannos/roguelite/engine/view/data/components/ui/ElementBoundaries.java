@@ -3,6 +3,7 @@ package fi.jakojaannos.roguelite.engine.view.data.components.ui;
 import fi.jakojaannos.roguelite.engine.ecs.Component;
 import lombok.Getter;
 import lombok.Setter;
+import org.joml.Vector2i;
 
 /**
  * Cached read-only view of a component's boundaries.
@@ -25,5 +26,10 @@ public class ElementBoundaries implements Component {
         this.maxY = ElementBoundaries.INVALID_VALUE;
         this.width = ElementBoundaries.INVALID_VALUE;
         this.height = ElementBoundaries.INVALID_VALUE;
+    }
+
+    public Vector2i getCenter() {
+        return new Vector2i((int) ((this.minX + this.maxX) * 0.5),
+                            (int) ((this.minY + this.maxY) * 0.5));
     }
 }

@@ -8,6 +8,7 @@ import fi.jakojaannos.roguelite.engine.view.data.components.internal.panel.Panel
 import fi.jakojaannos.roguelite.engine.view.data.components.ui.ElementBoundaries;
 import fi.jakojaannos.roguelite.engine.view.ui.internal.ComponentBackedUIProperty;
 import fi.jakojaannos.roguelite.engine.view.ui.internal.InstanceMappedUIProperty;
+import org.joml.Vector2i;
 
 import java.util.Optional;
 
@@ -22,6 +23,9 @@ public interface UIProperty<T> {
     UIProperty<Integer> MAX_Y = new ComponentBackedUIProperty<>("maxY", ElementBoundaries.class, ElementBoundaries::getMaxY, ElementBoundaries::setMaxY);
     UIProperty<Integer> WIDTH = new ComponentBackedUIProperty<>("width", ElementBoundaries.class, ElementBoundaries::getWidth, ElementBoundaries::setWidth);
     UIProperty<Integer> HEIGHT = new ComponentBackedUIProperty<>("height", ElementBoundaries.class, ElementBoundaries::getHeight, ElementBoundaries::setHeight);
+    UIProperty<Vector2i> CENTER = new ComponentBackedUIProperty<>("center", ElementBoundaries.class, ElementBoundaries::getCenter, (a, b) -> {
+        throw new UnsupportedOperationException("Center is a calculated property. It cannot be set.");
+    });
 
     // Panel
     UIProperty<String> SPRITE = new ComponentBackedUIProperty<>("sprite", PanelSprite.class, PanelSprite::getSprite, PanelSprite::setSprite);

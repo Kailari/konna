@@ -1,6 +1,7 @@
 package fi.jakojaannos.roguelite.game.view;
 
 import fi.jakojaannos.roguelite.engine.content.AssetManager;
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.state.GameState;
@@ -9,12 +10,12 @@ import fi.jakojaannos.roguelite.engine.view.GameRenderer;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.Window;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.game.state.GameplayGameState;
 import fi.jakojaannos.roguelite.game.state.MainMenuGameState;
 import fi.jakojaannos.roguelite.game.view.state.GameStateRenderer;
 import fi.jakojaannos.roguelite.game.view.state.GameplayGameStateRenderer;
 import fi.jakojaannos.roguelite.game.view.state.MainMenuGameStateRenderer;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
@@ -24,7 +25,7 @@ import java.util.Optional;
 
 @Slf4j
 public class RogueliteGameRenderer implements GameRenderer {
-    private final Camera camera;
+    @Getter private final Camera camera;
 
     private final Map<Class<? extends GameState>, GameStateRenderer> stateRenderers;
 

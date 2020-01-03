@@ -15,6 +15,9 @@ import lombok.val;
 import java.nio.file.Path;
 
 public class MainMenuGameStateRenderer extends GameStateRenderer {
+
+    public static final String TITLE_LABEL_NAME = "title_label";
+
     public MainMenuGameStateRenderer(
             final Path assetRoot,
             final Camera camera,
@@ -86,7 +89,26 @@ public class MainMenuGameStateRenderer extends GameStateRenderer {
                                                           .top(ProportionValue.percentOf().ownHeight(-0.5))
                                                           .text("Play")
                                                           .fontSize(24)))
-                .element("title_label",
+                .element("quit_button",
+                         UIElementType.PANEL,
+                         builder -> builder.anchorX(ProportionValue.percentOf().parentWidth(0.5))
+                                           .left(ProportionValue.percentOf().ownWidth(-0.5))
+                                           .top(ProportionValue.percentOf().parentHeight(0.6))
+                                           .width(ProportionValue.absolute(width))
+                                           .height(ProportionValue.absolute(height))
+                                           .borderSize(borderSize)
+                                           .sprite("sprites/ui/ui")
+                                           // TODO: panelAnimationName
+                                           .child("quit_button_label",
+                                                  UIElementType.LABEL,
+                                                  labelBuilder -> labelBuilder
+                                                          .anchorX(ProportionValue.percentOf().parentWidth(0.5))
+                                                          .anchorY(ProportionValue.percentOf().parentHeight(0.5))
+                                                          .left(ProportionValue.percentOf().ownWidth(-0.5))
+                                                          .top(ProportionValue.percentOf().ownHeight(-0.5))
+                                                          .text("Quit")
+                                                          .fontSize(24)))
+                .element(TITLE_LABEL_NAME,
                          UIElementType.LABEL,
                          builder -> builder.anchorX(ProportionValue.percentOf().parentWidth(0.5))
                                            .anchorY(ProportionValue.percentOf().parentHeight(0.25))

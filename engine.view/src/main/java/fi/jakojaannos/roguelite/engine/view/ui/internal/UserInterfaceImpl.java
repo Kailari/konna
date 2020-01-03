@@ -92,6 +92,12 @@ public class UserInterfaceImpl implements UserInterface {
     }
 
     @Override
+    public Stream<UIElement> allElements() {
+        return this.uiWorld.getOrCreateResource(UIHierarchy.class)
+                           .getElements();
+    }
+
+    @Override
     public void update(final TimeManager time, final Mouse mouse, final Events events) {
         this.uiWorld.createOrReplaceResource(Time.class, new Time(time));
         this.uiWorld.createOrReplaceResource(Events.class, events);
