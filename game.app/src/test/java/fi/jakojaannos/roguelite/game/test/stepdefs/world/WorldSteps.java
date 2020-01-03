@@ -4,12 +4,15 @@ import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.game.data.archetypes.FollowerArchetype;
-import fi.jakojaannos.roguelite.game.data.components.character.Health;
 import fi.jakojaannos.roguelite.game.data.components.ObstacleTag;
-import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
 import fi.jakojaannos.roguelite.game.data.components.SpawnerComponent;
+import fi.jakojaannos.roguelite.game.data.components.character.CharacterAbilities;
+import fi.jakojaannos.roguelite.game.data.components.character.Health;
+import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
+import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
+import lombok.val;
 import org.joml.Vector2d;
 
 import java.util.Optional;
@@ -26,6 +29,16 @@ public class WorldSteps {
     public void theWorldIsBlankWithEnemiesScatteredAbout(int numberOfEnemies) {
         // Write code here that turns the phrase above into concrete actions
         throw new io.cucumber.java.PendingException();
+    }
+
+    @Given("the player has no kills")
+    public void thePlayerHasNoKills() {
+        setPlayerKills(0);
+    }
+
+    @Given("the player has {int} kills")
+    public void thePlayerHasKills(int amount) {
+        setPlayerKills(amount);
     }
 
     @Given("the player has {int} health")
@@ -87,5 +100,14 @@ public class WorldSteps {
             Health health = state.getWorld().getEntityManager().getComponentOf(player.get(), Health.class).orElseThrow();
             assertFalse(health.currentHealth > 0);
         }
+    }
+
+    private static void setPlayerKills(final int amount) {
+        val localPlayerDamageSource = getComponentOf(getLocalPlayer().orElseThrow(), CharacterAbilities.class)
+                .orElseThrow()
+                .damageSource;
+        state.getWorld()
+             .getOrCreateResource(SessionStats.class)
+             .setKillsOf(localPlayerDamageSource, amount);
     }
 }

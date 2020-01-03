@@ -1,14 +1,15 @@
 package fi.jakojaannos.roguelite.game.systems;
 
+import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
+import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.game.data.DamageSource;
 import fi.jakojaannos.roguelite.game.data.components.character.CharacterAbilities;
 import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
-import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
-import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -33,7 +34,7 @@ class PlayerInputSystemTest {
 
         player = entityManager.createEntity();
         this.input = new CharacterInput();
-        this.abilities = new CharacterAbilities();
+        this.abilities = new CharacterAbilities(new DamageSource.Entity(player));
         entityManager.addComponentTo(player, this.input);
         entityManager.addComponentTo(player, this.abilities);
         entityManager.addComponentTo(player, new PlayerTag());

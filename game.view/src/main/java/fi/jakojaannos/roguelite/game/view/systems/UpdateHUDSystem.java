@@ -8,6 +8,8 @@ import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
+import fi.jakojaannos.roguelite.game.data.components.character.CharacterAbilities;
+import fi.jakojaannos.roguelite.game.data.resources.Players;
 import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
 import lombok.val;
 
@@ -18,15 +20,20 @@ public class UpdateHUDSystem implements ECSSystem {
     public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.addToGroup(RenderSystemGroups.UI)
                     .tickBefore(UserInterfaceRenderingSystem.class)
+                    .requireResource(Players.class)
                     .requireResource(Time.class);
     }
 
     private final UIElement timePlayedTimer;
+    private final UIElement killsCounter;
 
     public UpdateHUDSystem(final UserInterface userInterface) {
         this.timePlayedTimer = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("time-played-timer"))
                                             .findFirst()
                                             .orElseThrow();
+        this.killsCounter = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("score-kills"))
+                                         .findFirst()
+                                         .orElseThrow();
     }
 
     @Override
@@ -36,6 +43,14 @@ public class UpdateHUDSystem implements ECSSystem {
     ) {
         val timeManager = world.getOrCreateResource(Time.class);
         val sessionStats = world.getOrCreateResource(SessionStats.class);
+        val localPlayer = world.getOrCreateResource(Players.class).player;
+        if (localPlayer != null) {
+            val localPlayerAbilities = world.getEntityManager().getComponentOf(localPlayer, CharacterAbilities.class)
+                                            .orElseThrow();
+            val localPlayerKills = sessionStats.getKillsOf(localPlayerAbilities.damageSource);
+            this.killsCounter.setProperty(UIProperty.TEXT, String.format("Kills: %02d",
+                                                                         localPlayerKills));
+        }
 
         val ticks = sessionStats.endTimeStamp - sessionStats.beginTimeStamp;
         val secondsRaw = ticks / (1000 / timeManager.getTimeStep());

@@ -60,4 +60,12 @@ public class HudSteps {
                         .isLabel()
                         .hasText().whichContains(a, b));
     }
+
+    @Then("the kill counter has text {string}")
+    public void theKillCounterHasText(String text) {
+        assertUI(gameRenderer.getUserInterfaceForState(state))
+                .hasExactlyOneElementWithName("score-kills")
+                .isLabel()
+                .hasText().whichContains(text);
+    }
 }

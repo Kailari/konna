@@ -13,6 +13,7 @@ import fi.jakojaannos.roguelite.game.data.components.*;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
 import fi.jakojaannos.roguelite.game.systems.*;
+import fi.jakojaannos.roguelite.game.systems.cleanup.CleanUpDeadEnemyKillsSystem;
 import fi.jakojaannos.roguelite.game.systems.cleanup.CleanUpDeadPlayersSystem;
 import fi.jakojaannos.roguelite.game.systems.cleanup.ReaperSystem;
 import fi.jakojaannos.roguelite.game.systems.collision.*;
@@ -99,10 +100,11 @@ public class GameplayGameState extends GameState {
                 .withSystem(new EnemyAttackCoolDownSystem())
                 .withSystem(new EnemyToPlayerCollisionHandlerSystem())
                 .withSystem(new ReaperSystem())
-                .withSystem(new CleanUpDeadPlayersSystem())
                 .withSystem(new RotatePlayerTowardsAttackTargetSystem())
                 .withSystem(new RestartGameSystem())
                 .withSystem(new UpdateSessionTimerSystem())
+                .withSystem(new CleanUpDeadPlayersSystem())
+                .withSystem(new CleanUpDeadEnemyKillsSystem())
                 .build();
     }
 }

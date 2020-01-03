@@ -84,6 +84,7 @@ public class GameplayGameStateRenderer extends GameStateRenderer {
         val font = fontRegistry.getByAssetName("fonts/VCR_OSD_MONO.ttf");
         return UserInterface.builder(camera.getViewport(), font)
                             .element(TIME_PLAYED_LABEL_NAME, UIElementType.LABEL, GameplayGameStateRenderer::buildTimePlayedTimer)
+                            .element("score-kills", UIElementType.LABEL, GameplayGameStateRenderer::buildKillsCounter)
                             .element("game-over-container", UIElementType.NONE, GameplayGameStateRenderer::buildGameOverSplash)
                             .build();
     }
@@ -108,6 +109,14 @@ public class GameplayGameStateRenderer extends GameStateRenderer {
                                     .left(percentOf().ownWidth(-0.5))
                                     .text(GAME_OVER_HELP_TEXT)
                                     .fontSize(24));
+    }
+
+    private static void buildKillsCounter(final UILabelBuilder builder) {
+        builder.anchorX(absolute(0))
+               .left(absolute(5))
+               .bottom(absolute(0))
+               .fontSize(24)
+               .text("Kills: ??");
     }
 
     private static void buildTimePlayedTimer(final UILabelBuilder builder) {

@@ -1,11 +1,12 @@
 package fi.jakojaannos.roguelite.game.systems;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.game.data.components.*;
-import fi.jakojaannos.roguelite.engine.data.resources.Time;
+import fi.jakojaannos.roguelite.game.data.DamageSource;
+import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.game.data.components.character.CharacterAbilities;
 import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
 import fi.jakojaannos.roguelite.game.data.components.character.CharacterStats;
@@ -44,7 +45,7 @@ class CharacterAttackSystemTest {
         this.characterInput.move.set(0.0);
         this.characterInput.attack = false;
         this.characterStats = new CharacterStats();
-        this.characterAbilities = new CharacterAbilities();
+        this.characterAbilities = new CharacterAbilities(new DamageSource.Entity(entity));
         this.weaponStats = new BasicWeaponStats();
         entityManager.addComponentTo(entity, new Transform(0.0, 0.0));
         entityManager.addComponentTo(entity, new Velocity());
