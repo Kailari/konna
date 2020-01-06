@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.opengl.GL32.GL_GEOMETRY_SHADER;
 
 public class LWJGLShaderBuilder implements ShaderBuilder {
     private final int programPtr;
@@ -29,6 +30,11 @@ public class LWJGLShaderBuilder implements ShaderBuilder {
     @Override
     public ShaderBuilder fragmentShader(final Path sourcePath) {
         return shader(sourcePath, GL_FRAGMENT_SHADER);
+    }
+
+    @Override
+    public ShaderBuilder geometryShader(final Path sourcePath) {
+        return shader(sourcePath, GL_GEOMETRY_SHADER);
     }
 
     @Override

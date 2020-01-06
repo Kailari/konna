@@ -7,6 +7,8 @@ public interface ShaderBuilder {
 
     ShaderBuilder fragmentShader(Path sourcePath);
 
+    ShaderBuilder geometryShader(Path sourcePath);
+
     ShaderBuilder shader(Path sourcePath, int shaderType);
 
     ShaderBuilder attributeLocation(int index, String name);

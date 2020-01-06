@@ -17,7 +17,7 @@ out vec3 v_tint;
 
 void main(void) {
     mat4 mvp = camera_info.projection * camera_info.view * model;
-    gl_Position = mvp * vec4(in_pos.x, in_pos.y, 0.0, 1.0);
+    gl_Position = mvp * vec4(in_pos.xy, 0.0, 1.0);
 
     v_uv = in_uv;
     v_tint = in_tint;

@@ -19,6 +19,7 @@ import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class HealthBarRenderingSystem implements ECSSystem, AutoCloseable {
@@ -29,7 +30,8 @@ public class HealthBarRenderingSystem implements ECSSystem, AutoCloseable {
                     .withComponent(Transform.class);
     }
 
-    private static final int SIZE_IN_BYTES = (2 + 1) * 4;
+    private static final int SIZE_IN_BYTES = 4 * 4;
+    private static final int MAX_PER_BATCH = 256 / 8;
 
     private final Camera camera;
     private final ShaderProgram shader;
@@ -46,31 +48,27 @@ public class HealthBarRenderingSystem implements ECSSystem, AutoCloseable {
         this.shader = backend.createShaderProgram()
                              .vertexShader(assetRoot.resolve("shaders/healthbar.vert"))
                              .attributeLocation(0, "in_pos")
-                             .attributeLocation(1, "in_percent")
+                             .attributeLocation(1, "in_health")
+                             .attributeLocation(2, "in_maxHealth")
+                             .geometryShader(assetRoot.resolve("shaders/healthbar.geom"))
                              .fragmentShader(assetRoot.resolve("shaders/healthbar.frag"))
                              .fragmentDataLocation(0, "out_fragColor")
                              .build();
 
+        this.shader.use();
         this.shader.bindUniformBlock("CameraInfo", EngineUniformBufferObjectIndices.CAMERA);
 
 
         val vertexFormat = backend.createVertexFormat()
                                   .withAttribute(VertexAttribute.Type.FLOAT, 2, false)
                                   .withAttribute(VertexAttribute.Type.FLOAT, 1, false)
+                                  .withAttribute(VertexAttribute.Type.FLOAT, 1, false)
                                   .build();
         this.mesh = backend.createMesh(vertexFormat);
-        this.vertexDataBuffer = MemoryUtil.memAlloc(4 * SIZE_IN_BYTES);
-        this.mesh.setElements(0, 1, 2,
-                              3, 0, 2);
+        this.vertexDataBuffer = MemoryUtil.memAlloc(MAX_PER_BATCH * SIZE_IN_BYTES);
+        this.mesh.setElements(IntStream.range(0, MAX_PER_BATCH)
+                                       .toArray());
 
-        val width = 1.5;
-        val height = 0.25;
-        val offsetX = -width / 2;
-        val offsetY = 0.85;
-        updateVertex(0, offsetX, offsetY, 0.0);
-        updateVertex(SIZE_IN_BYTES, offsetX + width, offsetY, 1.0);
-        updateVertex(2 * SIZE_IN_BYTES, offsetX + width, offsetY + height, 1.0);
-        updateVertex(3 * SIZE_IN_BYTES, offsetX, offsetY + height, 0.0);
         this.mesh.setVertexData(this.vertexDataBuffer);
     }
 
@@ -80,46 +78,64 @@ public class HealthBarRenderingSystem implements ECSSystem, AutoCloseable {
             final Stream<Entity> entities,
             final World world
     ) {
-        this.shader.use();
         this.camera.useWorldCoordinates();
+
+        this.shader.use();
+        val width = 1.5f;
+        val height = 0.25f;
+        val offsetX = -width / 2.0f;
+        val offsetY = 0.85f;
+        this.shader.setUniform2f("healthBarSize", width, height);
+        this.shader.setUniform2f("healthBarOffset", offsetX, offsetY);
 
         val entityManager = world.getEntityManager();
         val timeManager = world.getOrCreateResource(Time.class);
         val healthbarDurationInTicks = timeManager.convertToTicks(5.0);
 
+        this.mesh.setPointSize(10.0f);
         this.mesh.startDrawing();
-        entities.forEach(entity -> {
+        var count = 0;
+        for (val entity : (Iterable<Entity>) entities::iterator) {
+            if (count == MAX_PER_BATCH) {
+                this.mesh.updateVertexData(this.vertexDataBuffer, 0, count);
+                this.mesh.drawAsPoints(count);
+                count = 0;
+            }
+
             val transform = entityManager.getComponentOf(entity, Transform.class).orElseThrow();
             val health = entityManager.getComponentOf(entity, Health.class).orElseThrow();
 
             long ticksSinceDamaged = timeManager.getCurrentGameTime() - health.lastDamageInstanceTimeStamp;
             if (!health.healthBarAlwaysVisible && ticksSinceDamaged >= healthbarDurationInTicks) {
-                return;
+                continue;
             }
 
-            this.shader.setUniform1f("health", (float) health.asPercentage());
+            queueVertex(count * SIZE_IN_BYTES,
+                        transform.position.x,
+                        transform.position.y,
+                        health.currentHealth,
+                        health.maxHealth);
+            ++count;
+        }
 
-            this.shader.setUniformMat4x4("model",
-                                         new Matrix4f().translate((float) transform.position.x,
-                                                                  (float) transform.position.y,
-                                                                  (float) 0.0)
-            );
-
-            this.mesh.draw(6);
-        });
-
+        if (count > 0) {
+            this.mesh.updateVertexData(this.vertexDataBuffer, 0, count);
+            this.mesh.drawAsPoints(count);
+        }
     }
 
 
-    private void updateVertex(
+    private void queueVertex(
             final int offset,
             final double x,
             final double y,
-            final double percent
+            final double health,
+            final double maxHealth
     ) {
         this.vertexDataBuffer.putFloat(offset, (float) x);
         this.vertexDataBuffer.putFloat(offset + 4, (float) y);
-        this.vertexDataBuffer.putFloat(offset + 8, (float) percent);
+        this.vertexDataBuffer.putFloat(offset + 8, (float) health);
+        this.vertexDataBuffer.putFloat(offset + 12, (float) maxHealth);
     }
 
     @Override

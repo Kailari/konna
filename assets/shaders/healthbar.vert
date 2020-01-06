@@ -1,20 +1,15 @@
-#version 150
+#version 330
 
 in vec2 in_pos;
-in float in_percent;
+in float in_health;
+in float in_maxHealth;
 
-layout (std140) uniform CameraInfo
-{
-    mat4 view;
-    mat4 projection;
-} camera_info;
-
-uniform mat4 model;
-
-out float v_percent;
+out Vertex {
+    float healthPercentage;
+} vertex;
 
 void main(void) {
-    mat4 mvp = camera_info.projection * camera_info.view * model;
-    gl_Position = mvp * vec4(in_pos.x, in_pos.y, 0.0, 1.0);
-    v_percent = in_percent;
+    gl_Position = vec4(in_pos.xy, 0.0, 1.0);
+
+    vertex.healthPercentage = in_health / in_maxHealth;
 }

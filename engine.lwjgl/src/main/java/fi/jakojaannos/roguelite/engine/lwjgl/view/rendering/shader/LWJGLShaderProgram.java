@@ -69,6 +69,14 @@ class LWJGLShaderProgram implements AutoCloseable, ShaderProgram {
                     value);
     }
 
+    @Override
+    public void setUniform2f(final String uniformName, final float a, final float b) {
+        glUniform2f(this.uniformLocations.computeIfAbsent(uniformName,
+                                                          this::getUniformLocation),
+                    a,
+                    b);
+    }
+
     public int getUniformLocation(final String name) {
         return glGetUniformLocation(this.shaderProgram, name);
     }
