@@ -8,6 +8,8 @@ public class Mouse implements Resource {
     public final Vector2d position = new Vector2d(-999.0, -999.0);
     public boolean clicked;
 
+    private final Vector2d tmpPosition = new Vector2d();
+
     /**
      * @deprecated Use {@link CameraProperties#calculatePositionRelativeToCamera(Vector2d,
      * EntityManager, Vector2d)} instead
@@ -24,9 +26,14 @@ public class Mouse implements Resource {
 
     public final Vector2d calculateCursorPositionRelativeToCamera(
             final EntityManager entityManager,
-            final CameraProperties camProps,
+            final CameraProperties cameraProperties,
             final Vector2d outResult
     ) {
-        return camProps.calculatePositionRelativeToCamera(this.position, entityManager, outResult);
+        // FIXME: This might not be correct
+        return cameraProperties.calculatePositionRelativeToCamera(tmpPosition.set(this.position)
+                                                                             .mul(cameraProperties.viewportWidthInWorldUnits,
+                                                                                  cameraProperties.viewportHeightInWorldUnits),
+                                                                  entityManager,
+                                                                  outResult);
     }
 }

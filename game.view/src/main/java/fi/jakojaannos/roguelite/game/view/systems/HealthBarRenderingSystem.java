@@ -1,6 +1,7 @@
 package fi.jakojaannos.roguelite.game.view.systems;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
@@ -14,7 +15,7 @@ import fi.jakojaannos.roguelite.engine.view.rendering.shader.EngineUniformBuffer
 import fi.jakojaannos.roguelite.engine.view.rendering.shader.ShaderProgram;
 import fi.jakojaannos.roguelite.game.data.components.character.Health;
 import lombok.val;
-import org.joml.Matrix4f;
+import org.joml.Vector2d;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
@@ -27,11 +28,15 @@ public class HealthBarRenderingSystem implements ECSSystem, AutoCloseable {
     public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.addToGroup(RenderSystemGroups.UI)
                     .withComponent(Health.class)
-                    .withComponent(Transform.class);
+                    .withComponent(Transform.class)
+                    .requireResource(CameraProperties.class)
+                    .requireResource(Time.class);
     }
 
     private static final int SIZE_IN_BYTES = 4 * 4;
     private static final int MAX_PER_BATCH = 256 / 8;
+
+    private final Vector2d tmpPosition = new Vector2d();
 
     private final Camera camera;
     private final ShaderProgram shader;
@@ -78,13 +83,15 @@ public class HealthBarRenderingSystem implements ECSSystem, AutoCloseable {
             final Stream<Entity> entities,
             final World world
     ) {
-        this.camera.useWorldCoordinates();
+        val cameraProperties = world.getOrCreateResource(CameraProperties.class);
+
+        this.camera.useScreenCoordinates();
 
         this.shader.use();
-        val width = 1.5f;
-        val height = 0.25f;
+        val width = 1.5f * (float) this.camera.getPixelsPerUnitX();
+        val height = 0.25f * (float) this.camera.getPixelsPerUnitY();
         val offsetX = -width / 2.0f;
-        val offsetY = 0.85f;
+        val offsetY = (float) this.camera.getPixelsPerUnitY() * 0.85f;
         this.shader.setUniform2f("healthBarSize", width, height);
         this.shader.setUniform2f("healthBarOffset", offsetX, offsetY);
 
@@ -110,11 +117,13 @@ public class HealthBarRenderingSystem implements ECSSystem, AutoCloseable {
                 continue;
             }
 
-            queueVertex(count * SIZE_IN_BYTES,
-                        transform.position.x,
-                        transform.position.y,
-                        health.currentHealth,
-                        health.maxHealth);
+            cameraProperties.calculateRelativePositionAndReMapToSize(transform.position,
+                                                                     entityManager,
+                                                                     this.camera.getViewport().getWidthInPixels(),
+                                                                     this.camera.getViewport().getHeightInPixels(),
+                                                                     tmpPosition);
+
+            queueVertex(count * SIZE_IN_BYTES, tmpPosition.x(), tmpPosition.y(), health.currentHealth, health.maxHealth);
             ++count;
         }
 

@@ -37,6 +37,14 @@ public abstract class Camera implements AutoCloseable {
 
     public abstract void resize(int width, int height);
 
+    public double getPixelsPerUnitX() {
+        return getViewport().getWidthInPixels() / getVisibleAreaWidth();
+    }
+
+    public double getPixelsPerUnitY() {
+        return getViewport().getHeightInPixels() / getVisibleAreaHeight();
+    }
+
     public abstract void useWorldCoordinates();
 
     public abstract void useScreenCoordinates();

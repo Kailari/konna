@@ -24,7 +24,19 @@ public class CameraProperties implements Resource {
         val cameraPosition = entityManager.getComponentOf(this.cameraEntity, Transform.class)
                                           .map(transform -> transform.position)
                                           .orElse(new Vector2d(0.0, 0.0));
-        return outResult.set(cameraPosition.x + position.x * this.viewportWidthInWorldUnits - this.viewportWidthInWorldUnits / 2.0,
-                             cameraPosition.y + position.y * this.viewportHeightInWorldUnits - this.viewportHeightInWorldUnits / 2.0);
+        return outResult.set(cameraPosition.x - position.x - this.viewportWidthInWorldUnits / 2.0,
+                             cameraPosition.y - position.y - this.viewportHeightInWorldUnits / 2.0);
+    }
+
+    public Vector2d calculateRelativePositionAndReMapToSize(
+            final Vector2d position,
+            final EntityManager entityManager,
+            final int targetWidth,
+            final int targetHeight,
+            final Vector2d outResult
+    ) {
+        calculatePositionRelativeToCamera(position, entityManager, outResult);
+        return outResult.set(-outResult.x / this.viewportWidthInWorldUnits * targetWidth,
+                             -outResult.y / this.viewportHeightInWorldUnits * targetHeight);
     }
 }

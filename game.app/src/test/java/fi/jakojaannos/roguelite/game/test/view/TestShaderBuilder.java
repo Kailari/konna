@@ -19,6 +19,11 @@ public class TestShaderBuilder implements ShaderBuilder {
     }
 
     @Override
+    public ShaderBuilder geometryShader(final Path sourcePath) {
+        return this;
+    }
+
+    @Override
     public ShaderBuilder shader(final Path sourcePath, final int shaderType) {
         return this;
     }
