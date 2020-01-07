@@ -11,12 +11,12 @@ public class CameraProperties implements Resource {
     public double viewportWidthInWorldUnits;
     public double viewportHeightInWorldUnits;
 
-    public double targetViewportSizeInWorldUnits = 24.0;
+    public double targetViewportSizeInWorldUnits = 24;
     public boolean targetViewportSizeRespectiveToMinorAxis = true;
 
     public Entity cameraEntity;
 
-    public Vector2d calculatePositionRelativeToCamera(
+    public Vector2d offsetByCameraPosition(
             final Vector2d position,
             final EntityManager entityManager,
             final Vector2d outResult
@@ -35,7 +35,7 @@ public class CameraProperties implements Resource {
             final int targetHeight,
             final Vector2d outResult
     ) {
-        calculatePositionRelativeToCamera(position, entityManager, outResult);
+        offsetByCameraPosition(position, entityManager, outResult);
         return outResult.set(-outResult.x / this.viewportWidthInWorldUnits * targetWidth,
                              -outResult.y / this.viewportHeightInWorldUnits * targetHeight);
     }

@@ -2,6 +2,7 @@
 /.idea/*.xml
 /.idea/dictionaries/
 /.idea/modules/
+/.idea/codeStyles/codeStyleConfig.xml
 /.idea/$PRODUCT_WORKSPACE_FILE$
 /.idea/.name
 /.idea/codeStyles/codeStyleConfig.xml

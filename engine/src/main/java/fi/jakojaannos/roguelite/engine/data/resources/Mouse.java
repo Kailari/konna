@@ -11,8 +11,8 @@ public class Mouse implements Resource {
     private final Vector2d tmpPosition = new Vector2d();
 
     /**
-     * @deprecated Use {@link CameraProperties#calculatePositionRelativeToCamera(Vector2d,
-     * EntityManager, Vector2d)} instead
+     * @deprecated Use {@link CameraProperties#offsetByCameraPosition(Vector2d, EntityManager,
+     * Vector2d)} instead
      */
     @Deprecated
     public final Vector2d calculateCursorPositionRelativeToCamera(
@@ -30,10 +30,10 @@ public class Mouse implements Resource {
             final Vector2d outResult
     ) {
         // FIXME: This might not be correct
-        return cameraProperties.calculatePositionRelativeToCamera(tmpPosition.set(this.position)
-                                                                             .mul(cameraProperties.viewportWidthInWorldUnits,
-                                                                                  cameraProperties.viewportHeightInWorldUnits),
-                                                                  entityManager,
-                                                                  outResult);
+        return cameraProperties.offsetByCameraPosition(tmpPosition.set(this.position)
+                                                                  .mul(cameraProperties.viewportWidthInWorldUnits,
+                                                                       cameraProperties.viewportHeightInWorldUnits),
+                                                       entityManager,
+                                                       outResult);
     }
 }

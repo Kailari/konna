@@ -13,6 +13,7 @@ import javax.annotation.Nullable;
 @Slf4j
 public abstract class SpriteBatchBase
         implements SpriteBatch {
+    private static final double ROTATION_EPSILON = 0.0001;
     private final int maxFramesPerBatch;
 
     private boolean beginCalled;
@@ -108,7 +109,15 @@ public abstract class SpriteBatchBase
     ) {
         val textureRegion = sprite.getSpecificFrame(animation, frame);
         updateTextureAndFlushIfNeeded(textureRegion);
-        queueFrame(textureRegion, x, y, originX, originY, width, height, rotation);
+
+        if (Math.abs(rotation) < ROTATION_EPSILON) {
+            queueFrameUnrotated(textureRegion,
+                                x - originX, y - originY,
+                                x - originX + width, y - originY + height,
+                                1.0, 1.0, 1.0);
+        } else {
+            queueFrame(textureRegion, x, y, originX, originY, width, height, rotation);
+        }
         this.nFrames += 1;
     }
 
