@@ -8,6 +8,7 @@ import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.roguelite.game.data.archetypes.BasicTurretArchetype;
 import fi.jakojaannos.roguelite.game.data.archetypes.PlayerArchetype;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
@@ -64,6 +65,7 @@ public class GameplayGameState extends GameState {
 
         val sessionStats = world.getOrCreateResource(SessionStats.class);
         sessionStats.endTimeStamp = sessionStats.beginTimeStamp = timeManager.getCurrentGameTime();
+        BasicTurretArchetype.create(entityManager, new Transform(2.0,0.0));
 
         entityManager.applyModifications();
     }
@@ -105,6 +107,7 @@ public class GameplayGameState extends GameState {
                 .withSystem(new UpdateSessionTimerSystem())
                 .withSystem(new CleanUpDeadPlayersSystem())
                 .withSystem(new CleanUpDeadEnemyKillsSystem())
+                .withSystem(new BasicTurretControllerSystem())
                 .build();
     }
 }
