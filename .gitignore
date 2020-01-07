@@ -4,6 +4,7 @@
 /.idea/modules/
 /.idea/$PRODUCT_WORKSPACE_FILE$
 /.idea/.name
+/.idea/codeStyles/codeStyleConfig.xml
 /build/
 /*/build/
 
