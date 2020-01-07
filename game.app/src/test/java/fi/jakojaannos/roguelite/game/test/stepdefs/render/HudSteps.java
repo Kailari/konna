@@ -1,16 +1,61 @@
 package fi.jakojaannos.roguelite.game.test.stepdefs.render;
 
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
+import fi.jakojaannos.roguelite.engine.utilities.assertions.ui.UIElementMatcher;
+import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
+import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
+import fi.jakojaannos.roguelite.game.data.components.character.Health;
 import fi.jakojaannos.roguelite.game.view.state.GameplayGameStateRenderer;
 import io.cucumber.java.en.And;
+import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
+import lombok.val;
+import org.joml.Vector2d;
+import org.joml.Vector2i;
+
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 import static fi.jakojaannos.roguelite.engine.utilities.assertions.ui.AssertUI.assertUI;
-import static fi.jakojaannos.roguelite.game.test.global.GlobalState.gameRenderer;
-import static fi.jakojaannos.roguelite.game.test.global.GlobalState.state;
+import static fi.jakojaannos.roguelite.game.test.global.GlobalState.*;
 
 public class HudSteps {
     private static final String TIMER_LABEL_NAME = GameplayGameStateRenderer.TIME_PLAYED_LABEL_NAME;
     public static final String GAME_OVER_CONTAINER_NAME = "game-over-container";
+
+    private static final double HEALTHBAR_NEAR_THRESHOLD = 2.0; // World units
+
+    @Given("no enemies have taken damage")
+    public void noEnemiesHaveTakenDamage() {
+        // NO-OP
+    }
+
+    @Given("one enemy has taken damage recently")
+    public void oneEnemyHasTakenDamageRecently() {
+        dealDamageToNumberOfEnemies(1, timeManager.convertToTicks(0.5));
+    }
+
+    @Given("{int} enemies have taken damage recently")
+    public void enemiesHaveTakenDamageRecently(int n) {
+        dealDamageToNumberOfEnemies(n, timeManager.convertToTicks(0.5));
+    }
+
+    protected void dealDamageToNumberOfEnemies(final int n, final long ticksSinceDamaged) {
+        val healths = state.getWorld()
+                           .getEntityManager()
+                           .getEntitiesWith(Health.class)
+                           .map(EntityManager.EntityComponentPair::getComponent)
+                           .collect(Collectors.toList());
+
+        Collections.shuffle(healths, random);
+        healths.stream()
+               .limit(n)
+               .forEach(health -> {
+                   health.currentHealth -= 1.0;
+                   health.lastDamageInstanceTimeStamp = timeManager.getCurrentGameTime() - ticksSinceDamaged;
+               });
+    }
 
     @Then("there is a timer label on the top-middle of the screen")
     public void thereIsATimerLabelOnTheTopMiddleOfTheScreen() {
@@ -67,5 +112,59 @@ public class HudSteps {
                 .hasExactlyOneElementWithName("score-kills")
                 .isLabel()
                 .hasText().whichContains(text);
+    }
+
+    @Then("there should be no health-bars rendered")
+    public void thereShouldBeNoHealthBarsRendered() {
+        assertUI(gameRenderer.getUserInterfaceForState(state))
+                .hasNoElementMatching(element -> element.withName().whichContains("healthbar")
+                                                        .isProgressBar());
+    }
+
+    @Then("there should be one health-bar visible")
+    public void thereShouldBeOneHealthBarVisible() {
+        assertUI(gameRenderer.getUserInterfaceForState(state))
+                .hasMatchingElements(1,
+                                     element -> element.withName().whichContains("healthbar")
+                                                       .isVisible()
+                                                       .isProgressBar());
+    }
+
+    @Then("the health-bar should be close to the damaged enemy")
+    public void theHealthBarShouldBeCloseToTheDamagedEnemy() {
+        if (true) return;
+        assertUI(gameRenderer.getUserInterfaceForState(state))
+                .elementsMatching(element -> element.withName().whichContains("healthbar")
+                                                    .isVisible()
+                                                    .isProgressBar())
+                .allMatch(this::projectedPositionIsNearDamagedEnemy);
+    }
+
+    private boolean projectedPositionIsNearDamagedEnemy(final UIElementMatcher matcher) {
+        return state.getWorld()
+                    .getEntityManager()
+                    .getEntitiesWith(Health.class)
+                    .filter(pair -> pair.getComponent().currentHealth < pair.getComponent().maxHealth)
+                    .map(EntityManager.EntityComponentPair::getEntity)
+                    .map(entity -> state.getWorld().getEntityManager().getComponentOf(entity, Transform.class).orElseThrow().position)
+                    .anyMatch(enemyPosition -> isNearPosition(matcher.getElement(), enemyPosition, HEALTHBAR_NEAR_THRESHOLD));
+    }
+
+    private boolean isNearPosition(
+            final UIElement uiElement,
+            final Vector2d enemyPosition,
+            final double epsilon
+    ) {
+        return uiElement.getProperty(UIProperty.CENTER)
+                        .map(this::projectScreenToWorld)
+                        .orElseThrow()
+                        .distance(enemyPosition) < epsilon;
+    }
+
+    private Vector2d projectScreenToWorld(final Vector2i position) {
+        val camera = gameRenderer.getCamera();
+        val viewport = camera.getViewport();
+        return new Vector2d(((position.x / (double) viewport.getWidthInPixels()) * camera.getVisibleAreaWidth()) + camera.getVisibleAreaWidth() / 2.0,
+                            ((position.y / (double) viewport.getHeightInPixels()) * camera.getVisibleAreaHeight()) + camera.getVisibleAreaHeight() / 2.0);
     }
 }

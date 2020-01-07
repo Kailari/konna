@@ -4,33 +4,39 @@ Feature: Enemies that have taken damage recently have health-bars rendered near 
   damage for a while, the health-bar is hidden, being non-relevant to the player.
 
   Background:
-    Given the world is blank with 20 enemies scattered about
+    Given the game world just finished loading
+    And the world is blank with 20 enemies scattered about
 
   Scenario: No enemies have taken damage. No health-bars should be rendered.
     Given no enemies have taken damage
-    When the game is rendered
+    When the game runs for a single tick
+    And the game is rendered
     Then there should be no health-bars rendered
 
   Scenario: A single enemy takes damage. The health-bar is rendered.
     Given one enemy has taken damage recently
-    When the game is rendered
+    When the game runs for 0.5 seconds
+    And the game is rendered
     Then there should be one health-bar visible
     And the health-bar should be close to the damaged enemy
 
   Scenario: A bunch of enemies take damage. There are as many health-bars as damaged enemies.
     Given 6 enemies have taken damage recently
-    When the game is rendered
+    When the game runs for a single tick
+    And the game is rendered
     Then there should be 6 health-bars visible
     And each health-bar should be close to an damaged enemy
 
   Scenario: A bunch of enemies have taken damage some time ago. No health-bars are rendered.
     Given 6 enemies have taken damage 10 seconds ago
-    When the game is rendered
+    When the game runs for a single tick
+    And the game is rendered
     Then there should be no health-bars rendered
 
   Scenario: A bunch of have taken earlier but some time has passed. A few enemies take damage now. Only recently damaged enemies have health-bars.
     Given 6 enemies have taken damage 10 seconds ago
     And 3 enemies have taken damage recently
-    When the game is rendered
+    When the game runs for a single tick
+    And the game is rendered
     Then there should be 3 health-bars visible
     And each health-bar should be close to a damaged enemy

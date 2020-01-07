@@ -67,6 +67,10 @@ public class UIElementMatcher {
         return new UILabelMatcher(this.uiElement, this.uiWidth, this.uiHeight);
     }
 
+    public UIProgressBarMatcher isProgressBar() {
+        return null;
+    }
+
     public UIElementMatcher isHidden() {
         assertTrue(this.uiElement.getProperty(UIProperty.HIDDEN)
                                  .orElse(false));
@@ -90,5 +94,15 @@ public class UIElementMatcher {
         }));
 
         return this;
+    }
+
+    public UIPropertyStringValueMatcher<UIElementMatcher> withName() {
+        Optional<String> propertyValue = this.uiElement.getProperty(UIProperty.NAME);
+        assertTrue(propertyValue.isPresent(), "Expected ui element to have a name");
+        return new UIPropertyStringValueMatcher<>(UIProperty.NAME, propertyValue.get(), this);
+    }
+
+    public UIElement getElement() {
+        return this.uiElement;
     }
 }

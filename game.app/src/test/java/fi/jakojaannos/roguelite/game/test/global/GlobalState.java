@@ -23,6 +23,7 @@ import java.nio.file.Paths;
 import java.util.ArrayDeque;
 import java.util.Optional;
 import java.util.Queue;
+import java.util.Random;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -40,8 +41,12 @@ public class GlobalState {
     public static Window window;
     public static TestTimeManager timeManager;
 
+    public static Random random;
+
     @Before
     public void before() {
+        random = new Random(13376969);
+
         timeManager = new TestTimeManager(20L);
         game = new Roguelite(timeManager);
         Path assetRoot = Paths.get("../assets");

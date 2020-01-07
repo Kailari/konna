@@ -43,7 +43,7 @@ public class UpdateHUDSystem implements ECSSystem {
     ) {
         val timeManager = world.getOrCreateResource(Time.class);
         val sessionStats = world.getOrCreateResource(SessionStats.class);
-        val localPlayer = world.getOrCreateResource(Players.class).player;
+        val localPlayer = world.getOrCreateResource(Players.class).getPlayer();
         if (localPlayer != null) {
             val localPlayerAbilities = world.getEntityManager().getComponentOf(localPlayer, CharacterAbilities.class)
                                             .orElseThrow();

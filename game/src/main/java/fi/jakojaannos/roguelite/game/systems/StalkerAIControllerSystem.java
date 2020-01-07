@@ -38,7 +38,7 @@ public class StalkerAIControllerSystem implements ECSSystem {
     ) {
         val delta = world.getOrCreateResource(Time.class).getTimeStepInSeconds();
 
-        val player = world.getOrCreateResource(Players.class).player;
+        val player = world.getOrCreateResource(Players.class).getPlayer();
         if (player == null) {
             entities.forEach(entity -> world.getEntityManager()
                                             .getComponentOf(entity, CharacterInput.class)

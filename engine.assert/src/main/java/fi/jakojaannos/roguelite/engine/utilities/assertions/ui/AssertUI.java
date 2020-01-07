@@ -47,4 +47,53 @@ public class AssertUI {
         assertEquals(1, elements.size(), "Expected there to be exactly one element with matching child!");
         return new UIElementMatcher(elements.get(0), this.userInterface.getWidth(), this.userInterface.getHeight());
     }
+
+    public void hasNoElementMatching(
+            final Consumer<UIElementMatcher> matcher
+    ) {
+        List<UIElement> elements = this.userInterface.allElements()
+                                                     .filter(element -> {
+                                                         try {
+                                                             matcher.accept(new UIElementMatcher(element, this.userInterface.getWidth(), this.userInterface.getHeight()));
+                                                             return true;
+                                                         } catch (AssertionError ignored) {
+                                                             return false;
+                                                         }
+                                                     }).collect(Collectors.toList());
+
+        assertEquals(0, elements.size(), "Expected there to be no matching elements!");
+    }
+
+    public void hasMatchingElements(
+            final int expectedNumber,
+            final Consumer<UIElementMatcher> matcher
+    ) {
+        List<UIElement> elements = this.userInterface.allElements()
+                                                     .filter(element -> {
+                                                         try {
+                                                             matcher.accept(new UIElementMatcher(element, this.userInterface.getWidth(), this.userInterface.getHeight()));
+                                                             return true;
+                                                         } catch (AssertionError ignored) {
+                                                             return false;
+                                                         }
+                                                     }).collect(Collectors.toList());
+
+        assertEquals(expectedNumber, elements.size(), "Expected there to be exactly expected number of matching elements!");
+    }
+
+    public ElementStreamMatcher elementsMatching(
+            // TODO: Refactor matcher to be a "builder" with separate assert() and getAsBoolean()
+            final Consumer<UIElementMatcher> matcher
+    ) {
+        List<UIElement> elements = this.userInterface.allElements()
+                                                     .filter(element -> {
+                                                         try {
+                                                             matcher.accept(new UIElementMatcher(element, this.userInterface.getWidth(), this.userInterface.getHeight()));
+                                                             return true;
+                                                         } catch (AssertionError ignored) {
+                                                             return false;
+                                                         }
+                                                     }).collect(Collectors.toList());
+        return new ElementStreamMatcher(elements.stream(), this.userInterface);
+    }
 }

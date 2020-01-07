@@ -34,7 +34,7 @@ public class GameplayGameState extends GameState {
 
         val player = PlayerArchetype.create(entityManager,
                                             new Transform(0, 0));
-        world.getOrCreateResource(Players.class).player = player;
+        world.getOrCreateResource(Players.class).setPlayer(player);
         entityManager.addComponentTo(player, new CameraFollowTargetTag());
 
         val camera = entityManager.createEntity();

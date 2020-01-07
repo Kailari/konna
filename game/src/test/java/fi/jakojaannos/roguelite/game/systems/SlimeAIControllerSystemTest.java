@@ -34,8 +34,7 @@ public class SlimeAIControllerSystemTest {
         when(time.getTimeStepInSeconds()).thenReturn(0.02);
         world.createOrReplaceResource(Time.class, time);
 
-        world.getOrCreateResource(Players.class).player =
-                PlayerArchetype.create(entityManager, new Transform(100, 100));
+        world.getOrCreateResource(Players.class).setPlayer(PlayerArchetype.create(entityManager, new Transform(100, 100)));
 
 
         Vector2d vec = new Vector2d(0.0, 0.0);

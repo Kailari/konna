@@ -1,7 +1,7 @@
 package fi.jakojaannos.roguelite.game.test.global;
 
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 import org.joml.Vector2d;
 
@@ -13,12 +13,12 @@ public class GlobalGameState {
 
     public static Optional<Entity> getLocalPlayer() {
         return Optional.ofNullable(GlobalState.state.getWorld()
-                                                    .getOrCreateResource(Players.class).player);
+                                                    .getOrCreateResource(Players.class).getPlayer());
     }
 
     public static void updatePlayerPositionBeforeRun() {
         playerPositionBeforeRun = getLocalPlayer().flatMap(player -> GlobalState.getComponentOf(player, Transform.class))
                                                   .map(transform -> new Vector2d(transform.position))
-                                                  .orElseThrow();
+                                                  .orElse(new Vector2d(0.0));
     }
 }

@@ -1,7 +1,9 @@
 package fi.jakojaannos.roguelite.engine.view;
 
+import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import lombok.Getter;
+import lombok.val;
 import org.joml.Vector2d;
 
 // TODO: Move anything that can be abstracted from LWJGLCamera here (allows better testing matrices etc. producing correct coordinates)
@@ -53,5 +55,13 @@ public abstract class Camera implements AutoCloseable {
 
     public abstract double getVisibleAreaHeight();
 
-    public abstract void updateConfigurationFromState(GameState state);
+    public void updateConfigurationFromState(GameState state) {
+        val world = state.getWorld();
+        val cameraProperties = world.getOrCreateResource(CameraProperties.class);
+
+        // FIXME: THIS BREAKS MVC ENCAPSULATION. Technically, we should queue task on the controller
+        //  to make the change as we NEVER should mutate state on the view.
+        cameraProperties.viewportWidthInWorldUnits = getVisibleAreaWidth();
+        cameraProperties.viewportHeightInWorldUnits = getVisibleAreaHeight();
+    }
 }

@@ -27,17 +27,12 @@ public class TestCamera extends Camera {
 
     @Override
     public double getVisibleAreaWidth() {
-        return 0;
+        return 24;
     }
 
     @Override
     public double getVisibleAreaHeight() {
-        return 0;
-    }
-
-    @Override
-    public void updateConfigurationFromState(final GameState state) {
-
+        return 20;
     }
 
     @Override

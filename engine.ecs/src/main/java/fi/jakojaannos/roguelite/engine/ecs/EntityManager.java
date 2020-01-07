@@ -217,9 +217,27 @@ public interface EntityManager {
         return true;
     }
 
+    /**
+     * Counts how many entities there are currently present in the world.
+     *
+     * @return the number of entities present
+     */
     int entityCount();
 
+    /**
+     * Gets a stream containing ALL of the entities in the world. Heavy performance cost if whole
+     * stream is iterated, use sparingly and only when absolutely necessary.
+     *
+     * @return stream of all the entities in the world
+     */
     Stream<Entity> getAllEntities();
+
+    /**
+     * Marks all entities for removal.
+     */
+    default void clearEntities() {
+        getAllEntities().forEach(this::destroyEntity);
+    }
 
     @RequiredArgsConstructor
     class EntityComponentPair<TComponent extends Component> {

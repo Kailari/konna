@@ -1,10 +1,10 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view;
 
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
-import fi.jakojaannos.roguelite.engine.view.rendering.shader.EngineUniformBufferObjectIndices;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
+import fi.jakojaannos.roguelite.engine.view.rendering.shader.EngineUniformBufferObjectIndices;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -95,6 +95,8 @@ public class LWJGLCamera extends Camera implements AutoCloseable {
             super.setPosition(x, y);
             this.viewMatrixDirty = true;
         }
+
+        refreshMatricesIfDirty();
     }
 
     public LWJGLCamera(final Viewport viewport) {
@@ -132,15 +134,11 @@ public class LWJGLCamera extends Camera implements AutoCloseable {
 
     @Override
     public void updateConfigurationFromState(final GameState state) {
+        super.updateConfigurationFromState(state);
+
         val world = state.getWorld();
         val cameraProperties = world.getOrCreateResource(CameraProperties.class);
         refreshTargetScreenSizeInUnits(cameraProperties.targetViewportSizeInWorldUnits, cameraProperties.targetViewportSizeRespectiveToMinorAxis);
-
-        // FIXME: THIS BREAKS MVC ENCAPSULATION. Technically, we should queue task on the controller
-        //  to make the change as we NEVER should mutate state on the view.
-        cameraProperties.viewportWidthInWorldUnits = getVisibleAreaWidth();
-        cameraProperties.viewportHeightInWorldUnits = getVisibleAreaHeight();
-
         refreshMatricesIfDirty();
     }
 

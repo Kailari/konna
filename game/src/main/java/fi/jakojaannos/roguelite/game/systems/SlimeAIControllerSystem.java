@@ -40,7 +40,7 @@ public class SlimeAIControllerSystem implements ECSSystem {
     ) {
         val delta = world.getOrCreateResource(Time.class).getTimeStepInSeconds();
         val entityManager = world.getEntityManager();
-        val player = world.getOrCreateResource(Players.class).player;
+        val player = world.getOrCreateResource(Players.class).getPlayer();
         if (player == null) {
             return;
         }

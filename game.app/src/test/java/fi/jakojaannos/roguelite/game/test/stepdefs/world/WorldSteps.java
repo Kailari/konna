@@ -1,9 +1,11 @@
 package fi.jakojaannos.roguelite.game.test.stepdefs.world;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.game.data.archetypes.FollowerArchetype;
+import fi.jakojaannos.roguelite.game.data.components.NoDrawTag;
 import fi.jakojaannos.roguelite.game.data.components.ObstacleTag;
 import fi.jakojaannos.roguelite.game.data.components.SpawnerComponent;
 import fi.jakojaannos.roguelite.game.data.components.character.CharacterAbilities;
@@ -16,19 +18,34 @@ import lombok.val;
 import org.joml.Vector2d;
 
 import java.util.Optional;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static fi.jakojaannos.roguelite.game.test.global.GlobalGameState.getLocalPlayer;
-import static fi.jakojaannos.roguelite.game.test.global.GlobalState.getComponentOf;
-import static fi.jakojaannos.roguelite.game.test.global.GlobalState.state;
+import static fi.jakojaannos.roguelite.game.test.global.GlobalState.*;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class WorldSteps {
     @Given("the world is blank with {int} enemies scattered about")
     public void theWorldIsBlankWithEnemiesScatteredAbout(int numberOfEnemies) {
-        // Write code here that turns the phrase above into concrete actions
-        throw new io.cucumber.java.PendingException();
+        state.getWorld()
+             .getEntityManager()
+             .clearEntities();
+
+        val camera = state.getWorld().getEntityManager().createEntity();
+        state.getWorld().getEntityManager().addComponentTo(camera, new Transform());
+        state.getWorld().getEntityManager().addComponentTo(camera, new NoDrawTag());
+        state.getWorld().getOrCreateResource(CameraProperties.class).cameraEntity = camera;
+
+        val areaWidth = 800;
+        val areaHeight = 600;
+        IntStream.range(0, numberOfEnemies)
+                 .mapToObj(ignored -> new Vector2d((random.nextDouble() * 2.0 - 1.0) * areaWidth,
+                                                   (random.nextDouble() * 2.0 - 1.0) * areaHeight))
+                 .forEach(enemyPosition -> FollowerArchetype.create(state.getWorld().getEntityManager(),
+                                                                    new Transform(enemyPosition.x, enemyPosition.y)));
+        state.getWorld().getEntityManager().applyModifications();
     }
 
     @Given("the player has no kills")
