@@ -8,6 +8,9 @@ dependencies {
 
     // JOML
     implementation "org.joml:joml:${jomlVersion}"
+
+    // lwjgl for MemoryUtil
+    implementation "org.lwjgl:lwjgl:${lwjglVersion}"
 }
 
 

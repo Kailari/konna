@@ -58,13 +58,14 @@ public class GameplayGameStateRenderer extends GameStateRenderer {
                                       .withSystem(new SpriteRenderingSystem(assetRoot, camera, spriteRegistry, backend))
                                       .withSystem(new UpdateHUDSystem(userInterface))
                                       .withSystem(new UpdateGameOverSplashSystem(userInterface))
-                                      .withSystem(new HealthBarRenderingSystem(assetRoot, camera, backend))
-                                      .withSystem(new UserInterfaceRenderingSystem(camera,
+                                      .withSystem(new HealthBarUpdateSystem(camera, userInterface))
+                                      .withSystem(new UserInterfaceRenderingSystem(assetRoot,
+                                                                                   camera,
                                                                                    fontRegistry,
                                                                                    spriteRegistry,
-                                                                                   backend.createSpriteBatch(assetRoot, "sprite"),
                                                                                    textRenderer,
-                                                                                   userInterface));
+                                                                                   userInterface,
+                                                                                   backend));
 
         if (DebugConfig.debugModeEnabled) {
             builder.withSystem(new EntityCollisionBoundsRenderingSystem(assetRoot, camera, backend));

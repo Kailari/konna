@@ -6,18 +6,22 @@ import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.input.InputProvider;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
+import org.lwjgl.opengl.GLUtil;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL43.*;
 
+@Slf4j
 public class LWJGLGameRunner<TGame extends Game, TInput extends InputProvider>
         extends GameRunner<TGame, TInput> {
     @Getter
     private final LWJGLWindow window;
 
-    public LWJGLGameRunner(int windowWidth, int windowHeight) {
+    public LWJGLGameRunner(final boolean debugModeEnabled, int windowWidth, int windowHeight) {
         GLFWErrorCallback.createPrint(System.err).set();
 
         if (!glfwInit()) {
@@ -36,6 +40,10 @@ public class LWJGLGameRunner<TGame extends Game, TInput extends InputProvider>
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glfwPollEvents();
+
+        if (debugModeEnabled) {
+            GLUtil.setupDebugMessageCallback();
+        }
     }
 
     @Override

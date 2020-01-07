@@ -1,6 +1,7 @@
-package fi.jakojaannos.roguelite.engine.view.rendering;
+package fi.jakojaannos.roguelite.engine.view.rendering.ui;
 
 import fi.jakojaannos.roguelite.engine.content.AssetRegistry;
+import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.Sprite;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.SpriteBatch;
 import fi.jakojaannos.roguelite.engine.view.rendering.text.Font;
@@ -11,26 +12,35 @@ import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
+import java.nio.file.Path;
+
+// TODO: Render UI elements to cached render targets so that they can be cached (only updated/dirty
+//  parts should be re-rendered)
+
 @Slf4j
-public class UserInterfaceRenderer {
+public class UserInterfaceRenderer implements AutoCloseable {
     private static final int DEFAULT_BORDER_SIZE = 5;
     private static final int ROOT_FONT_SIZE = 12;
 
     private final SpriteBatch spriteBatch;
     private final AssetRegistry<Sprite> spriteRegistry;
     private final TextRenderer textRenderer;
+    private final ProgressBarRenderer progressBarRenderer;
     private final Font font;
 
     public UserInterfaceRenderer(
-            final SpriteBatch spriteBatch,
+            final Path assetRoot,
             final AssetRegistry<Sprite> spriteRegistry,
             final TextRenderer textRenderer,
-            final AssetRegistry<Font> fontRegistry
+            final AssetRegistry<Font> fontRegistry,
+            final RenderingBackend backend
     ) {
-        this.spriteBatch = spriteBatch;
+        this.spriteBatch = backend.createSpriteBatch(assetRoot, "sprite");
         this.spriteRegistry = spriteRegistry;
         this.textRenderer = textRenderer;
         this.font = fontRegistry.getByAssetName("fonts/VCR_OSD_MONO.ttf");
+
+        this.progressBarRenderer = new ProgressBarRenderer(assetRoot, backend);
     }
 
     public void render(final UserInterface userInterface) {
@@ -39,17 +49,30 @@ public class UserInterfaceRenderer {
     }
 
     private void renderElement(final UIElement uiElement) {
-        if (uiElement.getProperty(UIProperty.HIDDEN)
-                     .orElse(false)) {
+        if (uiElement.getProperty(UIProperty.HIDDEN).orElse(false)) {
             return;
         }
         uiElement.getProperty(UIProperty.SPRITE)
                  .ifPresent(spriteId -> renderPanelBackground(uiElement, spriteId));
         uiElement.getProperty(UIProperty.TEXT)
                  .ifPresent(text -> renderTextContent(uiElement, text));
+        uiElement.getProperty(UIProperty.PROGRESS)
+                 .ifPresent(percent -> renderProgressBar(uiElement, percent));
 
         uiElement.getChildren()
                  .forEach(this::renderElement);
+    }
+
+    private void renderProgressBar(final UIElement uiElement, final double percent) {
+        val x = uiElement.getProperty(UIProperty.MIN_X).orElseThrow();
+        val y = uiElement.getProperty(UIProperty.MIN_Y).orElseThrow();
+        val width = uiElement.getProperty(UIProperty.WIDTH).orElseThrow();
+        val height = uiElement.getProperty(UIProperty.HEIGHT).orElseThrow();
+
+        val max = uiElement.getProperty(UIProperty.MAX_PROGRESS)
+                           .orElse(1.0);
+
+        this.progressBarRenderer.render(x, y, width, height, percent, max);
     }
 
     private void renderTextContent(final UIElement uiElement, final String text) {
@@ -95,5 +118,10 @@ public class UserInterfaceRenderer {
         this.spriteBatch.draw(sprite, "panel_normal", row * 3, x, y, borderSize, height);
         this.spriteBatch.draw(sprite, "panel_normal", row * 3 + 1, x + borderSize, y, width - 2 * borderSize, height);
         this.spriteBatch.draw(sprite, "panel_normal", row * 3 + 2, x + width - borderSize, y, borderSize, height);
+    }
+
+    @Override
+    public void close() throws Exception {
+        this.progressBarRenderer.close();
     }
 }

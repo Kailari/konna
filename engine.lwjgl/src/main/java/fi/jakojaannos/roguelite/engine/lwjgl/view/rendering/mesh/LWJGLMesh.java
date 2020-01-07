@@ -34,14 +34,14 @@ public class LWJGLMesh implements AutoCloseable, Mesh {
     @Override
     public void setElements(final int... indices) {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this.ebo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_DYNAMIC_DRAW);
     }
 
     @Override
     public void setVertexData(final ByteBuffer vertexData) {
         glBindVertexArray(this.vao);
         glBindBuffer(GL_ARRAY_BUFFER, this.vbo);
-        glBufferData(GL_ARRAY_BUFFER, vertexData, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, vertexData, GL_DYNAMIC_DRAW);
         this.vertexFormat.apply();
     }
 

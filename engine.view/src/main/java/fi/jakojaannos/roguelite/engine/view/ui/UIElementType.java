@@ -2,10 +2,7 @@ package fi.jakojaannos.roguelite.engine.view.ui;
 
 import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.engine.view.ui.builder.GenericUIElementBuilder;
-import fi.jakojaannos.roguelite.engine.view.ui.builder.UIElementBuilder;
-import fi.jakojaannos.roguelite.engine.view.ui.builder.UILabelBuilder;
-import fi.jakojaannos.roguelite.engine.view.ui.builder.UIPanelBuilder;
+import fi.jakojaannos.roguelite.engine.view.ui.builder.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
@@ -16,6 +13,7 @@ public final class UIElementType<TBuilder extends UIElementBuilder<TBuilder>> {
     public static final UIElementType<GenericUIElementBuilder> NONE = new UIElementType<>(GenericUIElementBuilder::new);
     public static final UIElementType<UIPanelBuilder> PANEL = new UIElementType<>(UIPanelBuilder::new);
     public static final UIElementType<UILabelBuilder> LABEL = new UIElementType<>(UILabelBuilder::new);
+    public static final UIElementType<UIProgressBarBuilder> PROGRESS_BAR = new UIElementType<>(UIProgressBarBuilder::new);
 
     private final BuilderFactory<TBuilder> builderFactory;
 

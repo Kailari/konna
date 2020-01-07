@@ -7,10 +7,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @RequiredArgsConstructor
 public class EntityBackedUIElement implements UIElement {
@@ -36,5 +33,18 @@ public class EntityBackedUIElement implements UIElement {
 
     public void addChild(final UIElement child) {
         this.children.add(child);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final EntityBackedUIElement that = (EntityBackedUIElement) o;
+        return entity.equals(that.entity);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(entity);
     }
 }

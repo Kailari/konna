@@ -10,7 +10,6 @@ import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.ui.TextSizeProvider;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
-import fi.jakojaannos.roguelite.engine.view.data.components.internal.Name;
 import fi.jakojaannos.roguelite.engine.view.data.resources.ui.UIHierarchy;
 import fi.jakojaannos.roguelite.engine.view.data.resources.ui.UIRoot;
 import fi.jakojaannos.roguelite.engine.view.systems.ui.*;
@@ -104,6 +103,7 @@ public class UserInterfaceImpl implements UserInterface {
         this.uiWorld.createOrReplaceResource(Mouse.class, mouse);
 
         this.uiDispatcher.dispatch(this.uiWorld);
+        this.uiWorld.getEntityManager().applyModifications();
     }
 
     public void updateHierarchy() {

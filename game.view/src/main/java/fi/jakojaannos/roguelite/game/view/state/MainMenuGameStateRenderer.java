@@ -50,12 +50,13 @@ public class MainMenuGameStateRenderer extends GameStateRenderer {
                                       .addGroupDependencies(RenderSystemGroups.UI, RenderSystemGroups.OVERLAY, RenderSystemGroups.ENTITIES, RenderSystemGroups.LEVEL)
                                       .addGroupDependencies(RenderSystemGroups.OVERLAY, RenderSystemGroups.ENTITIES, RenderSystemGroups.LEVEL)
                                       .addGroupDependencies(RenderSystemGroups.ENTITIES, RenderSystemGroups.LEVEL)
-                                      .withSystem(new UserInterfaceRenderingSystem(camera,
+                                      .withSystem(new UserInterfaceRenderingSystem(assetRoot,
+                                                                                   camera,
                                                                                    fontRegistry,
                                                                                    spriteRegistry,
-                                                                                   backend.createSpriteBatch(assetRoot, "sprite"),
                                                                                    textRenderer,
-                                                                                   userInterface));
+                                                                                   userInterface,
+                                                                                   backend));
 
         if (DebugConfig.debugModeEnabled) {
             builder.withSystem(new EntityTransformRenderingSystem(assetRoot, camera, backend));
