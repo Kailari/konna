@@ -1,11 +1,9 @@
 package fi.jakojaannos.roguelite.engine.ecs.components;
 
+import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.ecs.entities.EntityImpl;
-import fi.jakojaannos.roguelite.test.mock.engine.ecs.MockComponent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -69,5 +67,8 @@ class ComponentMapTest {
         storage.addComponent(entity, new MockComponent());
 
         assertNotNull(storage.getComponent(entity));
+    }
+
+    public static class MockComponent implements Component {
     }
 }
