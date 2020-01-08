@@ -25,7 +25,17 @@ public class Players implements Resource {
         return Optional.ofNullable(this.localPlayer);
     }
 
-    public void setPlayer(@Nullable final Entity player) {
+    public void setLocalPlayer(final Entity player) {
         this.localPlayer = player;
+    }
+
+    public void removePlayer(final Entity entity) {
+        if (this.localPlayer == null) {
+            return;
+        }
+
+        if (this.localPlayer.getId() == entity.getId()) {
+            this.localPlayer = null;
+        }
     }
 }

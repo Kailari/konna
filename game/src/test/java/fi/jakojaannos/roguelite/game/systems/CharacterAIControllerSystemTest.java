@@ -33,7 +33,7 @@ public class CharacterAIControllerSystemTest {
         this.playerPos = new Transform();
         entityManager.addComponentTo(this.player, playerPos);
         entityManager.addComponentTo(this.player, new PlayerTag());
-        this.world.getOrCreateResource(Players.class).setPlayer(player);
+        this.world.getOrCreateResource(Players.class).setLocalPlayer(player);
 
         this.follower = entityManager.createEntity();
         this.followerInput = new CharacterInput();

@@ -27,15 +27,6 @@ public class CleanUpDeadPlayersSystem implements ECSSystem {
             final World world
     ) {
         val players = world.getOrCreateResource(Players.class);
-        if (players.getPlayer() == null) {
-            return;
-        }
-
-        for (val entity : (Iterable<Entity>) entities::iterator) {
-            // FIXME: Remove null-check and add support for multiple players
-            if (players.getPlayer() != null && entity.getId() == players.getPlayer().getId()) {
-                players.setPlayer(null);
-            }
-        }
+        entities.forEach(players::removePlayer);
     }
 }
