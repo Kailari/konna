@@ -38,8 +38,8 @@ public class WorldSteps {
         state.getWorld().getEntityManager().addComponentTo(camera, new NoDrawTag());
         state.getWorld().getOrCreateResource(CameraProperties.class).cameraEntity = camera;
 
-        val areaWidth = 800;
-        val areaHeight = 600;
+        val areaWidth = 20;
+        val areaHeight = 20;
         IntStream.range(0, numberOfEnemies)
                  .mapToObj(ignored -> new Vector2d((random.nextDouble() * 2.0 - 1.0) * areaWidth,
                                                    (random.nextDouble() * 2.0 - 1.0) * areaHeight))

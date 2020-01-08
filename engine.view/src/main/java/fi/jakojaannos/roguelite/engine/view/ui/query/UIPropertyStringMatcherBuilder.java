@@ -21,4 +21,10 @@ public class UIPropertyStringMatcherBuilder {
                                                      .ifPresentOrElse(actual -> actual.equals(string),
                                                                       string::isEmpty));
     }
+
+    public UIElementMatcher whichStartsWith(final String string) {
+        return this.parent.matching(UIPropertyMatcher.match(this.property)
+                                                     .ifPresentOrElse(actual -> actual.startsWith(string),
+                                                                      string::isEmpty));
+    }
 }

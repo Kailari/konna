@@ -29,6 +29,16 @@ public class AssertUI {
         assertEquals(1, elements.size(), "Expected there to be exactly one matching element.");
     }
 
+    public void hasElements(
+            final int n,
+            final Consumer<UIElementMatcher> matcher
+    ) {
+        val elements = this.userInterface.findElements(matcher)
+                                         .collect(Collectors.toList());
+
+        assertEquals(n, elements.size(), "Expected there to be " + n + " matching elements.");
+    }
+
     public void hasNoElementMatching(
             final Consumer<UIElementMatcher> matcher
     ) {
