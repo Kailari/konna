@@ -47,17 +47,16 @@ public class MenuSteps {
     @Then("there is a title with text {string}")
     public void there_is_a_title_with_text(String string) {
         assertUI(gameRenderer.getUserInterfaceForState(state))
-                .hasExactlyOneElementWithName(TITLE_LABEL_NAME)
-                .isLabel()
-                .hasText().equalTo(string);
+                .hasExactlyOneElement(that -> that.hasName().equalTo(TITLE_LABEL_NAME)
+                                                  .isLabel()
+                                                  .hasText().equalTo(string));
     }
 
     @Then("there is a button with text {string}")
     public void there_is_a_button_with_text(String string) {
         assertUI(gameRenderer.getUserInterfaceForState(state))
-                .hasExactlyOneElementWithMatchingChild(
-                        child -> child.isLabel()
-                                      .hasText().equalTo(string));
+                .hasExactlyOneElement(that -> that.hasChildMatching(child -> child.isLabel()
+                                                                                  .hasText().equalTo(string)));
     }
 
     @Then("the game should close")

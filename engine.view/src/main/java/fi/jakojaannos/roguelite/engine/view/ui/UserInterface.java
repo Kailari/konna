@@ -7,6 +7,8 @@ import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.UIBuilder;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.UIElementBuilder;
+import fi.jakojaannos.roguelite.engine.view.ui.query.UIElementMatcher;
+import lombok.val;
 
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -39,6 +41,21 @@ public interface UserInterface {
         return streamBuilder.build();
     }
 
+    default <T> Stream<UIElement> findElements(
+            final Consumer<UIElementMatcher> builder
+    ) {
+        Stream.Builder<UIElement> streamBuilder = Stream.builder();
+        this.getRoots().forEach(root -> addIfMatching(builder, streamBuilder, root));
+        return streamBuilder.build();
+    }
+
+    <T extends UIElementType<TBuilder>, TBuilder extends UIElementBuilder<TBuilder>> UIElement addElement(
+            final String name,
+            final T elementType,
+            final Consumer<TBuilder> factory
+    );
+
+
     private <T> void addIfMatching(
             final UIProperty<T> property,
             final Predicate<T> matcher,
@@ -52,9 +69,17 @@ public interface UserInterface {
         element.getChildren().forEach(child -> addIfMatching(property, matcher, streamBuilder, child));
     }
 
-    <T extends UIElementType<TBuilder>, TBuilder extends UIElementBuilder<TBuilder>> UIElement addElement(
-            final String name,
-            final T elementType,
-            final Consumer<TBuilder> factory
-    );
+    private void addIfMatching(
+            final Consumer<UIElementMatcher> builder,
+            final Stream.Builder<UIElement> streamBuilder,
+            final UIElement element
+    ) {
+        val elementMatcher = UIElementMatcher.create();
+        builder.accept(elementMatcher);
+        if (elementMatcher.evaluate(element)) {
+            streamBuilder.add(element);
+        }
+
+        element.getChildren().forEach(child -> addIfMatching(builder, streamBuilder, child));
+    }
 }

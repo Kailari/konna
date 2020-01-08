@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-public class VerticalPositionMatcher<TParent extends UIElementMatcher> {
+public class VerticalPositionMatcher<TParent> {
     private final TParent parent;
     private final String name;
     private final int minY;
