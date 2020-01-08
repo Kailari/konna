@@ -7,6 +7,8 @@ import fi.jakojaannos.roguelite.engine.ecs.Resource;
 import lombok.val;
 import org.joml.Vector2d;
 
+import java.util.Optional;
+
 public class CameraProperties implements Resource {
     public double viewportWidthInWorldUnits;
     public double viewportHeightInWorldUnits;
@@ -21,9 +23,10 @@ public class CameraProperties implements Resource {
             final EntityManager entityManager,
             final Vector2d outResult
     ) {
-        val cameraPosition = entityManager.getComponentOf(this.cameraEntity, Transform.class)
-                                          .map(transform -> transform.position)
-                                          .orElse(new Vector2d(0.0, 0.0));
+        val cameraPosition = Optional.ofNullable(this.cameraEntity)
+                                     .flatMap(entity -> entityManager.getComponentOf(entity, Transform.class)
+                                                                     .map(transform -> transform.position))
+                                     .orElse(new Vector2d(0.0, 0.0));
         return outResult.set(cameraPosition.x - position.x - this.viewportWidthInWorldUnits / 2.0,
                              cameraPosition.y - position.y - this.viewportHeightInWorldUnits / 2.0);
     }

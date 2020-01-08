@@ -1,5 +1,6 @@
 package fi.jakojaannos.roguelite.game.systems;
 
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
@@ -10,6 +11,7 @@ import fi.jakojaannos.roguelite.game.data.components.character.CharacterAbilitie
 import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
+import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -74,7 +76,7 @@ class PlayerInputSystemTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"0.5,0.5,16,16", "0.25,0.125,8,4", "1.0,0.0,32,0"})
+    @CsvSource({"0.5,0.5,0,0", "0.25,0.125,-8,-12", "1.0,0.0,16,-16"})
     void attackTargetIsSetToMouseCoordinates(
             double mouseX,
             double mouseY,
@@ -82,11 +84,17 @@ class PlayerInputSystemTest {
             double expectedY
     ) {
         Mouse mouse = this.world.getOrCreateResource(Mouse.class);
-        CameraProperties camBounds = this.world.getOrCreateResource(CameraProperties.class);
-        camBounds.viewportWidthInWorldUnits = 32.0f;
-        camBounds.viewportHeightInWorldUnits = 32.0f;
+        CameraProperties cameraProperties = this.world.getOrCreateResource(CameraProperties.class);
+        cameraProperties.viewportWidthInWorldUnits = 32.0f;
+        cameraProperties.viewportHeightInWorldUnits = 32.0f;
         mouse.position.x = mouseX;
         mouse.position.y = mouseY;
+
+        val cameraEntity = world.getEntityManager().createEntity();
+        this.world.getEntityManager().addComponentTo(cameraEntity, new Transform());
+        cameraProperties.cameraEntity = cameraEntity;
+        this.world.getEntityManager().applyModifications();
+
 
         system.tick(Stream.of(player), this.world);
         this.world.getEntityManager().applyModifications();

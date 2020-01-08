@@ -89,7 +89,6 @@ public class MainMenuGameStateRenderer extends GameStateRenderer {
                                            .height(ProportionValue.absolute(height))
                                            .borderSize(borderSize)
                                            .sprite("sprites/ui/ui")
-                                           // TODO: panelAnimationName
                                            .child("play_button_label",
                                                   UIElementType.LABEL,
                                                   labelBuilder -> labelBuilder
@@ -109,7 +108,6 @@ public class MainMenuGameStateRenderer extends GameStateRenderer {
                                            .height(ProportionValue.absolute(height))
                                            .borderSize(borderSize)
                                            .sprite("sprites/ui/ui")
-                                           // TODO: panelAnimationName
                                            .child("quit_button_label",
                                                   UIElementType.LABEL,
                                                   labelBuilder -> labelBuilder

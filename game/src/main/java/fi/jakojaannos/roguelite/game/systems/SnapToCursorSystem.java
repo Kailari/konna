@@ -11,7 +11,6 @@ import fi.jakojaannos.roguelite.game.data.components.CrosshairTag;
 import lombok.val;
 import org.joml.Vector2d;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 public class SnapToCursorSystem implements ECSSystem {
@@ -24,7 +23,7 @@ public class SnapToCursorSystem implements ECSSystem {
                     .withComponent(CrosshairTag.class);
     }
 
-    private final Vector2d tmpCamPos = new Vector2d();
+    private final Vector2d tmpCursorPosition = new Vector2d();
 
     @Override
     public void tick(
@@ -34,14 +33,10 @@ public class SnapToCursorSystem implements ECSSystem {
         val mouse = world.getOrCreateResource(Mouse.class);
         val camProps = world.getOrCreateResource(CameraProperties.class);
 
-        val cursorPosition = Optional.ofNullable(camProps.cameraEntity)
-                                     .flatMap(cameraEntity -> world.getEntityManager().getComponentOf(cameraEntity, Transform.class))
-                                     .map(cameraTransform -> mouse.calculateCursorPositionRelativeToCamera(cameraTransform.position, camProps, tmpCamPos))
-                                     .orElseGet(() -> tmpCamPos.set(0.0, 0.0));
+        val entityManager = world.getEntityManager();
+        mouse.calculateCursorPositionRelativeToCamera(entityManager, camProps, tmpCursorPosition);
 
-        entities.forEach(entity -> {
-            val transform = world.getEntityManager().getComponentOf(entity, Transform.class).orElseThrow();
-            transform.position.set(cursorPosition.x, cursorPosition.y);
-        });
+        entities.map(entity -> entityManager.getComponentOf(entity, Transform.class).orElseThrow().position)
+                .forEach(entityPosition -> entityPosition.set(tmpCursorPosition));
     }
 }
