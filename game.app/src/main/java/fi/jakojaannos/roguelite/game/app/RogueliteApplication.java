@@ -9,7 +9,7 @@ import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLRenderingBackend;
 import fi.jakojaannos.roguelite.engine.lwjgl.input.LWJGLInputProvider;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.game.DebugConfig;
-import fi.jakojaannos.roguelite.game.Roguelite;
+import fi.jakojaannos.roguelite.game.RogueliteGame;
 import fi.jakojaannos.roguelite.game.state.MainMenuGameState;
 import fi.jakojaannos.roguelite.game.view.RogueliteGameRenderer;
 import lombok.Setter;
@@ -35,10 +35,11 @@ public class RogueliteApplication {
         LOG.trace("Running application");
         LOG.debug("asset root: {}", assetRoot);
 
-        try (val runner = new LWJGLGameRunner<Roguelite, LWJGLInputProvider>(DebugConfig.debugModeEnabled, this.windowWidth, this.windowHeight);
+        try (val runner = new LWJGLGameRunner<RogueliteGame, LWJGLInputProvider>(DebugConfig.debugModeEnabled, this.windowWidth, this.windowHeight);
              val assetManager = new LWJGLAssetManager(assetRoot);
-             val game = new Roguelite()
+             val game = new RogueliteGame()
         ) {
+            game.connect();
             try (val backend = new LWJGLRenderingBackend(assetRoot);
                  val renderer = new RogueliteGameRenderer(assetRoot, runner.getWindow(), backend, assetManager)
             ) {

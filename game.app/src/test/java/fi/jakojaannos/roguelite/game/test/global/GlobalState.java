@@ -9,7 +9,7 @@ import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLRenderingBackend;
 import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLWindow;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.engine.view.Window;
-import fi.jakojaannos.roguelite.game.Roguelite;
+import fi.jakojaannos.roguelite.game.RogueliteGame;
 import fi.jakojaannos.roguelite.game.test.content.TestAssetManager;
 import fi.jakojaannos.roguelite.game.test.view.TestRenderingBackend;
 import fi.jakojaannos.roguelite.game.test.view.TestWindow;
@@ -33,7 +33,7 @@ import static org.lwjgl.opengl.GL11.*;
  * tests from running from parallel in single test runner instance.
  */
 public class GlobalState {
-    public static Roguelite game;
+    public static RogueliteGame game;
     public static GameState state;
     public static Events events;
     public static Queue<InputEvent> inputEvents;
@@ -48,7 +48,7 @@ public class GlobalState {
         random = new Random(13376969);
 
         timeManager = new TestTimeManager(20L);
-        game = new Roguelite(timeManager);
+        game = new RogueliteGame(timeManager);
         Path assetRoot = Paths.get("../assets");
         gameRenderer = Optional.ofNullable(System.getenv("VISUALIZE_TESTS"))
                                .map(Boolean::valueOf)
@@ -108,8 +108,6 @@ public class GlobalState {
         inputEvents.forEach(events.getInput()::fire);
         state = game.tick(state, events);
         game.updateTime();
-
-        renderTick();
 
         inputEvents.clear();
     }

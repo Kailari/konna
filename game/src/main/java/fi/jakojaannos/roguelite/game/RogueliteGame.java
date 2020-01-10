@@ -10,15 +10,22 @@ import fi.jakojaannos.roguelite.engine.input.InputButton;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.engine.utilities.UpdateableTimeManager;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
+import fi.jakojaannos.roguelite.game.network.client.RogueliteClient;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 @Slf4j
 @NoArgsConstructor
-public class Roguelite extends GameBase {
-    public Roguelite(final UpdateableTimeManager timeManager) {
+public class RogueliteGame extends GameBase {
+    private final RogueliteClient networkClient = new RogueliteClient();
+
+    public RogueliteGame(final UpdateableTimeManager timeManager) {
         super(timeManager);
+    }
+
+    public void connect() {
+        this.networkClient.connect("localhost", 18181);
     }
 
     @Override
@@ -26,6 +33,8 @@ public class Roguelite extends GameBase {
             final GameState state,
             final Events events
     ) {
+        this.networkClient.handleMessageTasksAndFlush();
+
         val inputs = state.getWorld().getOrCreateResource(Inputs.class);
         val mouse = state.getWorld().getOrCreateResource(Mouse.class);
         val inputEvents = events.getInput();
@@ -77,5 +86,11 @@ public class Roguelite extends GameBase {
         }
 
         return stateManager.getNextState(state);
+    }
+
+    @Override
+    public void close() {
+        super.close();
+        this.networkClient.close();
     }
 }

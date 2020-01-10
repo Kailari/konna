@@ -15,13 +15,13 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class RogueliteTest {
-    private Roguelite roguelite;
+class RogueliteGameTest {
+    private RogueliteGame roguelite;
     private GameState state;
 
     @BeforeEach
     void beforeEach() {
-        roguelite = new Roguelite();
+        roguelite = new RogueliteGame();
         state = new GameplayGameState(6969,
                                       World.createNew(EntityManager.createNew(256, 32)),
                                       roguelite.getTime());

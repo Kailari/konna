@@ -23,6 +23,7 @@ public class MenuSteps {
     public void the_main_menu_has_just_loaded() {
         state = new MainMenuGameState(World.createNew(EntityManager.createNew(256, 32)),
                                       game.getTime());
+        simulateTick();
     }
 
     @When("the player clicks the {string} button")
@@ -37,11 +38,17 @@ public class MenuSteps {
         mouse.position.set(buttonCenter)
                       .mul(1.0 / gameRenderer.getCamera().getViewport().getWidthInPixels(),
                            1.0 / gameRenderer.getCamera().getViewport().getHeightInPixels());
+        mouse.clicked = false;
+        simulateTick();
+        renderTick();
+
         mouse.clicked = true;
         simulateTick();
+        renderTick();
 
         mouse.clicked = false;
         simulateTick();
+        renderTick();
     }
 
     @Then("there is a title with text {string}")
