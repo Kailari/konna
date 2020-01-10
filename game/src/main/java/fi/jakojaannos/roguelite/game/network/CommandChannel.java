@@ -1,6 +1,6 @@
 package fi.jakojaannos.roguelite.game.network;
 
-import fi.jakojaannos.roguelite.game.network.client.RogueliteClient;
+import fi.jakojaannos.roguelite.game.network.client.ClientNetworkManager;
 import fi.jakojaannos.roguelite.game.network.message.MessageHandlingContext;
 import fi.jakojaannos.roguelite.game.network.message.NetworkMessage;
 import fi.jakojaannos.roguelite.game.network.message.NetworkMessageType;
@@ -30,7 +30,7 @@ public class CommandChannel implements AutoCloseable {
 
     private final Queue<MainThreadTask> inboundTaskQueue = new ArrayDeque<>();
     private final NetworkMessageTypeMap typeMap = NetworkMessageTypeMap.builder()
-                                                                       .messageType(new RogueliteClient.HelloMessage.Type())
+                                                                       .messageType(new ClientNetworkManager.HelloMessage.Type())
                                                                        .build();
 
 
@@ -71,6 +71,10 @@ public class CommandChannel implements AutoCloseable {
     @Override
     public void close() {
         this.networkThread.disconnect();
+    }
+
+    public boolean isConnected() {
+        return this.networkThread.channel != null && this.networkThread.channel.isConnected();
     }
 
     public static class ClientCommandChannelThread implements Runnable {

@@ -10,22 +10,23 @@ import fi.jakojaannos.roguelite.engine.input.InputButton;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.engine.utilities.UpdateableTimeManager;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
-import fi.jakojaannos.roguelite.game.network.client.RogueliteClient;
-import lombok.NoArgsConstructor;
+import fi.jakojaannos.roguelite.game.network.client.NetworkManager;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 @Slf4j
-@NoArgsConstructor
+@RequiredArgsConstructor
 public class RogueliteGame extends GameBase {
-    private final RogueliteClient networkClient = new RogueliteClient();
+    @Getter private final NetworkManager networkManager;
 
-    public RogueliteGame(final UpdateableTimeManager timeManager) {
+    public RogueliteGame(
+            final NetworkManager networkManager,
+            final UpdateableTimeManager timeManager
+    ) {
         super(timeManager);
-    }
-
-    public void connect() {
-        this.networkClient.connect("localhost", 18181);
+        this.networkManager = networkManager;
     }
 
     @Override
@@ -33,7 +34,9 @@ public class RogueliteGame extends GameBase {
             final GameState state,
             final Events events
     ) {
-        this.networkClient.handleMessageTasksAndFlush();
+        if (this.networkManager.isConnected()) {
+            this.networkManager.handleMessageTasksAndFlush();
+        }
 
         val inputs = state.getWorld().getOrCreateResource(Inputs.class);
         val mouse = state.getWorld().getOrCreateResource(Mouse.class);
@@ -80,17 +83,15 @@ public class RogueliteGame extends GameBase {
             this.setFinished(true);
         }
 
+        return selectNextState(state);
+    }
+
+    protected GameState selectNextState(final GameState state) {
         val stateManager = state.getWorld().getOrCreateResource(GameStateManager.class);
         if (stateManager.shouldShutDown()) {
             this.setFinished(true);
         }
 
         return stateManager.getNextState(state);
-    }
-
-    @Override
-    public void close() {
-        super.close();
-        this.networkClient.close();
     }
 }

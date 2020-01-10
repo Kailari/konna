@@ -12,10 +12,9 @@ import lombok.val;
 import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.ExecutionException;
 
 @Slf4j
-public class RogueliteClient implements AutoCloseable {
+public class ClientNetworkManager implements NetworkManager {
     @Nullable private CommandChannel commandChannel;
 
     public void connect(final String host, final int port) {
@@ -29,6 +28,12 @@ public class RogueliteClient implements AutoCloseable {
         this.commandChannel.send(new HelloMessage("Hello Netty!"));
     }
 
+    @Override
+    public boolean isConnected() {
+        return this.commandChannel != null && this.commandChannel.isConnected();
+    }
+
+    @Override
     public void handleMessageTasksAndFlush() {
         if (this.commandChannel == null) {
             return;

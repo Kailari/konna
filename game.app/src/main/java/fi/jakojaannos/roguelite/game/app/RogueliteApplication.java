@@ -10,6 +10,7 @@ import fi.jakojaannos.roguelite.engine.lwjgl.input.LWJGLInputProvider;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.game.DebugConfig;
 import fi.jakojaannos.roguelite.game.RogueliteGame;
+import fi.jakojaannos.roguelite.game.network.client.ClientNetworkManager;
 import fi.jakojaannos.roguelite.game.state.MainMenuGameState;
 import fi.jakojaannos.roguelite.game.view.RogueliteGameRenderer;
 import lombok.Setter;
@@ -36,16 +37,16 @@ public class RogueliteApplication {
         LOG.debug("asset root: {}", assetRoot);
 
         try (val runner = new LWJGLGameRunner<RogueliteGame, LWJGLInputProvider>(DebugConfig.debugModeEnabled, this.windowWidth, this.windowHeight);
+             val networkManager = new ClientNetworkManager();
              val assetManager = new LWJGLAssetManager(assetRoot);
-             val game = new RogueliteGame()
+             val backend = new LWJGLRenderingBackend(assetRoot);
+             val renderer = new RogueliteGameRenderer(assetRoot, runner.getWindow(), backend, assetManager);
+             RogueliteGame game = new RogueliteGame(networkManager)
         ) {
-            game.connect();
-            try (val backend = new LWJGLRenderingBackend(assetRoot);
-                 val renderer = new RogueliteGameRenderer(assetRoot, runner.getWindow(), backend, assetManager)
-            ) {
-                val inputProvider = new LWJGLInputProvider(runner.getWindow());
-                runner.run(() -> createInitialState(game), game, inputProvider, renderer::render);
-            }
+            val inputProvider = new LWJGLInputProvider(runner.getWindow());
+            // FIXME: Don't do this here, create a main menu button or sth. ":D"
+            networkManager.connect("localhost", 18181);
+            runner.run(() -> createInitialState(game), game, inputProvider, renderer::render);
         } catch (Exception e) {
             LOG.error("The game loop unexpectedly stopped.");
             LOG.error("\tException:\t{}", e.getClass().getName());
