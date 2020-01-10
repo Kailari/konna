@@ -1,5 +1,6 @@
 package fi.jakojaannos.roguelite.launcher.arguments;
 
+import fi.jakojaannos.roguelite.launcher.arguments.parameters.Parameter;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.val;

@@ -1,5 +1,6 @@
 package fi.jakojaannos.roguelite.launcher.arguments;
 
+import fi.jakojaannos.roguelite.launcher.arguments.parameters.Parameter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;

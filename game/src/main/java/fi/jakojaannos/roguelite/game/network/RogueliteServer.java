@@ -16,18 +16,12 @@ import java.nio.channels.SocketChannel;
 @Slf4j
 @RequiredArgsConstructor
 public class RogueliteServer {
-    private final int port;
-
-    public static void main(String[] args) throws Exception {
-        new RogueliteServer(18181).run();
-    }
-
-    public void run() throws Exception {
+    public static void run(final int port) throws Exception {
         LOG.info("Opening a server socket channel...");
         val connectionChannel = ServerSocketChannel.open();
 
         LOG.info("Binding to port {}", port);
-        connectionChannel.bind(new InetSocketAddress(this.port));
+        connectionChannel.bind(new InetSocketAddress(port));
 
         LOG.info("Configuring connection channel...");
         connectionChannel.configureBlocking(false);

@@ -4,7 +4,7 @@ import fi.jakojaannos.roguelite.game.app.RogueliteApplication;
 import fi.jakojaannos.roguelite.launcher.arguments.Argument;
 import fi.jakojaannos.roguelite.launcher.arguments.ArgumentParsingException;
 import fi.jakojaannos.roguelite.launcher.arguments.Arguments;
-import fi.jakojaannos.roguelite.launcher.arguments.Parameter;
+import fi.jakojaannos.roguelite.launcher.arguments.parameters.Parameter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -19,12 +19,27 @@ public class RogueliteLauncher {
     @Setter private boolean enableLWJGLDebug = false;
     @Setter private boolean enableLWJGLLibraryLoaderDebug = false;
     @Setter private String assetRoot = "assets/";
+    @Setter private boolean runAsServer = false;
 
     private final RogueliteApplication application = new RogueliteApplication();
 
     public void parseCommandLineArguments(String... args) {
         try {
             Arguments.builder()
+                     .with(Argument.withName("server")
+                                   .withAction(params -> {
+                                       val port = params.parameter(Parameter.optional(Parameter.integer("port")));
+                                       this.runAsServer = true;
+                                       this.application.setPort(port.orElse(18181));
+                                   }))
+                     .with(Argument.withName("client")
+                                   .withAction(params -> {
+                                       val host = params.parameter(Parameter.string("host"));
+                                       val maybePort = params.parameter(Parameter.optional(Parameter.integer("port")));
+                                       this.runAsServer = false;
+                                       this.application.setHost(host);
+                                       maybePort.ifPresent(this.application::setPort);
+                                   }))
                      .with(Argument.withName("window")
                                    .withAction((params) -> {
                                        val width = params.parameter(Parameter.integer("width")
@@ -91,6 +106,7 @@ public class RogueliteLauncher {
             System.setProperty("org.lwjgl.util.DebugLoader", "true");
         }
 
-        this.application.run(Path.of(this.assetRoot));
+        this.application.setAssetRoot(Path.of(this.assetRoot));
+        this.application.run(this.runAsServer);
     }
 }

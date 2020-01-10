@@ -110,6 +110,20 @@ run {
     setArgsString("--debug --assetRoot ../assets/")
 }
 
+task runClient {
+    group 'application'
+
+    doFirst { run.setArgsString("--debug --assetRoot ../assets/ --client localhost 18181") }
+    finalizedBy(run)
+}
+
+task runServer {
+    group 'application'
+
+    doFirst { run.setArgsString("--debug --assetRoot ../assets/ --server 18181") }
+    finalizedBy(run)
+}
+
 jar {
     manifest {
         attributes "Main-Class": "fi.jakojaannos.roguelite.launcher.Main"
