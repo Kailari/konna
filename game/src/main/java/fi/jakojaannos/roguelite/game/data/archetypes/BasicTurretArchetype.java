@@ -20,14 +20,14 @@ public class BasicTurretArchetype {
         entityManager.addComponentTo(turret, transform);
         entityManager.addComponentTo(turret, new BasicTurretComponent());
         entityManager.addComponentTo(turret, createSpriteInfo());
-        entityManager.addComponentTo(turret, new Collider(CollisionLayer.NONE));
+        entityManager.addComponentTo(turret, new Collider(CollisionLayer.NONE, 2.0, 2.0, 1.0, 1.0));
 
         return turret;
     }
 
     private static SpriteInfo createSpriteInfo() {
         val sprite = new SpriteInfo();
-        sprite.spriteName = "sprites/enemy";
+        sprite.spriteName = "sprites/turret";
 
         return sprite;
     }

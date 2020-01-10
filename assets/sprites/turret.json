@@ -1,0 +1,11 @@
+{
+  "frames": [
+    {
+      "texture": "textures/turret.png",
+      "x": 0,
+      "y": 0,
+      "w": 48,
+      "h": 48
+    }
+  ]
+}
