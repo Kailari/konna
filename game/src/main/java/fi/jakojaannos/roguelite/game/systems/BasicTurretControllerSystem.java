@@ -3,6 +3,7 @@ package fi.jakojaannos.roguelite.game.systems;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.*;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.DamageSource;
 import fi.jakojaannos.roguelite.game.data.archetypes.BasicProjectileArchetype;
 import fi.jakojaannos.roguelite.game.data.components.BasicTurretComponent;
@@ -22,7 +23,7 @@ public class BasicTurretControllerSystem implements ECSSystem {
                     .withComponent(BasicTurretComponent.class);
     }
 
-    private final List<Class<? extends Component>> targetRequirements =
+    private static final List<Class<? extends Component>> targetRequirements =
             List.of(EnemyTag.class, Transform.class);
 
     @Override
@@ -41,51 +42,67 @@ public class BasicTurretControllerSystem implements ECSSystem {
                     turretAI.lastShotTimestamp + turretAI.shootingCoolDownInTicks)
                 return;
 
+            findOrUpdateTarget(entityManager, turretAI, myPos);
 
-            boolean hasTarget = false;
-            if (turretAI.target == null || !isValidTarget(entityManager, turretAI.target)) {
-                val newTarget = findNewTarget(entityManager, turretAI, myPos);
-                if (newTarget.isPresent()) {
-                    turretAI.target = newTarget.get();
-                    hasTarget = true;
-                }
-            } else {
-                hasTarget = true;
-            }
-
-            if (hasTarget) {
+            if (turretAI.target != null) {
                 val targetPos = entityManager.getComponentOf(turretAI.target, Transform.class).orElseThrow();
-
-                Velocity velocity = new Velocity();
-                velocity.velocity
-                        .set(targetPos.position)
-                        .sub(myPos.position)
-                        .normalize(turretAI.projectileSpeed);
-                BasicProjectileArchetype.create(world, new Transform(myPos), velocity, DamageSource.Generic.UNDEFINED);
-
-                turretAI.lastShotTimestamp = timeManager.getCurrentGameTime();
+                shoot(world, timeManager, myPos, targetPos, turretAI);
             }
-
         });
-
-
     }
 
-    private boolean isValidTarget(EntityManager entityManager, Entity entity) {
-        if (entity.isMarkedForRemoval()) return false;
-
-        return (entityManager.hasComponent(entity, EnemyTag.class)
-                && entityManager.hasComponent(entity, Transform.class));
-    }
-
-    private Optional<Entity> findNewTarget(
-            EntityManager entityManager,
-            BasicTurretComponent turretAI,
-            Transform myPos
+    private static void shoot(
+            final World world,
+            final TimeManager timeManager,
+            final Transform origin,
+            final Transform target,
+            final BasicTurretComponent turretAI
     ) {
-        return entityManager.getEntitiesWith(targetRequirements).filter(entity -> {
-            val enemyPos = entityManager.getComponentOf(entity, Transform.class).orElseThrow();
-            return (myPos.position.distanceSquared(enemyPos.position) <= turretAI.targetingRadiusSquared);
-        }).findAny();
+        val velocity = new Velocity();
+        velocity.velocity
+                .set(target.position)
+                .sub(origin.position)
+                .normalize(turretAI.projectileSpeed);
+
+        BasicProjectileArchetype.create(world, new Transform(origin), velocity, DamageSource.Generic.UNDEFINED);
+        turretAI.lastShotTimestamp = timeManager.getCurrentGameTime();
+    }
+
+    private static void findOrUpdateTarget(
+            final EntityManager entityManager,
+            final BasicTurretComponent turretAI,
+            final Transform myPos
+    ) {
+        if (turretAI.target == null || !isTargetValid(entityManager, turretAI.target, myPos, turretAI.targetingRadiusSquared)) {
+            turretAI.target = findNewTarget(entityManager, turretAI, myPos).orElse(null);
+        }
+    }
+
+    private static boolean isTargetValid(
+            final EntityManager entityManager,
+            final Entity target,
+            final Transform turretPos,
+            final double targetingRadiusSquared
+    ) {
+        if (target.isMarkedForRemoval()) return false;
+        if (!entityManager.hasComponent(target, EnemyTag.class)) return false;
+        if (!entityManager.hasComponent(target, Transform.class)) return false;
+
+        val targetPos = entityManager.getComponentOf(target, Transform.class).orElseThrow();
+        return turretPos.position.distanceSquared(targetPos.position) <= targetingRadiusSquared;
+    }
+
+    private static Optional<Entity> findNewTarget(
+            final EntityManager entityManager,
+            final BasicTurretComponent turretAI,
+            final Transform myPos
+    ) {
+        return entityManager
+                .getEntitiesWith(targetRequirements)
+                .filter(entity -> {
+                    val enemyPos = entityManager.getComponentOf(entity, Transform.class).orElseThrow();
+                    return (myPos.position.distanceSquared(enemyPos.position) <= turretAI.targetingRadiusSquared);
+                })
+                .findAny();
     }
 }
