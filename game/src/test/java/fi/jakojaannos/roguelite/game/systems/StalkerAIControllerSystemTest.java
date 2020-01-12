@@ -5,7 +5,7 @@ import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
-import fi.jakojaannos.roguelite.game.data.components.character.CharacterStats;
+import fi.jakojaannos.roguelite.game.data.components.character.MovementStats;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.StalkerAI;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
@@ -26,7 +26,7 @@ public class StalkerAIControllerSystemTest {
     private World world;
     private Transform playerPos, stalkerPos;
     private Entity stalker;
-    private CharacterStats stalkerStats;
+    private MovementStats stalkerStats;
     private StalkerAI stalkerAI;
 
     @BeforeEach
@@ -55,7 +55,7 @@ public class StalkerAIControllerSystemTest {
                 25.0f,
                 20.0f);
         entityManager.addComponentTo(stalker, stalkerAI);
-        this.stalkerStats = new CharacterStats(
+        this.stalkerStats = new MovementStats(
                 1.0,
                 100.0,
                 800.0
@@ -84,7 +84,7 @@ public class StalkerAIControllerSystemTest {
 
         this.system.tick(Stream.of(stalker), this.world);
 
-        assertEquals(expectedSpeed, stalkerStats.speed, 0.001f);
+        assertEquals(expectedSpeed, stalkerStats.maxSpeed, 0.001f);
     }
 
     @ParameterizedTest

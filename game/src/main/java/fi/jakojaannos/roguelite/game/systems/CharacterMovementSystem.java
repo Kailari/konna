@@ -4,8 +4,9 @@ import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.game.data.components.InAir;
 import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
-import fi.jakojaannos.roguelite.game.data.components.character.CharacterStats;
+import fi.jakojaannos.roguelite.game.data.components.character.MovementStats;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
@@ -23,7 +24,8 @@ public class CharacterMovementSystem implements ECSSystem {
                     .withComponent(Transform.class)
                     .withComponent(Velocity.class)
                     .withComponent(CharacterInput.class)
-                    .withComponent(CharacterStats.class);
+                    .withComponent(MovementStats.class)
+                    .withoutComponent(InAir.class);
     }
 
     private static final float INPUT_EPSILON = 0.001f;
@@ -39,7 +41,7 @@ public class CharacterMovementSystem implements ECSSystem {
 
         entities.forEach(entity -> {
             val input = world.getEntityManager().getComponentOf(entity, CharacterInput.class).orElseThrow();
-            val stats = world.getEntityManager().getComponentOf(entity, CharacterStats.class).orElseThrow();
+            val stats = world.getEntityManager().getComponentOf(entity, MovementStats.class).orElseThrow();
             val velocity = world.getEntityManager().getComponentOf(entity, Velocity.class).orElseThrow();
 
             // Accelerate
@@ -47,8 +49,8 @@ public class CharacterMovementSystem implements ECSSystem {
                 input.move.normalize(stats.acceleration * delta, tmpVelocity);
                 tmpVelocity.add(velocity.velocity);
 
-                if (tmpVelocity.lengthSquared() > stats.speed * stats.speed) {
-                    tmpVelocity.normalize(stats.speed);
+                if (tmpVelocity.lengthSquared() > stats.maxSpeed * stats.maxSpeed) {
+                    tmpVelocity.normalize(stats.maxSpeed);
                 }
                 velocity.velocity.set(tmpVelocity);
             }

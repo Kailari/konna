@@ -7,7 +7,7 @@ import fi.jakojaannos.roguelite.game.data.DamageSource;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import fi.jakojaannos.roguelite.game.data.components.character.CharacterAbilities;
 import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
-import fi.jakojaannos.roguelite.game.data.components.character.CharacterStats;
+import fi.jakojaannos.roguelite.game.data.components.character.MovementStats;
 import fi.jakojaannos.roguelite.game.data.components.character.Health;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.EnemyTag;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.StalkerAI;
@@ -45,7 +45,7 @@ public class StalkerArchetype {
         entityManager.addComponentTo(stalker, new CharacterInput());
         entityManager.addComponentTo(stalker, new Health(2));
         entityManager.addComponentTo(stalker, new Collider(CollisionLayer.ENEMY, 1.0, 1.0, 0.5, 0.5));
-        entityManager.addComponentTo(stalker, createCharacterStats());
+        entityManager.addComponentTo(stalker, createMovementStats());
         entityManager.addComponentTo(stalker, createStalkerAi());
         entityManager.addComponentTo(stalker, createSpriteInfo());
         entityManager.addComponentTo(stalker, new EnemyTag());
@@ -56,8 +56,8 @@ public class StalkerArchetype {
     }
 
 
-    private static CharacterStats createCharacterStats() {
-        return new CharacterStats(
+    private static MovementStats createMovementStats() {
+        return new MovementStats(
                 1.0,
                 100.0,
                 800.0

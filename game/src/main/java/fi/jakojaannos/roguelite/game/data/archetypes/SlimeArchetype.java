@@ -7,7 +7,7 @@ import fi.jakojaannos.roguelite.game.data.DamageSource;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import fi.jakojaannos.roguelite.game.data.components.character.CharacterAbilities;
 import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
-import fi.jakojaannos.roguelite.game.data.components.character.CharacterStats;
+import fi.jakojaannos.roguelite.game.data.components.character.MovementStats;
 import fi.jakojaannos.roguelite.game.data.components.character.Health;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.EnemyTag;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.SlimeAI;
@@ -52,7 +52,7 @@ public class SlimeArchetype {
         slimeAi.jumpDir.set(dir);
 
         entityManager.addComponentTo(slime, slimeAi);
-        entityManager.addComponentTo(slime, new CharacterStats(
+        entityManager.addComponentTo(slime, new MovementStats(
                 11.0,
                 100.0,
                 800.0
@@ -90,7 +90,7 @@ public class SlimeArchetype {
         slimeAi.jumpDir.set(dir);
 
         entityManager.addComponentTo(slime, slimeAi);
-        entityManager.addComponentTo(slime, new CharacterStats(
+        entityManager.addComponentTo(slime, new MovementStats(
                 6.0,
                 100.0,
                 800.0
@@ -121,7 +121,7 @@ public class SlimeArchetype {
                 1.0,
                 3
         ));
-        entityManager.addComponentTo(slime, new CharacterStats(
+        entityManager.addComponentTo(slime, new MovementStats(
                 4.5,
                 100.0,
                 800.0

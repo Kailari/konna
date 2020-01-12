@@ -4,7 +4,7 @@ import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.*;
 import fi.jakojaannos.roguelite.game.data.archetypes.SlimeArchetype;
 import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
-import fi.jakojaannos.roguelite.game.data.components.character.CharacterStats;
+import fi.jakojaannos.roguelite.game.data.components.character.MovementStats;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.SlimeAI;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.SlimeSharedAI;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
@@ -23,7 +23,7 @@ public class SlimeAIControllerSystem implements ECSSystem {
                 .requireResource(Players.class)
                 .withComponent(SlimeAI.class)
                 .withComponent(CharacterInput.class)
-                .withComponent(CharacterStats.class)
+                .withComponent(MovementStats.class)
                 .withComponent(Transform.class);
     }
 
@@ -106,7 +106,7 @@ public class SlimeAIControllerSystem implements ECSSystem {
         val sharedAI = entityManager.getComponentOf(entity, SlimeSharedAI.class).orElseThrow();
 
         val input = entityManager.getComponentOf(entity, CharacterInput.class).orElseThrow();
-        val stats = entityManager.getComponentOf(entity, CharacterStats.class).orElseThrow();
+        val stats = entityManager.getComponentOf(entity, MovementStats.class).orElseThrow();
 
 
         // check if everyone else died
@@ -194,7 +194,7 @@ public class SlimeAIControllerSystem implements ECSSystem {
             SlimeAI ai,
             CharacterInput input,
             Vector2d myPos,
-            CharacterStats stats
+            MovementStats stats
     ) {
         if (sharedAI.regroupPos.distanceSquared(myPos) <= sharedAI.regroupRadiusSquared) {
             input.move.set(0);
@@ -202,7 +202,7 @@ public class SlimeAIControllerSystem implements ECSSystem {
         }
 
 
-        stats.speed = ai.crawlSpeed;
+        stats.maxSpeed = ai.crawlSpeed;
         tempDir.set(sharedAI.regroupPos)
                 .sub(myPos);
 

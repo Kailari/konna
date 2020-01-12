@@ -25,7 +25,7 @@ public class PlayerArchetype {
         entityManager.addComponentTo(player, new CharacterAbilities(new DamageSource.Entity(player)));
         entityManager.addComponentTo(player, createCollider());
         entityManager.addComponentTo(player, new PlayerTag());
-        entityManager.addComponentTo(player, createCharacterStats());
+        entityManager.addComponentTo(player, createMovementStats());
         entityManager.addComponentTo(player, createWeaponStats());
         entityManager.addComponentTo(player, createSpriteInfo());
         Health health = new Health(10);
@@ -43,8 +43,8 @@ public class PlayerArchetype {
         return collider;
     }
 
-    private static CharacterStats createCharacterStats() {
-        return new CharacterStats(
+    private static MovementStats createMovementStats() {
+        return new MovementStats(
                 10.0f,
                 100.0f,
                 150.0f

@@ -5,7 +5,7 @@ import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
-import fi.jakojaannos.roguelite.game.data.components.character.CharacterStats;
+import fi.jakojaannos.roguelite.game.data.components.character.MovementStats;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.StalkerAI;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
@@ -26,7 +26,7 @@ public class StalkerAIControllerSystem implements ECSSystem {
                     .withComponent(StalkerAI.class)
                     .withComponent(CharacterInput.class)
                     .withComponent(Transform.class)
-                    .withComponent(CharacterStats.class);
+                    .withComponent(MovementStats.class);
     }
 
     private final Vector2d tmpDirection = new Vector2d();
@@ -53,13 +53,13 @@ public class StalkerAIControllerSystem implements ECSSystem {
         entities.forEach(entity -> {
             val stalkerAI = world.getEntityManager().getComponentOf(entity, StalkerAI.class).orElseThrow();
             val characterInput = world.getEntityManager().getComponentOf(entity, CharacterInput.class).orElseThrow();
-            val characterStats = world.getEntityManager().getComponentOf(entity, CharacterStats.class).orElseThrow();
+            val characterStats = world.getEntityManager().getComponentOf(entity, MovementStats.class).orElseThrow();
 
             stalkerAI.airTime -= delta;
             stalkerAI.jumpCoolDown -= delta;
 
             if (stalkerAI.airTime > 0) {
-                characterStats.speed = 18.0f;
+                characterStats.maxSpeed = 18.0f;
                 characterInput.move.set(stalkerAI.jumpDir);
                 return;
             }
@@ -73,10 +73,10 @@ public class StalkerAIControllerSystem implements ECSSystem {
 
             if (distToPlayerSquared > stalkerAI.sneakRadiusSquared) {
                 // outside players "view"
-                characterStats.speed = 1.7f;
+                characterStats.maxSpeed = 1.7f;
             } else if (distToPlayerSquared > stalkerAI.leapRadiusSquared) {
                 // shh, be quiet, the player can hear us
-                characterStats.speed = 0.3f;
+                characterStats.maxSpeed = 0.3f;
             } else {
                 if (stalkerAI.jumpCoolDown <= 0.0f) {
                     // RRAAARRGHWG! JUMP ON THEM!
@@ -86,7 +86,7 @@ public class StalkerAIControllerSystem implements ECSSystem {
                     stalkerAI.airTime = 0.5f;
 
                 } else {
-                    characterStats.speed = 0.3f;
+                    characterStats.maxSpeed = 0.3f;
                 }
             }
 

@@ -9,7 +9,7 @@ import fi.jakojaannos.roguelite.game.data.DamageSource;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.game.data.components.character.CharacterAbilities;
 import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
-import fi.jakojaannos.roguelite.game.data.components.character.CharacterStats;
+import fi.jakojaannos.roguelite.game.data.components.character.MovementStats;
 import fi.jakojaannos.roguelite.game.data.components.weapon.BasicWeaponStats;
 import fi.jakojaannos.roguelite.game.data.components.weapon.ProjectileStats;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +26,7 @@ class CharacterAttackSystemTest {
     private World world;
     private Entity entity;
     private CharacterInput characterInput;
-    private CharacterStats characterStats;
+    private MovementStats movementStats;
     private CharacterAbilities characterAbilities;
     private BasicWeaponStats weaponStats;
 
@@ -44,14 +44,14 @@ class CharacterAttackSystemTest {
         this.characterInput = new CharacterInput();
         this.characterInput.move.set(0.0);
         this.characterInput.attack = false;
-        this.characterStats = new CharacterStats();
+        this.movementStats = new MovementStats();
         this.characterAbilities = new CharacterAbilities(new DamageSource.Entity(entity));
         this.weaponStats = new BasicWeaponStats();
         entityManager.addComponentTo(entity, new Transform(0.0, 0.0));
         entityManager.addComponentTo(entity, new Velocity());
         entityManager.addComponentTo(entity, this.characterInput);
         entityManager.addComponentTo(entity, this.characterAbilities);
-        entityManager.addComponentTo(entity, this.characterStats);
+        entityManager.addComponentTo(entity, this.movementStats);
         entityManager.addComponentTo(entity, this.weaponStats);
 
         entityManager.applyModifications();

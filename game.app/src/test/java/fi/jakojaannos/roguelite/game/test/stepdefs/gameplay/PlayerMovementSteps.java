@@ -1,7 +1,7 @@
 package fi.jakojaannos.roguelite.game.test.stepdefs.gameplay;
 
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.game.data.components.character.CharacterStats;
+import fi.jakojaannos.roguelite.game.data.components.character.MovementStats;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.game.test.global.GlobalGameState;
 import io.cucumber.java.en.Given;
@@ -23,8 +23,8 @@ public class PlayerMovementSteps {
             double friction
     ) {
         Entity player = GlobalGameState.getLocalPlayer().orElseThrow();
-        CharacterStats stats = getComponentOf(player, CharacterStats.class).orElseThrow();
-        stats.speed = speed;
+        MovementStats stats = getComponentOf(player, MovementStats.class).orElseThrow();
+        stats.maxSpeed = speed;
         stats.acceleration = acceleration;
         stats.friction = friction;
     }
