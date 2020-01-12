@@ -16,8 +16,8 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CharacterAIControllerSystemTest {
-    private CharacterAIControllerSystem system;
+public class FollowerAIControllerSystemTest {
+    private FollowerAIControllerSystem system;
     private World world;
     private Entity player, follower;
     private Transform playerPos, followerPos;
@@ -25,7 +25,7 @@ public class CharacterAIControllerSystemTest {
 
     @BeforeEach
     void beforeEach() {
-        system = new CharacterAIControllerSystem();
+        system = new FollowerAIControllerSystem();
         EntityManager entityManager = EntityManager.createNew(256, 32);
         this.world = World.createNew(entityManager);
 

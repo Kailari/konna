@@ -18,11 +18,11 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BasicTurretControllerSystemTest {
+public class TurretControllerSystemTest {
 
     private EntityManager entityManager;
     private World world;
-    private BasicTurretControllerSystem system;
+    private TurretControllerSystem system;
     private Entity turret;
     private BasicTurretComponent turretComp;
 
@@ -32,7 +32,7 @@ public class BasicTurretControllerSystemTest {
         world = World.createNew(entityManager);
         world.createOrReplaceResource(Time.class, new Time(new SimpleTimeManager(20)));
 
-        system = new BasicTurretControllerSystem();
+        system = new TurretControllerSystem();
         turret = entityManager.createEntity();
         entityManager.addComponentTo(turret, new Transform(0.0, 0.0));
         turretComp = new BasicTurretComponent();

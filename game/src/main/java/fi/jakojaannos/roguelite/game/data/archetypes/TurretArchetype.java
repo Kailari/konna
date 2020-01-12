@@ -9,7 +9,7 @@ import fi.jakojaannos.roguelite.game.data.components.SpriteInfo;
 import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
 import lombok.val;
 
-public class BasicTurretArchetype {
+public class TurretArchetype {
 
 
     public static Entity create(

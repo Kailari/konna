@@ -16,7 +16,7 @@ import java.util.Random;
 import java.util.stream.Stream;
 
 @Slf4j
-public class CharacterAIControllerSystem implements ECSSystem {
+public class FollowerAIControllerSystem implements ECSSystem {
     @Override
     public void declareRequirements(RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.INPUT)
