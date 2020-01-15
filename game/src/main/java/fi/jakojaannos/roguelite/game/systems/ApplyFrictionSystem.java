@@ -7,7 +7,6 @@ import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.game.data.components.character.MovementStats;
 import lombok.val;
-import org.joml.Vector2d;
 
 import java.util.stream.Stream;
 
