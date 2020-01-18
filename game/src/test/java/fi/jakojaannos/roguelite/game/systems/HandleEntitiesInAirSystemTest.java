@@ -55,4 +55,28 @@ public class HandleEntitiesInAirSystemTest {
         assertTrue(entityManager.hasComponent(entity, InAir.class));
     }
 
+    @Test
+    void inAirComponentIsRemovedOnExactCorrectTick() {
+        EntityManager entityManager = EntityManager.createNew(256, 32);
+        World world = World.createNew(entityManager);
+        SimpleTimeManager timeManager = new SimpleTimeManager(20);
+        world.createOrReplaceResource(Time.class, new Time(timeManager));
+        HandleEntitiesInAirSystem system = new HandleEntitiesInAirSystem();
+
+        Entity entity = entityManager.createEntity();
+        entityManager.addComponentTo(entity, new InAir(timeManager.getCurrentGameTime(), 5));
+        entityManager.applyModifications();
+
+        for (int i = 0; i < 5; i++) {
+            timeManager.refresh();
+        }
+        system.tick(Stream.of(entity), world);
+        assertTrue(entityManager.hasComponent(entity, InAir.class));
+
+        timeManager.refresh();
+        system.tick(Stream.of(entity), world);
+
+        assertFalse(entityManager.hasComponent(entity, InAir.class));
+    }
+
 }

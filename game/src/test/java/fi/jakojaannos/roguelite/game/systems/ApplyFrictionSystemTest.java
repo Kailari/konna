@@ -1,10 +1,12 @@
 package fi.jakojaannos.roguelite.game.systems;
 
+import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.game.data.components.character.MovementStats;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -12,10 +14,38 @@ import org.junit.jupiter.params.provider.CsvSource;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class ApplyFrictionSystemTest {
 
     private static final double EPSILON = 0.01;
+
+    private EntityManager entityManager;
+    private World world;
+    private ApplyFrictionSystem system;
+    private Entity entity;
+    private Velocity velocity;
+    private MovementStats stats;
+
+    @BeforeEach
+    void beforeEach() {
+        entityManager = EntityManager.createNew(256, 32);
+        world = World.createNew(entityManager);
+        system = new ApplyFrictionSystem();
+
+        Time time = mock(Time.class);
+        when(time.getTimeStepInSeconds()).thenReturn(0.02);
+        world.createOrReplaceResource(Time.class, time);
+
+        velocity = new Velocity();
+        stats = new MovementStats(15.0, 1.0, 5.0);
+        entity = entityManager.createEntity();
+        entityManager.addComponentTo(entity, velocity);
+        entityManager.addComponentTo(entity, stats);
+
+        entityManager.applyModifications();
+    }
 
     @ParameterizedTest
     @CsvSource({
@@ -33,18 +63,13 @@ public class ApplyFrictionSystemTest {
             final double expectedX,
             final double expectedY
     ) {
-        EntityManager entityManager = EntityManager.createNew(256, 32);
-        World world = World.createNew(entityManager);
-        ApplyFrictionSystem system = new ApplyFrictionSystem();
-
-        Entity entity = entityManager.createEntity();
-        Velocity velocity = new Velocity();
-        entityManager.addComponentTo(entity, velocity);
-        entityManager.addComponentTo(entity, new MovementStats(15.0, 1.0, friction));
+        stats.friction = friction;
         velocity.velocity.set(startX, startY);
 
         entityManager.applyModifications();
-        system.tick(Stream.of(entity), world);
+        for (int i = 0; i < 50; i++) {
+            system.tick(Stream.of(entity), world);
+        }
 
         assertEquals(expectedX, velocity.velocity.x, EPSILON);
         assertEquals(expectedY, velocity.velocity.y, EPSILON);
@@ -52,14 +77,7 @@ public class ApplyFrictionSystemTest {
 
     @Test
     void zeroFrictionDoesntSlowEntities() {
-        EntityManager entityManager = EntityManager.createNew(256, 32);
-        World world = World.createNew(entityManager);
-        ApplyFrictionSystem system = new ApplyFrictionSystem();
-
-        Entity entity = entityManager.createEntity();
-        Velocity velocity = new Velocity();
-        entityManager.addComponentTo(entity, velocity);
-        entityManager.addComponentTo(entity, new MovementStats(15.0, 1.0, 0.0));
+        stats.friction = 0;
         velocity.velocity.set(12.34, 34.56);
 
         entityManager.applyModifications();
@@ -73,18 +91,11 @@ public class ApplyFrictionSystemTest {
 
     @Test
     void frictionStopsEntityAfterAWhile() {
-        EntityManager entityManager = EntityManager.createNew(256, 32);
-        World world = World.createNew(entityManager);
-        ApplyFrictionSystem system = new ApplyFrictionSystem();
-
-        Entity entity = entityManager.createEntity();
-        Velocity velocity = new Velocity();
-        entityManager.addComponentTo(entity, velocity);
-        entityManager.addComponentTo(entity, new MovementStats(15.0, 1.0, 5.0));
         velocity.velocity.set(12.34, 34.56);
+        stats.friction = 10.0f;
 
         entityManager.applyModifications();
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 200; i++) {
             system.tick(Stream.of(entity), world);
         }
 

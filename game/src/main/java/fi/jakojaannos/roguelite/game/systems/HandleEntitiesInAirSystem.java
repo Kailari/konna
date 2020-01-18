@@ -28,7 +28,7 @@ public class HandleEntitiesInAirSystem implements ECSSystem {
         entities.forEach(entity -> {
             val inAir = entityManager.getComponentOf(entity, InAir.class).orElseThrow();
 
-            if (time.getCurrentGameTime() >= inAir.flightStartTimeStamp + inAir.flightDuration) {
+            if (time.getCurrentGameTime() > inAir.flightStartTimeStamp + inAir.flightDuration) {
                 entityManager.removeComponentFrom(entity, InAir.class);
             }
         });
