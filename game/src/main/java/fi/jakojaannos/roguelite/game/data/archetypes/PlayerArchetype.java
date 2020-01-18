@@ -28,7 +28,7 @@ public class PlayerArchetype {
         entityManager.addComponentTo(player, createMovementStats());
         entityManager.addComponentTo(player, createWeaponStats());
         entityManager.addComponentTo(player, createSpriteInfo());
-        Health health = new Health(1000);
+        Health health = new Health(10);
         health.healthBarAlwaysVisible = true;
         entityManager.addComponentTo(player, health);
         return player;
@@ -46,8 +46,8 @@ public class PlayerArchetype {
     private static MovementStats createMovementStats() {
         return new MovementStats(
                 10.0f,
-                9.0f,
-                0.2f
+                69.0f,
+                42.0f
         );
     }
 
