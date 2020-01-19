@@ -1,0 +1,11 @@
+{
+  "frames": [
+    {
+      "texture": "textures/sheep_black.png",
+      "x": 0,
+      "y": 0,
+      "w": 8,
+      "h": 8
+    }
+  ]
+}

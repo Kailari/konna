@@ -71,7 +71,7 @@ public class StalkerArchetype {
 
     private static SpriteInfo createSpriteInfo() {
         val sprite = new SpriteInfo();
-        sprite.spriteName = "sprites/enemy";
+        sprite.spriteName = "sprites/sheep_red";
 
         return sprite;
     }
