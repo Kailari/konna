@@ -27,7 +27,7 @@ public class HandleEntitiesInAirSystemTest {
         entityManager.addComponentTo(entity, new InAir(timeManager.getCurrentGameTime(), 10));
         entityManager.applyModifications();
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 20; i++) {
             timeManager.refresh();
         }
         system.tick(Stream.of(entity), world);

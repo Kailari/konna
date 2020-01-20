@@ -42,6 +42,7 @@ public class StalkerArchetype {
         val stalker = entityManager.createEntity();
         entityManager.addComponentTo(stalker, transform);
         entityManager.addComponentTo(stalker, new Velocity());
+        entityManager.addComponentTo(stalker, new Physics());
         entityManager.addComponentTo(stalker, new CharacterInput());
         entityManager.addComponentTo(stalker, new Health(2));
         entityManager.addComponentTo(stalker, new Collider(CollisionLayer.ENEMY, 1.0, 1.0, 0.5, 0.5));
@@ -59,13 +60,13 @@ public class StalkerArchetype {
     private static MovementStats createMovementStats() {
         return new MovementStats(
                 1.0,
-                100.0,
-                800.0
+                250.0,
+                200.0
         );
     }
 
     private static StalkerAI createStalkerAi() {
-        return new StalkerAI(250.0f, 50.0f, 8.0f);
+        return new StalkerAI();
     }
 
 

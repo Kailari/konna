@@ -1,15 +1,14 @@
 package fi.jakojaannos.roguelite.game.systems;
 
-import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
-import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.data.resources.Time;
+import fi.jakojaannos.roguelite.engine.ecs.*;
+import fi.jakojaannos.roguelite.game.data.components.InAir;
+import fi.jakojaannos.roguelite.game.data.components.Physics;
 import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
 import fi.jakojaannos.roguelite.game.data.components.character.MovementStats;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.StalkerAI;
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
-import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joml.Vector2d;
@@ -26,71 +25,112 @@ public class StalkerAIControllerSystem implements ECSSystem {
                     .withComponent(StalkerAI.class)
                     .withComponent(CharacterInput.class)
                     .withComponent(Transform.class)
-                    .withComponent(MovementStats.class);
+                    .withComponent(MovementStats.class)
+                    .withComponent(Physics.class)
+                    .withoutComponent(InAir.class);
     }
 
-    private final Vector2d tmpDirection = new Vector2d();
+    private final Random random = new Random(8055); // 8055 = 666 + 420 + 6969
+    private final Vector2d tempForce = new Vector2d();
+    private final Vector2d emptyPos = new Vector2d();
 
     @Override
     public void tick(
             final Stream<Entity> entities,
             final World world
     ) {
-        val delta = world.getOrCreateResource(Time.class).getTimeStepInSeconds();
-
-        val player = world.getOrCreateResource(Players.class).getPlayer();
-        if (player == null) {
-            entities.forEach(entity -> world.getEntityManager()
-                                            .getComponentOf(entity, CharacterInput.class)
-                                            .orElseThrow().move.set(new Random().nextDouble() * 2 - 1.0,
-                                                                    new Random().nextDouble() * 2 - 1.0));
-            return;
-        }
-
-        val playerTransform = world.getEntityManager().getComponentOf(player, Transform.class);
-        val playerPos = playerTransform.orElseThrow().position;
+        val entityManager = world.getEntityManager();
+        val timeManager = world.getOrCreateResource(Time.class);
+        val optPlayer = world.getOrCreateResource(Players.class).getLocalPlayer();
+        val playerPos = optPlayer.isPresent()
+                ? entityManager.getComponentOf(optPlayer.get(), Transform.class).orElseThrow().position
+                : emptyPos;
 
         entities.forEach(entity -> {
-            val stalkerAI = world.getEntityManager().getComponentOf(entity, StalkerAI.class).orElseThrow();
-            val characterInput = world.getEntityManager().getComponentOf(entity, CharacterInput.class).orElseThrow();
-            val characterStats = world.getEntityManager().getComponentOf(entity, MovementStats.class).orElseThrow();
+            val stalkerAI = entityManager.getComponentOf(entity, StalkerAI.class).orElseThrow();
+            val characterInput = entityManager.getComponentOf(entity, CharacterInput.class).orElseThrow();
+            val characterStats = entityManager.getComponentOf(entity, MovementStats.class).orElseThrow();
+            val physics = entityManager.getComponentOf(entity, Physics.class).orElseThrow();
+            val myPos = entityManager.getComponentOf(entity, Transform.class).orElseThrow();
 
-            stalkerAI.airTime -= delta;
-            stalkerAI.jumpCoolDown -= delta;
-
-            if (stalkerAI.airTime > 0) {
-                characterStats.maxSpeed = 18.0f;
-                characterInput.move.set(stalkerAI.jumpDir);
+            if (optPlayer.isEmpty()) {
+                doWanderMovement(characterInput, characterStats, stalkerAI);
                 return;
             }
 
-            val myPos = new Vector2d();
-            world.getEntityManager().getComponentOf(entity, Transform.class).get()
-                 .getCenter(myPos);
-            tmpDirection.set(playerPos).sub(myPos);
+            val distToPlayerSquared = myPos.position.distanceSquared(playerPos);
 
-            double distToPlayerSquared = tmpDirection.lengthSquared();
-
-            if (distToPlayerSquared > stalkerAI.sneakRadiusSquared) {
-                // outside players "view"
-                characterStats.maxSpeed = 1.7f;
-            } else if (distToPlayerSquared > stalkerAI.leapRadiusSquared) {
-                // shh, be quiet, the player can hear us
-                characterStats.maxSpeed = 0.3f;
+            if (distToPlayerSquared <= stalkerAI.leapRadiusSquared) {
+                doCloseRangeMovement(characterInput, entityManager, entity, characterStats, physics, stalkerAI, timeManager, myPos.position, playerPos);
+            } else if (distToPlayerSquared <= stalkerAI.aggroRadiusSquared) {
+                sneakTowardsPlayer(characterInput, characterStats, stalkerAI, myPos.position, playerPos);
             } else {
-                if (stalkerAI.jumpCoolDown <= 0.0f) {
-                    // RRAAARRGHWG! JUMP ON THEM!
-
-                    stalkerAI.jumpDir.set(tmpDirection);
-                    stalkerAI.jumpCoolDown = stalkerAI.jumpAbilityGoesCoolDownThisLong;
-                    stalkerAI.airTime = 0.5f;
-
-                } else {
-                    characterStats.maxSpeed = 0.3f;
-                }
+                doWanderMovement(characterInput, characterStats, stalkerAI);
             }
-
-            characterInput.move.set(tmpDirection);
         });
     }
+
+    public void doWanderMovement(
+            final CharacterInput characterInput,
+            final MovementStats stats,
+            final StalkerAI ai
+    ) {
+        stats.maxSpeed = ai.moveSpeedWalk;
+        if (random.nextInt(40) == 0) {
+            characterInput.move.set(
+                    random.nextDouble() * 2 - 1.0,
+                    random.nextDouble() * 2 - 1.0
+            );
+        }
+    }
+
+    public void doCloseRangeMovement(
+            final CharacterInput characterInput,
+            final EntityManager entityManager,
+            final Entity entity,
+            final MovementStats stats,
+            final Physics physics,
+            final StalkerAI ai,
+            final Time time,
+            final Vector2d myPos,
+            final Vector2d playerPos
+    ) {
+        if (time.getCurrentGameTime() > ai.lastJumpTimeStamp + ai.jumpCoolDownInTicks) {
+            leapTowardsPlayer(characterInput, entityManager, entity, physics, ai, time, myPos, playerPos);
+        } else {
+            stats.maxSpeed = ai.moveSpeedWalk;
+            characterInput.move.set(playerPos).sub(myPos);
+        }
+    }
+
+    public void leapTowardsPlayer(
+            final CharacterInput characterInput,
+            final EntityManager entityManager,
+            final Entity entity,
+            final Physics physics,
+            final StalkerAI ai,
+            final Time time,
+            final Vector2d myPos,
+            final Vector2d playerPos
+    ) {
+        characterInput.move.set(0.0);
+        ai.lastJumpTimeStamp = time.getCurrentGameTime();
+        entityManager.addComponentTo(entity, new InAir(time.getCurrentGameTime(), ai.jumpDurationInTicks));
+        tempForce.set(playerPos)
+                 .sub(myPos)
+                 .normalize(ai.moveSpeedJump);
+        physics.applyForce(tempForce);
+    }
+
+    public void sneakTowardsPlayer(
+            final CharacterInput characterInput,
+            final MovementStats stats,
+            final StalkerAI ai,
+            final Vector2d myPos,
+            final Vector2d playerPos
+    ) {
+        stats.maxSpeed = ai.moveSpeedSneak;
+        characterInput.move.set(playerPos).sub(myPos);
+    }
+
 }

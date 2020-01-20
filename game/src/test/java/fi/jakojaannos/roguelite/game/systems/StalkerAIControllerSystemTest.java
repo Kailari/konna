@@ -1,15 +1,18 @@
 package fi.jakojaannos.roguelite.game.systems;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
+import fi.jakojaannos.roguelite.game.data.components.InAir;
+import fi.jakojaannos.roguelite.game.data.components.Physics;
 import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
 import fi.jakojaannos.roguelite.game.data.components.character.MovementStats;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.StalkerAI;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
-import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -17,27 +20,26 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class StalkerAIControllerSystemTest {
+
+    private EntityManager entityManager;
+    private SimpleTimeManager timeManager;
     private StalkerAIControllerSystem system;
     private World world;
     private Transform playerPos, stalkerPos;
     private Entity stalker;
-    private MovementStats stalkerStats;
+    private MovementStats movementStats;
     private StalkerAI stalkerAI;
 
     @BeforeEach
     void beforeEach() {
         system = new StalkerAIControllerSystem();
-        EntityManager entityManager = EntityManager.createNew(256, 32);
+        entityManager = EntityManager.createNew(256, 32);
         this.world = World.createNew(entityManager);
-        Time time = mock(Time.class);
-        when(time.getTimeStepInSeconds()).thenReturn(0.02);
-        world.createOrReplaceResource(Time.class, time);
-
+        timeManager = new SimpleTimeManager(20);
+        world.createOrReplaceResource(Time.class, new Time(timeManager));
 
         Entity player = entityManager.createEntity();
         this.playerPos = new Transform();
@@ -45,54 +47,50 @@ public class StalkerAIControllerSystemTest {
         entityManager.addComponentTo(player, new PlayerTag());
         this.world.getOrCreateResource(Players.class).setLocalPlayer(player);
 
-
         stalker = entityManager.createEntity();
+        this.stalkerAI = new StalkerAI();
+        this.stalkerAI.moveSpeedWalk = 4.5;
+        this.stalkerAI.moveSpeedSneak = 1.5;
+        entityManager.addComponentTo(stalker, stalkerAI);
+        entityManager.addComponentTo(stalker, new CharacterInput());
         this.stalkerPos = new Transform();
         entityManager.addComponentTo(stalker, stalkerPos);
-        entityManager.addComponentTo(stalker, new CharacterInput());
-        this.stalkerAI = new StalkerAI(
-                100.0f,
-                25.0f,
-                20.0f);
-        entityManager.addComponentTo(stalker, stalkerAI);
-        this.stalkerStats = new MovementStats(
-                1.0,
-                100.0,
-                800.0
-        );
-        entityManager.addComponentTo(stalker, stalkerStats);
+        movementStats = new MovementStats(1.0, 250.0, 200.0);
+        entityManager.addComponentTo(stalker, movementStats);
+        entityManager.addComponentTo(stalker, new Physics());
 
         entityManager.applyModifications();
     }
 
     @ParameterizedTest
     @CsvSource({
-                       "0.0f,0.0f,50.0f,50.0f,1.7f",
-                       "0.0f,0.0f,6.0f,6.0f,0.3f",
-                       "0.0f,0.0f,1.0f,1.0f,0.3f"
+                       "0.0f, 0.0f, 50.0f, 50.0f, 4.5f",
+                       "0.0f, 0.0f, 6.0f, 6.0f, 1.5f",
+                       "0.0f, 0.0f, 1.0f, 1.0f, 4.5f"
                })
-    void stalkerEnemySpeedDependingOnDistanceToPlayerIsSetCorrectly(
+    void stalkerSpeedDependsOnDistanceToPlayer(
             double playerX,
             double playerY,
             double stalkerX,
             double stalkerY,
             double expectedSpeed
     ) {
-        this.playerPos.setPosition(playerX, playerY);
-        this.stalkerPos.setPosition(stalkerX, stalkerY);
-        this.stalkerAI.jumpCoolDown = 100.0f;
+        this.playerPos.position.set(playerX, playerY);
+        this.stalkerPos.position.set(stalkerX, stalkerY);
+        this.stalkerAI.jumpCoolDownInTicks = 10000;
+        this.stalkerAI.lastJumpTimeStamp = 10000;
 
         this.system.tick(Stream.of(stalker), this.world);
 
-        assertEquals(expectedSpeed, stalkerStats.maxSpeed, 0.001f);
+        assertEquals(expectedSpeed, movementStats.maxSpeed, 0.001f);
     }
 
     @ParameterizedTest
     @CsvSource({
-                       "0.0f,0.0f,200.0f,200.0f,false",
-                       "0.0f,0.0f,8.0f,8.0f,false",
-                       "0.0f,0.0f,3.0f,3.0f,true",
-                       "0.0f,0.0f,1.0f,1.0f,true"
+                       "0.0f, 0.0f, 200.0f, 200.0f, false",
+                       "0.0f, 0.0f, 8.0f, 8.0f, false",
+                       "0.0f, 0.0f, 3.0f, 3.0f, true",
+                       "0.0f, 0.0f, 1.0f, 1.0f, true"
                })
     void stalkerLeapAbilityIsUsedWhenNearPlayer(
             double playerX,
@@ -101,39 +99,35 @@ public class StalkerAIControllerSystemTest {
             double stalkerY,
             boolean expectedToUseAbility
     ) {
-        this.playerPos.setPosition(playerX, playerY);
-        this.stalkerPos.setPosition(stalkerX, stalkerY);
-        this.stalkerAI.jumpCoolDown = 0.0f;
+        this.playerPos.position.set(playerX, playerY);
+        this.stalkerPos.position.set(stalkerX, stalkerY);
+        this.stalkerAI.leapRadiusSquared = 50.0;
+        this.stalkerAI.lastJumpTimeStamp = -100;
+        this.stalkerAI.jumpCoolDownInTicks = 50;
 
         this.system.tick(Stream.of(stalker), this.world);
+        entityManager.applyModifications();
 
-        boolean didUseAbility = (stalkerAI.jumpCoolDown > 0);
-        assertEquals(expectedToUseAbility, didUseAbility);
+        assertEquals(expectedToUseAbility, entityManager.hasComponent(stalker, InAir.class));
     }
 
 
     @Test
-    void stalkerLeapAbilityCoolDownWorksCorrectly() {
-        this.stalkerAI.jumpCoolDown = 0.0f;
-        this.stalkerAI.jumpAbilityGoesCoolDownThisLong = 2.0f;
+    void leapAbilityIsNotUsedWhileOnCooldown() {
+        this.stalkerAI.jumpCoolDownInTicks = 20;
+        this.stalkerAI.lastJumpTimeStamp = -100;
 
         this.system.tick(Stream.of(stalker), this.world);
-        assertEquals(2.0f, this.stalkerAI.jumpCoolDown, 0.001f);
+        entityManager.applyModifications();
+        assertTrue(entityManager.hasComponent(stalker, InAir.class));
 
-        for (int i = 0; i < 45; i++) {
-            this.system.tick(Stream.of(stalker), this.world);
+        entityManager.removeComponentFrom(stalker, InAir.class);
+        for (int i = 0; i < 10; i++) {
+            timeManager.refresh();
         }
 
-        assertEquals(1.1f, stalkerAI.jumpCoolDown, 0.001f);
-
-        // move player out so stalker doesn't instantly leap on them
-        this.playerPos.setPosition(100.0f, 100.0f);
-
-        for (int i = 0; i < 55; i++) {
-            this.system.tick(Stream.of(stalker), this.world);
-        }
-        assertEquals(0.0f, stalkerAI.jumpCoolDown, 0.001f);
+        this.system.tick(Stream.of(stalker), this.world);
+        entityManager.applyModifications();
+        assertFalse(entityManager.hasComponent(stalker, InAir.class));
     }
-
-
 }

@@ -109,6 +109,8 @@ public class GameplayGameState extends GameState {
                 .withSystem(new CleanUpDeadEnemyKillsSystem())
                 .withSystem(new TurretControllerSystem())
                 .withSystem(new ApplyFrictionSystem())
+                .withSystem(new ApplyForceSystem())
+                .withSystem(new HandleEntitiesInAirSystem())
                 .build();
     }
 }

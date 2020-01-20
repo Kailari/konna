@@ -1,21 +1,42 @@
 package fi.jakojaannos.roguelite.game.data.components.character.enemy;
 
 import fi.jakojaannos.roguelite.engine.ecs.Component;
-import org.joml.Vector2d;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
 public class StalkerAI implements Component {
 
-    public double sneakRadiusSquared, leapRadiusSquared, jumpAbilityGoesCoolDownThisLong;
-    public double jumpCoolDown, airTime;
-    public Vector2d jumpDir;
+    public double aggroRadiusSquared = 750.0, leapRadiusSquared = 50.0;
+    public long lastJumpTimeStamp = -1000, jumpCoolDownInTicks = 200, jumpDurationInTicks = 20;
+    public double moveSpeedSneak = 1.5, moveSpeedWalk = 4.5, moveSpeedJump = 14.0;
 
-    public StalkerAI(double sneakRadiusSquared, double leapRadiusSquared, double jumpCoolDownTimer) {
-        this.sneakRadiusSquared = sneakRadiusSquared;
+    public StalkerAI(
+            final double aggroRadiusSquared,
+            final double leapRadiusSquared,
+            final long jumpCoolDownInTicks,
+            final long jumpDurationInTicks,
+            final double moveSpeedSneak,
+            final double moveSpeedWalk,
+            final double moveSpeedJump
+    ) {
+        this.aggroRadiusSquared = aggroRadiusSquared;
         this.leapRadiusSquared = leapRadiusSquared;
-        this.jumpAbilityGoesCoolDownThisLong = jumpCoolDownTimer;
-        jumpDir = new Vector2d(0.0f, 0.0f);
+        this.jumpCoolDownInTicks = jumpCoolDownInTicks;
+        this.jumpDurationInTicks = jumpDurationInTicks;
+        this.moveSpeedSneak = moveSpeedSneak;
+        this.moveSpeedWalk = moveSpeedWalk;
+        this.moveSpeedJump = moveSpeedJump;
+    }
 
-        this.jumpCoolDown = 0;
-        this.airTime = 0;
+    public StalkerAI(
+            final double aggroRadiusSquared,
+            final double leapRadiusSquared,
+            final double moveSpeedSneak,
+            final double moveSpeedWalk
+    ) {
+        this.aggroRadiusSquared = aggroRadiusSquared;
+        this.leapRadiusSquared = leapRadiusSquared;
+        this.moveSpeedSneak = moveSpeedSneak;
+        this.moveSpeedWalk = moveSpeedWalk;
     }
 }

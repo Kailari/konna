@@ -5,6 +5,7 @@ import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.game.data.components.InAir;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.game.data.components.character.MovementStats;
 import lombok.val;
@@ -17,7 +18,8 @@ public class ApplyFrictionSystem implements ECSSystem {
     public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.CHARACTER_TICK)
                     .withComponent(MovementStats.class)
-                    .withComponent(Velocity.class);
+                    .withComponent(Velocity.class)
+                    .withoutComponent(InAir.class);
     }
 
     @Override
