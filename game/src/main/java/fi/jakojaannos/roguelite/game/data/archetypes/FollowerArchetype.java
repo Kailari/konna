@@ -48,8 +48,8 @@ public class FollowerArchetype {
     private static MovementStats createMovementStats() {
         return new MovementStats(
                 4.0,
-                100.0,
-                800.0
+                50.0,
+                35.0
         );
     }
 
