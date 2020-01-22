@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.game.network.message;
+package fi.jakojaannos.roguelite.engine.network.message;
 
 import lombok.Builder;
 import lombok.Singular;

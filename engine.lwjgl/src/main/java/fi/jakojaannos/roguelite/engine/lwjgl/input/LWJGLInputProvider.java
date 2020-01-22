@@ -102,9 +102,4 @@ public class LWJGLInputProvider implements InputProvider {
     public Queue<InputEvent> pollEvents() {
         return inputEvents;
     }
-
-    @Override
-    public int mapScancode(InputButton.Keyboard key) {
-        return glfwGetKeyScancode(key.getKey());
-    }
 }

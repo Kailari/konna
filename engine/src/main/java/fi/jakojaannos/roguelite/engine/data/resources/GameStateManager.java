@@ -2,10 +2,12 @@ package fi.jakojaannos.roguelite.engine.data.resources;
 
 import fi.jakojaannos.roguelite.engine.ecs.Resource;
 import fi.jakojaannos.roguelite.engine.state.GameState;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 import javax.annotation.Nullable;
 
+@Slf4j
 public class GameStateManager implements Resource {
     @Nullable private GameState newState;
     private boolean gameShouldClose;
@@ -19,11 +21,24 @@ public class GameStateManager implements Resource {
     }
 
     public GameState getNextState(final GameState current) {
-        val nextState = this.newState != null
-                ? this.newState
-                : current;
-        this.newState = null;
-        return nextState;
+        if (this.newState != null) {
+            try {
+                current.getNetworkManager()
+                       .ifPresent(netman -> {
+                           this.newState.setNetworkManager(netman);
+                           current.setNetworkManager(null);
+                       });
+                current.close();
+
+                val newState = this.newState;
+                this.newState = null;
+                return newState;
+            } catch (Exception e) {
+                LOG.error("Error destroying the previous game state:", e);
+            }
+        }
+
+        return current;
     }
 
     public void quitGame() {

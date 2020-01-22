@@ -3,7 +3,6 @@ package fi.jakojaannos.roguelite.engine.lwjgl;
 import fi.jakojaannos.roguelite.engine.Game;
 import fi.jakojaannos.roguelite.engine.GameRunner;
 import fi.jakojaannos.roguelite.engine.event.Events;
-import fi.jakojaannos.roguelite.engine.input.InputProvider;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -13,11 +12,9 @@ import org.lwjgl.opengl.GLUtil;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL43.*;
 
 @Slf4j
-public class LWJGLGameRunner<TGame extends Game, TInput extends InputProvider>
-        extends GameRunner<TGame, TInput> {
+public class LWJGLGameRunner<TGame extends Game> extends GameRunner<TGame> {
     @Getter
     private final LWJGLWindow window;
 

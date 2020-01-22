@@ -1,7 +1,7 @@
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 @FieldsAreNonnullByDefault
-package fi.jakojaannos.roguelite.game.network.client;
+package fi.jakojaannos.roguelite.engine.network.client;
 
 import fi.jakojaannos.roguelite.engine.utilities.annotation.FieldsAreNonnullByDefault;
 import fi.jakojaannos.roguelite.engine.utilities.annotation.MethodsReturnNonnullByDefault;

@@ -10,7 +10,6 @@ import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLWindow;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.engine.view.Window;
 import fi.jakojaannos.roguelite.game.RogueliteGame;
-import fi.jakojaannos.roguelite.game.network.client.ClientNetworkManager;
 import fi.jakojaannos.roguelite.game.test.content.TestAssetManager;
 import fi.jakojaannos.roguelite.game.test.view.TestRenderingBackend;
 import fi.jakojaannos.roguelite.game.test.view.TestWindow;
@@ -49,7 +48,7 @@ public class GlobalState {
         random = new Random(13376969);
 
         timeManager = new TestTimeManager(20L);
-        game = new RogueliteGame(new ClientNetworkManager(), timeManager);
+        game = new RogueliteGame(timeManager);
         Path assetRoot = Paths.get("../assets");
         gameRenderer = Optional.ofNullable(System.getenv("VISUALIZE_TESTS"))
                                .map(Boolean::valueOf)

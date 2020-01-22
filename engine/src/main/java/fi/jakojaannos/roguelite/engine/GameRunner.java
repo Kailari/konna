@@ -12,15 +12,19 @@ import java.util.function.Supplier;
 /**
  * Game simulation runner. Utility for running the game simulation.
  *
- * @param <TGame>
- * @param <TInput>
+ * @param <TGame> Type of the game to run
  */
 @Slf4j
 @RequiredArgsConstructor
-public abstract class GameRunner<
-        TGame extends Game,
-        TInput extends InputProvider>
-        implements AutoCloseable {
+public class GameRunner<TGame extends Game> implements AutoCloseable {
+    protected long getMaxFrameTime() {
+        return 250L;
+    }
+
+    protected long getFramerateLimit() {
+        return -1L;
+    }
+
     /**
      * Should the game loop continue running
      *
@@ -45,7 +49,7 @@ public abstract class GameRunner<
     public void run(
             final Supplier<GameState> defaultStateSupplier,
             final TGame game,
-            final TInput inputProvider,
+            final InputProvider inputProvider,
             final RendererFunction renderer
     ) {
         if (game.isDisposed()) {
@@ -64,32 +68,41 @@ public abstract class GameRunner<
 
         LOG.info("Entering main loop");
         val events = new Events();
-        while (shouldContinueLoop(game)) {
-            val currentFrameTime = System.currentTimeMillis();
-            var frameElapsedTime = currentFrameTime - previousFrameTime;
-            if (frameElapsedTime > 250L) {
-                LOG.warn("Last tick took over 250 ms! Slowing down simulation to catch up!");
-                frameElapsedTime = 250L;
+        try {
+            while (shouldContinueLoop(game)) {
+                val currentFrameTime = System.currentTimeMillis();
+                var frameElapsedTime = currentFrameTime - previousFrameTime;
+                if (frameElapsedTime > getMaxFrameTime()) {
+                    LOG.warn("Last tick took over 250 ms! Slowing down simulation to catch up!");
+                    frameElapsedTime = getMaxFrameTime();
+                }
+
+                previousFrameTime = currentFrameTime;
+
+                accumulator += frameElapsedTime;
+                while (accumulator >= game.getTime().getTimeStep()) {
+                    inputProvider.pollEvents()
+                                 .forEach(events.getInput()::fire);
+
+                    state.getWorld().createOrReplaceResource(Events.class, events);
+                    state = simulateTick(state, game, events);
+                    accumulator -= game.getTime().getTimeStep();
+                    ++ticks;
+                }
+
+                val partialTickAlpha = accumulator / (double) game.getTime().getTimeStep();
+                presentGameState(state, renderer, partialTickAlpha, events);
+                frames++;
+
+                limitFramerate();
             }
-
-            previousFrameTime = currentFrameTime;
-
-            accumulator += frameElapsedTime;
-            while (accumulator >= game.getTime().getTimeStep()) {
-                inputProvider.pollEvents()
-                             .forEach(events.getInput()::fire);
-
-                state.getWorld().createOrReplaceResource(Events.class, events);
-                state = simulateTick(state, game, events);
-                accumulator -= game.getTime().getTimeStep();
-                ++ticks;
+        } finally {
+            try {
+                state.close();
+            } catch (Exception e) {
+                LOG.warn("Destroying the game state failed:", e);
             }
-
-            val partialTickAlpha = accumulator / (double) game.getTime().getTimeStep();
-            presentGameState(state, renderer, partialTickAlpha, events);
-            frames++;
         }
-
         val totalTime = System.currentTimeMillis() - initialTime;
         val totalTimeSeconds = totalTime / 1000.0;
 
@@ -105,6 +118,17 @@ public abstract class GameRunner<
         LOG.info("\tFrames:\t\t{}", frames);
         LOG.info("\tAvg. TPF:\t{}", avgTimePerFrame);
         LOG.info("\tAvg. FPS:\t{}", avgFramesPerSecond);
+    }
+
+    private void limitFramerate() {
+        if (getFramerateLimit() > 0) {
+            val targetTimePerFrame = 1.0 / getFramerateLimit();
+            val remaining = (long) (1000L * targetTimePerFrame * 0.95);
+            try {
+                Thread.sleep(remaining);
+            } catch (InterruptedException ignored) {
+            }
+        }
     }
 
     /**
@@ -144,5 +168,10 @@ public abstract class GameRunner<
 
     public interface RendererFunction {
         void render(GameState state, double partialTickAlpha, Events events);
+    }
+
+    @Override
+    @SuppressWarnings("RedundantThrows")
+    public void close() throws Exception {
     }
 }

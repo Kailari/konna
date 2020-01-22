@@ -21,4 +21,7 @@ module roguelite.engine {
     exports fi.jakojaannos.roguelite.engine.input;
     exports fi.jakojaannos.roguelite.engine.content;
     exports fi.jakojaannos.roguelite.engine.data.components;
+    exports fi.jakojaannos.roguelite.engine.network;
+    exports fi.jakojaannos.roguelite.engine.network.client;
+    exports fi.jakojaannos.roguelite.engine.network.message;
 }

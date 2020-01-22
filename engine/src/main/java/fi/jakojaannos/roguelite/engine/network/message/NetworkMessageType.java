@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.game.network.message;
+package fi.jakojaannos.roguelite.engine.network.message;
 
 import java.nio.ByteBuffer;
 
@@ -14,18 +14,9 @@ public interface NetworkMessageType<TMessage extends NetworkMessage> {
      */
     int getTypeId();
 
-    /**
-     * Size of a single message in bytes.
-     *
-     * @return size of a single message
-     */
-    int getSizeInBytes();
-
     Class<TMessage> getMessageClass();
 
     TMessage deserialize(ByteBuffer bufferIn);
 
     void serialize(TMessage message, ByteBuffer buffer);
-
-    void handle(TMessage message, MessageHandlingContext context);
 }

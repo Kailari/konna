@@ -9,7 +9,7 @@ import fi.jakojaannos.roguelite.engine.view.rendering.text.TextRenderer;
 
 import java.nio.file.Path;
 
-public interface RenderingBackend {
+public interface RenderingBackend extends AutoCloseable {
     Viewport getViewport(Window window);
 
     Camera createCamera(Viewport viewport);
