@@ -10,13 +10,14 @@ import fi.jakojaannos.roguelite.engine.input.InputButton;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.engine.utilities.UpdateableTimeManager;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
+import fi.jakojaannos.roguelite.game.data.resources.MainThread;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 @Slf4j
 @RequiredArgsConstructor
-public class RogueliteGame extends GameBase {
+public class RogueliteGame extends GameBase implements MainThread {
     public RogueliteGame(final UpdateableTimeManager timeManager) {
         super(timeManager);
     }
@@ -27,6 +28,9 @@ public class RogueliteGame extends GameBase {
             final Events events
     ) {
         super.tick(state, events);
+
+        // FIXME: This is ugly but works
+        state.getWorld().createOrReplaceResource(MainThread.class, this);
 
         val inputs = state.getWorld().getOrCreateResource(Inputs.class);
         val mouse = state.getWorld().getOrCreateResource(Mouse.class);

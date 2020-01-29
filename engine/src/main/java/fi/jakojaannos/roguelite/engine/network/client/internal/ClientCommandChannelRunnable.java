@@ -68,7 +68,9 @@ public class ClientCommandChannelRunnable extends CommandChannelRunnable {
     }
 
     public void send(final NetworkMessage message) {
-        encodeAndWrite(message, this.writeBuffer, this.channel);
+        if (this.isConnected()) {
+            encodeAndWrite(message, this.writeBuffer, this.channel);
+        }
     }
 
     @Override

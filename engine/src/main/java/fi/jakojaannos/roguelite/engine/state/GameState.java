@@ -1,5 +1,6 @@
 package fi.jakojaannos.roguelite.engine.state;
 
+import fi.jakojaannos.roguelite.engine.MainThread;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.ecs.World;

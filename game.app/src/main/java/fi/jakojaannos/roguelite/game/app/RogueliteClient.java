@@ -7,7 +7,6 @@ import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLAssetManager;
 import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLGameRunner;
 import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLRenderingBackend;
 import fi.jakojaannos.roguelite.engine.lwjgl.input.LWJGLInputProvider;
-import fi.jakojaannos.roguelite.engine.network.client.ClientNetworkManager;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.game.DebugConfig;
 import fi.jakojaannos.roguelite.game.RogueliteGame;
@@ -16,7 +15,6 @@ import fi.jakojaannos.roguelite.game.view.RogueliteGameRenderer;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
-import java.io.IOException;
 import java.nio.file.Path;
 
 @Slf4j
@@ -47,15 +45,10 @@ public class RogueliteClient {
             final String host,
             final int port
     ) {
-        val state = new MainMenuGameState(World.createNew(EntityManager.createNew(256, 32)),
-                                          game.getTime());
-
-        // FIXME: Don't do this here. Add a button to the main menu
-        try {
-            state.setNetworkManager(new ClientNetworkManager(host, port, game));
-        } catch (IOException e) {
-            LOG.error("Error connecting to server:", e);
-        }
-        return state;
+        // FIXME: Do not pass the host and the port to main menu. Instead, connect and start game if
+        //  host is given
+        LOG.trace("Creating main menu game state with host and port {}:{}", host, port);
+        return new MainMenuGameState(World.createNew(EntityManager.createNew(256, 32)),
+                                     game.getTime(), host, port);
     }
 }

@@ -103,7 +103,7 @@ public class MainMenuGameStateRenderer extends GameStateRenderer {
                          builder -> builder.anchorX(ProportionValue.percentOf().parentWidth(0.5))
                                            .anchorY(ProportionValue.percentOf().parentHeight(0.3))
                                            .left(ProportionValue.percentOf().ownWidth(-0.5))
-                                           .top(ProportionValue.percentOf().ownHeight(1.1))
+                                           .top(ProportionValue.percentOf().ownHeight(2.2))
                                            .width(ProportionValue.absolute(width))
                                            .height(ProportionValue.absolute(height))
                                            .borderSize(borderSize)
@@ -116,6 +116,25 @@ public class MainMenuGameStateRenderer extends GameStateRenderer {
                                                           .left(ProportionValue.percentOf().ownWidth(-0.5))
                                                           .top(ProportionValue.percentOf().ownHeight(-0.5))
                                                           .text("Quit")
+                                                          .fontSize(24)))
+                .element("connect_button",
+                         UIElementType.PANEL,
+                         builder -> builder.anchorX(ProportionValue.percentOf().parentWidth(0.5))
+                                           .anchorY(ProportionValue.percentOf().parentHeight(0.3))
+                                           .left(ProportionValue.percentOf().ownWidth(-0.5))
+                                           .top(ProportionValue.percentOf().ownHeight(1.1))
+                                           .width(ProportionValue.absolute(width))
+                                           .height(ProportionValue.absolute(height))
+                                           .borderSize(borderSize)
+                                           .sprite("sprites/ui/ui")
+                                           .child("connect_button_label",
+                                                  UIElementType.LABEL,
+                                                  labelBuilder -> labelBuilder
+                                                          .anchorX(ProportionValue.percentOf().parentWidth(0.5))
+                                                          .anchorY(ProportionValue.percentOf().parentHeight(0.5))
+                                                          .left(ProportionValue.percentOf().ownWidth(-0.5))
+                                                          .top(ProportionValue.percentOf().ownHeight(-0.5))
+                                                          .text("Connect")
                                                           .fontSize(24)))
                 .element(TITLE_LABEL_NAME,
                          UIElementType.LABEL,

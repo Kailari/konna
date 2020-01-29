@@ -4,13 +4,22 @@ import fi.jakojaannos.roguelite.engine.data.resources.GameStateManager;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.*;
 import fi.jakojaannos.roguelite.engine.event.Events;
+import fi.jakojaannos.roguelite.engine.network.client.ClientNetworkManager;
 import fi.jakojaannos.roguelite.engine.ui.UIEvent;
+import fi.jakojaannos.roguelite.game.data.resources.MainThread;
 import fi.jakojaannos.roguelite.game.state.GameplayGameState;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
+import javax.annotation.Nullable;
+import java.io.IOException;
 import java.util.stream.Stream;
 
+@Slf4j
 public class HandleMainMenuUIEventsSystem implements ECSSystem {
+    @Nullable public String host;
+    public int port;
+
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.requireResource(GameStateManager.class)
@@ -34,6 +43,22 @@ public class HandleMainMenuUIEventsSystem implements ECSSystem {
                                                                             world.getOrCreateResource(Time.class).getTimeManager()));
                 } else if (event.getElement().equalsIgnoreCase("quit_button")) {
                     gameStateManager.quitGame();
+                } else if (event.getElement().equalsIgnoreCase("connect_button")) {
+                    LOG.warn("Connect clicked!");
+                    if (this.host == null) {
+                        return;
+                    }
+
+                    val state = new GameplayGameState(System.nanoTime(),
+                                                      World.createNew(EntityManager.createNew(256, 32)),
+                                                      world.getOrCreateResource(Time.class).getTimeManager());
+
+                    try {
+                        state.setNetworkManager(new ClientNetworkManager(this.host, this.port, world.getOrCreateResource(MainThread.class)));
+                    } catch (IOException e) {
+                        LOG.error("Error connecting to server:", e);
+                    }
+                    gameStateManager.queueStateChange(state);
                 }
             }
         }

@@ -144,7 +144,10 @@ public abstract class CommandChannelRunnable implements Runnable, AutoCloseable 
     }
 
     public void disconnect() {
-        LOG.trace("Initiating disconnect...");
+        if (isConnected()) {
+            LOG.trace("Initiating disconnect...");
+        }
+
         if (this.selector != null) {
             try {
                 this.selector.close();

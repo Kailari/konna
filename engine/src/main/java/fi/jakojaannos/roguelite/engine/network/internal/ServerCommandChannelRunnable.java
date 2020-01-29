@@ -29,7 +29,6 @@ import java.util.function.Consumer;
 
 @Slf4j
 public class ServerCommandChannelRunnable extends CommandChannelRunnable {
-    private final int port;
     private final MainThread mainThread;
 
     @Nullable protected ServerSocketChannel connectionChannel;
@@ -50,13 +49,12 @@ public class ServerCommandChannelRunnable extends CommandChannelRunnable {
             final MainThread mainThread
     ) throws IOException {
         super(messageHandlers, messageEncoder, messageDecoder);
-        this.port = port;
         this.mainThread = mainThread;
 
-        LOG.trace("Starting TCP channel for listening new connections on port {}", this.port);
+        LOG.trace("Starting TCP channel for listening new connections on port {}", port);
         this.connectionChannel = ServerSocketChannel.open();
 
-        this.connectionChannel.bind(new InetSocketAddress(this.port));
+        this.connectionChannel.bind(new InetSocketAddress(port));
         this.connectionChannel.configureBlocking(false);
 
         this.connectionChannel.register(this.selector, SelectionKey.OP_ACCEPT);
