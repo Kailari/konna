@@ -1,23 +1,27 @@
 package fi.jakojaannos.roguelite.engine.view.data.components.ui;
 
-import fi.jakojaannos.roguelite.engine.ecs.Component;
 import lombok.Getter;
 import lombok.Setter;
 import org.joml.Vector2i;
 
+import fi.jakojaannos.roguelite.engine.ecs.Component;
+
 /**
  * Cached read-only view of a component's boundaries.
  * <p>
- * Note that while the component is not immutable, modifying these fields does nothing (but totally
- * messes up the rest of the UI rendering tick). To actually modify the ui element, use one of the
+ * Note that while the component is not immutable, modifying these fields does nothing (but totally messes up the rest
+ * of the UI rendering tick). To actually modify the ui element, use one of the
  * <code>BoundXXX</code> components.
  */
 public class ElementBoundaries implements Component {
     public static int INVALID_VALUE = Integer.MIN_VALUE;
 
-    @Getter @Setter public int minX, maxX;
-    @Getter @Setter public int minY, maxY;
-    @Getter @Setter public int width, height;
+    @Getter @Setter public int minX;
+    @Getter @Setter public int maxX;
+    @Getter @Setter public int minY;
+    @Getter @Setter public int maxY;
+    @Getter @Setter public int width;
+    @Getter @Setter public int height;
 
     public void invalidate() {
         this.minX = ElementBoundaries.INVALID_VALUE;

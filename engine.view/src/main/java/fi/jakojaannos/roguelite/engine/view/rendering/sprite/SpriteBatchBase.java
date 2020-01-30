@@ -1,14 +1,14 @@
 package fi.jakojaannos.roguelite.engine.view.rendering.sprite;
 
-import fi.jakojaannos.roguelite.engine.view.rendering.Texture;
-import fi.jakojaannos.roguelite.engine.view.rendering.TextureRegion;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.joml.Matrix4f;
 
 import javax.annotation.Nullable;
+
+import fi.jakojaannos.roguelite.engine.view.rendering.Texture;
+import fi.jakojaannos.roguelite.engine.view.rendering.TextureRegion;
 
 @Slf4j
 public abstract class SpriteBatchBase
@@ -21,7 +21,7 @@ public abstract class SpriteBatchBase
     private Texture activeTexture;
     @Getter(AccessLevel.PROTECTED) private int nFrames;
 
-    protected SpriteBatchBase(int maxFramesPerBatch) {
+    protected SpriteBatchBase(final int maxFramesPerBatch) {
         this.maxFramesPerBatch = maxFramesPerBatch;
     }
 
@@ -48,8 +48,7 @@ public abstract class SpriteBatchBase
     );
 
     /**
-     * Queues a new sprite animation frame for rendering. Passing in -1 as the frame renders the
-     * whole texture.
+     * Queues a new sprite animation frame for rendering. Passing in -1 as the frame renders the whole texture.
      *
      * @param texture texture to render
      * @param x       world x-coordinate to place the sprite to
@@ -69,7 +68,7 @@ public abstract class SpriteBatchBase
     );
 
     @Override
-    public void begin(@Nullable Matrix4f transformation) {
+    public void begin(@Nullable final Matrix4f transformation) {
         this.activeTransformation = transformation;
         if (this.beginCalled) {
             LOG.error("SpriteBatch.begin() called without calling .end() first!");
@@ -96,18 +95,18 @@ public abstract class SpriteBatchBase
 
     @Override
     public void draw(
-            Sprite sprite,
-            String animation,
-            int frame,
-            double x,
-            double y,
-            double originX,
-            double originY,
-            double width,
-            double height,
-            double rotation
+            final Sprite sprite,
+            final String animation,
+            final int frame,
+            final double x,
+            final double y,
+            final double originX,
+            final double originY,
+            final double width,
+            final double height,
+            final double rotation
     ) {
-        val textureRegion = sprite.getSpecificFrame(animation, frame);
+        final var textureRegion = sprite.getSpecificFrame(animation, frame);
         updateTextureAndFlushIfNeeded(textureRegion);
 
         if (Math.abs(rotation) < ROTATION_EPSILON) {
@@ -142,8 +141,8 @@ public abstract class SpriteBatchBase
             this.activeTexture = textureRegion.getTexture();
         }
 
-        val needToChangeTexture = !textureRegion.getTexture().equals(this.activeTexture);
-        val batchIsFull = this.nFrames >= this.maxFramesPerBatch - 1;
+        final var needToChangeTexture = !textureRegion.getTexture().equals(this.activeTexture);
+        final var batchIsFull = this.nFrames >= this.maxFramesPerBatch - 1;
         if (needToChangeTexture || batchIsFull) {
             flush(this.activeTexture, this.activeTransformation);
             this.nFrames = 0;

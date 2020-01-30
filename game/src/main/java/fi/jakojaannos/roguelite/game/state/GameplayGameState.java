@@ -1,5 +1,7 @@
 package fi.jakojaannos.roguelite.game.state;
 
+import java.util.Arrays;
+
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
@@ -26,9 +28,6 @@ import fi.jakojaannos.roguelite.game.systems.physics.ApplyForceSystem;
 import fi.jakojaannos.roguelite.game.systems.physics.ApplyFrictionSystem;
 import fi.jakojaannos.roguelite.game.systems.physics.ApplyVelocitySystem;
 import fi.jakojaannos.roguelite.game.world.WorldGenerator;
-import lombok.val;
-
-import java.util.Arrays;
 
 public class GameplayGameState extends GameState {
     public GameplayGameState(
@@ -38,39 +37,39 @@ public class GameplayGameState extends GameState {
     ) {
         super(world, timeManager);
 
-        val entityManager = world.getEntityManager();
+        final var entityManager = world.getEntityManager();
 
-        val player = PlayerArchetype.create(entityManager,
-                                            new Transform(0, 0));
+        final var player = PlayerArchetype.create(entityManager,
+                                                  new Transform(0, 0));
         world.getOrCreateResource(Players.class).setLocalPlayer(player);
         entityManager.addComponentTo(player, new CameraFollowTargetTag());
 
-        val camera = entityManager.createEntity();
+        final var camera = entityManager.createEntity();
         entityManager.addComponentTo(camera, new Transform());
         entityManager.addComponentTo(camera, new NoDrawTag());
         world.getOrCreateResource(CameraProperties.class).cameraEntity = camera;
 
-        val crosshair = entityManager.createEntity();
+        final var crosshair = entityManager.createEntity();
         entityManager.addComponentTo(crosshair, new Transform(-999.0, -999.0));
         entityManager.addComponentTo(crosshair, new CrosshairTag());
-        val crosshairCollider = new Collider(CollisionLayer.NONE);
+        final var crosshairCollider = new Collider(CollisionLayer.NONE);
         crosshairCollider.width = 0.3;
         crosshairCollider.height = 0.3;
         crosshairCollider.origin.set(0.15);
         entityManager.addComponentTo(crosshair, crosshairCollider);
 
-        val emptiness = new TileType(0, false);
-        val floor = new TileType(1, false);
-        val wall = new TileType(2, true);
-        val generator = new WorldGenerator<TileType>(emptiness);
+        final var emptiness = new TileType(0, false);
+        final var floor = new TileType(1, false);
+        final var wall = new TileType(2, true);
+        final var generator = new WorldGenerator<>(emptiness);
         generator.prepareInitialRoom(seed, world, floor, wall, 25, 45, 5, 5, 2);
 
-        val levelEntity = entityManager.createEntity();
-        val layer = new TileMapLayer(generator.getTileMap());
+        final var levelEntity = entityManager.createEntity();
+        final var layer = new TileMapLayer(generator.getTileMap());
         layer.collisionEnabled = true;
         entityManager.addComponentTo(levelEntity, layer);
 
-        val sessionStats = world.getOrCreateResource(SessionStats.class);
+        final var sessionStats = world.getOrCreateResource(SessionStats.class);
         sessionStats.endTimeStamp = sessionStats.beginTimeStamp = timeManager.getCurrentGameTime();
         TurretArchetype.create(entityManager, new Transform(2.0, 0.0));
 
@@ -89,7 +88,8 @@ public class GameplayGameState extends GameState {
                 .addGroupDependencies(SystemGroups.CHARACTER_TICK, SystemGroups.INPUT, SystemGroups.EARLY_TICK)
                 .addGroupDependencies(SystemGroups.PHYSICS_TICK, SystemGroups.CHARACTER_TICK, SystemGroups.EARLY_TICK)
                 .addGroupDependencies(SystemGroups.COLLISION_HANDLER, SystemGroups.PHYSICS_TICK)
-                .addGroupDependencies(SystemGroups.LATE_TICK, SystemGroups.COLLISION_HANDLER, SystemGroups.PHYSICS_TICK, SystemGroups.CHARACTER_TICK)
+                .addGroupDependencies(SystemGroups.LATE_TICK, SystemGroups.COLLISION_HANDLER, SystemGroups.PHYSICS_TICK,
+                                      SystemGroups.CHARACTER_TICK)
                 .withSystem(new ColliderDataCollectorSystem())
                 .withSystem(new PlayerInputSystem())
                 .withSystem(new CharacterMovementSystem())

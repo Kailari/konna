@@ -1,11 +1,12 @@
 package fi.jakojaannos.roguelite.engine.ecs.systems;
 
-import fi.jakojaannos.roguelite.engine.ecs.*;
 import lombok.RequiredArgsConstructor;
 
+import fi.jakojaannos.roguelite.engine.ecs.*;
+
 /**
- * Default {@link RequirementsBuilder} implementation. Handles delegating system/group/component
- * relations and/or requirements to other internal classes.
+ * Default {@link RequirementsBuilder} implementation. Handles delegating system/group/component relations and/or
+ * requirements to other internal classes.
  */
 @RequiredArgsConstructor
 public class RequirementsBuilderImpl implements RequirementsBuilder {
@@ -20,7 +21,6 @@ public class RequirementsBuilderImpl implements RequirementsBuilder {
                       .dependencies(this.dependencyBuilder.buildFor(this.instance))
                       .build();
     }
-
 
     @Override
     public RequirementsBuilder tickAfter(final Class<? extends ECSSystem> other) {

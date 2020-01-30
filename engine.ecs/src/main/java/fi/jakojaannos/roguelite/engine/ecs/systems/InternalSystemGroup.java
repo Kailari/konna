@@ -1,13 +1,14 @@
 package fi.jakojaannos.roguelite.engine.ecs.systems;
 
-import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
-import fi.jakojaannos.roguelite.engine.ecs.SystemGroup;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Singular;
 
 import java.util.Collection;
 import java.util.stream.Stream;
+
+import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
+import fi.jakojaannos.roguelite.engine.ecs.SystemGroup;
 
 /**
  * Internal storage for a {@link SystemGroup}. Analogous to {@link SystemContext} but for groups.

@@ -1,12 +1,13 @@
 package fi.jakojaannos.roguelite.engine.view.ui.query;
 
-import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
-import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+
+import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
+import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 
 /**
  * Utility for constructing simple matchers on UI property values
@@ -27,13 +28,13 @@ public class UIPropertyValueMatcher<T> implements UIPropertyMatcher<T> {
     public static class Builder<T> {
         private final UIProperty<T> property;
 
-        public UIPropertyValueMatcher<T> isUndefinedOr(T value) {
+        public UIPropertyValueMatcher<T> isUndefinedOr(final T value) {
             return new UIPropertyValueMatcher<>(this.property,
                                                 maybeActual -> maybeActual.map(actual -> actual.equals(value))
                                                                           .orElse(true));
         }
 
-        public UIPropertyValueMatcher<T> isPresentAndEqual(T expected) {
+        public UIPropertyValueMatcher<T> isPresentAndEqual(final T expected) {
             return new UIPropertyValueMatcher<>(this.property,
                                                 maybeActual -> maybeActual.map(actual -> actual.equals(expected))
                                                                           .orElse(false));

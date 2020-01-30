@@ -1,20 +1,21 @@
 package fi.jakojaannos.roguelite.engine.ecs.world;
 
-import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.Resource;
-import fi.jakojaannos.roguelite.engine.ecs.World;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
+import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.Resource;
+import fi.jakojaannos.roguelite.engine.ecs.World;
+
 @Slf4j
 public class WorldImpl implements World {
     private final EntityManager entityManager;
     private final Map<Class<? extends Resource>, Resource> resourceStorage = new HashMap<>();
 
-    public WorldImpl(EntityManager entityManager) {
+    public WorldImpl(final EntityManager entityManager) {
         this.entityManager = entityManager;
     }
 
@@ -32,33 +33,38 @@ public class WorldImpl implements World {
     }
 
     @Override
-    public <TResource extends Resource> TResource getOrCreateResource(Class<? extends TResource> resourceType) {
-        // noinspection unchecked
+    @SuppressWarnings("unchecked")
+    public <TResource extends Resource> TResource getOrCreateResource(final Class<? extends TResource> resourceType) {
         return (TResource) this.resourceStorage.computeIfAbsent(resourceType,
-                                                                rt -> {
-                                                                    try {
-                                                                        return resourceType.getConstructor().newInstance();
-                                                                    } catch (InstantiationException e) {
-                                                                        throw new IllegalStateException(String.format(
-                                                                                "Resource type %s represents an abstract class!",
-                                                                                rt.getSimpleName()
-                                                                        ), e);
-                                                                    } catch (IllegalAccessException e) {
-                                                                        throw new IllegalStateException(String.format(
-                                                                                "Resource type %s default constructor is not accessible!",
-                                                                                rt.getSimpleName()
-                                                                        ), e);
-                                                                    } catch (InvocationTargetException e) {
-                                                                        throw new IllegalStateException(String.format(
-                                                                                "Error creating resource of type %s, constructor threw an exception",
-                                                                                rt.getSimpleName()
-                                                                        ), e);
-                                                                    } catch (NoSuchMethodException e) {
-                                                                        throw new IllegalStateException(String.format(
-                                                                                "Resource type %s does not define a default constructor!",
-                                                                                rt.getSimpleName()
-                                                                        ));
-                                                                    }
-                                                                });
+                                                                rt -> constructResource(resourceType, rt));
+    }
+
+    private <TResource extends Resource> Resource constructResource(
+            final Class<? extends TResource> resourceType,
+            final Class<? extends Resource> rt
+    ) {
+        try {
+            return resourceType.getConstructor().newInstance();
+        } catch (final InstantiationException e) {
+            throw new IllegalStateException(String.format(
+                    "Resource type %s represents an abstract class!",
+                    rt.getSimpleName()
+            ), e);
+        } catch (final IllegalAccessException e) {
+            throw new IllegalStateException(String.format(
+                    "Resource type %s default constructor is not accessible!",
+                    rt.getSimpleName()
+            ), e);
+        } catch (final InvocationTargetException e) {
+            throw new IllegalStateException(String.format(
+                    "Error creating resource of type %s, constructor threw an exception",
+                    rt.getSimpleName()
+            ), e);
+        } catch (final NoSuchMethodException e) {
+            throw new IllegalStateException(String.format(
+                    "Resource type %s does not define a default constructor!",
+                    rt.getSimpleName()
+            ));
+        }
     }
 }

@@ -1,5 +1,10 @@
 package fi.jakojaannos.roguelite.game.view.systems;
 
+import lombok.extern.slf4j.Slf4j;
+
+import java.nio.file.Path;
+import java.util.stream.Stream;
+
 import fi.jakojaannos.roguelite.engine.content.AssetRegistry;
 import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
@@ -11,29 +16,14 @@ import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.Sprite;
-import fi.jakojaannos.roguelite.engine.view.rendering.sprite.SpriteBatch;
 import fi.jakojaannos.roguelite.engine.view.rendering.text.Font;
 import fi.jakojaannos.roguelite.engine.view.rendering.text.TextRenderer;
 import fi.jakojaannos.roguelite.engine.view.rendering.ui.UserInterfaceRenderer;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
-import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-
-import java.nio.file.Path;
-import java.util.stream.Stream;
 
 @Slf4j
 public class UserInterfaceRenderingSystem implements ECSSystem, AutoCloseable {
-    @Override
-    public void declareRequirements(final RequirementsBuilder requirements) {
-        requirements.addToGroup(RenderSystemGroups.UI)
-                    .requireResource(Mouse.class)
-                    .requireResource(Events.class)
-                    .requireResource(Time.class);
-    }
-
     private final UserInterface userInterface;
-
     private final Camera camera;
     private final UserInterfaceRenderer userInterfaceRenderer;
 
@@ -48,7 +38,19 @@ public class UserInterfaceRenderingSystem implements ECSSystem, AutoCloseable {
     ) {
         this.userInterface = userInterface;
         this.camera = camera;
-        this.userInterfaceRenderer = new UserInterfaceRenderer(assetRoot, spriteRegistry, textRenderer, fontRegistry, backend);
+        this.userInterfaceRenderer = new UserInterfaceRenderer(assetRoot,
+                                                               spriteRegistry,
+                                                               textRenderer,
+                                                               fontRegistry,
+                                                               backend);
+    }
+
+    @Override
+    public void declareRequirements(final RequirementsBuilder requirements) {
+        requirements.addToGroup(RenderSystemGroups.UI)
+                    .requireResource(Mouse.class)
+                    .requireResource(Events.class)
+                    .requireResource(Time.class);
     }
 
     @Override
@@ -56,13 +58,13 @@ public class UserInterfaceRenderingSystem implements ECSSystem, AutoCloseable {
             final Stream<Entity> entities,
             final World world
     ) {
-        val rawMouse = world.getOrCreateResource(Mouse.class);
-        val mouse = new Mouse();
+        final var rawMouse = world.getOrCreateResource(Mouse.class);
+        final var mouse = new Mouse();
         mouse.clicked = rawMouse.clicked;
         mouse.position.set(rawMouse.position)
                       .mul(this.camera.getViewport().getWidthInPixels(),
                            this.camera.getViewport().getHeightInPixels());
-        val events = world.getOrCreateResource(Events.class);
+        final var events = world.getOrCreateResource(Events.class);
         this.userInterface.update(world.getOrCreateResource(Time.class).getTimeManager(),
                                   mouse,
                                   events);

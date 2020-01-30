@@ -1,9 +1,9 @@
 package fi.jakojaannos.roguelite.game.test.view;
 
+import java.nio.file.Path;
+
 import fi.jakojaannos.roguelite.engine.view.rendering.shader.ShaderBuilder;
 import fi.jakojaannos.roguelite.engine.view.rendering.shader.ShaderProgram;
-
-import java.nio.file.Path;
 
 import static org.mockito.Mockito.mock;
 

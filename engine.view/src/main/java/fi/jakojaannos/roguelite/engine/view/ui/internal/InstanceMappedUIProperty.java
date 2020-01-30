@@ -1,12 +1,12 @@
 package fi.jakojaannos.roguelite.engine.view.ui.internal;
 
-import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
-import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
-
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import javax.annotation.Nullable;
+
+import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
+import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 
 public class InstanceMappedUIProperty<T> implements UIProperty<T> {
     private final String name;

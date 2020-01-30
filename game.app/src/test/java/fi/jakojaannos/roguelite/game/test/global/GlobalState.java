@@ -1,5 +1,16 @@
 package fi.jakojaannos.roguelite.game.test.global;
 
+import io.cucumber.java.After;
+import io.cucumber.java.Before;
+import org.lwjgl.opengl.GL;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayDeque;
+import java.util.Optional;
+import java.util.Queue;
+import java.util.Random;
+
 import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.event.Events;
@@ -14,23 +25,13 @@ import fi.jakojaannos.roguelite.game.test.content.TestAssetManager;
 import fi.jakojaannos.roguelite.game.test.view.TestRenderingBackend;
 import fi.jakojaannos.roguelite.game.test.view.TestWindow;
 import fi.jakojaannos.roguelite.game.view.RogueliteGameRenderer;
-import io.cucumber.java.After;
-import io.cucumber.java.Before;
-import org.lwjgl.opengl.GL;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayDeque;
-import java.util.Optional;
-import java.util.Queue;
-import java.util.Random;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 
 /**
- * Singleton game state to be used by step definitions. Note that this effectively prevents the E2E
- * tests from running from parallel in single test runner instance.
+ * Singleton game state to be used by step definitions. Note that this effectively prevents the E2E tests from running
+ * from parallel in single test runner instance.
  */
 public class GlobalState {
     public static RogueliteGame game;
@@ -42,6 +43,43 @@ public class GlobalState {
     public static TestTimeManager timeManager;
 
     public static Random random;
+
+    public static <T extends Component> Optional<T> getComponentOf(
+            Entity player,
+            Class<T> componentClass
+    ) {
+        return state.getWorld()
+                    .getEntityManager()
+                    .getComponentOf(player, componentClass);
+    }
+
+    public static void simulateTick() {
+        inputEvents.forEach(events.getInput()::fire);
+        state = game.tick(state, events);
+        game.updateTime();
+
+        inputEvents.clear();
+    }
+
+    public static void renderTick() {
+        if (window instanceof LWJGLWindow) {
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        }
+
+        gameRenderer.render(state, 0.0, events);
+
+        if (window instanceof LWJGLWindow) {
+            glfwSwapBuffers(((LWJGLWindow) window).getId());
+            glfwPollEvents();
+        }
+    }
+
+    public static void simulateSeconds(double seconds) {
+        int ticks = (int) (seconds / 0.02);
+        for (int i = 0; i < ticks; ++i) {
+            simulateTick();
+        }
+    }
 
     @Before
     public void before() {
@@ -93,42 +131,5 @@ public class GlobalState {
                 glfwTerminate();
             }
         } catch (Exception ignored) { }
-    }
-
-    public static <T extends Component> Optional<T> getComponentOf(
-            Entity player,
-            Class<T> componentClass
-    ) {
-        return state.getWorld()
-                    .getEntityManager()
-                    .getComponentOf(player, componentClass);
-    }
-
-    public static void simulateTick() {
-        inputEvents.forEach(events.getInput()::fire);
-        state = game.tick(state, events);
-        game.updateTime();
-
-        inputEvents.clear();
-    }
-
-    public static void renderTick() {
-        if (window instanceof LWJGLWindow) {
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        }
-
-        gameRenderer.render(state, 0.0, events);
-
-        if (window instanceof LWJGLWindow) {
-            glfwSwapBuffers(((LWJGLWindow) window).getId());
-            glfwPollEvents();
-        }
-    }
-
-    public static void simulateSeconds(double seconds) {
-        int ticks = (int) (seconds / 0.02);
-        for (int i = 0; i < ticks; ++i) {
-            simulateTick();
-        }
     }
 }

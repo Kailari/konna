@@ -1,12 +1,11 @@
 package fi.jakojaannos.roguelite.engine.view.content;
 
+import java.nio.file.Path;
+import java.util.Optional;
+
 import fi.jakojaannos.roguelite.engine.content.AbstractAssetRegistry;
 import fi.jakojaannos.roguelite.engine.content.AssetHandle;
 import fi.jakojaannos.roguelite.engine.view.rendering.text.Font;
-import lombok.val;
-
-import java.nio.file.Path;
-import java.util.Optional;
 
 public class FontRegistry extends AbstractAssetRegistry<Font> {
     private final Path assetRoot;
@@ -30,7 +29,7 @@ public class FontRegistry extends AbstractAssetRegistry<Font> {
 
     @Override
     protected Optional<Font> loadAsset(final AssetHandle handle) {
-        val path = this.assetRoot.resolve(handle.getName());
+        final var path = this.assetRoot.resolve(handle.getName());
         return Optional.of(this.fontLoader.load(path, 1.0f, 1.0f));
     }
 

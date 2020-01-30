@@ -1,9 +1,7 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text;
 
-import fi.jakojaannos.roguelite.engine.view.rendering.text.Font;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.val;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.stb.STBTTFontinfo;
 import org.lwjgl.system.MemoryStack;
@@ -17,20 +15,21 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
+import fi.jakojaannos.roguelite.engine.view.rendering.text.Font;
+
 import static org.lwjgl.stb.STBTruetype.*;
 
 public class LWJGLFont implements AutoCloseable, Font {
-    private final float contentScaleX, contentScaleY;
+    private final float contentScaleX;
+    private final float contentScaleY;
 
     private final ByteBuffer ttf;
     @Getter private final STBTTFontinfo fontInfo;
-    @Getter @Setter private boolean kerningEnabled = false;
-
     private final Map<Integer, LWJGLFontTexture> sizes = new HashMap<>();
-
     private final int ascent;
     private final int descent;
     private final int lineGap;
+    @Getter @Setter private boolean kerningEnabled = false;
 
     public LWJGLFont(
             final Path assetPath,
@@ -54,10 +53,10 @@ public class LWJGLFont implements AutoCloseable, Font {
             throw new IllegalStateException("Failed to initialize font descriptor.");
         }
 
-        try (val stack = MemoryStack.stackPush()) {
-            val pAscent = stack.mallocInt(1);
-            val pDescent = stack.mallocInt(1);
-            val pLineGap = stack.mallocInt(1);
+        try (final var stack = MemoryStack.stackPush()) {
+            final var pAscent = stack.mallocInt(1);
+            final var pDescent = stack.mallocInt(1);
+            final var pLineGap = stack.mallocInt(1);
 
             stbtt_GetFontVMetrics(this.fontInfo, pAscent, pDescent, pLineGap);
             this.ascent = pAscent.get(0);
@@ -67,7 +66,12 @@ public class LWJGLFont implements AutoCloseable, Font {
     }
 
     public LWJGLFontTexture getTextureForSize(final int fontSize) {
-        return this.sizes.computeIfAbsent(fontSize, key -> new LWJGLFontTexture(this.ttf, this, key, this.contentScaleX, this.contentScaleY));
+        return this.sizes.computeIfAbsent(fontSize,
+                                          key -> new LWJGLFontTexture(this.ttf,
+                                                                      this,
+                                                                      key,
+                                                                      this.contentScaleX,
+                                                                      this.contentScaleY));
     }
 
     @Override
@@ -78,8 +82,8 @@ public class LWJGLFont implements AutoCloseable, Font {
             IntBuffer pAdvancedWidth = stack.mallocInt(1);
             IntBuffer pLeftSideBearing = stack.mallocInt(1);
 
-            val from = 0;
-            val to = string.length();
+            final var from = 0;
+            final var to = string.length();
             int i = from;
             while (i < to) {
                 i += Font.getCP(string, to, i, pCodePoint);

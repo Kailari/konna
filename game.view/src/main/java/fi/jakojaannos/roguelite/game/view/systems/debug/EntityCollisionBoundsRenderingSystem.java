@@ -1,5 +1,12 @@
 package fi.jakojaannos.roguelite.game.view.systems.debug;
 
+import lombok.extern.slf4j.Slf4j;
+import org.joml.Matrix4f;
+import org.lwjgl.system.MemoryStack;
+
+import java.nio.file.Path;
+import java.util.stream.Stream;
+
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
@@ -16,27 +23,14 @@ import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.NoDrawTag;
 import fi.jakojaannos.roguelite.game.data.components.SpriteInfo;
 import fi.jakojaannos.roguelite.game.view.systems.RenderSystemGroups;
-import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-import org.joml.Matrix4f;
-import org.lwjgl.system.MemoryStack;
 
-import java.nio.file.Path;
-import java.util.stream.Stream;
+// FIXME: Use batching
 
 @Slf4j
 public class EntityCollisionBoundsRenderingSystem implements ECSSystem, AutoCloseable {
-    @Override
-    public void declareRequirements(final RequirementsBuilder requirements) {
-        requirements.addToGroup(RenderSystemGroups.DEBUG)
-                    .withComponent(Transform.class)
-                    .withComponent(Collider.class);
-    }
-
     private final Camera camera;
     private final ShaderProgram shader;
     private final Mesh mesh;
-
     private final Matrix4f modelMatrix = new Matrix4f();
 
     public EntityCollisionBoundsRenderingSystem(
@@ -54,16 +48,16 @@ public class EntityCollisionBoundsRenderingSystem implements ECSSystem, AutoClos
 
         this.shader.bindUniformBlock("CameraInfo", EngineUniformBufferObjectIndices.CAMERA);
 
-        val vertexFormat = backend.createVertexFormat()
-                                  .withAttribute(VertexAttribute.Type.FLOAT, 2, false)
-                                  .build();
+        final var vertexFormat = backend.createVertexFormat()
+                                        .withAttribute(VertexAttribute.Type.FLOAT, 2, false)
+                                        .build();
         this.mesh = backend.createMesh(vertexFormat);
-        val posX = 0.0f;
-        val posY = 0.0f;
-        val width = 1.0f;
-        val height = 1.0f;
-        try (val stack = MemoryStack.stackPush()) {
-            val vertexData = stack.malloc(8 * 4);
+        final var posX = 0.0f;
+        final var posY = 0.0f;
+        final var width = 1.0f;
+        final var height = 1.0f;
+        try (final var stack = MemoryStack.stackPush()) {
+            final var vertexData = stack.malloc(8 * 4);
             vertexData.putFloat(0, posX);
             vertexData.putFloat(4, posY);
 
@@ -82,29 +76,41 @@ public class EntityCollisionBoundsRenderingSystem implements ECSSystem, AutoClos
     }
 
     @Override
+    public void declareRequirements(final RequirementsBuilder requirements) {
+        requirements.addToGroup(RenderSystemGroups.DEBUG)
+                    .withoutComponent(NoDrawTag.class)
+                    .withComponent(Transform.class)
+                    .withComponent(Collider.class);
+    }
+
+    @Override
     public void tick(
             final Stream<Entity> entities,
             final World world
     ) {
+        final var entityManager = world.getEntityManager();
+
         this.shader.use();
         this.camera.useWorldCoordinates();
 
         this.mesh.startDrawing();
         entities.forEach(
                 entity -> {
-                    if (world.getEntityManager().hasComponent(entity, NoDrawTag.class) || (!DebugConfig.renderBounds && world.getEntityManager().hasComponent(entity, SpriteInfo.class))) {
+                    final var hasSprite = entityManager.hasComponent(entity, SpriteInfo.class);
+                    if (!DebugConfig.renderBounds && hasSprite) {
                         return;
                     }
 
-                    Transform transform = world.getEntityManager().getComponentOf(entity, Transform.class).orElseThrow();
-                    Collider collider = world.getEntityManager().getComponentOf(entity, Collider.class).orElseThrow();
+                    Transform transform = entityManager.getComponentOf(entity, Transform.class).orElseThrow();
+                    Collider collider = entityManager.getComponentOf(entity, Collider.class).orElseThrow();
                     this.shader.setUniformMat4x4("model",
                                                  modelMatrix.identity()
                                                             .translate((float) transform.position.x,
-                                                                       (float) transform.position.y, 0.0f));
-                    val vertices = collider.getVerticesInLocalSpace(transform);
-                    try (val stack = MemoryStack.stackPush()) {
-                        val vertexData = stack.malloc(8 * 4);
+                                                                       (float) transform.position.y,
+                                                                       0.0f));
+                    final var vertices = collider.getVerticesInLocalSpace(transform);
+                    try (final var stack = MemoryStack.stackPush()) {
+                        final var vertexData = stack.malloc(8 * 4);
                         for (int i = 0, j = 0; i < 4; ++i, j += 2) {
                             vertexData.putFloat(j * 4, (float) vertices[i].x);
                             vertexData.putFloat((j + 1) * 4, (float) vertices[i].y);

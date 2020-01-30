@@ -1,5 +1,13 @@
 package fi.jakojaannos.roguelite.game.systems;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.time.Duration;
+import java.util.stream.Stream;
+
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
@@ -7,18 +15,10 @@ import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.TileMapLayer;
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
-import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.game.systems.collision.ColliderDataCollectorSystem;
 import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
 import fi.jakojaannos.roguelite.game.systems.physics.ApplyVelocitySystem;
-import org.joml.Vector2d;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.time.Duration;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
@@ -32,7 +32,6 @@ class ApplyVelocitySystemTest {
     private Entity entity;
     private Velocity velocity;
     private Transform transform;
-    private Collider collider;
 
     @BeforeEach
     void beforeEach() {
@@ -46,6 +45,7 @@ class ApplyVelocitySystemTest {
         entity = entityManager.createEntity();
         entityManager.addComponentTo(entity, velocity = new Velocity());
         entityManager.addComponentTo(entity, transform = new Transform(0.0, 0.0));
+        Collider collider;
         entityManager.addComponentTo(entity, collider = new Collider(CollisionLayer.COLLIDE_ALL));
         collider.height = collider.width = 1;
 
@@ -55,7 +55,7 @@ class ApplyVelocitySystemTest {
 
     @Test
     void entityWithColliderDoesNotMoveWhenVelocityIsZero() {
-        velocity.velocity = new Vector2d(0.0);
+        velocity.set(0.0);
 
         world.getEntityManager().applyModifications();
         dataCollectorSystem.tick(Stream.of(entity), world);
@@ -67,7 +67,7 @@ class ApplyVelocitySystemTest {
 
     @Test
     void entityWithColliderMovesWhenVelocityIsNonZero() {
-        velocity.velocity = new Vector2d(10.0);
+        velocity.set(10.0);
 
         world.getEntityManager().applyModifications();
         for (int i = 0; i < 50; ++i) {
@@ -91,7 +91,7 @@ class ApplyVelocitySystemTest {
         Entity entity = entityManager.createEntity();
         entityManager.addComponentTo(entity, velocity = new Velocity());
         entityManager.addComponentTo(entity, transform = new Transform(0.0, 0.0));
-        velocity.velocity = new Vector2d(0.0);
+        velocity.set(0.0);
 
         world.getEntityManager().applyModifications();
         system.tick(Stream.of(entity), world);
@@ -112,7 +112,7 @@ class ApplyVelocitySystemTest {
         Entity entity = entityManager.createEntity();
         entityManager.addComponentTo(entity, velocity = new Velocity());
         entityManager.addComponentTo(entity, transform = new Transform(0.0, 0.0));
-        velocity.velocity = new Vector2d(10.0);
+        velocity.set(10.0);
 
         for (int i = 0; i < 50; ++i) {
             world.getEntityManager().applyModifications();
@@ -131,7 +131,7 @@ class ApplyVelocitySystemTest {
         entityManager.addComponentTo(other, otherCollider);
         entityManager.addComponentTo(other, otherTransform);
 
-        velocity.velocity = new Vector2d(10.0, 0.75);
+        velocity.set(10.0, 0.75);
 
         world.getEntityManager().applyModifications();
         for (int i = 0; i < 50; ++i) {
@@ -151,7 +151,7 @@ class ApplyVelocitySystemTest {
         entityManager.addComponentTo(other, otherCollider);
         entityManager.addComponentTo(other, otherTransform);
 
-        velocity.velocity = new Vector2d(1.0, 0.1);
+        velocity.set(1.0, 0.1);
 
         world.getEntityManager().applyModifications();
         for (int i = 0; i < 50; ++i) {
@@ -170,7 +170,7 @@ class ApplyVelocitySystemTest {
         entityManager.addComponentTo(other, otherCollider);
         entityManager.addComponentTo(other, otherTransform);
 
-        velocity.velocity = new Vector2d(0.1, 1.0);
+        velocity.set(0.1, 1.0);
 
         world.getEntityManager().applyModifications();
         for (int i = 0; i < 50; ++i) {
@@ -190,7 +190,7 @@ class ApplyVelocitySystemTest {
         entityManager.addComponentTo(other, otherCollider);
         entityManager.addComponentTo(other, otherTransform);
 
-        velocity.velocity = new Vector2d(1.0, 0.25);
+        velocity.set(1.0, 0.25);
         transform.position.x = -0.05;
 
         world.getEntityManager().applyModifications();
@@ -214,7 +214,7 @@ class ApplyVelocitySystemTest {
         layer.collisionEnabled = false;
         entityManager.addComponentTo(other, layer);
 
-        velocity.velocity = new Vector2d(1.0, 0.1);
+        velocity.set(1.0, 0.1);
         transform.position.x = 0;
 
         world.getEntityManager().applyModifications();
@@ -236,7 +236,7 @@ class ApplyVelocitySystemTest {
         tileMap.setTile(1, 0, block);
         entityManager.addComponentTo(other, new TileMapLayer(tileMap));
 
-        velocity.velocity = new Vector2d(1.0, 0.1);
+        velocity.set(1.0, 0.1);
 
         world.getEntityManager().applyModifications();
         for (int i = 0; i < 50; ++i) {
@@ -257,7 +257,7 @@ class ApplyVelocitySystemTest {
         tileMap.setTile(1, 0, nonSolid);
         entityManager.addComponentTo(other, new TileMapLayer(tileMap));
 
-        velocity.velocity = new Vector2d(1.0, 0.1);
+        velocity.set(1.0, 0.1);
 
         world.getEntityManager().applyModifications();
         for (int i = 0; i < 50; ++i) {
@@ -278,7 +278,7 @@ class ApplyVelocitySystemTest {
         entityManager.addComponentTo(other, otherCollider);
         entityManager.addComponentTo(other, otherTransform);
 
-        velocity.velocity = new Vector2d(1.0, 0);
+        velocity.set(1.0, 0);
         transform.position.x = -1.5;
         transform.position.y = -1;
 

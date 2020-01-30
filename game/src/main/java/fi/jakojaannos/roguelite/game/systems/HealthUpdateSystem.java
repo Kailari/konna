@@ -1,5 +1,9 @@
 package fi.jakojaannos.roguelite.game.systems;
 
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.stream.Stream;
+
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
@@ -8,10 +12,6 @@ import fi.jakojaannos.roguelite.game.LogCategories;
 import fi.jakojaannos.roguelite.game.data.components.character.DeadTag;
 import fi.jakojaannos.roguelite.game.data.components.character.Health;
 import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
-import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-
-import java.util.stream.Stream;
 
 @Slf4j
 
@@ -28,23 +28,27 @@ public class HealthUpdateSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
-        val sessionStats = world.getOrCreateResource(SessionStats.class);
-        val entityManager = world.getEntityManager();
+        final var sessionStats = world.getOrCreateResource(SessionStats.class);
+        final var entityManager = world.getEntityManager();
 
         entities.forEach(entity -> {
-            val health = entityManager.getComponentOf(entity, Health.class).orElseThrow();
+            final var health = entityManager.getComponentOf(entity, Health.class).orElseThrow();
 
-            val damageInstances = health.damageInstances;
-            for (val instance : damageInstances) {
+            final var damageInstances = health.damageInstances;
+            for (final var instance : damageInstances) {
                 health.currentHealth -= instance.damage;
-                LOG.debug(LogCategories.HEALTH, "Entity {} took {} damage. Has {} health remaining", entity.getId(), instance.damage, health.currentHealth);
+                LOG.debug(LogCategories.HEALTH, "Entity {} took {} damage. Has {} health remaining",
+                          entity.getId(),
+                          instance.damage,
+                          health.currentHealth);
             }
 
             if (health.currentHealth <= 0.0f) {
-                LOG.debug(LogCategories.HEALTH, "Entity {} health less than or equal to zero. Marking as dead.", entity.getId());
+                LOG.debug(LogCategories.HEALTH, "Entity {} health less than or equal to zero. Marking as dead.",
+                          entity.getId());
                 entityManager.addComponentIfAbsent(entity, DeadTag.class, DeadTag::new);
 
-                for (val instance : damageInstances) {
+                for (final var instance : damageInstances) {
                     sessionStats.awardKillTo(instance.source);
                 }
             }

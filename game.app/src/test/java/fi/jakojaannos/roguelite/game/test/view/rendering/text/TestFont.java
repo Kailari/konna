@@ -1,12 +1,12 @@
 package fi.jakojaannos.roguelite.game.test.view.rendering.text;
 
-import fi.jakojaannos.roguelite.engine.view.rendering.text.Font;
-import fi.jakojaannos.roguelite.engine.view.rendering.text.FontTexture;
-import fi.jakojaannos.roguelite.engine.view.rendering.text.RenderableCharacter;
-
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.file.Path;
+
+import fi.jakojaannos.roguelite.engine.view.rendering.text.Font;
+import fi.jakojaannos.roguelite.engine.view.rendering.text.FontTexture;
+import fi.jakojaannos.roguelite.engine.view.rendering.text.RenderableCharacter;
 
 import static org.mockito.Mockito.mock;
 

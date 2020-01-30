@@ -13,7 +13,6 @@ import fi.jakojaannos.roguelite.game.data.components.character.enemy.EnemyTag;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.FollowerEnemyAI;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.SplitOnDeath;
 import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
-import lombok.val;
 
 public class SlimeArchetype {
     public static final double LARGE_SLIME_SIZE = 16.0;
@@ -60,7 +59,7 @@ public class SlimeArchetype {
             final double mass,
             final double slimeSize
     ) {
-        val slime = entityManager.createEntity();
+        final var slime = entityManager.createEntity();
         entityManager.addComponentTo(slime, new Transform(xPos, yPos));
         entityManager.addComponentTo(slime, new Health(maxHp));
         entityManager.addComponentTo(slime, createCollider(size, size));
@@ -90,18 +89,18 @@ public class SlimeArchetype {
         return movementAbility;
     }
 
-    private static SplitOnDeath createSplitOnDeath(double slimeSize) {
-        val split = new SplitOnDeath();
+    private static SplitOnDeath createSplitOnDeath(final double slimeSize) {
+        final var split = new SplitOnDeath();
         split.size = slimeSize;
         return split;
     }
 
-    private static Collider createCollider(double width, double height) {
+    private static Collider createCollider(final double width, final double height) {
         return new Collider(CollisionLayer.ENEMY, width, height, width / 2, height / 2);
     }
 
     private static SpriteInfo createSpriteInfo() {
-        val sprite = new SpriteInfo();
+        final var sprite = new SpriteInfo();
         sprite.spriteName = "sprites/slime";
 
         return sprite;

@@ -1,11 +1,12 @@
 package fi.jakojaannos.roguelite.game.test.stepdefs.simulation;
 
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.When;
+
 import fi.jakojaannos.roguelite.engine.input.ButtonInput;
 import fi.jakojaannos.roguelite.engine.input.InputButton;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
 import fi.jakojaannos.roguelite.game.test.global.GlobalGameState;
-import io.cucumber.java.en.Given;
-import io.cucumber.java.en.When;
 
 import static fi.jakojaannos.roguelite.game.test.global.GlobalState.*;
 

@@ -1,13 +1,13 @@
 package fi.jakojaannos.roguelite.engine.ecs.systems;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.*;
+
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-
-import java.util.*;
 
 /**
  * Default {@link SystemDispatcher} implementation.
@@ -19,14 +19,14 @@ public class SystemDispatcherImpl implements SystemDispatcher {
 
     @Override
     public void dispatch(final World world) {
-        val dispatchContext = new DispatchContext(this.systems.getSystems(), this.systems.getSystemGroups());
+        final var dispatchContext = new DispatchContext(this.systems.getSystems(), this.systems.getSystemGroups());
 
         Optional<Class<? extends ECSSystem>> nextEntryPoint;
         while ((nextEntryPoint = dispatchContext.findAnyNotDispatched()).isPresent()) {
-            Deque<SystemContext> queue = new ArrayDeque<>();
+            final Deque<SystemContext> queue = new ArrayDeque<>();
             queue.add(this.systems.findContextByType(nextEntryPoint.get()));
             while (!queue.isEmpty()) {
-                val systemContext = queue.getFirst();
+                final var systemContext = queue.getFirst();
 
                 // Due to the fact our dependency walker is paranoid, same systems may end up on the
                 // queue multiple times. If that happens, just throw away systems already dispatched.
@@ -44,7 +44,6 @@ public class SystemDispatcherImpl implements SystemDispatcher {
         }
     }
 
-
     private void removeFromQueueAndDispatch(
             final World world,
             final DispatchContext dispatchContext,
@@ -52,11 +51,13 @@ public class SystemDispatcherImpl implements SystemDispatcher {
             final SystemContext systemContext
     ) {
         queue.removeFirst();
-        systemContext.getInstance().tick(world.getEntityManager().getEntitiesWith(systemContext.getRequirements().getRequiredComponents(),
-                                                                                  systemContext.getRequirements().getExcludedComponents(),
-                                                                                  systemContext.getRequirements().getRequiredGroups(),
-                                                                                  systemContext.getRequirements().getExcludedGroups()),
-                                         world);
+        systemContext.getInstance()
+                     .tick(world.getEntityManager()
+                                .getEntitiesWith(systemContext.getRequirements().getRequiredComponents(),
+                                                 systemContext.getRequirements().getExcludedComponents(),
+                                                 systemContext.getRequirements().getRequiredGroups(),
+                                                 systemContext.getRequirements().getExcludedGroups()),
+                           world);
         dispatchContext.setDispatched(systemContext);
     }
 
@@ -121,18 +122,18 @@ public class SystemDispatcherImpl implements SystemDispatcher {
 
     @Override
     public void close() throws Exception {
-        val exceptions = this.systems.nonPrioritizedStream()
-                                     .filter(s -> s instanceof AutoCloseable)
-                                     .map(s -> {
-                                         try {
-                                             ((AutoCloseable) s).close();
-                                             return null;
-                                         } catch (Exception e) {
-                                             return e;
-                                         }
-                                     })
-                                     .filter(Objects::nonNull)
-                                     .toArray(Exception[]::new);
+        final var exceptions = this.systems.nonPrioritizedStream()
+                                           .filter(AutoCloseable.class::isInstance)
+                                           .map(s -> {
+                                               try {
+                                                   ((AutoCloseable) s).close();
+                                                   return null;
+                                               } catch (final Exception e) {
+                                                   return e;
+                                               }
+                                           })
+                                           .filter(Objects::nonNull)
+                                           .toArray(Exception[]::new);
 
         if (exceptions.length > 0) {
             LOG.error("SYSTEM DISPATCHER FAILED TO DISPOSE ONE OR MORE SYSTEM(S)");
@@ -141,7 +142,7 @@ public class SystemDispatcherImpl implements SystemDispatcher {
     }
 
     private static class SystemDisposeException extends Exception {
-        SystemDisposeException(Exception[] exceptions) {
+        SystemDisposeException(final Exception[] exceptions) {
             super(Arrays.stream(exceptions)
                         .map(Exception::toString)
                         .reduce(new StringBuilder(),

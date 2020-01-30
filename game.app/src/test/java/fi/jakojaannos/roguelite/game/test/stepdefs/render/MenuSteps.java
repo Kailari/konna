@@ -1,15 +1,15 @@
 package fi.jakojaannos.roguelite.game.test.stepdefs.render;
 
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
+
 import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 import fi.jakojaannos.roguelite.game.state.GameplayGameState;
 import fi.jakojaannos.roguelite.game.state.MainMenuGameState;
-import io.cucumber.java.en.Given;
-import io.cucumber.java.en.Then;
-import io.cucumber.java.en.When;
-import lombok.val;
 
 import static fi.jakojaannos.roguelite.engine.utilities.assertions.ui.AssertUI.assertUI;
 import static fi.jakojaannos.roguelite.game.test.global.GlobalState.*;
@@ -28,13 +28,13 @@ public class MenuSteps {
 
     @When("the player clicks the {string} button")
     public void the_player_clicks_the_button(String string) {
-        val userInterface = gameRenderer.getUserInterfaceForState(state);
-        val buttonCenter = userInterface.findElementsWithMatchingProperty(UIProperty.TEXT, text -> text.equals(string))
-                                        .findFirst()
-                                        .flatMap(element -> element.getProperty(UIProperty.CENTER))
-                                        .orElseThrow();
+        final var userInterface = gameRenderer.getUserInterfaceForState(state);
+        final var buttonCenter = userInterface.findElementsWithMatchingProperty(UIProperty.TEXT, text -> text.equals(string))
+                                              .findFirst()
+                                              .flatMap(element -> element.getProperty(UIProperty.CENTER))
+                                              .orElseThrow();
 
-        val mouse = state.getWorld().getOrCreateResource(Mouse.class);
+        final var mouse = state.getWorld().getOrCreateResource(Mouse.class);
         mouse.position.set(buttonCenter)
                       .mul(1.0 / gameRenderer.getCamera().getViewport().getWidthInPixels(),
                            1.0 / gameRenderer.getCamera().getViewport().getHeightInPixels());

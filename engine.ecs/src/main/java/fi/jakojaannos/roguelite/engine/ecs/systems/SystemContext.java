@@ -1,8 +1,5 @@
 package fi.jakojaannos.roguelite.engine.ecs.systems;
 
-import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
-import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
-import fi.jakojaannos.roguelite.engine.ecs.SystemGroup;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Singular;
@@ -10,10 +7,14 @@ import lombok.Singular;
 import java.util.Collection;
 import java.util.stream.Stream;
 
+import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
+import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
+import fi.jakojaannos.roguelite.engine.ecs.SystemGroup;
+
 /**
- * Everything known about a system. More specifically everything that ever needs to be known from
- * the {@link SystemDispatcher dispatcher} point of view, at least. Analogous to {@link
- * InternalSystemGroup}, but for single systems.
+ * Everything known about a system. More specifically everything that ever needs to be known from the {@link
+ * SystemDispatcher dispatcher} point of view, at least. Analogous to {@link InternalSystemGroup}, but for single
+ * systems.
  *
  * @see InternalSystemGroup
  */

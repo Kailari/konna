@@ -1,0 +1,82 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+        "https://checkstyle.org/dtds/configuration_1_3.dtd">
+
+<module name="Checker">
+    <property name="charset" value="UTF-8"/>
+    <property name="severity" value="warning"/>
+
+    <!-- Only run checkstyle on .java files -->
+    <property name="fileExtensions" value="java, properties, xml"/>
+
+    <!-- Excludes all 'module-/package-info.java' files -->
+    <module name="BeforeExecutionExclusionFileFilter">
+        <!--property name="fileNamePattern" value="^(module|package)\-info\.java$"/ -->
+        <property name="fileNamePattern" value="module\-info\.java$"/>
+    </module>
+
+    <!-- https://checkstyle.org/config_filters.html#SuppressionFilter -->
+    <module name="SuppressionFilter">
+        <property name="file" value="suppressions.xml"/>
+        <property name="optional" value="true"/>
+    </module>
+
+    <!-- Checks that only spaces are used as whitespace -->
+    <module name="FileTabCharacter">
+        <property name="eachLine" value="true"/>
+    </module>
+
+    <!-- Enforce indentation with 4 whitespace characters -->
+    <property name="tabWidth" value="4"/>
+
+    <!-- Enforce maximum line length of 120 characters. Do not run on lines with package
+         or import declarations or urls or constant declarations                         -->
+    <module name="LineLength">
+        <property name="fileExtensions" value="java"/>
+        <property name="max" value="120"/>
+        <property name="ignorePattern"
+                  value="^package.*|^import.*|a href|href|http://|https://|ftp://|(static final)"/>
+    </module>
+
+    <module name="TreeWalker">
+        <!-- Enforces import ordering and grouping -->
+        <module name="CustomImportOrder">
+            <property name="customImportOrderRules"
+                      value="THIRD_PARTY_PACKAGE###STANDARD_JAVA_PACKAGE###SPECIAL_IMPORTS###STATIC"/>
+            <property name="thirdPartyPackageRegExp" value="^(lombok|org|net|com)\."/>
+            <property name="specialImportsRegExp" value="^(fi)\."/>
+            <property name="sortImportsInGroupAlphabetically" value="true"/>
+            <property name="separateLineBetweenGroups" value="true"/>
+        </module>
+        <!-- Enforce exactly one newline between class members (except fields) -->
+        <module name="EmptyLineSeparator">
+            <property name="allowNoEmptyLineBetweenFields" value="true"/>
+            <property name="allowMultipleEmptyLines" value="false"/>
+            <property name="allowMultipleEmptyLinesInsideClassMembers" value="false"/>
+        </module>
+        <!-- Enforces common whitespace conventions around generic parameters -->
+        <module name="GenericWhitespace"/>
+
+        <!-- Enforces maximum length of 30 lines for anonymous inner classes -->
+        <module name="AnonInnerLength">
+            <property name="max" value="30"/>
+        </module>
+
+        <!-- Prevents placing whitespace after tokens -->
+        <module name="NoWhitespaceAfter"/>
+        <!-- More strict whitespace prevention after '.'-character -->
+        <module name="NoWhitespaceAfter">
+            <property name="tokens" value="DOT"/>
+            <property name="allowLineBreaks" value="false"/>
+        </module>
+        <!-- Prevents placing whitespace before tokens -->
+        <module name="NoWhitespaceBefore"/>
+        <!-- Enforce final parameters -->
+        <module name="FinalParameters"/>
+        <!-- Warn about redundant modifiers (everywhere except interfaces) -->
+        <module name="RedundantModifier">
+            <property name="tokens"
+                      value="METHOD_DEF, INTERFACE_DEF, VARIABLE_DEF, ANNOTATION_FIELD_DEF, CTOR_DEF, CLASS_DEF, ENUM_DEF"/>
+        </module>
+    </module>
+</module>

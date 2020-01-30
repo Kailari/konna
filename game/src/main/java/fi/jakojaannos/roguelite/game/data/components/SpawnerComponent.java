@@ -1,32 +1,31 @@
 package fi.jakojaannos.roguelite.game.data.components;
 
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.Component;
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
-import lombok.val;
 import org.joml.Vector2d;
 
 import java.util.Random;
 
-public class SpawnerComponent implements Component {
-    public double spawnFrequency;
-    public double spawnCoolDown, maxSpawnDistance;
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.ecs.Component;
+import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 
+public class SpawnerComponent implements Component {
     public final Random random;
     public final EntityFactory entityFactory;
-
     private final Vector2d temp = new Vector2d();
+    public double spawnFrequency;
+    public double spawnCoolDown;
+    public double maxSpawnDistance;
 
-    public SpawnerComponent(double spawnFrequency, EntityFactory entityFactory) {
+    public SpawnerComponent(final double spawnFrequency, final EntityFactory entityFactory) {
         this(spawnFrequency, entityFactory, 3.0f, System.currentTimeMillis());
     }
 
     public SpawnerComponent(
-            double spawnFrequency,
-            EntityFactory entityFactory,
-            double maxSpawnDistance,
-            long seed
+            final double spawnFrequency,
+            final EntityFactory entityFactory,
+            final double maxSpawnDistance,
+            final long seed
     ) {
         this.spawnFrequency = spawnFrequency;
         this.maxSpawnDistance = maxSpawnDistance;
@@ -42,8 +41,8 @@ public class SpawnerComponent implements Component {
             final Random random,
             final Vector2d result
     ) {
-        double xDir = random.nextDouble() * 2.0f - 1.0f;
-        double yDir = random.nextDouble() * 2.0f - 1.0f;
+        final double xDir = random.nextDouble() * 2.0f - 1.0f;
+        final double yDir = random.nextDouble() * 2.0f - 1.0f;
         result.set(xDir, yDir);
         if (result.lengthSquared() != 0.0) result.normalize();
 
@@ -53,14 +52,13 @@ public class SpawnerComponent implements Component {
         return result;
     }
 
-
     public interface EntityFactory {
         static EntityFactory withRandomDistance(final EntityFactory factory) {
             return (entityManager, spawnerTransform, spawnerComponent) -> {
-                val randomPosition = getRandomSpotAround(spawnerTransform,
-                                                         spawnerComponent.maxSpawnDistance,
-                                                         spawnerComponent.random,
-                                                         spawnerComponent.temp);
+                final var randomPosition = getRandomSpotAround(spawnerTransform,
+                                                               spawnerComponent.maxSpawnDistance,
+                                                               spawnerComponent.random,
+                                                               spawnerComponent.temp);
 
                 return factory.get(entityManager, new Transform(randomPosition.x, randomPosition.y), spawnerComponent);
             };
@@ -73,5 +71,4 @@ public class SpawnerComponent implements Component {
                 SpawnerComponent spawnerComponent
         );
     }
-
 }

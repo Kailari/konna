@@ -1,7 +1,6 @@
 package fi.jakojaannos.roguelite.engine.view.rendering.mesh;
 
 import lombok.Getter;
-import lombok.val;
 
 import java.util.Arrays;
 
@@ -18,7 +17,7 @@ public class VertexFormat {
 
     public void apply() {
         for (int i = 0, offset = 0; i < this.vertexAttributes.length; ++i) {
-            val attribute = this.vertexAttributes[i];
+            final var attribute = this.vertexAttributes[i];
             attribute.apply(i, offset, this.sizeInBytes);
             offset += attribute.getSizeInBytes();
         }

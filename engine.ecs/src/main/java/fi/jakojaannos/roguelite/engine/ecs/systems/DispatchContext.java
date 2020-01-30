@@ -1,17 +1,16 @@
 package fi.jakojaannos.roguelite.engine.ecs.systems;
 
-import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
-import fi.jakojaannos.roguelite.engine.ecs.SystemGroup;
-import lombok.val;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
+import fi.jakojaannos.roguelite.engine.ecs.SystemGroup;
+
 /**
- * Internal representation of status of a dispatch. Stores current dispatch status for systems
- * and groups. Used to determine if system has been ticked during current dispatch.
+ * Internal representation of status of a dispatch. Stores current dispatch status for systems and groups. Used to
+ * determine if system has been ticked during current dispatch.
  */
 public class DispatchContext {
     private final Map<SystemGroup, InternalSystemGroup> groups = new HashMap<>();
@@ -37,7 +36,7 @@ public class DispatchContext {
     }
 
     public boolean isReadyToDispatch(final SystemGroup group) {
-        val internalGroup = this.groups.get(group);
+        final var internalGroup = this.groups.get(group);
         return internalGroup.getDependencies()
                             .allMatch(this::isDispatched)
                 && internalGroup.getGroupDependencies()
@@ -63,7 +62,7 @@ public class DispatchContext {
     }
 
     public Optional<Class<? extends ECSSystem>> findAnyNotDispatched() {
-        for (val entry : this.dispatchStatus.entrySet()) {
+        for (final var entry : this.dispatchStatus.entrySet()) {
             if (!entry.getValue()) {
                 return Optional.of(entry.getKey());
             }

@@ -1,6 +1,5 @@
 package fi.jakojaannos.roguelite.engine.ecs;
 
-import fi.jakojaannos.roguelite.engine.ecs.entities.EntityManagerImpl;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -9,9 +8,11 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import fi.jakojaannos.roguelite.engine.ecs.entities.EntityManagerImpl;
+
 /**
- * Allows manipulating entities and their components. Accessor to a {@link World world's} entity
- * storage. All entity-related data mutations happen through the <code>EntityManager</code>.
+ * Allows manipulating entities and their components. Accessor to a {@link World world's} entity storage. All
+ * entity-related data mutations happen through the <code>EntityManager</code>.
  */
 public interface EntityManager {
     static EntityManager createNew(int entityCapacity, int maxComponentTypes) {
@@ -34,16 +35,16 @@ public interface EntityManager {
     Entity createEntity();
 
     /**
-     * Destroys an entity. The entity is marked for removal instantly, and destroyed during the next
-     * {@link #applyModifications()}
+     * Destroys an entity. The entity is marked for removal instantly, and destroyed during the next {@link
+     * #applyModifications()}
      *
      * @param entity the entity to mark for removal
      */
     void destroyEntity(Entity entity);
 
     /**
-     * Applies all entity mutations. Executes all tasks queued with {@link #createEntity()} and
-     * {@link #destroyEntity(Entity)}
+     * Applies all entity mutations. Executes all tasks queued with {@link #createEntity()} and {@link
+     * #destroyEntity(Entity)}
      */
     void applyModifications();
 
@@ -57,7 +58,6 @@ public interface EntityManager {
      * @return The added component
      */
     <TComponent extends Component> TComponent addComponentTo(Entity entity, TComponent component);
-
 
     /**
      * Removes a component of given type from the entity.
@@ -87,8 +87,7 @@ public interface EntityManager {
      * @param componentClass Component class to get
      * @param <TComponent>   Type of the component
      *
-     * @return If component exists, component optional of the component. Otherwise, an empty
-     * optional
+     * @return If component exists, component optional of the component. Otherwise, an empty optional
      */
     <TComponent extends Component> Optional<TComponent> getComponentOf(
             Entity entity,
@@ -159,8 +158,8 @@ public interface EntityManager {
     );
 
     /**
-     * Gets all entities which have all components specified in <code>required</code> and none of
-     * the components specified in <code>excluded</code>.
+     * Gets all entities which have all components specified in <code>required</code> and none of the components
+     * specified in <code>excluded</code>.
      *
      * @param required       required component types
      * @param excluded       excluded component types
@@ -177,15 +176,14 @@ public interface EntityManager {
     );
 
     /**
-     * Adds the component to the entity if it does not already have a component of the given type.
-     * In other words, ensures the entity has a component of given type.
+     * Adds the component to the entity if it does not already have a component of the given type. In other words,
+     * ensures the entity has a component of given type.
      *
      * @param entity            Entity to add the component to
      * @param componentSupplier Supplier used to get a component to add
      * @param <TComponent>      Type of the component
      *
-     * @return The existing component for the entity or the added if the entity did not have
-     * component of given type yet
+     * @return The existing component for the entity or the added if the entity did not have component of given type yet
      */
     default <TComponent extends Component> TComponent addComponentIfAbsent(
             final Entity entity,
@@ -197,8 +195,8 @@ public interface EntityManager {
     }
 
     /**
-     * Removes the component from the entity if it has a component of given type. In other words,
-     * ensures that the entity has no component of the given type.
+     * Removes the component from the entity if it has a component of given type. In other words, ensures that the
+     * entity has no component of the given type.
      *
      * @param entity         Entity to remove the component from
      * @param componentClass Type of the component to remove
@@ -225,8 +223,8 @@ public interface EntityManager {
     int entityCount();
 
     /**
-     * Gets a stream containing ALL of the entities in the world. Heavy performance cost if whole
-     * stream is iterated, use sparingly and only when absolutely necessary.
+     * Gets a stream containing ALL of the entities in the world. Heavy performance cost if whole stream is iterated,
+     * use sparingly and only when absolutely necessary.
      *
      * @return stream of all the entities in the world
      */

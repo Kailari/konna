@@ -1,7 +1,8 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view;
 
-import fi.jakojaannos.roguelite.engine.view.Viewport;
 import lombok.extern.slf4j.Slf4j;
+
+import fi.jakojaannos.roguelite.engine.view.Viewport;
 
 import static org.lwjgl.opengl.GL11.glViewport;
 

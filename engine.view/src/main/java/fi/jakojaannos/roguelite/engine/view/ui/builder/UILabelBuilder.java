@@ -1,5 +1,7 @@
 package fi.jakojaannos.roguelite.engine.view.ui.builder;
 
+import java.util.function.Consumer;
+
 import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.view.data.components.internal.AutomaticSizeTag;
@@ -7,8 +9,6 @@ import fi.jakojaannos.roguelite.engine.view.data.components.internal.FontSize;
 import fi.jakojaannos.roguelite.engine.view.data.components.internal.label.Text;
 import fi.jakojaannos.roguelite.engine.view.ui.ProportionValue;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
-
-import java.util.function.Consumer;
 
 public class UILabelBuilder extends UIElementBuilder<UILabelBuilder> {
     public UILabelBuilder(

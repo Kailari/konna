@@ -1,12 +1,6 @@
 package fi.jakojaannos.roguelite.engine.network.internal;
 
-import fi.jakojaannos.roguelite.engine.network.message.NetworkMessage;
-import fi.jakojaannos.roguelite.engine.network.message.NetworkMessageHandlerMap;
-import fi.jakojaannos.roguelite.engine.network.message.serialization.MessageDecoder;
-import fi.jakojaannos.roguelite.engine.network.message.serialization.MessageEncoder;
-import fi.jakojaannos.roguelite.engine.network.message.serialization.TypedNetworkMessage;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -15,6 +9,12 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.Optional;
 import java.util.function.Consumer;
+
+import fi.jakojaannos.roguelite.engine.network.message.NetworkMessage;
+import fi.jakojaannos.roguelite.engine.network.message.NetworkMessageHandlerMap;
+import fi.jakojaannos.roguelite.engine.network.message.serialization.MessageDecoder;
+import fi.jakojaannos.roguelite.engine.network.message.serialization.MessageEncoder;
+import fi.jakojaannos.roguelite.engine.network.message.serialization.TypedNetworkMessage;
 
 @Slf4j
 public abstract class CommandChannelRunnable implements Runnable, AutoCloseable {
@@ -25,10 +25,6 @@ public abstract class CommandChannelRunnable implements Runnable, AutoCloseable 
     private final Object writeLock = new Object();
 
     protected Selector selector;
-
-    public boolean isConnected() {
-        return this.selector != null && this.selector.isOpen();
-    }
 
     protected CommandChannelRunnable(
             final NetworkMessageHandlerMap messageHandlers,
@@ -43,19 +39,23 @@ public abstract class CommandChannelRunnable implements Runnable, AutoCloseable 
         this.selector = Selector.open();
     }
 
+    public boolean isConnected() {
+        return this.selector != null && this.selector.isOpen();
+    }
+
     @Override
     public void run() {
         try {
             while (isConnected()) {
                 handleReceivedMessages();
 
-                int selectedKeyCount = this.selector.select();
+                final int selectedKeyCount = this.selector.select();
                 if (selectedKeyCount > 0) {
-                    val keys = this.selector.selectedKeys();
+                    final var keys = this.selector.selectedKeys();
 
-                    val keyIterator = keys.iterator();
+                    final var keyIterator = keys.iterator();
                     while (keyIterator.hasNext()) {
-                        val selectionKey = keyIterator.next();
+                        final var selectionKey = keyIterator.next();
                         keyIterator.remove();
                         handleSelectedKey(this.selector, selectionKey);
                     }
@@ -63,14 +63,14 @@ public abstract class CommandChannelRunnable implements Runnable, AutoCloseable 
             }
 
             shutdown();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             LOG.error("Command channel thread has crashed:", e);
         }
     }
 
     protected void handleSelectedKey(
-            Selector selector,
-            SelectionKey selectionKey
+            final Selector selector,
+            final SelectionKey selectionKey
     ) throws IOException {
         if (selectionKey.isReadable()) {
             handleReadableKey(selectionKey);
@@ -87,15 +87,15 @@ public abstract class CommandChannelRunnable implements Runnable, AutoCloseable 
     }
 
     protected void handleReadableKey(
-            SelectionKey selectionKey
+            final SelectionKey selectionKey
     ) throws IOException {
-        val channel = (SocketChannel) selectionKey.channel();
+        final var channel = (SocketChannel) selectionKey.channel();
 
-        ByteBuffer readBuffer = resolveReadBufferFromKey(selectionKey);
-        Consumer<TypedNetworkMessage<?>> messageConsumer = resolveMessageConsumerFromKey(selectionKey);
+        final ByteBuffer readBuffer = resolveReadBufferFromKey(selectionKey);
+        final Consumer<TypedNetworkMessage<?>> messageConsumer = resolveMessageConsumerFromKey(selectionKey);
 
-        val readCount = channel.read(readBuffer);
-        val endOfStream = readCount < 0;
+        final var readCount = channel.read(readBuffer);
+        final var endOfStream = readCount < 0;
         if (!endOfStream) {
             LOG.trace("Read {} bytes!", readCount);
             tryReadMessage(readBuffer, messageConsumer);
@@ -136,8 +136,8 @@ public abstract class CommandChannelRunnable implements Runnable, AutoCloseable 
     protected abstract void handleReceivedMessages();
 
     protected void handleEndOfStream(
-            SelectionKey selectionKey,
-            SocketChannel channel
+            final SelectionKey selectionKey,
+            final SocketChannel channel
     ) throws IOException {
         selectionKey.cancel();
         channel.close();
@@ -151,7 +151,7 @@ public abstract class CommandChannelRunnable implements Runnable, AutoCloseable 
         if (this.selector != null) {
             try {
                 this.selector.close();
-            } catch (IOException ignored) {
+            } catch (final IOException ignored) {
             }
         }
     }
@@ -166,7 +166,7 @@ public abstract class CommandChannelRunnable implements Runnable, AutoCloseable 
 
             try {
                 tryWriteMessageToChannel(channel, writeBuffer);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 LOG.error("Write to channel failed:", e);
             }
         }
@@ -180,7 +180,7 @@ public abstract class CommandChannelRunnable implements Runnable, AutoCloseable 
         if (writeBuffer.hasRemaining()) {
             LOG.info("Writing {} bytes to {}", writeBuffer.remaining(), channel.getRemoteAddress());
 
-            val remaining = writeBuffer.remaining();
+            final var remaining = writeBuffer.remaining();
             if (channel.write(writeBuffer) < remaining) {
                 LOG.trace("Could not write the whole message. Registering for OP_WRITE");
 

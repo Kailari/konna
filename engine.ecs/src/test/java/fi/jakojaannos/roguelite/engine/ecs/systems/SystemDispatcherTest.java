@@ -1,6 +1,5 @@
 package fi.jakojaannos.roguelite.engine.ecs.systems;
 
-import fi.jakojaannos.roguelite.engine.ecs.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
@@ -11,6 +10,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import fi.jakojaannos.roguelite.engine.ecs.*;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -18,52 +19,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 class SystemDispatcherTest {
-    class SystemBase implements ECSSystem {
-        @Override
-        public void declareRequirements(RequirementsBuilder requirements) {
-        }
-
-        @Override
-        public void tick(
-                Stream<Entity> entities, World world
-        ) {
-            synchronized (callOrderLock) {
-                callOrder.add(this);
-            }
-        }
-    }
-
-    class SystemA extends SystemBase {
-    }
-
-    class SystemB extends SystemBase {
-    }
-
-    class SystemC extends SystemBase {
-    }
-
-    class SystemD extends SystemBase {
-    }
-
-    static class ComponentA implements Component {
-    }
-
-    static class ComponentB implements Component {
-    }
-
-    static class ComponentC implements Component {
-    }
-
-    static class ComponentD implements Component {
-    }
-
     private final Object callOrderLock = new Object();
-    private World world;
-    private EntityManager entityManager;
-    private List<ECSSystem> callOrder;
-    private Entity entityA, entityB, entityC, entityD;
-
-    private ComponentGroup componentGroup = new ComponentGroup() {
+    private final ComponentGroup componentGroup = new ComponentGroup() {
         @Override
         public int getId() {
             return 0;
@@ -79,6 +36,13 @@ class SystemDispatcherTest {
             return List.of(ComponentD.class, ComponentC.class);
         }
     };
+    private World world;
+    private EntityManager entityManager;
+    private List<ECSSystem> callOrder;
+
+    private static <T> Stream<T> streamThat(ArgumentMatcher<Stream<T>> matcher) {
+        return argThat(new SafeStreamMatcher<>(matcher));
+    }
 
     @BeforeEach
     void beforeEach() {
@@ -88,16 +52,16 @@ class SystemDispatcherTest {
         when(world.getEntityManager()).thenReturn(entityManager);
 
         entityManager.registerComponentGroup(componentGroup);
-        entityA = entityManager.createEntity();
+        final Entity entityA = entityManager.createEntity();
         entityManager.addComponentTo(entityA, new ComponentA());
-        entityB = entityManager.createEntity();
+        final Entity entityB = entityManager.createEntity();
         entityManager.addComponentTo(entityB, new ComponentA());
         entityManager.addComponentTo(entityB, new ComponentB());
-        entityC = entityManager.createEntity();
+        final Entity entityC = entityManager.createEntity();
         entityManager.addComponentTo(entityC, new ComponentA());
         entityManager.addComponentTo(entityC, new ComponentB());
         entityManager.addComponentTo(entityC, new ComponentC());
-        entityD = entityManager.createEntity();
+        final Entity entityD = entityManager.createEntity();
         entityManager.addComponentTo(entityD, new ComponentA());
         entityManager.addComponentTo(entityD, new ComponentB());
         entityManager.addComponentTo(entityD, new ComponentC());
@@ -564,8 +528,16 @@ class SystemDispatcherTest {
                       any());
     }
 
-    private static <T> Stream<T> streamThat(ArgumentMatcher<Stream<T>> matcher) {
-        return argThat(new SafeStreamMatcher<>(matcher));
+    static class ComponentA implements Component {
+    }
+
+    static class ComponentB implements Component {
+    }
+
+    static class ComponentC implements Component {
+    }
+
+    static class ComponentD implements Component {
     }
 
     private static class SafeStreamMatcher<T> implements ArgumentMatcher<Stream<T>> {
@@ -582,5 +554,32 @@ class SystemDispatcherTest {
             input = input == null ? item.collect(Collectors.toList()) : input;
             return matcher.matches(input.stream());
         }
+    }
+
+    class SystemBase implements ECSSystem {
+        @Override
+        public void declareRequirements(RequirementsBuilder requirements) {
+        }
+
+        @Override
+        public void tick(
+                Stream<Entity> entities, World world
+        ) {
+            synchronized (callOrderLock) {
+                callOrder.add(this);
+            }
+        }
+    }
+
+    class SystemA extends SystemBase {
+    }
+
+    class SystemB extends SystemBase {
+    }
+
+    class SystemC extends SystemBase {
+    }
+
+    class SystemD extends SystemBase {
     }
 }

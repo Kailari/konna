@@ -1,14 +1,14 @@
 package fi.jakojaannos.roguelite.engine.view.ui.internal;
 
+import lombok.RequiredArgsConstructor;
+
+import java.util.Optional;
+import java.util.function.BiFunction;
+
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-
-import java.util.Optional;
-import java.util.function.BiFunction;
 
 @RequiredArgsConstructor
 public class EntityBackedUIProperty<T> implements UIProperty<T> {
@@ -24,9 +24,10 @@ public class EntityBackedUIProperty<T> implements UIProperty<T> {
     @Override
     public Optional<T> getFor(final UIElement uiElement) {
         if (!(uiElement instanceof EntityBackedUIElement)) {
-            throw new IllegalStateException("Unknown type of UI Element: \"" + uiElement.getClass().getSimpleName() + "\"");
+            throw new IllegalStateException("Unknown type of UI Element: \"" +
+                                                    uiElement.getClass().getSimpleName() + "\"");
         }
-        val entityBackedUiElement = (EntityBackedUIElement) uiElement;
+        final var entityBackedUiElement = (EntityBackedUIElement) uiElement;
         return this.valueGetter.apply(entityBackedUiElement.getEntity(),
                                       entityBackedUiElement.getEntityManager());
     }
@@ -34,9 +35,10 @@ public class EntityBackedUIProperty<T> implements UIProperty<T> {
     @Override
     public void set(final UIElement uiElement, final T value) {
         if (!(uiElement instanceof EntityBackedUIElement)) {
-            throw new IllegalStateException("Unknown type of UI Element: \"" + uiElement.getClass().getSimpleName() + "\"");
+            throw new IllegalStateException("Unknown type of UI Element: \"" +
+                                                    uiElement.getClass().getSimpleName() + "\"");
         }
-        val entityBackedUiElement = (EntityBackedUIElement) uiElement;
+        final var entityBackedUiElement = (EntityBackedUIElement) uiElement;
         this.valueSetter.accept(entityBackedUiElement.getEntity(),
                                 entityBackedUiElement.getEntityManager(),
                                 value);

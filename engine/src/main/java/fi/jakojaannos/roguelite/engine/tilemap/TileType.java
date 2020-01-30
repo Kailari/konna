@@ -6,7 +6,7 @@ public class TileType {
     @Getter private final int typeIndex;
     @Getter private final boolean solid;
 
-    public TileType(int typeIndex, boolean solid) {
+    public TileType(final int typeIndex, final boolean solid) {
         this.typeIndex = typeIndex;
         this.solid = solid;
     }

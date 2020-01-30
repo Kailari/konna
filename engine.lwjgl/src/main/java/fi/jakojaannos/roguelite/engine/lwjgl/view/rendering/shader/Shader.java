@@ -19,7 +19,7 @@ public class Shader implements AutoCloseable {
 
         try {
             glShaderSource(this.shaderPtr, Files.readString(sourcePath));
-        } catch (IOException e) {
+        } catch (final IOException e) {
             LOG.error("Loading shader \"{}\" failed!", sourcePath);
             return;
         }
@@ -34,7 +34,7 @@ public class Shader implements AutoCloseable {
         glAttachShader(programPtr, this.shaderPtr);
     }
 
-    private static String shaderTypeToString(int shaderType) {
+    private static String shaderTypeToString(final int shaderType) {
         switch (shaderType) {
             case GL_GEOMETRY_SHADER:
                 return "GL_GEOMETRY_SHADER";

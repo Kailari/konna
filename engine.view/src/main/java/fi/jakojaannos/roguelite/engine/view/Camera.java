@@ -1,40 +1,41 @@
 package fi.jakojaannos.roguelite.engine.view;
 
-import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
-import fi.jakojaannos.roguelite.engine.state.GameState;
 import lombok.Getter;
-import lombok.val;
 import org.joml.Vector2d;
 
-// TODO: Move anything that can be abstracted from LWJGLCamera here (allows better testing matrices etc. producing correct coordinates)
+import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
+import fi.jakojaannos.roguelite.engine.state.GameState;
+
+// TODO: Move anything that can be abstracted from LWJGLCamera here
+//  (allows better testing matrices etc. producing correct coordinates)
 
 public abstract class Camera implements AutoCloseable {
     private final Vector2d position;
     @Getter private final Viewport viewport;
 
+    public Camera(final Vector2d position, final Viewport viewport) {
+        this.position = new Vector2d(position);
+        this.viewport = viewport;
+    }
+
     public final double getX() {
         return this.position.x;
+    }
+
+    public final void setX(final double x) {
+        setPosition(x, getY());
     }
 
     public final double getY() {
         return this.position.y;
     }
 
-    public final void setX(double x) {
-        setPosition(x, getY());
-    }
-
-    public final void setY(double y) {
+    public final void setY(final double y) {
         setPosition(getX(), y);
     }
 
-    public void setPosition(double x, double y) {
+    public void setPosition(final double x, final double y) {
         this.position.set(x, y);
-    }
-
-    public Camera(final Vector2d position, final Viewport viewport) {
-        this.position = new Vector2d(position);
-        this.viewport = viewport;
     }
 
     public abstract void resize(int width, int height);
@@ -55,9 +56,9 @@ public abstract class Camera implements AutoCloseable {
 
     public abstract double getVisibleAreaHeight();
 
-    public void updateConfigurationFromState(GameState state) {
-        val world = state.getWorld();
-        val cameraProperties = world.getOrCreateResource(CameraProperties.class);
+    public void updateConfigurationFromState(final GameState state) {
+        final var world = state.getWorld();
+        final var cameraProperties = world.getOrCreateResource(CameraProperties.class);
 
         // FIXME: THIS BREAKS MVC ENCAPSULATION. Technically, we should queue task on the controller
         //  to make the change as we NEVER should mutate state on the view.

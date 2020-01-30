@@ -11,7 +11,7 @@ Using `null` is bad. Public methods should never return `null` and should return
 
 
 ### Naming Conventions
-Avoid abbreviations. As of writing this, the year is soon 2020, we have autocomplete and modern editors/IDEs. There is no sensible reason to write stuff like `val em` over `val entityManager`. Short abbreaviations only obfuscate the code, making it harder to read. Use full words for variable names. Yes, this includes commonly used abbreviations like `damage -> dmg`. Don't shorten those either, you are not that lazy. Use autocomplete if you are.
+Avoid abbreviations. As of writing this, the year is soon 2020, we have autocomplete and modern editors/IDEs. There is no sensible reason to write stuff like `final var em` over `final var entityManager`. Short abbreaviations only obfuscate the code, making it harder to read. Use full words for variable names. Yes, this includes commonly used abbreviations like `damage -> dmg`. Don't shorten those either, you are not that lazy. Use autocomplete if you are.
 
 In general, class names start with a capital letter and instances should have similar name, but starting with lowercase. Moreover, component instances should always have the name of the component class in their name.
 
@@ -30,15 +30,15 @@ Collider otherBounds = ...   // NO. Don't name things as something they are not.
 ```
 The name `otherCollider` immediately tells the one reading the code that the instance is a collider component, belonging to an entity tagged as `other`. On the other hand `otherBounds` misleads the reader to think that the instance has boundaries of some kind. While partially true, this might cause confusion and bugs later down the line.
 
-There are some situations where it is allowed to use names breaking this rule. These are both valid *(assuming the loop/method continues for only 4-8 lines at most afterwards)*:
+There are some situations where it is allowed to use names breaking this rule. These are both final varid *(assuming the loop/method continues for only 4-8 lines at most afterwards)*:
 ```java
-for (val damageInstance : damageInstances) { /* some short 4-8 line loop */ }
-for (val instance : damageInstances) { /* some short 4-8 line loop */ }
+for (final var damageInstance : damageInstances) { /* some short 4-8 line loop */ }
+for (final var instance : damageInstances) { /* some short 4-8 line loop */ }
 ```
 And same goes for these:
 ```java
-val otherEntity = collision.getOtherEntity();
-val other = collision.getOtherEntity();
+final var otherEntity = collision.getOtherEntity();
+final var other = collision.getOtherEntity();
 ```
 
 The more verbose form is always preferred, but in short loops or methods it does not matter that much whether or not the full noun is postfixed.

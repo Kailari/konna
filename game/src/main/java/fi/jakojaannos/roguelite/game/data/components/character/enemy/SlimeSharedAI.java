@@ -1,11 +1,12 @@
 package fi.jakojaannos.roguelite.game.data.components.character.enemy;
 
-import fi.jakojaannos.roguelite.engine.ecs.Component;
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import org.joml.Vector2d;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import fi.jakojaannos.roguelite.engine.ecs.Component;
+import fi.jakojaannos.roguelite.engine.ecs.Entity;
 
 public class SlimeSharedAI implements Component {
 

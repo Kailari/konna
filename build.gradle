@@ -14,6 +14,12 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'jacoco'
     apply plugin: 'org.javamodularity.moduleplugin'
+    apply plugin: 'checkstyle'
+
+    checkstyle {
+        configFile file('../config/checkstyle/checkstyle.xml')
+        toolVersion '8.29'
+    }
 
     dependencies {
         // FindBugs Annotations

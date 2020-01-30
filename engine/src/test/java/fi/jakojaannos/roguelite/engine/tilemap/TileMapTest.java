@@ -1,11 +1,11 @@
 package fi.jakojaannos.roguelite.engine.tilemap;
 
-import fi.jakojaannos.roguelite.engine.utilities.GenerateStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import fi.jakojaannos.roguelite.engine.utilities.GenerateStream;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class TileMapTest {
     private TileMap<String> level;

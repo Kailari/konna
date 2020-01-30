@@ -1,12 +1,12 @@
 package fi.jakojaannos.roguelite.engine.view.ui.builder;
 
-import fi.jakojaannos.roguelite.engine.view.data.components.internal.panel.BorderSize;
-import fi.jakojaannos.roguelite.engine.view.data.components.internal.panel.PanelSprite;
+import java.util.function.Consumer;
+
 import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.engine.view.data.components.internal.panel.BorderSize;
+import fi.jakojaannos.roguelite.engine.view.data.components.internal.panel.PanelSprite;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
-
-import java.util.function.Consumer;
 
 public final class UIPanelBuilder extends UIElementBuilder<UIPanelBuilder> {
     public UIPanelBuilder(

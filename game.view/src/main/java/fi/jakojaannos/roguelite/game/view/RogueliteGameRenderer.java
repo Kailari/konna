@@ -1,5 +1,12 @@
 package fi.jakojaannos.roguelite.game.view;
 
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+
+import java.nio.file.Path;
+import java.util.Map;
+import java.util.Optional;
+
 import fi.jakojaannos.roguelite.engine.content.AssetManager;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
@@ -15,13 +22,6 @@ import fi.jakojaannos.roguelite.game.state.MainMenuGameState;
 import fi.jakojaannos.roguelite.game.view.state.GameStateRenderer;
 import fi.jakojaannos.roguelite.game.view.state.GameplayGameStateRenderer;
 import fi.jakojaannos.roguelite.game.view.state.MainMenuGameStateRenderer;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-
-import java.nio.file.Path;
-import java.util.Map;
-import java.util.Optional;
 
 @Slf4j
 public class RogueliteGameRenderer implements GameRenderer {
@@ -37,7 +37,7 @@ public class RogueliteGameRenderer implements GameRenderer {
     ) {
         LOG.trace("Constructing GameRenderer...");
 
-        val viewport = backend.getViewport(window);
+        final var viewport = backend.getViewport(window);
         this.camera = backend.createCamera(viewport);
         window.addResizeCallback(viewport::resize);
         window.addResizeCallback(this.camera::resize);
@@ -64,11 +64,12 @@ public class RogueliteGameRenderer implements GameRenderer {
         this.camera.updateConfigurationFromState(state);
 
         // Snap camera to active camera
-        val world = state.getWorld();
-        val entityManager = world.getEntityManager();
+        final var world = state.getWorld();
+        final var entityManager = world.getEntityManager();
         Optional.ofNullable(world.getOrCreateResource(CameraProperties.class).cameraEntity)
                 .flatMap(cameraEntity -> entityManager.getComponentOf(cameraEntity, Transform.class))
-                .ifPresent(cameraTransform -> this.camera.setPosition(cameraTransform.position.x, cameraTransform.position.y));
+                .ifPresent(cameraTransform -> this.camera.setPosition(cameraTransform.position.x,
+                                                                      cameraTransform.position.y));
 
         Optional.ofNullable(this.stateRenderers.get(state.getClass()))
                 .ifPresent(renderer -> renderer.render(state.getWorld()));

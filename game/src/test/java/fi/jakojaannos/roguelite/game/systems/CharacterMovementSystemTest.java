@@ -1,20 +1,21 @@
 package fi.jakojaannos.roguelite.game.systems;
 
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
-import fi.jakojaannos.roguelite.game.data.components.character.WalkingMovementAbility;
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.game.data.components.Velocity;
-import fi.jakojaannos.roguelite.engine.data.resources.Time;
-import fi.jakojaannos.roguelite.game.systems.characters.movement.CharacterMovementSystem;
-import fi.jakojaannos.roguelite.game.systems.physics.ApplyVelocitySystem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.stream.Stream;
+
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.data.resources.Time;
+import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.game.data.components.Velocity;
+import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
+import fi.jakojaannos.roguelite.game.data.components.character.WalkingMovementAbility;
+import fi.jakojaannos.roguelite.game.systems.characters.movement.CharacterMovementSystem;
+import fi.jakojaannos.roguelite.game.systems.physics.ApplyVelocitySystem;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -68,7 +69,7 @@ class CharacterMovementSystemTest {
             this.applyVelocity.tick(Stream.of(entity), this.world);
         }
 
-        assertEquals(expectedSpeedAfter10s, this.velocity.velocity.length(), EPSILON);
+        assertEquals(expectedSpeedAfter10s, this.velocity.length(), EPSILON);
     }
 
     @ParameterizedTest
@@ -88,7 +89,7 @@ class CharacterMovementSystemTest {
             this.applyVelocity.tick(Stream.of(entity), this.world);
         }
 
-        assertEquals(expectedSpeedAfter10s, this.velocity.velocity.length(), EPSILON);
+        assertEquals(expectedSpeedAfter10s, this.velocity.length(), EPSILON);
     }
 
     @ParameterizedTest
@@ -108,7 +109,7 @@ class CharacterMovementSystemTest {
             this.applyVelocity.tick(Stream.of(entity), this.world);
         }
 
-        assertEquals(expectedSpeedAfter10s, this.velocity.velocity.length(), EPSILON);
+        assertEquals(expectedSpeedAfter10s, this.velocity.length(), EPSILON);
     }
 
     @ParameterizedTest

@@ -1,15 +1,15 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.shader;
 
-import fi.jakojaannos.roguelite.engine.view.rendering.shader.ShaderProgram;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryStack;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
+import fi.jakojaannos.roguelite.engine.view.rendering.shader.ShaderProgram;
 
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.glBindFragDataLocation;
@@ -54,7 +54,7 @@ class LWJGLShaderProgram implements AutoCloseable, ShaderProgram {
 
     @Override
     public void setUniformMat4x4(final String uniformName, final Matrix4f matrix) {
-        try (val stack = MemoryStack.stackPush()) {
+        try (final var stack = MemoryStack.stackPush()) {
             glUniformMatrix4fv(this.uniformLocations.computeIfAbsent(uniformName,
                                                                      this::getUniformLocation),
                                false,

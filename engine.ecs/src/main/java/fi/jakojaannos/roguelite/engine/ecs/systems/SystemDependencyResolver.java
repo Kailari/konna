@@ -1,25 +1,24 @@
 package fi.jakojaannos.roguelite.engine.ecs.systems;
 
+import lombok.RequiredArgsConstructor;
+
+import java.util.*;
+import java.util.stream.Collectors;
+import javax.annotation.Nullable;
+
 import fi.jakojaannos.roguelite.engine.ecs.DispatcherBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.SystemGroup;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-
-import javax.annotation.Nullable;
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
- * Backend for handling constructing system dependency graph during {@link DispatcherBuilder}.
- * Handles dependency validation and assigning proper concrete dependencies on dependency
- * declarations.
+ * Backend for handling constructing system dependency graph during {@link DispatcherBuilder}. Handles dependency final
+ * varidation and assigning proper concrete dependencies on dependency declarations.
  */
 class SystemDependencyResolver {
     private final Map<Class<? extends ECSSystem>, Entry> systems = new HashMap<>();
     private final Map<SystemGroup, InternalSystemGroup.Builder> groups = new HashMap<>();
 
-    private boolean firstInstanceAdded = false;
+    private boolean firstInstanceAdded;
 
     void addGroup(final SystemGroup group) {
         if (this.firstInstanceAdded) {
@@ -74,12 +73,12 @@ class SystemDependencyResolver {
         this.groups.get(group).dependency(instance.getClass());
     }
 
-    private Entry entryFor(Class<? extends ECSSystem> systemClass) {
+    private Entry entryFor(final Class<? extends ECSSystem> systemClass) {
         return this.systems.computeIfAbsent(systemClass, clazz -> new Entry());
     }
 
-    private Entry entryFor(ECSSystem systemInstance) {
-        val entry = entryFor(systemInstance.getClass());
+    private Entry entryFor(final ECSSystem systemInstance) {
+        final var entry = entryFor(systemInstance.getClass());
         if (entry.systemInstance == null) {
             entry.systemInstance = systemInstance;
         } else if (entry.systemInstance != systemInstance) {
@@ -99,8 +98,8 @@ class SystemDependencyResolver {
         this.groups.get(group).system(instance);
     }
 
-    public SystemDependencies buildFor(ECSSystem instance) {
-        val entry = this.systems.get(instance.getClass());
+    public SystemDependencies buildFor(final ECSSystem instance) {
+        final var entry = this.systems.get(instance.getClass());
 
         validateSystemInstances(entry.tickAfter);
         validateSystemInstances(entry.tickBefore);
@@ -109,7 +108,7 @@ class SystemDependencyResolver {
         return new SystemDependencies(entry.tickAfter, entry.tickAfterGroup);
     }
 
-    private void validateSystemInstances(Collection<Class<? extends ECSSystem>> systems) {
+    private void validateSystemInstances(final Collection<Class<? extends ECSSystem>> systems) {
         if (!systems.stream()
                     .map(this::entryFor)
                     .allMatch(Entry::hasInstance)) {
@@ -123,12 +122,12 @@ class SystemDependencyResolver {
     }
 
     public List<InternalSystemGroup> buildGroups() {
-        val groups = this.groups.values()
-                                .stream()
-                                .map(InternalSystemGroup.Builder::build)
-                                .collect(Collectors.toList());
-        for (val group : groups) {
-            for (val dependency : (Iterable<Class<? extends ECSSystem>>) group.getDependencies()::iterator) {
+        final var groups = this.groups.values()
+                                      .stream()
+                                      .map(InternalSystemGroup.Builder::build)
+                                      .collect(Collectors.toList());
+        for (final var group : groups) {
+            for (final var dependency : (Iterable<Class<? extends ECSSystem>>) group.getDependencies()::iterator) {
                 if (group.getSystems().anyMatch(system -> system.equals(dependency))) {
                     throw new IllegalStateException(String.format(
                             "Group %s depends on the system %s which belongs to it!",
@@ -137,7 +136,7 @@ class SystemDependencyResolver {
                 }
             }
 
-            for (val system : (Iterable<Class<? extends ECSSystem>>) group.getSystems()::iterator) {
+            for (final var system : (Iterable<Class<? extends ECSSystem>>) group.getSystems()::iterator) {
                 if (entryFor(system).tickAfterGroup.contains(group.getGroup())) {
                     throw new IllegalStateException(String.format(
                             "System %s depends on the group %s which it belongs to!",
@@ -150,7 +149,7 @@ class SystemDependencyResolver {
         return groups;
     }
 
-    public void addGroupDependency(SystemGroup group, SystemGroup dependency) {
+    public void addGroupDependency(final SystemGroup group, final SystemGroup dependency) {
         this.groups.get(group).groupDependency(dependency);
     }
 

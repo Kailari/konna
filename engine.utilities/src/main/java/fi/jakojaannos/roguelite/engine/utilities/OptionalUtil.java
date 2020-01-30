@@ -1,7 +1,6 @@
 package fi.jakojaannos.roguelite.engine.utilities;
 
 import lombok.experimental.UtilityClass;
-import lombok.val;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -13,7 +12,7 @@ public class OptionalUtil {
     /**
      * Returns the value wrapped in optional if all given condition optionals are present.
      *
-     * @param value      Value to wrap
+     * @param value      value to wrap
      * @param conditions List of optionals that need to be present
      * @param <T>        Type of the value to return
      *
@@ -34,7 +33,7 @@ public class OptionalUtil {
     /**
      * Returns the value if all given condition optionals are present.
      *
-     * @param value      Value to return
+     * @param value      value to return
      * @param conditions List of optionals that need to be present
      * @param <T>        Type of the value to return
      *
@@ -55,7 +54,7 @@ public class OptionalUtil {
     /**
      * Returns the value wrapped in optional if none of the given condition optionals are present.
      *
-     * @param value      Value to wrap
+     * @param value      value to wrap
      * @param conditions List of optionals that need to be empty
      * @param <T>        Type of the value to return
      *
@@ -76,7 +75,7 @@ public class OptionalUtil {
     /**
      * Returns the value if all given condition optionals are present.
      *
-     * @param value      Value to return
+     * @param value      value to return
      * @param conditions List of optionals that need to be empty
      * @param <T>        Type of the value to return
      *
@@ -97,7 +96,7 @@ public class OptionalUtil {
     /**
      * Returns the value wrapped in optional if any of the given condition optionals are empty.
      *
-     * @param value      Value to wrap
+     * @param value      value to wrap
      * @param conditions List of optionals of which one needs to be empty
      * @param <T>        Type of the value to return
      *
@@ -108,7 +107,7 @@ public class OptionalUtil {
             final T value,
             final Optional<?>... conditions
     ) {
-        for (val condition : conditions) {
+        for (final var condition : conditions) {
             if (condition.isEmpty()) {
                 return Optional.of(value);
             }
@@ -120,7 +119,7 @@ public class OptionalUtil {
     /**
      * Returns the value if any of the given condition optionals are empty.
      *
-     * @param value      Value to return
+     * @param value      value to return
      * @param conditions List of optionals of which one needs to be empty
      * @param <T>        Type of the value to return
      *
@@ -131,7 +130,7 @@ public class OptionalUtil {
             final Optional<T> value,
             final Optional<?>... conditions
     ) {
-        for (val condition : conditions) {
+        for (final var condition : conditions) {
             if (condition.isEmpty()) {
                 return value;
             }

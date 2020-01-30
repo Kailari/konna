@@ -1,5 +1,12 @@
 package fi.jakojaannos.roguelite.game.systems;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
+
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
@@ -9,12 +16,6 @@ import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
 import fi.jakojaannos.roguelite.game.data.components.BasicTurretComponent;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.EnemyTag;
 import fi.jakojaannos.roguelite.game.data.components.weapon.ProjectileStats;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -76,7 +77,7 @@ public class TurretControllerSystemTest {
     }
 
     @Test
-    void targetIsRemovedAfterBecomingInvalid() {
+    void targetIsRemovedAfterBecominginvalid() {
         Entity target = entityManager.createEntity();
         entityManager.addComponentTo(target, new EnemyTag());
         entityManager.addComponentTo(target, new Transform(4.0, 4.0));

@@ -1,18 +1,18 @@
 package fi.jakojaannos.roguelite.game.data.archetypes;
 
+import org.joml.Vector2d;
+
+import javax.annotation.Nonnull;
+
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.DamageSource;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
-import fi.jakojaannos.roguelite.game.data.components.weapon.ProjectileStats;
 import fi.jakojaannos.roguelite.game.data.components.SpriteInfo;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
+import fi.jakojaannos.roguelite.game.data.components.weapon.ProjectileStats;
 import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
-import lombok.val;
-import org.joml.Vector2d;
-
-import javax.annotation.Nonnull;
 
 public class BasicProjectileArchetype {
     public static Entity create(
@@ -31,16 +31,15 @@ public class BasicProjectileArchetype {
                       source);
     }
 
-
     public static Entity create(
             final World world,
             final Transform transform,
             final Velocity velocity,
             final DamageSource<?> source
     ) {
-        val entities = world.getEntityManager();
+        final var entities = world.getEntityManager();
 
-        val projectile = entities.createEntity();
+        final var projectile = entities.createEntity();
         entities.addComponentTo(projectile, createProjectileStats(source));
         entities.addComponentTo(projectile, createCollider());
         entities.addComponentTo(projectile, transform);
@@ -52,7 +51,7 @@ public class BasicProjectileArchetype {
 
     @Nonnull
     private static Collider createCollider() {
-        val collider = new Collider(CollisionLayer.PLAYER_PROJECTILE);
+        final var collider = new Collider(CollisionLayer.PLAYER_PROJECTILE);
         collider.width = 0.30;
         collider.height = 0.30;
         collider.origin.set(0.15);
@@ -63,9 +62,8 @@ public class BasicProjectileArchetype {
         return new ProjectileStats(1.0, source);
     }
 
-
     private static SpriteInfo createSpriteInfo() {
-        val sprite = new SpriteInfo();
+        final var sprite = new SpriteInfo();
         sprite.spriteName = "sprites/projectile";
 
         return sprite;

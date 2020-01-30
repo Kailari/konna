@@ -1,5 +1,14 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering;
 
+import lombok.extern.slf4j.Slf4j;
+import org.joml.Matrix4f;
+import org.joml.Vector2d;
+import org.lwjgl.system.MemoryUtil;
+
+import java.nio.ByteBuffer;
+import java.nio.file.Path;
+import javax.annotation.Nullable;
+
 import fi.jakojaannos.roguelite.engine.utilities.math.RotatedRectangle;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.rendering.Texture;
@@ -10,15 +19,6 @@ import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexFormat;
 import fi.jakojaannos.roguelite.engine.view.rendering.shader.EngineUniformBufferObjectIndices;
 import fi.jakojaannos.roguelite.engine.view.rendering.shader.ShaderProgram;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.SpriteBatchBase;
-import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-import org.joml.Matrix4f;
-import org.joml.Vector2d;
-import org.lwjgl.system.MemoryUtil;
-
-import javax.annotation.Nullable;
-import java.nio.ByteBuffer;
-import java.nio.file.Path;
 
 @Slf4j
 public class LWJGLSpriteBatch extends SpriteBatchBase {
@@ -61,6 +61,21 @@ public class LWJGLSpriteBatch extends SpriteBatchBase {
         this.batchMesh.setVertexData(this.vertexDataBuffer);
     }
 
+    private static ShaderProgram createShader(
+            final Path assetRoot,
+            final String shader,
+            final RenderingBackend backend
+    ) {
+        return backend.createShaderProgram()
+                      .vertexShader(assetRoot.resolve("shaders").resolve(shader + ".vert"))
+                      .fragmentShader(assetRoot.resolve("shaders").resolve(shader + ".frag"))
+                      .attributeLocation(0, "in_pos")
+                      .attributeLocation(1, "in_uv")
+                      .attributeLocation(2, "in_tint")
+                      .fragmentDataLocation(0, "out_fragColor")
+                      .build();
+    }
+
     @Override
     protected void queueFrame(
             final TextureRegion region,
@@ -72,26 +87,26 @@ public class LWJGLSpriteBatch extends SpriteBatchBase {
             final double height,
             final double rotation
     ) {
-        val offset = getNFrames() * VERTICES_PER_SPRITE * SIZE_IN_BYTES;
-        tmpRectangle.set(x, y, originX, originY, width, height, rotation);
-        tmpRectangle.getTopLeft(tmpVertex);
+        final var offset = getNFrames() * VERTICES_PER_SPRITE * SIZE_IN_BYTES;
+        this.tmpRectangle.set(x, y, originX, originY, width, height, rotation);
+        this.tmpRectangle.getTopLeft(this.tmpVertex);
         updateVertex(offset,
-                     tmpVertex.x, tmpVertex.y,
+                     this.tmpVertex.x, this.tmpVertex.y,
                      (float) region.getU0(), (float) region.getV0(),
                      1.0f, 1.0f, 1.0f);
-        tmpRectangle.getTopRight(tmpVertex);
+        this.tmpRectangle.getTopRight(this.tmpVertex);
         updateVertex(offset + SIZE_IN_BYTES,
-                     tmpVertex.x, tmpVertex.y,
+                     this.tmpVertex.x, this.tmpVertex.y,
                      (float) region.getU1(), (float) region.getV0(),
                      1.0f, 1.0f, 1.0f);
-        tmpRectangle.getBottomRight(tmpVertex);
+        this.tmpRectangle.getBottomRight(this.tmpVertex);
         updateVertex(offset + (2 * SIZE_IN_BYTES),
-                     tmpVertex.x, tmpVertex.y,
+                     this.tmpVertex.x, this.tmpVertex.y,
                      (float) region.getU1(), (float) region.getV1(),
                      1.0f, 1.0f, 1.0f);
-        tmpRectangle.getBottomLeft(tmpVertex);
+        this.tmpRectangle.getBottomLeft(this.tmpVertex);
         updateVertex(offset + (3 * SIZE_IN_BYTES),
-                     tmpVertex.x, tmpVertex.y,
+                     this.tmpVertex.x, this.tmpVertex.y,
                      (float) region.getU0(), (float) region.getV1(),
                      1.0f, 1.0f, 1.0f);
     }
@@ -107,7 +122,7 @@ public class LWJGLSpriteBatch extends SpriteBatchBase {
             final double g,
             final double b
     ) {
-        val offset = getNFrames() * VERTICES_PER_SPRITE * SIZE_IN_BYTES;
+        final var offset = getNFrames() * VERTICES_PER_SPRITE * SIZE_IN_BYTES;
         updateVertex(offset,
                      x0, y0,
                      textureRegion.getU0(), textureRegion.getV0(),
@@ -127,14 +142,14 @@ public class LWJGLSpriteBatch extends SpriteBatchBase {
     }
 
     private void updateVertex(
-            int offset,
-            double x,
-            double y,
-            double u,
-            double v,
-            double r,
-            double g,
-            double b
+            final int offset,
+            final double x,
+            final double y,
+            final double u,
+            final double v,
+            final double r,
+            final double g,
+            final double b
     ) {
         this.vertexDataBuffer.putFloat(offset, (float) x);
         this.vertexDataBuffer.putFloat(offset + 4, (float) y);
@@ -174,7 +189,7 @@ public class LWJGLSpriteBatch extends SpriteBatchBase {
     }
 
     private int[] constructIndicesArray() {
-        val indices = new int[MAX_SPRITES_PER_BATCH * 6];
+        final var indices = new int[MAX_SPRITES_PER_BATCH * 6];
         for (int i = 0, j = 0; i < indices.length; i += 6, j += 4) {
             indices[i] = j;
             indices[i + 1] = j + 1;
@@ -184,20 +199,5 @@ public class LWJGLSpriteBatch extends SpriteBatchBase {
             indices[i + 5] = j;
         }
         return indices;
-    }
-
-    private static ShaderProgram createShader(
-            final Path assetRoot,
-            final String shader,
-            final RenderingBackend backend
-    ) {
-        return backend.createShaderProgram()
-                      .vertexShader(assetRoot.resolve("shaders").resolve(shader + ".vert"))
-                      .fragmentShader(assetRoot.resolve("shaders").resolve(shader + ".frag"))
-                      .attributeLocation(0, "in_pos")
-                      .attributeLocation(1, "in_uv")
-                      .attributeLocation(2, "in_tint")
-                      .fragmentDataLocation(0, "out_fragColor")
-                      .build();
     }
 }

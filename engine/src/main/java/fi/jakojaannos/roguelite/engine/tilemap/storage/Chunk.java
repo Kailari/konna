@@ -1,7 +1,6 @@
 package fi.jakojaannos.roguelite.engine.tilemap.storage;
 
 import lombok.Getter;
-import lombok.val;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,19 +12,20 @@ public final class Chunk<TTile> {
     private static final int TILES_PER_CHUNK = CHUNK_SIZE * CHUNK_SIZE;
 
     private final int[] tileData = new int[TILES_PER_CHUNK];
-    @Getter private final int chunkX, chunkY;
+    @Getter private final int chunkX;
+    @Getter private final int chunkY;
 
     private transient final List<TTile> tileTypes = new ArrayList<>();
     private transient final Map<TTile, Integer> tileTypeToIndex = new HashMap<>();
 
-    public Chunk(final int chunkX, final int chunkY,  final TTile defaultTileType) {
+    public Chunk(final int chunkX, final int chunkY, final TTile defaultTileType) {
         this.chunkX = chunkX;
         this.chunkY = chunkY;
         this.tileTypes.add(defaultTileType);
         this.tileTypeToIndex.put(defaultTileType, 0);
     }
 
-    private int local(int coord) {
+    private int local(final int coord) {
         return Math.abs(coord % CHUNK_SIZE);
     }
 
@@ -39,7 +39,7 @@ public final class Chunk<TTile> {
     public void setByTileCoordinates(
             final int x,
             final int y,
-             final TTile tileType
+            final TTile tileType
     ) {
         setByLocal(local(x), local(y), tileType);
     }
@@ -52,14 +52,14 @@ public final class Chunk<TTile> {
         return this.tileTypes.get(this.tileData[index(localX, localY)]);
     }
 
-    private void setByLocal(final int localX, final int localY,  final TTile tileType) {
+    private void setByLocal(final int localX, final int localY, final TTile tileType) {
         this.tileData[index(localX, localY)] = resolveTileTypeIndex(tileType);
     }
 
-    private int resolveTileTypeIndex( final TTile tileType) {
+    private int resolveTileTypeIndex(final TTile tileType) {
         return this.tileTypeToIndex.computeIfAbsent(tileType,
                                                     type -> {
-                                                        val index = this.tileTypes.size();
+                                                        final var index = this.tileTypes.size();
                                                         this.tileTypes.add(type);
                                                         return index;
                                                     });

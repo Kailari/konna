@@ -1,9 +1,9 @@
 package fi.jakojaannos.roguelite.game.test.view;
 
-import fi.jakojaannos.roguelite.engine.state.GameState;
+import org.joml.Vector2d;
+
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
-import org.joml.Vector2d;
 
 public class TestCamera extends Camera {
     public TestCamera(final Viewport viewport) {

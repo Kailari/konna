@@ -1,8 +1,8 @@
 package fi.jakojaannos.roguelite.game.systems.collision;
 
-import fi.jakojaannos.roguelite.engine.utilities.BitMaskUtils;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
+
+import fi.jakojaannos.roguelite.engine.utilities.BitMaskUtils;
 
 @Slf4j
 public enum CollisionLayer {
@@ -15,6 +15,19 @@ public enum CollisionLayer {
     ENEMY;
 
     private static final int MASK_SIZE = 1;
+
+    static {
+        LOG.debug("Registering collision layers...");
+
+        COLLIDE_ALL.setCollidesWith(values());
+        OVERLAP_ALL.setCollidesWith(values());
+        PLAYER.setCollidesWith(COLLIDE_ALL, OBSTACLE);
+        PLAYER.setOverlapsWith(OVERLAP_ALL, ENEMY);
+        PLAYER_PROJECTILE.setCollidesWith(COLLIDE_ALL, OBSTACLE);
+        PLAYER_PROJECTILE.setOverlapsWith(OVERLAP_ALL, ENEMY);
+        ENEMY.setCollidesWith(COLLIDE_ALL, OBSTACLE);
+        ENEMY.setOverlapsWith(OVERLAP_ALL, PLAYER);
+    }
 
     private final byte[] collisionMask = new byte[MASK_SIZE];
     private final byte[] overlapMask = new byte[MASK_SIZE];
@@ -33,7 +46,7 @@ public enum CollisionLayer {
 
     private void setCollidesWith(final CollisionLayer... layers) {
         LOG.trace("Setting collisions for {}", this.name());
-        for (val other : layers) {
+        for (final var other : layers) {
             LOG.trace("\t-> {}", other.name());
             BitMaskUtils.setNthBit(this.collisionMask, other.getIndex());
         }
@@ -41,22 +54,9 @@ public enum CollisionLayer {
 
     private void setOverlapsWith(final CollisionLayer... layers) {
         LOG.trace("Setting overlaps for {}", this.name());
-        for (val other : layers) {
+        for (final var other : layers) {
             LOG.trace("\t-> {}", other.name());
             BitMaskUtils.setNthBit(this.overlapMask, other.getIndex());
         }
-    }
-
-    static {
-        LOG.debug("Registering collision layers...");
-
-        COLLIDE_ALL.setCollidesWith(values());
-        OVERLAP_ALL.setCollidesWith(values());
-        PLAYER.setCollidesWith(COLLIDE_ALL, OBSTACLE);
-        PLAYER.setOverlapsWith(OVERLAP_ALL, ENEMY);
-        PLAYER_PROJECTILE.setCollidesWith(COLLIDE_ALL, OBSTACLE);
-        PLAYER_PROJECTILE.setOverlapsWith(OVERLAP_ALL, ENEMY);
-        ENEMY.setCollidesWith(COLLIDE_ALL, OBSTACLE);
-        ENEMY.setOverlapsWith(OVERLAP_ALL, PLAYER);
     }
 }

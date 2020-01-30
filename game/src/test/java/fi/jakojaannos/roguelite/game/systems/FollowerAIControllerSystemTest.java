@@ -1,26 +1,27 @@
 package fi.jakojaannos.roguelite.game.systems;
 
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
-import fi.jakojaannos.roguelite.game.data.components.character.enemy.FollowerEnemyAI;
-import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.game.data.resources.Players;
-import fi.jakojaannos.roguelite.game.systems.characters.ai.FollowerAIControllerSystem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.stream.Stream;
 
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
+import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
+import fi.jakojaannos.roguelite.game.data.components.character.enemy.FollowerEnemyAI;
+import fi.jakojaannos.roguelite.game.data.resources.Players;
+import fi.jakojaannos.roguelite.game.systems.characters.ai.FollowerAIControllerSystem;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FollowerAIControllerSystemTest {
     private FollowerAIControllerSystem system;
     private World world;
-    private Entity player, follower;
+    private Entity follower;
     private Transform playerTransform, followerPos;
     private CharacterInput followerInput;
 
@@ -30,10 +31,10 @@ public class FollowerAIControllerSystemTest {
         EntityManager entityManager = EntityManager.createNew(256, 32);
         this.world = World.createNew(entityManager);
 
-        this.player = entityManager.createEntity();
+        final Entity player = entityManager.createEntity();
         this.playerTransform = new Transform();
-        entityManager.addComponentTo(this.player, playerTransform);
-        entityManager.addComponentTo(this.player, new PlayerTag());
+        entityManager.addComponentTo(player, playerTransform);
+        entityManager.addComponentTo(player, new PlayerTag());
         this.world.getOrCreateResource(Players.class).setLocalPlayer(player);
 
         this.follower = entityManager.createEntity();

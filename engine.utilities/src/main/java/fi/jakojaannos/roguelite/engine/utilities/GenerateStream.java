@@ -7,8 +7,8 @@ import java.util.stream.Stream;
 
 public class GenerateStream {
     /**
-     * Generates a stream containing all integer coordinates of the given region. The stream will
-     * have exactly <code>w * h</code> elements.
+     * Generates a stream containing all integer coordinates of the given region. The stream will have exactly <code>w *
+     * h</code> elements.
      *
      * @param x from x-coordinate (inclusive)
      * @param y from y-coordinate (inclusive)
@@ -24,8 +24,8 @@ public class GenerateStream {
             final int h
     ) {
         return Stream.generate(new Supplier<Vector2i>() {
-            private int ix = -1, iy = 0;
             private final Vector2i state = new Vector2i(x, y);
+            private int ix = -1, iy = 0;
 
             @Override
             public Vector2i get() {

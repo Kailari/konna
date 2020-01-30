@@ -1,14 +1,14 @@
 package fi.jakojaannos.roguelite.engine.ecs.entities;
 
-import fi.jakojaannos.roguelite.engine.ecs.Component;
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.components.ComponentStorage;
-import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+
+import fi.jakojaannos.roguelite.engine.ecs.Component;
+import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.components.ComponentStorage;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
@@ -48,7 +48,7 @@ class EntityManagerTest {
     void addingComponentsToNonAppliedEntitiesWorks() {
         Entity entity = entityManager.createEntity();
         ComponentA component = new ComponentA();
-        val added = entityManager.addComponentTo(entity, component);
+        final var added = entityManager.addComponentTo(entity, component);
         assertEquals(component, added);
     }
 
@@ -56,7 +56,7 @@ class EntityManagerTest {
     void gettingComponentsOfNonAppliedEntitiesWorks() {
         Entity entity = entityManager.createEntity();
         ComponentA component = new ComponentA();
-        val added = entityManager.addComponentTo(entity, component);
+        final var added = entityManager.addComponentTo(entity, component);
         assertEquals(component, added);
     }
 
@@ -242,7 +242,7 @@ class EntityManagerTest {
         ComponentA component = new ComponentA();
         entityManager.addComponentTo(entity, component);
 
-        val added = entityManager.addComponentIfAbsent(entity, ComponentA.class, ComponentA::new);
+        final var added = entityManager.addComponentIfAbsent(entity, ComponentA.class, ComponentA::new);
         assertEquals(component, added);
     }
 

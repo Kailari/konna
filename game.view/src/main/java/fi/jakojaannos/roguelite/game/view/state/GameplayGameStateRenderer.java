@@ -1,5 +1,7 @@
 package fi.jakojaannos.roguelite.game.view.state;
 
+import java.nio.file.Path;
+
 import fi.jakojaannos.roguelite.engine.content.AssetManager;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.view.Camera;
@@ -14,9 +16,6 @@ import fi.jakojaannos.roguelite.game.DebugConfig;
 import fi.jakojaannos.roguelite.game.view.systems.*;
 import fi.jakojaannos.roguelite.game.view.systems.debug.EntityCollisionBoundsRenderingSystem;
 import fi.jakojaannos.roguelite.game.view.systems.debug.EntityTransformRenderingSystem;
-import lombok.val;
-
-import java.nio.file.Path;
 
 import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.absolute;
 import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.percentOf;
@@ -34,60 +33,6 @@ public class GameplayGameStateRenderer extends GameStateRenderer {
             final RenderingBackend backend
     ) {
         super(assetRoot, camera, assetManager, backend);
-    }
-
-    @Override
-    protected SystemDispatcher createRenderDispatcher(
-            final UserInterface userInterface,
-            final Path assetRoot,
-            final Camera camera,
-            final AssetManager assetManager,
-            final RenderingBackend backend
-    ) {
-        val fontRegistry = assetManager.getAssetRegistry(Font.class);
-        val spriteRegistry = assetManager.getAssetRegistry(Sprite.class);
-        val textRenderer = backend.getTextRenderer();
-
-        val builder = SystemDispatcher.builder()
-                                      .withGroups(RenderSystemGroups.values())
-                                      .addGroupDependencies(RenderSystemGroups.DEBUG, RenderSystemGroups.UI, RenderSystemGroups.OVERLAY, RenderSystemGroups.ENTITIES, RenderSystemGroups.LEVEL)
-                                      .addGroupDependencies(RenderSystemGroups.UI, RenderSystemGroups.OVERLAY, RenderSystemGroups.ENTITIES, RenderSystemGroups.LEVEL)
-                                      .addGroupDependencies(RenderSystemGroups.OVERLAY, RenderSystemGroups.ENTITIES, RenderSystemGroups.LEVEL)
-                                      .addGroupDependencies(RenderSystemGroups.ENTITIES, RenderSystemGroups.LEVEL)
-                                      .withSystem(new LevelRenderingSystem(assetRoot, camera, spriteRegistry, backend))
-                                      .withSystem(new SpriteRenderingSystem(assetRoot, camera, spriteRegistry, backend))
-                                      .withSystem(new UpdateHUDSystem(userInterface))
-                                      .withSystem(new UpdateGameOverSplashSystem(userInterface))
-                                      .withSystem(new HealthBarUpdateSystem(camera, userInterface))
-                                      .withSystem(new UserInterfaceRenderingSystem(assetRoot,
-                                                                                   camera,
-                                                                                   fontRegistry,
-                                                                                   spriteRegistry,
-                                                                                   textRenderer,
-                                                                                   userInterface,
-                                                                                   backend));
-
-        if (DebugConfig.debugModeEnabled) {
-            builder.withSystem(new EntityCollisionBoundsRenderingSystem(assetRoot, camera, backend));
-            builder.withSystem(new EntityTransformRenderingSystem(assetRoot, camera, backend));
-        }
-
-        return builder.build();
-    }
-
-    @Override
-    protected UserInterface createUserInterface(
-            final Camera camera,
-            final AssetManager assetManager
-    ) {
-        val fontRegistry = assetManager.getAssetRegistry(Font.class);
-
-        val font = fontRegistry.getByAssetName("fonts/VCR_OSD_MONO.ttf");
-        return UserInterface.builder(camera.getViewport(), font)
-                            .element(TIME_PLAYED_LABEL_NAME, UIElementType.LABEL, GameplayGameStateRenderer::buildTimePlayedTimer)
-                            .element("score-kills", UIElementType.LABEL, GameplayGameStateRenderer::buildKillsCounter)
-                            .element("game-over-container", UIElementType.NONE, GameplayGameStateRenderer::buildGameOverSplash)
-                            .build();
     }
 
     private static void buildGameOverSplash(final GenericUIElementBuilder builder) {
@@ -126,5 +71,70 @@ public class GameplayGameStateRenderer extends GameStateRenderer {
                .top(absolute(5))
                .fontSize(48)
                .text("12:34:56");
+    }
+
+    @Override
+    protected SystemDispatcher createRenderDispatcher(
+            final UserInterface userInterface,
+            final Path assetRoot,
+            final Camera camera,
+            final AssetManager assetManager,
+            final RenderingBackend backend
+    ) {
+        final var fontRegistry = assetManager.getAssetRegistry(Font.class);
+        final var spriteRegistry = assetManager.getAssetRegistry(Sprite.class);
+        final var textRenderer = backend.getTextRenderer();
+
+        final var builder =
+                SystemDispatcher.builder()
+                                .withGroups(RenderSystemGroups.values())
+                                .addGroupDependencies(RenderSystemGroups.DEBUG, RenderSystemGroups.UI,
+                                                      RenderSystemGroups.OVERLAY, RenderSystemGroups.ENTITIES,
+                                                      RenderSystemGroups.LEVEL)
+                                .addGroupDependencies(RenderSystemGroups.UI, RenderSystemGroups.OVERLAY,
+                                                      RenderSystemGroups.ENTITIES, RenderSystemGroups.LEVEL)
+                                .addGroupDependencies(RenderSystemGroups.OVERLAY, RenderSystemGroups.ENTITIES,
+                                                      RenderSystemGroups.LEVEL)
+                                .addGroupDependencies(RenderSystemGroups.ENTITIES, RenderSystemGroups.LEVEL)
+                                .withSystem(new LevelRenderingSystem(assetRoot, camera, spriteRegistry, backend))
+                                .withSystem(new SpriteRenderingSystem(assetRoot, camera, spriteRegistry, backend))
+                                .withSystem(new UpdateHUDSystem(userInterface))
+                                .withSystem(new UpdateGameOverSplashSystem(userInterface))
+                                .withSystem(new HealthBarUpdateSystem(camera, userInterface))
+                                .withSystem(new UserInterfaceRenderingSystem(assetRoot,
+                                                                             camera,
+                                                                             fontRegistry,
+                                                                             spriteRegistry,
+                                                                             textRenderer,
+                                                                             userInterface,
+                                                                             backend));
+
+        if (DebugConfig.debugModeEnabled) {
+            builder.withSystem(new EntityCollisionBoundsRenderingSystem(assetRoot, camera, backend));
+            builder.withSystem(new EntityTransformRenderingSystem(assetRoot, camera, backend));
+        }
+
+        return builder.build();
+    }
+
+    @Override
+    protected UserInterface createUserInterface(
+            final Camera camera,
+            final AssetManager assetManager
+    ) {
+        final var fontRegistry = assetManager.getAssetRegistry(Font.class);
+
+        final var font = fontRegistry.getByAssetName("fonts/VCR_OSD_MONO.ttf");
+        return UserInterface.builder(camera.getViewport(), font)
+                            .element(TIME_PLAYED_LABEL_NAME,
+                                     UIElementType.LABEL,
+                                     GameplayGameStateRenderer::buildTimePlayedTimer)
+                            .element("score-kills",
+                                     UIElementType.LABEL,
+                                     GameplayGameStateRenderer::buildKillsCounter)
+                            .element("game-over-container",
+                                     UIElementType.NONE,
+                                     GameplayGameStateRenderer::buildGameOverSplash)
+                            .build();
     }
 }

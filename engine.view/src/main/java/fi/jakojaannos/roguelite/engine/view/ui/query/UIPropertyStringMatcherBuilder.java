@@ -1,9 +1,10 @@
 package fi.jakojaannos.roguelite.engine.view.ui.query;
 
-import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
+
+import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 
 @RequiredArgsConstructor
 public class UIPropertyStringMatcherBuilder {
@@ -12,8 +13,11 @@ public class UIPropertyStringMatcherBuilder {
 
     public UIElementMatcher whichContains(final String... strings) {
         return this.parent.matching(UIPropertyMatcher.match(this.property)
-                                                     .ifPresentOrElse(actual -> Arrays.stream(strings).anyMatch(actual::contains),
-                                                                      () -> strings.length == 0 || Arrays.stream(strings).allMatch(String::isEmpty)));
+                                                     .ifPresentOrElse(actual -> Arrays.stream(strings)
+                                                                                      .anyMatch(actual::contains),
+                                                                      () -> strings.length == 0
+                                                                              || Arrays.stream(strings)
+                                                                                       .allMatch(String::isEmpty)));
     }
 
     public UIElementMatcher equalTo(final String string) {

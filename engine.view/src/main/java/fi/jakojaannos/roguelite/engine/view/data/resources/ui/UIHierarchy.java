@@ -1,22 +1,21 @@
 package fi.jakojaannos.roguelite.engine.view.data.resources.ui;
 
+import java.util.*;
+import java.util.stream.Stream;
+import javax.annotation.Nullable;
+
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.Resource;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
 import fi.jakojaannos.roguelite.engine.view.ui.internal.EntityBackedUIElement;
-import lombok.val;
-
-import javax.annotation.Nullable;
-import java.util.*;
-import java.util.stream.Stream;
 
 public class UIHierarchy implements Resource {
-    private Map<Entity, List<Entity>> children = new HashMap<>();
-    private Map<Entity, Entity> parents = new HashMap<>();
+    private final Map<Entity, List<Entity>> children = new HashMap<>();
+    private final Map<Entity, Entity> parents = new HashMap<>();
 
-    private Map<Entity, EntityBackedUIElement> elements = new HashMap<>();
-    private List<UIElement> roots = new ArrayList<>();
+    private final Map<Entity, EntityBackedUIElement> elements = new HashMap<>();
+    private final List<UIElement> roots = new ArrayList<>();
 
     public Stream<UIElement> getRoots() {
         return this.roots.stream();
@@ -39,7 +38,7 @@ public class UIHierarchy implements Resource {
             final Entity child,
             @Nullable final Entity parent
     ) {
-        val childElement = getOrCreateElementFor(child, entityManager);
+        final var childElement = getOrCreateElementFor(child, entityManager);
         if (parent == null) {
             this.roots.add(childElement);
         } else {
@@ -47,7 +46,7 @@ public class UIHierarchy implements Resource {
             this.children.computeIfAbsent(parent, key -> new ArrayList<>())
                          .add(child);
 
-            val parentElement = getOrCreateElementFor(parent, entityManager);
+            final var parentElement = getOrCreateElementFor(parent, entityManager);
             childElement.setParent(parentElement);
             parentElement.addChild(childElement);
         }
@@ -76,10 +75,5 @@ public class UIHierarchy implements Resource {
         } else {
             return 0;
         }
-    }
-
-    public int getLevelOf(final Entity entity) {
-        return getParentOf(entity).map(parent -> getLevelOf(parent) + 1)
-                                  .orElse(0);
     }
 }

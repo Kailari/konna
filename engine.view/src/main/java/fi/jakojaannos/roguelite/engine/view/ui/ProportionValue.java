@@ -1,27 +1,26 @@
 package fi.jakojaannos.roguelite.engine.view.ui;
 
-import fi.jakojaannos.roguelite.engine.view.data.components.ui.ElementBoundaries;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.val;
 
 import java.util.function.Function;
 
+import fi.jakojaannos.roguelite.engine.view.data.components.ui.ElementBoundaries;
+
 /**
- * Utility for converting human-readable values from UI definition to values understood by the
- * rendering system.
+ * Utility for converting human-readable values from UI definition to values understood by the rendering system.
  */
 public abstract class ProportionValue {
     public static PercentBuilder percentOf() {
         return new PercentBuilder();
     }
 
-    public abstract int getValue(final Context context);
-
     public static ProportionValue absolute(final int value) {
         return new Absolute(value);
     }
+
+    public abstract int getValue(Context context);
 
     // TODO: "em"-style proportional-to-font-size proportion value
 
@@ -44,9 +43,10 @@ public abstract class ProportionValue {
 
         @Override
         public int getValue(final Context context) {
-            val sizeValue = this.sizeFunction.apply(context);
+            final var sizeValue = this.sizeFunction.apply(context);
             if (sizeValue == ElementBoundaries.INVALID_VALUE) {
-                throw new IllegalStateException("Tried to get proportional size of self in context where own size is not set!");
+                throw new IllegalStateException("Tried to get proportional size of self in context where own size is " +
+                                                        "not set!");
             }
             return (int) (this.value * this.sizeFunction.apply(context));
         }

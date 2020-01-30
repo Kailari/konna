@@ -6,7 +6,7 @@ public class FollowerEnemyAI implements Component {
     public double aggroRadius;
     public double targetDistance;
 
-    public FollowerEnemyAI(double aggroRadius, double targetDistance) {
+    public FollowerEnemyAI(final double aggroRadius, final double targetDistance) {
         this.aggroRadius = aggroRadius;
         this.targetDistance = targetDistance;
     }

@@ -1,12 +1,13 @@
 package fi.jakojaannos.roguelite.engine.view.ui.query;
 
-import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
+
 public interface UIPropertyMatcher<T> extends UIMatcher {
-    static <T> UIPropertyValueMatcher.Builder<T> match(UIProperty<T> property) {
+    static <T> UIPropertyValueMatcher.Builder<T> match(final UIProperty<T> property) {
         return new UIPropertyValueMatcher.Builder<>(property);
     }
 

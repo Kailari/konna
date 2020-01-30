@@ -1,23 +1,22 @@
 package fi.jakojaannos.roguelite.engine.ecs.entities;
 
-import fi.jakojaannos.roguelite.engine.utilities.IdSupplier;
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.val;
 
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import fi.jakojaannos.roguelite.engine.utilities.IdSupplier;
+
 /**
- * Internal entity storage for default {@link fi.jakojaannos.roguelite.engine.ecs.EntityManager
- * EntityManager} implementation.
+ * Internal entity storage for default {@link fi.jakojaannos.roguelite.engine.ecs.EntityManager EntityManager}
+ * implementation.
  */
 public class EntityStorage {
+    private final IdSupplier idSupplier = new IdSupplier();
     @Getter(AccessLevel.PACKAGE) private int capacity;
     private EntityImpl[] entities;
-
-    private final IdSupplier idSupplier = new IdSupplier();
     private int entityCount;
 
     public EntityStorage(final int capacity) {
@@ -28,7 +27,7 @@ public class EntityStorage {
     }
 
     EntityImpl create(final int maxComponentTypes) {
-        val entityId = this.idSupplier.get();
+        final var entityId = this.idSupplier.get();
         this.entityCount += 1;
         return new EntityImpl(entityId, maxComponentTypes);
     }

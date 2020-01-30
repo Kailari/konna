@@ -1,18 +1,8 @@
 package fi.jakojaannos.roguelite.engine.network.internal;
 
-import fi.jakojaannos.roguelite.engine.MainThread;
-import fi.jakojaannos.roguelite.engine.network.NetworkConnection;
-import fi.jakojaannos.roguelite.engine.network.message.MessageHandlingContext;
-import fi.jakojaannos.roguelite.engine.network.message.NetworkMessage;
-import fi.jakojaannos.roguelite.engine.network.message.NetworkMessageHandlerMap;
-import fi.jakojaannos.roguelite.engine.network.message.serialization.MessageDecoder;
-import fi.jakojaannos.roguelite.engine.network.message.serialization.MessageEncoder;
-import fi.jakojaannos.roguelite.engine.network.message.serialization.TypedNetworkMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -27,19 +17,21 @@ import java.util.Queue;
 import java.util.concurrent.Semaphore;
 import java.util.function.Consumer;
 
+import fi.jakojaannos.roguelite.engine.MainThread;
+import fi.jakojaannos.roguelite.engine.network.NetworkConnection;
+import fi.jakojaannos.roguelite.engine.network.message.MessageHandlingContext;
+import fi.jakojaannos.roguelite.engine.network.message.NetworkMessage;
+import fi.jakojaannos.roguelite.engine.network.message.NetworkMessageHandlerMap;
+import fi.jakojaannos.roguelite.engine.network.message.serialization.MessageDecoder;
+import fi.jakojaannos.roguelite.engine.network.message.serialization.MessageEncoder;
+import fi.jakojaannos.roguelite.engine.network.message.serialization.TypedNetworkMessage;
+
 @Slf4j
 public class ServerCommandChannelRunnable extends CommandChannelRunnable {
     private final MainThread mainThread;
-
-    @Nullable protected ServerSocketChannel connectionChannel;
-
     private final Map<NetworkConnection, ClientInfo> clients = new HashMap<>();
+    private final ServerSocketChannel connectionChannel;
     private int clientIdCounter;
-
-    @Override
-    public boolean isConnected() {
-        return super.isConnected() && this.connectionChannel != null && this.connectionChannel.isOpen();
-    }
 
     public ServerCommandChannelRunnable(
             final int port,
@@ -62,6 +54,11 @@ public class ServerCommandChannelRunnable extends CommandChannelRunnable {
     }
 
     @Override
+    public boolean isConnected() {
+        return super.isConnected() && this.connectionChannel != null && this.connectionChannel.isOpen();
+    }
+
+    @Override
     protected void shutdown() throws IOException {
         if (this.connectionChannel != null && this.connectionChannel.isOpen()) {
             this.connectionChannel.close();
@@ -70,7 +67,7 @@ public class ServerCommandChannelRunnable extends CommandChannelRunnable {
     }
 
     public void send(final NetworkConnection target, final NetworkMessage message) {
-        ClientInfo clientInfo;
+        final ClientInfo clientInfo;
         synchronized (this.clients) {
             clientInfo = this.clients.get(target);
 
@@ -84,7 +81,7 @@ public class ServerCommandChannelRunnable extends CommandChannelRunnable {
                 // info before we have locked it down. If synchronized-blocks were used, we would
                 // need to keep the clients locked until the end of the write.
                 clientInfo.removalSemaphore.acquire();
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 LOG.warn("Write was interrupted while waiting for client info semaphore!");
                 return;
             }
@@ -101,7 +98,6 @@ public class ServerCommandChannelRunnable extends CommandChannelRunnable {
         }
     }
 
-
     @Override
     protected void handleSelectedKey(
             final Selector selector,
@@ -116,22 +112,22 @@ public class ServerCommandChannelRunnable extends CommandChannelRunnable {
 
     @Override
     protected ByteBuffer resolveWriteBufferFromKey(final SelectionKey selectionKey) {
-        val connection = (NetworkConnection) selectionKey.attachment();
-        val clientInfo = this.clients.get(connection);
+        final var connection = (NetworkConnection) selectionKey.attachment();
+        final var clientInfo = this.clients.get(connection);
         return clientInfo.writeBuffer;
     }
 
     @Override
     protected ByteBuffer resolveReadBufferFromKey(final SelectionKey selectionKey) {
-        val clientConnection = (NetworkConnection) selectionKey.attachment();
-        val clientInfo = this.clients.get(clientConnection);
+        final var clientConnection = (NetworkConnection) selectionKey.attachment();
+        final var clientInfo = this.clients.get(clientConnection);
         return clientInfo.readBuffer;
     }
 
     @Override
     protected Consumer<TypedNetworkMessage<?>> resolveMessageConsumerFromKey(final SelectionKey selectionKey) {
-        val clientConnection = (NetworkConnection) selectionKey.attachment();
-        val clientInfo = this.clients.get(clientConnection);
+        final var clientConnection = (NetworkConnection) selectionKey.attachment();
+        final var clientInfo = this.clients.get(clientConnection);
         return clientInfo.receiveQueue::offer;
     }
 
@@ -139,7 +135,7 @@ public class ServerCommandChannelRunnable extends CommandChannelRunnable {
     protected void handleReceivedMessages() {
         this.clients.forEach((connection, clientInfo) -> {
             while (!clientInfo.receiveQueue.isEmpty()) {
-                val received = clientInfo.receiveQueue.remove();
+                final var received = clientInfo.receiveQueue.remove();
                 this.messageHandlers.tryHandle(received, clientInfo.context);
             }
         });
@@ -154,14 +150,14 @@ public class ServerCommandChannelRunnable extends CommandChannelRunnable {
                  ((SocketChannel) selectionKey.channel()).getRemoteAddress());
 
         synchronized (this.clients) {
-            val connection = (NetworkConnection) selectionKey.attachment();
-            val clientInfo = this.clients.get(connection);
+            final var connection = (NetworkConnection) selectionKey.attachment();
+            final var clientInfo = this.clients.get(connection);
             try {
                 clientInfo.removalSemaphore.acquire();
 
                 this.clients.remove(connection);
-            } catch (InterruptedException e) {
-                LOG.warn("Selector thread was interrupted while waiting for client info semaphore for removing client!");
+            } catch (final InterruptedException e) {
+                LOG.warn("Selector thread was interrupted while waiting for removal semaphore for removing a client!");
             } finally {
                 clientInfo.removalSemaphore.release();
             }
@@ -174,15 +170,14 @@ public class ServerCommandChannelRunnable extends CommandChannelRunnable {
             final Selector selector,
             final int clientId
     ) throws IOException {
-        assert connectionChannel != null;
-
-        val clientChannel = this.connectionChannel.accept();
+        final var clientChannel = this.connectionChannel.accept();
         LOG.info("New connection from {}", clientChannel.getRemoteAddress());
 
         clientChannel.configureBlocking(false);
 
-        val clientConnection = new NetworkConnection(clientId);
-        val clientInfo = new ClientInfo(clientChannel, new MessageHandlingContext(this.mainThread, clientConnection));
+        final var clientConnection = new NetworkConnection(clientId);
+        final var clientInfo = new ClientInfo(clientChannel,
+                                              new MessageHandlingContext(this.mainThread, clientConnection));
 
         clientChannel.register(selector, SelectionKey.OP_READ, clientConnection);
         this.clients.put(clientConnection, clientInfo);

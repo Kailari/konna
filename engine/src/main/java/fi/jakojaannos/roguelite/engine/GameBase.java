@@ -1,26 +1,25 @@
 package fi.jakojaannos.roguelite.engine;
 
-import fi.jakojaannos.roguelite.engine.event.Events;
-import fi.jakojaannos.roguelite.engine.state.GameState;
-import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
-import fi.jakojaannos.roguelite.engine.utilities.UpdateableTimeManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
 
+import fi.jakojaannos.roguelite.engine.event.Events;
+import fi.jakojaannos.roguelite.engine.state.GameState;
+import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.roguelite.engine.utilities.UpdateableTimeManager;
+
 @Slf4j
 @RequiredArgsConstructor
 public abstract class GameBase implements Game, MainThread {
-    private boolean disposed = false;
-    private boolean finished = false;
-
     private final Object taskQueueLock = new Object();
     private final Queue<MainThreadTask> mainThreadTaskQueue = new ArrayDeque<>();
-
     private final UpdateableTimeManager timeManager;
+    private boolean disposed = false;
+    private boolean finished = false;
 
     public GameBase() {
         this(new SimpleTimeManager(20L));

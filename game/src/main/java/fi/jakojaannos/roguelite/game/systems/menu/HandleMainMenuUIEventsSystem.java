@@ -1,5 +1,11 @@
 package fi.jakojaannos.roguelite.game.systems.menu;
 
+import lombok.extern.slf4j.Slf4j;
+
+import java.io.IOException;
+import java.util.stream.Stream;
+import javax.annotation.Nullable;
+
 import fi.jakojaannos.roguelite.engine.data.resources.GameStateManager;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.*;
@@ -8,12 +14,6 @@ import fi.jakojaannos.roguelite.engine.network.client.ClientNetworkManager;
 import fi.jakojaannos.roguelite.engine.ui.UIEvent;
 import fi.jakojaannos.roguelite.game.data.resources.MainThread;
 import fi.jakojaannos.roguelite.game.state.GameplayGameState;
-import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-
-import javax.annotation.Nullable;
-import java.io.IOException;
-import java.util.stream.Stream;
 
 @Slf4j
 public class HandleMainMenuUIEventsSystem implements ECSSystem {
@@ -32,15 +32,13 @@ public class HandleMainMenuUIEventsSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
-        val gameStateManager = world.getOrCreateResource(GameStateManager.class);
-        val events = world.getOrCreateResource(Events.class).getUi();
+        final var gameStateManager = world.getOrCreateResource(GameStateManager.class);
+        final var events = world.getOrCreateResource(Events.class).getUi();
         while (events.hasEvents()) {
-            val event = events.pollEvent();
+            final var event = events.pollEvent();
             if (event.getType() == UIEvent.Type.CLICK) {
                 if (event.getElement().equalsIgnoreCase("play_button")) {
-                    gameStateManager.queueStateChange(new GameplayGameState(System.nanoTime(),
-                                                                            World.createNew(EntityManager.createNew(256, 32)),
-                                                                            world.getOrCreateResource(Time.class).getTimeManager()));
+                    gameStateManager.queueStateChange(createGameplayState(world));
                 } else if (event.getElement().equalsIgnoreCase("quit_button")) {
                     gameStateManager.quitGame();
                 } else if (event.getElement().equalsIgnoreCase("connect_button")) {
@@ -49,12 +47,11 @@ public class HandleMainMenuUIEventsSystem implements ECSSystem {
                         return;
                     }
 
-                    val state = new GameplayGameState(System.nanoTime(),
-                                                      World.createNew(EntityManager.createNew(256, 32)),
-                                                      world.getOrCreateResource(Time.class).getTimeManager());
-
+                    final var state = createGameplayState(world);
                     try {
-                        state.setNetworkManager(new ClientNetworkManager(this.host, this.port, world.getOrCreateResource(MainThread.class)));
+                        state.setNetworkManager(new ClientNetworkManager(this.host,
+                                                                         this.port,
+                                                                         world.getOrCreateResource(MainThread.class)));
                     } catch (IOException e) {
                         LOG.error("Error connecting to server:", e);
                     }
@@ -62,5 +59,11 @@ public class HandleMainMenuUIEventsSystem implements ECSSystem {
                 }
             }
         }
+    }
+
+    private GameplayGameState createGameplayState(final World world) {
+        return new GameplayGameState(System.nanoTime(),
+                                     World.createNew(EntityManager.createNew(256, 32)),
+                                     world.getOrCreateResource(Time.class).getTimeManager());
     }
 }

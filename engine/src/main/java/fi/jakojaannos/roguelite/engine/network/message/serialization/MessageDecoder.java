@@ -1,14 +1,14 @@
 package fi.jakojaannos.roguelite.engine.network.message.serialization;
 
-import fi.jakojaannos.roguelite.engine.network.message.NetworkMessage;
-import fi.jakojaannos.roguelite.engine.network.message.NetworkMessageType;
-import fi.jakojaannos.roguelite.engine.network.message.NetworkMessageTypeMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 
 import java.nio.ByteBuffer;
 import java.util.Optional;
+
+import fi.jakojaannos.roguelite.engine.network.message.NetworkMessage;
+import fi.jakojaannos.roguelite.engine.network.message.NetworkMessageType;
+import fi.jakojaannos.roguelite.engine.network.message.NetworkMessageTypeMap;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -21,15 +21,16 @@ public class MessageDecoder {
         }
 
         bufferIn.mark();
-        val typeId = bufferIn.getInt();
-        val messageLength = bufferIn.getShort();
+        final var typeId = bufferIn.getInt();
+        final var messageLength = bufferIn.getShort();
         if (bufferIn.remaining() < messageLength) {
             bufferIn.reset();
             return Optional.empty();
         }
 
         Optional<TypedNetworkMessage<?>> typedMessage = this.typeMap.getByMessageTypeId(typeId)
-                                                                    .map(type -> deserializeToTypedWrapper(type, bufferIn));
+                                                                    .map(type -> deserializeToTypedWrapper(type,
+                                                                                                           bufferIn));
 
         if (typedMessage.isEmpty()) {
             bufferIn.reset();

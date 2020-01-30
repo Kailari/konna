@@ -1,16 +1,16 @@
 package fi.jakojaannos.roguelite.engine.view.rendering.ui;
 
-import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
-import fi.jakojaannos.roguelite.engine.view.rendering.mesh.Mesh;
-import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexAttribute;
-import fi.jakojaannos.roguelite.engine.view.rendering.shader.EngineUniformBufferObjectIndices;
-import fi.jakojaannos.roguelite.engine.view.rendering.shader.ShaderProgram;
-import lombok.val;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.util.stream.IntStream;
+
+import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
+import fi.jakojaannos.roguelite.engine.view.rendering.mesh.Mesh;
+import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexAttribute;
+import fi.jakojaannos.roguelite.engine.view.rendering.shader.EngineUniformBufferObjectIndices;
+import fi.jakojaannos.roguelite.engine.view.rendering.shader.ShaderProgram;
 
 public class ProgressBarRenderer implements AutoCloseable {
     private static final int SIZE_IN_BYTES = 4 * 4;
@@ -38,11 +38,11 @@ public class ProgressBarRenderer implements AutoCloseable {
         this.shader.use();
         this.shader.bindUniformBlock("CameraInfo", EngineUniformBufferObjectIndices.CAMERA);
 
-        val vertexFormat = backend.createVertexFormat()
-                                  .withAttribute(VertexAttribute.Type.FLOAT, 2, false)
-                                  .withAttribute(VertexAttribute.Type.FLOAT, 1, false)
-                                  .withAttribute(VertexAttribute.Type.FLOAT, 1, false)
-                                  .build();
+        final var vertexFormat = backend.createVertexFormat()
+                                        .withAttribute(VertexAttribute.Type.FLOAT, 2, false)
+                                        .withAttribute(VertexAttribute.Type.FLOAT, 1, false)
+                                        .withAttribute(VertexAttribute.Type.FLOAT, 1, false)
+                                        .build();
         this.mesh = backend.createMesh(vertexFormat);
         this.vertexDataBuffer = MemoryUtil.memAlloc(MAX_PER_BATCH * SIZE_IN_BYTES);
         this.mesh.setElements(IntStream.range(0, MAX_PER_BATCH)

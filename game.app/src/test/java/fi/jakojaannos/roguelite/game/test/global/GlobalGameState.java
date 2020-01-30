@@ -1,11 +1,12 @@
 package fi.jakojaannos.roguelite.game.test.global;
 
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.game.data.resources.Players;
 import org.joml.Vector2d;
 
 import java.util.Optional;
+
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.game.data.resources.Players;
 
 public class GlobalGameState {
     public static Vector2d playerInitialPosition;

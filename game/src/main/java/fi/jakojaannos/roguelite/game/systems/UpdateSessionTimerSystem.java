@@ -1,5 +1,7 @@
 package fi.jakojaannos.roguelite.game.systems;
 
+import java.util.stream.Stream;
+
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
@@ -7,9 +9,6 @@ import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
 import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
-import lombok.val;
-
-import java.util.stream.Stream;
 
 public class UpdateSessionTimerSystem implements ECSSystem {
     @Override
@@ -24,13 +23,13 @@ public class UpdateSessionTimerSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
-        val noPlayersAlive = entities.count() == 0;
+        final var noPlayersAlive = entities.count() == 0;
         if (noPlayersAlive) {
             return;
         }
 
-        val timeManager = world.getOrCreateResource(Time.class);
-        val sessionStats = world.getOrCreateResource(SessionStats.class);
+        final var timeManager = world.getOrCreateResource(Time.class);
+        final var sessionStats = world.getOrCreateResource(SessionStats.class);
         sessionStats.endTimeStamp = timeManager.getCurrentGameTime();
     }
 }

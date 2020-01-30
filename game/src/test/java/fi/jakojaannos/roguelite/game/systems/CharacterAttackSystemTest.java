@@ -1,5 +1,10 @@
 package fi.jakojaannos.roguelite.game.systems;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.util.stream.Stream;
+
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
@@ -13,10 +18,6 @@ import fi.jakojaannos.roguelite.game.data.components.character.WalkingMovementAb
 import fi.jakojaannos.roguelite.game.data.components.weapon.BasicWeaponStats;
 import fi.jakojaannos.roguelite.game.data.components.weapon.ProjectileStats;
 import fi.jakojaannos.roguelite.game.systems.characters.CharacterAttackSystem;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -27,7 +28,6 @@ class CharacterAttackSystemTest {
     private World world;
     private Entity entity;
     private CharacterInput characterInput;
-    private WalkingMovementAbility movementStats;
     private CharacterAbilities characterAbilities;
     private BasicWeaponStats weaponStats;
 
@@ -45,14 +45,14 @@ class CharacterAttackSystemTest {
         this.characterInput = new CharacterInput();
         this.characterInput.move.set(0.0);
         this.characterInput.attack = false;
-        this.movementStats = new WalkingMovementAbility();
+        final WalkingMovementAbility movementStats = new WalkingMovementAbility();
         this.characterAbilities = new CharacterAbilities(new DamageSource.Entity(entity));
         this.weaponStats = new BasicWeaponStats();
         entityManager.addComponentTo(entity, new Transform(0.0, 0.0));
         entityManager.addComponentTo(entity, new Velocity());
         entityManager.addComponentTo(entity, this.characterInput);
         entityManager.addComponentTo(entity, this.characterAbilities);
-        entityManager.addComponentTo(entity, this.movementStats);
+        entityManager.addComponentTo(entity, movementStats);
         entityManager.addComponentTo(entity, this.weaponStats);
 
         entityManager.applyModifications();

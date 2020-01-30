@@ -1,32 +1,31 @@
 package fi.jakojaannos.roguelite.engine.view.rendering.sprite;
 
-import fi.jakojaannos.roguelite.engine.view.rendering.TextureRegion;
-import fi.jakojaannos.roguelite.engine.view.rendering.sprite.Sprite;
 import org.joml.Matrix4f;
 
 import javax.annotation.Nullable;
 
+import fi.jakojaannos.roguelite.engine.view.rendering.TextureRegion;
+
 public interface SpriteBatch
         extends AutoCloseable {
     /**
-     * Begins a new rendering batch. A batch must be finished using {@link #end()}, before calling
-     * {@link #begin} again.
+     * Begins a new rendering batch. A batch must be finished using {@link #end()}, before calling {@link #begin}
+     * again.
      */
     default void begin() {
         begin(null);
     }
 
     /**
-     * Begins a new rendering batch. Applies provided global transformation. A batch must be
-     * finished using {@link #end()}, before calling {@link #begin} again.
+     * Begins a new rendering batch. Applies provided global transformation. A batch must be finished using {@link
+     * #end()}, before calling {@link #begin} again.
      *
      * @param transformation additional global transformation to apply. May be <code>null</code>
      */
     void begin(@Nullable Matrix4f transformation);
 
     /**
-     * Renders the sprite at given coordinates with given size. Uses the default animation and first
-     * available frame.
+     * Renders the sprite at given coordinates with given size. Uses the default animation and first available frame.
      *
      * @param sprite sprite to render
      * @param x      world x-coordinate where the sprite should be placed
@@ -39,8 +38,7 @@ public interface SpriteBatch
     }
 
     /**
-     * Renders the sprite at given coordinates with given size. Uses the given animation and the
-     * frame.
+     * Renders the sprite at given coordinates with given size. Uses the given animation and the frame.
      *
      * @param sprite    sprite to render
      * @param animation name of the animation to use
@@ -63,8 +61,8 @@ public interface SpriteBatch
     }
 
     /**
-     * Renders the sprite at given coordinates with given size.  Uses the given animation and the
-     * frame. Additionally uses the given origin and rotation to offset the sprite.
+     * Renders the sprite at given coordinates with given size.  Uses the given animation and the frame. Additionally
+     * uses the given origin and rotation to offset the sprite.
      *
      * @param sprite    sprite to render
      * @param animation name of the animation to use

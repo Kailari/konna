@@ -1,5 +1,9 @@
 package fi.jakojaannos.roguelite.engine.view.rendering.ui;
 
+import lombok.extern.slf4j.Slf4j;
+
+import java.nio.file.Path;
+
 import fi.jakojaannos.roguelite.engine.content.AssetRegistry;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.Sprite;
@@ -9,10 +13,6 @@ import fi.jakojaannos.roguelite.engine.view.rendering.text.TextRenderer;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
-import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-
-import java.nio.file.Path;
 
 // TODO: Render UI elements to cached render targets so that they can be cached (only updated/dirty
 //  parts should be re-rendered)
@@ -43,6 +43,13 @@ public class UserInterfaceRenderer implements AutoCloseable {
         this.progressBarRenderer = new ProgressBarRenderer(assetRoot, backend);
     }
 
+    private static int getFontSizeFor(final UIElement uiElement) {
+        return uiElement.getProperty(UIProperty.FONT_SIZE)
+                        .orElseGet(() -> uiElement.getParent()
+                                                  .map(UserInterfaceRenderer::getFontSizeFor)
+                                                  .orElse(ROOT_FONT_SIZE));
+    }
+
     public void render(final UserInterface userInterface) {
         userInterface.getRoots()
                      .forEach(this::renderElement);
@@ -64,41 +71,34 @@ public class UserInterfaceRenderer implements AutoCloseable {
     }
 
     private void renderProgressBar(final UIElement uiElement, final double percent) {
-        val x = uiElement.getProperty(UIProperty.MIN_X).orElseThrow();
-        val y = uiElement.getProperty(UIProperty.MIN_Y).orElseThrow();
-        val width = uiElement.getProperty(UIProperty.WIDTH).orElseThrow();
-        val height = uiElement.getProperty(UIProperty.HEIGHT).orElseThrow();
+        final var x = uiElement.getProperty(UIProperty.MIN_X).orElseThrow();
+        final var y = uiElement.getProperty(UIProperty.MIN_Y).orElseThrow();
+        final var width = uiElement.getProperty(UIProperty.WIDTH).orElseThrow();
+        final var height = uiElement.getProperty(UIProperty.HEIGHT).orElseThrow();
 
-        val max = uiElement.getProperty(UIProperty.MAX_PROGRESS)
-                           .orElse(1.0);
+        final var max = uiElement.getProperty(UIProperty.MAX_PROGRESS)
+                                 .orElse(1.0);
 
         this.progressBarRenderer.render(x, y, width, height, percent, max);
     }
 
     private void renderTextContent(final UIElement uiElement, final String text) {
-        val fontSize = getFontSizeFor(uiElement);
-        val x = uiElement.getProperty(UIProperty.MIN_X).orElseThrow();
-        val y = uiElement.getProperty(UIProperty.MIN_Y).orElseThrow();
+        final var fontSize = getFontSizeFor(uiElement);
+        final var x = uiElement.getProperty(UIProperty.MIN_X).orElseThrow();
+        final var y = uiElement.getProperty(UIProperty.MIN_Y).orElseThrow();
         this.textRenderer.draw(x, y, fontSize, this.font, text);
-    }
-
-    private static int getFontSizeFor(final UIElement uiElement) {
-        return uiElement.getProperty(UIProperty.FONT_SIZE)
-                        .orElseGet(() -> uiElement.getParent()
-                                                  .map(UserInterfaceRenderer::getFontSizeFor)
-                                                  .orElse(ROOT_FONT_SIZE));
     }
 
     private void renderPanelBackground(final UIElement uiElement, final String spriteId) {
         this.spriteBatch.begin();
-        val sprite = this.spriteRegistry.getByAssetName(spriteId);
+        final var sprite = this.spriteRegistry.getByAssetName(spriteId);
         int borderSize = uiElement.getProperty(UIProperty.BORDER_SIZE)
                                   .orElse(DEFAULT_BORDER_SIZE);
 
-        val x = uiElement.getProperty(UIProperty.MIN_X).orElseThrow();
-        val y = uiElement.getProperty(UIProperty.MIN_Y).orElseThrow();
-        val width = uiElement.getProperty(UIProperty.WIDTH).orElseThrow();
-        val height = uiElement.getProperty(UIProperty.HEIGHT).orElseThrow();
+        final var x = uiElement.getProperty(UIProperty.MIN_X).orElseThrow();
+        final var y = uiElement.getProperty(UIProperty.MIN_Y).orElseThrow();
+        final var width = uiElement.getProperty(UIProperty.WIDTH).orElseThrow();
+        final var height = uiElement.getProperty(UIProperty.HEIGHT).orElseThrow();
 
         drawPanelRow(sprite, 0, x, y, width, borderSize, borderSize);
         drawPanelRow(sprite, 1, x, y + borderSize, width, height - 2 * borderSize, borderSize);

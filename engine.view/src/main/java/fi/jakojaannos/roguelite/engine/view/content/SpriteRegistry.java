@@ -2,14 +2,7 @@ package fi.jakojaannos.roguelite.engine.view.content;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import fi.jakojaannos.roguelite.engine.content.AbstractAssetRegistry;
-import fi.jakojaannos.roguelite.engine.content.AssetHandle;
-import fi.jakojaannos.roguelite.engine.view.LogCategories;
-import fi.jakojaannos.roguelite.engine.view.rendering.TextureRegion;
-import fi.jakojaannos.roguelite.engine.view.rendering.sprite.Sprite;
-import fi.jakojaannos.roguelite.engine.view.rendering.sprite.serialization.SpriteDeserializer;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -17,6 +10,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Optional;
+
+import fi.jakojaannos.roguelite.engine.content.AbstractAssetRegistry;
+import fi.jakojaannos.roguelite.engine.content.AssetHandle;
+import fi.jakojaannos.roguelite.engine.view.LogCategories;
+import fi.jakojaannos.roguelite.engine.view.rendering.TextureRegion;
+import fi.jakojaannos.roguelite.engine.view.rendering.sprite.Sprite;
+import fi.jakojaannos.roguelite.engine.view.rendering.sprite.serialization.SpriteDeserializer;
 
 /**
  * Handles loading sprites from assets-directory.
@@ -50,8 +50,8 @@ public class SpriteRegistry extends AbstractAssetRegistry<Sprite> {
         Gson gson = new GsonBuilder()
                 .registerTypeAdapter(Sprite.class, new SpriteDeserializer<>(textures))
                 .create();
-        val path = assetRoot.resolve(handle.getName() + ".json");
-        try (val reader = new InputStreamReader(Files.newInputStream(path, StandardOpenOption.READ))) {
+        final var path = assetRoot.resolve(handle.getName() + ".json");
+        try (final var reader = new InputStreamReader(Files.newInputStream(path, StandardOpenOption.READ))) {
             LOG.trace(LogCategories.SPRITE_SERIALIZATION,
                       "Loading sprite {}", path.toString());
             return Optional.ofNullable(gson.fromJson(reader, Sprite.class));

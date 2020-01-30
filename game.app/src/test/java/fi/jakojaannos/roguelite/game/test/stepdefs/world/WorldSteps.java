@@ -1,5 +1,13 @@
 package fi.jakojaannos.roguelite.game.test.stepdefs.world;
 
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import org.joml.Vector2d;
+
+import java.util.Optional;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
@@ -12,14 +20,6 @@ import fi.jakojaannos.roguelite.game.data.components.character.CharacterAbilitie
 import fi.jakojaannos.roguelite.game.data.components.character.Health;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
 import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
-import io.cucumber.java.en.Given;
-import io.cucumber.java.en.Then;
-import lombok.val;
-import org.joml.Vector2d;
-
-import java.util.Optional;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import static fi.jakojaannos.roguelite.game.test.global.GlobalGameState.getLocalPlayer;
 import static fi.jakojaannos.roguelite.game.test.global.GlobalState.*;
@@ -27,19 +27,28 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class WorldSteps {
+    private static void setPlayerKills(final int amount) {
+        final var localPlayerDamageSource = getComponentOf(getLocalPlayer().orElseThrow(), CharacterAbilities.class)
+                .orElseThrow()
+                .damageSource;
+        state.getWorld()
+             .getOrCreateResource(SessionStats.class)
+             .setKillsOf(localPlayerDamageSource, amount);
+    }
+
     @Given("the world is blank with {int} enemies scattered about")
     public void theWorldIsBlankWithEnemiesScatteredAbout(int numberOfEnemies) {
         state.getWorld()
              .getEntityManager()
              .clearEntities();
 
-        val camera = state.getWorld().getEntityManager().createEntity();
+        final var camera = state.getWorld().getEntityManager().createEntity();
         state.getWorld().getEntityManager().addComponentTo(camera, new Transform());
         state.getWorld().getEntityManager().addComponentTo(camera, new NoDrawTag());
         state.getWorld().getOrCreateResource(CameraProperties.class).cameraEntity = camera;
 
-        val areaWidth = 20;
-        val areaHeight = 20;
+        final var areaWidth = 20;
+        final var areaHeight = 20;
         IntStream.range(0, numberOfEnemies)
                  .mapToObj(ignored -> new Vector2d((random.nextDouble() * 2.0 - 1.0) * areaWidth,
                                                    (random.nextDouble() * 2.0 - 1.0) * areaHeight))
@@ -117,14 +126,5 @@ public class WorldSteps {
             Health health = state.getWorld().getEntityManager().getComponentOf(player.get(), Health.class).orElseThrow();
             assertFalse(health.currentHealth > 0);
         }
-    }
-
-    private static void setPlayerKills(final int amount) {
-        val localPlayerDamageSource = getComponentOf(getLocalPlayer().orElseThrow(), CharacterAbilities.class)
-                .orElseThrow()
-                .damageSource;
-        state.getWorld()
-             .getOrCreateResource(SessionStats.class)
-             .setKillsOf(localPlayerDamageSource, amount);
     }
 }

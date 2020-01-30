@@ -1,9 +1,10 @@
 package fi.jakojaannos.roguelite.game.test.view.rendering;
 
-import fi.jakojaannos.roguelite.engine.view.rendering.Texture;
 import lombok.Getter;
 
 import java.awt.image.BufferedImage;
+
+import fi.jakojaannos.roguelite.engine.view.rendering.Texture;
 
 public class TestTexture implements Texture {
     @Getter private final int width;

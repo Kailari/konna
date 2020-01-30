@@ -1,5 +1,11 @@
 package fi.jakojaannos.roguelite.game.systems;
 
+import lombok.extern.slf4j.Slf4j;
+import org.joml.Vector2d;
+
+import java.util.Random;
+import java.util.stream.Stream;
+
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.*;
@@ -9,15 +15,13 @@ import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
 import fi.jakojaannos.roguelite.game.data.components.character.WalkingMovementAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.StalkerAI;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
-import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-import org.joml.Vector2d;
-
-import java.util.Random;
-import java.util.stream.Stream;
 
 @Slf4j
 public class StalkerAIControllerSystem implements ECSSystem {
+    private final Random random = new Random(8055); // 8055 = 666 + 420 + 6969
+    private final Vector2d tempForce = new Vector2d();
+    private final Vector2d emptyPos = new Vector2d();
+
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.INPUT)
@@ -30,38 +34,42 @@ public class StalkerAIControllerSystem implements ECSSystem {
                     .withoutComponent(InAir.class);
     }
 
-    private final Random random = new Random(8055); // 8055 = 666 + 420 + 6969
-    private final Vector2d tempForce = new Vector2d();
-    private final Vector2d emptyPos = new Vector2d();
-
     @Override
     public void tick(
             final Stream<Entity> entities,
             final World world
     ) {
-        val entityManager = world.getEntityManager();
-        val timeManager = world.getOrCreateResource(Time.class);
-        val optPlayer = world.getOrCreateResource(Players.class).getLocalPlayer();
-        val playerPos = optPlayer.isPresent()
+        final var entityManager = world.getEntityManager();
+        final var timeManager = world.getOrCreateResource(Time.class);
+        final var optPlayer = world.getOrCreateResource(Players.class).getLocalPlayer();
+        final var playerPos = optPlayer.isPresent()
                 ? entityManager.getComponentOf(optPlayer.get(), Transform.class).orElseThrow().position
                 : emptyPos;
 
         entities.forEach(entity -> {
-            val stalkerAI = entityManager.getComponentOf(entity, StalkerAI.class).orElseThrow();
-            val characterInput = entityManager.getComponentOf(entity, CharacterInput.class).orElseThrow();
-            val characterStats = entityManager.getComponentOf(entity, WalkingMovementAbility.class).orElseThrow();
-            val physics = entityManager.getComponentOf(entity, Physics.class).orElseThrow();
-            val myPos = entityManager.getComponentOf(entity, Transform.class).orElseThrow();
+            final var stalkerAI = entityManager.getComponentOf(entity, StalkerAI.class).orElseThrow();
+            final var characterInput = entityManager.getComponentOf(entity, CharacterInput.class).orElseThrow();
+            final var characterStats = entityManager.getComponentOf(entity, WalkingMovementAbility.class).orElseThrow();
+            final var physics = entityManager.getComponentOf(entity, Physics.class).orElseThrow();
+            final var myPos = entityManager.getComponentOf(entity, Transform.class).orElseThrow();
 
             if (optPlayer.isEmpty()) {
                 doWanderMovement(characterInput, characterStats, stalkerAI);
                 return;
             }
 
-            val distToPlayerSquared = myPos.position.distanceSquared(playerPos);
+            final var distToPlayerSquared = myPos.position.distanceSquared(playerPos);
 
             if (distToPlayerSquared <= stalkerAI.leapRadiusSquared) {
-                doCloseRangeMovement(characterInput, entityManager, entity, characterStats, physics, stalkerAI, timeManager, myPos.position, playerPos);
+                doCloseRangeMovement(characterInput,
+                                     entityManager,
+                                     entity,
+                                     characterStats,
+                                     physics,
+                                     stalkerAI,
+                                     timeManager,
+                                     myPos.position,
+                                     playerPos);
             } else if (distToPlayerSquared <= stalkerAI.aggroRadiusSquared) {
                 sneakTowardsPlayer(characterInput, characterStats, stalkerAI, myPos.position, playerPos);
             } else {

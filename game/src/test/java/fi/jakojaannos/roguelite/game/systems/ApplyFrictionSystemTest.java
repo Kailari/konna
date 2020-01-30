@@ -1,5 +1,12 @@
 package fi.jakojaannos.roguelite.game.systems;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import java.util.stream.Stream;
+
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
@@ -7,12 +14,6 @@ import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.game.systems.physics.ApplyFrictionSystem;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -64,34 +65,34 @@ public class ApplyFrictionSystemTest {
             final double expectedY
     ) {
         physics.friction = friction;
-        velocity.velocity.set(startX, startY);
+        velocity.set(startX, startY);
 
         entityManager.applyModifications();
         for (int i = 0; i < 50; i++) {
             system.tick(Stream.of(entity), world);
         }
 
-        assertEquals(expectedX, velocity.velocity.x, EPSILON);
-        assertEquals(expectedY, velocity.velocity.y, EPSILON);
+        assertEquals(expectedX, velocity.x, EPSILON);
+        assertEquals(expectedY, velocity.y, EPSILON);
     }
 
     @Test
     void zeroFrictionDoesNotSlowEntities() {
         physics.friction = 0;
-        velocity.velocity.set(12.34, 34.56);
+        velocity.set(12.34, 34.56);
 
         entityManager.applyModifications();
         for (int i = 0; i < 10; i++) {
             system.tick(Stream.of(entity), world);
         }
 
-        assertEquals(12.34, velocity.velocity.x);
-        assertEquals(34.56, velocity.velocity.y);
+        assertEquals(12.34, velocity.x);
+        assertEquals(34.56, velocity.y);
     }
 
     @Test
     void frictionStopsEntityAfterAWhile() {
-        velocity.velocity.set(12.34, 34.56);
+        velocity.set(12.34, 34.56);
         physics.friction = 10.0f;
 
         entityManager.applyModifications();
@@ -99,7 +100,7 @@ public class ApplyFrictionSystemTest {
             system.tick(Stream.of(entity), world);
         }
 
-        assertEquals(0.0, velocity.velocity.x);
-        assertEquals(0.0, velocity.velocity.y);
+        assertEquals(0.0, velocity.x);
+        assertEquals(0.0, velocity.y);
     }
 }

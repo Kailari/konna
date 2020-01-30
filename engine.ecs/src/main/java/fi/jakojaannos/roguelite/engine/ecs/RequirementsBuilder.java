@@ -3,9 +3,9 @@ package fi.jakojaannos.roguelite.engine.ecs;
 import java.util.stream.Stream;
 
 /**
- * One-stop solution to all yur configuring-systems-is-a-PITA needs! Define system dependencies,
- * requirements, etc. conveniently with a single builder instance. Most likely ends up making system
- * configuration even worse, but I have wasted so many hours on this, I DO NOT EVEN CARE ANYMORE!
+ * One-stop solution to all yur configuring-systems-is-a-PITA needs! Define system dependencies, requirements, etc.
+ * conveniently with a single builder instance. Most likely ends up making system configuration even worse, but I have
+ * wasted so many hours on this, I DO NOT EVEN CARE ANYMORE!
  *
  * @see ECSSystem#declareRequirements(RequirementsBuilder)
  */
@@ -65,9 +65,9 @@ public interface RequirementsBuilder {
     RequirementsBuilder withComponent(Class<? extends Component> componentClass);
 
     /**
-     * Marks requirement for all entities this system handles to not have a component of given type.
-     * This means that any entities with given component type are excluded from being passed into
-     * {@link ECSSystem#tick(Stream, World, double)} for the system.
+     * Marks requirement for all entities this system handles to not have a component of given type. This means that any
+     * entities with given component type are excluded from being passed into {@link ECSSystem#tick(Stream, World,
+     * double)} for the system.
      *
      * @param componentClass type of the excluded component
      *
@@ -76,8 +76,7 @@ public interface RequirementsBuilder {
     RequirementsBuilder withoutComponent(Class<? extends Component> componentClass);
 
     /**
-     * Marks requirement for all entities this system handles to have at least one component from
-     * the given group.
+     * Marks requirement for all entities this system handles to have at least one component from the given group.
      *
      * @param componentGroup the group of components to require
      *
@@ -86,9 +85,9 @@ public interface RequirementsBuilder {
     RequirementsBuilder withComponentFrom(ComponentGroup componentGroup);
 
     /**
-     * Marks requirement for all entities this system handles to not have any components from the
-     * given group. This means that any entities with any components from the group are excluded
-     * from being passed into {@link ECSSystem#tick(Stream, World, double)} for the system.
+     * Marks requirement for all entities this system handles to not have any components from the given group. This
+     * means that any entities with any components from the group are excluded from being passed into {@link
+     * ECSSystem#tick(Stream, World, double)} for the system.
      *
      * @param componentGroup the group of components to exclude
      *

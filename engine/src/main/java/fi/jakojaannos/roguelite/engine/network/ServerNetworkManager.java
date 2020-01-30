@@ -1,14 +1,15 @@
 package fi.jakojaannos.roguelite.engine.network;
 
+import lombok.extern.slf4j.Slf4j;
+
+import java.io.IOException;
+
 import fi.jakojaannos.roguelite.engine.MainThread;
 import fi.jakojaannos.roguelite.engine.network.internal.ServerCommandChannelRunnable;
 import fi.jakojaannos.roguelite.engine.network.message.MessageHandler;
 import fi.jakojaannos.roguelite.engine.network.message.NetworkMessage;
 import fi.jakojaannos.roguelite.engine.network.message.serialization.MessageDecoder;
 import fi.jakojaannos.roguelite.engine.network.message.serialization.MessageEncoder;
-import lombok.extern.slf4j.Slf4j;
-
-import java.io.IOException;
 
 @Slf4j
 public class ServerNetworkManager extends NetworkManager<ServerCommandChannelRunnable> {

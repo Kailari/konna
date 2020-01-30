@@ -1,5 +1,8 @@
 package fi.jakojaannos.roguelite.engine.view.systems.ui;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.event.Events;
@@ -8,9 +11,6 @@ import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.UIBuilder;
-import lombok.val;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.absolute;
 import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.percentOf;
@@ -39,8 +39,8 @@ public class UIElementBoundaryCalculationSystemTest_ParentRelativeProportions {
                 .build();
         userInterface.update(mock(Time.class), new Mouse(), mock(Events.class));
 
-        val element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
-                                   .findFirst().orElseThrow();
+        final var element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
+                                         .findFirst().orElseThrow();
         assertEquals(50, element.getProperty(UIProperty.MIN_X).orElseThrow());
         assertEquals(VIEWPORT_WIDTH - 20, element.getProperty(UIProperty.MAX_X).orElseThrow());
         assertEquals(VIEWPORT_WIDTH - (50 + 20), element.getProperty(UIProperty.WIDTH).orElseThrow());
@@ -56,8 +56,8 @@ public class UIElementBoundaryCalculationSystemTest_ParentRelativeProportions {
                 .build();
         userInterface.update(mock(Time.class), new Mouse(), mock(Events.class));
 
-        val element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
-                                   .findFirst().orElseThrow();
+        final var element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
+                                         .findFirst().orElseThrow();
         assertEquals(25, element.getProperty(UIProperty.MIN_X).orElseThrow());
         assertEquals(VIEWPORT_WIDTH - 10, element.getProperty(UIProperty.MAX_X).orElseThrow());
         assertEquals(VIEWPORT_WIDTH - (25 + 10), element.getProperty(UIProperty.WIDTH).orElseThrow());
@@ -73,8 +73,8 @@ public class UIElementBoundaryCalculationSystemTest_ParentRelativeProportions {
                 .build();
         userInterface.update(mock(Time.class), new Mouse(), mock(Events.class));
 
-        val element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
-                                   .findFirst().orElseThrow();
+        final var element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
+                                         .findFirst().orElseThrow();
         assertEquals(50, element.getProperty(UIProperty.MIN_Y).orElseThrow());
         assertEquals(VIEWPORT_HEIGHT - 20, element.getProperty(UIProperty.MAX_Y).orElseThrow());
         assertEquals(VIEWPORT_HEIGHT - (50 + 20), element.getProperty(UIProperty.HEIGHT).orElseThrow());
@@ -90,8 +90,8 @@ public class UIElementBoundaryCalculationSystemTest_ParentRelativeProportions {
                 .build();
         userInterface.update(mock(Time.class), new Mouse(), mock(Events.class));
 
-        val element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
-                                   .findFirst().orElseThrow();
+        final var element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
+                                         .findFirst().orElseThrow();
         assertEquals(25, element.getProperty(UIProperty.MIN_Y).orElseThrow());
         assertEquals(VIEWPORT_HEIGHT - 10, element.getProperty(UIProperty.MAX_Y).orElseThrow());
         assertEquals(VIEWPORT_HEIGHT - (25 + 10), element.getProperty(UIProperty.HEIGHT).orElseThrow());
@@ -107,8 +107,8 @@ public class UIElementBoundaryCalculationSystemTest_ParentRelativeProportions {
                 .build();
         userInterface.update(mock(Time.class), new Mouse(), mock(Events.class));
 
-        val element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
-                                   .findFirst().orElseThrow();
+        final var element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
+                                         .findFirst().orElseThrow();
         assertEquals(10, element.getProperty(UIProperty.MIN_X).orElseThrow());
         assertEquals(10 + 20, element.getProperty(UIProperty.MAX_X).orElseThrow());
         assertEquals(20, element.getProperty(UIProperty.WIDTH).orElseThrow());
@@ -124,8 +124,8 @@ public class UIElementBoundaryCalculationSystemTest_ParentRelativeProportions {
                 .build();
         userInterface.update(mock(Time.class), new Mouse(), mock(Events.class));
 
-        val element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
-                                   .findFirst().orElseThrow();
+        final var element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
+                                         .findFirst().orElseThrow();
         assertEquals(10, element.getProperty(UIProperty.MIN_X).orElseThrow());
         assertEquals(10 + 10, element.getProperty(UIProperty.MAX_X).orElseThrow());
         assertEquals(10, element.getProperty(UIProperty.WIDTH).orElseThrow());
@@ -141,8 +141,8 @@ public class UIElementBoundaryCalculationSystemTest_ParentRelativeProportions {
                 .build();
         userInterface.update(mock(Time.class), new Mouse(), mock(Events.class));
 
-        val element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
-                                   .findFirst().orElseThrow();
+        final var element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
+                                         .findFirst().orElseThrow();
         assertEquals(10, element.getProperty(UIProperty.MIN_Y).orElseThrow());
         assertEquals(10 + 20, element.getProperty(UIProperty.MAX_Y).orElseThrow());
         assertEquals(20, element.getProperty(UIProperty.HEIGHT).orElseThrow());
@@ -158,8 +158,8 @@ public class UIElementBoundaryCalculationSystemTest_ParentRelativeProportions {
                 .build();
         userInterface.update(mock(Time.class), new Mouse(), mock(Events.class));
 
-        val element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
-                                   .findFirst().orElseThrow();
+        final var element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
+                                         .findFirst().orElseThrow();
         assertEquals(10, element.getProperty(UIProperty.MIN_Y).orElseThrow());
         assertEquals(10 + 10, element.getProperty(UIProperty.MAX_Y).orElseThrow());
         assertEquals(10, element.getProperty(UIProperty.HEIGHT).orElseThrow());
@@ -176,8 +176,8 @@ public class UIElementBoundaryCalculationSystemTest_ParentRelativeProportions {
                 .build();
         userInterface.update(mock(Time.class), new Mouse(), mock(Events.class));
 
-        val element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
-                                   .findFirst().orElseThrow();
+        final var element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
+                                         .findFirst().orElseThrow();
         assertEquals(50 + 20, element.getProperty(UIProperty.MIN_X).orElseThrow());
         assertEquals(50 + 200 - 150, element.getProperty(UIProperty.MAX_X).orElseThrow());
         assertEquals(30, element.getProperty(UIProperty.WIDTH).orElseThrow());
@@ -194,8 +194,8 @@ public class UIElementBoundaryCalculationSystemTest_ParentRelativeProportions {
                 .build();
         userInterface.update(mock(Time.class), new Mouse(), mock(Events.class));
 
-        val element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
-                                   .findFirst().orElseThrow();
+        final var element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
+                                         .findFirst().orElseThrow();
         assertEquals(50 + 20, element.getProperty(UIProperty.MIN_Y).orElseThrow());
         assertEquals(50 + 100 - 10, element.getProperty(UIProperty.MAX_Y).orElseThrow());
         assertEquals(70, element.getProperty(UIProperty.HEIGHT).orElseThrow());

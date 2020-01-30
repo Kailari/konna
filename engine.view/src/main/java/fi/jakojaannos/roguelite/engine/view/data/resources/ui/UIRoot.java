@@ -1,9 +1,10 @@
 package fi.jakojaannos.roguelite.engine.view.data.resources.ui;
 
+import lombok.RequiredArgsConstructor;
+
 import fi.jakojaannos.roguelite.engine.ecs.Resource;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.data.components.ui.ElementBoundaries;
-import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class UIRoot implements Resource {

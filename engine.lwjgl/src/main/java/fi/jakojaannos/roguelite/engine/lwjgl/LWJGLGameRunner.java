@@ -1,14 +1,15 @@
 package fi.jakojaannos.roguelite.engine.lwjgl;
 
-import fi.jakojaannos.roguelite.engine.Game;
-import fi.jakojaannos.roguelite.engine.GameRunner;
-import fi.jakojaannos.roguelite.engine.event.Events;
-import fi.jakojaannos.roguelite.engine.state.GameState;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLUtil;
+
+import fi.jakojaannos.roguelite.engine.Game;
+import fi.jakojaannos.roguelite.engine.GameRunner;
+import fi.jakojaannos.roguelite.engine.event.Events;
+import fi.jakojaannos.roguelite.engine.state.GameState;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -18,7 +19,7 @@ public class LWJGLGameRunner<TGame extends Game> extends GameRunner<TGame> {
     @Getter
     private final LWJGLWindow window;
 
-    public LWJGLGameRunner(final boolean debugModeEnabled, int windowWidth, int windowHeight) {
+    public LWJGLGameRunner(final boolean debugModeEnabled, final int windowWidth, final int windowHeight) {
         GLFWErrorCallback.createPrint(System.err).set();
 
         if (!glfwInit()) {
@@ -44,7 +45,7 @@ public class LWJGLGameRunner<TGame extends Game> extends GameRunner<TGame> {
     }
 
     @Override
-    protected boolean shouldContinueLoop(TGame game) {
+    protected boolean shouldContinueLoop(final TGame game) {
         return super.shouldContinueLoop(game) && !glfwWindowShouldClose(this.window.getId());
     }
 

@@ -5,8 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 
-public abstract class AbstractAssetRegistry<TAsset>
-        implements AssetRegistry<TAsset> {
+public abstract class AbstractAssetRegistry<TAsset> implements AssetRegistry<TAsset> {
     private final Map<AssetHandle, TAsset> assets = new HashMap<>();
 
     protected abstract TAsset getDefault();

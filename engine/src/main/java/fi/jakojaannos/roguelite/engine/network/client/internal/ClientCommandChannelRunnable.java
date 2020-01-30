@@ -1,17 +1,7 @@
 package fi.jakojaannos.roguelite.engine.network.client.internal;
 
-import fi.jakojaannos.roguelite.engine.MainThread;
-import fi.jakojaannos.roguelite.engine.network.NetworkConnection;
-import fi.jakojaannos.roguelite.engine.network.internal.CommandChannelRunnable;
-import fi.jakojaannos.roguelite.engine.network.message.MessageHandlingContext;
-import fi.jakojaannos.roguelite.engine.network.message.NetworkMessage;
-import fi.jakojaannos.roguelite.engine.network.message.NetworkMessageHandlerMap;
-import fi.jakojaannos.roguelite.engine.network.message.serialization.MessageDecoder;
-import fi.jakojaannos.roguelite.engine.network.message.serialization.MessageEncoder;
-import fi.jakojaannos.roguelite.engine.network.message.serialization.TypedNetworkMessage;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
@@ -21,19 +11,25 @@ import java.nio.channels.SocketChannel;
 import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.function.Consumer;
+import javax.annotation.Nullable;
+
+import fi.jakojaannos.roguelite.engine.MainThread;
+import fi.jakojaannos.roguelite.engine.network.NetworkConnection;
+import fi.jakojaannos.roguelite.engine.network.internal.CommandChannelRunnable;
+import fi.jakojaannos.roguelite.engine.network.message.MessageHandlingContext;
+import fi.jakojaannos.roguelite.engine.network.message.NetworkMessage;
+import fi.jakojaannos.roguelite.engine.network.message.NetworkMessageHandlerMap;
+import fi.jakojaannos.roguelite.engine.network.message.serialization.MessageDecoder;
+import fi.jakojaannos.roguelite.engine.network.message.serialization.MessageEncoder;
+import fi.jakojaannos.roguelite.engine.network.message.serialization.TypedNetworkMessage;
 
 @Slf4j
 public class ClientCommandChannelRunnable extends CommandChannelRunnable {
-    protected final ByteBuffer readBuffer, writeBuffer;
-
-    @Nullable protected SocketChannel channel;
+    protected final ByteBuffer readBuffer;
+    protected final ByteBuffer writeBuffer;
     private final Queue<TypedNetworkMessage<?>> receiveQueue = new ArrayDeque<>();
     private final MessageHandlingContext context;
-
-    @Override
-    public boolean isConnected() {
-        return super.isConnected() && this.channel != null && this.channel.isConnected();
-    }
+    @Nullable protected SocketChannel channel;
 
     public ClientCommandChannelRunnable(
             final String host,
@@ -65,6 +61,11 @@ public class ClientCommandChannelRunnable extends CommandChannelRunnable {
 
         LOG.info("Connection successful.");
         this.channel.register(this.selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+    }
+
+    @Override
+    public boolean isConnected() {
+        return super.isConnected() && this.channel != null && this.channel.isConnected();
     }
 
     public void send(final NetworkMessage message) {

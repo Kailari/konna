@@ -1,11 +1,10 @@
 package fi.jakojaannos.roguelite.engine.network.message;
 
-import fi.jakojaannos.roguelite.engine.network.message.serialization.TypedNetworkMessage;
-import lombok.val;
-
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import fi.jakojaannos.roguelite.engine.network.message.serialization.TypedNetworkMessage;
 
 public class NetworkMessageHandlerMap {
     private final Map<Integer, MessageHandler<?>> handlers;
@@ -21,7 +20,7 @@ public class NetworkMessageHandlerMap {
             final TypedNetworkMessage<?> message,
             final MessageHandlingContext context
     ) {
-        val typeId = message.getMessageType().getTypeId();
+        final var typeId = message.getMessageType().getTypeId();
         if (this.handlers.containsKey(typeId)) {
             MessageHandler handler = this.handlers.get(typeId);
             handler.handle(message.getMessage(), context);

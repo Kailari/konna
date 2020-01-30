@@ -1,13 +1,12 @@
 package fi.jakojaannos.roguelite.game.data.components.character;
 
-import fi.jakojaannos.roguelite.engine.ecs.Component;
-import fi.jakojaannos.roguelite.game.data.DamageInstance;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import fi.jakojaannos.roguelite.engine.ecs.Component;
+import fi.jakojaannos.roguelite.game.data.DamageInstance;
 
 @NoArgsConstructor
 public class Health implements Component {
@@ -22,25 +21,25 @@ public class Health implements Component {
     public double currentHealth = 100.0;
 
     public long lastDamageInstanceTimeStamp = -10000L;
-    public boolean healthBarAlwaysVisible = false;
+    public boolean healthBarAlwaysVisible;
 
-    public Health(double maxHp, double currentHp) {
+    public Health(final double maxHp, final double currentHp) {
         this.maxHealth = maxHp;
         this.currentHealth = currentHp;
     }
 
-    public Health(double maxHp) {
+    public Health(final double maxHp) {
         this.maxHealth = maxHp;
         this.currentHealth = maxHp;
     }
 
-    public void addDamageInstance(DamageInstance dmg, long timeStamp) {
-        damageInstances.add(dmg);
-        if (timeStamp >= lastDamageInstanceTimeStamp) lastDamageInstanceTimeStamp = timeStamp;
+    public void addDamageInstance(final DamageInstance dmg, final long timeStamp) {
+        this.damageInstances.add(dmg);
+        if (timeStamp >= this.lastDamageInstanceTimeStamp) this.lastDamageInstanceTimeStamp = timeStamp;
     }
 
     public double asPercentage() {
-        if (maxHealth == 0.0) return 0.0;
-        return currentHealth / maxHealth;
+        if (this.maxHealth == 0.0) return 0.0;
+        return this.currentHealth / this.maxHealth;
     }
 }

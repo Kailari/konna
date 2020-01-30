@@ -1,11 +1,11 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.mesh;
 
-import fi.jakojaannos.roguelite.engine.view.rendering.mesh.Mesh;
-import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexFormat;
 import lombok.Setter;
-import lombok.val;
 
 import java.nio.ByteBuffer;
+
+import fi.jakojaannos.roguelite.engine.view.rendering.mesh.Mesh;
+import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexFormat;
 
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL30.*;
@@ -24,7 +24,7 @@ public class LWJGLMesh implements AutoCloseable, Mesh {
         this.vao = glGenVertexArrays();
         glBindVertexArray(this.vao);
 
-        val buffers = new int[2];
+        final var buffers = new int[2];
         glGenBuffers(buffers);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this.ebo = buffers[0]);
         glBindBuffer(GL_ARRAY_BUFFER, this.vbo = buffers[1]);
@@ -53,7 +53,7 @@ public class LWJGLMesh implements AutoCloseable, Mesh {
     ) {
         glBindBuffer(GL_ARRAY_BUFFER, this.vbo);
 
-        val limitBefore = vertexData.limit();
+        final var limitBefore = vertexData.limit();
         vertexData.limit(vertexCount * this.vertexFormat.getSizeInBytes());
         glBufferSubData(GL_ARRAY_BUFFER, destOffsetInBytes, vertexData);
         vertexData.limit(limitBefore);

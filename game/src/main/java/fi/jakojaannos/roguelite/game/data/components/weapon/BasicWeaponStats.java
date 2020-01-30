@@ -1,7 +1,8 @@
 package fi.jakojaannos.roguelite.game.data.components.weapon;
 
-import fi.jakojaannos.roguelite.engine.ecs.Component;
 import lombok.AllArgsConstructor;
+
+import fi.jakojaannos.roguelite.engine.ecs.Component;
 
 @AllArgsConstructor
 public class BasicWeaponStats implements Component {
@@ -15,7 +16,7 @@ public class BasicWeaponStats implements Component {
         this(2.0, 40.0, 2.5);
     }
 
-    public BasicWeaponStats(double attackRate, double attackProjectileSpeed, double attackSpread) {
+    public BasicWeaponStats(final double attackRate, final double attackProjectileSpeed, final double attackSpread) {
         this(attackRate, attackProjectileSpeed, attackSpread, 5.0);
     }
 }

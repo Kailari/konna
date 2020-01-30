@@ -1,20 +1,20 @@
 package fi.jakojaannos.roguelite.game.test.stepdefs.render;
 
+import io.cucumber.java.en.And;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import org.joml.Vector2d;
+import org.joml.Vector2i;
+
+import java.util.Collections;
+import java.util.stream.Collectors;
+
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 import fi.jakojaannos.roguelite.game.data.components.character.Health;
 import fi.jakojaannos.roguelite.game.view.state.GameplayGameStateRenderer;
-import io.cucumber.java.en.And;
-import io.cucumber.java.en.Given;
-import io.cucumber.java.en.Then;
-import lombok.val;
-import org.joml.Vector2d;
-import org.joml.Vector2i;
-
-import java.util.Collections;
-import java.util.stream.Collectors;
 
 import static fi.jakojaannos.roguelite.engine.utilities.assertions.ui.AssertUI.assertUI;
 import static fi.jakojaannos.roguelite.engine.utilities.assertions.ui.PositionMatcherBuilder.isHorizontallyIn;
@@ -23,9 +23,8 @@ import static fi.jakojaannos.roguelite.game.test.global.GlobalState.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class HudSteps {
-    private static final String TIMER_LABEL_NAME = GameplayGameStateRenderer.TIME_PLAYED_LABEL_NAME;
     public static final String GAME_OVER_CONTAINER_NAME = "game-over-container";
-
+    private static final String TIMER_LABEL_NAME = GameplayGameStateRenderer.TIME_PLAYED_LABEL_NAME;
     private static final double HEALTHBAR_NEAR_THRESHOLD = 2.0; // World units
 
     @Given("no enemies have taken damage")
@@ -49,11 +48,11 @@ public class HudSteps {
     }
 
     protected void dealDamageToNumberOfEnemies(final int n, final long ticksSinceDamaged) {
-        val healths = state.getWorld()
-                           .getEntityManager()
-                           .getEntitiesWith(Health.class)
-                           .map(EntityManager.EntityComponentPair::getComponent)
-                           .collect(Collectors.toList());
+        final var healths = state.getWorld()
+                                 .getEntityManager()
+                                 .getEntitiesWith(Health.class)
+                                 .map(EntityManager.EntityComponentPair::getComponent)
+                                 .collect(Collectors.toList());
 
         Collections.shuffle(healths, random);
         healths.stream()
@@ -66,7 +65,7 @@ public class HudSteps {
 
     @Then("there is a timer label on the top-middle of the screen")
     public void thereIsATimerLabelOnTheTopMiddleOfTheScreen() {
-        val ui = gameRenderer.getUserInterfaceForState(state);
+        final var ui = gameRenderer.getUserInterfaceForState(state);
         assertUI(ui)
                 .hasExactlyOneElement(that -> that.hasName().equalTo(TIMER_LABEL_NAME)
                                                   .matching(isVerticallyIn(ui).min())
@@ -183,8 +182,8 @@ public class HudSteps {
     }
 
     private Vector2d projectScreenToWorld(final Vector2i position) {
-        val camera = gameRenderer.getCamera();
-        val viewport = camera.getViewport();
+        final var camera = gameRenderer.getCamera();
+        final var viewport = camera.getViewport();
         return new Vector2d(((position.x / (double) viewport.getWidthInPixels()) * camera.getVisibleAreaWidth()) - camera.getVisibleAreaWidth() / 2.0,
                             ((position.y / (double) viewport.getHeightInPixels()) * camera.getVisibleAreaHeight()) - camera.getVisibleAreaHeight() / 2.0);
     }

@@ -1,13 +1,12 @@
 package fi.jakojaannos.roguelite.engine.view.ui.query;
 
+import java.util.Collection;
+import java.util.function.Consumer;
+
 import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 import fi.jakojaannos.roguelite.engine.view.ui.internal.query.UIElementMatcherImpl;
-import lombok.val;
-
-import java.util.Collection;
-import java.util.function.Consumer;
 
 public interface UIElementMatcher extends UIMatcher {
     static UIElementMatcher create() {
@@ -16,7 +15,7 @@ public interface UIElementMatcher extends UIMatcher {
 
     UIElementMatcher matching(UIMatcher matcher);
 
-    Collection<UIMatcher> evaluateAndGetFailures(final UIElement element);
+    Collection<UIMatcher> evaluateAndGetFailures(UIElement element);
 
     default UIPropertyStringMatcherBuilder hasName() {
         return new UIPropertyStringMatcherBuilder(this, UIProperty.NAME);
@@ -27,7 +26,7 @@ public interface UIElementMatcher extends UIMatcher {
     }
 
     default UIElementMatcher hasChildMatching(final Consumer<UIElementMatcher> builder) {
-        val childMatcher = UIElementMatcher.create();
+        final var childMatcher = UIElementMatcher.create();
         builder.accept(childMatcher);
         return matching(element -> element.getChildren().stream()
                                           .anyMatch(childMatcher::evaluate));

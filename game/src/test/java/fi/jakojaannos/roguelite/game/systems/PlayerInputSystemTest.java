@@ -1,5 +1,12 @@
 package fi.jakojaannos.roguelite.game.systems;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import java.util.stream.Stream;
+
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
@@ -11,13 +18,6 @@ import fi.jakojaannos.roguelite.game.data.components.character.CharacterAbilitie
 import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
-import lombok.val;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -90,7 +90,7 @@ class PlayerInputSystemTest {
         mouse.position.x = mouseX;
         mouse.position.y = mouseY;
 
-        val cameraEntity = world.getEntityManager().createEntity();
+        final var cameraEntity = world.getEntityManager().createEntity();
         this.world.getEntityManager().addComponentTo(cameraEntity, new Transform());
         cameraProperties.cameraEntity = cameraEntity;
         this.world.getEntityManager().applyModifications();

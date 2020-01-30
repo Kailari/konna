@@ -1,12 +1,12 @@
 package fi.jakojaannos.roguelite.launcher.arguments.parameters;
 
 public class BoolParameter extends Parameter<Boolean> {
-    BoolParameter(String name) {
+    BoolParameter(final String name) {
         super(name);
     }
 
     @Override
-    public Boolean parse(String string) {
+    public Boolean parse(final String string) {
         return Boolean.valueOf(string);
     }
 }

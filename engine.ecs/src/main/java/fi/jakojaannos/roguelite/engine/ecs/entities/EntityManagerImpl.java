@@ -1,19 +1,19 @@
 package fi.jakojaannos.roguelite.engine.ecs.entities;
 
-import fi.jakojaannos.roguelite.engine.ecs.Component;
-import fi.jakojaannos.roguelite.engine.ecs.ComponentGroup;
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.components.ComponentStorage;
-import fi.jakojaannos.roguelite.engine.utilities.BitMaskUtils;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.stream.Stream;
+
+import fi.jakojaannos.roguelite.engine.ecs.Component;
+import fi.jakojaannos.roguelite.engine.ecs.ComponentGroup;
+import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.components.ComponentStorage;
+import fi.jakojaannos.roguelite.engine.utilities.BitMaskUtils;
 
 /**
  * Default {@link EntityManager} implementation.
@@ -28,7 +28,8 @@ public class EntityManagerImpl implements EntityManager {
     private int entityCapacity;
 
     public EntityManagerImpl(final int entityCapacity, final int maxComponentTypes) {
-        this(entityCapacity, maxComponentTypes, new EntityStorage(entityCapacity), new ComponentStorage(entityCapacity, maxComponentTypes));
+        this(entityCapacity, maxComponentTypes, new EntityStorage(entityCapacity),
+             new ComponentStorage(entityCapacity, maxComponentTypes));
     }
 
     public EntityManagerImpl(
@@ -60,7 +61,7 @@ public class EntityManagerImpl implements EntityManager {
 
     @Override
     public Entity createEntity() {
-        val entity = this.entityStorage.create(this.maxComponentTypes);
+        final var entity = this.entityStorage.create(this.maxComponentTypes);
         if (this.entityStorage.isFull()) {
             resize(this.entityCapacity * 2);
         }
@@ -72,7 +73,7 @@ public class EntityManagerImpl implements EntityManager {
 
     @Override
     public void destroyEntity(final Entity entityRaw) {
-        val entity = (EntityImpl) entityRaw;
+        final var entity = (EntityImpl) entityRaw;
         entity.markForRemoval();
         this.taskQueue.offer(() -> {
             this.componentStorage.clear(entity);
@@ -134,14 +135,15 @@ public class EntityManagerImpl implements EntityManager {
     ) {
         return this.entityStorage.stream()
                                  .filter(e -> this.componentStorage.exists(e, componentClass))
-                                 .map(e -> new EntityComponentPair<>(e, getComponentOf(e, componentClass).orElseThrow()));
+                                 .map(e -> new EntityComponentPair<>(e, getComponentOf(e, componentClass)
+                                         .orElseThrow()));
     }
 
     @Override
     public Stream<Entity> getEntitiesWith(
             final Collection<Class<? extends Component>> componentTypes
     ) {
-        val requiredMask = this.componentStorage.createComponentBitmask(componentTypes);
+        final var requiredMask = this.componentStorage.createComponentBitmask(componentTypes);
         return this.entityStorage.stream()
                                  .filter(e -> BitMaskUtils.hasAllBitsOf(e.getComponentBitmask(), requiredMask))
                                  .map(Entity.class::cast);
@@ -154,8 +156,8 @@ public class EntityManagerImpl implements EntityManager {
             final Collection<ComponentGroup> requiredGroups,
             final Collection<ComponentGroup> excludedGroups
     ) {
-        val requiredMask = this.componentStorage.createComponentBitmask(required, requiredGroups);
-        val excludedMask = this.componentStorage.createComponentBitmask(excluded, excludedGroups);
+        final var requiredMask = this.componentStorage.createComponentBitmask(required, requiredGroups);
+        final var excludedMask = this.componentStorage.createComponentBitmask(excluded, excludedGroups);
         return this.entityStorage.stream()
                                  .filter(e -> BitMaskUtils.hasNoneOfTheBitsOf(e.getComponentBitmask(), excludedMask))
                                  .filter(e -> BitMaskUtils.hasAllBitsOf(e.getComponentBitmask(), requiredMask))

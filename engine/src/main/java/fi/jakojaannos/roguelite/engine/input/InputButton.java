@@ -9,38 +9,6 @@ import java.util.Optional;
 import java.util.TreeMap;
 
 public interface InputButton {
-    @EqualsAndHashCode
-    final class Mouse implements InputButton {
-        private static Map<Integer, Mouse> buttonInstances = new TreeMap<>();
-
-        private final int index;
-
-        private Mouse(int index) {
-            this.index = index;
-        }
-
-        public static Mouse button(int index) {
-            return buttonInstances.computeIfAbsent(index, integer -> new Mouse(index));
-        }
-
-        public String getName() {
-            switch (this.index) {
-                case 0:
-                    return "Mouse Left";
-                case 1:
-                    return "Mouse Right";
-                case 2:
-                    return "Mouse Middle";
-                case 3:
-                    return "Thumb 1";
-                case 4:
-                    return "Thumb 2";
-                default:
-                    return "Mouse Button #" + (this.index + 1);
-            }
-        }
-    }
-
     enum Keyboard implements InputButton {
         // Printable keys
         KEY_UNKNOWN(-1),
@@ -170,26 +138,58 @@ public interface InputButton {
         public static final int NUM_KEYS = KEY_MENU.ordinal() + 1;
         private static final Keyboard[] KEY_LOOKUP = new Keyboard[349];
 
-        @Getter
-        private final int key;
-
-        Keyboard(int key) {
-            this.key = key;
-        }
-
         static {
             Arrays.stream(Keyboard.values())
                   .filter(key -> key.key >= 0 && key.key < 349)
                   .forEach(key -> KEY_LOOKUP[key.key] = key);
         }
 
-        public static Optional<Keyboard> get(int key) {
+        @Getter
+        private final int key;
+
+        Keyboard(final int key) {
+            this.key = key;
+        }
+
+        public static Optional<Keyboard> get(final int key) {
             Keyboard result = null;
             if (key >= 0 && key < 349) {
                 result = KEY_LOOKUP[key];
             }
 
             return Optional.ofNullable(result);
+        }
+    }
+
+    @EqualsAndHashCode
+    final class Mouse implements InputButton {
+        private static final Map<Integer, Mouse> buttonInstances = new TreeMap<>();
+
+        private final int index;
+
+        private Mouse(final int index) {
+            this.index = index;
+        }
+
+        public static Mouse button(final int index) {
+            return buttonInstances.computeIfAbsent(index, integer -> new Mouse(index));
+        }
+
+        public String getName() {
+            switch (this.index) {
+                case 0:
+                    return "Mouse Left";
+                case 1:
+                    return "Mouse Right";
+                case 2:
+                    return "Mouse Middle";
+                case 3:
+                    return "Thumb 1";
+                case 4:
+                    return "Thumb 2";
+                default:
+                    return "Mouse Button #" + (this.index + 1);
+            }
         }
     }
 }

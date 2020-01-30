@@ -1,5 +1,7 @@
 package fi.jakojaannos.roguelite.game.data.archetypes;
 
+import javax.annotation.Nonnull;
+
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
@@ -11,17 +13,13 @@ import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.game.data.components.character.*;
 import fi.jakojaannos.roguelite.game.data.components.weapon.BasicWeaponStats;
 import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
-import lombok.val;
-
-import javax.annotation.Nonnull;
 
 public class PlayerArchetype {
-
     public static Entity create(
             final EntityManager entityManager,
             final Transform transform
     ) {
-        val player = entityManager.createEntity();
+        final var player = entityManager.createEntity();
         entityManager.addComponentTo(player, transform);
         entityManager.addComponentTo(player, new Velocity());
         entityManager.addComponentTo(player, createPhysics());
@@ -40,7 +38,7 @@ public class PlayerArchetype {
 
     @Nonnull
     private static Collider createCollider() {
-        val collider = new Collider(CollisionLayer.PLAYER);
+        final var collider = new Collider(CollisionLayer.PLAYER);
         collider.width = 1.0;
         collider.height = 1.0;
         collider.origin.set(0.5);
@@ -69,7 +67,7 @@ public class PlayerArchetype {
     }
 
     private static SpriteInfo createSpriteInfo() {
-        val sprite = new SpriteInfo();
+        final var sprite = new SpriteInfo();
         sprite.spriteName = "sprites/player";
 
         return sprite;

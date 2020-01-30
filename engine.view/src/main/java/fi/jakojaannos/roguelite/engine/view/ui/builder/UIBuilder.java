@@ -1,12 +1,12 @@
 package fi.jakojaannos.roguelite.engine.view.ui.builder;
 
+import java.util.function.Consumer;
+
 import fi.jakojaannos.roguelite.engine.ui.TextSizeProvider;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.engine.view.ui.internal.UserInterfaceImpl;
-
-import java.util.function.Consumer;
 
 public class UIBuilder {
     private final UserInterfaceImpl userInterface;

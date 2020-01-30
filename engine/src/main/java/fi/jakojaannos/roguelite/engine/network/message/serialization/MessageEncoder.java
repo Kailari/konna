@@ -1,13 +1,13 @@
 package fi.jakojaannos.roguelite.engine.network.message.serialization;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import java.nio.ByteBuffer;
+
 import fi.jakojaannos.roguelite.engine.network.message.NetworkMessage;
 import fi.jakojaannos.roguelite.engine.network.message.NetworkMessageType;
 import fi.jakojaannos.roguelite.engine.network.message.NetworkMessageTypeMap;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-
-import java.nio.ByteBuffer;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -38,8 +38,8 @@ public class MessageEncoder {
         ((NetworkMessageType) messageType).serialize(message, bufferOut);
 
         // Write the message length to header
-        val endIndex = bufferOut.position();
-        val messageLength = (short) (bufferOut.position() - TypedNetworkMessage.FIXED_HEADER_SIZE_IN_BYTES);
+        final var endIndex = bufferOut.position();
+        final var messageLength = (short) (bufferOut.position() - TypedNetworkMessage.FIXED_HEADER_SIZE_IN_BYTES);
         bufferOut.position(TypedNetworkMessage.HEADER_MESSAGE_LENGTH_OFFSET);
         bufferOut.putShort(messageLength);
 

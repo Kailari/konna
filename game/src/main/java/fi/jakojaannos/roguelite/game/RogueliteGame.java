@@ -1,5 +1,8 @@
 package fi.jakojaannos.roguelite.game;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import fi.jakojaannos.roguelite.engine.GameBase;
 import fi.jakojaannos.roguelite.engine.data.resources.GameStateManager;
 import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
@@ -11,9 +14,6 @@ import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.engine.utilities.UpdateableTimeManager;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
 import fi.jakojaannos.roguelite.game.data.resources.MainThread;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -32,12 +32,12 @@ public class RogueliteGame extends GameBase implements MainThread {
         // FIXME: This is ugly but works
         state.getWorld().createOrReplaceResource(MainThread.class, this);
 
-        val inputs = state.getWorld().getOrCreateResource(Inputs.class);
-        val mouse = state.getWorld().getOrCreateResource(Mouse.class);
-        val inputEvents = events.getInput();
+        final var inputs = state.getWorld().getOrCreateResource(Inputs.class);
+        final var mouse = state.getWorld().getOrCreateResource(Mouse.class);
+        final var inputEvents = events.getInput();
 
         while (inputEvents.hasEvents()) {
-            val event = inputEvents.pollEvent();
+            final var event = inputEvents.pollEvent();
 
             event.getAxis().ifPresent(input -> {
                 if (input.getAxis() == InputAxis.Mouse.X_POS) {
@@ -81,7 +81,7 @@ public class RogueliteGame extends GameBase implements MainThread {
     }
 
     protected GameState selectNextState(final GameState state) {
-        val stateManager = state.getWorld().getOrCreateResource(GameStateManager.class);
+        final var stateManager = state.getWorld().getOrCreateResource(GameStateManager.class);
         if (stateManager.shouldShutDown()) {
             this.setFinished(true);
         }

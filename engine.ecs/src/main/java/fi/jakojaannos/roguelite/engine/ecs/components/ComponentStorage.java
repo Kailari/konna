@@ -1,20 +1,21 @@
 package fi.jakojaannos.roguelite.engine.ecs.components;
 
-import fi.jakojaannos.roguelite.engine.ecs.Component;
-import fi.jakojaannos.roguelite.engine.ecs.ComponentGroup;
-import fi.jakojaannos.roguelite.engine.ecs.entities.EntityImpl;
-import fi.jakojaannos.roguelite.engine.utilities.BitMaskUtils;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import fi.jakojaannos.roguelite.engine.ecs.Component;
+import fi.jakojaannos.roguelite.engine.ecs.ComponentGroup;
+import fi.jakojaannos.roguelite.engine.ecs.entities.EntityImpl;
+import fi.jakojaannos.roguelite.engine.utilities.BitMaskUtils;
+
 @Slf4j
 public class ComponentStorage {
     private final int maxComponentTypes;
+    @SuppressWarnings("rawtypes")
     private final Map<Integer, ComponentMap> componentTypes = new HashMap<>();
     private final Map<Class<? extends Component>, Integer> componentTypeIndices = new HashMap<>();
     private final Map<ComponentGroup, Integer> componentGroupIndices = new HashMap<>();
@@ -28,7 +29,7 @@ public class ComponentStorage {
     }
 
     public void clear(final EntityImpl entity) {
-        for (val storage : this.componentTypes.values()) {
+        for (final var storage : this.componentTypes.values()) {
             storage.removeComponent(entity);
         }
     }
@@ -37,7 +38,7 @@ public class ComponentStorage {
             final EntityImpl entity,
             final Class<? extends Component> except
     ) {
-        val componentTypeIndex = getComponentTypeIndexFor(except);
+        final var componentTypeIndex = getComponentTypeIndexFor(except);
         IntStream.range(0, this.componentTypes.size())
                  .filter(i -> i != componentTypeIndex)
                  .forEach(index -> removeComponentByIndex(entity, index));
@@ -62,7 +63,7 @@ public class ComponentStorage {
     public void resize(final int entityCapacity) {
         if (entityCapacity > this.entityCapacity) {
             this.entityCapacity = entityCapacity;
-            for (val storage : this.componentTypes.values()) {
+            for (final var storage : this.componentTypes.values()) {
                 storage.resize(entityCapacity);
             }
         }
@@ -76,7 +77,7 @@ public class ComponentStorage {
             final EntityImpl entity,
             final TComponent component
     ) {
-        val componentTypeIndex = getComponentTypeIndexFor(component.getClass());
+        final var componentTypeIndex = getComponentTypeIndexFor(component.getClass());
         if (BitMaskUtils.isNthBitSet(entity.getComponentBitmask(), componentTypeIndex)) {
             throw new IllegalStateException("Component added while type bit is already set!");
         }
@@ -90,7 +91,7 @@ public class ComponentStorage {
     }
 
     public void remove(final EntityImpl entity, final Class<? extends Component> componentClass) {
-        val componentTypeIndex = getComponentTypeIndexFor(componentClass);
+        final var componentTypeIndex = getComponentTypeIndexFor(componentClass);
         if (!BitMaskUtils.isNthBitSet(entity.getComponentBitmask(), componentTypeIndex)) {
             throw new IllegalStateException("Component removed while type bit is already unset!");
         }
@@ -103,12 +104,12 @@ public class ComponentStorage {
             final EntityImpl entity,
             final Class<? extends TComponent> componentClass
     ) {
-        val componentTypeIndex = getComponentTypeIndexFor(componentClass);
+        final var componentTypeIndex = getComponentTypeIndexFor(componentClass);
         if (!BitMaskUtils.isNthBitSet(entity.getComponentBitmask(), componentTypeIndex)) {
             return Optional.empty();
         }
 
-        val componentStorage = componentTypes.get(componentTypeIndex);
+        final var componentStorage = componentTypes.get(componentTypeIndex);
         // noinspection unchecked
         return (Optional<TComponent>) Optional.ofNullable(componentStorage.getComponent(entity));
     }
@@ -172,7 +173,7 @@ public class ComponentStorage {
     }
 
     private int getNextComponentTypeIndex() {
-        val index = this.registeredTypeIndices;
+        final var index = this.registeredTypeIndices;
         ++this.registeredTypeIndices;
 
         if (index >= this.maxComponentTypes) {
@@ -212,7 +213,9 @@ public class ComponentStorage {
                                   .stream()
                                   .filter(entry -> entry.getKey().getComponentTypes().contains(added))
                                   .map(Map.Entry::getValue)
-                                  .forEach(groupComponentTypeIndex -> BitMaskUtils.setNthBit(entity.getComponentBitmask(), groupComponentTypeIndex));
+                                  .forEach(groupComponentTypeIndex ->
+                                                   BitMaskUtils.setNthBit(entity.getComponentBitmask(),
+                                                                          groupComponentTypeIndex));
     }
 
     private void checkGroupsAfterRemove(
@@ -224,6 +227,8 @@ public class ComponentStorage {
                                   .filter(entry -> entry.getKey().getComponentTypes().contains(removed))
                                   .filter(entry -> !anyExists(entity, entry.getKey()))
                                   .map(Map.Entry::getValue)
-                                  .forEach(groupComponentTypeIndex -> BitMaskUtils.unsetNthBit(entity.getComponentBitmask(), groupComponentTypeIndex));
+                                  .forEach(groupComponentTypeIndex ->
+                                                   BitMaskUtils.unsetNthBit(entity.getComponentBitmask(),
+                                                                            groupComponentTypeIndex));
     }
 }

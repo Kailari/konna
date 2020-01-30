@@ -2,7 +2,6 @@ package fi.jakojaannos.roguelite.engine.view.rendering.sprite;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,10 +14,6 @@ public final class Animation {
     private final List<Frame> frames;
     private final double totalDuration;
 
-    public int frameCount() {
-        return this.frames.size();
-    }
-
     private Animation(final List<Frame> frames) {
         if (frames.stream().anyMatch(frame -> frame.duration < 0)) {
             throw new IllegalArgumentException("Cannot have frame with negative duration!");
@@ -30,26 +25,6 @@ public final class Animation {
                                         .sum();
     }
 
-    public int getFrameIndexOfFrame(int n) {
-        return this.frames.get(n).index;
-    }
-
-    public int getFrameIndexAtTime(final double time) {
-        var t = time % this.totalDuration;
-        int i = -1;
-        do {
-            ++i;
-            val frameDuration = this.frames.get(i).duration;
-            if (Double.isInfinite(frameDuration)) {
-                break;
-            }
-
-            t -= frameDuration;
-        } while (t > 0);
-
-        return this.frames.get(i).index;
-    }
-
     public static Animation forSingleFrame(final int index, final double duration) {
         return new Animation(List.of(new Frame(index, duration)));
     }
@@ -59,8 +34,8 @@ public final class Animation {
             final int lastFrame,
             final double totalDuration
     ) {
-        val count = lastFrame - firstFrame + 1;
-        val durationPerFrame = totalDuration < 0
+        final var count = lastFrame - firstFrame + 1;
+        final var durationPerFrame = totalDuration < 0
                 ? Double.POSITIVE_INFINITY
                 : totalDuration / count;
         return new Animation(IntStream.rangeClosed(firstFrame, lastFrame)
@@ -73,7 +48,7 @@ public final class Animation {
             final int lastFrame,
             final double[] durations
     ) {
-        List<Double> durationList = new ArrayList<>();
+        final List<Double> durationList = new ArrayList<>();
         Arrays.stream(durations)
               .map(Double.class::cast)
               .forEach(durationList::add);
@@ -88,11 +63,35 @@ public final class Animation {
         return new Animation(List.copyOf(frames));
     }
 
+    public int frameCount() {
+        return this.frames.size();
+    }
+
+    public int getFrameIndexOfFrame(final int n) {
+        return this.frames.get(n).index;
+    }
+
+    public int getFrameIndexAtTime(final double time) {
+        var t = time % this.totalDuration;
+        int i = -1;
+        do {
+            ++i;
+            final var frameDuration = this.frames.get(i).duration;
+            if (Double.isInfinite(frameDuration)) {
+                break;
+            }
+
+            t -= frameDuration;
+        } while (t > 0);
+
+        return this.frames.get(i).index;
+    }
+
     public static class Frame {
         @Getter private final int index;
         @Getter private final double duration;
 
-        public Frame(int index, double duration) {
+        public Frame(final int index, final double duration) {
             this.index = index;
             this.duration = duration < 0
                     ? Double.POSITIVE_INFINITY

@@ -1,13 +1,14 @@
 package fi.jakojaannos.roguelite.game.test.stepdefs.gameplay;
 
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import org.joml.Vector2d;
+
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
 import fi.jakojaannos.roguelite.game.data.components.character.WalkingMovementAbility;
 import fi.jakojaannos.roguelite.game.test.global.GlobalGameState;
-import io.cucumber.java.en.Given;
-import io.cucumber.java.en.Then;
-import org.joml.Vector2d;
 
 import static fi.jakojaannos.roguelite.game.test.global.GlobalState.getComponentOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;

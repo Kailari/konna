@@ -1,17 +1,18 @@
 package fi.jakojaannos.roguelite.game.test.view;
 
-import fi.jakojaannos.roguelite.engine.view.Window;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import fi.jakojaannos.roguelite.engine.view.Window;
+
 @AllArgsConstructor
 public class TestWindow implements Window {
+    private final List<ResizeCallback> resizeCallbacks = new ArrayList<>();
     @Getter private int width;
     @Getter private int height;
-    private final List<ResizeCallback> resizeCallbacks = new ArrayList<>();
 
     public void resize(final int width, final int height) {
         this.width = width;

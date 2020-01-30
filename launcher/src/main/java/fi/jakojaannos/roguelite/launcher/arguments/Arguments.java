@@ -1,40 +1,36 @@
 package fi.jakojaannos.roguelite.launcher.arguments;
-import lombok.val;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Arguments {
-    private boolean ignoreUnknown = false;
-    private List<Argument> arguments = new ArrayList<>();
-
+    private final List<Argument> arguments = new ArrayList<>();
+    private boolean ignoreUnknown;
 
     public static Arguments builder() {
         return new Arguments();
     }
-
 
     public Arguments ignoreUnknown() {
         this.ignoreUnknown = true;
         return this;
     }
 
-
-    public Arguments with( Argument argument) {
+    public Arguments with(final Argument argument) {
         this.arguments.add(argument);
         return this;
     }
 
-    public void consume( String... args) throws ArgumentParsingException {
+    public void consume(final String... args) throws ArgumentParsingException {
         for (int i = 0; i < args.length; ++i) {
-            val argStr = args[i];
+            final var argStr = args[i];
             if (argStr.isEmpty()) {
                 throw new ArgumentParsingException("Argument cannot be empty!");
             } else if (argStr.equals("-") || argStr.equals("--")) {
-                throw new ArgumentParsingException("Hyphen(s) should be followed by argument name.");
+                throw new ArgumentParsingException("Hyphen should be followed by argument name.");
             }
 
-            String argName;
+            final String argName;
             if (argStr.startsWith("--")) {
                 argName = argStr.substring(2);
             } else if (argStr.startsWith("-")) {
@@ -50,10 +46,10 @@ public class Arguments {
                 ));
             }
 
-            val params = new ArgumentParameters(i + 1, args);
-            val argument = this.arguments.stream()
-                                         .filter(a -> a.nameMatches(argName))
-                                         .findFirst();
+            final var params = new ArgumentParameters(i + 1, args);
+            final var argument = this.arguments.stream()
+                                               .filter(a -> a.nameMatches(argName))
+                                               .findFirst();
 
             if (argument.isPresent()) {
                 argument.get().consumeArguments(params);

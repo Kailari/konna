@@ -1,13 +1,7 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view;
 
-import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
-import fi.jakojaannos.roguelite.engine.state.GameState;
-import fi.jakojaannos.roguelite.engine.view.Camera;
-import fi.jakojaannos.roguelite.engine.view.Viewport;
-import fi.jakojaannos.roguelite.engine.view.rendering.shader.EngineUniformBufferObjectIndices;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.joml.Matrix4f;
 import org.joml.Vector2d;
 import org.lwjgl.system.MemoryStack;
@@ -15,44 +9,78 @@ import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
 
+import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
+import fi.jakojaannos.roguelite.engine.state.GameState;
+import fi.jakojaannos.roguelite.engine.view.Camera;
+import fi.jakojaannos.roguelite.engine.view.Viewport;
+import fi.jakojaannos.roguelite.engine.view.rendering.shader.EngineUniformBufferObjectIndices;
+
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL30.glBindBufferBase;
 import static org.lwjgl.opengl.GL31.GL_UNIFORM_BUFFER;
 
 @Slf4j
-public class LWJGLCamera extends Camera implements AutoCloseable {
+public class LWJGLCamera extends Camera {
     private static final double CAMERA_MOVE_EPSILON = 0.0001;
 
     private static final int MATRIX4F_SIZE_IN_BYTES = 16 * 4;
     private static final int VIEW_MATRIX_UBO_OFFSET = 0;
     private static final int PROJECTION_MATRIX_UBO_OFFSET = MATRIX4F_SIZE_IN_BYTES;
-
+    private final Matrix4f projectionMatrix;
+    private final Matrix4f screenProjectionMatrix;
+    private final Matrix4f viewMatrix;
+    private final int worldCameraMatricesUbo;
+    private final int screenCameraMatricesUbo;
+    private final ByteBuffer cameraMatricesData;
     @Getter private double targetScreenSizeInUnits = 32.0;
     private boolean targetSizeIsRespectiveToMinorAxis;
-
     private double viewportWidthInUnits;
     private double viewportHeightInUnits;
+    private boolean projectionMatrixDirty;
+    private boolean viewMatrixDirty;
+
+    public LWJGLCamera(final Viewport viewport) {
+        super(new Vector2d(0.0, 0.0), viewport);
+
+        this.projectionMatrix = new Matrix4f().identity();
+        this.screenProjectionMatrix = new Matrix4f().identity();
+        this.projectionMatrixDirty = true;
+
+        this.viewMatrix = new Matrix4f();
+        this.viewMatrixDirty = true;
+
+        // TODO: final var -> final var
+        try (final var stack = MemoryStack.stackPush()) {
+            final var ubos = stack.mallocInt(2);
+            glGenBuffers(ubos);
+            this.worldCameraMatricesUbo = ubos.get(0);
+            this.screenCameraMatricesUbo = ubos.get(1);
+        }
+        this.cameraMatricesData = MemoryUtil.memAlloc(2 * MATRIX4F_SIZE_IN_BYTES);
+
+        for (int i = 0; i < this.cameraMatricesData.capacity(); ++i) {
+            this.cameraMatricesData.put(i, (byte) 0);
+        }
+        glBindBuffer(GL_UNIFORM_BUFFER, this.worldCameraMatricesUbo);
+        glBufferData(GL_UNIFORM_BUFFER, this.cameraMatricesData, GL_DYNAMIC_DRAW);
+        glBindBuffer(GL_UNIFORM_BUFFER, this.screenCameraMatricesUbo);
+        glBufferData(GL_UNIFORM_BUFFER, this.cameraMatricesData, GL_DYNAMIC_DRAW);
+
+        refreshUniforms();
+
+        refreshViewMatrixIfDirty();
+        useWorldCoordinates();
+    }
 
     @Override
     public double getVisibleAreaWidth() {
-        return viewportWidthInUnits;
+        return this.viewportWidthInUnits;
     }
 
     @Override
     public double getVisibleAreaHeight() {
-        return viewportHeightInUnits;
+        return this.viewportHeightInUnits;
     }
-
-    private final Matrix4f projectionMatrix;
-    private final Matrix4f screenProjectionMatrix;
-    private boolean projectionMatrixDirty;
-
-    private final Matrix4f viewMatrix;
-    private boolean viewMatrixDirty;
-
-    private final int worldCameraMatricesUbo;
-    private final int screenCameraMatricesUbo;
-    private final ByteBuffer cameraMatricesData;
 
     public void refreshMatricesIfDirty() {
         refreshViewMatrixIfDirty();
@@ -63,7 +91,9 @@ public class LWJGLCamera extends Camera implements AutoCloseable {
             final double targetScreenSizeInUnits,
             final boolean targetSizeIsRespectiveToMinorAxis
     ) {
-        if (this.targetScreenSizeInUnits != targetScreenSizeInUnits || this.targetSizeIsRespectiveToMinorAxis != targetSizeIsRespectiveToMinorAxis) {
+        final var screenSizeIsDirty = this.targetScreenSizeInUnits != targetScreenSizeInUnits;
+        final var minorAxisSizeIsDirty = this.targetSizeIsRespectiveToMinorAxis != targetSizeIsRespectiveToMinorAxis;
+        if (screenSizeIsDirty || minorAxisSizeIsDirty) {
             this.projectionMatrixDirty = true;
             this.targetScreenSizeInUnits = targetScreenSizeInUnits;
             this.targetSizeIsRespectiveToMinorAxis = targetSizeIsRespectiveToMinorAxis;
@@ -86,9 +116,9 @@ public class LWJGLCamera extends Camera implements AutoCloseable {
     }
 
     @Override
-    public void setPosition(double x, double y) {
-        double dx = x - getX();
-        double dy = y - getY();
+    public void setPosition(final double x, final double y) {
+        final double dx = x - getX();
+        final double dy = y - getY();
         if (dx * dx + dy * dy > CAMERA_MOVE_EPSILON || this.viewMatrixDirty) {
             super.setPosition(x, y);
             this.viewMatrixDirty = true;
@@ -97,45 +127,14 @@ public class LWJGLCamera extends Camera implements AutoCloseable {
         refreshMatricesIfDirty();
     }
 
-    public LWJGLCamera(final Viewport viewport) {
-        super(new Vector2d(0.0, 0.0), viewport);
-
-        this.projectionMatrix = new Matrix4f().identity();
-        this.screenProjectionMatrix = new Matrix4f().identity();
-        this.projectionMatrixDirty = true;
-
-        this.viewMatrix = new Matrix4f();
-        this.viewMatrixDirty = true;
-
-        try (val stack = MemoryStack.stackPush()) {
-            val ubos = stack.mallocInt(2);
-            glGenBuffers(ubos);
-            this.worldCameraMatricesUbo = ubos.get(0);
-            this.screenCameraMatricesUbo = ubos.get(1);
-        }
-        this.cameraMatricesData = MemoryUtil.memAlloc(2 * MATRIX4F_SIZE_IN_BYTES);
-
-        for (int i = 0; i < this.cameraMatricesData.capacity(); ++i) {
-            this.cameraMatricesData.put(i, (byte) 0);
-        }
-        glBindBuffer(GL_UNIFORM_BUFFER, this.worldCameraMatricesUbo);
-        glBufferData(GL_UNIFORM_BUFFER, this.cameraMatricesData, GL_DYNAMIC_DRAW);
-        glBindBuffer(GL_UNIFORM_BUFFER, this.screenCameraMatricesUbo);
-        glBufferData(GL_UNIFORM_BUFFER, this.cameraMatricesData, GL_DYNAMIC_DRAW);
-
-        refreshUniforms();
-
-        refreshViewMatrixIfDirty();
-        useWorldCoordinates();
-    }
-
     @Override
     public void updateConfigurationFromState(final GameState state) {
         super.updateConfigurationFromState(state);
 
-        val world = state.getWorld();
-        val cameraProperties = world.getOrCreateResource(CameraProperties.class);
-        refreshTargetScreenSizeInUnits(cameraProperties.targetViewportSizeInWorldUnits, cameraProperties.targetViewportSizeRespectiveToMinorAxis);
+        final var world = state.getWorld();
+        final var cameraProperties = world.getOrCreateResource(CameraProperties.class);
+        refreshTargetScreenSizeInUnits(cameraProperties.targetViewportSizeInWorldUnits,
+                                       cameraProperties.targetViewportSizeRespectiveToMinorAxis);
         refreshMatricesIfDirty();
     }
 
@@ -153,26 +152,30 @@ public class LWJGLCamera extends Camera implements AutoCloseable {
 
     private void refreshProjectionMatrixIfDirty() {
         if (this.projectionMatrixDirty) {
-            val horizontalMajor = this.getViewport().getWidthInPixels() > this.getViewport().getHeightInPixels();
-            double major = horizontalMajor ? this.getViewport().getWidthInPixels() : this.getViewport().getHeightInPixels();
-            double minor = horizontalMajor ? this.getViewport().getHeightInPixels() : this.getViewport().getWidthInPixels();
+            final var horizontalMajor = this.getViewport().getWidthInPixels() > this.getViewport().getHeightInPixels();
+            final double major = horizontalMajor
+                    ? this.getViewport().getWidthInPixels()
+                    : this.getViewport().getHeightInPixels();
+            final double minor = horizontalMajor
+                    ? this.getViewport().getHeightInPixels()
+                    : this.getViewport().getWidthInPixels();
 
             // TODO: Find such realTargetSize that pixelsPerUnit is a positive whole number to avoid
             //  aliasing.
-            double realTargetSize = this.targetScreenSizeInUnits;
-            val pixelsPerUnit = horizontalMajor
+            final double realTargetSize = this.targetScreenSizeInUnits;
+            final var pixelsPerUnit = horizontalMajor
                     ? this.getViewport().getWidthInPixels() / realTargetSize
                     : this.getViewport().getHeightInPixels() / realTargetSize;
 
-            val ratio = major / minor;
+            final var ratio = major / minor;
             this.viewportWidthInUnits = (float) Math.ceil(horizontalMajor
                                                                   ? ratio * realTargetSize
                                                                   : realTargetSize);
             this.viewportHeightInUnits = (float) Math.ceil(horizontalMajor
                                                                    ? realTargetSize
                                                                    : ratio * realTargetSize);
-            val halfWidth = (float) (this.viewportWidthInUnits / 2.0);
-            val halfHeight = (float) (this.viewportHeightInUnits / 2.0);
+            final var halfWidth = (float) (this.viewportWidthInUnits / 2.0);
+            final var halfHeight = (float) (this.viewportHeightInUnits / 2.0);
             this.projectionMatrix.setOrtho2D(
                     -halfWidth,
                     halfWidth,
@@ -183,7 +186,9 @@ public class LWJGLCamera extends Camera implements AutoCloseable {
                                                    this.getViewport().getHeightInPixels(),
                                                    0.0f);
 
-            LOG.trace("Refreshing projection matrix. New visible area size: {}×{}", this.viewportWidthInUnits, this.viewportHeightInUnits);
+            LOG.trace("Refreshing projection matrix. New visible area size: {}×{}",
+                      this.viewportWidthInUnits,
+                      this.viewportHeightInUnits);
             this.projectionMatrixDirty = false;
             refreshUniforms();
         }

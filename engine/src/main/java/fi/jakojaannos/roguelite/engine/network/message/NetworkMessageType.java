@@ -7,8 +7,8 @@ import java.nio.ByteBuffer;
 
 public interface NetworkMessageType<TMessage extends NetworkMessage> {
     /**
-     * Message-type unique identifier. Must have same value on clients and the server for packets to
-     * be handled correctly. Used to identify what type a packet is.
+     * Message-type unique identifier. Must have same value on clients and the server for packets to be handled
+     * correctly. Used to identify what type a packet is.
      *
      * @return unique id of this packet type
      */

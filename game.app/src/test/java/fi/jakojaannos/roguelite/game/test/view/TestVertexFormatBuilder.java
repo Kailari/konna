@@ -1,11 +1,11 @@
 package fi.jakojaannos.roguelite.game.test.view;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexAttribute;
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexFormat;
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexFormatBuilder;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class TestVertexFormatBuilder implements VertexFormatBuilder {
     private final List<VertexAttribute> attributes = new ArrayList<>();

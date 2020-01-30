@@ -1,12 +1,13 @@
 package fi.jakojaannos.roguelite.engine.view.ui;
 
-import fi.jakojaannos.roguelite.engine.ecs.Component;
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.engine.view.ui.builder.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
 import java.util.function.Consumer;
+
+import fi.jakojaannos.roguelite.engine.ecs.Component;
+import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.engine.view.ui.builder.*;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class UIElementType<TBuilder extends UIElementBuilder<TBuilder>> {

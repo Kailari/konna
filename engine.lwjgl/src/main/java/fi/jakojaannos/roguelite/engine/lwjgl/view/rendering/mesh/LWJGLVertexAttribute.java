@@ -1,12 +1,13 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.mesh;
 
-import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexAttribute;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexAttribute;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
@@ -46,18 +47,15 @@ public class LWJGLVertexAttribute implements VertexAttribute {
         SHORT(VertexAttribute.Type.SHORT, GL_SHORT, 8),
         UNSIGNED_SHORT(VertexAttribute.Type.UNSIGNED_SHORT, GL_UNSIGNED_SHORT, 8);
 
+        private static final Map<Type, LWJGLType> typeMappings = Arrays.stream(LWJGLType.values()).collect(Collectors.toMap(LWJGLType::getType, lwjglType -> lwjglType));
         @Getter private final Type type;
         @Getter private final int glType;
         @Getter private final int sizeInBytes;
 
-        private static final Map<Type, LWJGLType> typeMappings = Arrays.stream(LWJGLType.values())
-                                                                       .collect(Collectors.toMap(LWJGLType::getType,
-                                                                                                 lwjglType -> lwjglType));
-
         LWJGLType(
                 final Type type,
                 final int glType,
-                int sizeInBytes
+                final int sizeInBytes
         ) {
             this.type = type;
             this.glType = glType;

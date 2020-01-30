@@ -1,13 +1,13 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.shader;
 
-import fi.jakojaannos.roguelite.engine.view.rendering.shader.ShaderBuilder;
-import fi.jakojaannos.roguelite.engine.view.rendering.shader.ShaderProgram;
-
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import fi.jakojaannos.roguelite.engine.view.rendering.shader.ShaderBuilder;
+import fi.jakojaannos.roguelite.engine.view.rendering.shader.ShaderProgram;
 
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL32.GL_GEOMETRY_SHADER;

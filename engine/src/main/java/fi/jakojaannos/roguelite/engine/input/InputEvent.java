@@ -6,12 +6,12 @@ public class InputEvent {
     private final AxialInput axialInput;
     private final ButtonInput buttonInput;
 
-    public InputEvent(AxialInput input) {
+    public InputEvent(final AxialInput input) {
         this.axialInput = input;
         this.buttonInput = null;
     }
 
-    public InputEvent(ButtonInput input) {
+    public InputEvent(final ButtonInput input) {
         this.axialInput = null;
         this.buttonInput = input;
     }

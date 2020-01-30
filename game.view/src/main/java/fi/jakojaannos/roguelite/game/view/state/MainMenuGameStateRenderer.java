@@ -1,5 +1,7 @@
 package fi.jakojaannos.roguelite.game.view.state;
 
+import java.nio.file.Path;
+
 import fi.jakojaannos.roguelite.engine.content.AssetManager;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.view.Camera;
@@ -14,9 +16,6 @@ import fi.jakojaannos.roguelite.game.view.systems.RenderSystemGroups;
 import fi.jakojaannos.roguelite.game.view.systems.UserInterfaceRenderingSystem;
 import fi.jakojaannos.roguelite.game.view.systems.debug.EntityCollisionBoundsRenderingSystem;
 import fi.jakojaannos.roguelite.game.view.systems.debug.EntityTransformRenderingSystem;
-import lombok.val;
-
-import java.nio.file.Path;
 
 public class MainMenuGameStateRenderer extends GameStateRenderer {
 
@@ -39,24 +38,29 @@ public class MainMenuGameStateRenderer extends GameStateRenderer {
             final AssetManager assetManager,
             final RenderingBackend backend
     ) {
-        val fontRegistry = assetManager.getAssetRegistry(Font.class);
-        val spriteRegistry = assetManager.getAssetRegistry(Sprite.class);
+        final var fontRegistry = assetManager.getAssetRegistry(Font.class);
+        final var spriteRegistry = assetManager.getAssetRegistry(Sprite.class);
 
-        val textRenderer = backend.getTextRenderer();
+        final var textRenderer = backend.getTextRenderer();
 
-        val builder = SystemDispatcher.builder()
-                                      .withGroups(RenderSystemGroups.values())
-                                      .addGroupDependencies(RenderSystemGroups.DEBUG, RenderSystemGroups.UI, RenderSystemGroups.OVERLAY, RenderSystemGroups.ENTITIES, RenderSystemGroups.LEVEL)
-                                      .addGroupDependencies(RenderSystemGroups.UI, RenderSystemGroups.OVERLAY, RenderSystemGroups.ENTITIES, RenderSystemGroups.LEVEL)
-                                      .addGroupDependencies(RenderSystemGroups.OVERLAY, RenderSystemGroups.ENTITIES, RenderSystemGroups.LEVEL)
-                                      .addGroupDependencies(RenderSystemGroups.ENTITIES, RenderSystemGroups.LEVEL)
-                                      .withSystem(new UserInterfaceRenderingSystem(assetRoot,
-                                                                                   camera,
-                                                                                   fontRegistry,
-                                                                                   spriteRegistry,
-                                                                                   textRenderer,
-                                                                                   userInterface,
-                                                                                   backend));
+        final var builder =
+                SystemDispatcher.builder()
+                                .withGroups(RenderSystemGroups.values())
+                                .addGroupDependencies(RenderSystemGroups.DEBUG, RenderSystemGroups.UI,
+                                                      RenderSystemGroups.OVERLAY, RenderSystemGroups.ENTITIES,
+                                                      RenderSystemGroups.LEVEL)
+                                .addGroupDependencies(RenderSystemGroups.UI, RenderSystemGroups.OVERLAY,
+                                                      RenderSystemGroups.ENTITIES, RenderSystemGroups.LEVEL)
+                                .addGroupDependencies(RenderSystemGroups.OVERLAY, RenderSystemGroups.ENTITIES,
+                                                      RenderSystemGroups.LEVEL)
+                                .addGroupDependencies(RenderSystemGroups.ENTITIES, RenderSystemGroups.LEVEL)
+                                .withSystem(new UserInterfaceRenderingSystem(assetRoot,
+                                                                             camera,
+                                                                             fontRegistry,
+                                                                             spriteRegistry,
+                                                                             textRenderer,
+                                                                             userInterface,
+                                                                             backend));
 
         if (DebugConfig.debugModeEnabled) {
             builder.withSystem(new EntityTransformRenderingSystem(assetRoot, camera, backend));
@@ -71,12 +75,12 @@ public class MainMenuGameStateRenderer extends GameStateRenderer {
             final Camera camera,
             final AssetManager assetManager
     ) {
-        val fontRegistry = assetManager.getAssetRegistry(Font.class);
+        final var fontRegistry = assetManager.getAssetRegistry(Font.class);
 
-        val font = fontRegistry.getByAssetName("fonts/VCR_OSD_MONO.ttf");
-        val width = 600;
-        val height = 100;
-        val borderSize = 25;
+        final var font = fontRegistry.getByAssetName("fonts/VCR_OSD_MONO.ttf");
+        final var width = 600;
+        final var height = 100;
+        final var borderSize = 25;
         return UserInterface
                 .builder(camera.getViewport(), font)
                 .element("play_button",

@@ -1,13 +1,14 @@
 package fi.jakojaannos.roguelite.game.systems;
 
+import org.junit.jupiter.api.Test;
+
+import java.util.stream.Stream;
+
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.character.DeadTag;
 import fi.jakojaannos.roguelite.game.systems.cleanup.ReaperSystem;
-import org.junit.jupiter.api.Test;
-
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

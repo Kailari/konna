@@ -1,5 +1,9 @@
 package fi.jakojaannos.roguelite.game.app;
 
+import lombok.extern.slf4j.Slf4j;
+
+import java.nio.file.Path;
+
 import fi.jakojaannos.roguelite.engine.Game;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
@@ -12,10 +16,6 @@ import fi.jakojaannos.roguelite.game.DebugConfig;
 import fi.jakojaannos.roguelite.game.RogueliteGame;
 import fi.jakojaannos.roguelite.game.state.MainMenuGameState;
 import fi.jakojaannos.roguelite.game.view.RogueliteGameRenderer;
-import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-
-import java.nio.file.Path;
 
 @Slf4j
 public class RogueliteClient {
@@ -29,13 +29,15 @@ public class RogueliteClient {
         LOG.trace("Running application");
         LOG.debug("asset root: {}", assetRoot);
 
-        try (val runner = new LWJGLGameRunner<RogueliteGame>(DebugConfig.debugModeEnabled, windowWidth, windowHeight);
-             val assetManager = new LWJGLAssetManager(assetRoot);
-             val backend = new LWJGLRenderingBackend(assetRoot);
-             val renderer = new RogueliteGameRenderer(assetRoot, runner.getWindow(), backend, assetManager);
-             val game = new RogueliteGame()
+        try (final var runner = new LWJGLGameRunner<RogueliteGame>(DebugConfig.debugModeEnabled,
+                                                                   windowWidth,
+                                                                   windowHeight);
+             final var assetManager = new LWJGLAssetManager(assetRoot);
+             final var backend = new LWJGLRenderingBackend(assetRoot);
+             final var renderer = new RogueliteGameRenderer(assetRoot, runner.getWindow(), backend, assetManager);
+             final var game = new RogueliteGame()
         ) {
-            val inputProvider = new LWJGLInputProvider(runner.getWindow());
+            final var inputProvider = new LWJGLInputProvider(runner.getWindow());
             runner.run(() -> createInitialState(game, host, port), game, inputProvider, renderer::render);
         }
     }

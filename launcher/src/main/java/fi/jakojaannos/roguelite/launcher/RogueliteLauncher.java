@@ -1,72 +1,72 @@
 package fi.jakojaannos.roguelite.launcher;
 
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+
+import java.nio.file.Path;
+
 import fi.jakojaannos.roguelite.game.app.RogueliteApplication;
 import fi.jakojaannos.roguelite.launcher.arguments.Argument;
 import fi.jakojaannos.roguelite.launcher.arguments.ArgumentParsingException;
 import fi.jakojaannos.roguelite.launcher.arguments.Arguments;
 import fi.jakojaannos.roguelite.launcher.arguments.parameters.Parameter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-
-import java.nio.file.Path;
 
 @Slf4j
 public class RogueliteLauncher {
+    private final RogueliteApplication application = new RogueliteApplication();
     // Master-debug flag, this sets a bunch of default debug settings on
     @Setter private boolean debug;
-
-    @Setter private boolean enableLWJGLDebug = false;
-    @Setter private boolean enableLWJGLLibraryLoaderDebug = false;
+    @Setter private boolean enableLWJGLDebug;
+    @Setter private boolean enableLWJGLLibraryLoaderDebug;
     @Setter private String assetRoot = "assets/";
-    @Setter private boolean runAsServer = false;
+    @Setter private boolean runAsServer;
 
-    private final RogueliteApplication application = new RogueliteApplication();
-
-    public void parseCommandLineArguments(String... args) {
+    public void parseCommandLineArguments(final String... args) {
         try {
             Arguments.builder()
                      .with(Argument.withName("server")
                                    .withAction(params -> {
-                                       val port = params.parameter(Parameter.optional(Parameter.integer("port")));
+                                       final var port =
+                                               params.parameter(Parameter.optional(Parameter.integer("port")));
                                        this.runAsServer = true;
                                        this.application.setPort(port.orElse(18181));
                                    }))
                      .with(Argument.withName("client")
                                    .withAction(params -> {
-                                       val host = params.parameter(Parameter.string("host"));
-                                       val maybePort = params.parameter(Parameter.optional(Parameter.integer("port")));
+                                       final var host = params.parameter(Parameter.string("host"));
+                                       final var maybePort =
+                                               params.parameter(Parameter.optional(Parameter.integer("port")));
                                        this.runAsServer = false;
                                        this.application.setHost(host);
                                        maybePort.ifPresent(this.application::setPort);
                                    }))
                      .with(Argument.withName("window")
                                    .withAction((params) -> {
-                                       val width = params.parameter(Parameter.integer("width")
-                                                                             .withMin(1));
-                                       val height = params.parameter(Parameter.integer("height")
-                                                                              .withMin(1));
+                                       final var width = params.parameter(Parameter.integer("width")
+                                                                                   .withMin(1));
+                                       final var height = params.parameter(Parameter.integer("height")
+                                                                                    .withMin(1));
 
                                        this.application.setWindowWidth(width);
                                        this.application.setWindowHeight(height);
                                    }))
                      .with(Argument.withName("width")
                                    .withAction(params -> {
-                                       val width = params.parameter(Parameter.integer("width")
-                                                                             .withMin(1));
+                                       final var width = params.parameter(Parameter.integer("width")
+                                                                                   .withMin(1));
                                        this.application.setWindowWidth(width);
                                    }))
                      .with(Argument.withName("height")
                                    .withAction(params -> {
-                                       val height = params.parameter(Parameter.integer("height")
-                                                                              .withMin(1));
+                                       final var height = params.parameter(Parameter.integer("height")
+                                                                                    .withMin(1));
                                        this.application.setWindowHeight(height);
                                    }))
                      .with(Argument.withName("assetRoot")
                                    .withAction(params -> {
-                                       val assetRoot = params.parameter(Parameter.filePath("path")
-                                                                                 .mustBeDirectory()
-                                                                                 .mustExist());
+                                       final var assetRoot = params.parameter(Parameter.filePath("path")
+                                                                                       .mustBeDirectory()
+                                                                                       .mustExist());
 
                                        LOG.debug("Changing asset root");
                                        this.setAssetRoot(assetRoot);
@@ -81,7 +81,7 @@ public class RogueliteLauncher {
                                    .withAction(params -> this.setDebug(true)))
                      .ignoreUnknown()
                      .consume(args);
-        } catch (ArgumentParsingException e) {
+        } catch (final ArgumentParsingException e) {
             LOG.error("Error parsing command-line arguments: ", e);
         }
 

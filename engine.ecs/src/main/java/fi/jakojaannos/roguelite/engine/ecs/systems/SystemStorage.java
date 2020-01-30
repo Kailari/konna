@@ -1,16 +1,16 @@
 package fi.jakojaannos.roguelite.engine.ecs.systems;
 
-import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
-import fi.jakojaannos.roguelite.engine.ecs.SystemGroup;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
+import fi.jakojaannos.roguelite.engine.ecs.SystemGroup;
+
 /**
- * Internal {@link ECSSystem} storage for {@link SystemDispatcherImpl}. Provides convenient access
- * to the per-system context with either the system class or a raw instance.
+ * Internal {@link ECSSystem} storage for {@link SystemDispatcherImpl}. Provides convenient access to the per-system
+ * context with either the system class or a raw instance.
  */
 class SystemStorage {
     private final List<SystemContext> systems;

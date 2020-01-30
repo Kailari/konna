@@ -1,5 +1,7 @@
 package fi.jakojaannos.roguelite.engine.lwjgl;
 
+import java.nio.file.Path;
+
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLViewport;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLSpriteBatch;
@@ -11,14 +13,12 @@ import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.Window;
-import fi.jakojaannos.roguelite.engine.view.rendering.sprite.SpriteBatch;
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.Mesh;
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexFormat;
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexFormatBuilder;
 import fi.jakojaannos.roguelite.engine.view.rendering.shader.ShaderBuilder;
+import fi.jakojaannos.roguelite.engine.view.rendering.sprite.SpriteBatch;
 import fi.jakojaannos.roguelite.engine.view.rendering.text.TextRenderer;
-
-import java.nio.file.Path;
 
 public class LWJGLRenderingBackend implements RenderingBackend, AutoCloseable {
     private final LWJGLTextRenderer textRenderer;

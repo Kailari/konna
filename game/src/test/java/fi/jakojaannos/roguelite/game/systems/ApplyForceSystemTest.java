@@ -1,11 +1,5 @@
 package fi.jakojaannos.roguelite.game.systems;
 
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.game.data.components.Physics;
-import fi.jakojaannos.roguelite.game.data.components.Velocity;
-import fi.jakojaannos.roguelite.game.systems.physics.ApplyForceSystem;
 import org.joml.Vector2d;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,11 +8,17 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.stream.Stream;
 
+import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.game.data.components.Physics;
+import fi.jakojaannos.roguelite.game.data.components.Velocity;
+import fi.jakojaannos.roguelite.game.systems.physics.ApplyForceSystem;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ApplyForceSystemTest {
-
     private static final double EPSILON = 0.001;
 
     private EntityManager entityManager;
@@ -57,35 +57,35 @@ public class ApplyForceSystemTest {
             final double expectedVelocityX,
             final double expectedVelocityY
     ) {
-        velocity.velocity.set(initialVelocityX, initialVelocityY);
+        velocity.set(initialVelocityX, initialVelocityY);
         physics.acceleration.set(accelerationX, accelerationY);
 
         system.tick(Stream.of(entity), world);
 
-        assertEquals(expectedVelocityX, velocity.velocity.x, EPSILON);
-        assertEquals(expectedVelocityY, velocity.velocity.y, EPSILON);
+        assertEquals(expectedVelocityX, velocity.x, EPSILON);
+        assertEquals(expectedVelocityY, velocity.y, EPSILON);
     }
 
     @Test
     void entityAtZeroVelocityIsAccelerated() {
-        velocity.velocity.set(0.0, 0.0);
+        velocity.set(0.0, 0.0);
         physics.acceleration.set(-13.7, 7.3);
 
         system.tick(Stream.of(entity), world);
 
-        assertEquals(-13.7, velocity.velocity.x, EPSILON);
-        assertEquals(7.3, velocity.velocity.y, EPSILON);
+        assertEquals(-13.7, velocity.x, EPSILON);
+        assertEquals(7.3, velocity.y, EPSILON);
     }
 
     @Test
     void movingEntityCanBeStoppedWithOppositeFacingForce() {
-        velocity.velocity.set(18.5, -16.0);
+        velocity.set(18.5, -16.0);
         physics.acceleration.set(-18.5, 16.0);
 
         system.tick(Stream.of(entity), world);
 
-        assertEquals(0.0, velocity.velocity.x, EPSILON);
-        assertEquals(0.0, velocity.velocity.y, EPSILON);
+        assertEquals(0.0, velocity.x, EPSILON);
+        assertEquals(0.0, velocity.y, EPSILON);
     }
 
     @Test
@@ -113,6 +113,6 @@ public class ApplyForceSystemTest {
         entityManager.applyModifications();
         system.tick(Stream.of(entity, heavy), world);
 
-        assertTrue(velocity.velocity.length() > heavyVelocity.velocity.length());
+        assertTrue(velocity.length() > heavyVelocity.length());
     }
 }

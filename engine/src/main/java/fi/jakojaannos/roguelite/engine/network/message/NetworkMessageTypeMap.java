@@ -2,7 +2,6 @@ package fi.jakojaannos.roguelite.engine.network.message;
 
 import lombok.Builder;
 import lombok.Singular;
-import lombok.val;
 
 import java.util.Collection;
 import java.util.List;
@@ -16,19 +15,19 @@ public class NetworkMessageTypeMap {
     private final List<Optional<NetworkMessageType<?>>> messageTypesByTypeId;
 
     @Builder
-    public NetworkMessageTypeMap(@Singular final Collection<NetworkMessageType<?>> messageTypes) {
-        val maxId = messageTypes.stream()
-                                .mapToInt(NetworkMessageType::getTypeId)
-                                .max()
-                                .orElse(-1);
+    public NetworkMessageTypeMap(@Singular final Collection<NetworkMessageType<?>> types) {
+        final var maxId = types.stream()
+                               .mapToInt(NetworkMessageType::getTypeId)
+                               .max()
+                               .orElse(-1);
         this.messageTypesByTypeId = IntStream.rangeClosed(0, maxId)
-                                             .mapToObj(typeId -> messageTypes.stream()
-                                                                             .filter(type -> type.getTypeId() == typeId)
-                                                                             .findFirst())
+                                             .mapToObj(typeId -> types.stream()
+                                                                      .filter(type -> type.getTypeId() == typeId)
+                                                                      .findFirst())
                                              .collect(Collectors.toUnmodifiableList());
-        this.messageTypesByClass = messageTypes.stream()
-                                               .collect(Collectors.toUnmodifiableMap(NetworkMessageType::getMessageClass,
-                                                                                     type -> type));
+        this.messageTypesByClass = types.stream()
+                                        .collect(Collectors.toUnmodifiableMap(NetworkMessageType::getMessageClass,
+                                                                              type -> type));
     }
 
     @SuppressWarnings("unchecked")

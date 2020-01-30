@@ -7,16 +7,13 @@ import fi.jakojaannos.roguelite.game.data.components.BasicTurretComponent;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.SpriteInfo;
 import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
-import lombok.val;
 
 public class TurretArchetype {
-
-
     public static Entity create(
             final EntityManager entityManager,
             final Transform transform
     ) {
-        val turret = entityManager.createEntity();
+        final var turret = entityManager.createEntity();
         entityManager.addComponentTo(turret, transform);
         entityManager.addComponentTo(turret, new BasicTurretComponent());
         entityManager.addComponentTo(turret, createSpriteInfo());
@@ -26,7 +23,7 @@ public class TurretArchetype {
     }
 
     private static SpriteInfo createSpriteInfo() {
-        val sprite = new SpriteInfo();
+        final var sprite = new SpriteInfo();
         sprite.spriteName = "sprites/turret";
 
         return sprite;

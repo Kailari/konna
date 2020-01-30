@@ -1,5 +1,7 @@
 package fi.jakojaannos.roguelite.game.systems.physics;
 
+import java.util.stream.Stream;
+
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
@@ -7,9 +9,6 @@ import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.game.systems.SystemGroups;
-import lombok.val;
-
-import java.util.stream.Stream;
 
 public class ApplyForceSystem implements ECSSystem {
     @Override
@@ -25,13 +24,13 @@ public class ApplyForceSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
-        val entityManager = world.getEntityManager();
+        final var entityManager = world.getEntityManager();
 
         entities.forEach(entity -> {
-            val physics = entityManager.getComponentOf(entity, Physics.class).orElseThrow();
-            val velocity = entityManager.getComponentOf(entity, Velocity.class).orElseThrow();
+            final var physics = entityManager.getComponentOf(entity, Physics.class).orElseThrow();
+            final var velocity = entityManager.getComponentOf(entity, Velocity.class).orElseThrow();
 
-            velocity.velocity.add(physics.acceleration);
+            velocity.add(physics.acceleration);
             physics.acceleration.set(0.0);
         });
     }

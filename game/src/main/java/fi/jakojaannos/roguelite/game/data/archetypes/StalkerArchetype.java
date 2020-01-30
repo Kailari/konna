@@ -12,21 +12,20 @@ import fi.jakojaannos.roguelite.game.data.components.character.WalkingMovementAb
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.EnemyTag;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.StalkerAI;
 import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
-import lombok.val;
 
 public class StalkerArchetype {
     public static Entity spawnStalker(
-            EntityManager entityManager,
-            Transform spawnerTransform,
-            SpawnerComponent spawnerComponent
+            final EntityManager entityManager,
+            final Transform spawnerTransform,
+            final SpawnerComponent spawnerComponent
     ) {
         return create(entityManager, new Transform(spawnerTransform));
     }
 
     public static Entity create(
             final EntityManager entityManager,
-            double x,
-            double y
+            final double x,
+            final double y
     ) {
         return create(
                 entityManager,
@@ -34,12 +33,11 @@ public class StalkerArchetype {
         );
     }
 
-
     public static Entity create(
             final EntityManager entityManager,
             final Transform transform
     ) {
-        val stalker = entityManager.createEntity();
+        final var stalker = entityManager.createEntity();
         entityManager.addComponentTo(stalker, transform);
         entityManager.addComponentTo(stalker, new Velocity());
         entityManager.addComponentTo(stalker, createPhysics());
@@ -56,7 +54,6 @@ public class StalkerArchetype {
         return stalker;
     }
 
-
     private static WalkingMovementAbility createMovementStats() {
         return new WalkingMovementAbility(1.0,
                                           250.0);
@@ -72,9 +69,8 @@ public class StalkerArchetype {
         return new StalkerAI();
     }
 
-
     private static SpriteInfo createSpriteInfo() {
-        val sprite = new SpriteInfo();
+        final var sprite = new SpriteInfo();
         sprite.spriteName = "sprites/sheep_red";
 
         return sprite;

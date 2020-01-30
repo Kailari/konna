@@ -8,11 +8,11 @@ public interface UIElement {
 
     Collection<UIElement> getChildren();
 
-    default <T> Optional<T> getProperty(UIProperty<T> property) {
+    default <T> Optional<T> getProperty(final UIProperty<T> property) {
         return property.getFor(this);
     }
 
-    default <T> void setProperty(UIProperty<T> property, T value) {
+    default <T> void setProperty(final UIProperty<T> property, final T value) {
         property.set(this, value);
     }
 }

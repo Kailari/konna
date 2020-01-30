@@ -1,15 +1,14 @@
 package fi.jakojaannos.roguelite.launcher.arguments.parameters;
 
-import fi.jakojaannos.roguelite.launcher.arguments.ArgumentParsingException;
-import lombok.val;
-
 import java.nio.file.Paths;
+
+import fi.jakojaannos.roguelite.launcher.arguments.ArgumentParsingException;
 
 public class PathParameter extends Parameter<String> {
     private boolean mustBeDirectory;
     private boolean mustExist;
 
-    PathParameter(String name) {
+    PathParameter(final String name) {
         super(name);
     }
 
@@ -25,8 +24,8 @@ public class PathParameter extends Parameter<String> {
     }
 
     @Override
-    public String parse(String string) throws ArgumentParsingException {
-        val file = Paths.get(string).toFile();
+    public String parse(final String string) throws ArgumentParsingException {
+        final var file = Paths.get(string).toFile();
         if (this.mustExist && !file.exists()) {
             throw new ArgumentParsingException(String.format(
                     "File/directory in path \"%s\" does not exist",

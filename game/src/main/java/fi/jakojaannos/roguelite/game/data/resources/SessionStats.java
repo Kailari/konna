@@ -1,14 +1,15 @@
 package fi.jakojaannos.roguelite.game.data.resources;
 
-import fi.jakojaannos.roguelite.engine.ecs.Resource;
-import fi.jakojaannos.roguelite.game.data.DamageSource;
-
 import java.util.HashMap;
 import java.util.Map;
 
+import fi.jakojaannos.roguelite.engine.ecs.Resource;
+import fi.jakojaannos.roguelite.game.data.DamageSource;
+
 public class SessionStats implements Resource {
     private final Map<Object, Integer> kills = new HashMap<>();
-    public long beginTimeStamp, endTimeStamp;
+    public long beginTimeStamp;
+    public long endTimeStamp;
 
     public int getKillsOf(final DamageSource<?> source) {
         return this.kills.getOrDefault(source.getKiller(), 0);

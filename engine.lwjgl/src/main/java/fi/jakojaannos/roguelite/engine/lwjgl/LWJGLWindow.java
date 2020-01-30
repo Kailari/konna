@@ -1,6 +1,5 @@
 package fi.jakojaannos.roguelite.engine.lwjgl;
 
-import fi.jakojaannos.roguelite.engine.view.Window;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.lwjgl.glfw.GLFWWindowSizeCallback;
@@ -14,20 +13,21 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import fi.jakojaannos.roguelite.engine.view.Window;
+
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 @Slf4j
-public class LWJGLWindow implements Window, AutoCloseable {
+public class LWJGLWindow implements Window {
     @Getter
     private final long id;
-
+    private final List<ResizeCallback> resizeCallbacks = new ArrayList<>();
     @Getter private int width;
     @Getter private int height;
-    private final List<ResizeCallback> resizeCallbacks = new ArrayList<>();
 
-    public LWJGLWindow(int width, int height) {
+    public LWJGLWindow(final int width, final int height) {
         glfwDefaultWindowHints();
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
@@ -52,17 +52,17 @@ public class LWJGLWindow implements Window, AutoCloseable {
                         })
                 .set(this.id);
 
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            FloatBuffer pContentScaleX = stack.mallocFloat(1);
-            FloatBuffer pContentScaleY = stack.mallocFloat(1);
+        try (final MemoryStack stack = MemoryStack.stackPush()) {
+            final FloatBuffer pContentScaleX = stack.mallocFloat(1);
+            final FloatBuffer pContentScaleY = stack.mallocFloat(1);
             glfwGetWindowContentScale(this.id, pContentScaleX, pContentScaleY);
 
             LOG.debug("Window content scale after creation: {}×{}",
                       pContentScaleX.get(0),
                       pContentScaleY.get(0));
 
-            IntBuffer pWidth = stack.mallocInt(1);
-            IntBuffer pHeight = stack.mallocInt(1);
+            final IntBuffer pWidth = stack.mallocInt(1);
+            final IntBuffer pHeight = stack.mallocInt(1);
 
             glfwGetWindowSize(this.id, pWidth, pHeight);
             this.width = pWidth.get();
@@ -76,9 +76,8 @@ public class LWJGLWindow implements Window, AutoCloseable {
         }
     }
 
-
     @Override
-    public void addResizeCallback(ResizeCallback callback) {
+    public void addResizeCallback(final ResizeCallback callback) {
         this.resizeCallbacks.add(callback);
     }
 

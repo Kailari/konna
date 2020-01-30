@@ -1,13 +1,9 @@
 package fi.jakojaannos.roguelite.engine.ecs;
 
-import lombok.val;
-
 /**
- * Constructs a new {@link SystemDispatcher}. Use {@link SystemDispatcher#builder()} to get a new
- * builder instance.
+ * Constructs a new {@link SystemDispatcher}. Use {@link SystemDispatcher#builder()} to get a new builder instance.
  * <p>
- * All {@link SystemGroup SystemGroups} must be registered before any of the systems can be
- * registered.
+ * All {@link SystemGroup SystemGroups} must be registered before any of the systems can be registered.
  */
 public interface DispatcherBuilder {
     /**
@@ -27,7 +23,7 @@ public interface DispatcherBuilder {
      * @return the builder for chaining
      */
     default DispatcherBuilder withGroups(SystemGroup... groups) {
-        for (val group : groups) {
+        for (final var group : groups) {
             withGroup(group);
         }
         return this;
@@ -58,7 +54,7 @@ public interface DispatcherBuilder {
             SystemGroup group,
             SystemGroup... dependencies
     ) {
-        for (val dependency : dependencies) {
+        for (final var dependency : dependencies) {
             addGroupDependency(group, dependency);
         }
         return this;
@@ -81,15 +77,14 @@ public interface DispatcherBuilder {
      * @return the builder for chaining
      */
     default DispatcherBuilder withSystems(ECSSystem... systems) {
-        for (val system : systems) {
+        for (final var system : systems) {
             withSystem(system);
         }
         return this;
     }
 
     /**
-     * Finalizes the construction process and outputs a fully operational {@link SystemDispatcher}
-     * instance.
+     * Finalizes the construction process and outputs a fully operational {@link SystemDispatcher} instance.
      *
      * @return the newly constructed <code>SystemDispatcher</code>
      */

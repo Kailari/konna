@@ -1,5 +1,8 @@
 package fi.jakojaannos.roguelite.engine.lwjgl;
 
+import java.nio.file.Path;
+import java.util.Map;
+
 import fi.jakojaannos.roguelite.engine.content.AssetManager;
 import fi.jakojaannos.roguelite.engine.content.AssetRegistry;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLTexture;
@@ -10,16 +13,12 @@ import fi.jakojaannos.roguelite.engine.view.content.TextureRegistry;
 import fi.jakojaannos.roguelite.engine.view.rendering.Texture;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.Sprite;
 import fi.jakojaannos.roguelite.engine.view.rendering.text.Font;
-import lombok.val;
-
-import java.nio.file.Path;
-import java.util.Map;
 
 public class LWJGLAssetManager implements AssetManager {
     private final Map<Class<?>, AssetRegistry<?>> registries;
 
     public LWJGLAssetManager(final Path assetRoot) {
-        val textureRegistry = new TextureRegistry(assetRoot, LWJGLTexture::new);
+        final var textureRegistry = new TextureRegistry(assetRoot, LWJGLTexture::new);
         this.registries = Map.ofEntries(
                 Map.entry(Texture.class, textureRegistry),
                 Map.entry(Sprite.class, new SpriteRegistry(assetRoot, textureRegistry)),

@@ -1,17 +1,17 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text;
 
-import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
-import fi.jakojaannos.roguelite.engine.view.rendering.sprite.SpriteBatch;
-import fi.jakojaannos.roguelite.engine.view.rendering.text.Font;
-import fi.jakojaannos.roguelite.engine.view.rendering.text.RenderableCharacter;
-import fi.jakojaannos.roguelite.engine.view.rendering.text.TextRenderer;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
+
+import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
+import fi.jakojaannos.roguelite.engine.view.rendering.sprite.SpriteBatch;
+import fi.jakojaannos.roguelite.engine.view.rendering.text.Font;
+import fi.jakojaannos.roguelite.engine.view.rendering.text.RenderableCharacter;
+import fi.jakojaannos.roguelite.engine.view.rendering.text.TextRenderer;
 
 @Slf4j
 public class LWJGLTextRenderer implements TextRenderer {
@@ -36,10 +36,10 @@ public class LWJGLTextRenderer implements TextRenderer {
             final Font font,
             final String text
     ) {
-        val textWidth = font.getStringWidthInPixels(fontSize, text);
+        final var textWidth = font.getStringWidthInPixels(fontSize, text);
 
-        val textX = x - textWidth / 2.0;
-        val textY = y - fontSize / 2.0;
+        final var textX = x - textWidth / 2.0;
+        final var textY = y - fontSize / 2.0;
         draw(textX, textY, fontSize, font, text);
     }
 
@@ -51,30 +51,30 @@ public class LWJGLTextRenderer implements TextRenderer {
             final Font font,
             final String string
     ) {
-        val fontTexture = font.getTextureForSize(fontSize);
-        val fontPixelHeightScale = fontTexture.getPixelHeightScale();
+        final var fontTexture = font.getTextureForSize(fontSize);
+        final var fontPixelHeightScale = fontTexture.getPixelHeightScale();
 
         this.spriteBatch.begin();
         fontTexture.use();
-        try (val stack = MemoryStack.stackPush()) {
-            val pCodePoint = stack.mallocInt(1);
-            val pX = stack.floats(0.0f);
-            val pY = stack.floats(0.0f);
+        try (final var stack = MemoryStack.stackPush()) {
+            final var pCodePoint = stack.mallocInt(1);
+            final var pX = stack.floats(0.0f);
+            final var pY = stack.floats(0.0f);
 
-            val factorX = 1.0f / fontTexture.getContentScaleX();
-            val factorY = 1.0f / fontTexture.getContentScaleY();
+            final var factorX = 1.0f / fontTexture.getContentScaleX();
+            final var factorY = 1.0f / fontTexture.getContentScaleY();
 
             var lineY = 0.0f;
 
             for (int i = 0, to = string.length(); i < to; ) {
                 i += Font.getCP(string, to, i, pCodePoint);
 
-                val codePoint = pCodePoint.get(0);
+                final var codePoint = pCodePoint.get(0);
                 if (codePoint == '\n') {
                     pX.put(0, 0.0f);
 
-                    val lineOffset = font.getLineOffset() * fontPixelHeightScale;
-                    val nextLineY = pY.get(0) + lineOffset;
+                    final var lineOffset = font.getLineOffset() * fontPixelHeightScale;
+                    final var nextLineY = pY.get(0) + lineOffset;
                     pY.put(0, nextLineY);
                     lineY = nextLineY;
 
@@ -83,12 +83,17 @@ public class LWJGLTextRenderer implements TextRenderer {
                     continue;
                 }
 
-                val cpX = pX.get(0);
-                RenderableCharacter renderableCharacter = fontTexture.getNextCharacterAndAdvance(codePoint, pCodePoint, pX, pY, i, to, string, factorX);
-                val x0 = x + scale(cpX, renderableCharacter.getX0(), factorX);
-                val x1 = x + scale(cpX, renderableCharacter.getX1(), factorX);
-                val y0 = y + fontSize + scale(lineY, renderableCharacter.getY0(), factorY);
-                val y1 = y + fontSize + scale(lineY, renderableCharacter.getY1(), factorY);
+                final var cpX = pX.get(0);
+                RenderableCharacter renderableCharacter = fontTexture.getNextCharacterAndAdvance(codePoint,
+                                                                                                 pCodePoint,
+                                                                                                 pX, pY,
+                                                                                                 i, to,
+                                                                                                 string,
+                                                                                                 factorX);
+                final var x0 = x + scale(cpX, renderableCharacter.getX0(), factorX);
+                final var x1 = x + scale(cpX, renderableCharacter.getX1(), factorX);
+                final var y0 = y + fontSize + scale(lineY, renderableCharacter.getY0(), factorY);
+                final var y1 = y + fontSize + scale(lineY, renderableCharacter.getY1(), factorY);
 
                 this.spriteBatch.draw(renderableCharacter.getTextureRegion(),
                                       x0, y0, x1, y1,

@@ -1,14 +1,15 @@
 package fi.jakojaannos.roguelite.game.view.state;
 
+import lombok.Getter;
+
+import java.nio.file.Path;
+
 import fi.jakojaannos.roguelite.engine.content.AssetManager;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
-import lombok.Getter;
-
-import java.nio.file.Path;
 
 public abstract class GameStateRenderer implements AutoCloseable {
     private final SystemDispatcher rendererDispatcher;
@@ -25,16 +26,16 @@ public abstract class GameStateRenderer implements AutoCloseable {
     }
 
     protected abstract SystemDispatcher createRenderDispatcher(
-            final UserInterface userInterface,
-            final Path assetRoot,
-            final Camera camera,
-            final AssetManager assetManager,
-            final RenderingBackend backend
+            UserInterface userInterface,
+            Path assetRoot,
+            Camera camera,
+            AssetManager assetManager,
+            RenderingBackend backend
     );
 
     protected abstract UserInterface createUserInterface(
-            final Camera camera,
-            final AssetManager assetManager
+            Camera camera,
+            AssetManager assetManager
     );
 
     public void render(final World world) {

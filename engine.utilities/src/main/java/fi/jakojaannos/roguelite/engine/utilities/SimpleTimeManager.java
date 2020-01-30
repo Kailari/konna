@@ -6,7 +6,7 @@ public class SimpleTimeManager implements UpdateableTimeManager {
 
     private long currentGameTime;
 
-    public SimpleTimeManager(long timestepInMs) {
+    public SimpleTimeManager(final long timestepInMs) {
         this.timestep = timestepInMs;
         this.timestepInSeconds = timestepInMs / 1000.0;
     }

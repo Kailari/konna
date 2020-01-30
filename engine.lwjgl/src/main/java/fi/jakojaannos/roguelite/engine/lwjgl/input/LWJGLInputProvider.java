@@ -1,13 +1,13 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.input;
 
-import fi.jakojaannos.roguelite.engine.input.*;
-import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLWindow;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 
 import java.util.ArrayDeque;
 import java.util.Optional;
 import java.util.Queue;
+
+import fi.jakojaannos.roguelite.engine.input.*;
+import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLWindow;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -18,7 +18,8 @@ public class LWJGLInputProvider implements InputProvider {
 
     private int viewportWidth;
     private int viewportHeight;
-    private double mouseX, mouseY;
+    private double mouseX;
+    private double mouseY;
     private boolean justResized;
 
     public LWJGLInputProvider(final LWJGLWindow window) {
@@ -37,9 +38,9 @@ public class LWJGLInputProvider implements InputProvider {
         glfwSetCursorPosCallback(window.getId(), this::cursorPositionCallback);
     }
 
-    private void cursorPositionCallback(long window, double x, double y) {
-        x = x / this.viewportWidth;
-        y = y / this.viewportHeight;
+    private void cursorPositionCallback(final long window, final double windowX, final double windowY) {
+        final var x = windowX / this.viewportWidth;
+        final var y = windowY / this.viewportHeight;
 
         // In case we just resized, update cached position and skip sending delta-events
         if (this.justResized) {
@@ -51,14 +52,14 @@ public class LWJGLInputProvider implements InputProvider {
             return;
         }
 
-        val deltaX = this.mouseX - x;
+        final var deltaX = this.mouseX - x;
         if (Math.abs(deltaX) > MOUSE_EPSILON) {
             this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.X, deltaX)));
             this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.X_POS, x)));
             this.mouseX = x;
         }
 
-        val deltaY = this.mouseY - y;
+        final var deltaY = this.mouseY - y;
         if (Math.abs(deltaY) > MOUSE_EPSILON) {
             this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.Y, deltaY)));
             this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.Y_POS, y)));
@@ -73,18 +74,22 @@ public class LWJGLInputProvider implements InputProvider {
             final int action,
             final int mods
     ) {
-        mapAction(action).ifPresent(inputAction -> this.inputEvents.offer(ButtonInput.event(InputButton.Keyboard.get(key)
-                                                                                                                .orElse(InputButton.Keyboard.KEY_UNKNOWN),
-                                                                                            inputAction)));
+        mapAction(action).ifPresent(
+                inputAction -> this.inputEvents.offer(ButtonInput.event(keyOrUnknown(key), inputAction)));
     }
 
-    private void mouseButtonCallback(long window, int button, int action, int mods) {
+    private InputButton.Keyboard keyOrUnknown(final int key) {
+        return InputButton.Keyboard.get(key)
+                                   .orElse(InputButton.Keyboard.KEY_UNKNOWN);
+    }
+
+    private void mouseButtonCallback(final long window, final int button, final int action, final int mods) {
         mapAction(action)
                 .ifPresent(inputAction -> this.inputEvents.offer(ButtonInput.event(InputButton.Mouse.button(button),
                                                                                    inputAction)));
     }
 
-    private Optional<ButtonInput.Action> mapAction(int action) {
+    private Optional<ButtonInput.Action> mapAction(final int action) {
         switch (action) {
             case GLFW_RELEASE:
                 return Optional.of(ButtonInput.Action.RELEASE);
@@ -100,6 +105,6 @@ public class LWJGLInputProvider implements InputProvider {
 
     @Override
     public Queue<InputEvent> pollEvents() {
-        return inputEvents;
+        return this.inputEvents;
     }
 }

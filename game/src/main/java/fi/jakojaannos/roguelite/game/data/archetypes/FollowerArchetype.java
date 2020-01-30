@@ -12,7 +12,6 @@ import fi.jakojaannos.roguelite.game.data.components.character.WalkingMovementAb
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.EnemyTag;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.FollowerEnemyAI;
 import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
-import lombok.val;
 
 public class FollowerArchetype {
     public static Entity spawnFollower(
@@ -23,12 +22,11 @@ public class FollowerArchetype {
         return create(entityManager, new Transform(spawnerTransform));
     }
 
-
     public static Entity create(
             final EntityManager entityManager,
             final Transform transform
     ) {
-        val follower = entityManager.createEntity();
+        final var follower = entityManager.createEntity();
         entityManager.addComponentTo(follower, transform);
         entityManager.addComponentTo(follower, new Velocity());
         entityManager.addComponentTo(follower, createPhysics());
@@ -51,21 +49,17 @@ public class FollowerArchetype {
         return physics;
     }
 
-
     private static WalkingMovementAbility createMovementStats() {
-        return new WalkingMovementAbility(
-                4.0,
-                50.0
-        );
+        return new WalkingMovementAbility(4.0,
+                                          50.0);
     }
 
     private static FollowerEnemyAI createEnemyAI() {
         return new FollowerEnemyAI(25.0f, 1.0f);
     }
 
-
     private static SpriteInfo createSpriteInfo() {
-        val sprite = new SpriteInfo();
+        final var sprite = new SpriteInfo();
         sprite.spriteName = "sprites/enemy";
 
         return sprite;

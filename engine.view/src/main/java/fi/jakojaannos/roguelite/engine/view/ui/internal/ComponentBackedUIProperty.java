@@ -1,13 +1,13 @@
 package fi.jakojaannos.roguelite.engine.view.ui.internal;
 
-import fi.jakojaannos.roguelite.engine.ecs.Component;
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
-
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+
+import fi.jakojaannos.roguelite.engine.ecs.Component;
+import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 
 public class ComponentBackedUIProperty<T, C extends Component> extends EntityBackedUIProperty<T> {
     public ComponentBackedUIProperty(
@@ -33,7 +33,8 @@ public class ComponentBackedUIProperty<T, C extends Component> extends EntityBac
             final Class<? extends C> componentClass,
             final BiConsumer<C, T> componentValueSetter
     ) {
-        return (entity, entityManager, value) -> entityManager.getComponentOf(entity, componentClass)
-                                                              .ifPresent(component -> componentValueSetter.accept(component, value));
+        return (entity, entityManager, value) ->
+                entityManager.getComponentOf(entity, componentClass)
+                             .ifPresent(component -> componentValueSetter.accept(component, value));
     }
 }

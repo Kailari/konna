@@ -1,5 +1,7 @@
 package fi.jakojaannos.roguelite.game.systems;
 
+import java.util.stream.Stream;
+
 import fi.jakojaannos.roguelite.engine.data.resources.GameStateManager;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.*;
@@ -8,9 +10,6 @@ import fi.jakojaannos.roguelite.game.data.resources.Inputs;
 import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
 import fi.jakojaannos.roguelite.game.state.GameplayGameState;
 import fi.jakojaannos.roguelite.game.state.MainMenuGameState;
-import lombok.val;
-
-import java.util.stream.Stream;
 
 public class RestartGameSystem implements ECSSystem {
     @Override
@@ -28,12 +27,12 @@ public class RestartGameSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
-        val anyPlayerAlive = entities.count() > 0;
+        final var anyPlayerAlive = entities.count() > 0;
         if (anyPlayerAlive) {
             return;
         }
 
-        val inputs = world.getOrCreateResource(Inputs.class);
+        final var inputs = world.getOrCreateResource(Inputs.class);
         if (inputs.inputRestart) {
             world.getOrCreateResource(GameStateManager.class)
                  .queueStateChange(new GameplayGameState(System.nanoTime(),

@@ -1,5 +1,10 @@
 package fi.jakojaannos.roguelite.game.systems;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
+import javax.annotation.Nullable;
+
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.*;
@@ -9,47 +14,10 @@ import fi.jakojaannos.roguelite.game.data.archetypes.BasicProjectileArchetype;
 import fi.jakojaannos.roguelite.game.data.components.BasicTurretComponent;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.EnemyTag;
-import lombok.val;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 public class TurretControllerSystem implements ECSSystem {
-    @Override
-    public void declareRequirements(final RequirementsBuilder requirements) {
-        requirements.addToGroup(SystemGroups.INPUT)
-                    .withComponent(Transform.class)
-                    .withComponent(BasicTurretComponent.class);
-    }
-
     private static final List<Class<? extends Component>> targetRequirements =
             List.of(EnemyTag.class, Transform.class);
-
-    @Override
-    public void tick(
-            final Stream<Entity> entities,
-            final World world
-    ) {
-        val entityManager = world.getEntityManager();
-        val timeManager = world.getOrCreateResource(Time.class);
-
-        entities.forEach(entity -> {
-            val turretAI = entityManager.getComponentOf(entity, BasicTurretComponent.class).orElseThrow();
-            val myPos = entityManager.getComponentOf(entity, Transform.class).orElseThrow();
-
-            if (timeManager.getCurrentGameTime() <
-                    turretAI.lastShotTimestamp + turretAI.shootingCoolDownInTicks)
-                return;
-
-            findOrUpdateTarget(entityManager, turretAI, myPos);
-
-            if (turretAI.target != null) {
-                val targetPos = entityManager.getComponentOf(turretAI.target, Transform.class).orElseThrow();
-                shoot(world, timeManager, myPos, targetPos, turretAI);
-            }
-        });
-    }
 
     private static void shoot(
             final World world,
@@ -58,9 +26,8 @@ public class TurretControllerSystem implements ECSSystem {
             final Transform target,
             final BasicTurretComponent turretAI
     ) {
-        val velocity = new Velocity();
-        velocity.velocity
-                .set(target.position)
+        final var velocity = new Velocity();
+        velocity.set(target.position)
                 .sub(origin.position)
                 .normalize(turretAI.projectileSpeed);
 
@@ -73,22 +40,23 @@ public class TurretControllerSystem implements ECSSystem {
             final BasicTurretComponent turretAI,
             final Transform myPos
     ) {
-        if (turretAI.target == null || !isTargetValid(entityManager, turretAI.target, myPos, turretAI.targetingRadiusSquared)) {
+        if (!isTargetValid(entityManager, turretAI.target, myPos, turretAI.targetingRadiusSquared)) {
             turretAI.target = findNewTarget(entityManager, turretAI, myPos).orElse(null);
         }
     }
 
     private static boolean isTargetValid(
             final EntityManager entityManager,
-            final Entity target,
+            @Nullable final Entity target,
             final Transform turretPos,
             final double targetingRadiusSquared
     ) {
+        if (target == null) return false;
         if (target.isMarkedForRemoval()) return false;
         if (!entityManager.hasComponent(target, EnemyTag.class)) return false;
         if (!entityManager.hasComponent(target, Transform.class)) return false;
 
-        val targetPos = entityManager.getComponentOf(target, Transform.class).orElseThrow();
+        final var targetPos = entityManager.getComponentOf(target, Transform.class).orElseThrow();
         return turretPos.position.distanceSquared(targetPos.position) <= targetingRadiusSquared;
     }
 
@@ -100,9 +68,41 @@ public class TurretControllerSystem implements ECSSystem {
         return entityManager
                 .getEntitiesWith(targetRequirements)
                 .filter(entity -> {
-                    val enemyPos = entityManager.getComponentOf(entity, Transform.class).orElseThrow();
+                    final var enemyPos = entityManager.getComponentOf(entity, Transform.class).orElseThrow();
                     return (myPos.position.distanceSquared(enemyPos.position) <= turretAI.targetingRadiusSquared);
                 })
                 .findAny();
+    }
+
+    @Override
+    public void declareRequirements(final RequirementsBuilder requirements) {
+        requirements.addToGroup(SystemGroups.INPUT)
+                    .withComponent(Transform.class)
+                    .withComponent(BasicTurretComponent.class);
+    }
+
+    @Override
+    public void tick(
+            final Stream<Entity> entities,
+            final World world
+    ) {
+        final var entityManager = world.getEntityManager();
+        final var timeManager = world.getOrCreateResource(Time.class);
+
+        entities.forEach(entity -> {
+            final var turretAI = entityManager.getComponentOf(entity, BasicTurretComponent.class).orElseThrow();
+            final var myPos = entityManager.getComponentOf(entity, Transform.class).orElseThrow();
+
+            if (timeManager.getCurrentGameTime() <
+                    turretAI.lastShotTimestamp + turretAI.shootingCoolDownInTicks)
+                return;
+
+            findOrUpdateTarget(entityManager, turretAI, myPos);
+
+            if (turretAI.target != null) {
+                final var targetPos = entityManager.getComponentOf(turretAI.target, Transform.class).orElseThrow();
+                shoot(world, timeManager, myPos, targetPos, turretAI);
+            }
+        });
     }
 }

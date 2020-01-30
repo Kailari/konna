@@ -1,11 +1,11 @@
 package fi.jakojaannos.roguelite.engine.data.resources;
 
-import fi.jakojaannos.roguelite.engine.ecs.Resource;
-import fi.jakojaannos.roguelite.engine.state.GameState;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 
 import javax.annotation.Nullable;
+
+import fi.jakojaannos.roguelite.engine.ecs.Resource;
+import fi.jakojaannos.roguelite.engine.state.GameState;
 
 @Slf4j
 public class GameStateManager implements Resource {
@@ -30,7 +30,7 @@ public class GameStateManager implements Resource {
                        });
                 current.close();
 
-                val newState = this.newState;
+                final var newState = this.newState;
                 this.newState = null;
                 return newState;
             } catch (Exception e) {

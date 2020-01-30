@@ -7,7 +7,7 @@ public class IdSupplier {
     private int count;
 
     public int get() {
-        int newId;
+        final int newId;
         if (this.freeIDs.isEmpty()) {
             newId = this.count;
         } else {
@@ -18,7 +18,7 @@ public class IdSupplier {
         return newId;
     }
 
-    public void free(int id) {
+    public void free(final int id) {
         this.freeIDs.offer(id);
         this.count = this.count - 1;
     }

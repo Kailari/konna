@@ -1,13 +1,13 @@
 package fi.jakojaannos.roguelite.engine;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.function.Supplier;
+
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.input.InputProvider;
 import fi.jakojaannos.roguelite.engine.state.GameState;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-
-import java.util.function.Supplier;
 
 /**
  * Game simulation runner. Utility for running the game simulation.
@@ -33,18 +33,18 @@ public class GameRunner<TGame extends Game> implements AutoCloseable {
      * @return <code>true</code> if runner should continue with the game loop. <code>false</code> to
      * break from the loop.
      */
-    protected boolean shouldContinueLoop(TGame game) {
+    protected boolean shouldContinueLoop(final TGame game) {
         return !game.isFinished();
     }
 
     /**
-     * Runs the game. The main entry-point for the game, the first and only call launcher should
-     * need to make on the instance.
+     * Runs the game. The main entry-point for the game, the first and only call launcher should need to make on the
+     * instance.
      *
      * @param game          Game to run
      * @param inputProvider Input provider for gathering input
-     * @param renderer      Renderer to use for presenting the game. NOP-renderer is used if
-     *                      provided renderer is <code>null</code>.
+     * @param renderer      Renderer to use for presenting the game. NOP-renderer is used if provided renderer is
+     *                      <code>null</code>.
      */
     public void run(
             final Supplier<GameState> defaultStateSupplier,
@@ -60,17 +60,17 @@ public class GameRunner<TGame extends Game> implements AutoCloseable {
 
         // Loop
         var state = defaultStateSupplier.get();
-        val initialTime = System.currentTimeMillis();
+        final var initialTime = System.currentTimeMillis();
         var previousFrameTime = initialTime;
         var accumulator = 0L;
         var ticks = 0;
         var frames = 0;
 
         LOG.info("Entering main loop");
-        val events = new Events();
+        final var events = new Events();
         try {
             while (shouldContinueLoop(game)) {
-                val currentFrameTime = System.currentTimeMillis();
+                final var currentFrameTime = System.currentTimeMillis();
                 var frameElapsedTime = currentFrameTime - previousFrameTime;
                 if (frameElapsedTime > getMaxFrameTime()) {
                     LOG.warn("Last tick took over 250 ms! Slowing down simulation to catch up!");
@@ -90,7 +90,7 @@ public class GameRunner<TGame extends Game> implements AutoCloseable {
                     ++ticks;
                 }
 
-                val partialTickAlpha = accumulator / (double) game.getTime().getTimeStep();
+                final var partialTickAlpha = accumulator / (double) game.getTime().getTimeStep();
                 presentGameState(state, renderer, partialTickAlpha, events);
                 frames++;
 
@@ -99,18 +99,18 @@ public class GameRunner<TGame extends Game> implements AutoCloseable {
         } finally {
             try {
                 state.close();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 LOG.warn("Destroying the game state failed:", e);
             }
         }
-        val totalTime = System.currentTimeMillis() - initialTime;
-        val totalTimeSeconds = totalTime / 1000.0;
+        final var totalTime = System.currentTimeMillis() - initialTime;
+        final var totalTimeSeconds = totalTime / 1000.0;
 
-        val avgTimePerTick = totalTime / (double) ticks;
-        val avgTicksPerSecond = ticks / totalTimeSeconds;
+        final var avgTimePerTick = totalTime / (double) ticks;
+        final var avgTicksPerSecond = ticks / totalTimeSeconds;
 
-        val avgTimePerFrame = totalTime / (double) frames;
-        val avgFramesPerSecond = frames / totalTimeSeconds;
+        final var avgTimePerFrame = totalTime / (double) frames;
+        final var avgFramesPerSecond = frames / totalTimeSeconds;
         LOG.info("Finished execution after {} seconds", totalTimeSeconds);
         LOG.info("\tTicks:\t\t{}", ticks);
         LOG.info("\tAvg. TPT:\t{}", avgTimePerTick);
@@ -122,11 +122,11 @@ public class GameRunner<TGame extends Game> implements AutoCloseable {
 
     private void limitFramerate() {
         if (getFramerateLimit() > 0) {
-            val targetTimePerFrame = 1.0 / getFramerateLimit();
-            val remaining = (long) (1000L * targetTimePerFrame * 0.95);
+            final var targetTimePerFrame = 1.0 / getFramerateLimit();
+            final var remaining = (long) (1000L * targetTimePerFrame * 0.95);
             try {
                 Thread.sleep(remaining);
-            } catch (InterruptedException ignored) {
+            } catch (final InterruptedException ignored) {
             }
         }
     }
@@ -146,7 +146,7 @@ public class GameRunner<TGame extends Game> implements AutoCloseable {
             throw new IllegalStateException("Simulating tick for already disposed game!");
         }
 
-        val newState = game.tick(state, events);
+        final var newState = game.tick(state, events);
         game.updateTime();
         return newState;
     }
@@ -166,12 +166,12 @@ public class GameRunner<TGame extends Game> implements AutoCloseable {
         renderer.render(state, partialTickAlpha, events);
     }
 
-    public interface RendererFunction {
-        void render(GameState state, double partialTickAlpha, Events events);
-    }
-
     @Override
     @SuppressWarnings("RedundantThrows")
     public void close() throws Exception {
+    }
+
+    public interface RendererFunction {
+        void render(GameState state, double partialTickAlpha, Events events);
     }
 }

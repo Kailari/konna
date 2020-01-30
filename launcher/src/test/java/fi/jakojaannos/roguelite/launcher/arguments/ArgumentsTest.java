@@ -1,9 +1,10 @@
 package fi.jakojaannos.roguelite.launcher.arguments;
 
-import fi.jakojaannos.roguelite.launcher.arguments.parameters.Parameter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import fi.jakojaannos.roguelite.launcher.arguments.parameters.Parameter;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -16,7 +17,7 @@ class ArgumentsTest {
     void passingNonPrefixedStringAsArgumentThrows() {
         assertThrows(ArgumentParsingException.class,
                      () -> Arguments.builder()
-                                    .consume("thisIsNotAValidArgument"));
+                                    .consume("thisIsNotAfinal varidArgument"));
     }
 
     @Test
