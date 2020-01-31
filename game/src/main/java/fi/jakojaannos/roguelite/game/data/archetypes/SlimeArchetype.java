@@ -7,129 +7,108 @@ import fi.jakojaannos.roguelite.game.data.DamageSource;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import fi.jakojaannos.roguelite.game.data.components.character.CharacterAbilities;
 import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
-import fi.jakojaannos.roguelite.game.data.components.character.MovementStats;
 import fi.jakojaannos.roguelite.game.data.components.character.Health;
+import fi.jakojaannos.roguelite.game.data.components.character.MovementStats;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.EnemyTag;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.SlimeAI;
 import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
 import lombok.val;
-import org.joml.Vector2d;
 
 public class SlimeArchetype {
-    public static Entity spawnLargeSlime(
+
+    public static Entity createLargeSlime(
             final EntityManager entityManager,
             final Transform spawnerTransform,
             final SpawnerComponent spawnerComponent
     ) {
-        return createLargeSlime(entityManager,
-                                spawnerTransform.position.x,
-                                spawnerTransform.position.y);
+        return createLargeSlime(entityManager, spawnerTransform.position.x, spawnerTransform.position.y);
     }
-
-    public static Entity createSmallSlimeWithInitialVelocity(
-            final EntityManager entityManager,
-            double x,
-            double y,
-            Vector2d dir,
-            double airTime
-    ) {
-        val slime = entityManager.createEntity();
-        entityManager.addComponentTo(slime, new Transform(x, y));
-        entityManager.addComponentTo(slime, new Health(1));
-        entityManager.addComponentTo(slime, new Collider(CollisionLayer.ENEMY, 0.6, 0.6, 0.3, 0.3));
-        entityManager.addComponentTo(slime, new Velocity());
-        entityManager.addComponentTo(slime, new CharacterInput());
-        entityManager.addComponentTo(slime, new EnemyTag());
-        entityManager.addComponentTo(slime, new CharacterAbilities(new DamageSource.Entity(slime)));
-        entityManager.addComponentTo(slime, new EnemyMeleeWeaponStats());
-        val slimeAi = new SlimeAI(
-                0.2,
-                0.4,
-                1
-        );
-        slimeAi.airTime = airTime;
-        slimeAi.jumpCoolDown = airTime * 1.2;
-        slimeAi.jumpDir.set(dir);
-
-        entityManager.addComponentTo(slime, slimeAi);
-        entityManager.addComponentTo(slime, new MovementStats(
-                11.0,
-                100.0,
-                800.0
-        ));
-        entityManager.addComponentTo(slime, createSpriteInfo());
-
-
-        return slime;
-    }
-
-
-    public static Entity createMediumSlimeWithInitialVelocity(
-            final EntityManager entityManager,
-            double x,
-            double y,
-            Vector2d dir,
-            double airTime
-    ) {
-        val slime = entityManager.createEntity();
-        entityManager.addComponentTo(slime, new Transform(x, y));
-        entityManager.addComponentTo(slime, new Health(3));
-        entityManager.addComponentTo(slime, new Collider(CollisionLayer.ENEMY, 1.0, 1.0, 0.5, 0.5));
-        entityManager.addComponentTo(slime, new Velocity());
-        entityManager.addComponentTo(slime, new CharacterInput());
-        entityManager.addComponentTo(slime, new EnemyTag());
-        entityManager.addComponentTo(slime, new CharacterAbilities(new DamageSource.Entity(slime)));
-        entityManager.addComponentTo(slime, new EnemyMeleeWeaponStats());
-        val slimeAi = new SlimeAI(
-                0.3,
-                0.8,
-                2
-        );
-        slimeAi.airTime = airTime;
-        slimeAi.jumpCoolDown = airTime * 1.2;
-        slimeAi.jumpDir.set(dir);
-
-        entityManager.addComponentTo(slime, slimeAi);
-        entityManager.addComponentTo(slime, new MovementStats(
-                6.0,
-                100.0,
-                800.0
-        ));
-        entityManager.addComponentTo(slime, createSpriteInfo());
-
-
-        return slime;
-    }
-
 
     public static Entity createLargeSlime(
             final EntityManager entityManager,
-            double x,
-            double y
+            final double xPos,
+            final double yPos
+    ) {
+        return createSlimeOfSize(entityManager, xPos, yPos, 16.0);
+    }
+
+    public static Entity createMediumSlime(
+            final EntityManager entityManager,
+            final double xPos,
+            final double yPos
+    ) {
+        return createSlimeOfSize(entityManager, xPos, yPos, 4.0);
+    }
+
+    public static Entity createSmallSlime(
+            final EntityManager entityManager,
+            final double xPos,
+            final double yPos
+    ) {
+        return createSlimeOfSize(entityManager, xPos, yPos, 1.0);
+    }
+
+    public static Entity createSlimeOfSize(
+            final EntityManager entityManager,
+            final double xPos,
+            final double yPos,
+            final double slimeSize
+    ) {
+        return createSlime(
+                entityManager,
+                xPos,
+                yPos,
+                (26.0 + 7 * slimeSize) / 11.0,
+                (5.45 + 1.15 * slimeSize) / 11.0,
+                (-1.0 + 23.0 * slimeSize) / 11.0,
+                slimeSize
+        );
+    }
+
+    public static Entity createSlime(
+            final EntityManager entityManager,
+            final double xPos,
+            final double yPos,
+            final double maxHp,
+            final double size,
+            final double mass,
+            final double slimeSize
     ) {
         val slime = entityManager.createEntity();
-        entityManager.addComponentTo(slime, new Transform(x, y));
-        entityManager.addComponentTo(slime, new Health(5));
-        entityManager.addComponentTo(slime, new Collider(CollisionLayer.ENEMY, 1.75, 1.75, 1.75 / 2, 1.75 / 2));
+        entityManager.addComponentTo(slime, new Transform(xPos, yPos));
+        entityManager.addComponentTo(slime, new Health(maxHp));
+        entityManager.addComponentTo(slime, createCollider(size, size));
+        entityManager.addComponentTo(slime, new Physics(mass));
         entityManager.addComponentTo(slime, new Velocity());
         entityManager.addComponentTo(slime, new CharacterInput());
         entityManager.addComponentTo(slime, new EnemyTag());
         entityManager.addComponentTo(slime, new CharacterAbilities(new DamageSource.Entity(slime)));
         entityManager.addComponentTo(slime, new EnemyMeleeWeaponStats());
-        entityManager.addComponentTo(slime, new SlimeAI(
-                0.6,
-                1.0,
-                3
-        ));
-        entityManager.addComponentTo(slime, new MovementStats(
-                4.5,
-                100.0,
-                800.0
-        ));
+        entityManager.addComponentTo(slime, createSlimeAI(slimeSize));
+        entityManager.addComponentTo(slime, createMovementStats());
         entityManager.addComponentTo(slime, createSpriteInfo());
 
-
         return slime;
+    }
+
+    private static MovementStats createMovementStats() {
+        return new MovementStats(
+                0,
+                2.0,
+                100.0
+        );
+    }
+
+    private static SlimeAI createSlimeAI(double slimeSize) {
+        val ai = new SlimeAI();
+        ai.slimeSize = slimeSize;
+        ai.jumpForce = 5.0 * slimeSize;
+
+        return ai;
+    }
+
+    private static Collider createCollider(double width, double height) {
+        return new Collider(CollisionLayer.ENEMY, width, height, width / 2, height / 2);
     }
 
     private static SpriteInfo createSpriteInfo() {
@@ -138,6 +117,4 @@ public class SlimeArchetype {
 
         return sprite;
     }
-
-
 }
