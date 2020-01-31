@@ -16,5 +16,4 @@ public class SlimeSharedAI implements Component {
 
     public double regroupRadiusSquared = 0.01;
 
-
 }

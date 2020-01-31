@@ -10,36 +10,13 @@ public class SlimeAI implements Component {
 
     public double crawlSpeed = 0.5;
 
-    public double airTime = 0.0, setAirTimeCoolDown = 0.6,
-            jumpCoolDown = 0.0, setJumpCoolDown = 1.0,
-            regroupTimer = 5.0;
+    public long lastJumpTimeStamp = -100, jumpCoolDownInTicks = 50, jumpDurationInTicks = 30;
+    public double jumpForce = 5.0;
 
-    public int slimeSize = 3;
-
-    public final Vector2d jumpDir = new Vector2d();
+    public double slimeSize = 3;
+    public int offspringAmountAfterDeath = 4;
 
     public SlimeAI() {
     }
-
-    public SlimeAI(
-            double chaseRadiusSquared,
-            double targetRadiusSquared,
-            double airTimeCoolDown,
-            double jumpCoolDown,
-            int slimeSize
-    ) {
-        this.chaseRadiusSquared = chaseRadiusSquared;
-        this.targetRadiusSquared = targetRadiusSquared;
-        this.setAirTimeCoolDown = airTimeCoolDown;
-        this.setJumpCoolDown = jumpCoolDown;
-        this.slimeSize = slimeSize;
-    }
-
-    public SlimeAI(double airTimeCoolDown, double jumpCoolDown, int slimeSize) {
-        this.setAirTimeCoolDown = airTimeCoolDown;
-        this.setJumpCoolDown = jumpCoolDown;
-        this.slimeSize = slimeSize;
-    }
-
 
 }

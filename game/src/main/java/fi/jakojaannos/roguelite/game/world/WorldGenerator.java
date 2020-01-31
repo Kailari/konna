@@ -102,7 +102,7 @@ public class WorldGenerator<TTile> {
             createSpawner(spawnerXH + 1, startY - spawnerYH - 1, followerFrequency, entities, followerFactory);
             createSpawner(spawnerXH - 1, startY + mainRoomHeight + spawnerYH, stalkerFrequency, entities, stalkerFactory);
             createSpawner(spawnerXH + 1, startY + mainRoomHeight + spawnerYH, followerFrequency, entities, followerFactory);
-            createSpawner(spawnerXH, startY - spawnerYH, slimeFrequency, entities, SlimeArchetype::spawnLargeSlime);
+            createSpawner(spawnerXH, startY - spawnerYH, slimeFrequency, entities, SlimeArchetype::createLargeSlime);
 
             val spawnerXV = hallwayLength - 2;
             val spawnerYV = hallwayStartY + hallwaySize / 2;

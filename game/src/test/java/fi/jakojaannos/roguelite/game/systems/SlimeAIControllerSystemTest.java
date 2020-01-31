@@ -1,31 +1,31 @@
 package fi.jakojaannos.roguelite.game.systems;
 
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.archetypes.PlayerArchetype;
-import fi.jakojaannos.roguelite.game.data.archetypes.SlimeArchetype;
+import fi.jakojaannos.roguelite.game.data.components.Physics;
+import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
+import fi.jakojaannos.roguelite.game.data.components.character.MovementStats;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.SlimeAI;
-import fi.jakojaannos.roguelite.game.data.components.character.enemy.SlimeSharedAI;
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
-import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import org.joml.Vector2d;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class SlimeAIControllerSystemTest {
 
+    private static final double EPSILON = 0.001;
+
     @Test
-    void smallerSlimesCanRegroupIntoLargerSlime() {
+    void slimeHopsTowardsPlayer() {
         SlimeAIControllerSystem system = new SlimeAIControllerSystem();
         EntityManager entityManager = EntityManager.createNew(256, 32);
         World world = World.createNew(entityManager);
@@ -34,40 +34,30 @@ public class SlimeAIControllerSystemTest {
         when(time.getTimeStepInSeconds()).thenReturn(0.02);
         world.createOrReplaceResource(Time.class, time);
 
-        world.getOrCreateResource(Players.class).setLocalPlayer(PlayerArchetype.create(entityManager, new Transform(100, 100)));
+        Transform playerPos = new Transform(10, 10);
+        world.getOrCreateResource(Players.class).setLocalPlayer(PlayerArchetype.create(entityManager, playerPos));
 
+        Entity slime = entityManager.createEntity();
+        SlimeAI slimeAI = new SlimeAI();
+        slimeAI.jumpForce = 5.0;
+        slimeAI.chaseRadiusSquared = 100 * 100;
+        entityManager.addComponentTo(slime, slimeAI);
+        entityManager.addComponentTo(slime, new CharacterInput());
+        Transform slimePos = new Transform(3, 6);
+        entityManager.addComponentTo(slime, slimePos);
+        entityManager.addComponentTo(slime, new MovementStats());
+        Physics physics = new Physics();
+        physics.mass = 2.5;
+        entityManager.addComponentTo(slime, physics);
 
-        Vector2d vec = new Vector2d(0.0, 0.0);
-        SlimeSharedAI sharedAI = new SlimeSharedAI();
-        List<Entity> list = new ArrayList<>();
-
-        for (int i = 0; i < 4; i++) {
-            Entity slime = SlimeArchetype.createSmallSlimeWithInitialVelocity(entityManager, 0.0, 0.0, vec, 0.0);
-            entityManager.addComponentTo(slime, sharedAI);
-            sharedAI.slimes.add(slime);
-            list.add(slime);
-        }
-
-        sharedAI.regroupPos.set(0.0, 0.0);
-        sharedAI.regrouping = true;
-
-        system.tick(list.stream(), world);
         entityManager.applyModifications();
+        system.tick(Stream.of(slime), world);
 
-        List<EntityManager.EntityComponentPair<SlimeAI>> entities =
-                entityManager
-                        .getEntitiesWith(SlimeAI.class)
-                        .collect(Collectors.toList());
+        Vector2d expectedDir = new Vector2d(playerPos.position)
+                .sub(slimePos.position)
+                .normalize(slimeAI.jumpForce / physics.mass);
 
-
-        assertEquals(1, entities.size());
-
-        boolean hasOneLargeSlime =
-                (entities.size() == 1
-                        && entities.get(0).getComponent().slimeSize == 2);
-
-        assertTrue(hasOneLargeSlime);
-
+        assertEquals(expectedDir.x, physics.acceleration.x, EPSILON);
+        assertEquals(expectedDir.y, physics.acceleration.y, EPSILON);
     }
-
 }
