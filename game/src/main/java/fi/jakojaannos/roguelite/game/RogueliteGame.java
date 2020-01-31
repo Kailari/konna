@@ -71,7 +71,7 @@ public class RogueliteGame extends GameBase implements MainThread {
             });
         }
 
-        state.tick();
+        state.tick(events);
 
         if (inputs.inputForceCloseA && inputs.inputForceCloseB) {
             this.setFinished(true);

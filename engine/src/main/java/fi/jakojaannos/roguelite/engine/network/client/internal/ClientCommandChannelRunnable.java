@@ -99,9 +99,13 @@ public class ClientCommandChannelRunnable extends CommandChannelRunnable {
     }
 
     @Override
-    protected void shutdown() throws IOException {
+    protected void shutdown() {
         if (this.channel != null && this.channel.isConnected()) {
-            this.channel.close();
+            try {
+                this.channel.close();
+            } catch (final IOException e) {
+                LOG.error("Error closing channel:", e);
+            }
         }
         super.shutdown();
     }

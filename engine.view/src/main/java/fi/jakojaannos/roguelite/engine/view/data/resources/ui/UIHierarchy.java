@@ -6,11 +6,11 @@ import javax.annotation.Nullable;
 
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.Resource;
+import fi.jakojaannos.roguelite.engine.ecs.ProvidedResource;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
 import fi.jakojaannos.roguelite.engine.view.ui.internal.EntityBackedUIElement;
 
-public class UIHierarchy implements Resource {
+public class UIHierarchy implements ProvidedResource {
     private final Map<Entity, List<Entity>> children = new HashMap<>();
     private final Map<Entity, Entity> parents = new HashMap<>();
 

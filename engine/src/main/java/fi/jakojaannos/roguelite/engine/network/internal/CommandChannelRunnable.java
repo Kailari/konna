@@ -61,10 +61,10 @@ public abstract class CommandChannelRunnable implements Runnable, AutoCloseable 
                     }
                 }
             }
-
-            shutdown();
         } catch (final IOException e) {
             LOG.error("Command channel thread has crashed:", e);
+        } finally {
+            shutdown();
         }
     }
 
@@ -126,9 +126,13 @@ public abstract class CommandChannelRunnable implements Runnable, AutoCloseable 
         readBuffer.compact();
     }
 
-    protected void shutdown() throws IOException {
+    protected void shutdown() {
         if (this.selector != null && this.selector.isOpen()) {
-            this.selector.close();
+            try {
+                this.selector.close();
+            } catch (final IOException e) {
+                LOG.error("Error closing selector:", e);
+            }
         }
         this.selector = null;
     }

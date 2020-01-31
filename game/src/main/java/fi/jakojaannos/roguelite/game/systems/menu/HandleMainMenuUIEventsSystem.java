@@ -23,8 +23,8 @@ public class HandleMainMenuUIEventsSystem implements ECSSystem {
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.requireResource(GameStateManager.class)
-                    .requireResource(Time.class)
-                    .requireResource(Events.class);
+                    .requireProvidedResource(Time.class)
+                    .requireProvidedResource(Events.class);
     }
 
     @Override
@@ -33,7 +33,7 @@ public class HandleMainMenuUIEventsSystem implements ECSSystem {
             final World world
     ) {
         final var gameStateManager = world.getOrCreateResource(GameStateManager.class);
-        final var events = world.getOrCreateResource(Events.class).getUi();
+        final var events = world.getResource(Events.class).getUi();
         while (events.hasEvents()) {
             final var event = events.pollEvent();
             if (event.getType() == UIEvent.Type.CLICK) {
@@ -64,6 +64,6 @@ public class HandleMainMenuUIEventsSystem implements ECSSystem {
     private GameplayGameState createGameplayState(final World world) {
         return new GameplayGameState(System.nanoTime(),
                                      World.createNew(EntityManager.createNew(256, 32)),
-                                     world.getOrCreateResource(Time.class).getTimeManager());
+                                     world.getResource(Time.class).getTimeManager());
     }
 }

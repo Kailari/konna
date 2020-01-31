@@ -17,7 +17,7 @@ public class UIElementHoverEventProvider implements ECSSystem {
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.addToGroup(UISystemGroups.EVENTS)
-                    .requireResource(Events.class)
+                    .requireProvidedResource(Events.class)
                     .requireResource(Mouse.class)
                     .withComponent(Name.class)
                     .withComponent(ElementBoundaries.class);
@@ -29,7 +29,7 @@ public class UIElementHoverEventProvider implements ECSSystem {
             final World world
     ) {
         final var entityManager = world.getEntityManager();
-        final var events = world.getOrCreateResource(Events.class);
+        final var events = world.getResource(Events.class);
         final var mouse = world.getOrCreateResource(Mouse.class);
 
         entities.forEach(entity -> {

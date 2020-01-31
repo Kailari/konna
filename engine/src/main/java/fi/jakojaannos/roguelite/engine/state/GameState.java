@@ -5,9 +5,11 @@ import lombok.Getter;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
+import fi.jakojaannos.roguelite.engine.data.resources.Network;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.network.NetworkManager;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 
@@ -21,7 +23,8 @@ public abstract class GameState implements WorldProvider, AutoCloseable {
             final TimeManager timeManager
     ) {
         this.world = world;
-        this.world.createOrReplaceResource(Time.class, new Time(timeManager));
+        this.world.provideResource(Time.class, new Time(timeManager));
+        this.world.provideResource(Network.class, this::getNetworkManager);
 
         this.dispatcher = createDispatcher();
     }
@@ -38,7 +41,9 @@ public abstract class GameState implements WorldProvider, AutoCloseable {
 
     protected abstract SystemDispatcher createDispatcher();
 
-    public void tick() {
+    public void tick(final Events events) {
+        this.world.provideResource(Events.class, events);
+
         this.dispatcher.dispatch(this.world);
         this.world.getEntityManager().applyModifications();
     }

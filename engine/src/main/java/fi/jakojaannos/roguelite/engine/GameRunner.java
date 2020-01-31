@@ -84,7 +84,7 @@ public class GameRunner<TGame extends Game> implements AutoCloseable {
                     inputProvider.pollEvents()
                                  .forEach(events.getInput()::fire);
 
-                    state.getWorld().createOrReplaceResource(Events.class, events);
+                    state.getWorld().provideResource(Events.class, events);
                     state = simulateTick(state, game, events);
                     accumulator -= game.getTime().getTimeStep();
                     ++ticks;

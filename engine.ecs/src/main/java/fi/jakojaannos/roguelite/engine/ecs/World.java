@@ -22,7 +22,7 @@ public interface World {
      *
      * @return the resource of given type
      */
-    <TResource extends Resource> TResource getOrCreateResource(Class<? extends TResource> resourceType);
+    <TResource extends Resource> TResource getOrCreateResource(Class<TResource> resourceType);
 
     /**
      * Manually assigns a resource to a specific value.
@@ -34,4 +34,17 @@ public interface World {
             Class<TResource> resourceClass,
             TResource resource
     );
+
+    /**
+     * Manually assigns a provided resource to a specific value.
+     *
+     * @param resourceClass type of the resource to create
+     * @param resource      resource to create
+     */
+    <TResource extends ProvidedResource> void provideResource(
+            Class<TResource> resourceClass,
+            TResource resource
+    );
+
+    <TResource extends ProvidedResource> TResource getResource(Class<TResource> resourceType);
 }

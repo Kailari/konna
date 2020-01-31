@@ -34,7 +34,7 @@ public class UpdateHUDSystem implements ECSSystem {
         requirements.addToGroup(RenderSystemGroups.UI)
                     .tickBefore(UserInterfaceRenderingSystem.class)
                     .requireResource(Players.class)
-                    .requireResource(Time.class);
+                    .requireProvidedResource(Time.class);
     }
 
     @Override
@@ -42,7 +42,7 @@ public class UpdateHUDSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
-        final var timeManager = world.getOrCreateResource(Time.class);
+        final var timeManager = world.getResource(Time.class);
         final var sessionStats = world.getOrCreateResource(SessionStats.class);
         world.getOrCreateResource(Players.class)
              .getLocalPlayer()

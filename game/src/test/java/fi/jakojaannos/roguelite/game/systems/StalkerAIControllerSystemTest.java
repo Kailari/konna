@@ -41,7 +41,7 @@ public class StalkerAIControllerSystemTest {
         entityManager = EntityManager.createNew(256, 32);
         this.world = World.createNew(entityManager);
         timeManager = new SimpleTimeManager(20);
-        world.createOrReplaceResource(Time.class, new Time(timeManager));
+        world.provideResource(Time.class, new Time(timeManager));
 
         Entity player = entityManager.createEntity();
         this.playerPos = new Transform();

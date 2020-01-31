@@ -59,9 +59,13 @@ public class ServerCommandChannelRunnable extends CommandChannelRunnable {
     }
 
     @Override
-    protected void shutdown() throws IOException {
+    protected void shutdown() {
         if (this.connectionChannel != null && this.connectionChannel.isOpen()) {
-            this.connectionChannel.close();
+            try {
+                this.connectionChannel.close();
+            } catch (final IOException e) {
+                LOG.error("Error closing connection channel:", e);
+            }
         }
         super.shutdown();
     }

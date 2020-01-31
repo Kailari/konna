@@ -49,8 +49,8 @@ public class UserInterfaceRenderingSystem implements ECSSystem, AutoCloseable {
     public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.addToGroup(RenderSystemGroups.UI)
                     .requireResource(Mouse.class)
-                    .requireResource(Events.class)
-                    .requireResource(Time.class);
+                    .requireProvidedResource(Events.class)
+                    .requireProvidedResource(Time.class);
     }
 
     @Override
@@ -64,8 +64,8 @@ public class UserInterfaceRenderingSystem implements ECSSystem, AutoCloseable {
         mouse.position.set(rawMouse.position)
                       .mul(this.camera.getViewport().getWidthInPixels(),
                            this.camera.getViewport().getHeightInPixels());
-        final var events = world.getOrCreateResource(Events.class);
-        this.userInterface.update(world.getOrCreateResource(Time.class).getTimeManager(),
+        final var events = world.getResource(Events.class);
+        this.userInterface.update(world.getResource(Time.class).getTimeManager(),
                                   mouse,
                                   events);
 

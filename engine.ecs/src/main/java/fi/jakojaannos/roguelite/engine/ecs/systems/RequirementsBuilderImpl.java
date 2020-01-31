@@ -82,4 +82,10 @@ public class RequirementsBuilderImpl implements RequirementsBuilder {
         this.requirements.requiredResource(resource);
         return this;
     }
+
+    @Override
+    public RequirementsBuilder requireProvidedResource(final Class<? extends ProvidedResource> resource) {
+        this.requirements.requiredProvidedResource(resource);
+        return this;
+    }
 }

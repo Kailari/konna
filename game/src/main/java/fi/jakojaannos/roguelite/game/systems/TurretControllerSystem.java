@@ -87,7 +87,7 @@ public class TurretControllerSystem implements ECSSystem {
             final World world
     ) {
         final var entityManager = world.getEntityManager();
-        final var timeManager = world.getOrCreateResource(Time.class);
+        final var timeManager = world.getResource(Time.class);
 
         entities.forEach(entity -> {
             final var turretAI = entityManager.getComponentOf(entity, BasicTurretComponent.class).orElseThrow();

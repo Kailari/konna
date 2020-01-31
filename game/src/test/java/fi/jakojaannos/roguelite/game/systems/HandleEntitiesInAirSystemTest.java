@@ -21,7 +21,7 @@ public class HandleEntitiesInAirSystemTest {
         EntityManager entityManager = EntityManager.createNew(256, 32);
         World world = World.createNew(entityManager);
         SimpleTimeManager timeManager = new SimpleTimeManager(20);
-        world.createOrReplaceResource(Time.class, new Time(timeManager));
+        world.provideResource(Time.class, new Time(timeManager));
         HandleEntitiesInAirSystem system = new HandleEntitiesInAirSystem();
 
         Entity entity = entityManager.createEntity();
@@ -41,7 +41,7 @@ public class HandleEntitiesInAirSystemTest {
         EntityManager entityManager = EntityManager.createNew(256, 32);
         World world = World.createNew(entityManager);
         SimpleTimeManager timeManager = new SimpleTimeManager(20);
-        world.createOrReplaceResource(Time.class, new Time(timeManager));
+        world.provideResource(Time.class, new Time(timeManager));
         HandleEntitiesInAirSystem system = new HandleEntitiesInAirSystem();
 
         Entity entity = entityManager.createEntity();
@@ -61,7 +61,7 @@ public class HandleEntitiesInAirSystemTest {
         EntityManager entityManager = EntityManager.createNew(256, 32);
         World world = World.createNew(entityManager);
         SimpleTimeManager timeManager = new SimpleTimeManager(20);
-        world.createOrReplaceResource(Time.class, new Time(timeManager));
+        world.provideResource(Time.class, new Time(timeManager));
         HandleEntitiesInAirSystem system = new HandleEntitiesInAirSystem();
 
         Entity entity = entityManager.createEntity();

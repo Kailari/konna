@@ -31,7 +31,7 @@ public class TurretControllerSystemTest {
     void beforeEach() {
         entityManager = EntityManager.createNew(256, 32);
         world = World.createNew(entityManager);
-        world.createOrReplaceResource(Time.class, new Time(new SimpleTimeManager(20)));
+        world.provideResource(Time.class, new Time(new SimpleTimeManager(20)));
 
         system = new TurretControllerSystem();
         turret = entityManager.createEntity();

@@ -22,7 +22,7 @@ public class HandleEntitiesInAirSystem implements ECSSystem {
             final World world
     ) {
         final var entityManager = world.getEntityManager();
-        final var time = world.getOrCreateResource(Time.class);
+        final var time = world.getResource(Time.class);
 
         entities.forEach(entity -> {
             final var inAir = entityManager.getComponentOf(entity, InAir.class).orElseThrow();

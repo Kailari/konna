@@ -34,12 +34,6 @@ public class UIPropertyValueMatcher<T> implements UIPropertyMatcher<T> {
                                                                           .orElse(true));
         }
 
-        public UIPropertyValueMatcher<T> isPresentAndEqual(final T expected) {
-            return new UIPropertyValueMatcher<>(this.property,
-                                                maybeActual -> maybeActual.map(actual -> actual.equals(expected))
-                                                                          .orElse(false));
-        }
-
         public UIPropertyValueMatcher<T> ifPresentOrElse(
                 final Predicate<T> ifPresent,
                 final Supplier<Boolean> orElse
@@ -47,6 +41,16 @@ public class UIPropertyValueMatcher<T> implements UIPropertyMatcher<T> {
             return new UIPropertyValueMatcher<>(this.property,
                                                 maybeActual -> maybeActual.map(ifPresent::test)
                                                                           .orElseGet(orElse));
+        }
+
+        public UIPropertyValueMatcher<T> isPresentAndEqual(final T expected) {
+            return isPresentAndMatches(actual -> actual.equals(expected));
+        }
+
+        public UIPropertyValueMatcher<T> isPresentAndMatches(final Predicate<T> matcher) {
+            return new UIPropertyValueMatcher<>(this.property,
+                                                maybeActual -> maybeActual.map(matcher::test)
+                                                                          .orElse(false));
         }
     }
 }

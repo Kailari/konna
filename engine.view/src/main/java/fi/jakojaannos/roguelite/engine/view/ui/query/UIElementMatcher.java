@@ -15,7 +15,19 @@ public interface UIElementMatcher extends UIMatcher {
 
     UIElementMatcher matching(UIMatcher matcher);
 
+    /**
+     * Evaluates the matcher on given element, keeping track of all failed UI matchers
+     *
+     * @param element element to match against
+     *
+     * @return collection containing all failed matchers
+     */
     Collection<UIMatcher> evaluateAndGetFailures(UIElement element);
+
+    @Override
+    default boolean evaluate(final UIElement element) {
+        return evaluateAndGetFailures(element).isEmpty();
+    }
 
     default UIPropertyStringMatcherBuilder hasName() {
         return new UIPropertyStringMatcherBuilder(this, UIProperty.NAME);
@@ -46,10 +58,5 @@ public interface UIElementMatcher extends UIMatcher {
 
     default UIElementMatcher isLabel() {
         return matching(UIPropertyMatcher.match(UIProperty.TYPE).isPresentAndEqual(UIElementType.LABEL));
-    }
-
-    @Override
-    default boolean evaluate(final UIElement element) {
-        return evaluateAndGetFailures(element).isEmpty();
     }
 }

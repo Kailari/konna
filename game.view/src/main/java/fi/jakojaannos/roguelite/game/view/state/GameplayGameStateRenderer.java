@@ -101,6 +101,7 @@ public class GameplayGameStateRenderer extends GameStateRenderer {
                                 .withSystem(new UpdateHUDSystem(userInterface))
                                 .withSystem(new UpdateGameOverSplashSystem(userInterface))
                                 .withSystem(new HealthBarUpdateSystem(camera, userInterface))
+                                .withSystem(new NetworkHUDSystem(userInterface))
                                 .withSystem(new UserInterfaceRenderingSystem(assetRoot,
                                                                              camera,
                                                                              fontRegistry,

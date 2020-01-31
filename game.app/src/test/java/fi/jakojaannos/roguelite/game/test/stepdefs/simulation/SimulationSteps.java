@@ -7,6 +7,7 @@ import org.joml.Vector2d;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.game.state.GameplayGameState;
 
 import static fi.jakojaannos.roguelite.game.test.global.GlobalGameState.*;
@@ -18,6 +19,7 @@ public class SimulationSteps {
         state = new GameplayGameState(6969,
                                       World.createNew(EntityManager.createNew(256, 32)),
                                       game.getTime());
+        state.getWorld().provideResource(Events.class, events);
 
         playerInitialPosition = getLocalPlayer().flatMap(entity -> getComponentOf(entity, Transform.class))
                                                 .map(transform -> new Vector2d(transform.position))

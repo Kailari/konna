@@ -12,6 +12,7 @@ import fi.jakojaannos.roguelite.engine.view.ui.ProportionValue;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.game.DebugConfig;
+import fi.jakojaannos.roguelite.game.view.systems.NetworkHUDSystem;
 import fi.jakojaannos.roguelite.game.view.systems.RenderSystemGroups;
 import fi.jakojaannos.roguelite.game.view.systems.UserInterfaceRenderingSystem;
 import fi.jakojaannos.roguelite.game.view.systems.debug.EntityCollisionBoundsRenderingSystem;
@@ -54,6 +55,7 @@ public class MainMenuGameStateRenderer extends GameStateRenderer {
                                 .addGroupDependencies(RenderSystemGroups.OVERLAY, RenderSystemGroups.ENTITIES,
                                                       RenderSystemGroups.LEVEL)
                                 .addGroupDependencies(RenderSystemGroups.ENTITIES, RenderSystemGroups.LEVEL)
+                                .withSystem(new NetworkHUDSystem(userInterface))
                                 .withSystem(new UserInterfaceRenderingSystem(assetRoot,
                                                                              camera,
                                                                              fontRegistry,

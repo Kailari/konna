@@ -21,7 +21,7 @@ public class UIHierarchySystem implements ECSSystem {
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.addToGroup(UISystemGroups.PREPARATIONS)
-                    .requireResource(UIHierarchy.class);
+                    .requireProvidedResource(UIHierarchy.class);
     }
 
     @Override
@@ -29,7 +29,7 @@ public class UIHierarchySystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
-        final var hierarchy = world.getOrCreateResource(UIHierarchy.class);
+        final var hierarchy = world.getResource(UIHierarchy.class);
         final var entityManager = world.getEntityManager();
         hierarchy.clear();
         entities.forEach(entity -> hierarchy.update(entityManager,

@@ -35,7 +35,7 @@ public class HealthBarUpdateSystem implements ECSSystem {
                     .withComponent(Health.class)
                     .withComponent(Transform.class)
                     .requireResource(CameraProperties.class)
-                    .requireResource(Time.class);
+                    .requireProvidedResource(Time.class);
     }
 
     @Override
@@ -46,7 +46,7 @@ public class HealthBarUpdateSystem implements ECSSystem {
         final var cameraProperties = world.getOrCreateResource(CameraProperties.class);
 
         final var entityManager = world.getEntityManager();
-        final var timeManager = world.getOrCreateResource(Time.class);
+        final var timeManager = world.getResource(Time.class);
         final var healthbarDurationInTicks = timeManager.convertToTicks(5.0);
 
         for (final var uiElement : this.healthBars.values()) {

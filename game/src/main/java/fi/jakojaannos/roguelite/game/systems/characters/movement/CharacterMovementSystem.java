@@ -38,7 +38,7 @@ public class CharacterMovementSystem implements ECSSystem {
             final World world
     ) {
         final var entityManager = world.getEntityManager();
-        final var delta = world.getOrCreateResource(Time.class).getTimeStepInSeconds();
+        final var delta = world.getResource(Time.class).getTimeStepInSeconds();
 
         entities.forEach(entity -> {
             final var input = entityManager.getComponentOf(entity, CharacterInput.class).orElseThrow();

@@ -28,7 +28,7 @@ public class UpdateSessionTimerSystem implements ECSSystem {
             return;
         }
 
-        final var timeManager = world.getOrCreateResource(Time.class);
+        final var timeManager = world.getResource(Time.class);
         final var sessionStats = world.getOrCreateResource(SessionStats.class);
         sessionStats.endTimeStamp = timeManager.getCurrentGameTime();
     }

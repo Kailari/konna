@@ -43,7 +43,7 @@ class CharacterMovementSystemTest {
 
         Time time = mock(Time.class);
         when(time.getTimeStepInSeconds()).thenReturn(0.02);
-        world.createOrReplaceResource(Time.class, time);
+        world.provideResource(Time.class, time);
 
         entity = entityManager.createEntity();
         this.characterInput = new CharacterInput();

@@ -122,7 +122,6 @@ public class GlobalState {
             }
         }
 
-
         try {
             gameRenderer.close();
             window.close();

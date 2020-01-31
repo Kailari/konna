@@ -48,8 +48,8 @@ public class UserInterfaceImpl implements UserInterface {
                                             .withSystem(new UIElementClickEventProvider())
                                             .build();
 
-        this.uiWorld.createOrReplaceResource(UIRoot.class, new UIRoot(viewport));
-        this.uiWorld.createOrReplaceResource(UIHierarchy.class, new UIHierarchy());
+        this.uiWorld.provideResource(UIRoot.class, new UIRoot(viewport));
+        this.uiWorld.provideResource(UIHierarchy.class, new UIHierarchy());
     }
 
     @Override
@@ -79,29 +79,31 @@ public class UserInterfaceImpl implements UserInterface {
                                                    component -> this.uiWorld.getEntityManager()
                                                                             .addComponentTo(elementEntity, component));
         factory.accept(builder);
-        final var element = this.uiWorld.getOrCreateResource(UIHierarchy.class)
+        final var element = this.uiWorld.getResource(UIHierarchy.class)
                                         .getOrCreateElementFor(elementEntity, this.uiWorld.getEntityManager());
         element.setProperty(UIProperty.TYPE, elementType);
+        this.uiWorld.getEntityManager().applyModifications();
+        this.updateHierarchy();
         return element;
     }
 
     @Override
     public Stream<UIElement> getRoots() {
-        return this.uiWorld.getOrCreateResource(UIHierarchy.class)
+        return this.uiWorld.getResource(UIHierarchy.class)
                            .getRoots();
     }
 
     @Override
     public Stream<UIElement> allElements() {
-        return this.uiWorld.getOrCreateResource(UIHierarchy.class)
+        return this.uiWorld.getResource(UIHierarchy.class)
                            .getElements();
     }
 
     @Override
     public void update(final TimeManager time, final Mouse mouse, final Events events) {
         this.uiWorld.getEntityManager().applyModifications();
-        this.uiWorld.createOrReplaceResource(Time.class, new Time(time));
-        this.uiWorld.createOrReplaceResource(Events.class, events);
+        this.uiWorld.provideResource(Time.class, new Time(time));
+        this.uiWorld.provideResource(Events.class, events);
         this.uiWorld.createOrReplaceResource(Mouse.class, mouse);
 
         this.uiDispatcher.dispatch(this.uiWorld);

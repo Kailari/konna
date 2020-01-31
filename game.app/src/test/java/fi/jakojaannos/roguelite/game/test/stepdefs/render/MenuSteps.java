@@ -7,6 +7,7 @@ import io.cucumber.java.en.When;
 import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 import fi.jakojaannos.roguelite.game.state.GameplayGameState;
 import fi.jakojaannos.roguelite.game.state.MainMenuGameState;
@@ -23,6 +24,7 @@ public class MenuSteps {
     public void the_main_menu_has_just_loaded() {
         state = new MainMenuGameState(World.createNew(EntityManager.createNew(256, 32)),
                                       game.getTime());
+        state.getWorld().provideResource(Events.class, events);
         simulateTick();
     }
 

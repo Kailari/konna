@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.ProvidedResource;
 import fi.jakojaannos.roguelite.engine.ecs.Resource;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 
@@ -14,6 +15,7 @@ import fi.jakojaannos.roguelite.engine.ecs.World;
 public class WorldImpl implements World {
     private final EntityManager entityManager;
     private final Map<Class<? extends Resource>, Resource> resourceStorage = new HashMap<>();
+    private final Map<Class<? extends ProvidedResource>, ProvidedResource> providedResourceStorage = new HashMap<>();
 
     public WorldImpl(final EntityManager entityManager) {
         this.entityManager = entityManager;
@@ -33,10 +35,29 @@ public class WorldImpl implements World {
     }
 
     @Override
+    public <TResource extends ProvidedResource> void provideResource(
+            final Class<TResource> resourceClass,
+            final TResource resource
+    ) {
+        this.providedResourceStorage.put(resourceClass, resource);
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
-    public <TResource extends Resource> TResource getOrCreateResource(final Class<? extends TResource> resourceType) {
+    public <TResource extends Resource> TResource getOrCreateResource(final Class<TResource> resourceType) {
         return (TResource) this.resourceStorage.computeIfAbsent(resourceType,
                                                                 rt -> constructResource(resourceType, rt));
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <TResource extends ProvidedResource> TResource getResource(final Class<TResource> resourceType) {
+        if (!this.providedResourceStorage.containsKey(resourceType)) {
+            throw new IllegalStateException("Tried to get provided resource \"" + resourceType.getSimpleName() +
+                                                    "\" but no instance exists!");
+        }
+
+        return (TResource) this.providedResourceStorage.get(resourceType);
     }
 
     private <TResource extends Resource> Resource constructResource(

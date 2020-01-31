@@ -39,8 +39,8 @@ public class UILabelAutomaticSizeCalculationSystem implements ECSSystem {
     public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.addToGroup(UISystemGroups.PREPARATIONS)
                     .tickBefore(UIElementBoundaryCalculationSystem.class)
-                    .requireResource(UIHierarchy.class)
-                    .requireResource(UIRoot.class)
+                    .requireProvidedResource(UIHierarchy.class)
+                    .requireProvidedResource(UIRoot.class)
                     .withComponent(AutomaticSizeTag.class)
                     .withComponent(Text.class);
     }
@@ -50,8 +50,8 @@ public class UILabelAutomaticSizeCalculationSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
-        final var hierarchy = world.getOrCreateResource(UIHierarchy.class);
-        final var uiRoot = world.getOrCreateResource(UIRoot.class);
+        final var hierarchy = world.getResource(UIHierarchy.class);
+        final var uiRoot = world.getResource(UIRoot.class);
 
         final var entityManager = world.getEntityManager();
         entities.forEach(entity -> {

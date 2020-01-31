@@ -34,7 +34,7 @@ public class EnemyToPlayerCollisionHandlerSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
-        final var timeManager = world.getOrCreateResource(Time.class);
+        final var timeManager = world.getResource(Time.class);
         final var entityManager = world.getEntityManager();
         final var collisions = world.getOrCreateResource(Collisions.class);
 

@@ -60,6 +60,9 @@ public class RogueliteGameRenderer implements GameRenderer {
 
     @Override
     public void render(final GameState state, final double partialTickAlpha, final Events events) {
+        // Make sure the events resource exists. It might not if the last tick ended with state change
+        state.getWorld().provideResource(Events.class, events);
+
         // Make sure that the camera configuration matches the current state
         this.camera.updateConfigurationFromState(state);
 

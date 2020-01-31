@@ -66,8 +66,8 @@ public interface RequirementsBuilder {
 
     /**
      * Marks requirement for all entities this system handles to not have a component of given type. This means that any
-     * entities with given component type are excluded from being passed into {@link ECSSystem#tick(Stream, World,
-     * double)} for the system.
+     * entities with given component type are excluded from being passed into {@link ECSSystem#tick(Stream, World)} for
+     * the system.
      *
      * @param componentClass type of the excluded component
      *
@@ -87,7 +87,7 @@ public interface RequirementsBuilder {
     /**
      * Marks requirement for all entities this system handles to not have any components from the given group. This
      * means that any entities with any components from the group are excluded from being passed into {@link
-     * ECSSystem#tick(Stream, World, double)} for the system.
+     * ECSSystem#tick(Stream, World)} for the system.
      *
      * @param componentGroup the group of components to exclude
      *
@@ -103,4 +103,13 @@ public interface RequirementsBuilder {
      * @return the builder for chaining
      */
     RequirementsBuilder requireResource(Class<? extends Resource> resource);
+
+    /**
+     * Marks requirement for a provided resource to be available for this system to be able to tick.
+     *
+     * @param resource type of the required resource
+     *
+     * @return the builder for chaining
+     */
+    RequirementsBuilder requireProvidedResource(Class<? extends ProvidedResource> resource);
 }

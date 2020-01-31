@@ -18,9 +18,9 @@ public class UIElementClickEventProvider implements ECSSystem {
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.addToGroup(UISystemGroups.EVENTS)
-                    .requireResource(Events.class)
+                    .requireProvidedResource(Events.class)
                     .requireResource(Mouse.class)
-                    .requireResource(Time.class)
+                    .requireProvidedResource(Time.class)
                     .tickAfter(UIElementHoverEventProvider.class)
                     .withComponent(Name.class)
                     .withComponent(ActiveTag.class);
@@ -32,9 +32,9 @@ public class UIElementClickEventProvider implements ECSSystem {
             final World world
     ) {
         final var entityManager = world.getEntityManager();
-        final var events = world.getOrCreateResource(Events.class);
+        final var events = world.getResource(Events.class);
         final var mouse = world.getOrCreateResource(Mouse.class);
-        final var timeManager = world.getOrCreateResource(Time.class);
+        final var timeManager = world.getResource(Time.class);
 
         entities.forEach(entity -> {
             final var name = entityManager.getComponentOf(entity, Name.class)

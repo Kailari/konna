@@ -12,6 +12,7 @@ import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.UIBuilder;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.UIElementBuilder;
 import fi.jakojaannos.roguelite.engine.view.ui.query.UIElementMatcher;
+import fi.jakojaannos.roguelite.engine.view.ui.query.UIPropertyMatcher;
 
 public interface UserInterface {
     static UIBuilder builder(
@@ -31,18 +32,29 @@ public interface UserInterface {
 
     Stream<UIElement> allElements();
 
+    /**
+     * @deprecated Use {@link #findElements(Consumer)} with {@link UIPropertyMatcher} static methods instead
+     */
+    @Deprecated
     default <T> Stream<UIElement> findElementsWithMatchingProperty(
             final UIProperty<T> property,
             final Predicate<T> matcher
     ) {
         final Stream.Builder<UIElement> streamBuilder = Stream.builder();
-        this.getRoots().forEach(root -> addIfMatching(property, matcher, streamBuilder, root));
+        final var elementMatcher = UIElementMatcher.create();
+        elementMatcher.matching(UIPropertyMatcher.match(property)
+                                                 .isPresentAndMatches(matcher));
+
+        this.getRoots().forEach(root -> addIfMatching(elementMatcher, streamBuilder, root));
         return streamBuilder.build();
     }
 
     default Stream<UIElement> findElements(final Consumer<UIElementMatcher> builder) {
-        final Stream.Builder<UIElement> streamBuilder = Stream.builder();
-        this.getRoots().forEach(root -> addIfMatching(builder, streamBuilder, root));
+        final var matcher = UIElementMatcher.create();
+        builder.accept(matcher);
+
+        final var streamBuilder = Stream.<UIElement>builder();
+        getRoots().forEach(root -> addIfMatching(matcher, streamBuilder, root));
         return streamBuilder.build();
     }
 
@@ -52,30 +64,15 @@ public interface UserInterface {
             Consumer<TBuilder> factory
     );
 
-    private <T> void addIfMatching(
-            final UIProperty<T> property,
-            final Predicate<T> matcher,
-            final Stream.Builder<UIElement> streamBuilder,
-            final UIElement element
-    ) {
-        element.getProperty(property)
-               .filter(matcher)
-               .ifPresent(ignored -> streamBuilder.add(element));
-
-        element.getChildren().forEach(child -> addIfMatching(property, matcher, streamBuilder, child));
-    }
-
     private void addIfMatching(
-            final Consumer<UIElementMatcher> builder,
+            final UIElementMatcher matcher,
             final Stream.Builder<UIElement> streamBuilder,
             final UIElement element
     ) {
-        final var elementMatcher = UIElementMatcher.create();
-        builder.accept(elementMatcher);
-        if (elementMatcher.evaluate(element)) {
+        if (matcher.evaluate(element)) {
             streamBuilder.add(element);
         }
 
-        element.getChildren().forEach(child -> addIfMatching(builder, streamBuilder, child));
+        element.getChildren().forEach(child -> addIfMatching(matcher, streamBuilder, child));
     }
 }

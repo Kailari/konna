@@ -23,7 +23,7 @@ public class SpawnerSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
-        final var delta = world.getOrCreateResource(Time.class).getTimeStepInSeconds();
+        final var delta = world.getResource(Time.class).getTimeStepInSeconds();
         final EntityManager cluster = world.getEntityManager();
 
         entities.forEach(entity -> {

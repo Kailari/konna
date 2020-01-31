@@ -40,7 +40,7 @@ public class StalkerAIControllerSystem implements ECSSystem {
             final World world
     ) {
         final var entityManager = world.getEntityManager();
-        final var timeManager = world.getOrCreateResource(Time.class);
+        final var timeManager = world.getResource(Time.class);
         final var optPlayer = world.getOrCreateResource(Players.class).getLocalPlayer();
         final var playerPos = optPlayer.isPresent()
                 ? entityManager.getComponentOf(optPlayer.get(), Transform.class).orElseThrow().position
