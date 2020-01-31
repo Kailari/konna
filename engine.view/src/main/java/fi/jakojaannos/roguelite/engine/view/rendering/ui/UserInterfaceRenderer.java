@@ -86,14 +86,17 @@ public class UserInterfaceRenderer implements AutoCloseable {
         final var fontSize = getFontSizeFor(uiElement);
         final var x = uiElement.getProperty(UIProperty.MIN_X).orElseThrow();
         final var y = uiElement.getProperty(UIProperty.MIN_Y).orElseThrow();
-        this.textRenderer.draw(x, y, fontSize, this.font, text);
+        uiElement.getProperty(UIProperty.COLOR)
+                 .ifPresentOrElse(color -> this.textRenderer.draw(x, y, fontSize, this.font, text,
+                                                                  color.r, color.g, color.b),
+                                  () -> this.textRenderer.draw(x, y, fontSize, this.font, text));
     }
 
     private void renderPanelBackground(final UIElement uiElement, final String spriteId) {
         this.spriteBatch.begin();
         final var sprite = this.spriteRegistry.getByAssetName(spriteId);
-        int borderSize = uiElement.getProperty(UIProperty.BORDER_SIZE)
-                                  .orElse(DEFAULT_BORDER_SIZE);
+        final int borderSize = uiElement.getProperty(UIProperty.BORDER_SIZE)
+                                        .orElse(DEFAULT_BORDER_SIZE);
 
         final var x = uiElement.getProperty(UIProperty.MIN_X).orElseThrow();
         final var y = uiElement.getProperty(UIProperty.MIN_Y).orElseThrow();

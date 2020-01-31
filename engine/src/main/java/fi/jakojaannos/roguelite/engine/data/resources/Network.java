@@ -7,4 +7,8 @@ import fi.jakojaannos.roguelite.engine.network.NetworkManager;
 
 public interface Network extends ProvidedResource {
     Optional<NetworkManager<?>> getNetworkManager();
+
+    Optional<String> getConnectionError();
+
+    void setConnectionError(String error);
 }

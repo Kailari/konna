@@ -8,6 +8,7 @@ import fi.jakojaannos.roguelite.engine.view.data.components.internal.*;
 import fi.jakojaannos.roguelite.engine.view.data.components.internal.label.Text;
 import fi.jakojaannos.roguelite.engine.view.data.components.internal.panel.BorderSize;
 import fi.jakojaannos.roguelite.engine.view.data.components.internal.panel.PanelSprite;
+import fi.jakojaannos.roguelite.engine.view.data.components.ui.Color;
 import fi.jakojaannos.roguelite.engine.view.data.components.ui.ElementBoundaries;
 import fi.jakojaannos.roguelite.engine.view.ui.internal.ComponentBackedUIProperty;
 import fi.jakojaannos.roguelite.engine.view.ui.internal.ElementBoundaryUIProperty;
@@ -38,6 +39,7 @@ public interface UIProperty<T> {
 
     // Label
     public static final UIProperty<String> TEXT = new ComponentBackedUIProperty<>("text", Text.class, Text::getText, Text::setText);
+    public static final UIProperty<Color> COLOR = new ComponentBackedUIProperty<>("color", Color.class, c -> c, Color::set);
     public static final UIProperty<Integer> FONT_SIZE = new ComponentBackedUIProperty<>("fontSize", FontSize.class, FontSize::getValue, FontSize::setValue);
 
     // Progress Bar

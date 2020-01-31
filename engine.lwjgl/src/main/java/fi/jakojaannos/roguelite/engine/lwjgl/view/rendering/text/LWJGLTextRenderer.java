@@ -10,7 +10,6 @@ import java.nio.file.Path;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.SpriteBatch;
 import fi.jakojaannos.roguelite.engine.view.rendering.text.Font;
-import fi.jakojaannos.roguelite.engine.view.rendering.text.RenderableCharacter;
 import fi.jakojaannos.roguelite.engine.view.rendering.text.TextRenderer;
 
 @Slf4j
@@ -49,7 +48,10 @@ public class LWJGLTextRenderer implements TextRenderer {
             final double y,
             final int fontSize,
             final Font font,
-            final String string
+            final String string,
+            final double r,
+            final double g,
+            final double b
     ) {
         final var fontTexture = font.getTextureForSize(fontSize);
         final var fontPixelHeightScale = fontTexture.getPixelHeightScale();
@@ -84,12 +86,12 @@ public class LWJGLTextRenderer implements TextRenderer {
                 }
 
                 final var cpX = pX.get(0);
-                RenderableCharacter renderableCharacter = fontTexture.getNextCharacterAndAdvance(codePoint,
-                                                                                                 pCodePoint,
-                                                                                                 pX, pY,
-                                                                                                 i, to,
-                                                                                                 string,
-                                                                                                 factorX);
+                final var renderableCharacter = fontTexture.getNextCharacterAndAdvance(codePoint,
+                                                                                       pCodePoint,
+                                                                                       pX, pY,
+                                                                                       i, to,
+                                                                                       string,
+                                                                                       factorX);
                 final var x0 = x + scale(cpX, renderableCharacter.getX0(), factorX);
                 final var x1 = x + scale(cpX, renderableCharacter.getX1(), factorX);
                 final var y0 = y + fontSize + scale(lineY, renderableCharacter.getY0(), factorY);
@@ -97,7 +99,7 @@ public class LWJGLTextRenderer implements TextRenderer {
 
                 this.spriteBatch.draw(renderableCharacter.getTextureRegion(),
                                       x0, y0, x1, y1,
-                                      1.0, 1.0, 1.0);
+                                      r, g, b);
             }
         }
         this.spriteBatch.end();

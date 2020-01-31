@@ -9,5 +9,6 @@ out vec4 out_fragColor;
 
 void main(void) {
     vec4 texSample = texture(in_texture, v_uv);
-    out_fragColor = vec4(1, 1, 1, texSample.r);// * vec4(v_tint, 1.0);
+    out_fragColor = vec4(1, 1, 1, texSample.r);
+    out_fragColor.rgb = mix(out_fragColor.rgb, v_tint.rgb, 1.0 /* v_tint.a */);
 }

@@ -24,7 +24,24 @@ public abstract class GameState implements WorldProvider, AutoCloseable {
     ) {
         this.world = world;
         this.world.provideResource(Time.class, new Time(timeManager));
-        this.world.provideResource(Network.class, this::getNetworkManager);
+        this.world.provideResource(Network.class, new Network() {
+            @Nullable private String error;
+
+            @Override
+            public Optional<NetworkManager<?>> getNetworkManager() {
+                return GameState.this.getNetworkManager();
+            }
+
+            @Override
+            public Optional<String> getConnectionError() {
+                return Optional.ofNullable(this.error);
+            }
+
+            @Override
+            public void setConnectionError(final String error) {
+                this.error = error;
+            }
+        });
 
         this.dispatcher = createDispatcher();
     }

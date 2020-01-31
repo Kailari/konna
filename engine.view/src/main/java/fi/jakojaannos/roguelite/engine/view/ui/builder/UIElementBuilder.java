@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.view.data.components.internal.*;
+import fi.jakojaannos.roguelite.engine.view.data.components.ui.Color;
 import fi.jakojaannos.roguelite.engine.view.data.components.ui.ElementBoundaries;
 import fi.jakojaannos.roguelite.engine.view.ui.ProportionValue;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
@@ -66,6 +67,11 @@ public class UIElementBuilder<TBuilder extends UIElementBuilder<TBuilder>> {
 
     public TBuilder height(final ProportionValue value) {
         this.componentConsumer.accept(new BoundHeight(value));
+        return (TBuilder) this;
+    }
+
+    public TBuilder color(final double r, final double g, final double b) {
+        this.componentConsumer.accept(new Color(r, g, b));
         return (TBuilder) this;
     }
 

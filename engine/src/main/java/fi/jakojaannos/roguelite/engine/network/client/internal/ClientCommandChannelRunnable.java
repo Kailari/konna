@@ -3,7 +3,6 @@ package fi.jakojaannos.roguelite.engine.network.client.internal;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
@@ -52,12 +51,7 @@ public class ClientCommandChannelRunnable extends CommandChannelRunnable {
         this.channel.socket().setKeepAlive(true);
         this.channel.connect(new InetSocketAddress(host, port));
 
-        try {
-            this.channel.finishConnect();
-        } catch (ConnectException e) {
-            LOG.warn("Could not connect: {}", e.getMessage());
-            return;
-        }
+        this.channel.finishConnect();
 
         LOG.info("Connection successful.");
         this.channel.register(this.selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);

@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 import fi.jakojaannos.roguelite.engine.data.resources.GameStateManager;
+import fi.jakojaannos.roguelite.engine.data.resources.Network;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.*;
 import fi.jakojaannos.roguelite.engine.event.Events;
@@ -42,20 +43,21 @@ public class HandleMainMenuUIEventsSystem implements ECSSystem {
                 } else if (event.getElement().equalsIgnoreCase("quit_button")) {
                     gameStateManager.quitGame();
                 } else if (event.getElement().equalsIgnoreCase("connect_button")) {
-                    LOG.warn("Connect clicked!");
                     if (this.host == null) {
                         return;
                     }
 
-                    final var state = createGameplayState(world);
                     try {
+                        final var state = createGameplayState(world);
                         state.setNetworkManager(new ClientNetworkManager(this.host,
                                                                          this.port,
                                                                          world.getOrCreateResource(MainThread.class)));
-                    } catch (IOException e) {
+                        gameStateManager.queueStateChange(state);
+                    } catch (final IOException e) {
                         LOG.error("Error connecting to server:", e);
+                        world.getResource(Network.class)
+                             .setConnectionError(e.getMessage());
                     }
-                    gameStateManager.queueStateChange(state);
                 }
             }
         }
