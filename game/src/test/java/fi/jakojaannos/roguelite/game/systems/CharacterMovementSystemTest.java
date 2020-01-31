@@ -4,10 +4,12 @@ import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
-import fi.jakojaannos.roguelite.game.data.components.character.MovementStats;
+import fi.jakojaannos.roguelite.game.data.components.character.WalkingMovementAbility;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
+import fi.jakojaannos.roguelite.game.systems.characters.movement.CharacterMovementSystem;
+import fi.jakojaannos.roguelite.game.systems.physics.ApplyVelocitySystem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -29,7 +31,7 @@ class CharacterMovementSystemTest {
     private Velocity velocity;
     private Transform transform;
     private CharacterInput characterInput;
-    private MovementStats movementStats;
+    private WalkingMovementAbility movementStats;
 
     @BeforeEach
     void beforeEach() {
@@ -44,7 +46,7 @@ class CharacterMovementSystemTest {
 
         entity = entityManager.createEntity();
         this.characterInput = new CharacterInput();
-        this.movementStats = new MovementStats();
+        this.movementStats = new WalkingMovementAbility();
         this.velocity = new Velocity();
         this.transform = new Transform(0.0, 0.0);
         entityManager.addComponentTo(entity, this.transform);

@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.game.systems;
+package fi.jakojaannos.roguelite.game.systems.characters;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
@@ -10,8 +10,9 @@ import fi.jakojaannos.roguelite.engine.utilities.math.CoordinateHelper;
 import fi.jakojaannos.roguelite.game.data.archetypes.BasicProjectileArchetype;
 import fi.jakojaannos.roguelite.game.data.components.character.CharacterAbilities;
 import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
-import fi.jakojaannos.roguelite.game.data.components.character.MovementStats;
+import fi.jakojaannos.roguelite.game.data.components.character.WalkingMovementAbility;
 import fi.jakojaannos.roguelite.game.data.components.weapon.BasicWeaponStats;
+import fi.jakojaannos.roguelite.game.systems.SystemGroups;
 import lombok.val;
 import org.joml.Vector2d;
 
@@ -24,7 +25,7 @@ public class CharacterAttackSystem implements ECSSystem {
         requirements.addToGroup(SystemGroups.CHARACTER_TICK)
                     .withComponent(Transform.class)
                     .withComponent(CharacterInput.class)
-                    .withComponent(MovementStats.class)
+                    .withComponent(WalkingMovementAbility.class)
                     .withComponent(CharacterAbilities.class)
                     .withComponent(BasicWeaponStats.class);
     }
@@ -47,7 +48,7 @@ public class CharacterAttackSystem implements ECSSystem {
 
             if (input.attack && abilities.attackTimer >= 1.0 / weapon.attackRate) {
                 val characterTransform = entityManager.getComponentOf(entity, Transform.class).orElseThrow();
-                val characterStats = entityManager.getComponentOf(entity, MovementStats.class).orElseThrow();
+                val characterStats = entityManager.getComponentOf(entity, WalkingMovementAbility.class).orElseThrow();
 
                 val weaponOffset = CoordinateHelper.transformCoordinate(0,
                                                                         0,

@@ -8,6 +8,7 @@ import fi.jakojaannos.roguelite.game.data.components.character.enemy.FollowerEne
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
+import fi.jakojaannos.roguelite.game.systems.characters.ai.FollowerAIControllerSystem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -20,7 +21,7 @@ public class FollowerAIControllerSystemTest {
     private FollowerAIControllerSystem system;
     private World world;
     private Entity player, follower;
-    private Transform playerPos, followerPos;
+    private Transform playerTransform, followerPos;
     private CharacterInput followerInput;
 
     @BeforeEach
@@ -30,8 +31,8 @@ public class FollowerAIControllerSystemTest {
         this.world = World.createNew(entityManager);
 
         this.player = entityManager.createEntity();
-        this.playerPos = new Transform();
-        entityManager.addComponentTo(this.player, playerPos);
+        this.playerTransform = new Transform();
+        entityManager.addComponentTo(this.player, playerTransform);
         entityManager.addComponentTo(this.player, new PlayerTag());
         this.world.getOrCreateResource(Players.class).setLocalPlayer(player);
 
@@ -66,7 +67,7 @@ public class FollowerAIControllerSystemTest {
             double expectedDirectionX,
             double expectedDirectionY
     ) {
-        this.playerPos.position.set(playerX, playerY);
+        this.playerTransform.position.set(playerX, playerY);
         this.followerPos.position.set(followerX, followerY);
 
         this.system.tick(Stream.of(follower), this.world);

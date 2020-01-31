@@ -6,7 +6,7 @@ import fi.jakojaannos.roguelite.engine.ecs.*;
 import fi.jakojaannos.roguelite.game.data.components.InAir;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
 import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
-import fi.jakojaannos.roguelite.game.data.components.character.MovementStats;
+import fi.jakojaannos.roguelite.game.data.components.character.WalkingMovementAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.StalkerAI;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,7 @@ public class StalkerAIControllerSystem implements ECSSystem {
                     .withComponent(StalkerAI.class)
                     .withComponent(CharacterInput.class)
                     .withComponent(Transform.class)
-                    .withComponent(MovementStats.class)
+                    .withComponent(WalkingMovementAbility.class)
                     .withComponent(Physics.class)
                     .withoutComponent(InAir.class);
     }
@@ -49,7 +49,7 @@ public class StalkerAIControllerSystem implements ECSSystem {
         entities.forEach(entity -> {
             val stalkerAI = entityManager.getComponentOf(entity, StalkerAI.class).orElseThrow();
             val characterInput = entityManager.getComponentOf(entity, CharacterInput.class).orElseThrow();
-            val characterStats = entityManager.getComponentOf(entity, MovementStats.class).orElseThrow();
+            val characterStats = entityManager.getComponentOf(entity, WalkingMovementAbility.class).orElseThrow();
             val physics = entityManager.getComponentOf(entity, Physics.class).orElseThrow();
             val myPos = entityManager.getComponentOf(entity, Transform.class).orElseThrow();
 
@@ -72,7 +72,7 @@ public class StalkerAIControllerSystem implements ECSSystem {
 
     public void doWanderMovement(
             final CharacterInput characterInput,
-            final MovementStats stats,
+            final WalkingMovementAbility stats,
             final StalkerAI ai
     ) {
         stats.maxSpeed = ai.moveSpeedWalk;
@@ -88,7 +88,7 @@ public class StalkerAIControllerSystem implements ECSSystem {
             final CharacterInput characterInput,
             final EntityManager entityManager,
             final Entity entity,
-            final MovementStats stats,
+            final WalkingMovementAbility stats,
             final Physics physics,
             final StalkerAI ai,
             final Time time,
@@ -124,7 +124,7 @@ public class StalkerAIControllerSystem implements ECSSystem {
 
     public void sneakTowardsPlayer(
             final CharacterInput characterInput,
-            final MovementStats stats,
+            final WalkingMovementAbility stats,
             final StalkerAI ai,
             final Vector2d myPos,
             final Vector2d playerPos

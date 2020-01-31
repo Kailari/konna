@@ -7,8 +7,8 @@ import fi.jakojaannos.roguelite.game.data.DamageSource;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import fi.jakojaannos.roguelite.game.data.components.character.CharacterAbilities;
 import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
-import fi.jakojaannos.roguelite.game.data.components.character.MovementStats;
 import fi.jakojaannos.roguelite.game.data.components.character.Health;
+import fi.jakojaannos.roguelite.game.data.components.character.WalkingMovementAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.EnemyTag;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.FollowerEnemyAI;
 import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
@@ -31,6 +31,7 @@ public class FollowerArchetype {
         val follower = entityManager.createEntity();
         entityManager.addComponentTo(follower, transform);
         entityManager.addComponentTo(follower, new Velocity());
+        entityManager.addComponentTo(follower, createPhysics());
         entityManager.addComponentTo(follower, new CharacterInput());
         entityManager.addComponentTo(follower, new Health(3));
         entityManager.addComponentTo(follower, new Collider(CollisionLayer.ENEMY, 1.0, 1.0, 0.5, 0.5));
@@ -44,12 +45,17 @@ public class FollowerArchetype {
         return follower;
     }
 
+    private static Physics createPhysics() {
+        final var physics = new Physics();
+        physics.friction = 35.0;
+        return physics;
+    }
 
-    private static MovementStats createMovementStats() {
-        return new MovementStats(
+
+    private static WalkingMovementAbility createMovementStats() {
+        return new WalkingMovementAbility(
                 4.0,
-                50.0,
-                35.0
+                50.0
         );
     }
 

@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.game.systems;
+package fi.jakojaannos.roguelite.game.systems.physics;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
@@ -9,6 +9,7 @@ import fi.jakojaannos.roguelite.game.GJK2D;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import fi.jakojaannos.roguelite.game.data.resources.collision.Colliders;
 import fi.jakojaannos.roguelite.game.data.resources.collision.Collisions;
+import fi.jakojaannos.roguelite.game.systems.SystemGroups;
 import fi.jakojaannos.roguelite.game.systems.collision.Collision;
 import fi.jakojaannos.roguelite.game.systems.collision.CollisionEvent;
 import lombok.RequiredArgsConstructor;
