@@ -15,7 +15,6 @@ import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
 import lombok.val;
 
 public class SlimeArchetype {
-
     public static Entity createLargeSlime(
             final EntityManager entityManager,
             final Transform spawnerTransform,
@@ -30,22 +29,6 @@ public class SlimeArchetype {
             final double yPos
     ) {
         return createSlimeOfSize(entityManager, xPos, yPos, 16.0);
-    }
-
-    public static Entity createMediumSlime(
-            final EntityManager entityManager,
-            final double xPos,
-            final double yPos
-    ) {
-        return createSlimeOfSize(entityManager, xPos, yPos, 4.0);
-    }
-
-    public static Entity createSmallSlime(
-            final EntityManager entityManager,
-            final double xPos,
-            final double yPos
-    ) {
-        return createSlimeOfSize(entityManager, xPos, yPos, 1.0);
     }
 
     public static Entity createSlimeOfSize(
