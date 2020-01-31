@@ -1,14 +1,15 @@
 package fi.jakojaannos.roguelite.game.test.stepdefs.gameplay;
 
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.game.data.components.character.MovementStats;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.game.data.components.Physics;
+import fi.jakojaannos.roguelite.game.data.components.character.WalkingMovementAbility;
 import fi.jakojaannos.roguelite.game.test.global.GlobalGameState;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import org.joml.Vector2d;
 
-import static fi.jakojaannos.roguelite.game.test.global.GlobalState.*;
+import static fi.jakojaannos.roguelite.game.test.global.GlobalState.getComponentOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
@@ -23,12 +24,12 @@ public class PlayerMovementSteps {
             double friction
     ) {
         Entity player = GlobalGameState.getLocalPlayer().orElseThrow();
-        MovementStats stats = getComponentOf(player, MovementStats.class).orElseThrow();
+        final var stats = getComponentOf(player, WalkingMovementAbility.class).orElseThrow();
         stats.maxSpeed = speed;
         stats.acceleration = acceleration;
-        stats.friction = friction;
+        final var physics = getComponentOf(player, Physics.class).orElseThrow();
+        physics.friction = friction;
     }
-
 
     @Then("the player should have moved approximately {double} units total on the {string} axis")
     public void the_player_should_have_moved_approximately_x_units_total_on_axis(

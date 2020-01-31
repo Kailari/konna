@@ -12,6 +12,7 @@ import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.game.systems.collision.ColliderDataCollectorSystem;
 import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
+import fi.jakojaannos.roguelite.game.systems.physics.ApplyVelocitySystem;
 import org.joml.Vector2d;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

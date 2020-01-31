@@ -8,9 +8,9 @@ import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.archetypes.PlayerArchetype;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
 import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
-import fi.jakojaannos.roguelite.game.data.components.character.MovementStats;
-import fi.jakojaannos.roguelite.game.data.components.character.enemy.SlimeAI;
+import fi.jakojaannos.roguelite.game.data.components.character.JumpingMovementAbility;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
+import fi.jakojaannos.roguelite.game.systems.characters.movement.JumpingCharacterMovementSystem;
 import org.joml.Vector2d;
 import org.junit.jupiter.api.Test;
 
@@ -20,32 +20,40 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class SlimeAIControllerSystemTest {
-
+public class JumpingCharacterMovementSystemTest {
     private static final double EPSILON = 0.001;
 
     @Test
     void slimeHopsTowardsPlayer() {
-        SlimeAIControllerSystem system = new SlimeAIControllerSystem();
-        EntityManager entityManager = EntityManager.createNew(256, 32);
-        World world = World.createNew(entityManager);
+        final var system = new JumpingCharacterMovementSystem();
+        final var entityManager = EntityManager.createNew(256, 32);
+        final var world = World.createNew(entityManager);
 
         Time time = mock(Time.class);
         when(time.getTimeStepInSeconds()).thenReturn(0.02);
         world.createOrReplaceResource(Time.class, time);
 
-        Transform playerPos = new Transform(10, 10);
-        world.getOrCreateResource(Players.class).setLocalPlayer(PlayerArchetype.create(entityManager, playerPos));
+        final var playerPos = new Transform(10, 10);
+        world.getOrCreateResource(Players.class)
+             .setLocalPlayer(PlayerArchetype.create(entityManager, playerPos));
 
         Entity slime = entityManager.createEntity();
-        SlimeAI slimeAI = new SlimeAI();
-        slimeAI.jumpForce = 5.0;
-        slimeAI.chaseRadiusSquared = 100 * 100;
-        entityManager.addComponentTo(slime, slimeAI);
-        entityManager.addComponentTo(slime, new CharacterInput());
-        Transform slimePos = new Transform(3, 6);
+        JumpingMovementAbility split = new JumpingMovementAbility();
+        split.jumpForce = 5.0;
+        entityManager.addComponentTo(slime, split);
+
+        final var slimePos = new Transform(3, 6);
         entityManager.addComponentTo(slime, slimePos);
-        entityManager.addComponentTo(slime, new MovementStats());
+
+        final var input = new CharacterInput();
+        entityManager.addComponentTo(slime, input);
+
+        final var expectedDir = new Vector2d(playerPos.position)
+                .sub(slimePos.position)
+                .normalize();
+
+        input.move = expectedDir;
+
         Physics physics = new Physics();
         physics.mass = 2.5;
         entityManager.addComponentTo(slime, physics);
@@ -53,11 +61,10 @@ public class SlimeAIControllerSystemTest {
         entityManager.applyModifications();
         system.tick(Stream.of(slime), world);
 
-        Vector2d expectedDir = new Vector2d(playerPos.position)
-                .sub(slimePos.position)
-                .normalize(slimeAI.jumpForce / physics.mass);
+        final var expectedAcceleration =
+                expectedDir.normalize(split.jumpForce / physics.mass, new Vector2d());
 
-        assertEquals(expectedDir.x, physics.acceleration.x, EPSILON);
-        assertEquals(expectedDir.y, physics.acceleration.y, EPSILON);
+        assertEquals(expectedAcceleration.x, physics.acceleration.x, EPSILON);
+        assertEquals(expectedAcceleration.y, physics.acceleration.y, EPSILON);
     }
 }

@@ -9,8 +9,8 @@ import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
 import fi.jakojaannos.roguelite.game.data.components.InAir;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
 import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
-import fi.jakojaannos.roguelite.game.data.components.character.MovementStats;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
+import fi.jakojaannos.roguelite.game.data.components.character.WalkingMovementAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.StalkerAI;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,7 +30,8 @@ public class StalkerAIControllerSystemTest {
     private World world;
     private Transform playerPos, stalkerPos;
     private Entity stalker;
-    private MovementStats movementStats;
+    private WalkingMovementAbility movementStats;
+    private Physics physics;
     private StalkerAI stalkerAI;
 
     @BeforeEach
@@ -55,9 +56,10 @@ public class StalkerAIControllerSystemTest {
         entityManager.addComponentTo(stalker, new CharacterInput());
         this.stalkerPos = new Transform();
         entityManager.addComponentTo(stalker, stalkerPos);
-        movementStats = new MovementStats(1.0, 250.0, 200.0);
+        movementStats = new WalkingMovementAbility(1.0, 250.0);
         entityManager.addComponentTo(stalker, movementStats);
-        entityManager.addComponentTo(stalker, new Physics());
+        entityManager.addComponentTo(stalker, physics = new Physics());
+        physics.friction = 200.0;
 
         entityManager.applyModifications();
     }

@@ -4,10 +4,13 @@ import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.game.data.DamageSource;
+import fi.jakojaannos.roguelite.game.data.components.Collider;
+import fi.jakojaannos.roguelite.game.data.components.Physics;
+import fi.jakojaannos.roguelite.game.data.components.SpriteInfo;
+import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.game.data.components.character.*;
 import fi.jakojaannos.roguelite.game.data.components.weapon.BasicWeaponStats;
 import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
-import fi.jakojaannos.roguelite.game.data.components.*;
 import lombok.val;
 
 import javax.annotation.Nonnull;
@@ -21,6 +24,7 @@ public class PlayerArchetype {
         val player = entityManager.createEntity();
         entityManager.addComponentTo(player, transform);
         entityManager.addComponentTo(player, new Velocity());
+        entityManager.addComponentTo(player, createPhysics());
         entityManager.addComponentTo(player, new CharacterInput());
         entityManager.addComponentTo(player, new CharacterAbilities(new DamageSource.Entity(player)));
         entityManager.addComponentTo(player, createCollider());
@@ -43,12 +47,17 @@ public class PlayerArchetype {
         return collider;
     }
 
-    private static MovementStats createMovementStats() {
-        return new MovementStats(
+    private static WalkingMovementAbility createMovementStats() {
+        return new WalkingMovementAbility(
                 10.0f,
-                69.0f,
-                42.0f
+                69.0f
         );
+    }
+
+    private static Physics createPhysics() {
+        final var physics = new Physics();
+        physics.friction = 42.0f;
+        return physics;
     }
 
     private static BasicWeaponStats createWeaponStats() {

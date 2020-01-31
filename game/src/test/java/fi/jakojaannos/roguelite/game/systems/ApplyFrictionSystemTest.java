@@ -4,8 +4,9 @@ import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.game.data.components.Physics;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
-import fi.jakojaannos.roguelite.game.data.components.character.MovementStats;
+import fi.jakojaannos.roguelite.game.systems.physics.ApplyFrictionSystem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -26,7 +27,7 @@ public class ApplyFrictionSystemTest {
     private ApplyFrictionSystem system;
     private Entity entity;
     private Velocity velocity;
-    private MovementStats stats;
+    private Physics physics;
 
     @BeforeEach
     void beforeEach() {
@@ -38,11 +39,10 @@ public class ApplyFrictionSystemTest {
         when(time.getTimeStepInSeconds()).thenReturn(0.02);
         world.createOrReplaceResource(Time.class, time);
 
-        velocity = new Velocity();
-        stats = new MovementStats(15.0, 1.0, 5.0);
         entity = entityManager.createEntity();
-        entityManager.addComponentTo(entity, velocity);
-        entityManager.addComponentTo(entity, stats);
+        entityManager.addComponentTo(entity, physics = new Physics());
+        entityManager.addComponentTo(entity, velocity = new Velocity());
+        physics.friction = 5.0;
 
         entityManager.applyModifications();
     }
@@ -63,7 +63,7 @@ public class ApplyFrictionSystemTest {
             final double expectedX,
             final double expectedY
     ) {
-        stats.friction = friction;
+        physics.friction = friction;
         velocity.velocity.set(startX, startY);
 
         entityManager.applyModifications();
@@ -76,8 +76,8 @@ public class ApplyFrictionSystemTest {
     }
 
     @Test
-    void zeroFrictionDoesntSlowEntities() {
-        stats.friction = 0;
+    void zeroFrictionDoesNotSlowEntities() {
+        physics.friction = 0;
         velocity.velocity.set(12.34, 34.56);
 
         entityManager.applyModifications();
@@ -92,7 +92,7 @@ public class ApplyFrictionSystemTest {
     @Test
     void frictionStopsEntityAfterAWhile() {
         velocity.velocity.set(12.34, 34.56);
-        stats.friction = 10.0f;
+        physics.friction = 10.0f;
 
         entityManager.applyModifications();
         for (int i = 0; i < 200; i++) {

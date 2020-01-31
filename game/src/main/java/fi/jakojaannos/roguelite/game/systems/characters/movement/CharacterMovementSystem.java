@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.game.systems;
+package fi.jakojaannos.roguelite.game.systems.characters.movement;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
@@ -9,7 +9,10 @@ import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.InAir;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
-import fi.jakojaannos.roguelite.game.data.components.character.MovementStats;
+import fi.jakojaannos.roguelite.game.data.components.character.WalkingMovementAbility;
+import fi.jakojaannos.roguelite.game.data.components.character.enemy.EnemyTag;
+import fi.jakojaannos.roguelite.game.systems.SystemGroups;
+import fi.jakojaannos.roguelite.game.systems.physics.ApplyFrictionSystem;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
@@ -24,7 +27,7 @@ public class CharacterMovementSystem implements ECSSystem {
                     .withComponent(Transform.class)
                     .withComponent(Velocity.class)
                     .withComponent(CharacterInput.class)
-                    .withComponent(MovementStats.class)
+                    .withComponent(WalkingMovementAbility.class)
                     .withoutComponent(InAir.class);
     }
 
@@ -40,7 +43,7 @@ public class CharacterMovementSystem implements ECSSystem {
 
         entities.forEach(entity -> {
             val input = entityManager.getComponentOf(entity, CharacterInput.class).orElseThrow();
-            val stats = entityManager.getComponentOf(entity, MovementStats.class).orElseThrow();
+            val stats = entityManager.getComponentOf(entity, WalkingMovementAbility.class).orElseThrow();
             val velocity = entityManager.getComponentOf(entity, Velocity.class).orElseThrow();
 
             if (input.move.lengthSquared() > INPUT_EPSILON * INPUT_EPSILON) {

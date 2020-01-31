@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.game.systems;
+package fi.jakojaannos.roguelite.game.systems.physics;
 
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
@@ -6,6 +6,7 @@ import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
+import fi.jakojaannos.roguelite.game.systems.SystemGroups;
 import lombok.val;
 
 import java.util.stream.Stream;

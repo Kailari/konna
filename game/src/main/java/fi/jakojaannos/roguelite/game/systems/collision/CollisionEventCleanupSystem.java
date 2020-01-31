@@ -7,7 +7,7 @@ import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.RecentCollisionTag;
 import fi.jakojaannos.roguelite.game.data.resources.collision.Collisions;
-import fi.jakojaannos.roguelite.game.systems.ApplyVelocitySystem;
+import fi.jakojaannos.roguelite.game.systems.physics.ApplyVelocitySystem;
 import fi.jakojaannos.roguelite.game.systems.SystemGroups;
 
 import java.util.stream.Stream;

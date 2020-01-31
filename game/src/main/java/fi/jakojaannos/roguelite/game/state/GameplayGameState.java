@@ -8,16 +8,23 @@ import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
-import fi.jakojaannos.roguelite.game.data.archetypes.TurretArchetype;
 import fi.jakojaannos.roguelite.game.data.archetypes.PlayerArchetype;
+import fi.jakojaannos.roguelite.game.data.archetypes.TurretArchetype;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
 import fi.jakojaannos.roguelite.game.systems.*;
+import fi.jakojaannos.roguelite.game.systems.characters.CharacterAttackSystem;
+import fi.jakojaannos.roguelite.game.systems.characters.ai.FollowerAIControllerSystem;
+import fi.jakojaannos.roguelite.game.systems.characters.movement.CharacterMovementSystem;
+import fi.jakojaannos.roguelite.game.systems.characters.movement.JumpingCharacterMovementSystem;
 import fi.jakojaannos.roguelite.game.systems.cleanup.CleanUpDeadEnemyKillsSystem;
 import fi.jakojaannos.roguelite.game.systems.cleanup.CleanUpDeadPlayersSystem;
 import fi.jakojaannos.roguelite.game.systems.cleanup.ReaperSystem;
 import fi.jakojaannos.roguelite.game.systems.collision.*;
+import fi.jakojaannos.roguelite.game.systems.physics.ApplyForceSystem;
+import fi.jakojaannos.roguelite.game.systems.physics.ApplyFrictionSystem;
+import fi.jakojaannos.roguelite.game.systems.physics.ApplyVelocitySystem;
 import fi.jakojaannos.roguelite.game.world.WorldGenerator;
 import lombok.val;
 
@@ -91,8 +98,8 @@ public class GameplayGameState extends GameState {
                 .withSystem(new SnapToCursorSystem())
                 .withSystem(new FollowerAIControllerSystem())
                 .withSystem(new StalkerAIControllerSystem())
-                .withSystem(new SlimeAIControllerSystem())
-                .withSystem(new SlimeDeathHandlerSystem())
+                .withSystem(new JumpingCharacterMovementSystem())
+                .withSystem(new SplitOnDeathSystem())
                 .withSystem(new CameraControlSystem())
                 .withSystem(new SpawnerSystem())
                 .withSystem(new ProjectileToCharacterCollisionHandlerSystem())

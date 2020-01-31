@@ -6,8 +6,8 @@ import org.joml.Vector2d;
 
 @NoArgsConstructor
 public class Physics implements Component {
-
     public double mass = 1.0;
+    public double friction = 2.0;
     public Vector2d acceleration = new Vector2d(0.0, 0.0);
 
     public Physics(double mass) {
@@ -15,7 +15,7 @@ public class Physics implements Component {
     }
 
     public void applyForce(Vector2d force) {
-        if (mass == 0.0) return;
-        acceleration.add(force.mul(1.0 / mass));
+        if (this.mass == 0.0) return;
+        this.acceleration.add(force.mul(1.0 / this.mass));
     }
 }

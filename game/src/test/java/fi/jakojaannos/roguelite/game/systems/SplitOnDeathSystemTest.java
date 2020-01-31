@@ -6,7 +6,7 @@ import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.archetypes.SlimeArchetype;
 import fi.jakojaannos.roguelite.game.data.components.character.DeadTag;
-import fi.jakojaannos.roguelite.game.data.components.character.enemy.SlimeAI;
+import fi.jakojaannos.roguelite.game.data.components.character.enemy.SplitOnDeath;
 import org.junit.jupiter.api.Test;
 
 import java.util.stream.Stream;
@@ -15,11 +15,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class SlimeDeathHandlerSystemTest {
-
+public class SplitOnDeathSystemTest {
     @Test
     void largeSlimeSpawnsMultipleSlimesOnDeath() {
-        SlimeDeathHandlerSystem system = new SlimeDeathHandlerSystem();
+        SplitOnDeathSystem system = new SplitOnDeathSystem();
         EntityManager entityManager = EntityManager.createNew(256, 32);
         World world = World.createNew(entityManager);
 
@@ -32,10 +31,10 @@ public class SlimeDeathHandlerSystemTest {
 
         entityManager.applyModifications();
 
-        long amountBefore = entityManager.getEntitiesWith(SlimeAI.class).count();
+        long amountBefore = entityManager.getEntitiesWith(SplitOnDeath.class).count();
         system.tick(Stream.of(slime), world);
         entityManager.applyModifications();
-        long amountAfter = entityManager.getEntitiesWith(SlimeAI.class).count();
+        long amountAfter = entityManager.getEntitiesWith(SplitOnDeath.class).count();
 
         assertTrue(amountAfter > amountBefore);
     }
