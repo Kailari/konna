@@ -19,12 +19,10 @@ import fi.jakojaannos.roguelite.engine.network.message.serialization.TypedNetwor
 @Slf4j
 public abstract class CommandChannelRunnable implements Runnable, AutoCloseable {
     protected final NetworkMessageHandlerMap messageHandlers;
+    protected final Selector selector;
     private final MessageEncoder messageEncoder;
     private final MessageDecoder messageDecoder;
-
     private final Object writeLock = new Object();
-
-    protected Selector selector;
 
     protected CommandChannelRunnable(
             final NetworkMessageHandlerMap messageHandlers,
@@ -127,14 +125,13 @@ public abstract class CommandChannelRunnable implements Runnable, AutoCloseable 
     }
 
     protected void shutdown() {
-        if (this.selector != null && this.selector.isOpen()) {
+        if (this.selector.isOpen()) {
             try {
                 this.selector.close();
             } catch (final IOException e) {
                 LOG.error("Error closing selector:", e);
             }
         }
-        this.selector = null;
     }
 
     protected abstract void handleReceivedMessages();

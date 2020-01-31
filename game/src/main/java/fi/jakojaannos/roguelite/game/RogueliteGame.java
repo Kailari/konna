@@ -13,11 +13,10 @@ import fi.jakojaannos.roguelite.engine.input.InputButton;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.engine.utilities.UpdateableTimeManager;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
-import fi.jakojaannos.roguelite.game.data.resources.MainThread;
 
 @Slf4j
 @RequiredArgsConstructor
-public class RogueliteGame extends GameBase implements MainThread {
+public class RogueliteGame extends GameBase {
     public RogueliteGame(final UpdateableTimeManager timeManager) {
         super(timeManager);
     }
@@ -27,15 +26,12 @@ public class RogueliteGame extends GameBase implements MainThread {
             final GameState state,
             final Events events
     ) {
-        super.tick(state, events);
-
-        // FIXME: This is ugly but works
-        state.getWorld().createOrReplaceResource(MainThread.class, this);
-
         final var inputs = state.getWorld().getOrCreateResource(Inputs.class);
         final var mouse = state.getWorld().getOrCreateResource(Mouse.class);
         final var inputEvents = events.getInput();
 
+        // FIXME: Input handling should happen in some engine-level system and provide actual inputs
+        //  via system events (once they are implemented) and/or through a resource.
         while (inputEvents.hasEvents()) {
             final var event = inputEvents.pollEvent();
 
@@ -71,7 +67,11 @@ public class RogueliteGame extends GameBase implements MainThread {
             });
         }
 
-        state.tick(events);
+        // NOTE: It is important that state is ticked first! state.tick(...) sets some engine -level
+        // default provided resources which might be needed while flushing the task queue, which in
+        // turn happens in the super.tick(...)
+        state.tick(events, this);
+        super.tick(state, events);
 
         if (inputs.inputForceCloseA && inputs.inputForceCloseB) {
             this.setFinished(true);

@@ -13,7 +13,7 @@ public class GameStateManager implements Resource {
     private boolean gameShouldClose;
 
     public boolean shouldShutDown() {
-        return gameShouldClose;
+        return this.gameShouldClose;
     }
 
     public void queueStateChange(final GameState newState) {

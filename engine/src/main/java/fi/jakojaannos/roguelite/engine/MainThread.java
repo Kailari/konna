@@ -1,5 +1,7 @@
 package fi.jakojaannos.roguelite.engine;
 
-public interface MainThread {
+import fi.jakojaannos.roguelite.engine.ecs.ProvidedResource;
+
+public interface MainThread extends ProvidedResource {
     void queueTask(MainThreadTask task);
 }

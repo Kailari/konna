@@ -54,7 +54,7 @@ public class ClientCommandChannelRunnable extends CommandChannelRunnable {
         this.channel.finishConnect();
 
         LOG.info("Connection successful.");
-        this.channel.register(this.selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+        this.channel.register(this.selector, SelectionKey.OP_READ);
     }
 
     @Override

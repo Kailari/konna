@@ -37,7 +37,7 @@ public abstract class GameBase implements Game, MainThread {
 
     @Override
     public boolean isDisposed() {
-        return disposed;
+        return this.disposed;
     }
 
     @Override

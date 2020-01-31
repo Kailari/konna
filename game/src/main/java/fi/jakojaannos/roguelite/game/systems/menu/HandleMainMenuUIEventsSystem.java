@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
+import fi.jakojaannos.roguelite.engine.MainThread;
 import fi.jakojaannos.roguelite.engine.data.resources.GameStateManager;
 import fi.jakojaannos.roguelite.engine.data.resources.Network;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
@@ -13,7 +14,6 @@ import fi.jakojaannos.roguelite.engine.ecs.*;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.network.client.ClientNetworkManager;
 import fi.jakojaannos.roguelite.engine.ui.UIEvent;
-import fi.jakojaannos.roguelite.game.data.resources.MainThread;
 import fi.jakojaannos.roguelite.game.state.GameplayGameState;
 
 @Slf4j
@@ -51,7 +51,7 @@ public class HandleMainMenuUIEventsSystem implements ECSSystem {
                         final var state = createGameplayState(world);
                         state.setNetworkManager(new ClientNetworkManager(this.host,
                                                                          this.port,
-                                                                         world.getOrCreateResource(MainThread.class)));
+                                                                         world.getResource(MainThread.class)));
                         gameStateManager.queueStateChange(state);
                     } catch (final IOException e) {
                         LOG.error("Error connecting to server:", e);

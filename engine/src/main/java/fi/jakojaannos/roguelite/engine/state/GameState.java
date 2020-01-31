@@ -5,6 +5,7 @@ import lombok.Getter;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
+import fi.jakojaannos.roguelite.engine.MainThread;
 import fi.jakojaannos.roguelite.engine.data.resources.Network;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
@@ -58,7 +59,8 @@ public abstract class GameState implements WorldProvider, AutoCloseable {
 
     protected abstract SystemDispatcher createDispatcher();
 
-    public void tick(final Events events) {
+    public void tick(final Events events, final MainThread mainThread) {
+        this.world.provideResource(MainThread.class, mainThread);
         this.world.provideResource(Events.class, events);
 
         this.dispatcher.dispatch(this.world);
