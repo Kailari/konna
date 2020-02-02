@@ -9,8 +9,8 @@ import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.RecentCollisionTag;
 import fi.jakojaannos.roguelite.game.data.resources.collision.Collisions;
-import fi.jakojaannos.roguelite.game.systems.physics.ApplyVelocitySystem;
 import fi.jakojaannos.roguelite.game.systems.SystemGroups;
+import fi.jakojaannos.roguelite.game.systems.physics.ApplyVelocitySystem;
 
 /**
  * Performs cleanup on all {@link Collider Colliders} to clear all unprocessed {@link CollisionEvent CollisionEvents} at

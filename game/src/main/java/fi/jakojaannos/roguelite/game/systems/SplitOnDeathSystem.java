@@ -26,7 +26,7 @@ public class SplitOnDeathSystem implements ECSSystem {
     private final Vector2d tempDir = new Vector2d();
 
     @Override
-    public void declareRequirements(RequirementsBuilder requirements) {
+    public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.tickAfter(HealthUpdateSystem.class)
                     .tickBefore(ReaperSystem.class)
                     .withComponent(DeadTag.class)
