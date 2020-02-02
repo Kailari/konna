@@ -1,5 +1,10 @@
 package fi.jakojaannos.roguelite.game.systems;
 
+import org.joml.Vector2d;
+import org.junit.jupiter.api.Test;
+
+import java.util.stream.Stream;
+
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
@@ -11,10 +16,6 @@ import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
 import fi.jakojaannos.roguelite.game.data.components.character.JumpingMovementAbility;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 import fi.jakojaannos.roguelite.game.systems.characters.movement.JumpingCharacterMovementSystem;
-import org.joml.Vector2d;
-import org.junit.jupiter.api.Test;
-
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -31,7 +32,7 @@ public class JumpingCharacterMovementSystemTest {
 
         Time time = mock(Time.class);
         when(time.getTimeStepInSeconds()).thenReturn(0.02);
-        world.createOrReplaceResource(Time.class, time);
+        world.provideResource(Time.class, time);
 
         final var playerPos = new Transform(10, 10);
         world.getOrCreateResource(Players.class)

@@ -1,5 +1,9 @@
 package fi.jakojaannos.roguelite.game.systems.characters.movement;
 
+import org.joml.Vector2d;
+
+import java.util.stream.Stream;
+
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.*;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
@@ -8,22 +12,19 @@ import fi.jakojaannos.roguelite.game.data.components.Physics;
 import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
 import fi.jakojaannos.roguelite.game.data.components.character.JumpingMovementAbility;
 import fi.jakojaannos.roguelite.game.systems.SystemGroups;
-import org.joml.Vector2d;
-
-import java.util.stream.Stream;
 
 public class JumpingCharacterMovementSystem implements ECSSystem {
+    private final Vector2d tmpForce = new Vector2d();
+
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.CHARACTER_TICK)
-                    .requireResource(Time.class)
+                    .requireProvidedResource(Time.class)
                     .withComponent(JumpingMovementAbility.class)
                     .withComponent(CharacterInput.class)
                     .withComponent(Physics.class)
                     .withoutComponent(InAir.class);
     }
-
-    private final Vector2d tmpForce = new Vector2d();
 
     @Override
     public void tick(
@@ -31,7 +32,7 @@ public class JumpingCharacterMovementSystem implements ECSSystem {
             final World world
     ) {
         final var entityManager = world.getEntityManager();
-        final var timeManager = world.getOrCreateResource(Time.class);
+        final var timeManager = world.getResource(Time.class);
 
         entities.forEach(entity -> {
             final var movementAbility = entityManager.getComponentOf(entity, JumpingMovementAbility.class)

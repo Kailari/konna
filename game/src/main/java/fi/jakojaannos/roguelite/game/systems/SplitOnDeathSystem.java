@@ -1,5 +1,11 @@
 package fi.jakojaannos.roguelite.game.systems;
 
+import lombok.extern.slf4j.Slf4j;
+import org.joml.Vector2d;
+
+import java.util.Random;
+import java.util.stream.Stream;
+
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
@@ -13,14 +19,12 @@ import fi.jakojaannos.roguelite.game.data.components.character.DeadTag;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.SlimeSharedAI;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.SplitOnDeath;
 import fi.jakojaannos.roguelite.game.systems.cleanup.ReaperSystem;
-import lombok.extern.slf4j.Slf4j;
-import org.joml.Vector2d;
-
-import java.util.Random;
-import java.util.stream.Stream;
 
 @Slf4j
 public class SplitOnDeathSystem implements ECSSystem {
+    private final Random random = new Random(System.nanoTime());
+    private final Vector2d tempDir = new Vector2d();
+
     @Override
     public void declareRequirements(RequirementsBuilder requirements) {
         requirements.tickAfter(HealthUpdateSystem.class)
@@ -31,16 +35,13 @@ public class SplitOnDeathSystem implements ECSSystem {
 
     }
 
-    private final Random random = new Random(System.nanoTime());
-    private final Vector2d tempDir = new Vector2d();
-
     @Override
     public void tick(
             final Stream<Entity> entities,
             final World world
     ) {
         final var entityManager = world.getEntityManager();
-        final var timeManager = world.getOrCreateResource(Time.class);
+        final var timeManager = world.getResource(Time.class);
 
         entities.forEach(entity -> {
             final var split = entityManager.getComponentOf(entity, SplitOnDeath.class).orElseThrow();
@@ -90,6 +91,7 @@ public class SplitOnDeathSystem implements ECSSystem {
     }
 
     private int getFlightDuration(final SplitOnDeath split) {
-        return random.nextInt(split.maxSpawnFlightDurationInTicks - split.minSpawnFlightDurationInTicks) + split.minSpawnFlightDurationInTicks;
+        final var bound = split.maxSpawnFlightDurationInTicks - split.minSpawnFlightDurationInTicks;
+        return random.nextInt(bound) + split.minSpawnFlightDurationInTicks;
     }
 }
