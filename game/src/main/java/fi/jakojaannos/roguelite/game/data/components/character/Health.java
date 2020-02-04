@@ -21,7 +21,6 @@ public class Health implements Component {
     public double currentHealth = 100.0;
 
     public long lastDamageInstanceTimeStamp = -10000L;
-    public boolean healthBarAlwaysVisible;
 
     public Health(final double maxHp, final double currentHp) {
         this.maxHealth = maxHp;

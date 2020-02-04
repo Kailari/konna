@@ -8,7 +8,7 @@ import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.game.data.components.character.CharacterAbilities;
+import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.EnemyTag;
 
 public class EnemyAttackCoolDownSystem implements ECSSystem {
@@ -16,7 +16,7 @@ public class EnemyAttackCoolDownSystem implements ECSSystem {
     public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.CHARACTER_TICK)
                     .withComponent(Transform.class)
-                    .withComponent(CharacterAbilities.class)
+                    .withComponent(AttackAbility.class)
                     .withComponent(EnemyTag.class);
     }
 
@@ -28,7 +28,7 @@ public class EnemyAttackCoolDownSystem implements ECSSystem {
         final var delta = world.getResource(Time.class).getTimeStepInSeconds();
 
         final var entityManager = world.getEntityManager();
-        entities.forEach(entity -> entityManager.getComponentOf(entity, CharacterAbilities.class)
-                                                .orElseThrow().attackTimer += delta);
+        entities.forEach(entity -> entityManager.getComponentOf(entity, AttackAbility.class)
+                                                .orElseThrow().lastAttackTimestamp += delta);
     }
 }

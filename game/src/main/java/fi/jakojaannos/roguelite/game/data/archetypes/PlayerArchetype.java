@@ -1,18 +1,16 @@
 package fi.jakojaannos.roguelite.game.data.archetypes;
 
-import javax.annotation.Nonnull;
-
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
+import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.DamageSource;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
 import fi.jakojaannos.roguelite.game.data.components.SpriteInfo;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.game.data.components.character.*;
-import fi.jakojaannos.roguelite.game.data.components.weapon.BasicWeaponStats;
-import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
+import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponStats;
 
 public class PlayerArchetype {
     public static Entity create(
@@ -22,54 +20,19 @@ public class PlayerArchetype {
         final var player = entityManager.createEntity();
         entityManager.addComponentTo(player, transform);
         entityManager.addComponentTo(player, new Velocity());
-        entityManager.addComponentTo(player, createPhysics());
-        entityManager.addComponentTo(player, new CharacterInput());
-        entityManager.addComponentTo(player, new CharacterAbilities(new DamageSource.Entity(player)));
-        entityManager.addComponentTo(player, createCollider());
+        entityManager.addComponentTo(player, Physics.builder().friction(42.0 * 2).build());
+        entityManager.addComponentTo(player, new MovementInput());
+        entityManager.addComponentTo(player, new WeaponInput());
+        entityManager.addComponentTo(player, new AttackAbility(new DamageSource.Entity(player),
+                                                               CollisionLayer.PLAYER_PROJECTILE,
+                                                               0.25,
+                                                               -0.5));
+        entityManager.addComponentTo(player, new Collider(CollisionLayer.PLAYER, 1.0, 1.0, 0.5, 0.5));
         entityManager.addComponentTo(player, new PlayerTag());
-        entityManager.addComponentTo(player, createMovementStats());
-        entityManager.addComponentTo(player, createWeaponStats());
-        entityManager.addComponentTo(player, createSpriteInfo());
-        Health health = new Health(10);
-        health.healthBarAlwaysVisible = true;
-        entityManager.addComponentTo(player, health);
+        entityManager.addComponentTo(player, new WalkingMovementAbility(10.0f, 69.0f * 1.5));
+        entityManager.addComponentTo(player, new WeaponStats(7.5, 40.0, 2.5));
+        entityManager.addComponentTo(player, new SpriteInfo("sprites/player"));
+        entityManager.addComponentTo(player, new Health(10));
         return player;
-    }
-
-    @Nonnull
-    private static Collider createCollider() {
-        final var collider = new Collider(CollisionLayer.PLAYER);
-        collider.width = 1.0;
-        collider.height = 1.0;
-        collider.origin.set(0.5);
-        return collider;
-    }
-
-    private static WalkingMovementAbility createMovementStats() {
-        return new WalkingMovementAbility(
-                10.0f,
-                69.0f
-        );
-    }
-
-    private static Physics createPhysics() {
-        final var physics = new Physics();
-        physics.friction = 42.0f;
-        return physics;
-    }
-
-    private static BasicWeaponStats createWeaponStats() {
-        return new BasicWeaponStats(
-                7.5,
-                40.0,
-                2.5
-        );
-    }
-
-    private static SpriteInfo createSpriteInfo() {
-        final var sprite = new SpriteInfo();
-        sprite.spriteName = "sprites/player";
-
-        return sprite;
     }
 }

@@ -10,7 +10,7 @@ import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.game.data.components.character.CharacterAbilities;
+import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
 
 public class RotatePlayerTowardsAttackTargetSystem implements ECSSystem {
@@ -23,7 +23,7 @@ public class RotatePlayerTowardsAttackTargetSystem implements ECSSystem {
         requirements.addToGroup(SystemGroups.INPUT)
                     .withComponent(PlayerTag.class)
                     .withComponent(Transform.class)
-                    .withComponent(CharacterAbilities.class)
+                    .withComponent(AttackAbility.class)
                     .tickAfter(PlayerInputSystem.class);
     }
 
@@ -36,10 +36,10 @@ public class RotatePlayerTowardsAttackTargetSystem implements ECSSystem {
         entities.forEach(entity -> {
             final var transform = entityManager.getComponentOf(entity, Transform.class)
                                                .orElseThrow();
-            final var abilities = entityManager.getComponentOf(entity, CharacterAbilities.class)
+            final var abilities = entityManager.getComponentOf(entity, AttackAbility.class)
                                                .orElseThrow();
 
-            abilities.attackTarget.sub(transform.position, this.tmpDirection);
+            abilities.targetPosition.sub(transform.position, this.tmpDirection);
             transform.rotation = -this.tmpDirection.angle(ROTATION_ZERO_DIRECTION);
         });
     }

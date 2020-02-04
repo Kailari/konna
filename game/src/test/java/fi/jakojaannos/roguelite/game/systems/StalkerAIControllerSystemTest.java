@@ -15,7 +15,7 @@ import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
 import fi.jakojaannos.roguelite.game.data.components.InAir;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
-import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
+import fi.jakojaannos.roguelite.game.data.components.character.MovementInput;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
 import fi.jakojaannos.roguelite.game.data.components.character.WalkingMovementAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.StalkerAI;
@@ -54,7 +54,7 @@ public class StalkerAIControllerSystemTest {
         this.stalkerAI.moveSpeedWalk = 4.5;
         this.stalkerAI.moveSpeedSneak = 1.5;
         entityManager.addComponentTo(stalker, stalkerAI);
-        entityManager.addComponentTo(stalker, new CharacterInput());
+        entityManager.addComponentTo(stalker, new MovementInput());
         this.stalkerPos = new Transform();
         entityManager.addComponentTo(stalker, stalkerPos);
         movementStats = new WalkingMovementAbility(1.0, 250.0);

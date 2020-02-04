@@ -12,7 +12,7 @@ import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.archetypes.PlayerArchetype;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
-import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
+import fi.jakojaannos.roguelite.game.data.components.character.MovementInput;
 import fi.jakojaannos.roguelite.game.data.components.character.JumpingMovementAbility;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 import fi.jakojaannos.roguelite.game.systems.characters.movement.JumpingCharacterMovementSystem;
@@ -46,7 +46,7 @@ public class JumpingCharacterMovementSystemTest {
         final var slimePos = new Transform(3, 6);
         entityManager.addComponentTo(slime, slimePos);
 
-        final var input = new CharacterInput();
+        final var input = new MovementInput();
         entityManager.addComponentTo(slime, input);
 
         final var expectedDir = new Vector2d(playerPos.position)

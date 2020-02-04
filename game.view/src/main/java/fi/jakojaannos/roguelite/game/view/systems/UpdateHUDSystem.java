@@ -10,7 +10,7 @@ import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
-import fi.jakojaannos.roguelite.game.data.components.character.CharacterAbilities;
+import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
 
@@ -48,7 +48,7 @@ public class UpdateHUDSystem implements ECSSystem {
              .getLocalPlayer()
              .ifPresent(localPlayer -> {
                  final var localPlayerAbilities = world.getEntityManager()
-                                                       .getComponentOf(localPlayer, CharacterAbilities.class)
+                                                       .getComponentOf(localPlayer, AttackAbility.class)
                                                        .orElseThrow();
                  final var localPlayerKills = sessionStats.getKillsOf(localPlayerAbilities.damageSource);
                  this.killsCounter.setProperty(UIProperty.TEXT, String.format("Kills: %02d",

@@ -11,8 +11,8 @@ import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
-import fi.jakojaannos.roguelite.game.data.components.character.enemy.FollowerEnemyAI;
+import fi.jakojaannos.roguelite.game.data.components.character.MovementInput;
+import fi.jakojaannos.roguelite.game.data.components.character.enemy.FollowerAI;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 import fi.jakojaannos.roguelite.game.systems.SystemGroups;
 
@@ -24,8 +24,8 @@ public class FollowerAIControllerSystem implements ECSSystem {
     public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.INPUT)
                     .requireResource(Players.class)
-                    .withComponent(FollowerEnemyAI.class)
-                    .withComponent(CharacterInput.class)
+                    .withComponent(FollowerAI.class)
+                    .withComponent(MovementInput.class)
                     .withComponent(Transform.class);
     }
 
@@ -41,9 +41,9 @@ public class FollowerAIControllerSystem implements ECSSystem {
                                          .orElse(new Vector2d(0.0));
 
         entities.forEach(entity -> {
-            final var ai = entityManager.getComponentOf(entity, FollowerEnemyAI.class)
+            final var ai = entityManager.getComponentOf(entity, FollowerAI.class)
                                         .orElseThrow();
-            final var input = entityManager.getComponentOf(entity, CharacterInput.class)
+            final var input = entityManager.getComponentOf(entity, MovementInput.class)
                                            .orElseThrow();
             final var entityPosition = entityManager.getComponentOf(entity, Transform.class)
                                                     .orElseThrow().position;
@@ -53,8 +53,8 @@ public class FollowerAIControllerSystem implements ECSSystem {
                           .sub(entityPosition);
 
             } else {
-                input.move.set(random.nextDouble() * 2.0 - 1.0,
-                               random.nextDouble() * 2.0 - 1.0);
+                input.move.set(this.random.nextDouble() * 2.0 - 1.0,
+                               this.random.nextDouble() * 2.0 - 1.0);
             }
 
             if (input.move.lengthSquared() != 0.0) {
@@ -66,7 +66,7 @@ public class FollowerAIControllerSystem implements ECSSystem {
     }
 
     private boolean wantsMoveTowardsTarget(
-            final FollowerEnemyAI ai,
+            final FollowerAI ai,
             final Vector2d targetPos,
             final Vector2d ownPosition
     ) {

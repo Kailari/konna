@@ -1,14 +1,9 @@
 package fi.jakojaannos.roguelite.game.data.components;
 
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-
 import java.util.List;
 
 import fi.jakojaannos.roguelite.engine.ecs.Component;
 
-@NoArgsConstructor
-@AllArgsConstructor
 public class SpriteInfo implements Component {
     public String spriteName;
     public String animationName = "default";
@@ -18,6 +13,10 @@ public class SpriteInfo implements Component {
     public int frameIndex = 0;
 
     public double frameTimer;
+
+    public SpriteInfo(final String spriteName) {
+        this.spriteName = spriteName;
+    }
 
     public int getCurrentFrame() {
         return this.frames.get(this.frameIndex);

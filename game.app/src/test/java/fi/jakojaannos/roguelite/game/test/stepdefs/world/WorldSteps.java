@@ -16,7 +16,7 @@ import fi.jakojaannos.roguelite.game.data.archetypes.FollowerArchetype;
 import fi.jakojaannos.roguelite.game.data.components.NoDrawTag;
 import fi.jakojaannos.roguelite.game.data.components.ObstacleTag;
 import fi.jakojaannos.roguelite.game.data.components.SpawnerComponent;
-import fi.jakojaannos.roguelite.game.data.components.character.CharacterAbilities;
+import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.Health;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
 import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class WorldSteps {
     private static void setPlayerKills(final int amount) {
-        final var localPlayerDamageSource = getComponentOf(getLocalPlayer().orElseThrow(), CharacterAbilities.class)
+        final var localPlayerDamageSource = getComponentOf(getLocalPlayer().orElseThrow(), AttackAbility.class)
                 .orElseThrow()
                 .damageSource;
         state.getWorld()

@@ -10,9 +10,10 @@ import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.game.data.components.character.CharacterAbilities;
-import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
+import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
+import fi.jakojaannos.roguelite.game.data.components.character.MovementInput;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
+import fi.jakojaannos.roguelite.game.data.components.character.WeaponInput;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
 
 public class PlayerInputSystem implements ECSSystem {
@@ -21,8 +22,9 @@ public class PlayerInputSystem implements ECSSystem {
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.INPUT)
-                    .withComponent(CharacterInput.class)
-                    .withComponent(CharacterAbilities.class)
+                    .withComponent(MovementInput.class)
+                    .withComponent(WeaponInput.class)
+                    .withComponent(AttackAbility.class)
                     .withComponent(PlayerTag.class)
                     .requireResource(Inputs.class)
                     .requireResource(Mouse.class)
@@ -47,12 +49,14 @@ public class PlayerInputSystem implements ECSSystem {
         final boolean inputAttack = inputs.inputAttack;
 
         entities.forEach(entity -> {
-            final var input = world.getEntityManager().getComponentOf(entity, CharacterInput.class).get();
-            final var abilities = world.getEntityManager().getComponentOf(entity, CharacterAbilities.class).get();
-            input.move.set(inputHorizontal,
-                           inputVertical);
-            input.attack = inputAttack;
-            abilities.attackTarget.set(this.tmpCursorPos);
+            final var moveInput = world.getEntityManager().getComponentOf(entity, MovementInput.class).orElseThrow();
+            final var attackInput = world.getEntityManager().getComponentOf(entity, WeaponInput.class).orElseThrow();
+            final var attackAbility = world.getEntityManager().getComponentOf(entity, AttackAbility.class)
+                                           .orElseThrow();
+            moveInput.move.set(inputHorizontal,
+                               inputVertical);
+            attackInput.attack = inputAttack;
+            attackAbility.targetPosition.set(this.tmpCursorPos);
         });
     }
 }

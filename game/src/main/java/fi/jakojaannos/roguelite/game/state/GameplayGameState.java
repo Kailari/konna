@@ -4,12 +4,14 @@ import java.util.Arrays;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
+import fi.jakojaannos.roguelite.engine.ecs.DispatcherBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.ecs.SystemGroup;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.archetypes.PlayerArchetype;
 import fi.jakojaannos.roguelite.game.data.archetypes.TurretArchetype;
 import fi.jakojaannos.roguelite.game.data.components.*;
@@ -17,11 +19,13 @@ import fi.jakojaannos.roguelite.game.data.resources.Players;
 import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
 import fi.jakojaannos.roguelite.game.systems.*;
 import fi.jakojaannos.roguelite.game.systems.characters.CharacterAttackSystem;
+import fi.jakojaannos.roguelite.game.systems.characters.ai.AttackAIControllerSystem;
 import fi.jakojaannos.roguelite.game.systems.characters.ai.FollowerAIControllerSystem;
 import fi.jakojaannos.roguelite.game.systems.characters.movement.CharacterMovementSystem;
 import fi.jakojaannos.roguelite.game.systems.characters.movement.JumpingCharacterMovementSystem;
 import fi.jakojaannos.roguelite.game.systems.cleanup.CleanUpDeadEnemyKillsSystem;
 import fi.jakojaannos.roguelite.game.systems.cleanup.CleanUpDeadPlayersSystem;
+import fi.jakojaannos.roguelite.game.systems.cleanup.CleanUpEntitiesWithLifetime;
 import fi.jakojaannos.roguelite.game.systems.cleanup.ReaperSystem;
 import fi.jakojaannos.roguelite.game.systems.collision.*;
 import fi.jakojaannos.roguelite.game.systems.physics.ApplyForceSystem;
@@ -78,46 +82,63 @@ public class GameplayGameState extends GameState {
 
     @Override
     protected SystemDispatcher createDispatcher() {
-        return SystemDispatcher
-                .builder()
-                .withGroups(SystemGroups.values())
-                .addGroupDependencies(SystemGroups.CLEANUP, Arrays.stream(SystemGroups.values())
-                                                                  .filter(group -> group != SystemGroups.CLEANUP)
-                                                                  .toArray(SystemGroup[]::new))
-                .addGroupDependencies(SystemGroups.EARLY_TICK, SystemGroups.INPUT)
-                .addGroupDependencies(SystemGroups.CHARACTER_TICK, SystemGroups.INPUT, SystemGroups.EARLY_TICK)
-                .addGroupDependencies(SystemGroups.PHYSICS_TICK, SystemGroups.CHARACTER_TICK, SystemGroups.EARLY_TICK)
-                .addGroupDependencies(SystemGroups.COLLISION_HANDLER, SystemGroups.PHYSICS_TICK)
-                .addGroupDependencies(SystemGroups.LATE_TICK, SystemGroups.COLLISION_HANDLER, SystemGroups.PHYSICS_TICK,
-                                      SystemGroups.CHARACTER_TICK)
-                .withSystem(new ColliderDataCollectorSystem())
-                .withSystem(new PlayerInputSystem())
-                .withSystem(new CharacterMovementSystem())
-                .withSystem(new CharacterAttackSystem())
-                .withSystem(new ApplyVelocitySystem())
-                .withSystem(new SnapToCursorSystem())
-                .withSystem(new FollowerAIControllerSystem())
-                .withSystem(new StalkerAIControllerSystem())
-                .withSystem(new JumpingCharacterMovementSystem())
-                .withSystem(new SplitOnDeathSystem())
-                .withSystem(new CameraControlSystem())
-                .withSystem(new SpawnerSystem())
-                .withSystem(new ProjectileToCharacterCollisionHandlerSystem())
-                .withSystem(new DestroyProjectilesOnCollisionSystem())
-                .withSystem(new CollisionEventCleanupSystem())
-                .withSystem(new HealthUpdateSystem())
-                .withSystem(new EnemyAttackCoolDownSystem())
-                .withSystem(new EnemyToPlayerCollisionHandlerSystem())
-                .withSystem(new ReaperSystem())
-                .withSystem(new RotatePlayerTowardsAttackTargetSystem())
-                .withSystem(new RestartGameSystem())
-                .withSystem(new UpdateSessionTimerSystem())
-                .withSystem(new CleanUpDeadPlayersSystem())
-                .withSystem(new CleanUpDeadEnemyKillsSystem())
-                .withSystem(new TurretControllerSystem())
-                .withSystem(new ApplyFrictionSystem())
-                .withSystem(new ApplyForceSystem())
-                .withSystem(new HandleEntitiesInAirSystem())
-                .build();
+        final var builder = SystemDispatcher.builder();
+        configureGroups(builder);
+        builder.withSystem(new PlayerInputSystem())
+               .withSystem(new CharacterMovementSystem())
+               .withSystem(new CharacterAttackSystem())
+               .withSystem(new JumpingCharacterMovementSystem())
+               .withSystem(new SnapToCursorSystem())
+               .withSystem(new RotatePlayerTowardsAttackTargetSystem())
+               .withSystem(new CameraControlSystem())
+               .withSystem(new EnemyAttackCoolDownSystem())
+               .withSystem(new SplitOnDeathSystem())
+               .withSystem(new SpawnerSystem())
+               .withSystem(new HealthUpdateSystem())
+               .withSystem(new RestartGameSystem())
+               .withSystem(new UpdateSessionTimerSystem());
+        registerAISystems(builder);
+        registerCleanupSystems(builder);
+        registerPhysicsSystems(builder);
+
+        return builder.build();
+    }
+
+    private void configureGroups(final DispatcherBuilder builder) {
+        builder.withGroups(SystemGroups.values())
+               .addGroupDependencies(SystemGroups.CLEANUP, Arrays.stream(SystemGroups.values())
+                                                                 .filter(group -> group != SystemGroups.CLEANUP)
+                                                                 .toArray(SystemGroup[]::new))
+               .addGroupDependencies(SystemGroups.EARLY_TICK, SystemGroups.INPUT)
+               .addGroupDependencies(SystemGroups.CHARACTER_TICK, SystemGroups.INPUT, SystemGroups.EARLY_TICK)
+               .addGroupDependencies(SystemGroups.PHYSICS_TICK, SystemGroups.CHARACTER_TICK, SystemGroups.EARLY_TICK)
+               .addGroupDependencies(SystemGroups.COLLISION_HANDLER, SystemGroups.PHYSICS_TICK)
+               .addGroupDependencies(SystemGroups.LATE_TICK, SystemGroups.COLLISION_HANDLER, SystemGroups.PHYSICS_TICK,
+                                     SystemGroups.CHARACTER_TICK);
+    }
+
+    private void registerAISystems(final DispatcherBuilder builder) {
+        builder.withSystem(new FollowerAIControllerSystem())
+               .withSystem(new StalkerAIControllerSystem())
+               .withSystem(new AttackAIControllerSystem())
+               .withSystem(new TurretControllerSystem());
+    }
+
+    private void registerCleanupSystems(final DispatcherBuilder builder) {
+        builder.withSystem(new CleanUpDeadPlayersSystem())
+               .withSystem(new CleanUpDeadEnemyKillsSystem())
+               .withSystem(new CleanUpEntitiesWithLifetime())
+               .withSystem(new ReaperSystem());
+    }
+
+    private void registerPhysicsSystems(final DispatcherBuilder builder) {
+        builder.withSystem(new ApplyFrictionSystem())
+               .withSystem(new ApplyForceSystem())
+               .withSystem(new HandleEntitiesInAirSystem())
+               .withSystem(new CollisionEventCleanupSystem())
+               .withSystem(new ProjectileToCharacterCollisionHandlerSystem())
+               .withSystem(new DestroyProjectilesOnCollisionSystem())
+               .withSystem(new ApplyVelocitySystem())
+               .withSystem(new ColliderDataCollectorSystem());
     }
 }

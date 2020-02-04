@@ -20,6 +20,7 @@ import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.game.data.components.character.Health;
+import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
 
 @RequiredArgsConstructor
 public class HealthBarUpdateSystem implements ECSSystem {
@@ -58,8 +59,9 @@ public class HealthBarUpdateSystem implements ECSSystem {
             final var transform = entityManager.getComponentOf(entity, Transform.class).orElseThrow();
             final var health = entityManager.getComponentOf(entity, Health.class).orElseThrow();
 
-            long ticksSinceDamaged = timeManager.getCurrentGameTime() - health.lastDamageInstanceTimeStamp;
-            if (!health.healthBarAlwaysVisible && ticksSinceDamaged >= healthbarDurationInTicks) {
+            final var isImportant = entityManager.hasComponent(entity, PlayerTag.class);
+            final var ticksSinceDamaged = timeManager.getCurrentGameTime() - health.lastDamageInstanceTimeStamp;
+            if (!isImportant && ticksSinceDamaged >= healthbarDurationInTicks) {
                 continue;
             }
 

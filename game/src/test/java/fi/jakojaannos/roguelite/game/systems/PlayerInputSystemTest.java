@@ -14,9 +14,10 @@ import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.DamageSource;
-import fi.jakojaannos.roguelite.game.data.components.character.CharacterAbilities;
-import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
+import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
+import fi.jakojaannos.roguelite.game.data.components.character.MovementInput;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
+import fi.jakojaannos.roguelite.game.data.components.character.WeaponInput;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,9 +25,10 @@ import static org.junit.jupiter.api.Assertions.*;
 class PlayerInputSystemTest {
     private PlayerInputSystem system;
     private World world;
-    private CharacterInput input;
+    private MovementInput movementInput;
+    private WeaponInput weaponInput;
     private Entity player;
-    private CharacterAbilities abilities;
+    private AttackAbility abilities;
 
     @BeforeEach
     void beforeEach() {
@@ -35,9 +37,9 @@ class PlayerInputSystemTest {
         this.world = World.createNew(entityManager);
 
         player = entityManager.createEntity();
-        this.input = new CharacterInput();
-        this.abilities = new CharacterAbilities(new DamageSource.Entity(player));
-        entityManager.addComponentTo(player, this.input);
+        this.abilities = new AttackAbility(new DamageSource.Entity(player));
+        entityManager.addComponentTo(player, movementInput = new MovementInput());
+        entityManager.addComponentTo(player, weaponInput = new WeaponInput());
         entityManager.addComponentTo(player, this.abilities);
         entityManager.addComponentTo(player, new PlayerTag());
 
@@ -71,8 +73,8 @@ class PlayerInputSystemTest {
         system.tick(Stream.of(player), this.world);
         world.getEntityManager().applyModifications();
 
-        assertEquals(expectedHorizontal, this.input.move.x);
-        assertEquals(expectedVertical, this.input.move.y);
+        assertEquals(expectedHorizontal, this.movementInput.move.x);
+        assertEquals(expectedVertical, this.movementInput.move.y);
     }
 
     @ParameterizedTest
@@ -99,8 +101,8 @@ class PlayerInputSystemTest {
         system.tick(Stream.of(player), this.world);
         this.world.getEntityManager().applyModifications();
 
-        assertEquals(expectedX, abilities.attackTarget.x);
-        assertEquals(expectedY, abilities.attackTarget.y);
+        assertEquals(expectedX, abilities.targetPosition.x);
+        assertEquals(expectedY, abilities.targetPosition.y);
     }
 
     @Test
@@ -110,16 +112,16 @@ class PlayerInputSystemTest {
 
         system.tick(Stream.of(player), this.world);
         this.world.getEntityManager().applyModifications();
-        assertFalse(input.attack);
+        assertFalse(weaponInput.attack);
 
         inputs.inputAttack = true;
         system.tick(Stream.of(player), this.world);
         this.world.getEntityManager().applyModifications();
-        assertTrue(input.attack);
+        assertTrue(weaponInput.attack);
 
         inputs.inputAttack = false;
         system.tick(Stream.of(player), this.world);
         this.world.getEntityManager().applyModifications();
-        assertFalse(input.attack);
+        assertFalse(weaponInput.attack);
     }
 }

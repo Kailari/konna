@@ -3,15 +3,14 @@ package fi.jakojaannos.roguelite.game.data.archetypes;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
+import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.DamageSource;
 import fi.jakojaannos.roguelite.game.data.components.*;
-import fi.jakojaannos.roguelite.game.data.components.character.CharacterAbilities;
-import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
-import fi.jakojaannos.roguelite.game.data.components.character.Health;
-import fi.jakojaannos.roguelite.game.data.components.character.WalkingMovementAbility;
+import fi.jakojaannos.roguelite.game.data.components.character.*;
+import fi.jakojaannos.roguelite.game.data.components.character.enemy.AttackAI;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.EnemyTag;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.StalkerAI;
-import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
+import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponStats;
 
 public class StalkerArchetype {
     public static Entity spawnStalker(
@@ -22,57 +21,25 @@ public class StalkerArchetype {
         return create(entityManager, new Transform(spawnerTransform));
     }
 
-    public static Entity create(
-            final EntityManager entityManager,
-            final double x,
-            final double y
-    ) {
-        return create(
-                entityManager,
-                new Transform(x, y)
-        );
-    }
+    public static Entity create(final EntityManager entityManager, final Transform transform) {
+        final var entity = entityManager.createEntity();
+        entityManager.addComponentTo(entity, transform);
+        entityManager.addComponentTo(entity, new Velocity());
+        entityManager.addComponentTo(entity, Physics.builder().friction(200.0).build());
+        entityManager.addComponentTo(entity, new Health(2));
+        entityManager.addComponentTo(entity, new Collider(CollisionLayer.ENEMY, 1.0, 1.0, 0.5, 0.5));
+        entityManager.addComponentTo(entity, new SpriteInfo("sprites/sheep_red"));
+        entityManager.addComponentTo(entity, new EnemyTag());
 
-    public static Entity create(
-            final EntityManager entityManager,
-            final Transform transform
-    ) {
-        final var stalker = entityManager.createEntity();
-        entityManager.addComponentTo(stalker, transform);
-        entityManager.addComponentTo(stalker, new Velocity());
-        entityManager.addComponentTo(stalker, createPhysics());
-        entityManager.addComponentTo(stalker, new CharacterInput());
-        entityManager.addComponentTo(stalker, new Health(2));
-        entityManager.addComponentTo(stalker, new Collider(CollisionLayer.ENEMY, 1.0, 1.0, 0.5, 0.5));
-        entityManager.addComponentTo(stalker, createMovementStats());
-        entityManager.addComponentTo(stalker, createStalkerAi());
-        entityManager.addComponentTo(stalker, createSpriteInfo());
-        entityManager.addComponentTo(stalker, new EnemyTag());
-        entityManager.addComponentTo(stalker, new CharacterAbilities(new DamageSource.Entity(stalker)));
-        entityManager.addComponentTo(stalker, new EnemyMeleeWeaponStats());
+        entityManager.addComponentTo(entity, new StalkerAI());
+        entityManager.addComponentTo(entity, new MovementInput());
+        entityManager.addComponentTo(entity, new WalkingMovementAbility(1.0, 250.0));
 
-        return stalker;
-    }
+        entityManager.addComponentTo(entity, new AttackAI(1.25));
+        entityManager.addComponentTo(entity, new AttackAbility(new DamageSource.Entity(entity), CollisionLayer.ENEMY));
+        entityManager.addComponentTo(entity, new WeaponInput());
+        entityManager.addComponentTo(entity, new WeaponStats(1.0, 10.0, 2.0, 0.0, 10));
 
-    private static WalkingMovementAbility createMovementStats() {
-        return new WalkingMovementAbility(1.0,
-                                          250.0);
-    }
-
-    private static Physics createPhysics() {
-        final var physics = new Physics();
-        physics.friction = 200.0;
-        return physics;
-    }
-
-    private static StalkerAI createStalkerAi() {
-        return new StalkerAI();
-    }
-
-    private static SpriteInfo createSpriteInfo() {
-        final var sprite = new SpriteInfo();
-        sprite.spriteName = "sprites/sheep_red";
-
-        return sprite;
+        return entity;
     }
 }

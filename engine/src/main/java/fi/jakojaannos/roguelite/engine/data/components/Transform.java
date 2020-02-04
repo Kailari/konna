@@ -8,10 +8,15 @@ import fi.jakojaannos.roguelite.engine.ecs.Component;
 @NoArgsConstructor
 public final class Transform implements Component {
     public Vector2d position = new Vector2d();
-    public double rotation = 0.0;
+    public double rotation;
+
+    public Transform(final Vector2d position) {
+        this(position.x, position.y);
+    }
 
     public Transform(final double x, final double y) {
         this.position.set(x, y);
+        this.rotation = 0.0;
     }
 
     public Transform(final Transform source) {
