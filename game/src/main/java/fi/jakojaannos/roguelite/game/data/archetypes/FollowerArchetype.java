@@ -3,15 +3,14 @@ package fi.jakojaannos.roguelite.game.data.archetypes;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
+import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.DamageSource;
 import fi.jakojaannos.roguelite.game.data.components.*;
-import fi.jakojaannos.roguelite.game.data.components.character.CharacterAbilities;
-import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
-import fi.jakojaannos.roguelite.game.data.components.character.Health;
-import fi.jakojaannos.roguelite.game.data.components.character.WalkingMovementAbility;
+import fi.jakojaannos.roguelite.game.data.components.character.*;
+import fi.jakojaannos.roguelite.game.data.components.character.enemy.AttackAI;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.EnemyTag;
-import fi.jakojaannos.roguelite.game.data.components.character.enemy.FollowerEnemyAI;
-import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
+import fi.jakojaannos.roguelite.game.data.components.character.enemy.FollowerAI;
+import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponStats;
 
 public class FollowerArchetype {
     public static Entity spawnFollower(
@@ -26,42 +25,24 @@ public class FollowerArchetype {
             final EntityManager entityManager,
             final Transform transform
     ) {
-        final var follower = entityManager.createEntity();
-        entityManager.addComponentTo(follower, transform);
-        entityManager.addComponentTo(follower, new Velocity());
-        entityManager.addComponentTo(follower, createPhysics());
-        entityManager.addComponentTo(follower, new CharacterInput());
-        entityManager.addComponentTo(follower, new Health(3));
-        entityManager.addComponentTo(follower, new Collider(CollisionLayer.ENEMY, 1.0, 1.0, 0.5, 0.5));
-        entityManager.addComponentTo(follower, createMovementStats());
-        entityManager.addComponentTo(follower, createEnemyAI());
-        entityManager.addComponentTo(follower, createSpriteInfo());
-        entityManager.addComponentTo(follower, new EnemyTag());
-        entityManager.addComponentTo(follower, new CharacterAbilities(new DamageSource.Entity(follower)));
-        entityManager.addComponentTo(follower, new EnemyMeleeWeaponStats());
+        final var entity = entityManager.createEntity();
+        entityManager.addComponentTo(entity, transform);
+        entityManager.addComponentTo(entity, new Velocity());
+        entityManager.addComponentTo(entity, Physics.builder().friction(35.0).build());
+        entityManager.addComponentTo(entity, new Health(3));
+        entityManager.addComponentTo(entity, new Collider(CollisionLayer.ENEMY, 1.0, 1.0, 0.5, 0.5));
+        entityManager.addComponentTo(entity, new SpriteInfo("sprites/enemy"));
+        entityManager.addComponentTo(entity, new EnemyTag());
 
-        return follower;
-    }
+        entityManager.addComponentTo(entity, new FollowerAI(25.0f, 1.0f));
+        entityManager.addComponentTo(entity, new MovementInput());
+        entityManager.addComponentTo(entity, new WalkingMovementAbility(4.0, 50.0));
 
-    private static Physics createPhysics() {
-        final var physics = new Physics();
-        physics.friction = 35.0;
-        return physics;
-    }
+        entityManager.addComponentTo(entity, new AttackAI(1.25));
+        entityManager.addComponentTo(entity, new WeaponInput());
+        entityManager.addComponentTo(entity, new AttackAbility(new DamageSource.Entity(entity), CollisionLayer.ENEMY));
+        entityManager.addComponentTo(entity, new WeaponStats(1.0, 10.0, 2.0, 0.0, 10));
 
-    private static WalkingMovementAbility createMovementStats() {
-        return new WalkingMovementAbility(4.0,
-                                          50.0);
-    }
-
-    private static FollowerEnemyAI createEnemyAI() {
-        return new FollowerEnemyAI(25.0f, 1.0f);
-    }
-
-    private static SpriteInfo createSpriteInfo() {
-        final var sprite = new SpriteInfo();
-        sprite.spriteName = "sprites/enemy";
-
-        return sprite;
+        return entity;
     }
 }

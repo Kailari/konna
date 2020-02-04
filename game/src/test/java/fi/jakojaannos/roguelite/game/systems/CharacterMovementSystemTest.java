@@ -12,7 +12,7 @@ import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
-import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
+import fi.jakojaannos.roguelite.game.data.components.character.MovementInput;
 import fi.jakojaannos.roguelite.game.data.components.character.WalkingMovementAbility;
 import fi.jakojaannos.roguelite.game.systems.characters.movement.CharacterMovementSystem;
 import fi.jakojaannos.roguelite.game.systems.physics.ApplyVelocitySystem;
@@ -31,7 +31,7 @@ class CharacterMovementSystemTest {
     private Entity entity;
     private Velocity velocity;
     private Transform transform;
-    private CharacterInput characterInput;
+    private MovementInput movementInput;
     private WalkingMovementAbility movementStats;
 
     @BeforeEach
@@ -46,13 +46,13 @@ class CharacterMovementSystemTest {
         world.provideResource(Time.class, time);
 
         entity = entityManager.createEntity();
-        this.characterInput = new CharacterInput();
+        this.movementInput = new MovementInput();
         this.movementStats = new WalkingMovementAbility();
         this.velocity = new Velocity();
         this.transform = new Transform(0.0, 0.0);
         entityManager.addComponentTo(entity, this.transform);
         entityManager.addComponentTo(entity, this.velocity);
-        entityManager.addComponentTo(entity, this.characterInput);
+        entityManager.addComponentTo(entity, this.movementInput);
         entityManager.addComponentTo(entity, this.movementStats);
 
         this.world.getEntityManager().applyModifications();
@@ -63,7 +63,7 @@ class CharacterMovementSystemTest {
     void characterAcceleratesCorrectly(float acceleration, float expectedSpeedAfter10s) {
         this.movementStats.maxSpeed = Float.MAX_VALUE;
         this.movementStats.acceleration = acceleration;
-        this.characterInput.move.x = 1.0f;
+        this.movementInput.move.x = 1.0f;
         for (int i = 0; i < 500; ++i) {
             this.system.tick(Stream.of(entity), this.world);
             this.applyVelocity.tick(Stream.of(entity), this.world);
@@ -82,8 +82,8 @@ class CharacterMovementSystemTest {
     ) {
         this.movementStats.maxSpeed = Float.MAX_VALUE;
         this.movementStats.acceleration = acceleration;
-        this.characterInput.move.x = inputH;
-        this.characterInput.move.y = inputV;
+        this.movementInput.move.x = inputH;
+        this.movementInput.move.y = inputV;
         for (int i = 0; i < 500; ++i) {
             this.system.tick(Stream.of(entity), this.world);
             this.applyVelocity.tick(Stream.of(entity), this.world);
@@ -102,8 +102,8 @@ class CharacterMovementSystemTest {
     ) {
         this.movementStats.maxSpeed = Float.MAX_VALUE;
         this.movementStats.acceleration = acceleration;
-        this.characterInput.move.x = inputH;
-        this.characterInput.move.y = inputV;
+        this.movementInput.move.x = inputH;
+        this.movementInput.move.y = inputV;
         for (int i = 0; i < 500; ++i) {
             this.system.tick(Stream.of(entity), this.world);
             this.applyVelocity.tick(Stream.of(entity), this.world);
@@ -117,7 +117,7 @@ class CharacterMovementSystemTest {
     void characterPositionChangesCorrectly(float acceleration, float expectedPositionAfter10s) {
         this.movementStats.maxSpeed = Float.MAX_VALUE;
         this.movementStats.acceleration = acceleration;
-        this.characterInput.move.x = 1.0f;
+        this.movementInput.move.x = 1.0f;
         for (int i = 0; i < 500; ++i) {
             this.system.tick(Stream.of(entity), this.world);
             this.applyVelocity.tick(Stream.of(entity), this.world);
@@ -137,8 +137,8 @@ class CharacterMovementSystemTest {
     ) {
         this.movementStats.maxSpeed = Float.MAX_VALUE;
         this.movementStats.acceleration = acceleration;
-        this.characterInput.move.x = inputH;
-        this.characterInput.move.y = inputV;
+        this.movementInput.move.x = inputH;
+        this.movementInput.move.y = inputV;
         for (int i = 0; i < 500; ++i) {
             this.system.tick(Stream.of(entity), this.world);
             this.applyVelocity.tick(Stream.of(entity), this.world);
@@ -159,8 +159,8 @@ class CharacterMovementSystemTest {
     ) {
         this.movementStats.maxSpeed = Float.MAX_VALUE;
         this.movementStats.acceleration = acceleration;
-        this.characterInput.move.x = inputH;
-        this.characterInput.move.y = inputV;
+        this.movementInput.move.x = inputH;
+        this.movementInput.move.y = inputV;
         for (int i = 0; i < 500; ++i) {
             this.system.tick(Stream.of(entity), this.world);
             this.applyVelocity.tick(Stream.of(entity), this.world);

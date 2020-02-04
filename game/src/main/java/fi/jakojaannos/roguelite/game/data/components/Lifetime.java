@@ -1,0 +1,22 @@
+package fi.jakojaannos.roguelite.game.data.components;
+
+import fi.jakojaannos.roguelite.engine.ecs.Component;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+
+public class Lifetime implements Component {
+    public long timestamp;
+    public long duration;
+
+    public static Lifetime ticks(final long timestamp, final long duration) {
+        return new Lifetime(timestamp, duration);
+    }
+
+    public static Lifetime seconds(final TimeManager timeManager, final long duration) {
+        return new Lifetime(timeManager.getCurrentGameTime(), timeManager.convertToTicks(duration));
+    }
+
+    private Lifetime(final long timestamp, final long duration) {
+        this.timestamp = timestamp;
+        this.duration = duration;
+    }
+}

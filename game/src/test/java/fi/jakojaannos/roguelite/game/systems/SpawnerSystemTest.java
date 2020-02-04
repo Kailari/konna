@@ -12,7 +12,7 @@ import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.SpawnerComponent;
-import fi.jakojaannos.roguelite.game.data.components.character.enemy.FollowerEnemyAI;
+import fi.jakojaannos.roguelite.game.data.components.character.enemy.FollowerAI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -51,13 +51,13 @@ public class SpawnerSystemTest {
         entityManager.addComponentTo(spawner,
                                      new SpawnerComponent(spawnFrequency, (entities, spawnerPos, spawnerComponent) -> {
                                          Entity e = entities.createEntity();
-                                         entities.addComponentTo(e, new FollowerEnemyAI(0, 0));
+                                         entities.addComponentTo(e, new FollowerAI(0, 0));
                                          return e;
                                      }));
 
         entityManager.applyModifications();
 
-        long enemiesBefore = this.world.getEntityManager().getEntitiesWith(FollowerEnemyAI.class).count();
+        long enemiesBefore = this.world.getEntityManager().getEntitiesWith(FollowerAI.class).count();
 
         for (int i = 0; i < nTicks; i++) {
             this.spawnerSystem.tick(Stream.of(spawner), this.world);
@@ -65,7 +65,7 @@ public class SpawnerSystemTest {
 
         entityManager.applyModifications();
 
-        long enemiesAfter = this.world.getEntityManager().getEntitiesWith(FollowerEnemyAI.class).count();
+        long enemiesAfter = this.world.getEntityManager().getEntitiesWith(FollowerAI.class).count();
 
         assertEquals(expectedAmount, (enemiesAfter - enemiesBefore));
     }

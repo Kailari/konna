@@ -10,9 +10,9 @@ import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
+import fi.jakojaannos.roguelite.game.data.components.character.MovementInput;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
-import fi.jakojaannos.roguelite.game.data.components.character.enemy.FollowerEnemyAI;
+import fi.jakojaannos.roguelite.game.data.components.character.enemy.FollowerAI;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 import fi.jakojaannos.roguelite.game.systems.characters.ai.FollowerAIControllerSystem;
 
@@ -23,7 +23,7 @@ public class FollowerAIControllerSystemTest {
     private World world;
     private Entity follower;
     private Transform playerTransform, followerPos;
-    private CharacterInput followerInput;
+    private MovementInput followerInput;
 
     @BeforeEach
     void beforeEach() {
@@ -38,11 +38,11 @@ public class FollowerAIControllerSystemTest {
         this.world.getOrCreateResource(Players.class).setLocalPlayer(player);
 
         this.follower = entityManager.createEntity();
-        this.followerInput = new CharacterInput();
+        this.followerInput = new MovementInput();
         this.followerPos = new Transform();
         entityManager.addComponentTo(this.follower, followerInput);
         entityManager.addComponentTo(this.follower, followerPos);
-        entityManager.addComponentTo(this.follower, new FollowerEnemyAI(100.0f, 0.0f));
+        entityManager.addComponentTo(this.follower, new FollowerAI(100.0f, 0.0f));
 
         entityManager.applyModifications();
     }

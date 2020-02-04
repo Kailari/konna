@@ -4,10 +4,10 @@ import fi.jakojaannos.roguelite.engine.ecs.Component;
 
 public class SplitOnDeath implements Component {
     /** "Size" of the entity */
-    public double size = 3;
+    public double size;
 
     /** Percentage of the size lost on each split */
-    public double sizeLossPercentage = 0.0;
+    public double sizeLossPercentage;
 
     /** Number of offspring spawned when split */
     public int offspringAmount = 4;
@@ -21,4 +21,8 @@ public class SplitOnDeath implements Component {
     public int minSpawnFlightDurationInTicks = 7;
     /** Maximum time the spawned offspring will spend in air after spawning */
     public int maxSpawnFlightDurationInTicks = 14;
+
+    public SplitOnDeath(final double size) {
+        this.size = size;
+    }
 }

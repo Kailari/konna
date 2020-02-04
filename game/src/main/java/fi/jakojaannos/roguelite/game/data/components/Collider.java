@@ -6,7 +6,7 @@ import org.joml.Vector2d;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.utilities.math.RotatedRectangle;
-import fi.jakojaannos.roguelite.game.systems.collision.CollisionLayer;
+import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 
 /**
  * Defines entity collision boundaries and which other entities it should interact with. Each collider belongs to a

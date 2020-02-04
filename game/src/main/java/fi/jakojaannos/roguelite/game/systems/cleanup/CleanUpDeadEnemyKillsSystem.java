@@ -6,7 +6,7 @@ import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.game.data.components.character.CharacterAbilities;
+import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.DeadTag;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.EnemyTag;
 import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
@@ -19,7 +19,7 @@ public class CleanUpDeadEnemyKillsSystem implements ECSSystem {
                     .tickBefore(ReaperSystem.class)
                     .requireResource(SessionStats.class)
                     .withComponent(EnemyTag.class)
-                    .withComponent(CharacterAbilities.class)
+                    .withComponent(AttackAbility.class)
                     .withComponent(DeadTag.class);
     }
 
@@ -29,7 +29,7 @@ public class CleanUpDeadEnemyKillsSystem implements ECSSystem {
             final World world
     ) {
         final var sessionStats = world.getOrCreateResource(SessionStats.class);
-        entities.map(entity -> world.getEntityManager().getComponentOf(entity, CharacterAbilities.class).orElseThrow())
+        entities.map(entity -> world.getEntityManager().getComponentOf(entity, AttackAbility.class).orElseThrow())
                 .map(abilities -> abilities.damageSource)
                 .forEach(sessionStats::clearKillsOf);
     }

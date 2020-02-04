@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.game.systems.collision;
+package fi.jakojaannos.roguelite.game.data;
 
 import lombok.extern.slf4j.Slf4j;
 

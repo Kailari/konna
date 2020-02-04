@@ -9,8 +9,8 @@ import fi.jakojaannos.roguelite.engine.ecs.*;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.InAir;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
-import fi.jakojaannos.roguelite.game.data.components.character.CharacterInput;
 import fi.jakojaannos.roguelite.game.data.components.character.JumpingMovementAbility;
+import fi.jakojaannos.roguelite.game.data.components.character.MovementInput;
 import fi.jakojaannos.roguelite.game.systems.SystemGroups;
 
 public class JumpingCharacterMovementSystem implements ECSSystem {
@@ -21,7 +21,7 @@ public class JumpingCharacterMovementSystem implements ECSSystem {
         requirements.addToGroup(SystemGroups.CHARACTER_TICK)
                     .requireProvidedResource(Time.class)
                     .withComponent(JumpingMovementAbility.class)
-                    .withComponent(CharacterInput.class)
+                    .withComponent(MovementInput.class)
                     .withComponent(Physics.class)
                     .withoutComponent(InAir.class);
     }
@@ -37,7 +37,7 @@ public class JumpingCharacterMovementSystem implements ECSSystem {
         entities.forEach(entity -> {
             final var movementAbility = entityManager.getComponentOf(entity, JumpingMovementAbility.class)
                                                      .orElseThrow();
-            final var input = entityManager.getComponentOf(entity, CharacterInput.class)
+            final var input = entityManager.getComponentOf(entity, MovementInput.class)
                                            .orElseThrow();
 
             if (isReadyToJump(timeManager, movementAbility)) {
