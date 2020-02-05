@@ -35,11 +35,8 @@ public class ApplyForceSystemTest {
         system = new ApplyForceSystem();
 
         entity = entityManager.createEntity();
-        velocity = new Velocity();
-        entityManager.addComponentTo(entity, velocity);
-        physics = new Physics();
-        entityManager.addComponentTo(entity, physics);
-
+        entityManager.addComponentTo(entity, velocity = new Velocity());
+        entityManager.addComponentTo(entity, physics = Physics.builder().build());
         entityManager.applyModifications();
     }
 
@@ -103,7 +100,7 @@ public class ApplyForceSystemTest {
         Entity heavy = entityManager.createEntity();
         Velocity heavyVelocity = new Velocity();
         entityManager.addComponentTo(heavy, heavyVelocity);
-        Physics heavyPhysics = new Physics(100);
+        Physics heavyPhysics = Physics.builder().mass(100).build();
         entityManager.addComponentTo(heavy, heavyPhysics);
         physics.mass = 1.0; // lighter one
 

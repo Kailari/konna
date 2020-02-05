@@ -41,7 +41,7 @@ public class ApplyFrictionSystemTest {
         world.provideResource(Time.class, time);
 
         entity = entityManager.createEntity();
-        entityManager.addComponentTo(entity, physics = new Physics());
+        entityManager.addComponentTo(entity, physics = Physics.builder().build());
         entityManager.addComponentTo(entity, velocity = new Velocity());
         physics.friction = 5.0;
 

@@ -49,7 +49,6 @@ public class LWJGLCamera extends Camera {
         this.viewMatrix = new Matrix4f();
         this.viewMatrixDirty = true;
 
-        // TODO: final var -> final var
         try (final var stack = MemoryStack.stackPush()) {
             final var ubos = stack.mallocInt(2);
             glGenBuffers(ubos);

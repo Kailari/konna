@@ -12,8 +12,8 @@ import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.archetypes.PlayerArchetype;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
-import fi.jakojaannos.roguelite.game.data.components.character.MovementInput;
 import fi.jakojaannos.roguelite.game.data.components.character.JumpingMovementAbility;
+import fi.jakojaannos.roguelite.game.data.components.character.MovementInput;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 import fi.jakojaannos.roguelite.game.systems.characters.movement.JumpingCharacterMovementSystem;
 
@@ -39,8 +39,8 @@ public class JumpingCharacterMovementSystemTest {
              .setLocalPlayer(PlayerArchetype.create(entityManager, playerPos));
 
         Entity slime = entityManager.createEntity();
-        JumpingMovementAbility split = new JumpingMovementAbility();
-        split.jumpForce = 5.0;
+        JumpingMovementAbility split = JumpingMovementAbility.builder().jumpForce(5.0)
+                                                             .build();
         entityManager.addComponentTo(slime, split);
 
         final var slimePos = new Transform(3, 6);
@@ -52,18 +52,17 @@ public class JumpingCharacterMovementSystemTest {
         final var expectedDir = new Vector2d(playerPos.position)
                 .sub(slimePos.position)
                 .normalize();
-
         input.move = expectedDir;
 
-        Physics physics = new Physics();
-        physics.mass = 2.5;
+        Physics physics = Physics.builder()
+                                 .mass(2.5)
+                                 .build();
         entityManager.addComponentTo(slime, physics);
 
         entityManager.applyModifications();
         system.tick(Stream.of(slime), world);
 
-        final var expectedAcceleration =
-                expectedDir.normalize(split.jumpForce / physics.mass, new Vector2d());
+        final var expectedAcceleration = expectedDir.normalize(split.jumpForce / physics.mass, new Vector2d());
 
         assertEquals(expectedAcceleration.x, physics.acceleration.x, EPSILON);
         assertEquals(expectedAcceleration.y, physics.acceleration.y, EPSILON);
