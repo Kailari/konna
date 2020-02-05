@@ -32,7 +32,6 @@ public class StalkerAIControllerSystemTest {
     private Transform playerPos, stalkerPos;
     private Entity stalker;
     private WalkingMovementAbility movementStats;
-    private Physics physics;
     private StalkerAI stalkerAI;
 
     @BeforeEach
@@ -59,8 +58,9 @@ public class StalkerAIControllerSystemTest {
         entityManager.addComponentTo(stalker, stalkerPos);
         movementStats = new WalkingMovementAbility(1.0, 250.0);
         entityManager.addComponentTo(stalker, movementStats);
-        entityManager.addComponentTo(stalker, physics = new Physics());
-        physics.friction = 200.0;
+        entityManager.addComponentTo(stalker, Physics.builder()
+                                                     .friction(200)
+                                                     .build());
 
         entityManager.applyModifications();
     }

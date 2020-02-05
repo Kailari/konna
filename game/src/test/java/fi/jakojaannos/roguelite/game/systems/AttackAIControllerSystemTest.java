@@ -13,19 +13,22 @@ import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
-import fi.jakojaannos.roguelite.game.data.components.BasicTurretComponent;
+import fi.jakojaannos.roguelite.game.data.DamageSource;
+import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
+import fi.jakojaannos.roguelite.game.data.components.character.WeaponInput;
+import fi.jakojaannos.roguelite.game.data.components.character.enemy.AttackAI;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.EnemyTag;
 import fi.jakojaannos.roguelite.game.data.components.weapon.ProjectileStats;
+import fi.jakojaannos.roguelite.game.systems.characters.ai.AttackAIControllerSystem;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TurretControllerSystemTest {
-
+public class AttackAIControllerSystemTest {
     private EntityManager entityManager;
     private World world;
-    private TurretControllerSystem system;
+    private AttackAIControllerSystem system;
     private Entity turret;
-    private BasicTurretComponent turretComp;
+    private AttackAI attackAi;
 
     @BeforeEach
     void beforeEach() {
@@ -33,12 +36,12 @@ public class TurretControllerSystemTest {
         world = World.createNew(entityManager);
         world.provideResource(Time.class, new Time(new SimpleTimeManager(20)));
 
-        system = new TurretControllerSystem();
+        system = new AttackAIControllerSystem();
         turret = entityManager.createEntity();
         entityManager.addComponentTo(turret, new Transform(0.0, 0.0));
-        turretComp = new BasicTurretComponent();
-        turretComp.targetingRadiusSquared = 7.0 * 7.0;
-        entityManager.addComponentTo(turret, turretComp);
+        entityManager.addComponentTo(turret, new AttackAbility(DamageSource.Generic.UNDEFINED));
+        entityManager.addComponentTo(turret, attackAi = new AttackAI(EnemyTag.class, 7.0));
+        entityManager.addComponentTo(turret, new WeaponInput());
     }
 
     @Test
@@ -50,7 +53,7 @@ public class TurretControllerSystemTest {
         entityManager.applyModifications();
         system.tick(Stream.of(turret), world);
 
-        assertEquals(target, turretComp.target);
+        assertEquals(target, attackAi.getAttackTarget().orElseThrow());
     }
 
     @Test
@@ -62,7 +65,7 @@ public class TurretControllerSystemTest {
         entityManager.applyModifications();
         system.tick(Stream.of(turret), world);
 
-        assertNull(turretComp.target);
+        assertTrue(attackAi.getAttackTarget().isEmpty());
     }
 
     @Test
@@ -73,22 +76,22 @@ public class TurretControllerSystemTest {
         entityManager.applyModifications();
         system.tick(Stream.of(turret), world);
 
-        assertNull(turretComp.target);
+        assertTrue(attackAi.getAttackTarget().isEmpty());
     }
 
     @Test
-    void targetIsRemovedAfterBecominginvalid() {
+    void targetIsRemovedAfterBecomingInvalid() {
         Entity target = entityManager.createEntity();
         entityManager.addComponentTo(target, new EnemyTag());
         entityManager.addComponentTo(target, new Transform(4.0, 4.0));
-        turretComp.target = target;
+        attackAi.setAttackTarget(target);
 
         entityManager.removeComponentFrom(target, EnemyTag.class);
 
         entityManager.applyModifications();
         system.tick(Stream.of(turret), world);
 
-        assertNull(turretComp.target);
+        assertTrue(attackAi.getAttackTarget().isEmpty());
     }
 
     @Test
@@ -96,7 +99,7 @@ public class TurretControllerSystemTest {
         Entity originalTarget = entityManager.createEntity();
         entityManager.addComponentTo(originalTarget, new EnemyTag());
         entityManager.addComponentTo(originalTarget, new Transform(4.0, 4.0));
-        turretComp.target = originalTarget;
+        attackAi.setAttackTarget(originalTarget);
 
         for (int i = 0; i < 10; i++) {
             Entity newTarget = entityManager.createEntity();
@@ -107,55 +110,20 @@ public class TurretControllerSystemTest {
         entityManager.applyModifications();
         system.tick(Stream.of(turret), world);
 
-        assertEquals(originalTarget, turretComp.target);
-    }
-
-
-    @Test
-    void turretShootsWhenTargetIsSet() {
-        Entity target = entityManager.createEntity();
-        entityManager.addComponentTo(target, new EnemyTag());
-        entityManager.addComponentTo(target, new Transform(4.0, 4.0));
-        turretComp.target = target;
-
-        entityManager.applyModifications();
-        system.tick(Stream.of(turret), world);
-        entityManager.applyModifications();
-
-        // after weapon rework this can be changed to something like this
-        // assertTrue(weaponAttackSystem.attack);
-
-        long projectiles = entityManager.getEntitiesWith(ProjectileStats.class).count();
-        assertEquals(1, projectiles);
+        assertEquals(originalTarget, attackAi.getAttackTarget().orElseThrow());
     }
 
     @Test
-    void turretDoesNotShootsWhenTargetIsNotSet() {
-        Entity target = entityManager.createEntity();
-        entityManager.addComponentTo(target, new EnemyTag());
-        entityManager.addComponentTo(target, new Transform(400.0, 400.0));
-
-        entityManager.applyModifications();
-        system.tick(Stream.of(turret), world);
-
-        // after weapon rework this can be changed to something like this
-        // assertFalse(weaponAttackSystem.attack);
-
-        long projectiles = entityManager.getEntitiesWith(ProjectileStats.class).count();
-        assertEquals(0, projectiles);
-    }
-
-    @Test
-    void targetGoingOutOfRangeIsRemovedAsTarget() {
+    void attackTargetIsClearedIfTargetGoesOutOfRange() {
         Entity target = entityManager.createEntity();
         entityManager.addComponentTo(target, new EnemyTag());
         entityManager.addComponentTo(target, new Transform(666.6, 666.6));
-        turretComp.target = target;
+        attackAi.setAttackTarget(target);
 
         entityManager.applyModifications();
         system.tick(Stream.of(turret), world);
 
-        assertNull(turretComp.target);
+        assertTrue(attackAi.getAttackTarget().isEmpty());
     }
 
     @Test
@@ -177,9 +145,6 @@ public class TurretControllerSystemTest {
         entityManager.applyModifications();
         system.tick(Stream.of(turret), world);
 
-        assertTrue(insideRange.contains(turretComp.target));
-
+        assertTrue(insideRange.contains(attackAi.getAttackTarget().orElseThrow()));
     }
-
-
 }
