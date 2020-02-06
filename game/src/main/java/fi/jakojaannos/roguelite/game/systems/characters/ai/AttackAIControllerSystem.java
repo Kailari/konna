@@ -122,7 +122,6 @@ public class AttackAIControllerSystem implements ECSSystem {
             final AttackAI ai,
             final Vector2d position
     ) {
-        LOG.debug("Getting entities with {}", ai.targetTagClass.getSimpleName());
         return entityManager
                 .getEntitiesWith(ai.targetTagClass)
                 .map(EntityManager.EntityComponentPair::getEntity)

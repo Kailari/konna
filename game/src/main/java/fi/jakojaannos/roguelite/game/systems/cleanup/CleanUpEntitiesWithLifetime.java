@@ -9,7 +9,6 @@ import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.*;
-import fi.jakojaannos.roguelite.game.LogCategories;
 import fi.jakojaannos.roguelite.game.data.components.Lifetime;
 import fi.jakojaannos.roguelite.game.systems.SystemGroups;
 
@@ -33,10 +32,7 @@ public class CleanUpEntitiesWithLifetime implements ECSSystem {
         final var timeManager = world.getResource(Time.class);
 
         entities.filter(onlyExpired(entityManager, timeManager))
-                .forEach(entity -> {
-                    entityManager.destroyEntity(entity);
-                    LOG.debug(LogCategories.DEATH, "Destroyed an expired entity {}", entity.getId());
-                });
+                .forEach(entityManager::destroyEntity);
     }
 
     private Predicate<Entity> onlyExpired(final EntityManager entityManager, final Time timeManager) {
