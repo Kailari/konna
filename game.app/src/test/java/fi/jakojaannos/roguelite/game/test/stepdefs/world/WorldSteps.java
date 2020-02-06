@@ -27,15 +27,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class WorldSteps {
-    private static void setPlayerKills(final int amount) {
-        final var localPlayerDamageSource = getComponentOf(getLocalPlayer().orElseThrow(), AttackAbility.class)
-                .orElseThrow()
-                .damageSource;
-        state.getWorld()
-             .getOrCreateResource(SessionStats.class)
-             .setKillsOf(localPlayerDamageSource, amount);
-    }
-
     @Given("the world is blank with {int} enemies scattered about")
     public void theWorldIsBlankWithEnemiesScatteredAbout(int numberOfEnemies) {
         state.getWorld()
@@ -84,10 +75,15 @@ public class WorldSteps {
              .flatMap(playerPosition -> Stream.of(playerPosition.add(2.0, 0.0, new Vector2d()),
                                                   playerPosition.add(-2.0, 0.0, new Vector2d()),
                                                   playerPosition.add(0.0, 2.0, new Vector2d()),
-                                                  playerPosition.add(0.0, -2.0, new Vector2d())))
+                                                  playerPosition.add(0.0, -2.0, new Vector2d()),
+                                                  playerPosition.add(1.5, 0.0, new Vector2d()),
+                                                  playerPosition.add(-1.5, 0.0, new Vector2d()),
+                                                  playerPosition.add(0.0, 1.5, new Vector2d()),
+                                                  playerPosition.add(0.0, -1.5, new Vector2d())))
              .forEach(enemyPosition -> FollowerArchetype.create(state.getWorld().getEntityManager(),
                                                                 new Transform(enemyPosition.x,
                                                                               enemyPosition.y)));
+        state.getWorld().getEntityManager().applyModifications();
     }
 
     @Given("there are no obstacles")
@@ -126,5 +122,14 @@ public class WorldSteps {
             Health health = state.getWorld().getEntityManager().getComponentOf(player.get(), Health.class).orElseThrow();
             assertFalse(health.currentHealth > 0);
         }
+    }
+
+    private static void setPlayerKills(final int amount) {
+        final var localPlayerDamageSource = getComponentOf(getLocalPlayer().orElseThrow(), AttackAbility.class)
+                .orElseThrow()
+                .damageSource;
+        state.getWorld()
+             .getOrCreateResource(SessionStats.class)
+             .setKillsOf(localPlayerDamageSource, amount);
     }
 }
