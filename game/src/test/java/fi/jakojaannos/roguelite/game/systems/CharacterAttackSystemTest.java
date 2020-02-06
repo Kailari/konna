@@ -61,7 +61,7 @@ class CharacterAttackSystemTest {
     @Test
     void characterDoesNotShootWhenInputIsFalse() {
         attackAbility.targetPosition.set(10.0, 10.0);
-        weaponStats.attackRate = 1.0;
+        weaponStats.timeBetweenShots = 20;
 
         weaponInput.attack = false;
         this.system.tick(Stream.of(entity), this.world);
@@ -73,7 +73,7 @@ class CharacterAttackSystemTest {
     @Test
     void characterShootsWhenInputIsTrue() {
         attackAbility.targetPosition.set(10.0, 10.0);
-        weaponStats.attackRate = 1.0;
+        weaponStats.timeBetweenShots = 20;
 
         weaponInput.attack = true;
         this.system.tick(Stream.of(entity), this.world);
@@ -85,10 +85,10 @@ class CharacterAttackSystemTest {
     @Test
     void attackRateLimitsWhenCharacterCanShoot() {
         attackAbility.targetPosition.set(10.0, 10.0);
-        weaponStats.attackRate = 1.0;
+        weaponStats.timeBetweenShots = 20;
 
         weaponInput.attack = true;
-        for (int i = 0; i < 175; ++i) {
+        for (int i = 0; i < 65; ++i) {
             this.system.tick(Stream.of(entity), this.world);
             this.world.getEntityManager().applyModifications();
             time.refresh();
@@ -100,7 +100,7 @@ class CharacterAttackSystemTest {
     @Test
     void characterStopsAttackingWhenInputIsSetToFalse() {
         attackAbility.targetPosition.set(10.0, 10.0);
-        weaponStats.attackRate = 1.0;
+        weaponStats.timeBetweenShots = 20;
 
         weaponInput.attack = true;
         this.system.tick(Stream.of(entity), this.world);

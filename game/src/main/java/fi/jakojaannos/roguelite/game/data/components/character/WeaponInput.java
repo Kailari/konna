@@ -4,4 +4,5 @@ import fi.jakojaannos.roguelite.engine.ecs.Component;
 
 public class WeaponInput implements Component {
     public boolean attack;
+    public boolean previousAttack;
 }

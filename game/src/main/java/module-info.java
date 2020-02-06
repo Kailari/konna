@@ -14,10 +14,12 @@ module roguelite.game {
     opens fi.jakojaannos.roguelite.game.data.resources.collision to roguelite.engine.ecs;
 
     exports fi.jakojaannos.roguelite.game;
+    exports fi.jakojaannos.roguelite.game.weapons;
     exports fi.jakojaannos.roguelite.game.state;
     exports fi.jakojaannos.roguelite.game.data;
     exports fi.jakojaannos.roguelite.game.data.archetypes;
     exports fi.jakojaannos.roguelite.game.data.components;
+    exports fi.jakojaannos.roguelite.game.data.components.weapon;
     exports fi.jakojaannos.roguelite.game.data.resources;
     exports fi.jakojaannos.roguelite.game.data.components.character;
 }

@@ -27,7 +27,7 @@ public class TurretArchetype {
         entityManager.addComponentTo(turret, new WeaponInput());
         entityManager.addComponentTo(turret, new AttackAbility(DamageSource.Generic.UNDEFINED,
                                                                CollisionLayer.PLAYER_PROJECTILE));
-        entityManager.addComponentTo(turret, new WeaponStats(5.0, 15.0, 5.0));
+        entityManager.addComponentTo(turret, new WeaponStats((long)(20 / 5.0), 15.0, 5.0));
 
         return turret;
     }
