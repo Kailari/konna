@@ -15,10 +15,17 @@ import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponStats;
 
 public class SlimeArchetype {
     public static final double LARGE_SLIME_SIZE = 16.0;
-    public static final double SIZE_SCALE = 11.0;
-    public static final int MAX_HP_SIZE_COEFFICIENT = 7;
-    public static final double SIZE_COEFFICIENT = 1.15;
-    public static final double MASS_SIZE_COEFFICIENT = 23.0;
+
+    /**
+     * Numbers are from our spreadsheet for slime stats (or equivalent to spreadsheet)
+     */
+    public static final double
+            HP_CURVE_A = 1.31, HP_CURVE_B = -6.15, HP_CURVE_C = 4.77,
+            SIZE_CURVE_A = 0.37, SIZE_CURVE_B = -0.06, SIZE_CURVE_C = 0.26,
+            MASS_CURVE_A = 7.46, MASS_CURVE_B = -1.23, MASS_CURVE_C = -4.85,
+            HP_MIN = 1.0, SIZE_MIN = 0.6, MASS_MIN = 2.0,
+            HP_MAX = 100.0, SIZE_MAX = 5.0, MASS_MAX = 70.0;
+
 
     public static Entity createLargeSlime(
             final EntityManager entityManager,
@@ -42,11 +49,11 @@ public class SlimeArchetype {
             final double yPos,
             final double slimeSize
     ) {
-        final var maxHp = (26.0 + MAX_HP_SIZE_COEFFICIENT * slimeSize) / SIZE_SCALE;
-        final var size = (5.45 + SIZE_COEFFICIENT * slimeSize) / SIZE_SCALE;
-        final var mass = (-1.0 + MASS_SIZE_COEFFICIENT * slimeSize) / SIZE_SCALE;
+        final var maxHp = Math.floor(getStatValue(slimeSize, HP_CURVE_A, HP_CURVE_B, HP_CURVE_C, HP_MIN, HP_MAX));
+        final var spriteSize = getStatValue(slimeSize, SIZE_CURVE_A, SIZE_CURVE_B, SIZE_CURVE_C, SIZE_MIN, SIZE_MAX);
+        final var mass = getStatValue(slimeSize, MASS_CURVE_A, MASS_CURVE_B, MASS_CURVE_C, MASS_MIN, MASS_MAX);
         final var jumpForce = (0.0 + 5.0 * slimeSize);
-        return createSlime(entityManager, xPos, yPos, maxHp, size, mass, jumpForce, slimeSize);
+        return createSlime(entityManager, xPos, yPos, maxHp, spriteSize, mass, jumpForce, slimeSize);
     }
 
     public static Entity createSlime(
@@ -54,7 +61,7 @@ public class SlimeArchetype {
             final double xPos,
             final double yPos,
             final double maxHp,
-            final double size,
+            final double spriteSize,
             final double mass,
             final double jumpForce,
             final double slimeSize
@@ -63,7 +70,7 @@ public class SlimeArchetype {
 
         entityManager.addComponentTo(entity, new Health(maxHp));
         entityManager.addComponentTo(entity, new SplitOnDeath(slimeSize));
-        entityManager.addComponentTo(entity, new Collider(CollisionLayer.ENEMY, size, size, size / 2, size / 2));
+        entityManager.addComponentTo(entity, new Collider(CollisionLayer.ENEMY, spriteSize, spriteSize, spriteSize / 2, spriteSize / 2));
         entityManager.addComponentTo(entity, new SpriteInfo("sprites/slime"));
         entityManager.addComponentTo(entity, new EnemyTag());
 
@@ -75,11 +82,24 @@ public class SlimeArchetype {
         entityManager.addComponentTo(entity, new MovementInput());
         entityManager.addComponentTo(entity, JumpingMovementAbility.builder().jumpForce(jumpForce).build());
 
-        entityManager.addComponentTo(entity, new AttackAI(size * 0.6));
+        entityManager.addComponentTo(entity, new AttackAI(spriteSize * 0.6));
         entityManager.addComponentTo(entity, new WeaponInput());
         entityManager.addComponentTo(entity, new AttackAbility(new DamageSource.Entity(entity), CollisionLayer.ENEMY));
         entityManager.addComponentTo(entity, new WeaponStats(20, 10.0, 2.0, 0.0, 15));
 
         return entity;
     }
+
+    private static double getStatValue(
+            final double x,
+            final double a,
+            final double b,
+            final double c,
+            final double min,
+            final double max
+    ) {
+        final double result = a * Math.pow(x, 0.5) + b * Math.pow(0.5, x) + c;
+        return Math.min(Math.max(result, min), max);
+    }
+
 }
