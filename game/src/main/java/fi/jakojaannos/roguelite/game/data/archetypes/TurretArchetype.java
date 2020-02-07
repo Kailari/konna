@@ -23,7 +23,7 @@ public class TurretArchetype {
         entityManager.addComponentTo(turret, new SpriteInfo("sprites/turret"));
         entityManager.addComponentTo(turret, new Collider(CollisionLayer.NONE, 2.0, 2.0, 1.0, 1.0));
 
-        entityManager.addComponentTo(turret, new AttackAI(EnemyTag.class, 30.0));
+        entityManager.addComponentTo(turret, new AttackAI(EnemyTag.class, 10.0));
         entityManager.addComponentTo(turret, new WeaponInput());
         entityManager.addComponentTo(turret, new AttackAbility(DamageSource.Generic.UNDEFINED,
                                                                CollisionLayer.PLAYER_PROJECTILE));

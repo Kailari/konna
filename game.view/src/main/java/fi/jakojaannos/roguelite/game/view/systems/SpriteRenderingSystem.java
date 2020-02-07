@@ -72,6 +72,9 @@ public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
                     final var transform = world.getEntityManager().getComponentOf(entity, Transform.class)
                                                .orElseThrow();
                     final var info = world.getEntityManager().getComponentOf(entity, SpriteInfo.class).orElseThrow();
+                    if (info.spriteName.equals("sprites/turret")) {
+                        return;
+                    }
 
                     final var texturesForZLayer = renderQueue.computeIfAbsent(info.zLayer,
                                                                               zLayer -> new HashMap<>());

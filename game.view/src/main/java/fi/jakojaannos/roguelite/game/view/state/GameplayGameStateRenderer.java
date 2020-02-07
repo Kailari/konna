@@ -35,44 +35,6 @@ public class GameplayGameStateRenderer extends GameStateRenderer {
         super(assetRoot, camera, assetManager, backend);
     }
 
-    private static void buildGameOverSplash(final GenericUIElementBuilder builder) {
-        builder.anchorY(percentOf().parentHeight(0.5))
-               .height(absolute(70))
-               .left(absolute(0))
-               .top(absolute(0))
-               .width(percentOf().parentWidth(1.0))
-               .child("game-over-label",
-                      UIElementType.LABEL,
-                      label -> label.anchorX(percentOf().parentWidth(0.5))
-                                    .top(absolute(0))
-                                    .left(percentOf().ownWidth(-0.5))
-                                    .text(GAME_OVER_MESSAGE)
-                                    .fontSize(48))
-               .child("game-over-help-label",
-                      UIElementType.LABEL,
-                      label -> label.anchorX(percentOf().parentWidth(0.5))
-                                    .bottom(absolute(0))
-                                    .left(percentOf().ownWidth(-0.5))
-                                    .text(GAME_OVER_HELP_TEXT)
-                                    .fontSize(24));
-    }
-
-    private static void buildKillsCounter(final UILabelBuilder builder) {
-        builder.anchorX(absolute(0))
-               .left(absolute(5))
-               .bottom(absolute(0))
-               .fontSize(24)
-               .text("Kills: ??");
-    }
-
-    private static void buildTimePlayedTimer(final UILabelBuilder builder) {
-        builder.anchorX(percentOf().parentWidth(0.5))
-               .left(percentOf().ownWidth(-0.5))
-               .top(absolute(5))
-               .fontSize(48)
-               .text("12:34:56");
-    }
-
     @Override
     protected SystemDispatcher createRenderDispatcher(
             final UserInterface userInterface,
@@ -98,6 +60,7 @@ public class GameplayGameStateRenderer extends GameStateRenderer {
                                 .addGroupDependencies(RenderSystemGroups.ENTITIES, RenderSystemGroups.LEVEL)
                                 .withSystem(new LevelRenderingSystem(assetRoot, camera, spriteRegistry, backend))
                                 .withSystem(new SpriteRenderingSystem(assetRoot, camera, spriteRegistry, backend))
+                                .withSystem(new TurretRenderingSystem(assetRoot, backend, camera))
                                 .withSystem(new UpdateHUDSystem(userInterface))
                                 .withSystem(new UpdateGameOverSplashSystem(userInterface))
                                 .withSystem(new HealthBarUpdateSystem(camera, userInterface))
@@ -137,5 +100,43 @@ public class GameplayGameStateRenderer extends GameStateRenderer {
                                      UIElementType.NONE,
                                      GameplayGameStateRenderer::buildGameOverSplash)
                             .build();
+    }
+
+    private static void buildGameOverSplash(final GenericUIElementBuilder builder) {
+        builder.anchorY(percentOf().parentHeight(0.5))
+               .height(absolute(70))
+               .left(absolute(0))
+               .top(absolute(0))
+               .width(percentOf().parentWidth(1.0))
+               .child("game-over-label",
+                      UIElementType.LABEL,
+                      label -> label.anchorX(percentOf().parentWidth(0.5))
+                                    .top(absolute(0))
+                                    .left(percentOf().ownWidth(-0.5))
+                                    .text(GAME_OVER_MESSAGE)
+                                    .fontSize(48))
+               .child("game-over-help-label",
+                      UIElementType.LABEL,
+                      label -> label.anchorX(percentOf().parentWidth(0.5))
+                                    .bottom(absolute(0))
+                                    .left(percentOf().ownWidth(-0.5))
+                                    .text(GAME_OVER_HELP_TEXT)
+                                    .fontSize(24));
+    }
+
+    private static void buildKillsCounter(final UILabelBuilder builder) {
+        builder.anchorX(absolute(0))
+               .left(absolute(5))
+               .bottom(absolute(0))
+               .fontSize(24)
+               .text("Kills: ??");
+    }
+
+    private static void buildTimePlayedTimer(final UILabelBuilder builder) {
+        builder.anchorX(percentOf().parentWidth(0.5))
+               .left(percentOf().ownWidth(-0.5))
+               .top(absolute(5))
+               .fontSize(48)
+               .text("12:34:56");
     }
 }
