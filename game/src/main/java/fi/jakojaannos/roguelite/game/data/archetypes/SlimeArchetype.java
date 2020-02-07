@@ -16,16 +16,24 @@ import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponStats;
 public class SlimeArchetype {
     public static final double LARGE_SLIME_SIZE = 16.0;
 
-    /**
+    /*
      * Numbers are from our spreadsheet for slime stats (or equivalent to spreadsheet)
      */
-    public static final double
-            HP_CURVE_A = 1.31, HP_CURVE_B = -6.15, HP_CURVE_C = 4.77,
-            SIZE_CURVE_A = 0.37, SIZE_CURVE_B = -0.06, SIZE_CURVE_C = 0.26,
-            MASS_CURVE_A = 7.46, MASS_CURVE_B = -1.23, MASS_CURVE_C = -4.85,
-            HP_MIN = 1.0, SIZE_MIN = 0.6, MASS_MIN = 2.0,
-            HP_MAX = 100.0, SIZE_MAX = 5.0, MASS_MAX = 70.0;
-
+    public static final double HP_CURVE_A = 1.31;
+    public static final double HP_CURVE_B = -6.15;
+    public static final double HP_CURVE_C = 4.77;
+    public static final double SIZE_CURVE_A = 0.37;
+    public static final double SIZE_CURVE_B = -0.06;
+    public static final double SIZE_CURVE_C = 0.26;
+    public static final double MASS_CURVE_A = 7.46;
+    public static final double MASS_CURVE_B = -1.23;
+    public static final double MASS_CURVE_C = -4.85;
+    public static final double HP_MIN = 1.0;
+    public static final double SIZE_MIN = 0.6;
+    public static final double MASS_MIN = 2.0;
+    public static final double HP_MAX = 100.0;
+    public static final double SIZE_MAX = 5.0;
+    public static final double MASS_MAX = 70.0;
 
     public static Entity createLargeSlime(
             final EntityManager entityManager,
@@ -70,7 +78,11 @@ public class SlimeArchetype {
 
         entityManager.addComponentTo(entity, new Health(maxHp));
         entityManager.addComponentTo(entity, new SplitOnDeath(slimeSize));
-        entityManager.addComponentTo(entity, new Collider(CollisionLayer.ENEMY, spriteSize, spriteSize, spriteSize / 2, spriteSize / 2));
+        entityManager.addComponentTo(entity, new Collider(CollisionLayer.ENEMY,
+                                                          spriteSize,
+                                                          spriteSize,
+                                                          spriteSize / 2,
+                                                          spriteSize / 2));
         entityManager.addComponentTo(entity, new SpriteInfo("sprites/slime"));
         entityManager.addComponentTo(entity, new EnemyTag());
 
