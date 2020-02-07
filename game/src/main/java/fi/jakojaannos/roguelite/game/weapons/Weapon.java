@@ -34,15 +34,15 @@ public interface Weapon {
 
     interface TriggerMechanism {
         void pull(
-                final TimeManager timeManager,
-                final AttackAbility attackAbility,
-                final WeaponStats weaponStats
+                TimeManager timeManager,
+                AttackAbility attackAbility,
+                WeaponStats weaponStats
         );
 
         void release(
-                final TimeManager timeManager,
-                final AttackAbility attackAbility,
-                final WeaponStats weaponStats
+                TimeManager timeManager,
+                AttackAbility attackAbility,
+                WeaponStats weaponStats
         );
 
         boolean shouldTrigger(TimeManager timeManager, AttackAbility attackAbility, WeaponStats weaponStats);

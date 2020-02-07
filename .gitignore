@@ -5,6 +5,7 @@
 /.idea/$PRODUCT_WORKSPACE_FILE$
 /.idea/.name
 /.idea/checkstyle-idea.xml
+/.idea/checkstyleidea-libs/
 /.idea/compiler.xml
 /.idea/gradle.xml
 /.idea/jarRepositories.xml
