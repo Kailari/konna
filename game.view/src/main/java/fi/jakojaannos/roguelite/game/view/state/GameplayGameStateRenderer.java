@@ -59,7 +59,7 @@ public class GameplayGameStateRenderer extends GameStateRenderer {
                                                       RenderSystemGroups.LEVEL)
                                 .addGroupDependencies(RenderSystemGroups.ENTITIES, RenderSystemGroups.LEVEL)
                                 //.withSystem(new LevelRenderingSystem(assetRoot, camera, spriteRegistry, backend))
-                                //.withSystem(new SpriteRenderingSystem(assetRoot, camera, spriteRegistry, backend))
+                                .withSystem(new SpriteRenderingSystem(assetRoot, camera, spriteRegistry, backend))
                                 .withSystem(new TurretRenderingSystem(assetRoot, backend, spriteRegistry, camera))
                                 //.withSystem(new UpdateHUDSystem(userInterface))
                                 //.withSystem(new UpdateGameOverSplashSystem(userInterface))
