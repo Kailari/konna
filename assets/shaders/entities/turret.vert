@@ -4,13 +4,13 @@ in vec2 in_pos;
 in float in_alert_status;
 in float in_shooting_status;
 in float in_base_rotation;
-in float in_target_pos;
+in vec2 in_target_pos;
 
 out Vertex {
     float alert_status;
     float shooting_status;
     float base_rotation;
-    float target_pos;
+    vec2 target_pos;
 } vertex;
 
 void main(void) {

@@ -14,7 +14,9 @@ public interface ShaderProgram extends AutoCloseable {
 
     void setUniform2f(String uniformName, float a, float b);
 
-    default void setUniform2f(String uniformName, Vector2f value) {
+    default void setUniform2f(final String uniformName, final Vector2f value) {
         setUniform2f(uniformName, value.x(), value.y());
     }
+
+    void setUniform1i(String uniformName, int value);
 }
