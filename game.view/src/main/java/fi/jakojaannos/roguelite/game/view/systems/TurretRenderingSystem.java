@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import fi.jakojaannos.roguelite.engine.content.AssetRegistry;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
@@ -18,6 +19,7 @@ import fi.jakojaannos.roguelite.engine.view.rendering.mesh.Mesh;
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexAttribute;
 import fi.jakojaannos.roguelite.engine.view.rendering.shader.EngineUniformBufferObjectIndices;
 import fi.jakojaannos.roguelite.engine.view.rendering.shader.ShaderProgram;
+import fi.jakojaannos.roguelite.engine.view.rendering.sprite.Sprite;
 import fi.jakojaannos.roguelite.game.data.components.SpriteInfo;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.AttackAI;
@@ -30,10 +32,12 @@ public class TurretRenderingSystem implements ECSSystem {
     private final Mesh mesh;
     private final int vertexSizeInBytes;
     private final Camera camera;
+    private final Sprite sprite;
 
     public TurretRenderingSystem(
             final Path assetRoot,
             final RenderingBackend backend,
+            final AssetRegistry<Sprite> spriteRegistry,
             final Camera camera
     ) {
         this.camera = camera;
@@ -50,6 +54,8 @@ public class TurretRenderingSystem implements ECSSystem {
                              .build();
         this.shader.use();
         this.shader.bindUniformBlock("CameraInfo", EngineUniformBufferObjectIndices.CAMERA);
+
+        this.sprite = spriteRegistry.getByAssetName("sprites/turret");
 
         final var vertexFormat = backend.createVertexFormat()
                                         // turret position
@@ -89,6 +95,11 @@ public class TurretRenderingSystem implements ECSSystem {
         final var entityManager = world.getEntityManager();
 
         this.shader.use();
+        // FIXME: Just bind the texture and handle the sprite stuff on the GPU using animation
+        //  data through an UBO
+        this.sprite.getFrame("default", 0.0)
+                   .getTexture()
+                   .use();
 
         this.camera.useWorldCoordinates();
         this.mesh.setPointSize(5.0f);
