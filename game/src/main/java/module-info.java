@@ -18,8 +18,9 @@ module roguelite.game {
     exports fi.jakojaannos.roguelite.game.state;
     exports fi.jakojaannos.roguelite.game.data;
     exports fi.jakojaannos.roguelite.game.data.archetypes;
+    exports fi.jakojaannos.roguelite.game.data.resources;
     exports fi.jakojaannos.roguelite.game.data.components;
     exports fi.jakojaannos.roguelite.game.data.components.weapon;
-    exports fi.jakojaannos.roguelite.game.data.resources;
     exports fi.jakojaannos.roguelite.game.data.components.character;
+    exports fi.jakojaannos.roguelite.game.data.components.character.enemy;
 }

@@ -53,7 +53,7 @@ class SpriteDeserializerTest {
                 "{" +
                 "   \"frames\": [" +
                 "       {" +
-                "           \"texture\": \"final varid\"," +
+                "           \"texture\": \"valid\"," +
                 "           \"x\": 0," +
                 "           \"y\": 0," +
                 "           \"w\": 32," +
@@ -83,7 +83,7 @@ class SpriteDeserializerTest {
         String json = "" +
                 "{" +
                 "   \"frames\": {" +
-                "       \"texture\": \"final varid\"," +
+                "       \"texture\": \"valid\"," +
                 "       \"rows\": 4," +
                 "       \"columns\": 4" +
                 "   }" +
@@ -99,7 +99,7 @@ class SpriteDeserializerTest {
         String json = "" +
                 "{" +
                 "   \"frames\": {" +
-                "       \"texture\": \"final varid\"," +
+                "       \"texture\": \"valid\"," +
                 "       \"rows\": 4," +
                 "       \"columns\": 4" +
                 "   }" +
@@ -115,21 +115,21 @@ class SpriteDeserializerTest {
                 "{" +
                 "   \"frames\": [" +
                 "       {" +
-                "           \"texture\": \"final varid\"," +
+                "           \"texture\": \"valid\"," +
                 "           \"x\": 0," +
                 "           \"y\": 0," +
                 "           \"w\": 8," +
                 "           \"h\": 8" +
                 "       }," +
                 "       {" +
-                "           \"texture\": \"final varid\"," +
+                "           \"texture\": \"valid\"," +
                 "           \"x\": 8," +
                 "           \"y\": 0," +
                 "           \"w\": 24," +
                 "           \"h\": 8" +
                 "       }," +
                 "       {" +
-                "           \"texture\": \"final varid\"," +
+                "           \"texture\": \"valid\"," +
                 "           \"x\": 8," +
                 "           \"y\": 8," +
                 "           \"w\": 24," +
@@ -149,21 +149,21 @@ class SpriteDeserializerTest {
                 "{" +
                 "   \"frames\": [" +
                 "       {" +
-                "           \"texture\": \"final varid\"," +
+                "           \"texture\": \"valid\"," +
                 "           \"x\": 0," +
                 "           \"y\": 0," +
                 "           \"w\": 8," +
                 "           \"h\": 8" +
                 "       }," +
                 "       {" +
-                "           \"texture\": \"final varid\"," +
+                "           \"texture\": \"valid\"," +
                 "           \"x\": 8," +
                 "           \"y\": 0," +
                 "           \"w\": 24," +
                 "           \"h\": 8" +
                 "       }," +
                 "       {" +
-                "           \"texture\": \"final varid\"," +
+                "           \"texture\": \"valid\"," +
                 "           \"x\": 8," +
                 "           \"y\": 8," +
                 "           \"w\": 24," +
@@ -182,7 +182,7 @@ class SpriteDeserializerTest {
                 "{" +
                 "   \"frames\": [" +
                 "       {" +
-                "           \"texture\": \"final varid\"," +
+                "           \"texture\": \"valid\"," +
                 "           \"x\": 8," +
                 "           \"h\": 24" +
                 "       }" +
@@ -198,7 +198,7 @@ class SpriteDeserializerTest {
         String json = "" +
                 "{" +
                 "   \"frames\": {" +
-                "       \"texture\": \"final varid\"," +
+                "       \"texture\": \"valid\"," +
                 "       \"rows\": 4," +
                 "       \"columns\": 4" +
                 "   }," +
@@ -216,7 +216,7 @@ class SpriteDeserializerTest {
         String json = "" +
                 "{" +
                 "   \"frames\": {" +
-                "       \"texture\": \"final varid\"," +
+                "       \"texture\": \"valid\"," +
                 "       \"rows\": 4," +
                 "       \"columns\": 4" +
                 "   }," +
@@ -234,7 +234,7 @@ class SpriteDeserializerTest {
         String json = "" +
                 "{" +
                 "   \"frames\": {" +
-                "       \"texture\": \"final varid\"," +
+                "       \"texture\": \"valid\"," +
                 "       \"rows\": 4," +
                 "       \"columns\": 4" +
                 "   }," +
@@ -254,7 +254,7 @@ class SpriteDeserializerTest {
         String json = "" +
                 "{" +
                 "   \"frames\": {" +
-                "       \"texture\": \"final varid\"," +
+                "       \"texture\": \"valid\"," +
                 "       \"rows\": 4," +
                 "       \"columns\": 4" +
                 "   }," +
@@ -275,7 +275,7 @@ class SpriteDeserializerTest {
         String json = "" +
                 "{" +
                 "   \"frames\": {" +
-                "       \"texture\": \"final varid\"," +
+                "       \"texture\": \"valid\"," +
                 "       \"rows\": 4," +
                 "       \"columns\": 4" +
                 "   }," +
@@ -296,7 +296,7 @@ class SpriteDeserializerTest {
         String json = "" +
                 "{" +
                 "   \"frames\": {" +
-                "       \"texture\": \"final varid\"," +
+                "       \"texture\": \"valid\"," +
                 "       \"rows\": 4," +
                 "       \"columns\": 4" +
                 "   }," +
@@ -317,7 +317,7 @@ class SpriteDeserializerTest {
         String json = "" +
                 "{" +
                 "   \"frames\": {" +
-                "       \"texture\": \"final varid\"," +
+                "       \"texture\": \"valid\"," +
                 "       \"rows\": 4," +
                 "       \"columns\": 4" +
                 "   }," +

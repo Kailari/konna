@@ -123,7 +123,7 @@ public class SpriteDeserializer<TTexture extends Texture>
     }
 
     private void deserializeAnimation(
-            final Map<String, Animation> animations,
+            final Map<String, Animation> outAnimations,
             final Map.Entry<String, JsonElement> animationEntry
     ) {
         final var animationName = animationEntry.getKey();
@@ -132,13 +132,19 @@ public class SpriteDeserializer<TTexture extends Texture>
         Animation animation = null;
         // JsonArray => list of frames
         if (animationElement.isJsonArray()) {
+            LOG.debug("Serializing as array!");
             final var animationArray = animationElement.getAsJsonArray();
             final List<Animation.Frame> animationFrames = new ArrayList<>();
-            for (final var frameElement : animationArray) {
-                final var frameObj = frameElement.getAsJsonObject();
 
-                animationFrames.add(new Animation.Frame(frameObj.get("index").getAsInt(),
-                                                        frameObj.get("duration").getAsDouble()));
+            for (final var frameElement : animationArray) {
+                if (frameElement.isJsonPrimitive()) {
+                    animationFrames.add(new Animation.Frame(frameElement.getAsInt(), 1.0));
+                } else {
+                    final var frameObj = frameElement.getAsJsonObject();
+
+                    animationFrames.add(new Animation.Frame(frameObj.get("index").getAsInt(),
+                                                            frameObj.get("duration").getAsDouble()));
+                }
             }
 
             animation = Animation.forFrames(animationFrames);
@@ -181,6 +187,6 @@ public class SpriteDeserializer<TTexture extends Texture>
             throw new JsonParseException("Malformed animation frame definition!");
         }
 
-        animations.put(animationName, animation);
+        outAnimations.put(animationName, animation);
     }
 }

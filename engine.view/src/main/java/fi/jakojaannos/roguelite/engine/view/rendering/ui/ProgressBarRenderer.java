@@ -44,7 +44,7 @@ public class ProgressBarRenderer implements AutoCloseable {
                                         .withAttribute(VertexAttribute.Type.FLOAT, 1, false)
                                         .build();
         this.mesh = backend.createMesh(vertexFormat);
-        this.vertexDataBuffer = MemoryUtil.memAlloc(MAX_PER_BATCH * SIZE_IN_BYTES);
+        this.vertexDataBuffer = MemoryUtil.memAlloc(MAX_PER_BATCH * vertexFormat.getSizeInBytes());
         this.mesh.setElements(IntStream.range(0, MAX_PER_BATCH)
                                        .toArray());
 
