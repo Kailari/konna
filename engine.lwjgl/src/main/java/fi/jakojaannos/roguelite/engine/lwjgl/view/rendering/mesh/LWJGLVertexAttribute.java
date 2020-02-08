@@ -40,12 +40,12 @@ public class LWJGLVertexAttribute implements VertexAttribute {
     public enum LWJGLType {
         FLOAT(VertexAttribute.Type.FLOAT, GL_FLOAT, 4),
         DOUBLE(VertexAttribute.Type.DOUBLE, GL_DOUBLE, 8),
-        INT(VertexAttribute.Type.INT, GL_INT, 8),
-        UNSIGNED_INT(VertexAttribute.Type.UNSIGNED_INT, GL_UNSIGNED_INT, 8),
-        BYTE(VertexAttribute.Type.BYTE, GL_BYTE, 8),
-        UNSIGNED_BYTE(VertexAttribute.Type.UNSIGNED_BYTE, GL_UNSIGNED_BYTE, 8),
-        SHORT(VertexAttribute.Type.SHORT, GL_SHORT, 8),
-        UNSIGNED_SHORT(VertexAttribute.Type.UNSIGNED_SHORT, GL_UNSIGNED_SHORT, 8);
+        INT(VertexAttribute.Type.INT, GL_INT, 4),
+        UNSIGNED_INT(VertexAttribute.Type.UNSIGNED_INT, GL_UNSIGNED_INT, 4),
+        BYTE(VertexAttribute.Type.BYTE, GL_BYTE, 1),
+        UNSIGNED_BYTE(VertexAttribute.Type.UNSIGNED_BYTE, GL_UNSIGNED_BYTE, 1),
+        SHORT(VertexAttribute.Type.SHORT, GL_SHORT, 2),
+        UNSIGNED_SHORT(VertexAttribute.Type.UNSIGNED_SHORT, GL_UNSIGNED_SHORT, 2);
 
         private static final Map<Type, LWJGLType> typeMappings = Arrays.stream(LWJGLType.values()).collect(Collectors.toMap(LWJGLType::getType, lwjglType -> lwjglType));
         @Getter private final Type type;
