@@ -52,20 +52,31 @@ public class ProjectileToCharacterCollisionHandlerSystem implements ECSSystem {
                                                    .map(Collision::getAsEntityCollision);
 
             for (final var collision : (Iterable<Collision.EntityCollision>) entityCollisions::iterator) {
-                if (entityManager.hasComponent(collision.getOther(), Health.class)) {
-                    final var health = entityManager.getComponentOf(collision.getOther(), Health.class)
-                                                    .orElseThrow();
-                    health.addDamageInstance(new DamageInstance(stats.damage,
-                                                                stats.damageSource),
-                                             timeManager.getCurrentGameTime());
-                    entityManager.getComponentOf(collision.getOther(), Physics.class).ifPresent(physics -> {
-                        this.temp.set(velocity).normalize(stats.pushForce);
-                        physics.applyForce(this.temp);
-                    });
+                final boolean hasHealth = entityManager.hasComponent(collision.getOther(), Health.class);
+                final boolean hasPhysics = entityManager.hasComponent(collision.getOther(), Physics.class);
+                if (hasHealth || hasPhysics) {
+                    entityManager.getComponentOf(collision.getOther(), Physics.class)
+                                 .ifPresent(physics -> applyKnockback(stats, velocity, physics));
+
+                    entityManager.getComponentOf(collision.getOther(), Health.class)
+                                 .ifPresent(health -> dealDamage(timeManager, stats, health));
+
                     entityManager.destroyEntity(entity);
                     break;
                 }
             }
         });
+    }
+
+    private void dealDamage(final Time timeManager, final ProjectileStats stats, final Health health) {
+        health.addDamageInstance(new DamageInstance(stats.damage,
+                                                    stats.damageSource),
+                                 timeManager.getCurrentGameTime());
+    }
+
+    private void applyKnockback(final ProjectileStats stats, final Velocity velocity, final Physics physics) {
+        if (velocity.lengthSquared() == 0) return;
+        this.temp.set(velocity).normalize(stats.pushForce);
+        physics.applyForce(this.temp);
     }
 }

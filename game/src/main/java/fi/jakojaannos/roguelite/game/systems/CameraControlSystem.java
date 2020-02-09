@@ -29,11 +29,12 @@ public class CameraControlSystem implements ECSSystem {
         }
 
         final var entityManager = world.getEntityManager();
-        final var cameraTransform = entityManager.getComponentOf(cameraEntity, Transform.class)
-                                                 .orElseThrow();
-        entities.findFirst()
-                .flatMap(entity -> entityManager.getComponentOf(entity, Transform.class))
-                .map(targetTransform -> targetTransform.position)
-                .ifPresent(cameraTransform.position::set);
+        entityManager.getComponentOf(cameraEntity, Transform.class)
+                     .ifPresent(cameraTransform -> {
+                         entities.findFirst()
+                                 .flatMap(entity -> entityManager.getComponentOf(entity, Transform.class))
+                                 .map(targetTransform -> targetTransform.position)
+                                 .ifPresent(cameraTransform.position::set);
+                     });
     }
 }
