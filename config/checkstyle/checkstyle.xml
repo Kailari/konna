@@ -78,5 +78,7 @@
             <property name="tokens"
                       value="METHOD_DEF, INTERFACE_DEF, VARIABLE_DEF, ANNOTATION_FIELD_DEF, CTOR_DEF, CLASS_DEF, ENUM_DEF"/>
         </module>
+        <!-- Warn about redundant imports -->
+        <module name="RedundantImport"/>
     </module>
 </module>
