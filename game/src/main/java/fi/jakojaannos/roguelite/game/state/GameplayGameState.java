@@ -78,7 +78,7 @@ public class GameplayGameState extends GameState {
 
         final var sessionStats = world.getOrCreateResource(SessionStats.class);
         sessionStats.endTimeStamp = sessionStats.beginTimeStamp = timeManager.getCurrentGameTime();
-        TurretArchetype.create(entityManager, new Transform(2.0, 0.0));
+        TurretArchetype.create(entityManager, timeManager, new Transform(2.0, 0.0));
 
         entityManager.applyModifications();
     }
@@ -93,6 +93,7 @@ public class GameplayGameState extends GameState {
                .withSystem(new JumpingCharacterMovementSystem())
                .withSystem(new SnapToCursorSystem())
                .withSystem(new RotatePlayerTowardsAttackTargetSystem())
+               .withSystem(new RotateTowardsVelocitySystem())
                .withSystem(new CameraControlSystem())
                .withSystem(new EnemyAttackCoolDownSystem())
                .withSystem(new SplitOnDeathSystem())

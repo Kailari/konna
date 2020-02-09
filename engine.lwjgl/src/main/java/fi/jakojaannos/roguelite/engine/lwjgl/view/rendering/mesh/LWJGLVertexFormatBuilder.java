@@ -8,7 +8,7 @@ import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexFormat;
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexFormatBuilder;
 
 public class LWJGLVertexFormatBuilder implements VertexFormatBuilder {
-    private List<VertexAttribute> attributes = new ArrayList<>();
+    private final List<VertexAttribute> attributes = new ArrayList<>();
 
     @Override
     public VertexFormatBuilder withAttribute(

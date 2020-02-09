@@ -29,6 +29,7 @@ public class PlayerArchetype {
                                                                -0.5));
         entityManager.addComponentTo(player, new Collider(CollisionLayer.PLAYER, 1.0, 1.0, 0.5, 0.5));
         entityManager.addComponentTo(player, new PlayerTag());
+        entityManager.addComponentTo(player, new LookAtTargetTag());
         entityManager.addComponentTo(player, new WalkingMovementAbility(10.0f, 69.0f * 1.5));
         entityManager.addComponentTo(player, new WeaponStats(10, 40.0, 2.5, 4, -1, 10));
         entityManager.addComponentTo(player, new SpriteInfo("sprites/player"));

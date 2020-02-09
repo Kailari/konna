@@ -10,21 +10,20 @@ import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
-import fi.jakojaannos.roguelite.game.data.components.character.LookAtTargetTag;
+import fi.jakojaannos.roguelite.game.data.components.RotateTowardsVelocityTag;
+import fi.jakojaannos.roguelite.game.data.components.Velocity;
 
-public class RotatePlayerTowardsAttackTargetSystem implements ECSSystem {
+public class RotateTowardsVelocitySystem implements ECSSystem {
     private static final Vector2dc ROTATION_ZERO_DIRECTION = new Vector2d(0.0, -1.0);
 
-    private final Vector2d tmpPosition = new Vector2d();
+    private final Vector2d tmpDirection = new Vector2d();
 
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.INPUT)
-                    .withComponent(LookAtTargetTag.class)
+                    .withComponent(RotateTowardsVelocityTag.class)
                     .withComponent(Transform.class)
-                    .withComponent(AttackAbility.class)
-                    .tickAfter(PlayerInputSystem.class);
+                    .withComponent(Velocity.class);
     }
 
     @Override
@@ -36,18 +35,14 @@ public class RotatePlayerTowardsAttackTargetSystem implements ECSSystem {
         entities.forEach(entity -> {
             final var transform = entityManager.getComponentOf(entity, Transform.class)
                                                .orElseThrow();
-            final var attackAbility = entityManager.getComponentOf(entity, AttackAbility.class)
-                                                   .orElseThrow();
-
-            final Vector2d position = transform.position.add(attackAbility.weaponOffset, this.tmpPosition);
-            final var targetPosition = attackAbility.targetPosition;
+            final var velocity = entityManager.getComponentOf(entity, Velocity.class)
+                                              .orElseThrow();
 
             final Vector2d direction;
-            if (position.lengthSquared() == 0 && targetPosition.lengthSquared() == 0) {
+            if (velocity.lengthSquared() == 0) {
                 direction = new Vector2d(0.0, -1.0);
             } else {
-                direction = targetPosition.sub(position, this.tmpPosition)
-                                          .normalize();
+                direction = velocity.normalize(this.tmpDirection);
             }
 
             transform.rotation = -direction.angle(ROTATION_ZERO_DIRECTION);
