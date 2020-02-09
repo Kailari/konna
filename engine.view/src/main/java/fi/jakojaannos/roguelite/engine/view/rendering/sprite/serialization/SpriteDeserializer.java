@@ -132,7 +132,6 @@ public class SpriteDeserializer<TTexture extends Texture>
         Animation animation = null;
         // JsonArray => list of frames
         if (animationElement.isJsonArray()) {
-            LOG.debug("Serializing as array!");
             final var animationArray = animationElement.getAsJsonArray();
             final List<Animation.Frame> animationFrames = new ArrayList<>();
 
