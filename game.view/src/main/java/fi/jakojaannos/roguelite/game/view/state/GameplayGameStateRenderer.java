@@ -58,23 +58,22 @@ public class GameplayGameStateRenderer extends GameStateRenderer {
                                 .addGroupDependencies(RenderSystemGroups.OVERLAY, RenderSystemGroups.ENTITIES,
                                                       RenderSystemGroups.LEVEL)
                                 .addGroupDependencies(RenderSystemGroups.ENTITIES, RenderSystemGroups.LEVEL)
-                                //.withSystem(new LevelRenderingSystem(assetRoot, camera, spriteRegistry, backend))
+                                .withSystem(new LevelRenderingSystem(assetRoot, camera, spriteRegistry, backend))
                                 .withSystem(new SpriteRenderingSystem(assetRoot, camera, spriteRegistry, backend))
                                 .withSystem(new TurretRenderingSystem(assetRoot, backend, spriteRegistry, camera))
-                                //.withSystem(new UpdateHUDSystem(userInterface))
-                                //.withSystem(new UpdateGameOverSplashSystem(userInterface))
-                                //.withSystem(new HealthBarUpdateSystem(camera, userInterface))
-                                //.withSystem(new NetworkHUDSystem(userInterface))
-                                //.withSystem(new UserInterfaceRenderingSystem(assetRoot,
-                                //                                             camera,
-                                //                                             fontRegistry,
-                                //                                             spriteRegistry,
-                                //                                             textRenderer,
-                                //                                             userInterface,
-                                //                                             backend))
-        ;
+                                .withSystem(new UpdateHUDSystem(userInterface))
+                                .withSystem(new UpdateGameOverSplashSystem(userInterface))
+                                .withSystem(new HealthBarUpdateSystem(camera, userInterface))
+                                .withSystem(new NetworkHUDSystem(userInterface))
+                                .withSystem(new UserInterfaceRenderingSystem(assetRoot,
+                                                                             camera,
+                                                                             fontRegistry,
+                                                                             spriteRegistry,
+                                                                             textRenderer,
+                                                                             userInterface,
+                                                                             backend));
 
-        if (DebugConfig.debugModeEnabled && false) {
+        if (DebugConfig.debugModeEnabled) {
             builder.withSystem(new EntityCollisionBoundsRenderingSystem(assetRoot, camera, backend));
             builder.withSystem(new EntityTransformRenderingSystem(assetRoot, camera, backend));
         }

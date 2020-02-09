@@ -125,15 +125,17 @@ public class TurretRenderingSystem implements ECSSystem {
             }
 
             final var transform = entityManager.getComponentOf(entity, Transform.class).orElseThrow();
-            final var targetPosition = entityManager.getComponentOf(entity, AttackAbility.class)
-                                                    .orElseThrow().targetPosition;
+            final var attackAbility = entityManager.getComponentOf(entity, AttackAbility.class)
+                                                   .orElseThrow();
             final var attackTarget = entityManager.getComponentOf(entity, AttackAI.class)
-                                                  .orElseThrow().getAttackTarget();
+                                                  .orElseThrow()
+                                                  .getAttackTarget();
+            final var targetPosition = attackAbility.targetPosition;
 
             queueVertex(queued,
                         transform.position.x,
                         transform.position.y,
-                        transform.rotation,
+                        0.0,
                         targetPosition.x,
                         targetPosition.y,
                         attackTarget.isPresent(),

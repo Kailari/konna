@@ -1,5 +1,7 @@
 #version 150
 
+#define PI 3.1415926538
+
 layout (points) in;
 layout (triangle_strip, max_vertices = 8) out;
 
@@ -23,9 +25,11 @@ out VertexData {
     vec2 uv;
 } out_vertex;
 
-vec2 transform_coord(vec2 origin, vec2 coord, float rotation) {
-    vec2 tmp = coord - origin;
-    return vec2(tmp.x * cos(rotation) - tmp.y * sin(rotation), tmp.x * sin(rotation) + tmp.y * cos(rotation)) + origin;
+vec2 transform_coord(vec2 position, vec2 offset, float rotation) {
+    vec2 tmp = offset - position;
+    float x = (tmp.x * cos(rotation)) - (tmp.y * sin(rotation));
+    float y = (tmp.x * sin(rotation)) + (tmp.y * cos(rotation));
+    return vec2(x, y) + position;
 }
 
 void create_quad
@@ -39,12 +43,12 @@ float v0,
 float u1,
 float v1
 ) {
-    vec2 origin = size * 0.5;
+    vec2 origin = vec2(-size.x, size.y) * 0.5;
 
-    vec2 bottom_left = position.xy + transform_coord(origin, vec2(0, 0), rotation);
-    vec2 top_left = position.xy + transform_coord(origin, vec2(0, size.y), rotation);
-    vec2 bottom_right = position.xy + transform_coord(origin, vec2(size.x, 0), rotation);
-    vec2 top_right = position.xy + transform_coord(origin, size, rotation);
+    vec2 bottom_left = transform_coord(position, vec2(0, 0) - origin, rotation);
+    vec2 top_left = transform_coord(position, vec2(0, size.y) - origin, rotation);
+    vec2 bottom_right = transform_coord(position, vec2(size.x, 0) - origin, rotation);
+    vec2 top_right = transform_coord(position, size - origin, rotation);
 
     // Bottom left
     out_vertex.uv = vec2(u0, v0);
@@ -146,7 +150,13 @@ void create_gun(mat4 mvp, vec2 size, vec2 position, bool shooting, vec2 target_p
     int frame_index = int(floor(t / frameDuration)) % animation_length;
     int frame = frames[frame_index];
 
-    float angle = radians((time / 2) % 360);//acos(dot(normalize(position), normalize(target_pos)));
+    vec2 direction = target_pos - position;
+
+    vec2 v1 = normalize(direction);
+    vec2 v2 = vec2(0.0, -1.0);
+    float dot = v1.x * v2.x + v1.y * v2.y;
+    float determinant = v1.x * v2.y + v1.y * v2.x;
+    float angle = -atan(determinant, dot);
 
     create_quad_from_frame(mvp, size, position, angle, columns, rows, frame);
 }
@@ -161,7 +171,8 @@ void main(void) {
     bool alert = in_vertices[0].alert_status > 0.5;
     bool shooting = in_vertices[0].shooting_status > 0.5;
     vec2 target_pos = in_vertices[0].target_pos;
+    float rotation = in_vertices[0].base_rotation;
 
-    create_base(mvp, base_size, position.xy, 0, alert);
+    create_base(mvp, base_size, position.xy, rotation, alert);
     create_gun(mvp, gun_size, position.xy, shooting, target_pos);
 }
