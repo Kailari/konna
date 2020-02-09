@@ -72,7 +72,8 @@ public class ProjectileFiringMechanism implements Weapon.FiringMechanism {
                                    attackAbility.damageSource,
                                    attackAbility.projectileLayer,
                                    timestamp,
-                                   weaponStats.projectileLifetimeInTicks);
+                                   weaponStats.projectileLifetimeInTicks,
+                                   weaponStats.projectilePushForce);
 
         attackAbility.lastAttackTimestamp = timestamp;
     }
