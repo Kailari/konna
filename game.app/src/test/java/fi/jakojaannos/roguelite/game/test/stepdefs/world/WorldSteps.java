@@ -1,5 +1,6 @@
 package fi.jakojaannos.roguelite.game.test.stepdefs.world;
 
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import org.joml.Vector2d;
@@ -16,6 +17,7 @@ import fi.jakojaannos.roguelite.game.data.archetypes.FollowerArchetype;
 import fi.jakojaannos.roguelite.game.data.components.NoDrawTag;
 import fi.jakojaannos.roguelite.game.data.components.ObstacleTag;
 import fi.jakojaannos.roguelite.game.data.components.SpawnerComponent;
+import fi.jakojaannos.roguelite.game.data.components.SpriteInfo;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.Health;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
@@ -27,8 +29,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class WorldSteps {
-    @Given("the world is blank with {int} enemies scattered about")
-    public void theWorldIsBlankWithEnemiesScatteredAbout(int numberOfEnemies) {
+    @Given("the world is blank with {int} enemies with {int} hp each scattered about")
+    public void theWorldIsBlankWithEnemiesScatteredAbout(int numberOfEnemies, int initialHealth) {
         state.getWorld()
              .getEntityManager()
              .clearEntities();
@@ -43,8 +45,16 @@ public class WorldSteps {
         IntStream.range(0, numberOfEnemies)
                  .mapToObj(ignored -> new Vector2d((random.nextDouble() * 2.0 - 1.0) * areaWidth,
                                                    (random.nextDouble() * 2.0 - 1.0) * areaHeight))
-                 .forEach(enemyPosition -> FollowerArchetype.create(state.getWorld().getEntityManager(),
-                                                                    new Transform(enemyPosition.x, enemyPosition.y)));
+                 .forEach(enemyPosition -> {
+                     final var entity = FollowerArchetype.create(state.getWorld().getEntityManager(),
+                                                                 new Transform(enemyPosition.x, enemyPosition.y));
+                     final var health = state.getWorld()
+                                             .getEntityManager()
+                                             .getComponentOf(entity, Health.class)
+                                             .orElseThrow();
+                     health.maxHealth = initialHealth;
+                     health.currentHealth = initialHealth;
+                 });
         state.getWorld().getEntityManager().applyModifications();
     }
 
@@ -93,6 +103,18 @@ public class WorldSteps {
              .getEntitiesWith(ObstacleTag.class)
              .map(EntityManager.EntityComponentPair::getEntity)
              .forEach(state.getWorld().getEntityManager()::destroyEntity);
+        state.getWorld().getEntityManager().applyModifications();
+    }
+
+    @And("there are no turrets")
+    public void thereAreNoTurrets() {
+        state.getWorld()
+             .getEntityManager()
+             .getEntitiesWith(SpriteInfo.class)
+             .filter(pair -> pair.getComponent().spriteName.equals("sprites/turret"))
+             .map(EntityManager.EntityComponentPair::getEntity)
+             .forEach(state.getWorld().getEntityManager()::destroyEntity);
+        state.getWorld().getEntityManager().applyModifications();
     }
 
     @Given("there are no spawners")
@@ -102,6 +124,7 @@ public class WorldSteps {
              .getEntitiesWith(SpawnerComponent.class)
              .map(EntityManager.EntityComponentPair::getEntity)
              .forEach(state.getWorld().getEntityManager()::destroyEntity);
+        state.getWorld().getEntityManager().applyModifications();
     }
 
     @Then("the player should still be alive.")

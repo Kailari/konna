@@ -47,7 +47,7 @@ public class GameplayGameState extends GameState {
         final var entityManager = world.getEntityManager();
 
         final var player = PlayerArchetype.create(entityManager,
-                                                  new Transform(0, 0));
+                                                  timeManager, new Transform(0, 0));
         world.getOrCreateResource(Players.class).setLocalPlayer(player);
         entityManager.addComponentTo(player, new CameraFollowTargetTag());
 

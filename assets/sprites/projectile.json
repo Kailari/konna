@@ -4,8 +4,8 @@
       "texture": "textures/projectile.png",
       "x": 0,
       "y": 0,
-      "w": 4,
-      "h": 8
+      "w": 8,
+      "h": 32
     }
   ]
 }
