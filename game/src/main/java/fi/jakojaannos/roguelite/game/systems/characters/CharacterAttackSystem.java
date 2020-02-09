@@ -1,5 +1,8 @@
 package fi.jakojaannos.roguelite.game.systems.characters;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
@@ -14,6 +17,8 @@ import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponStats;
 import fi.jakojaannos.roguelite.game.systems.SystemGroups;
 
 public class CharacterAttackSystem implements ECSSystem {
+    private static final Logger LOG = LoggerFactory.getLogger(CharacterAttackSystem.class);
+
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.CHARACTER_TICK)
@@ -29,6 +34,7 @@ public class CharacterAttackSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
+        LOG.debug("tick attack");
         final var timeManager = world.getResource(Time.class);
 
         final var entityManager = world.getEntityManager();

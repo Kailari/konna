@@ -33,7 +33,7 @@ public class TurretArchetype {
                                                                CollisionLayer.PLAYER_PROJECTILE,
                                                                0.375,
                                                                -1.0));
-        entityManager.addComponentTo(turret, new WeaponStats(timeManager.convertToTicks(1.0 / 3.0),
+        entityManager.addComponentTo(turret, new WeaponStats(timeManager.convertToTicks(1.0 / 5.0),
                                                              50.0,
                                                              5.0));
 

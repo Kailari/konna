@@ -5,7 +5,7 @@ Feature: Enemies that have taken damage recently have health-bars rendered near 
 
   Background:
     Given the game world just finished loading
-    And the world is blank with 20 enemies scattered about
+    And the world is blank with 20 enemies with 3 hp each scattered about
 
   Scenario: No enemies have taken damage. No health-bars should be rendered.
     Given no enemies have taken damage
@@ -35,8 +35,8 @@ Feature: Enemies that have taken damage recently have health-bars rendered near 
 
   Scenario: A bunch of have taken earlier but some time has passed. A few enemies take damage now. Only recently damaged enemies have health-bars.
     Given 6 enemies have taken damage 10 seconds ago
-    And 3 enemies have taken damage recently
+    And 2 enemies have taken damage recently
     When the game runs for a single tick
     And the game is rendered
-    Then there should be 3 health-bars visible
+    Then there should be 2 health-bars visible
     And each health-bar should be close to a damaged enemy

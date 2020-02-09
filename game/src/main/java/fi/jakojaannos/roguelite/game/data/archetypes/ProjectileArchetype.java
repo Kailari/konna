@@ -25,7 +25,7 @@ public class ProjectileArchetype {
         entityManager.addComponentTo(entity, new Transform(position));
         entityManager.addComponentTo(entity, new Velocity(velocity));
         entityManager.addComponentTo(entity, new ProjectileStats(1.0, source, pushForce));
-        entityManager.addComponentTo(entity, new Collider(collisionLayer, 0.3, 0.6, 0.15, 0.15));
+        entityManager.addComponentTo(entity, new Collider(collisionLayer, 0.3, 1.2, 0.15, 0.15));
         entityManager.addComponentTo(entity, new SpriteInfo("sprites/projectile"));
         entityManager.addComponentTo(entity, new RotateTowardsVelocityTag());
         if (duration > 0) {

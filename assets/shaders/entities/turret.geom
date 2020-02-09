@@ -1,6 +1,7 @@
 #version 150
 
 #define PI 3.1415926538
+#define MAX_ANIMATION_LENGTH 2
 
 layout (points) in;
 layout (triangle_strip, max_vertices = 8) out;
@@ -80,10 +81,17 @@ vec2 position,
 float rotation,
 int columns,
 int rows,
-int frame
+int frames[MAX_ANIMATION_LENGTH],
+int animation_length
 ) {
     float frame_width = 1.0 / columns;
     float frame_height = 1.0 / rows;
+
+    float frameDuration = 0.25;
+    float t = time / float(timestep);
+
+    int frame_index = int(floor(t / frameDuration)) % animation_length;
+    int frame = frames[frame_index];
 
     int column = frame % columns;
     int row = frame / columns;
@@ -99,16 +107,13 @@ void create_base(mat4 mvp, vec2 size, vec2 position, float rotation, bool alert)
     int columns = 3;
     int rows = 2;
 
-    int frames_idle[2];
+    int frames_idle[MAX_ANIMATION_LENGTH];
     frames_idle[0] = 0;
-    int frames_alert[2];
+    int frames_alert[MAX_ANIMATION_LENGTH];
     frames_alert[0] = 1;
     frames_alert[1] = 2;
 
-    float frameDuration = 0.25;
-    float t = time / float(timestep);
-
-    int frames[2];
+    int frames[MAX_ANIMATION_LENGTH];
     int animation_length;
     if (alert) {
         animation_length = 2;
@@ -118,26 +123,20 @@ void create_base(mat4 mvp, vec2 size, vec2 position, float rotation, bool alert)
         frames = frames_idle;
     }
 
-    int frame_index = int(floor(t / frameDuration)) % animation_length;
-    int frame = frames[frame_index];
-
-    create_quad_from_frame(mvp, size, position, rotation, columns, rows, frame);
+    create_quad_from_frame(mvp, size, position, rotation, columns, rows, frames, animation_length);
 }
 
 void create_gun(mat4 mvp, vec2 size, vec2 position, bool shooting, vec2 target_pos) {
     int columns = 3;
     int rows = 2;
 
-    int frames_idle[2];
+    int frames_idle[MAX_ANIMATION_LENGTH];
     frames_idle[0] = 3;
-    int frames_shoot[2];
+    int frames_shoot[MAX_ANIMATION_LENGTH];
     frames_shoot[0] = 4;
     frames_shoot[1] = 5;
 
-    float frameDuration = 0.25;
-    float t = time / float(timestep);
-
-    int frames[2];
+    int frames[MAX_ANIMATION_LENGTH];
     int animation_length;
     if (shooting) {
         animation_length = 2;
@@ -147,9 +146,6 @@ void create_gun(mat4 mvp, vec2 size, vec2 position, bool shooting, vec2 target_p
         frames = frames_idle;
     }
 
-    int frame_index = int(floor(t / frameDuration)) % animation_length;
-    int frame = frames[frame_index];
-
     vec2 direction = target_pos - position;
 
     vec2 v1 = normalize(direction);
@@ -158,7 +154,7 @@ void create_gun(mat4 mvp, vec2 size, vec2 position, bool shooting, vec2 target_p
     float determinant = v1.x * v2.y + v1.y * v2.x;
     float angle = -atan(determinant, dot);
 
-    create_quad_from_frame(mvp, size, position, angle, columns, rows, frame);
+    create_quad_from_frame(mvp, size, position, angle, columns, rows, frames, animation_length);
 }
 
 void main(void) {

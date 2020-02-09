@@ -3,6 +3,7 @@ package fi.jakojaannos.roguelite.game.data.archetypes;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.DamageSource;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
@@ -15,6 +16,7 @@ import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponStats;
 public class PlayerArchetype {
     public static Entity create(
             final EntityManager entityManager,
+            final TimeManager timeManager,
             final Transform transform
     ) {
         final var player = entityManager.createEntity();
@@ -31,7 +33,12 @@ public class PlayerArchetype {
         entityManager.addComponentTo(player, new PlayerTag());
         entityManager.addComponentTo(player, new LookAtTargetTag());
         entityManager.addComponentTo(player, new WalkingMovementAbility(10.0f, 69.0f * 1.5));
-        entityManager.addComponentTo(player, new WeaponStats(10, 40.0, 2.5, 4, -1, 10));
+        entityManager.addComponentTo(player, new WeaponStats(timeManager.convertToTicks(1.0 / 2.5),
+                                                             80.0,
+                                                             2.5,
+                                                             4,
+                                                             -1,
+                                                             10));
         entityManager.addComponentTo(player, new SpriteInfo("sprites/player"));
         entityManager.addComponentTo(player, new Health(10));
         return player;

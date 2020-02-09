@@ -36,7 +36,7 @@ public class JumpingCharacterMovementSystemTest {
 
         final var playerPos = new Transform(10, 10);
         world.getOrCreateResource(Players.class)
-             .setLocalPlayer(PlayerArchetype.create(entityManager, playerPos));
+             .setLocalPlayer(PlayerArchetype.create(entityManager, time, playerPos));
 
         Entity slime = entityManager.createEntity();
         JumpingMovementAbility split = JumpingMovementAbility.builder().jumpForce(5.0)
