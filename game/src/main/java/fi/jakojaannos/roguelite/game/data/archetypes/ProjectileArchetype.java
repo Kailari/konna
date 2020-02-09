@@ -21,12 +21,13 @@ public class ProjectileArchetype {
             final DamageSource<?> source,
             final CollisionLayer collisionLayer,
             final long timestamp,
-            final long duration
+            final long duration,
+            final double pushForce
     ) {
         final var entity = entityManager.createEntity();
         entityManager.addComponentTo(entity, new Transform(position));
         entityManager.addComponentTo(entity, new Velocity(velocity));
-        entityManager.addComponentTo(entity, new ProjectileStats(1.0, source));
+        entityManager.addComponentTo(entity, new ProjectileStats(1.0, source, pushForce));
         entityManager.addComponentTo(entity, new Collider(collisionLayer, 0.3, 0.3, 0.15, 0.15));
         entityManager.addComponentTo(entity, new SpriteInfo("sprites/projectile"));
         if (duration > 0) {

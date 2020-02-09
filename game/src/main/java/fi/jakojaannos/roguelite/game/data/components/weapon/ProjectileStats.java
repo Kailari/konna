@@ -9,4 +9,5 @@ import fi.jakojaannos.roguelite.game.data.DamageSource;
 public class ProjectileStats implements Component {
     public double damage;
     public DamageSource<?> damageSource;
+    public double pushForce;
 }
