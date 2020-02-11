@@ -33,9 +33,14 @@ public class TurretArchetype {
                                                                CollisionLayer.PLAYER_PROJECTILE,
                                                                0.375,
                                                                -1.0));
-        entityManager.addComponentTo(turret, new WeaponStats(timeManager.convertToTicks(1.0 / 5.0),
-                                                             50.0,
-                                                             5.0));
+        entityManager.addComponentTo(turret, WeaponStats.builder()
+                                                        .timeBetweenShots(timeManager.convertToTicks(1.0 / 5.0))
+                                                        .projectileSpeed(50.0)
+                                                        .spread(5.0)
+                                                        .projectileSpeedNoise(5.0)
+                                                        .projectileLifetimeInTicks(-1)
+                                                        .projectilePushForce(0.0)
+                                                        .build());
 
         return turret;
     }
