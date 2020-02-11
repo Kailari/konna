@@ -42,7 +42,7 @@ class CharacterAttackSystemTest {
         this.weaponInput = new WeaponInput();
         this.weaponInput.attack = false;
         this.attackAbility = new AttackAbility(new DamageSource.Entity(entity));
-        this.weaponStats = new WeaponStats();
+        this.weaponStats = WeaponStats.builder().build();
         entityManager.addComponentTo(entity, new Transform(0.0, 0.0));
         entityManager.addComponentTo(entity, new Velocity());
         entityManager.addComponentTo(entity, this.weaponInput);

@@ -33,12 +33,14 @@ public class PlayerArchetype {
         entityManager.addComponentTo(player, new PlayerTag());
         entityManager.addComponentTo(player, new LookAtTargetTag());
         entityManager.addComponentTo(player, new WalkingMovementAbility(10.0f, 69.0f * 1.5));
-        entityManager.addComponentTo(player, new WeaponStats(timeManager.convertToTicks(1.0 / 2.5),
-                                                             80.0,
-                                                             2.5,
-                                                             4,
-                                                             -1,
-                                                             10));
+        entityManager.addComponentTo(player, WeaponStats.builder()
+                                                        .timeBetweenShots(timeManager.convertToTicks(1.0 / 2.5))
+                                                        .projectileSpeed(80.0)
+                                                        .spread(2.5)
+                                                        .projectileSpeedNoise(4.0)
+                                                        .projectileLifetimeInTicks(-1)
+                                                        .projectilePushForce(10.0)
+                                                        .build());
         entityManager.addComponentTo(player, new SpriteInfo("sprites/player"));
         entityManager.addComponentTo(player, new Health(10));
         return player;
