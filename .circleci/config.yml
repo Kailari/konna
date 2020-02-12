@@ -1,50 +1,46 @@
-# Java Gradle CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-java/ for more details
-#
-version: 2
+version: 2.1
+orbs:
+  win: circleci/windows@2.2.0
+
 jobs:
   build:
     docker:
-      # specify the version you desire here
       - image: circleci/openjdk:13-jdk-buster
-
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/postgres:9.4
-
     working_directory: ~/repo
 
     environment:
-      # Customize the JVM maximum heap limit
       JVM_OPTS: -Xmx3200m
       TERM: dumb
 
     steps:
       - checkout
-
-      # Download and cache dependencies
       - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "build.gradle" }}
-            # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
 
       - run: gradle dependencies
-
       - save_cache:
           paths:
             - ~/.gradle
           key: v1-dependencies-{{ checksum "build.gradle" }}
-
-      # run tests!
-      - run: gradle test
-      - run: ./gradlew check
-      - run: ./gradlew jacocoTestReport jacocoRootReport
-      - run: bash <(curl -s https://codecov.io/bash)
       - run:
-          name: Save test results
+          name: Compile
+          command: |
+            gradle compileJava
+            gradle assemble
+      - run:
+          name: Run tests
+          command: |
+            gradle compileTestJava 
+            gradle check
+      - run:
+          name: Upload test results to CodeCov
+          command: |
+            gradle jacocoTestReport jacocoRootReport
+            bash <(curl -s https://codecov.io/bash)
+      - run:
+          name: Save test results to Circle
           command: |
             mkdir -p ~/test-results/junit/
             find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} ~/test-results/junit/ \;
@@ -53,3 +49,40 @@ jobs:
           path: ~/test-results
       - store_artifacts:
           path: ~/test-results/junit
+
+  deploy:
+    executor: win/default
+
+    environment:
+      JVM_OPTS: -Xmx3200m
+
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "build.gradle" }}
+            - v1-dependencies-
+      - run:
+          name: Build
+          command: ./gradlew.bat compileJava assemble
+          shell: bash.exe
+      - run:
+          name: Package
+          command: ./gradlew.bat jlinkZip
+          shell: bash.exe
+
+      - store_artifacts:
+          path: ./launcher/build/image.zip
+          destination: 'konna-unstable.zip'
+
+workflows:
+  version: 2.1
+  build-test-deploy:
+    jobs:
+      - build
+      - deploy:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
