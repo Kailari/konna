@@ -65,7 +65,7 @@ public class HandleMainMenuUIEventsSystem implements ECSSystem {
 
     private GameplayGameState createGameplayState(final World world) {
         return new GameplayGameState(System.nanoTime(),
-                                     World.createNew(EntityManager.createNew(256, 32)),
+                                     World.createNew(EntityManager.createNew(256, 64)),
                                      world.getResource(Time.class).getTimeManager());
     }
 }
