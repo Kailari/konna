@@ -1,22 +1,24 @@
 package fi.jakojaannos.roguelite.game.systems;
 
 import org.joml.Vector2d;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
-import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
-import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.ecs.*;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.MovementInput;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
 import fi.jakojaannos.roguelite.game.data.components.character.WeaponInput;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
+import fi.jakojaannos.roguelite.game.weapons.Weapon;
 
 public class PlayerInputSystem implements ECSSystem {
+    private static final Logger LOG = LoggerFactory.getLogger(PlayerInputSystem.class);
+
     private final Vector2d tmpCursorPos = new Vector2d();
 
     @Override
@@ -57,6 +59,54 @@ public class PlayerInputSystem implements ECSSystem {
                                inputVertical);
             attackInput.attack = inputAttack;
             attackAbility.targetPosition.set(this.tmpCursorPos);
+
+            if (inputs.inputWeaponSlot0)
+                tryEquipWeaponAtSlot(0, entityManager, entity, attackAbility);
+            else if (inputs.inputWeaponSlot1)
+                tryEquipWeaponAtSlot(1, entityManager, entity, attackAbility);
+            else if (inputs.inputWeaponSlot2)
+                tryEquipWeaponAtSlot(2, entityManager, entity, attackAbility);
+            else if (inputs.inputWeaponSlot3)
+                tryEquipWeaponAtSlot(3, entityManager, entity, attackAbility);
+            else if (inputs.inputWeaponSlot4)
+                tryEquipWeaponAtSlot(4, entityManager, entity, attackAbility);
+            else if (inputs.inputWeaponSlot5)
+                tryEquipWeaponAtSlot(5, entityManager, entity, attackAbility);
+            else if (inputs.inputWeaponSlot6)
+                tryEquipWeaponAtSlot(6, entityManager, entity, attackAbility);
+            else if (inputs.inputWeaponSlot7)
+                tryEquipWeaponAtSlot(7, entityManager, entity, attackAbility);
+            else if (inputs.inputWeaponSlot8)
+                tryEquipWeaponAtSlot(8, entityManager, entity, attackAbility);
+            else if (inputs.inputWeaponSlot9)
+                tryEquipWeaponAtSlot(9, entityManager, entity, attackAbility);
+
         });
+    }
+
+    private void tryEquipWeaponAtSlot(
+            final int slot,
+            final EntityManager entityManager,
+            final Entity entity,
+            final AttackAbility attackAbility
+    ) {
+        if (slot >= attackAbility.weaponList.length || slot < 0) {
+            LOG.debug("Trying to equip a weapon that doesn't exist! index:" + slot);
+            equipWeapon(attackAbility.unarmed, entityManager, entity, attackAbility);
+        } else {
+            LOG.debug("Equipping weapon at slot " + slot);
+            equipWeapon(attackAbility.weaponList[slot], entityManager, entity, attackAbility);
+        }
+    }
+
+    private void equipWeapon(
+            final Weapon weapon,
+            final EntityManager entityManager,
+            final Entity entity,
+            final AttackAbility attackAbility
+    ) {
+        attackAbility.equippedWeapon.unequip(entityManager, entity);
+        attackAbility.equippedWeapon = weapon;
+        attackAbility.equippedWeapon.equip(entityManager, entity);
     }
 }

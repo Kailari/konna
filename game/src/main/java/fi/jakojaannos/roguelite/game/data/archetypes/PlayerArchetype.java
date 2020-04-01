@@ -28,7 +28,9 @@ public class PlayerArchetype {
         entityManager.addComponentTo(player, new AttackAbility(new DamageSource.Entity(player),
                                                                CollisionLayer.PLAYER_PROJECTILE,
                                                                0.25,
-                                                               -0.5));
+                                                               -0.5,
+                                                               entityManager,
+                                                               player));
         entityManager.addComponentTo(player, new Collider(CollisionLayer.PLAYER, 1.0, 1.0, 0.5, 0.5));
         entityManager.addComponentTo(player, new PlayerTag());
         entityManager.addComponentTo(player, new LookAtTargetTag());

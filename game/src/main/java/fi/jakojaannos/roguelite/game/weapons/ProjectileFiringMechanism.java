@@ -77,4 +77,12 @@ public class ProjectileFiringMechanism implements Weapon.FiringMechanism {
 
         attackAbility.lastAttackTimestamp = timestamp;
     }
+
+    @Override
+    public void equip(final EntityManager entityManager, final Entity owner) {
+    }
+
+    @Override
+    public void unequip(final EntityManager entityManager, final Entity owner) {
+    }
 }

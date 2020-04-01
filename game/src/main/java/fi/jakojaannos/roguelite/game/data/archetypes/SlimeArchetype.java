@@ -96,7 +96,12 @@ public class SlimeArchetype {
 
         entityManager.addComponentTo(entity, new AttackAI(spriteSize * 0.6));
         entityManager.addComponentTo(entity, new WeaponInput());
-        entityManager.addComponentTo(entity, new AttackAbility(new DamageSource.Entity(entity), CollisionLayer.ENEMY));
+        entityManager.addComponentTo(entity, new AttackAbility(new DamageSource.Entity(entity),
+                                                               CollisionLayer.ENEMY,
+                                                               0.0,
+                                                               0.0,
+                                                               entityManager,
+                                                               entity));
         entityManager.addComponentTo(entity, WeaponStats.builder()
                                                         .timeBetweenShots(20)
                                                         .projectileSpeed(10.0)
