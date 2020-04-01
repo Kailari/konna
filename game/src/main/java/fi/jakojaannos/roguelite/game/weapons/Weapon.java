@@ -18,34 +18,60 @@ public interface Weapon {
             final TimeManager timeManager,
             final Entity entity
     ) {
-        if (canFire(timeManager, attackAbility, weaponStats)) {
+        if (canFire(entityManager, entity, timeManager, attackAbility, weaponStats)) {
             getFiringMechanism().fire(entityManager, weaponStats, timeManager, attackAbility, entity);
         }
     }
 
     default boolean canFire(
+            final EntityManager entityManager,
+            final Entity owner,
             final TimeManager timeManager,
             final AttackAbility attackAbility,
             final WeaponStats weaponStats
     ) {
-        return getTrigger().shouldTrigger(timeManager, attackAbility, weaponStats)
+        return getTrigger().shouldTrigger(entityManager, owner, timeManager, attackAbility, weaponStats)
                 && getFiringMechanism().isReadyToFire(timeManager, attackAbility, weaponStats);
+    }
+
+    default void equip(final EntityManager entityManager, final Entity owner) {
+        getTrigger().equip(entityManager, owner);
+        getFiringMechanism().equip(entityManager, owner);
+    }
+
+    default void unequip(final EntityManager entityManager, final Entity owner) {
+        getTrigger().unequip(entityManager, owner);
+        getFiringMechanism().unequip(entityManager, owner);
     }
 
     interface TriggerMechanism {
         void pull(
+                EntityManager entityManager,
+                Entity owner,
                 TimeManager timeManager,
                 AttackAbility attackAbility,
                 WeaponStats weaponStats
         );
 
         void release(
+                EntityManager entityManager,
+                Entity owner,
                 TimeManager timeManager,
                 AttackAbility attackAbility,
                 WeaponStats weaponStats
         );
 
-        boolean shouldTrigger(TimeManager timeManager, AttackAbility attackAbility, WeaponStats weaponStats);
+        boolean shouldTrigger(
+                EntityManager entityManager,
+                Entity owner,
+                TimeManager timeManager,
+                AttackAbility attackAbility,
+                WeaponStats weaponStats
+        );
+
+        void equip(EntityManager entityManager, Entity owner);
+
+        void unequip(EntityManager entityManager, Entity owner);
     }
 
     interface FiringMechanism {
@@ -58,5 +84,9 @@ public interface Weapon {
                 AttackAbility attackAbility,
                 Entity shooter
         );
+
+        void equip(EntityManager entityManager, Entity owner);
+
+        void unequip(EntityManager entityManager, Entity owner);
     }
 }
