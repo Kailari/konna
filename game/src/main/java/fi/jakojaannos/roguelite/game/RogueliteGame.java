@@ -63,6 +63,28 @@ public class RogueliteGame extends GameBase {
                     inputs.inputForceCloseA = input.getAction() != ButtonInput.Action.RELEASE;
                 } else if (input.getButton() == InputButton.Keyboard.KEY_F4) {
                     inputs.inputForceCloseB = input.getAction() != ButtonInput.Action.RELEASE;
+                } else if (input.getButton() == InputButton.Keyboard.KEY_0) {
+                    inputs.inputWeaponSlot0 = input.getAction() != ButtonInput.Action.RELEASE;
+                } else if (input.getButton() == InputButton.Keyboard.KEY_1) {
+                    inputs.inputWeaponSlot1 = input.getAction() != ButtonInput.Action.RELEASE;
+                } else if (input.getButton() == InputButton.Keyboard.KEY_2) {
+                    inputs.inputWeaponSlot2 = input.getAction() != ButtonInput.Action.RELEASE;
+                } else if (input.getButton() == InputButton.Keyboard.KEY_3) {
+                    inputs.inputWeaponSlot3 = input.getAction() != ButtonInput.Action.RELEASE;
+                } else if (input.getButton() == InputButton.Keyboard.KEY_4) {
+                    inputs.inputWeaponSlot4 = input.getAction() != ButtonInput.Action.RELEASE;
+                } else if (input.getButton() == InputButton.Keyboard.KEY_5) {
+                    inputs.inputWeaponSlot5 = input.getAction() != ButtonInput.Action.RELEASE;
+                } else if (input.getButton() == InputButton.Keyboard.KEY_6) {
+                    inputs.inputWeaponSlot6 = input.getAction() != ButtonInput.Action.RELEASE;
+                } else if (input.getButton() == InputButton.Keyboard.KEY_7) {
+                    inputs.inputWeaponSlot7 = input.getAction() != ButtonInput.Action.RELEASE;
+                } else if (input.getButton() == InputButton.Keyboard.KEY_8) {
+                    inputs.inputWeaponSlot8 = input.getAction() != ButtonInput.Action.RELEASE;
+                } else if (input.getButton() == InputButton.Keyboard.KEY_9) {
+                    inputs.inputWeaponSlot9 = input.getAction() != ButtonInput.Action.RELEASE;
+                } else if (input.getButton() == InputButton.Keyboard.KEY_R) {
+                    inputs.inputReload = input.getAction() != ButtonInput.Action.RELEASE;
                 }
             });
         }

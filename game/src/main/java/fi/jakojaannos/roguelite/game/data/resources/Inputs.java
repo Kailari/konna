@@ -14,4 +14,16 @@ public class Inputs implements Resource {
 
     public boolean inputForceCloseA;
     public boolean inputForceCloseB;
+
+    public boolean inputWeaponSlot1 = false;
+    public boolean inputWeaponSlot2 = false;
+    public boolean inputWeaponSlot3 = false;
+    public boolean inputWeaponSlot4 = false;
+    public boolean inputWeaponSlot5 = false;
+    public boolean inputWeaponSlot6 = false;
+    public boolean inputWeaponSlot7 = false;
+    public boolean inputWeaponSlot8 = false;
+    public boolean inputWeaponSlot9 = false;
+    public boolean inputWeaponSlot0 = false;
+    public boolean inputReload = false;
 }
