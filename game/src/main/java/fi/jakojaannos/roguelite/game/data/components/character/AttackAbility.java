@@ -2,14 +2,11 @@ package fi.jakojaannos.roguelite.game.data.components.character;
 
 import org.joml.Vector2d;
 
-import javax.annotation.Nullable;
-
 import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.DamageSource;
-import fi.jakojaannos.roguelite.game.weapons.NoWeapon;
 import fi.jakojaannos.roguelite.game.weapons.SimpleWeapon;
 import fi.jakojaannos.roguelite.game.weapons.Weapon;
 
@@ -17,10 +14,6 @@ public class AttackAbility implements Component {
     public final DamageSource<?> damageSource;
     public final CollisionLayer projectileLayer;
     public final Vector2d weaponOffset = new Vector2d(0.0, 0.0);
-
-    public final Weapon unarmed = new NoWeapon();
-
-    public final Weapon[] weaponList = {this.unarmed, new SimpleWeapon()};
 
     public Weapon equippedWeapon = new SimpleWeapon();
 
