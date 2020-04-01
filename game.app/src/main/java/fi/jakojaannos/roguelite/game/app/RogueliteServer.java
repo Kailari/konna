@@ -40,7 +40,7 @@ public class RogueliteServer {
     }
 
     private static ServerGameState createInitialGameState() {
-        return new ServerGameState(World.createNew(EntityManager.createNew(256, 32)),
+        return new ServerGameState(World.createNew(EntityManager.createNew(256, 64)),
                                    new SimpleTimeManager(20L));
     }
 

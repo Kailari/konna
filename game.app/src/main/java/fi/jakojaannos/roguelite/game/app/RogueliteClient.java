@@ -50,7 +50,7 @@ public class RogueliteClient {
         // FIXME: Do not pass the host and the port to main menu. Instead, connect and start game if
         //  host is given
         LOG.trace("Creating main menu game state with host and port {}:{}", host, port);
-        return new MainMenuGameState(World.createNew(EntityManager.createNew(256, 32)),
+        return new MainMenuGameState(World.createNew(EntityManager.createNew(256, 64)),
                                      game.getTime(), host, port);
     }
 }
