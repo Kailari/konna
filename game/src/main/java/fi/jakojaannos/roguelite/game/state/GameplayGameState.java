@@ -34,6 +34,7 @@ import fi.jakojaannos.roguelite.game.systems.collision.ProjectileToCharacterColl
 import fi.jakojaannos.roguelite.game.systems.physics.ApplyForceSystem;
 import fi.jakojaannos.roguelite.game.systems.physics.ApplyFrictionSystem;
 import fi.jakojaannos.roguelite.game.systems.physics.ApplyVelocitySystem;
+import fi.jakojaannos.roguelite.game.weapons.Weapons;
 import fi.jakojaannos.roguelite.game.world.WorldGenerator;
 
 public class GameplayGameState extends GameState {
@@ -43,6 +44,7 @@ public class GameplayGameState extends GameState {
             final TimeManager timeManager
     ) {
         super(world, timeManager);
+        world.provideResource(Weapons.class, new Weapons());
 
         final var entityManager = world.getEntityManager();
 
