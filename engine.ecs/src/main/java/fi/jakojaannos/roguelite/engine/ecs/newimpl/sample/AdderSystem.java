@@ -6,7 +6,7 @@ import fi.jakojaannos.roguelite.engine.ecs.newimpl.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.newimpl.Requirements;
 import fi.jakojaannos.roguelite.engine.ecs.newimpl.systemdata.RequirementsImpl;
 
-public class MutateSystem implements EcsSystem<EcsSystem.NoResources, MutateSystem.EntityData, EcsSystem.NoEvents> {
+public class AdderSystem implements EcsSystem<EcsSystem.NoResources, AdderSystem.EntityData, EcsSystem.NoEvents> {
     @Override
     public Requirements<EntityData> declareRequirements() {
         final var require = new RequirementsImpl<EntityData>();
@@ -29,8 +29,8 @@ public class MutateSystem implements EcsSystem<EcsSystem.NoResources, MutateSyst
     }
 
     public static record EntityData(
-            SampleComponentA a,
-            SampleComponentB b
+            ValueComponent a,
+            AmountComponent b
     ) {
     }
 }

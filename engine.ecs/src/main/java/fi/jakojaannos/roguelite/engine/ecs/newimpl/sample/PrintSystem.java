@@ -3,6 +3,7 @@ package fi.jakojaannos.roguelite.engine.ecs.newimpl.sample;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.ecs.newimpl.EcsSystem;
@@ -27,12 +28,11 @@ public class PrintSystem implements EcsSystem<EcsSystem.NoResources, PrintSystem
     ) {
         entities.forEach(entity -> {
             final var componentA = entity.getData().a;
-
-            LOG.info("Component A: {}", componentA.value);
+            LOG.info("Value for entity #{}: {}", entity.getId(), componentA.value);
         });
     }
 
-    public static record EntityData(SampleComponentA a) {
+    public static record EntityData(ValueComponent a) {
     }
 }
 

@@ -1,9 +1,9 @@
 package fi.jakojaannos.roguelite.engine.ecs.newimpl.sample;
 
-public class SampleComponentB {
+public class AmountComponent {
     public int value;
 
-    public SampleComponentB(final int value) {
+    public AmountComponent(final int value) {
         this.value = value;
     }
 }

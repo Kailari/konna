@@ -11,13 +11,13 @@ public class RequirementsImpl<TEntityData> implements Requirements<TEntityData> 
     private Class<?>[] componentTypes;
 
     @Override
-    public Constructor<TEntityData> getConstructor() {
+    public Constructor<TEntityData> getEntityDataConstructor() {
         return this.constructor;
     }
 
     @Override
-    public Class<?>[] getComponentTypes() {
-        return componentTypes;
+    public Class<?>[] getEntityDataComponentTypes() {
+        return this.componentTypes;
     }
 
     @SuppressWarnings("unchecked")
