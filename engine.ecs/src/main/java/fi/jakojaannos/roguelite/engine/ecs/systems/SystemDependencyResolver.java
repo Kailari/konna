@@ -1,7 +1,5 @@
 package fi.jakojaannos.roguelite.engine.ecs.systems;
 
-import lombok.RequiredArgsConstructor;
-
 import java.util.*;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -153,7 +151,6 @@ class SystemDependencyResolver {
         this.groups.get(group).groupDependency(dependency);
     }
 
-    @RequiredArgsConstructor
     private static class Entry {
         private final List<Class<? extends ECSSystem>> tickAfter = new ArrayList<>();
         private final List<Class<? extends ECSSystem>> tickBefore = new ArrayList<>();

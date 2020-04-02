@@ -1,6 +1,5 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering;
 
-import lombok.extern.slf4j.Slf4j;
 import org.joml.Matrix4f;
 import org.joml.Vector2d;
 import org.lwjgl.system.MemoryUtil;
@@ -20,7 +19,6 @@ import fi.jakojaannos.roguelite.engine.view.rendering.shader.EngineUniformBuffer
 import fi.jakojaannos.roguelite.engine.view.rendering.shader.ShaderProgram;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.SpriteBatchBase;
 
-@Slf4j
 public class LWJGLSpriteBatch extends SpriteBatchBase {
     private static final Matrix4f DEFAULT_TRANSFORM = new Matrix4f().identity();
     private static final int MAX_SPRITES_PER_BATCH = 4096;
@@ -61,21 +59,6 @@ public class LWJGLSpriteBatch extends SpriteBatchBase {
         this.batchMesh.setVertexData(this.vertexDataBuffer);
     }
 
-    private static ShaderProgram createShader(
-            final Path assetRoot,
-            final String shader,
-            final RenderingBackend backend
-    ) {
-        return backend.createShaderProgram()
-                      .vertexShader(assetRoot.resolve("shaders").resolve(shader + ".vert"))
-                      .fragmentShader(assetRoot.resolve("shaders").resolve(shader + ".frag"))
-                      .attributeLocation(0, "in_pos")
-                      .attributeLocation(1, "in_uv")
-                      .attributeLocation(2, "in_tint")
-                      .fragmentDataLocation(0, "out_fragColor")
-                      .build();
-    }
-
     @Override
     protected void queueFrame(
             final TextureRegion region,
@@ -92,22 +75,22 @@ public class LWJGLSpriteBatch extends SpriteBatchBase {
         this.tmpRectangle.getTopLeft(this.tmpVertex);
         updateVertex(offset,
                      this.tmpVertex.x, this.tmpVertex.y,
-                     (float) region.getU0(), (float) region.getV0(),
+                     (float) region.u0(), (float) region.v0(),
                      1.0f, 1.0f, 1.0f);
         this.tmpRectangle.getTopRight(this.tmpVertex);
         updateVertex(offset + SIZE_IN_BYTES,
                      this.tmpVertex.x, this.tmpVertex.y,
-                     (float) region.getU1(), (float) region.getV0(),
+                     (float) region.u1(), (float) region.v0(),
                      1.0f, 1.0f, 1.0f);
         this.tmpRectangle.getBottomRight(this.tmpVertex);
         updateVertex(offset + (2 * SIZE_IN_BYTES),
                      this.tmpVertex.x, this.tmpVertex.y,
-                     (float) region.getU1(), (float) region.getV1(),
+                     (float) region.u1(), (float) region.v1(),
                      1.0f, 1.0f, 1.0f);
         this.tmpRectangle.getBottomLeft(this.tmpVertex);
         updateVertex(offset + (3 * SIZE_IN_BYTES),
                      this.tmpVertex.x, this.tmpVertex.y,
-                     (float) region.getU0(), (float) region.getV1(),
+                     (float) region.u0(), (float) region.v1(),
                      1.0f, 1.0f, 1.0f);
     }
 
@@ -125,19 +108,19 @@ public class LWJGLSpriteBatch extends SpriteBatchBase {
         final var offset = getNFrames() * VERTICES_PER_SPRITE * SIZE_IN_BYTES;
         updateVertex(offset,
                      x0, y0,
-                     textureRegion.getU0(), textureRegion.getV0(),
+                     textureRegion.u0(), textureRegion.v0(),
                      r, g, b);
         updateVertex(offset + SIZE_IN_BYTES,
                      x1, y0,
-                     textureRegion.getU1(), textureRegion.getV0(),
+                     textureRegion.u1(), textureRegion.v0(),
                      r, g, b);
         updateVertex(offset + (2 * SIZE_IN_BYTES),
                      x1, y1,
-                     textureRegion.getU1(), textureRegion.getV1(),
+                     textureRegion.u1(), textureRegion.v1(),
                      r, g, b);
         updateVertex(offset + (3 * SIZE_IN_BYTES),
                      x0, y1,
-                     textureRegion.getU0(), textureRegion.getV1(),
+                     textureRegion.u0(), textureRegion.v1(),
                      r, g, b);
     }
 
@@ -199,5 +182,20 @@ public class LWJGLSpriteBatch extends SpriteBatchBase {
             indices[i + 5] = j;
         }
         return indices;
+    }
+
+    private static ShaderProgram createShader(
+            final Path assetRoot,
+            final String shader,
+            final RenderingBackend backend
+    ) {
+        return backend.createShaderProgram()
+                      .vertexShader(assetRoot.resolve("shaders").resolve(shader + ".vert"))
+                      .fragmentShader(assetRoot.resolve("shaders").resolve(shader + ".frag"))
+                      .attributeLocation(0, "in_pos")
+                      .attributeLocation(1, "in_uv")
+                      .attributeLocation(2, "in_tint")
+                      .fragmentDataLocation(0, "out_fragColor")
+                      .build();
     }
 }

@@ -1,5 +1,5 @@
 plugins {
-    id 'org.javamodularity.moduleplugin' version '1.5.0' apply false
+    id 'org.javamodularity.moduleplugin' version '1.6.0' apply false
     id 'java'
     id 'jacoco'
 }
@@ -8,28 +8,42 @@ allprojects {
     repositories {
         mavenCentral()
     }
+
+    compileJava {
+        sourceCompatibility = 14
+        targetCompatibility = 14
+    }
+
+    tasks.withType(JavaCompile) {
+        options.compilerArgs += '--enable-preview'
+    }
+    tasks.withType(JavaExec) {
+        jvmArgs += '--enable-preview'
+    }
+    tasks.withType(Test) {
+        jvmArgs += "--enable-preview"
+    }
 }
 
 subprojects {
     apply plugin: 'java'
     apply plugin: 'jacoco'
     apply plugin: 'org.javamodularity.moduleplugin'
-    apply plugin: 'checkstyle'
+    //apply plugin: 'checkstyle'
 
-    checkstyle {
+    compileJava {
+        sourceCompatibility = 14
+        targetCompatibility = 14
+    }
+
+    /*checkstyle {
         configFile file('../config/checkstyle/checkstyle.xml')
         toolVersion '8.29'
-    }
+    }*/
 
     dependencies {
         // FindBugs Annotations
         implementation "com.google.code.findbugs:jsr305:3.0.2"
-
-        // Lombok
-        compileOnly "org.projectlombok:lombok:${lombokVersion}"
-        testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
-        annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
-        testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
         // Logging
         implementation "org.slf4j:slf4j-api:${slf4jVersion}"

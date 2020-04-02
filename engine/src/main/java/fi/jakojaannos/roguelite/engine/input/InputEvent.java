@@ -1,27 +1,22 @@
 package fi.jakojaannos.roguelite.engine.input;
 
 import java.util.Optional;
+import javax.annotation.Nullable;
 
-public class InputEvent {
-    private final AxialInput axialInput;
-    private final ButtonInput buttonInput;
-
-    public InputEvent(final AxialInput input) {
-        this.axialInput = input;
-        this.buttonInput = null;
+public record InputEvent(@Nullable AxialInput axialInput, @Nullable ButtonInput buttonInput) {
+    public static InputEvent axial(final AxialInput input) {
+        return new InputEvent(input, null);
     }
 
-    public InputEvent(final ButtonInput input) {
-        this.axialInput = null;
-        this.buttonInput = input;
+    public static InputEvent button(final ButtonInput input) {
+        return new InputEvent(null, input);
     }
 
-    public Optional<AxialInput> getAxis() {
+    public Optional<AxialInput> asAxis() {
         return Optional.ofNullable(this.axialInput);
     }
 
-    public Optional<ButtonInput> getButton() {
+    public Optional<ButtonInput> asButton() {
         return Optional.ofNullable(this.buttonInput);
     }
-
 }

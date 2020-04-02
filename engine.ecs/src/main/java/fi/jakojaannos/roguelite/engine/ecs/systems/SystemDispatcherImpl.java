@@ -1,7 +1,7 @@
 package fi.jakojaannos.roguelite.engine.ecs.systems;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -12,10 +12,14 @@ import fi.jakojaannos.roguelite.engine.ecs.World;
 /**
  * Default {@link SystemDispatcher} implementation.
  */
-@Slf4j
-@RequiredArgsConstructor
 public class SystemDispatcherImpl implements SystemDispatcher {
+    private static final Logger LOG = LoggerFactory.getLogger(SystemDispatcherImpl.class);
+
     private final SystemStorage systems;
+
+    public SystemDispatcherImpl(final SystemStorage systems) {
+        this.systems = systems;
+    }
 
     @Override
     public void dispatch(final World world) {
@@ -53,10 +57,10 @@ public class SystemDispatcherImpl implements SystemDispatcher {
         queue.removeFirst();
         systemContext.getInstance()
                      .tick(world.getEntityManager()
-                                .getEntitiesWith(systemContext.getRequirements().getRequiredComponents(),
-                                                 systemContext.getRequirements().getExcludedComponents(),
-                                                 systemContext.getRequirements().getRequiredGroups(),
-                                                 systemContext.getRequirements().getExcludedGroups()),
+                                .getEntitiesWith(systemContext.getRequirements().requiredComponents(),
+                                                 systemContext.getRequirements().excludedComponents(),
+                                                 systemContext.getRequirements().requiredGroups(),
+                                                 systemContext.getRequirements().excludedGroups()),
                            world);
         dispatchContext.setDispatched(systemContext);
     }

@@ -1,7 +1,7 @@
 package fi.jakojaannos.roguelite.game.view;
 
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.Map;
@@ -23,11 +23,15 @@ import fi.jakojaannos.roguelite.game.view.state.GameStateRenderer;
 import fi.jakojaannos.roguelite.game.view.state.GameplayGameStateRenderer;
 import fi.jakojaannos.roguelite.game.view.state.MainMenuGameStateRenderer;
 
-@Slf4j
 public class RogueliteGameRenderer implements GameRenderer {
-    @Getter private final Camera camera;
+    private static final Logger LOG = LoggerFactory.getLogger(RogueliteGameRenderer.class);
 
+    private final Camera camera;
     private final Map<Class<? extends GameState>, GameStateRenderer> stateRenderers;
+
+    public Camera getCamera() {
+        return this.camera;
+    }
 
     public RogueliteGameRenderer(
             final Path assetRoot,
@@ -89,7 +93,7 @@ public class RogueliteGameRenderer implements GameRenderer {
         this.stateRenderers.values().forEach(renderer -> {
             try {
                 renderer.close();
-            } catch (Exception ignored) {
+            } catch (final Exception ignored) {
             }
         });
         this.camera.close();

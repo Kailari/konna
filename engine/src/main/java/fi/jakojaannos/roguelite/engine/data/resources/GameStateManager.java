@@ -1,14 +1,16 @@
 package fi.jakojaannos.roguelite.engine.data.resources;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 
 import fi.jakojaannos.roguelite.engine.ecs.Resource;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 
-@Slf4j
 public class GameStateManager implements Resource {
+    private static final Logger LOG = LoggerFactory.getLogger(GameStateManager.class);
+
     @Nullable private GameState newState;
     private boolean gameShouldClose;
 
@@ -33,7 +35,7 @@ public class GameStateManager implements Resource {
                 final var newState = this.newState;
                 this.newState = null;
                 return newState;
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 LOG.error("Error destroying the previous game state:", e);
             }
         }

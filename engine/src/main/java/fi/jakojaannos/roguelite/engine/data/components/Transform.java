@@ -1,14 +1,16 @@
 package fi.jakojaannos.roguelite.engine.data.components;
 
-import lombok.NoArgsConstructor;
 import org.joml.Vector2d;
 
 import fi.jakojaannos.roguelite.engine.ecs.Component;
 
-@NoArgsConstructor
 public final class Transform implements Component {
     public Vector2d position = new Vector2d();
     public double rotation;
+
+    public Transform() {
+        this(0.0, 0.0);
+    }
 
     public Transform(final Vector2d position) {
         this(position.x, position.y);

@@ -13,6 +13,8 @@ import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
+import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.TileMapLayer;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
@@ -38,8 +40,7 @@ class ApplyVelocitySystemTest {
         entityManager = EntityManager.createNew(256, 32);
         world = World.createNew(entityManager);
 
-        Time time = mock(Time.class);
-        when(time.getTimeStepInSeconds()).thenReturn(0.02);
+        final var time = new Time(new SimpleTimeManager(20));
         world.provideResource(Time.class, time);
 
         entity = entityManager.createEntity();
@@ -84,8 +85,7 @@ class ApplyVelocitySystemTest {
         EntityManager entityManager = EntityManager.createNew(256, 32);
         World world = World.createNew(entityManager);
 
-        Time time = mock(Time.class);
-        when(time.getTimeStepInSeconds()).thenReturn(0.02);
+        final var time = new Time(new SimpleTimeManager(20));
         world.provideResource(Time.class, time);
 
         Entity entity = entityManager.createEntity();
@@ -105,8 +105,7 @@ class ApplyVelocitySystemTest {
         EntityManager entityManager = EntityManager.createNew(256, 32);
         World world = World.createNew(entityManager);
 
-        Time time = mock(Time.class);
-        when(time.getTimeStepInSeconds()).thenReturn(0.02);
+        final var time = new Time(new SimpleTimeManager(20));
         world.provideResource(Time.class, time);
 
         Entity entity = entityManager.createEntity();
@@ -210,8 +209,7 @@ class ApplyVelocitySystemTest {
         TileType block = new TileType(1, true);
         TileMap<TileType> tileMap = new TileMap<>(empty);
         tileMap.setTile(1, 0, block);
-        TileMapLayer layer = new TileMapLayer(tileMap);
-        layer.collisionEnabled = false;
+        TileMapLayer layer = new TileMapLayer(tileMap, false);
         entityManager.addComponentTo(other, layer);
 
         velocity.set(1.0, 0.1);
@@ -234,7 +232,7 @@ class ApplyVelocitySystemTest {
         TileType block = new TileType(1, true);
         TileMap<TileType> tileMap = new TileMap<>(empty);
         tileMap.setTile(1, 0, block);
-        entityManager.addComponentTo(other, new TileMapLayer(tileMap));
+        entityManager.addComponentTo(other, new TileMapLayer(tileMap, true));
 
         velocity.set(1.0, 0.1);
 
@@ -255,7 +253,7 @@ class ApplyVelocitySystemTest {
         TileType nonSolid = new TileType(1, false);
         TileMap<TileType> tileMap = new TileMap<>(empty);
         tileMap.setTile(1, 0, nonSolid);
-        entityManager.addComponentTo(other, new TileMapLayer(tileMap));
+        entityManager.addComponentTo(other, new TileMapLayer(tileMap, false));
 
         velocity.set(1.0, 0.1);
 

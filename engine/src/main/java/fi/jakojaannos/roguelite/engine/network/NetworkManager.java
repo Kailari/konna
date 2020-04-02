@@ -1,21 +1,23 @@
 package fi.jakojaannos.roguelite.engine.network;
 
-import lombok.Getter;
-
 import fi.jakojaannos.roguelite.engine.network.internal.CommandChannelRunnable;
 
 public abstract class NetworkManager<TRunnable extends CommandChannelRunnable>
         implements AutoCloseable {
 
-    @Getter private final TRunnable commandChannel;
+    private final TRunnable commandChannel;
 
-    protected NetworkManager(final TRunnable networkThread) {
-        this.commandChannel = networkThread;
-        new Thread(this.commandChannel, "Network").start();
+    public TRunnable getCommandChannel() {
+        return this.commandChannel;
     }
 
     public boolean isConnected() {
         return this.commandChannel.isConnected();
+    }
+
+    protected NetworkManager(final TRunnable networkThread) {
+        this.commandChannel = networkThread;
+        new Thread(this.commandChannel, "Network").start();
     }
 
     @Override

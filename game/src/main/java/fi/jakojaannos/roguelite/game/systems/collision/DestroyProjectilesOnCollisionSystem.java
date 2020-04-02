@@ -1,7 +1,5 @@
 package fi.jakojaannos.roguelite.game.systems.collision;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
@@ -13,7 +11,6 @@ import fi.jakojaannos.roguelite.game.data.components.weapon.ProjectileStats;
 import fi.jakojaannos.roguelite.game.data.resources.collision.Collisions;
 import fi.jakojaannos.roguelite.game.systems.SystemGroups;
 
-@Slf4j
 public class DestroyProjectilesOnCollisionSystem implements ECSSystem {
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
@@ -34,7 +31,7 @@ public class DestroyProjectilesOnCollisionSystem implements ECSSystem {
         entities.forEach(entity -> {
             if (collisions.getEventsFor(entity)
                           .stream()
-                          .map(CollisionEvent::getCollision)
+                          .map(CollisionEvent::collision)
                           .anyMatch(c -> c.getMode() == Collision.Mode.COLLISION)) {
                 world.getEntityManager().destroyEntity(entity);
             }

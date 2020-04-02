@@ -1,5 +1,4 @@
 module roguelite.engine {
-    requires static lombok;
     requires jsr305;
     requires org.slf4j;
     requires org.joml;

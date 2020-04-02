@@ -101,7 +101,7 @@ public class TurretRenderingSystem implements ECSSystem {
         // FIXME: Just bind the texture and handle the sprite stuff on the GPU using animation
         //  data through an UBO/SSBO or regular uniforms
         this.sprite.getFrame("default", 0.0)
-                   .getTexture()
+                   .texture()
                    .use();
 
         this.shader.setUniform1i("time",

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.event.Events;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
@@ -36,7 +37,7 @@ public class UIElementBoundaryCalculationSystemTest_SelfRelativeProportions {
                          UIElementType.PANEL,
                          builder -> builder.width(percentOf().ownWidth(0.1)))
                 .build()
-                .update(mock(Time.class), new Mouse(), mock(Events.class)));
+                .update(new Time(mock(TimeManager.class)), new Mouse(), new Events()));
     }
 
     @Test
@@ -46,7 +47,7 @@ public class UIElementBoundaryCalculationSystemTest_SelfRelativeProportions {
                          UIElementType.PANEL,
                          builder -> builder.height(percentOf().ownHeight(0.1)))
                 .build()
-                .update(mock(Time.class), new Mouse(), mock(Events.class)));
+                .update(new Time(mock(TimeManager.class)), new Mouse(), new Events()));
     }
 
     @Test
@@ -57,7 +58,7 @@ public class UIElementBoundaryCalculationSystemTest_SelfRelativeProportions {
                          builder -> builder.width(percentOf().ownHeight(0.1))
                                            .height(percentOf().ownWidth(0.1)))
                 .build()
-                .update(mock(Time.class), new Mouse(), mock(Events.class)));
+                .update(new Time(mock(TimeManager.class)), new Mouse(), new Events()));
     }
 
     @Test
@@ -69,7 +70,7 @@ public class UIElementBoundaryCalculationSystemTest_SelfRelativeProportions {
                                            .height(absolute(100)))
                 .build();
 
-        assertDoesNotThrow(() -> userInterface.update(mock(Time.class), new Mouse(), mock(Events.class)));
+        assertDoesNotThrow(() -> userInterface.update(new Time(mock(TimeManager.class)), new Mouse(), new Events()));
     }
 
     @Test
@@ -80,7 +81,7 @@ public class UIElementBoundaryCalculationSystemTest_SelfRelativeProportions {
                          builder -> builder.width(percentOf().ownHeight(0.1)))
                 .build();
 
-        assertDoesNotThrow(() -> userInterface.update(mock(Time.class), new Mouse(), mock(Events.class)));
+        assertDoesNotThrow(() -> userInterface.update(new Time(mock(TimeManager.class)), new Mouse(), new Events()));
     }
 
     @Test
@@ -93,7 +94,7 @@ public class UIElementBoundaryCalculationSystemTest_SelfRelativeProportions {
                                            .bottom(absolute(20)))
                 .build();
 
-        assertDoesNotThrow(() -> userInterface.update(mock(Time.class), new Mouse(), mock(Events.class)));
+        assertDoesNotThrow(() -> userInterface.update(new Time(mock(TimeManager.class)), new Mouse(), new Events()));
     }
 
     @Test
@@ -105,7 +106,7 @@ public class UIElementBoundaryCalculationSystemTest_SelfRelativeProportions {
                                            .height(percentOf().ownWidth(0.1)))
                 .build();
 
-        assertDoesNotThrow(() -> userInterface.update(mock(Time.class), new Mouse(), mock(Events.class)));
+        assertDoesNotThrow(() -> userInterface.update(new Time(mock(TimeManager.class)), new Mouse(), new Events()));
     }
 
     @Test
@@ -116,7 +117,7 @@ public class UIElementBoundaryCalculationSystemTest_SelfRelativeProportions {
                          builder -> builder.height(percentOf().ownWidth(0.1)))
                 .build();
 
-        assertDoesNotThrow(() -> userInterface.update(mock(Time.class), new Mouse(), mock(Events.class)));
+        assertDoesNotThrow(() -> userInterface.update(new Time(mock(TimeManager.class)), new Mouse(), new Events()));
     }
 
     @Test
@@ -129,7 +130,7 @@ public class UIElementBoundaryCalculationSystemTest_SelfRelativeProportions {
                                            .height(percentOf().ownWidth(0.1)))
                 .build();
 
-        assertDoesNotThrow(() -> userInterface.update(mock(Time.class), new Mouse(), mock(Events.class)));
+        assertDoesNotThrow(() -> userInterface.update(new Time(mock(TimeManager.class)), new Mouse(), new Events()));
     }
 
     @Test
@@ -140,7 +141,7 @@ public class UIElementBoundaryCalculationSystemTest_SelfRelativeProportions {
                          builder -> builder.left(percentOf().ownWidth(0.1))
                                            .right(percentOf().ownWidth(0.05)))
                 .build()
-                .update(mock(Time.class), new Mouse(), mock(Events.class)));
+                .update(new Time(mock(TimeManager.class)), new Mouse(), new Events()));
     }
 
     @Test
@@ -152,7 +153,7 @@ public class UIElementBoundaryCalculationSystemTest_SelfRelativeProportions {
                                            .left(percentOf().ownWidth(0.5)))
                 .build();
 
-        assertDoesNotThrow(() -> userInterface.update(mock(Time.class), new Mouse(), mock(Events.class)));
+        assertDoesNotThrow(() -> userInterface.update(new Time(mock(TimeManager.class)), new Mouse(), new Events()));
     }
 
     @Test
@@ -164,7 +165,7 @@ public class UIElementBoundaryCalculationSystemTest_SelfRelativeProportions {
                                            .right(percentOf().ownWidth(0.5)))
                 .build();
 
-        assertDoesNotThrow(() -> userInterface.update(mock(Time.class), new Mouse(), mock(Events.class)));
+        assertDoesNotThrow(() -> userInterface.update(new Time(mock(TimeManager.class)), new Mouse(), new Events()));
     }
 
     @Test
@@ -176,7 +177,7 @@ public class UIElementBoundaryCalculationSystemTest_SelfRelativeProportions {
                                            .top(percentOf().ownWidth(0.5)))
                 .build();
 
-        assertDoesNotThrow(() -> userInterface.update(mock(Time.class), new Mouse(), mock(Events.class)));
+        assertDoesNotThrow(() -> userInterface.update(new Time(mock(TimeManager.class)), new Mouse(), new Events()));
     }
 
     @Test
@@ -188,7 +189,7 @@ public class UIElementBoundaryCalculationSystemTest_SelfRelativeProportions {
                                            .bottom(percentOf().ownWidth(0.5)))
                 .build();
 
-        assertDoesNotThrow(() -> userInterface.update(mock(Time.class), new Mouse(), mock(Events.class)));
+        assertDoesNotThrow(() -> userInterface.update(new Time(mock(TimeManager.class)), new Mouse(), new Events()));
     }
 
     @Test
@@ -200,7 +201,7 @@ public class UIElementBoundaryCalculationSystemTest_SelfRelativeProportions {
                                            .right(percentOf().ownHeight(0.05)))
                 .build();
 
-        assertDoesNotThrow(() -> userInterface.update(mock(Time.class), new Mouse(), mock(Events.class)));
+        assertDoesNotThrow(() -> userInterface.update(new Time(mock(TimeManager.class)), new Mouse(), new Events()));
     }
 
     @Test
@@ -212,9 +213,9 @@ public class UIElementBoundaryCalculationSystemTest_SelfRelativeProportions {
                                            .left(percentOf().ownHeight(0.25))
                                            .right(percentOf().ownHeight(0.1)))
                 .build();
-        userInterface.update(mock(Time.class), new Mouse(), mock(Events.class));
+        userInterface.update(new Time(mock(TimeManager.class)), new Mouse(), new Events());
 
-        final var element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
+        final var element = userInterface.findElements(that -> that.hasName().equalTo("a"))
                                          .findFirst().orElseThrow();
         assertEquals(50, element.getProperty(UIProperty.MIN_X).orElseThrow());
         assertEquals(VIEWPORT_WIDTH - 20, element.getProperty(UIProperty.MAX_X).orElseThrow());

@@ -1,11 +1,9 @@
 package fi.jakojaannos.roguelite.engine.utilities.json;
 
 import com.google.gson.JsonObject;
-import lombok.experimental.UtilityClass;
 
-@UtilityClass
 public class JsonUtils {
-    public boolean hasAll(final JsonObject jsonObject, final String... memberNames) {
+    public static boolean hasAll(final JsonObject jsonObject, final String... memberNames) {
         for (final var memberName : memberNames) {
             if (!jsonObject.has(memberName)) {
                 return false;
@@ -15,7 +13,7 @@ public class JsonUtils {
         return true;
     }
 
-    public boolean hasAnyOf(final JsonObject jsonObject, final String... memberNames) {
+    public static boolean hasAnyOf(final JsonObject jsonObject, final String... memberNames) {
         for (final var memberName : memberNames) {
             if (jsonObject.has(memberName)) {
                 return true;
@@ -23,5 +21,8 @@ public class JsonUtils {
         }
 
         return false;
+    }
+
+    private JsonUtils() {
     }
 }

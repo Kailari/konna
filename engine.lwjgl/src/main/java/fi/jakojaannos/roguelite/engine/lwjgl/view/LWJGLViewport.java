@@ -1,13 +1,15 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import fi.jakojaannos.roguelite.engine.view.Viewport;
 
 import static org.lwjgl.opengl.GL11.glViewport;
 
-@Slf4j
 public class LWJGLViewport extends Viewport {
+    private static final Logger LOG = LoggerFactory.getLogger(LWJGLViewport.class);
+
     public LWJGLViewport(final int width, final int height) {
         super(width, height);
     }

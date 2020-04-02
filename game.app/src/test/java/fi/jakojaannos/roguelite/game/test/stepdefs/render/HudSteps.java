@@ -51,7 +51,7 @@ public class HudSteps {
         final var healths = state.getWorld()
                                  .getEntityManager()
                                  .getEntitiesWith(Health.class)
-                                 .map(EntityManager.EntityComponentPair::getComponent)
+                                 .map(EntityManager.EntityComponentPair::component)
                                  .collect(Collectors.toList());
 
         Collections.shuffle(healths, random);
@@ -164,8 +164,8 @@ public class HudSteps {
         return state.getWorld()
                     .getEntityManager()
                     .getEntitiesWith(Health.class)
-                    .filter(pair -> pair.getComponent().currentHealth < pair.getComponent().maxHealth)
-                    .map(EntityManager.EntityComponentPair::getEntity)
+                    .filter(pair -> pair.component().currentHealth < pair.component().maxHealth)
+                    .map(EntityManager.EntityComponentPair::entity)
                     .map(entity -> state.getWorld().getEntityManager().getComponentOf(entity, Transform.class).orElseThrow().position)
                     .anyMatch(enemyPosition -> isNearPosition(element, enemyPosition, HEALTHBAR_NEAR_THRESHOLD));
     }

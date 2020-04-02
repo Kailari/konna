@@ -1,9 +1,6 @@
 package fi.jakojaannos.roguelite.engine.ecs.systems;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Singular;
-
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Stream;
 
@@ -18,15 +15,68 @@ import fi.jakojaannos.roguelite.engine.ecs.SystemGroup;
  *
  * @see InternalSystemGroup
  */
-@Builder(builderClassName = "Builder")
 public final class SystemContext {
-    @Getter private final SystemRequirements requirements;
-    @Getter private final SystemDependencies dependencies;
-    @Getter private final ECSSystem instance;
+    private final SystemRequirements requirements;
+    private final SystemDependencies dependencies;
+    private final ECSSystem instance;
+    private final Collection<SystemGroup> groups;
 
-    @Singular private final Collection<SystemGroup> groups;
+    public SystemRequirements getRequirements() {
+        return this.requirements;
+    }
+
+    public SystemDependencies getDependencies() {
+        return this.dependencies;
+    }
+
+    public ECSSystem getInstance() {
+        return this.instance;
+    }
 
     public Stream<SystemGroup> getGroups() {
         return this.groups.stream();
+    }
+
+    private SystemContext(
+            final SystemRequirements requirements,
+            final SystemDependencies dependencies,
+            final ECSSystem instance,
+            final Collection<SystemGroup> groups
+    ) {
+        this.requirements = requirements;
+        this.dependencies = dependencies;
+        this.instance = instance;
+        this.groups = groups;
+    }
+
+    public static final class Builder {
+        private final Collection<SystemGroup> groups = new ArrayList<>();
+        private SystemRequirements requirements;
+        private SystemDependencies dependencies;
+        private ECSSystem instance;
+
+        public SystemContext build() {
+            return new SystemContext(this.requirements, this.dependencies, this.instance, this.groups);
+        }
+
+        public Builder instance(final ECSSystem instance) {
+            this.instance = instance;
+            return this;
+        }
+
+        public Builder requirements(final SystemRequirements requirements) {
+            this.requirements = requirements;
+            return this;
+        }
+
+        public Builder dependencies(final SystemDependencies dependencies) {
+            this.dependencies = dependencies;
+            return this;
+        }
+
+        public Builder group(final SystemGroup group) {
+            this.groups.add(group);
+            return this;
+        }
     }
 }

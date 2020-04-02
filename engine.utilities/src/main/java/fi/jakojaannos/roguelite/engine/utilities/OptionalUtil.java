@@ -1,14 +1,14 @@
 package fi.jakojaannos.roguelite.engine.utilities;
 
-import lombok.experimental.UtilityClass;
-
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.BiFunction;
 
-@UtilityClass
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-public class OptionalUtil {
+public final class OptionalUtil {
+    private OptionalUtil() {
+    }
+
     /**
      * Returns the value wrapped in optional if all given condition optionals are present.
      *

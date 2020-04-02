@@ -1,6 +1,5 @@
 package fi.jakojaannos.roguelite.game.view.systems;
 
-import lombok.RequiredArgsConstructor;
 import org.joml.Vector2d;
 
 import java.util.HashMap;
@@ -22,12 +21,19 @@ import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.game.data.components.character.Health;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
 
-@RequiredArgsConstructor
 public class HealthBarUpdateSystem implements ECSSystem {
     private final Vector2d tmpPosition = new Vector2d();
     private final Camera camera;
     private final UserInterface userInterface;
     private final Map<Integer, UIElement> healthBars = new HashMap<>();
+
+    public HealthBarUpdateSystem(
+            final Camera camera,
+            final UserInterface userInterface
+    ) {
+        this.camera = camera;
+        this.userInterface = userInterface;
+    }
 
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
@@ -56,7 +62,8 @@ public class HealthBarUpdateSystem implements ECSSystem {
         }
 
         for (final var entity : (Iterable<Entity>) entities::iterator) {
-            final var transform = entityManager.getComponentOf(entity, Transform.class).orElseThrow();
+            final var transform = entityManager.getComponentOf(entity, Transform.class)
+                                               .orElseThrow();
             final var health = entityManager.getComponentOf(entity, Health.class).orElseThrow();
 
             final var isImportant = entityManager.hasComponent(entity, PlayerTag.class);
@@ -72,8 +79,10 @@ public class HealthBarUpdateSystem implements ECSSystem {
             final var offsetY = (float) this.camera.getPixelsPerUnitY() * 0.85f;
             cameraProperties.calculateRelativePositionAndReMapToSize(transform.position,
                                                                      entityManager,
-                                                                     this.camera.getViewport().getWidthInPixels(),
-                                                                     this.camera.getViewport().getHeightInPixels(),
+                                                                     this.camera.getViewport()
+                                                                                .getWidthInPixels(),
+                                                                     this.camera.getViewport()
+                                                                                .getHeightInPixels(),
                                                                      tmpPosition);
             tmpPosition.add(offsetX, offsetY);
             updateHealthBarFor(entity,
@@ -108,6 +117,7 @@ public class HealthBarUpdateSystem implements ECSSystem {
     private UIElement createHealthBarForEntity(final Integer entityId) {
         return this.userInterface.addElement("healthbar#" + entityId,
                                              UIElementType.PROGRESS_BAR,
-                                             builder -> {});
+                                             builder -> {
+                                             });
     }
 }

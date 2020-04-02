@@ -44,7 +44,7 @@ dependencies {
 }
 
 application {
-    mainClassName = "roguelite.launcher/fi.jakojaannos.roguelite.launcher.Main"
+    mainClassName = "fi.jakojaannos.roguelite.launcher.Main"
     //applicationDefaultJvmArgs = ['-XX:+PrintGCDetails']
 }
 
@@ -103,7 +103,7 @@ run {
                 "org.lwjgl.opengl.natives",
                 "org.lwjgl.glfw.natives",
         ]
-        addReads = ["launcher": "org.lwjgl.natives,org.lwjgl.opengl.natives,org.lwjgl.glfw.natives"]
+        addReads = ["roguelite.launcher": "org.lwjgl.natives,org.lwjgl.opengl.natives,org.lwjgl.glfw.natives"]
     }
 
     //jvmArgs = ['-XX:+PrintGCDetails']

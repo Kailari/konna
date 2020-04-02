@@ -1,6 +1,5 @@
 package fi.jakojaannos.roguelite.game.systems.collision;
 
-import lombok.extern.slf4j.Slf4j;
 import org.joml.Vector2d;
 
 import java.util.stream.Stream;
@@ -19,8 +18,9 @@ import fi.jakojaannos.roguelite.game.data.components.weapon.ProjectileStats;
 import fi.jakojaannos.roguelite.game.data.resources.collision.Collisions;
 import fi.jakojaannos.roguelite.game.systems.SystemGroups;
 
-@Slf4j
 public class ProjectileToCharacterCollisionHandlerSystem implements ECSSystem {
+    private final Vector2d temp = new Vector2d();
+
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.COLLISION_HANDLER)
@@ -29,8 +29,6 @@ public class ProjectileToCharacterCollisionHandlerSystem implements ECSSystem {
                     .withComponent(ProjectileStats.class)
                     .withComponent(Velocity.class);
     }
-
-    private final Vector2d temp = new Vector2d();
 
     @Override
     public void tick(
@@ -42,12 +40,13 @@ public class ProjectileToCharacterCollisionHandlerSystem implements ECSSystem {
         final var collisions = world.getOrCreateResource(Collisions.class);
 
         entities.forEach(entity -> {
-            final var stats = entityManager.getComponentOf(entity, ProjectileStats.class).orElseThrow();
+            final var stats = entityManager.getComponentOf(entity, ProjectileStats.class)
+                                           .orElseThrow();
             final var velocity = entityManager.getComponentOf(entity, Velocity.class).orElseThrow();
 
             final var entityCollisions = collisions.getEventsFor(entity)
                                                    .stream()
-                                                   .map(CollisionEvent::getCollision)
+                                                   .map(CollisionEvent::collision)
                                                    .filter(Collision::isEntity)
                                                    .map(Collision::getAsEntityCollision);
 
@@ -68,14 +67,24 @@ public class ProjectileToCharacterCollisionHandlerSystem implements ECSSystem {
         });
     }
 
-    private void dealDamage(final Time timeManager, final ProjectileStats stats, final Health health) {
+    private void dealDamage(
+            final Time timeManager,
+            final ProjectileStats stats,
+            final Health health
+    ) {
         health.addDamageInstance(new DamageInstance(stats.damage,
                                                     stats.damageSource),
                                  timeManager.getCurrentGameTime());
     }
 
-    private void applyKnockback(final ProjectileStats stats, final Velocity velocity, final Physics physics) {
-        if (velocity.lengthSquared() == 0) return;
+    private void applyKnockback(
+            final ProjectileStats stats,
+            final Velocity velocity,
+            final Physics physics
+    ) {
+        if (velocity.lengthSquared() == 0) {
+            return;
+        }
         this.temp.set(velocity).normalize(stats.pushForce);
         physics.applyForce(this.temp);
     }

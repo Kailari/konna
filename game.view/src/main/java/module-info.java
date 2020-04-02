@@ -1,5 +1,4 @@
 module roguelite.game.view {
-    requires static lombok;
     requires org.slf4j;
     requires org.lwjgl;
     requires org.joml;

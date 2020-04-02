@@ -1,5 +1,4 @@
 module roguelite.game {
-    requires static lombok;
     requires transitive org.joml;
     requires org.slf4j;
     requires org.lwjgl.opengl;

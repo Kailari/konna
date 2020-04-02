@@ -65,7 +65,7 @@ public class LevelRenderingSystem implements ECSSystem {
                     final var tile = level.tileMap.getTile(x, y);
                     this.batch.draw(sprite,
                                     "default",
-                                    tile.getTypeIndex(),
+                                    tile.typeIndex(),
                                     Math.floor(x * tileSize),
                                     Math.floor(y * tileSize),
                                     tileSize,

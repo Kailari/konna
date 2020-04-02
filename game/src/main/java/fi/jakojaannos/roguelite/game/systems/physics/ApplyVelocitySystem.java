@@ -1,9 +1,9 @@
 package fi.jakojaannos.roguelite.game.systems.physics;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.joml.Math;
 import org.joml.Vector2d;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,15 +29,16 @@ import fi.jakojaannos.roguelite.game.systems.collision.Collision;
 import fi.jakojaannos.roguelite.game.systems.collision.CollisionEvent;
 
 /**
- * Applies velocity read from the {@link Velocity} component to character {@link Transform}, handling collisions and
- * firing {@link CollisionEvent Collision Events} whenever necessary. Backbone of the physics and collision detection of
- * characters and other simple moving entities.
+ * Applies velocity read from the {@link Velocity} component to character {@link Transform},
+ * handling collisions and firing {@link CollisionEvent Collision Events} whenever necessary.
+ * Backbone of the physics and collision detection of characters and other simple moving entities.
  *
  * @see CollisionEvent
  * @see Collision
  */
-@Slf4j
 public class ApplyVelocitySystem implements ECSSystem {
+    private static final Logger LOG = LoggerFactory.getLogger(ApplyVelocitySystem.class);
+
     /**
      * If velocity length is smaller than this value, applying velocity will be skipped.
      */
@@ -49,14 +50,14 @@ public class ApplyVelocitySystem implements ECSSystem {
     private static final int MAX_ITERATIONS = 25;
 
     /**
-     * Should an entity move less than this value during an movement iteration, we may consider it being still and can
-     * stop trying to move.
+     * Should an entity move less than this value during an movement iteration, we may consider it
+     * being still and can stop trying to move.
      */
     private static final double MOVE_EPSILON = 0.00001;
 
     /**
-     * The size of a single movement step. When near collision, this is the resolution at which entities are allowed to
-     * move.
+     * The size of a single movement step. When near collision, this is the resolution at which
+     * entities are allowed to move.
      */
     private static final double STEP_SIZE = 0.01;
     private final Vector2d tmpVelocity = new Vector2d();
@@ -87,7 +88,8 @@ public class ApplyVelocitySystem implements ECSSystem {
         entities.forEach(entity -> {
             collisionTargets.clear();
             overlapTargets.clear();
-            final var transform = entityManager.getComponentOf(entity, Transform.class).orElseThrow();
+            final var transform = entityManager.getComponentOf(entity, Transform.class)
+                                               .orElseThrow();
             final var velocity = entityManager.getComponentOf(entity, Velocity.class).orElseThrow();
 
             if (velocity.length() < VELOCITY_EPSILON) {
@@ -95,7 +97,8 @@ public class ApplyVelocitySystem implements ECSSystem {
             }
 
             if (entityManager.hasComponent(entity, Collider.class)) {
-                final var collider = entityManager.getComponentOf(entity, Collider.class).orElseThrow();
+                final var collider = entityManager.getComponentOf(entity, Collider.class)
+                                                  .orElseThrow();
 
                 final var translatedCollider = new StretchedCollider(collider, transform);
                 final var translatedTransform = new Transform(transform);
@@ -152,7 +155,7 @@ public class ApplyVelocitySystem implements ECSSystem {
 
                 for (final var layer : tileMapLayers) {
                     final var tileType = layer.getTile(x, y);
-                    if (tileType.isSolid()) {
+                    if (tileType.solid()) {
                         colliderConsumer.accept(new CollisionCandidate(x, y));
                         break;
                     }
@@ -408,13 +411,13 @@ public class ApplyVelocitySystem implements ECSSystem {
                                                                 candidate.transform.position.y));
             collisions.fireCollisionEvent(entity, event);
         } else {
-            final var event = new CollisionEvent(Collision.entity(mode, candidate.entity.entity));
+            final var event = new CollisionEvent(Collision.entity(mode, candidate.entity.entity()));
             final var otherEvent = new CollisionEvent(Collision.entity(mode, entity));
             collisions.fireCollisionEvent(entity, event);
-            collisions.fireCollisionEvent(candidate.entity.entity, otherEvent);
+            collisions.fireCollisionEvent(candidate.entity.entity(), otherEvent);
 
             world.getEntityManager()
-                 .addComponentIfAbsent(candidate.entity.entity,
+                 .addComponentIfAbsent(candidate.entity.entity(),
                                        RecentCollisionTag.class,
                                        RecentCollisionTag::new);
         }
@@ -434,7 +437,7 @@ public class ApplyVelocitySystem implements ECSSystem {
     private List<TileMap<TileType>> getTileMapLayersWithCollision(final World world) {
         return world.getEntityManager()
                     .getEntitiesWith(TileMapLayer.class)
-                    .map(EntityManager.EntityComponentPair::getComponent)
+                    .map(EntityManager.EntityComponentPair::component)
                     .filter(TileMapLayer::isCollisionEnabled)
                     .map(TileMapLayer::getTileMap)
                     .collect(Collectors.toList());
@@ -464,7 +467,7 @@ public class ApplyVelocitySystem implements ECSSystem {
                 final Colliders.ColliderEntity entity
         ) {
             this.entity = entity;
-            this.transform = entity.transform;
+            this.transform = entity.transform();
         }
 
         public boolean overlaps(final Transform transform, final Shape shape) {
@@ -473,16 +476,16 @@ public class ApplyVelocitySystem implements ECSSystem {
                                     shape,
                                     this.transform,
                                     this.entity != null
-                                            ? this.entity.collider
+                                            ? this.entity.collider()
                                             : TILE_SHAPE,
                                     initialDirection);
         }
     }
 
-    @RequiredArgsConstructor
-    private static class CollisionEventCandidate {
-        private final Collision.Mode mode;
-        private final CollisionCandidate candidate;
+    private static record CollisionEventCandidate(
+            Collision.Mode mode,
+            CollisionCandidate candidate
+    ) {
     }
 
     private static class StretchedCollider implements Shape {

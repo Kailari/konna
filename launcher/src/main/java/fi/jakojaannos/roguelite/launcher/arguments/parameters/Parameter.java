@@ -1,15 +1,15 @@
 package fi.jakojaannos.roguelite.launcher.arguments.parameters;
 
-import lombok.RequiredArgsConstructor;
-
 import java.util.Optional;
 
 import fi.jakojaannos.roguelite.launcher.arguments.ArgumentParsingException;
 
-@RequiredArgsConstructor
 public abstract class Parameter<T> {
-
     protected final String name;
+
+    public Parameter(final String name) {
+        this.name = name;
+    }
 
     public static <T> Parameter<Optional<T>> optional(final Parameter<T> parameter) {
         return new Parameter<>(parameter.name) {

@@ -1,7 +1,5 @@
 package fi.jakojaannos.roguelite.engine.ecs.world;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,19 +9,18 @@ import fi.jakojaannos.roguelite.engine.ecs.ProvidedResource;
 import fi.jakojaannos.roguelite.engine.ecs.Resource;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 
-@Slf4j
 public class WorldImpl implements World {
     private final EntityManager entityManager;
     private final Map<Class<? extends Resource>, Resource> resourceStorage = new HashMap<>();
     private final Map<Class<? extends ProvidedResource>, ProvidedResource> providedResourceStorage = new HashMap<>();
 
-    public WorldImpl(final EntityManager entityManager) {
-        this.entityManager = entityManager;
-    }
-
     @Override
     public EntityManager getEntityManager() {
         return this.entityManager;
+    }
+
+    public WorldImpl(final EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 
     @Override

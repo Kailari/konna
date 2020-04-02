@@ -1,12 +1,6 @@
 package fi.jakojaannos.roguelite.engine.network.message;
 
-import lombok.Builder;
-import lombok.Singular;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -14,8 +8,11 @@ public class NetworkMessageTypeMap {
     private final Map<Class<?>, NetworkMessageType<?>> messageTypesByClass;
     private final List<Optional<NetworkMessageType<?>>> messageTypesByTypeId;
 
-    @Builder
-    public NetworkMessageTypeMap(@Singular final Collection<NetworkMessageType<?>> types) {
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public NetworkMessageTypeMap(final Collection<NetworkMessageType<?>> types) {
         final var maxId = types.stream()
                                .mapToInt(NetworkMessageType::getTypeId)
                                .max()
@@ -39,5 +36,18 @@ public class NetworkMessageTypeMap {
 
     public Optional<NetworkMessageType<?>> getByMessageTypeId(final int messageTypeId) {
         return this.messageTypesByTypeId.get(messageTypeId);
+    }
+
+    public static final class Builder {
+        private final Collection<NetworkMessageType<?>> types = new ArrayList<>();
+
+        public NetworkMessageTypeMap build() {
+            return new NetworkMessageTypeMap(this.types);
+        }
+
+        public Builder type(final HelloMessage.Type type) {
+            this.types.add(type);
+            return this;
+        }
     }
 }

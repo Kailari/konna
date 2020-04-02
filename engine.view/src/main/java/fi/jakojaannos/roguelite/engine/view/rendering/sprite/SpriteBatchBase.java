@@ -1,25 +1,28 @@
 package fi.jakojaannos.roguelite.engine.view.rendering.sprite;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import org.joml.Matrix4f;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 
 import fi.jakojaannos.roguelite.engine.view.rendering.Texture;
 import fi.jakojaannos.roguelite.engine.view.rendering.TextureRegion;
 
-@Slf4j
-public abstract class SpriteBatchBase
-        implements SpriteBatch {
+public abstract class SpriteBatchBase implements SpriteBatch {
+    private static final Logger LOG = LoggerFactory.getLogger(SpriteBatchBase.class);
+
     private static final double ROTATION_EPSILON = 0.0001;
     private final int maxFramesPerBatch;
 
     private boolean beginCalled;
     private Matrix4f activeTransformation;
     private Texture activeTexture;
-    @Getter(AccessLevel.PROTECTED) private int nFrames;
+    private int nFrames;
+
+    protected int getNFrames() {
+        return this.nFrames;
+    }
 
     protected SpriteBatchBase(final int maxFramesPerBatch) {
         this.maxFramesPerBatch = maxFramesPerBatch;
@@ -138,15 +141,15 @@ public abstract class SpriteBatchBase
 
     protected void updateTextureAndFlushIfNeeded(final TextureRegion textureRegion) {
         if (this.activeTexture == null) {
-            this.activeTexture = textureRegion.getTexture();
+            this.activeTexture = textureRegion.texture();
         }
 
-        final var needToChangeTexture = !textureRegion.getTexture().equals(this.activeTexture);
+        final var needToChangeTexture = !textureRegion.texture().equals(this.activeTexture);
         final var batchIsFull = this.nFrames >= this.maxFramesPerBatch - 1;
         if (needToChangeTexture || batchIsFull) {
             flush(this.activeTexture, this.activeTransformation);
             this.nFrames = 0;
-            this.activeTexture = textureRegion.getTexture();
+            this.activeTexture = textureRegion.texture();
         }
     }
 }

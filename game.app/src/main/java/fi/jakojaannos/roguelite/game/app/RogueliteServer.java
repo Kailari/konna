@@ -1,7 +1,5 @@
 package fi.jakojaannos.roguelite.game.app;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.function.Supplier;
@@ -18,7 +16,6 @@ import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.RogueliteGame;
 
-@Slf4j
 public class RogueliteServer {
     public static void run(
             final int port

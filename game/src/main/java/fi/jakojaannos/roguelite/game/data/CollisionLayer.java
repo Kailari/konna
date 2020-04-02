@@ -1,10 +1,10 @@
 package fi.jakojaannos.roguelite.game.data;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import fi.jakojaannos.roguelite.engine.utilities.BitMaskUtils;
 
-@Slf4j
 public enum CollisionLayer {
     NONE,
     COLLIDE_ALL,
@@ -13,6 +13,8 @@ public enum CollisionLayer {
     PLAYER,
     PLAYER_PROJECTILE,
     ENEMY;
+
+    private static final Logger LOG = LoggerFactory.getLogger(CollisionLayer.class);
 
     private static final int MASK_SIZE = 1;
 
@@ -32,16 +34,16 @@ public enum CollisionLayer {
     private final byte[] collisionMask = new byte[MASK_SIZE];
     private final byte[] overlapMask = new byte[MASK_SIZE];
 
+    private int getIndex() {
+        return ordinal() - 1;
+    }
+
     public boolean isSolidTo(final CollisionLayer other) {
         return other != NONE && BitMaskUtils.isNthBitSet(other.collisionMask, getIndex());
     }
 
     public boolean canOverlapWith(final CollisionLayer other) {
         return other != NONE && BitMaskUtils.isNthBitSet(other.overlapMask, getIndex());
-    }
-
-    private int getIndex() {
-        return ordinal() - 1;
     }
 
     private void setCollidesWith(final CollisionLayer... layers) {

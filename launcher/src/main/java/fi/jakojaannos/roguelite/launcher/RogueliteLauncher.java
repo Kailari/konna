@@ -1,7 +1,7 @@
 package fi.jakojaannos.roguelite.launcher;
 
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 
@@ -11,15 +11,32 @@ import fi.jakojaannos.roguelite.launcher.arguments.ArgumentParsingException;
 import fi.jakojaannos.roguelite.launcher.arguments.Arguments;
 import fi.jakojaannos.roguelite.launcher.arguments.parameters.Parameter;
 
-@Slf4j
 public class RogueliteLauncher {
+    private static final Logger LOG = LoggerFactory.getLogger(RogueliteLauncher.class);
+
     private final RogueliteApplication application = new RogueliteApplication();
-    // Master-debug flag, this sets a bunch of default debug settings on
-    @Setter private boolean debug;
-    @Setter private boolean enableLWJGLDebug;
-    @Setter private boolean enableLWJGLLibraryLoaderDebug;
-    @Setter private String assetRoot = "assets/";
-    @Setter private boolean runAsServer;
+    /** Master-debug flag, this sets a bunch of default debug settings on */
+    private boolean debug;
+    private boolean enableLWJGLDebug;
+    private boolean enableLWJGLLibraryLoaderDebug;
+    private String assetRoot = "assets/";
+    private boolean runAsServer;
+
+    public void setDebug(final boolean debug) {
+        this.debug = debug;
+    }
+
+    public void setEnableLWJGLDebug(final boolean enableLWJGLDebug) {
+        this.enableLWJGLDebug = enableLWJGLDebug;
+    }
+
+    public void setEnableLWJGLLibraryLoaderDebug(final boolean enableLWJGLLibraryLoaderDebug) {
+        this.enableLWJGLLibraryLoaderDebug = enableLWJGLLibraryLoaderDebug;
+    }
+
+    public void setAssetRoot(final String assetRoot) {
+        this.assetRoot = assetRoot;
+    }
 
     public void parseCommandLineArguments(final String... args) {
         try {

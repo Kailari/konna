@@ -20,10 +20,10 @@ public class NetworkMessageHandlerMap {
             final TypedNetworkMessage<?> message,
             final MessageHandlingContext context
     ) {
-        final var typeId = message.getMessageType().getTypeId();
+        final var typeId = message.messageType().getTypeId();
         if (this.handlers.containsKey(typeId)) {
-            MessageHandler handler = this.handlers.get(typeId);
-            handler.handle(message.getMessage(), context);
+            final MessageHandler handler = this.handlers.get(typeId);
+            handler.handle(message.message(), context);
         }
     }
 

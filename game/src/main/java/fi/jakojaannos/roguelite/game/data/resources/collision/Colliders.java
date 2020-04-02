@@ -1,6 +1,5 @@
 package fi.jakojaannos.roguelite.game.data.resources.collision;
 
-import lombok.RequiredArgsConstructor;
 import org.joml.Rectangled;
 
 import java.util.HashMap;
@@ -43,10 +42,10 @@ public class Colliders implements Resource {
         }
     }
 
-    @RequiredArgsConstructor
-    public static final class ColliderEntity {
-        public final Entity entity;
-        public final Transform transform;
-        public final Collider collider;
+    public static record ColliderEntity(
+            Entity entity,
+            Transform transform,
+            Collider collider
+    ) {
     }
 }

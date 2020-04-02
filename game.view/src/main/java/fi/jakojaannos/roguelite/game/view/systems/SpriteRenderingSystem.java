@@ -1,7 +1,5 @@
 package fi.jakojaannos.roguelite.game.view.systems;
 
-import lombok.Value;
-import lombok.extern.slf4j.Slf4j;
 import org.joml.Vector2d;
 
 import java.nio.file.Path;
@@ -24,7 +22,6 @@ import fi.jakojaannos.roguelite.engine.view.rendering.sprite.SpriteBatch;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.SpriteInfo;
 
-@Slf4j
 public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
     private static final Vector2d ZERO_VECTOR = new Vector2d(0.0);
     private final Camera camera;
@@ -69,9 +66,12 @@ public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
         final var renderQueue = new HashMap<Integer, HashMap<Texture, List<SpriteRenderEntry>>>();
         entities.forEach(
                 entity -> {
-                    final var transform = world.getEntityManager().getComponentOf(entity, Transform.class)
+                    final var transform = world.getEntityManager()
+                                               .getComponentOf(entity, Transform.class)
                                                .orElseThrow();
-                    final var info = world.getEntityManager().getComponentOf(entity, SpriteInfo.class).orElseThrow();
+                    final var info = world.getEntityManager()
+                                          .getComponentOf(entity, SpriteInfo.class)
+                                          .orElseThrow();
                     if (info.spriteName.equals("sprites/turret")) {
                         return;
                     }
@@ -80,11 +80,12 @@ public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
                                                                               zLayer -> new HashMap<>());
                     final var sprite = this.spriteRegistry.getByAssetName(info.spriteName);
                     final var texture = sprite.getSpecificFrame(info.animationName, info.getCurrentFrame())
-                                              .getTexture();
+                                              .texture();
                     final var spritesForTexture = texturesForZLayer.computeIfAbsent(texture,
                                                                                     tex -> new ArrayList<>());
 
-                    final var maybeCollider = world.getEntityManager().getComponentOf(entity, Collider.class);
+                    final var maybeCollider = world.getEntityManager()
+                                                   .getComponentOf(entity, Collider.class);
                     final var origin = maybeCollider.map(collider -> collider.origin)
                                                     .orElse(ZERO_VECTOR);
                     final var size = maybeCollider.map(collider -> new Vector2d(collider.width,
@@ -115,16 +116,16 @@ public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
                    .forEach(spritesForTexture ->
                                     spritesForTexture.forEach(
                                             (texture, entries) ->
-                                                    entries.forEach(entry -> this.spriteBatch.draw(entry.getSprite(),
-                                                                                                   entry.getAnimation(),
-                                                                                                   entry.getFrame(),
-                                                                                                   entry.getX(),
-                                                                                                   entry.getY(),
-                                                                                                   entry.getOriginX(),
-                                                                                                   entry.getOriginY(),
-                                                                                                   entry.getWidth(),
-                                                                                                   entry.getHeight(),
-                                                                                                   entry.getRotation())
+                                                    entries.forEach(entry -> this.spriteBatch.draw(entry.sprite(),
+                                                                                                   entry.animation(),
+                                                                                                   entry.frame(),
+                                                                                                   entry.x(),
+                                                                                                   entry.y(),
+                                                                                                   entry.originX(),
+                                                                                                   entry.originY(),
+                                                                                                   entry.width(),
+                                                                                                   entry.height(),
+                                                                                                   entry.rotation())
                                                     )));
         this.spriteBatch.end();
     }
@@ -134,18 +135,18 @@ public class SpriteRenderingSystem implements ECSSystem, AutoCloseable {
         this.spriteBatch.close();
     }
 
-    @Value
-    private static class SpriteRenderEntry {
-        Sprite sprite;
-        String animation;
-        int frame;
-        int zLayer;
-        double x;
-        double y;
-        double originX;
-        double originY;
-        double width;
-        double height;
-        double rotation;
+    private static record SpriteRenderEntry(
+            Sprite sprite,
+            String animation,
+            int frame,
+            int zLayer,
+            double x,
+            double y,
+            double originX,
+            double originY,
+            double width,
+            double height,
+            double rotation
+    ) {
     }
 }

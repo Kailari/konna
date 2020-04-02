@@ -1,8 +1,5 @@
 package fi.jakojaannos.roguelite.engine.ecs.entities;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -15,9 +12,13 @@ import fi.jakojaannos.roguelite.engine.utilities.IdSupplier;
  */
 public class EntityStorage {
     private final IdSupplier idSupplier = new IdSupplier();
-    @Getter(AccessLevel.PACKAGE) private int capacity;
+    private int capacity;
     private EntityImpl[] entities;
     private int entityCount;
+
+    public boolean isFull() {
+        return this.entityCount >= this.capacity;
+    }
 
     public EntityStorage(final int capacity) {
         this.capacity = 0;
@@ -49,10 +50,6 @@ public class EntityStorage {
 
     public Stream<EntityImpl> stream() {
         return Arrays.stream(this.entities).filter(Objects::nonNull);
-    }
-
-    public boolean isFull() {
-        return this.entityCount >= this.capacity;
     }
 
     public int count() {

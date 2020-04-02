@@ -1,7 +1,5 @@
 package fi.jakojaannos.roguelite.game.systems;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
@@ -9,7 +7,6 @@ import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.*;
 import fi.jakojaannos.roguelite.game.data.components.SpawnerComponent;
 
-@Slf4j
 public class SpawnerSystem implements ECSSystem {
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
@@ -27,8 +24,8 @@ public class SpawnerSystem implements ECSSystem {
         final EntityManager cluster = world.getEntityManager();
 
         entities.forEach(entity -> {
-            final var myPos = cluster.getComponentOf(entity, Transform.class).get();
-            final var spawnComp = cluster.getComponentOf(entity, SpawnerComponent.class).get();
+            final var myPos = cluster.getComponentOf(entity, Transform.class).orElseThrow();
+            final var spawnComp = cluster.getComponentOf(entity, SpawnerComponent.class).orElseThrow();
 
             spawnComp.spawnCoolDown -= delta;
 

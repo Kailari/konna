@@ -1,6 +1,5 @@
 package fi.jakojaannos.roguelite.engine.view;
 
-import lombok.Getter;
 import org.joml.Vector2d;
 
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
@@ -11,11 +10,10 @@ import fi.jakojaannos.roguelite.engine.state.GameState;
 
 public abstract class Camera implements AutoCloseable {
     private final Vector2d position;
-    @Getter private final Viewport viewport;
+    private final Viewport viewport;
 
-    public Camera(final Vector2d position, final Viewport viewport) {
-        this.position = new Vector2d(position);
-        this.viewport = viewport;
+    public Viewport getViewport() {
+        return this.viewport;
     }
 
     public final double getX() {
@@ -34,12 +32,6 @@ public abstract class Camera implements AutoCloseable {
         setPosition(getX(), y);
     }
 
-    public void setPosition(final double x, final double y) {
-        this.position.set(x, y);
-    }
-
-    public abstract void resize(int width, int height);
-
     public double getPixelsPerUnitX() {
         return getViewport().getWidthInPixels() / getVisibleAreaWidth();
     }
@@ -48,13 +40,24 @@ public abstract class Camera implements AutoCloseable {
         return getViewport().getHeightInPixels() / getVisibleAreaHeight();
     }
 
-    public abstract void useWorldCoordinates();
-
-    public abstract void useScreenCoordinates();
-
     public abstract double getVisibleAreaWidth();
 
     public abstract double getVisibleAreaHeight();
+
+    public Camera(final Vector2d position, final Viewport viewport) {
+        this.position = new Vector2d(position);
+        this.viewport = viewport;
+    }
+
+    public void setPosition(final double x, final double y) {
+        this.position.set(x, y);
+    }
+
+    public abstract void resize(int width, int height);
+
+    public abstract void useWorldCoordinates();
+
+    public abstract void useScreenCoordinates();
 
     public void updateConfigurationFromState(final GameState state) {
         final var world = state.getWorld();

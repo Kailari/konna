@@ -39,12 +39,12 @@ public class UIElementHoverEventProvider implements ECSSystem {
             final var bounds = entityManager.getComponentOf(entity, ElementBoundaries.class).orElseThrow();
             if (isInside(mouse, bounds)) {
                 if (!entityManager.hasComponent(entity, ActiveTag.class)) {
-                    events.getUi().fire(new UIEvent(name, UIEvent.Type.START_HOVER));
+                    events.ui().fire(new UIEvent(name, UIEvent.Type.START_HOVER));
                     entityManager.addComponentTo(entity, new ActiveTag());
                 }
             } else {
                 if (entityManager.hasComponent(entity, ActiveTag.class)) {
-                    events.getUi().fire(new UIEvent(name, UIEvent.Type.END_HOVER));
+                    events.ui().fire(new UIEvent(name, UIEvent.Type.END_HOVER));
                     entityManager.removeComponentFrom(entity, new ActiveTag());
                 }
             }

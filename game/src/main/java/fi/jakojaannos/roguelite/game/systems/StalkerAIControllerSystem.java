@@ -1,6 +1,5 @@
 package fi.jakojaannos.roguelite.game.systems;
 
-import lombok.extern.slf4j.Slf4j;
 import org.joml.Vector2d;
 
 import java.util.Random;
@@ -16,7 +15,6 @@ import fi.jakojaannos.roguelite.game.data.components.character.WalkingMovementAb
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.StalkerAI;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 
-@Slf4j
 public class StalkerAIControllerSystem implements ECSSystem {
     private final Random random = new Random(8055); // 8055 = 666 + 420 + 6969
     private final Vector2d tempForce = new Vector2d();
@@ -44,7 +42,7 @@ public class StalkerAIControllerSystem implements ECSSystem {
         final var optPlayer = world.getOrCreateResource(Players.class).getLocalPlayer();
         final var playerPos = optPlayer.isPresent()
                 ? entityManager.getComponentOf(optPlayer.get(), Transform.class).orElseThrow().position
-                : emptyPos;
+                : this.emptyPos;
 
         entities.forEach(entity -> {
             final var stalkerAI = entityManager.getComponentOf(entity, StalkerAI.class).orElseThrow();
@@ -84,10 +82,10 @@ public class StalkerAIControllerSystem implements ECSSystem {
             final StalkerAI ai
     ) {
         stats.maxSpeed = ai.moveSpeedWalk;
-        if (random.nextInt(40) == 0) {
+        if (this.random.nextInt(40) == 0) {
             movementInput.move.set(
-                    random.nextDouble() * 2 - 1.0,
-                    random.nextDouble() * 2 - 1.0
+                    this.random.nextDouble() * 2 - 1.0,
+                    this.random.nextDouble() * 2 - 1.0
             );
         }
     }
@@ -124,10 +122,10 @@ public class StalkerAIControllerSystem implements ECSSystem {
         movementInput.move.set(0.0);
         ai.lastJumpTimeStamp = time.getCurrentGameTime();
         entityManager.addComponentTo(entity, new InAir(time.getCurrentGameTime(), ai.jumpDurationInTicks));
-        tempForce.set(playerPos)
-                 .sub(myPos)
-                 .normalize(ai.moveSpeedJump);
-        physics.applyForce(tempForce);
+        this.tempForce.set(playerPos)
+                      .sub(myPos)
+                      .normalize(ai.moveSpeedJump);
+        physics.applyForce(this.tempForce);
     }
 
     public void sneakTowardsPlayer(

@@ -2,14 +2,11 @@ package fi.jakojaannos.roguelite.engine.view.rendering.text;
 
 import fi.jakojaannos.roguelite.engine.view.rendering.TextureRegion;
 
-public interface RenderableCharacter {
-    double getX0();
-
-    double getX1();
-
-    double getY0();
-
-    double getY1();
-
-    TextureRegion getTextureRegion();
+public record RenderableCharacter(
+        double x0,
+        double x1,
+        double y0,
+        double y1,
+        TextureRegion textureRegion
+) {
 }

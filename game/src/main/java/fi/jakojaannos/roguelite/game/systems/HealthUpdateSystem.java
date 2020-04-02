@@ -1,6 +1,7 @@
 package fi.jakojaannos.roguelite.game.systems;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.stream.Stream;
 
@@ -13,9 +14,9 @@ import fi.jakojaannos.roguelite.game.data.components.character.DeadTag;
 import fi.jakojaannos.roguelite.game.data.components.character.Health;
 import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
 
-@Slf4j
-
 public class HealthUpdateSystem implements ECSSystem {
+    private static final Logger LOG = LoggerFactory.getLogger(HealthUpdateSystem.class);
+
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.LATE_TICK)
@@ -36,10 +37,10 @@ public class HealthUpdateSystem implements ECSSystem {
 
             final var damageInstances = health.damageInstances;
             for (final var instance : damageInstances) {
-                health.currentHealth -= instance.damage;
+                health.currentHealth -= instance.damage();
                 LOG.debug(LogCategories.HEALTH, "Entity {} took {} damage. Has {} health remaining",
                           entity.getId(),
-                          instance.damage,
+                          instance.damage(),
                           health.currentHealth);
             }
 
@@ -49,7 +50,7 @@ public class HealthUpdateSystem implements ECSSystem {
                 entityManager.addComponentIfAbsent(entity, DeadTag.class, DeadTag::new);
 
                 for (final var instance : damageInstances) {
-                    sessionStats.awardKillTo(instance.source);
+                    sessionStats.awardKillTo(instance.source());
                 }
             }
 

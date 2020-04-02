@@ -74,8 +74,7 @@ public class GameplayGameState extends GameState {
         generator.prepareInitialRoom(seed, world, floor, wall, 25, 45, 5, 5, 2);
 
         final var levelEntity = entityManager.createEntity();
-        final var layer = new TileMapLayer(generator.getTileMap());
-        layer.collisionEnabled = true;
+        final var layer = new TileMapLayer(generator.getTileMap(), true);
         entityManager.addComponentTo(levelEntity, layer);
 
         final var sessionStats = world.getOrCreateResource(SessionStats.class);

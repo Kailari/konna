@@ -1,5 +1,4 @@
 module roguelite.engine.view {
-    requires static lombok;
     requires org.slf4j;
     requires org.lwjgl;
     requires com.google.gson;

@@ -1,12 +1,19 @@
 package fi.jakojaannos.roguelite.engine.view.data.components.internal.panel;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-
 import fi.jakojaannos.roguelite.engine.ecs.Component;
 
-@AllArgsConstructor
 public class PanelSprite implements Component {
-    @Getter @Setter public String sprite;
+    private String sprite;
+
+    public String getSprite() {
+        return this.sprite;
+    }
+
+    public void setSprite(final String sprite) {
+        this.sprite = sprite;
+    }
+
+    public PanelSprite(final String sprite) {
+        this.sprite = sprite;
+    }
 }

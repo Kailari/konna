@@ -77,7 +77,7 @@ class EntityManagerTest {
         entityManager.addComponentTo(entity, component);
 
         assertTrue(entityManager.getEntitiesWith(ComponentA.class)
-                                .noneMatch(c -> c.getComponent().equals(component)));
+                                .noneMatch(c -> c.component().equals(component)));
     }
 
     @Test
@@ -206,8 +206,8 @@ class EntityManagerTest {
         entityManager.addComponentTo(entityD, new ComponentD());
         entityManager.applyModifications();
 
-        assertTrue(entityManager.getEntitiesWith(ComponentA.class).anyMatch(e -> e.getEntity().getId() == entityA.getId()));
-        assertTrue(entityManager.getEntitiesWith(ComponentA.class).anyMatch(e -> e.getEntity().getId() == entityB.getId()));
+        assertTrue(entityManager.getEntitiesWith(ComponentA.class).anyMatch(e -> e.entity().getId() == entityA.getId()));
+        assertTrue(entityManager.getEntitiesWith(ComponentA.class).anyMatch(e -> e.entity().getId() == entityB.getId()));
     }
 
     @Test

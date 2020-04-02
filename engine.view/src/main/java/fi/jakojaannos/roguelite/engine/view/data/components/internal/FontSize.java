@@ -1,12 +1,19 @@
 package fi.jakojaannos.roguelite.engine.view.data.components.internal;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-
 import fi.jakojaannos.roguelite.engine.ecs.Component;
 
-@AllArgsConstructor
 public class FontSize implements Component {
-    @Getter @Setter public int value;
+    public int value;
+
+    public int getValue() {
+        return this.value;
+    }
+
+    public void setValue(final int value) {
+        this.value = value;
+    }
+
+    public FontSize(final int value) {
+        this.value = value;
+    }
 }

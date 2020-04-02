@@ -1,6 +1,5 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text;
 
-import lombok.extern.slf4j.Slf4j;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
@@ -12,7 +11,6 @@ import fi.jakojaannos.roguelite.engine.view.rendering.sprite.SpriteBatch;
 import fi.jakojaannos.roguelite.engine.view.rendering.text.Font;
 import fi.jakojaannos.roguelite.engine.view.rendering.text.TextRenderer;
 
-@Slf4j
 public class LWJGLTextRenderer implements TextRenderer {
     private static final int SIZE_IN_BYTES = (2 + 2 + 3) * 4;
 
@@ -92,12 +90,12 @@ public class LWJGLTextRenderer implements TextRenderer {
                                                                                        i, to,
                                                                                        string,
                                                                                        factorX);
-                final var x0 = x + scale(cpX, renderableCharacter.getX0(), factorX);
-                final var x1 = x + scale(cpX, renderableCharacter.getX1(), factorX);
-                final var y0 = y + fontSize + scale(lineY, renderableCharacter.getY0(), factorY);
-                final var y1 = y + fontSize + scale(lineY, renderableCharacter.getY1(), factorY);
+                final var x0 = x + scale(cpX, renderableCharacter.x0(), factorX);
+                final var x1 = x + scale(cpX, renderableCharacter.x1(), factorX);
+                final var y0 = y + fontSize + scale(lineY, renderableCharacter.y0(), factorY);
+                final var y1 = y + fontSize + scale(lineY, renderableCharacter.y1(), factorY);
 
-                this.spriteBatch.draw(renderableCharacter.getTextureRegion(),
+                this.spriteBatch.draw(renderableCharacter.textureRegion(),
                                       x0, y0, x1, y1,
                                       r, g, b);
             }

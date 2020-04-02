@@ -1,6 +1,5 @@
 package fi.jakojaannos.roguelite.game.view.systems.debug;
 
-import lombok.extern.slf4j.Slf4j;
 import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryStack;
 
@@ -26,7 +25,6 @@ import fi.jakojaannos.roguelite.game.view.systems.RenderSystemGroups;
 
 // FIXME: Use batching
 
-@Slf4j
 public class EntityCollisionBoundsRenderingSystem implements ECSSystem, AutoCloseable {
     private final Camera camera;
     private final ShaderProgram shader;
@@ -101,13 +99,15 @@ public class EntityCollisionBoundsRenderingSystem implements ECSSystem, AutoClos
                         return;
                     }
 
-                    Transform transform = entityManager.getComponentOf(entity, Transform.class).orElseThrow();
-                    Collider collider = entityManager.getComponentOf(entity, Collider.class).orElseThrow();
+                    final var transform = entityManager.getComponentOf(entity, Transform.class)
+                                                       .orElseThrow();
+                    final var collider = entityManager.getComponentOf(entity, Collider.class)
+                                                      .orElseThrow();
                     this.shader.setUniformMat4x4("model",
-                                                 modelMatrix.identity()
-                                                            .translate((float) transform.position.x,
-                                                                       (float) transform.position.y,
-                                                                       0.0f));
+                                                 this.modelMatrix.identity()
+                                                                 .translate((float) transform.position.x,
+                                                                            (float) transform.position.y,
+                                                                            0.0f));
                     final var vertices = collider.getVerticesInLocalSpace(transform);
                     try (final var stack = MemoryStack.stackPush()) {
                         final var vertexData = stack.malloc(8 * 4);

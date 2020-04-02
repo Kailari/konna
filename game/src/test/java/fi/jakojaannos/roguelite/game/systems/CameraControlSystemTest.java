@@ -12,6 +12,8 @@ import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.CameraFollowTargetTag;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,7 +24,6 @@ import static org.mockito.Mockito.when;
 class CameraControlSystemTest {
     private CameraControlSystem system;
     private World world;
-    private Entity cameraEntity;
     private Transform cameraTransform;
 
     @BeforeEach
@@ -30,11 +31,10 @@ class CameraControlSystemTest {
         system = new CameraControlSystem();
         world = World.createNew(EntityManager.createNew(256, 32));
 
-        Time time = mock(Time.class);
-        when(time.getTimeStepInSeconds()).thenReturn(0.02);
+        final var time = new Time(new SimpleTimeManager(20));
         world.provideResource(Time.class, time);
 
-        cameraEntity = world.getEntityManager().createEntity();
+        final Entity cameraEntity = world.getEntityManager().createEntity();
         world.getEntityManager().addComponentTo(cameraEntity, cameraTransform = new Transform());
 
         world.getOrCreateResource(CameraProperties.class).cameraEntity = cameraEntity;

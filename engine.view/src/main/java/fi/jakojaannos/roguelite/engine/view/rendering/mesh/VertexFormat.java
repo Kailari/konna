@@ -1,12 +1,14 @@
 package fi.jakojaannos.roguelite.engine.view.rendering.mesh;
 
-import lombok.Getter;
-
 import java.util.Arrays;
 
 public class VertexFormat {
-    @Getter private final int sizeInBytes;
+    private final int sizeInBytes;
     private final VertexAttribute[] vertexAttributes;
+
+    public int getSizeInBytes() {
+        return this.sizeInBytes;
+    }
 
     public VertexFormat(final VertexAttribute... vertexAttributes) {
         this.sizeInBytes = Arrays.stream(vertexAttributes)
