@@ -5,7 +5,7 @@ import java.lang.reflect.Constructor;
 public interface Requirements<TEntityData> {
     void entityData(Class<TEntityData> dataClass);
 
-    Constructor<TEntityData> getConstructor();
+    Constructor<TEntityData> getEntityDataConstructor();
 
-    Class<?>[] getComponentTypes();
+    Class<?>[] getEntityDataComponentTypes();
 }

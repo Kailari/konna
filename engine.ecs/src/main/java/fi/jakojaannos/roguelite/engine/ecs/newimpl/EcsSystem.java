@@ -1,5 +1,6 @@
 package fi.jakojaannos.roguelite.engine.ecs.newimpl;
 
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 /**
@@ -31,6 +32,8 @@ public interface EcsSystem<TResources, TEntityData, TEvents> {
 
     interface EntityDataHandle<TEntityData> extends EntityHandle {
         TEntityData getData();
+
+        int getId();
     }
 
     /**
