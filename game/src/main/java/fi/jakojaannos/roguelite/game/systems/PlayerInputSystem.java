@@ -1,8 +1,6 @@
 package fi.jakojaannos.roguelite.game.systems;
 
 import org.joml.Vector2d;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.stream.Stream;
 
@@ -18,8 +16,6 @@ import fi.jakojaannos.roguelite.game.weapons.Weapon;
 import fi.jakojaannos.roguelite.game.weapons.Weapons;
 
 public class PlayerInputSystem implements ECSSystem {
-    private static final Logger LOG = LoggerFactory.getLogger(PlayerInputSystem.class);
-
     private final Vector2d tmpCursorPos = new Vector2d();
 
     @Override
@@ -31,7 +27,8 @@ public class PlayerInputSystem implements ECSSystem {
                     .withComponent(PlayerTag.class)
                     .requireResource(Inputs.class)
                     .requireResource(Mouse.class)
-                    .requireResource(CameraProperties.class);
+                    .requireResource(CameraProperties.class)
+                    .requireProvidedResource(Weapons.class);
     }
 
     @Override
@@ -62,26 +59,27 @@ public class PlayerInputSystem implements ECSSystem {
             attackInput.attack = inputAttack;
             attackAbility.targetPosition.set(this.tmpCursorPos);
 
-            if (inputs.inputWeaponSlot0)
+            if (inputs.inputWeaponSlot0) {
                 equipWeapon(weapons.unarmed, entityManager, entity, attackAbility);
-            else if (inputs.inputWeaponSlot1)
+            } else if (inputs.inputWeaponSlot1) {
                 equipWeapon(weapons.simpleWeapon, entityManager, entity, attackAbility);
-            else if (inputs.inputWeaponSlot2)
+            } else if (inputs.inputWeaponSlot2) {
                 equipWeapon(weapons.unarmed, entityManager, entity, attackAbility);
-            else if (inputs.inputWeaponSlot3)
+            } else if (inputs.inputWeaponSlot3) {
                 equipWeapon(weapons.unarmed, entityManager, entity, attackAbility);
-            else if (inputs.inputWeaponSlot4)
+            } else if (inputs.inputWeaponSlot4) {
                 equipWeapon(weapons.unarmed, entityManager, entity, attackAbility);
-            else if (inputs.inputWeaponSlot5)
+            } else if (inputs.inputWeaponSlot5) {
                 equipWeapon(weapons.unarmed, entityManager, entity, attackAbility);
-            else if (inputs.inputWeaponSlot6)
+            } else if (inputs.inputWeaponSlot6) {
                 equipWeapon(weapons.unarmed, entityManager, entity, attackAbility);
-            else if (inputs.inputWeaponSlot7)
+            } else if (inputs.inputWeaponSlot7) {
                 equipWeapon(weapons.unarmed, entityManager, entity, attackAbility);
-            else if (inputs.inputWeaponSlot8)
+            } else if (inputs.inputWeaponSlot8) {
                 equipWeapon(weapons.unarmed, entityManager, entity, attackAbility);
-            else if (inputs.inputWeaponSlot9)
+            } else if (inputs.inputWeaponSlot9) {
                 equipWeapon(weapons.unarmed, entityManager, entity, attackAbility);
+            }
 
         });
     }

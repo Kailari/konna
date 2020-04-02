@@ -36,7 +36,7 @@ public class UserInterfaceImpl implements UserInterface {
             final TextSizeProvider textSizeProvider
     ) {
         this.viewport = viewport;
-        this.uiWorld = World.createNew(EntityManager.createNew(256, 64));
+        this.uiWorld = World.createNew(EntityManager.createNew(256, 32));
 
         this.uiDispatcher = SystemDispatcher.builder()
                                             .withGroups(UISystemGroups.values())
