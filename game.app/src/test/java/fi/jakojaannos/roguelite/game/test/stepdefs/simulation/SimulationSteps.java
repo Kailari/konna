@@ -17,7 +17,7 @@ public class SimulationSteps {
     @Given("the game world just finished loading")
     public void the_game_world_just_finished_loading() {
         state = new GameplayGameState(6969,
-                                      World.createNew(EntityManager.createNew(256, 32)),
+                                      World.createNew(EntityManager.createNew(256, 64)),
                                       game.getTime());
         state.getWorld().provideResource(Events.class, events);
 

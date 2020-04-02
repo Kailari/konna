@@ -13,12 +13,14 @@ import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.DamageSource;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.MovementInput;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
 import fi.jakojaannos.roguelite.game.data.components.character.WeaponInput;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
+import fi.jakojaannos.roguelite.game.weapons.Weapons;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -35,9 +37,15 @@ class PlayerInputSystemTest {
         system = new PlayerInputSystem();
         EntityManager entityManager = EntityManager.createNew(256, 32);
         this.world = World.createNew(entityManager);
+        world.provideResource(Weapons.class, new Weapons());
 
         player = entityManager.createEntity();
-        this.abilities = new AttackAbility(new DamageSource.Entity(player));
+        this.abilities = new AttackAbility(new DamageSource.Entity(player),
+                                           CollisionLayer.PLAYER,
+                                           0.0,
+                                           0.0,
+                                           entityManager,
+                                           player);
         entityManager.addComponentTo(player, movementInput = new MovementInput());
         entityManager.addComponentTo(player, weaponInput = new WeaponInput());
         entityManager.addComponentTo(player, this.abilities);
