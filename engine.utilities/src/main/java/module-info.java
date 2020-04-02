@@ -1,5 +1,4 @@
 module roguelite.engine.utilities {
-    requires static lombok;
     requires org.joml;
     requires com.google.gson;
     requires jsr305;

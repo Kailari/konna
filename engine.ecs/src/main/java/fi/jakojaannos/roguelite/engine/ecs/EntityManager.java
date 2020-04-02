@@ -1,8 +1,5 @@
 package fi.jakojaannos.roguelite.engine.ecs;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -237,9 +234,6 @@ public interface EntityManager {
         getAllEntities().forEach(this::destroyEntity);
     }
 
-    @RequiredArgsConstructor
-    class EntityComponentPair<TComponent extends Component> {
-        @Getter private final Entity entity;
-        @Getter private final TComponent component;
+    record EntityComponentPair<TComponent extends Component>(Entity entity, TComponent component) {
     }
 }

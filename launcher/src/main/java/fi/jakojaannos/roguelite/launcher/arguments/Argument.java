@@ -1,16 +1,20 @@
 package fi.jakojaannos.roguelite.launcher.arguments;
 
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class Argument {
     private final List<String> aliases;
     private final Action action;
+
+    private Argument(
+            final List<String> aliases,
+            final Action action
+    ) {
+        this.aliases = aliases;
+        this.action = action;
+    }
 
     public static Builder withName(final String name, final String... aliases) {
         final var aliasList = new ArrayList<String>(aliases.length + 1);
@@ -31,9 +35,12 @@ public class Argument {
         void perform(ArgumentParameters params) throws ArgumentParsingException;
     }
 
-    @RequiredArgsConstructor
     public static class Builder {
         private final List<String> aliases;
+
+        public Builder(final List<String> aliases) {
+            this.aliases = aliases;
+        }
 
         public Argument withAction(final Action action) {
             return new Argument(this.aliases, action);

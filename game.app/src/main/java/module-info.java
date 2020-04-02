@@ -1,5 +1,4 @@
 module roguelite.game.app {
-    requires static lombok;
     requires org.slf4j;
     requires jsr305;
 

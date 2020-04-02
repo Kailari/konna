@@ -1,8 +1,5 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.mesh;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -13,7 +10,6 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 
-@RequiredArgsConstructor
 public class LWJGLVertexAttribute implements VertexAttribute {
     private final Type type;
     private final int count;
@@ -21,6 +17,12 @@ public class LWJGLVertexAttribute implements VertexAttribute {
 
     public int getSizeInBytes() {
         return LWJGLType.forType(this.type).getSizeInBytes() * this.count;
+    }
+
+    public LWJGLVertexAttribute(final Type type, final int count, final boolean normalized) {
+        this.type = type;
+        this.count = count;
+        this.normalized = normalized;
     }
 
     public void apply(
@@ -48,9 +50,25 @@ public class LWJGLVertexAttribute implements VertexAttribute {
         UNSIGNED_SHORT(VertexAttribute.Type.UNSIGNED_SHORT, GL_UNSIGNED_SHORT, 2);
 
         private static final Map<Type, LWJGLType> typeMappings = Arrays.stream(LWJGLType.values()).collect(Collectors.toMap(LWJGLType::getType, lwjglType -> lwjglType));
-        @Getter private final Type type;
-        @Getter private final int glType;
-        @Getter private final int sizeInBytes;
+        private final Type type;
+        private final int glType;
+        private final int sizeInBytes;
+
+        public static LWJGLType forType(final Type type) {
+            return typeMappings.get(type);
+        }
+
+        public Type getType() {
+            return this.type;
+        }
+
+        public int getGlType() {
+            return this.glType;
+        }
+
+        public int getSizeInBytes() {
+            return this.sizeInBytes;
+        }
 
         LWJGLType(
                 final Type type,
@@ -60,10 +78,6 @@ public class LWJGLVertexAttribute implements VertexAttribute {
             this.type = type;
             this.glType = glType;
             this.sizeInBytes = sizeInBytes;
-        }
-
-        public static LWJGLType forType(final Type type) {
-            return typeMappings.get(type);
         }
     }
 }

@@ -1,7 +1,7 @@
 package fi.jakojaannos.roguelite.engine.network.message.serialization;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.util.Optional;
@@ -10,10 +10,14 @@ import fi.jakojaannos.roguelite.engine.network.message.NetworkMessage;
 import fi.jakojaannos.roguelite.engine.network.message.NetworkMessageType;
 import fi.jakojaannos.roguelite.engine.network.message.NetworkMessageTypeMap;
 
-@Slf4j
-@RequiredArgsConstructor
 public class MessageDecoder {
+    private static final Logger LOG = LoggerFactory.getLogger(MessageDecoder.class);
+
     private final NetworkMessageTypeMap typeMap;
+
+    public MessageDecoder(final NetworkMessageTypeMap typeMap) {
+        this.typeMap = typeMap;
+    }
 
     public Optional<TypedNetworkMessage<?>> decodeFromBuffer(final ByteBuffer bufferIn) {
         if (bufferIn.remaining() < TypedNetworkMessage.FIXED_HEADER_SIZE_IN_BYTES) {
@@ -28,9 +32,10 @@ public class MessageDecoder {
             return Optional.empty();
         }
 
-        Optional<TypedNetworkMessage<?>> typedMessage = this.typeMap.getByMessageTypeId(typeId)
-                                                                    .map(type -> deserializeToTypedWrapper(type,
-                                                                                                           bufferIn));
+        final Optional<TypedNetworkMessage<?>> typedMessage =
+                this.typeMap.getByMessageTypeId(typeId)
+                            .map(type -> deserializeToTypedWrapper(type,
+                                                                   bufferIn));
 
         if (typedMessage.isEmpty()) {
             bufferIn.reset();

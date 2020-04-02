@@ -1,7 +1,5 @@
 package fi.jakojaannos.roguelite.game.view.systems;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.nio.file.Path;
 import java.util.stream.Stream;
 
@@ -21,7 +19,6 @@ import fi.jakojaannos.roguelite.engine.view.rendering.text.TextRenderer;
 import fi.jakojaannos.roguelite.engine.view.rendering.ui.UserInterfaceRenderer;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 
-@Slf4j
 public class UserInterfaceRenderingSystem implements ECSSystem, AutoCloseable {
     private final UserInterface userInterface;
     private final Camera camera;
@@ -65,7 +62,7 @@ public class UserInterfaceRenderingSystem implements ECSSystem, AutoCloseable {
                       .mul(this.camera.getViewport().getWidthInPixels(),
                            this.camera.getViewport().getHeightInPixels());
         final var events = world.getResource(Events.class);
-        this.userInterface.update(world.getResource(Time.class).getTimeManager(),
+        this.userInterface.update(world.getResource(Time.class).timeManager(),
                                   mouse,
                                   events);
 

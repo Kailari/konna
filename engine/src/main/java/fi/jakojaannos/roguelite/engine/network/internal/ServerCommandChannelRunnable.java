@@ -1,7 +1,7 @@
 package fi.jakojaannos.roguelite.engine.network.internal;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -26,12 +26,18 @@ import fi.jakojaannos.roguelite.engine.network.message.serialization.MessageDeco
 import fi.jakojaannos.roguelite.engine.network.message.serialization.MessageEncoder;
 import fi.jakojaannos.roguelite.engine.network.message.serialization.TypedNetworkMessage;
 
-@Slf4j
 public class ServerCommandChannelRunnable extends CommandChannelRunnable {
+    private static final Logger LOG = LoggerFactory.getLogger(ServerCommandChannelRunnable.class);
+
     private final MainThread mainThread;
     private final Map<NetworkConnection, ClientInfo> clients = new HashMap<>();
     private final ServerSocketChannel connectionChannel;
     private int clientIdCounter;
+
+    @Override
+    public boolean isConnected() {
+        return super.isConnected() && this.connectionChannel != null && this.connectionChannel.isOpen();
+    }
 
     public ServerCommandChannelRunnable(
             final int port,
@@ -51,11 +57,6 @@ public class ServerCommandChannelRunnable extends CommandChannelRunnable {
 
         this.connectionChannel.register(this.selector, SelectionKey.OP_ACCEPT);
         this.clientIdCounter = 0;
-    }
-
-    @Override
-    public boolean isConnected() {
-        return super.isConnected() && this.connectionChannel != null && this.connectionChannel.isOpen();
     }
 
     @Override
@@ -188,13 +189,23 @@ public class ServerCommandChannelRunnable extends CommandChannelRunnable {
         this.clientIdCounter++;
     }
 
-    @RequiredArgsConstructor
-    private static class ClientInfo {
-        private final Queue<TypedNetworkMessage<?>> receiveQueue = new ArrayDeque<>();
-        private final ByteBuffer writeBuffer = ByteBuffer.allocate(2048);
-        private final ByteBuffer readBuffer = ByteBuffer.allocate(2048);
-        private final Semaphore removalSemaphore = new Semaphore(1);
-        private final SocketChannel channel;
-        private final MessageHandlingContext context;
+    private static record ClientInfo(Queue<TypedNetworkMessage<?>>receiveQueue,
+                                     ByteBuffer writeBuffer,
+                                     ByteBuffer readBuffer,
+                                     Semaphore removalSemaphore,
+                                     SocketChannel channel,
+                                     MessageHandlingContext context
+    ) {
+        ClientInfo(
+                final SocketChannel channel,
+                final MessageHandlingContext context
+        ) {
+            this(new ArrayDeque<>(),
+                 ByteBuffer.allocate(2048),
+                 ByteBuffer.allocate(2048),
+                 new Semaphore(1),
+                 channel,
+                 context);
+        }
     }
 }

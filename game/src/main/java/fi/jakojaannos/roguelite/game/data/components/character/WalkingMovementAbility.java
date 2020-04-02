@@ -1,14 +1,17 @@
 package fi.jakojaannos.roguelite.game.data.components.character;
 
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import org.joml.Vector2d;
-
 import fi.jakojaannos.roguelite.engine.ecs.Component;
 
-@NoArgsConstructor
-@AllArgsConstructor
 public class WalkingMovementAbility implements Component {
-    public double maxSpeed = 4.0;
-    public double acceleration = 1.0;
+    public double maxSpeed;
+    public double acceleration;
+
+    public WalkingMovementAbility() {
+        this(4.0, 1.0);
+    }
+
+    public WalkingMovementAbility(final double maxSpeed, final double acceleration) {
+        this.maxSpeed = maxSpeed;
+        this.acceleration = acceleration;
+    }
 }

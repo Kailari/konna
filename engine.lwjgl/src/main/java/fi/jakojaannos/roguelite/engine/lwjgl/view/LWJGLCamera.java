@@ -1,11 +1,11 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view;
 
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import org.joml.Matrix4f;
 import org.joml.Vector2d;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 
@@ -19,8 +19,9 @@ import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL30.glBindBufferBase;
 import static org.lwjgl.opengl.GL31.GL_UNIFORM_BUFFER;
 
-@Slf4j
 public class LWJGLCamera extends Camera {
+    private static final Logger LOG = LoggerFactory.getLogger(LWJGLCamera.class);
+
     private static final double CAMERA_MOVE_EPSILON = 0.0001;
 
     private static final int MATRIX4F_SIZE_IN_BYTES = 16 * 4;
@@ -32,12 +33,22 @@ public class LWJGLCamera extends Camera {
     private final int worldCameraMatricesUbo;
     private final int screenCameraMatricesUbo;
     private final ByteBuffer cameraMatricesData;
-    @Getter private double targetScreenSizeInUnits = 32.0;
+    private double targetScreenSizeInUnits = 32.0;
     private boolean targetSizeIsRespectiveToMinorAxis;
     private double viewportWidthInUnits;
     private double viewportHeightInUnits;
     private boolean projectionMatrixDirty;
     private boolean viewMatrixDirty;
+
+    @Override
+    public double getVisibleAreaWidth() {
+        return this.viewportWidthInUnits;
+    }
+
+    @Override
+    public double getVisibleAreaHeight() {
+        return this.viewportHeightInUnits;
+    }
 
     public LWJGLCamera(final Viewport viewport) {
         super(new Vector2d(0.0, 0.0), viewport);
@@ -69,16 +80,6 @@ public class LWJGLCamera extends Camera {
 
         refreshViewMatrixIfDirty();
         useWorldCoordinates();
-    }
-
-    @Override
-    public double getVisibleAreaWidth() {
-        return this.viewportWidthInUnits;
-    }
-
-    @Override
-    public double getVisibleAreaHeight() {
-        return this.viewportHeightInUnits;
     }
 
     public void refreshMatricesIfDirty() {

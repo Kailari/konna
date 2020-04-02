@@ -1,6 +1,5 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text;
 
-import lombok.Getter;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.stb.STBTTAlignedQuad;
 import org.lwjgl.stb.STBTTBakedChar;
@@ -23,19 +22,43 @@ import static org.lwjgl.stb.STBTruetype.*;
 public class LWJGLFontTexture implements FontTexture, Texture {
     private static final int FIRST_CHAR = 32;
 
-    @Getter private final float contentScaleX;
-    @Getter private final float contentScaleY;
-    @Getter private final float pixelHeightScale;
+    private final float contentScaleX;
+    private final float contentScaleY;
+    private final float pixelHeightScale;
 
     private final int fontHeight;
     private final LWJGLFont font;
     private final STBTTBakedChar.Buffer bakedCharacters;
     private final STBTTAlignedQuad alignedQuad;
-
     private final int textureId;
     private final int scaledBitmapW;
     private final int scaledBitmapH;
     private final Map<Integer, TextureRegion> textureRegions = new HashMap<>();
+
+    @Override
+    public float getContentScaleX() {
+        return this.contentScaleX;
+    }
+
+    @Override
+    public float getContentScaleY() {
+        return this.contentScaleY;
+    }
+
+    @Override
+    public float getPixelHeightScale() {
+        return this.pixelHeightScale;
+    }
+
+    @Override
+    public int getWidth() {
+        return this.scaledBitmapW;
+    }
+
+    @Override
+    public int getHeight() {
+        return this.scaledBitmapH;
+    }
 
     public LWJGLFontTexture(
             final ByteBuffer ttf,
@@ -85,16 +108,6 @@ public class LWJGLFontTexture implements FontTexture, Texture {
     }
 
     @Override
-    public int getWidth() {
-        return this.scaledBitmapW;
-    }
-
-    @Override
-    public int getHeight() {
-        return this.scaledBitmapH;
-    }
-
-    @Override
     public void use() {
         glBindTexture(GL_TEXTURE_2D, this.textureId);
     }
@@ -129,15 +142,15 @@ public class LWJGLFontTexture implements FontTexture, Texture {
             pX.put(0, pX.get(0) + kernAdvance * this.pixelHeightScale);
         }
 
-        return new LWJGLRenderableCharacter(this.alignedQuad.x0(), this.alignedQuad.x1(),
-                                            this.alignedQuad.y0(), this.alignedQuad.y1(),
-                                            this.textureRegions
-                                                    .computeIfAbsent(codePoint,
-                                                                     key -> new TextureRegion(this,
-                                                                                              this.alignedQuad.s0(),
-                                                                                              this.alignedQuad.t0(),
-                                                                                              this.alignedQuad.s1(),
-                                                                                              this.alignedQuad.t1())));
+        return new RenderableCharacter(this.alignedQuad.x0(), this.alignedQuad.x1(),
+                                       this.alignedQuad.y0(), this.alignedQuad.y1(),
+                                       this.textureRegions
+                                               .computeIfAbsent(codePoint,
+                                                                key -> new TextureRegion(this,
+                                                                                         this.alignedQuad.s0(),
+                                                                                         this.alignedQuad.t0(),
+                                                                                         this.alignedQuad.s1(),
+                                                                                         this.alignedQuad.t1())));
     }
 
     private double scale(

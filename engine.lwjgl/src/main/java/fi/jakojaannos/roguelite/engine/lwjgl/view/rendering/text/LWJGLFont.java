@@ -1,15 +1,11 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.text;
 
-import lombok.Getter;
-import lombok.Setter;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.stb.STBTTFontinfo;
 import org.lwjgl.system.MemoryStack;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
-import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -19,17 +15,30 @@ import fi.jakojaannos.roguelite.engine.view.rendering.text.Font;
 
 import static org.lwjgl.stb.STBTruetype.*;
 
-public class LWJGLFont implements AutoCloseable, Font {
+public class LWJGLFont implements Font {
     private final float contentScaleX;
     private final float contentScaleY;
 
     private final ByteBuffer ttf;
-    @Getter private final STBTTFontinfo fontInfo;
+    private final STBTTFontinfo fontInfo;
     private final Map<Integer, LWJGLFontTexture> sizes = new HashMap<>();
     private final int ascent;
     private final int descent;
     private final int lineGap;
-    @Getter @Setter private boolean kerningEnabled = false;
+
+    public STBTTFontinfo getFontInfo() {
+        return this.fontInfo;
+    }
+
+    @Override
+    public boolean isKerningEnabled() {
+        return false;
+    }
+
+    @Override
+    public float getLineOffset() {
+        return this.ascent - this.descent + this.lineGap;
+    }
 
     public LWJGLFont(
             final Path assetPath,
@@ -39,12 +48,12 @@ public class LWJGLFont implements AutoCloseable, Font {
         this.contentScaleX = contentScaleX;
         this.contentScaleY = contentScaleY;
 
-        try (SeekableByteChannel fc = Files.newByteChannel(assetPath)) {
+        try (final var fc = Files.newByteChannel(assetPath)) {
             this.ttf = BufferUtils.createByteBuffer((int) fc.size() + 1);
             //noinspection StatementWithEmptyBody
             while (fc.read(this.ttf) != -1) ;
             this.ttf.flip();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new IllegalStateException(String.format("Could not load font from %s!", assetPath.toString()));
         }
 
@@ -77,22 +86,22 @@ public class LWJGLFont implements AutoCloseable, Font {
     @Override
     public double getStringWidthInPixels(final int fontSize, final String string) {
         int width = 0;
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            IntBuffer pCodePoint = stack.mallocInt(1);
-            IntBuffer pAdvancedWidth = stack.mallocInt(1);
-            IntBuffer pLeftSideBearing = stack.mallocInt(1);
+        try (final var stack = MemoryStack.stackPush()) {
+            final var pCodePoint = stack.mallocInt(1);
+            final var pAdvancedWidth = stack.mallocInt(1);
+            final var pLeftSideBearing = stack.mallocInt(1);
 
             final var from = 0;
             final var to = string.length();
             int i = from;
             while (i < to) {
                 i += Font.getCP(string, to, i, pCodePoint);
-                int cp = pCodePoint.get(0);
+                final var cp = pCodePoint.get(0);
 
                 stbtt_GetCodepointHMetrics(this.fontInfo, cp, pAdvancedWidth, pLeftSideBearing);
                 width += pAdvancedWidth.get(0);
 
-                if (this.kerningEnabled && i < to) {
+                if (isKerningEnabled() && i < to) {
                     Font.getCP(string, to, i, pCodePoint);
                     width += stbtt_GetCodepointKernAdvance(this.fontInfo, cp, pCodePoint.get(0));
                 }
@@ -100,11 +109,6 @@ public class LWJGLFont implements AutoCloseable, Font {
         }
 
         return width * stbtt_ScaleForPixelHeight(this.fontInfo, fontSize);
-    }
-
-    @Override
-    public float getLineOffset() {
-        return this.ascent - this.descent + this.lineGap;
     }
 
     @Override

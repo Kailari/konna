@@ -1,7 +1,5 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.mesh;
 
-import lombok.Setter;
-
 import java.nio.ByteBuffer;
 
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.Mesh;
@@ -11,12 +9,12 @@ import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
-public class LWJGLMesh implements AutoCloseable, Mesh {
+public class LWJGLMesh implements Mesh {
     private final int vao;
     private final int ebo;
     private final int vbo;
     private final VertexFormat vertexFormat;
-    @Setter private float pointSize = 1.0f;
+    private float pointSize = 1.0f;
 
     public LWJGLMesh(final VertexFormat vertexFormat) {
         this.vertexFormat = vertexFormat;
@@ -29,6 +27,11 @@ public class LWJGLMesh implements AutoCloseable, Mesh {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this.ebo = buffers[0]);
         glBindBuffer(GL_ARRAY_BUFFER, this.vbo = buffers[1]);
         vertexFormat.apply();
+    }
+
+    @Override
+    public void setPointSize(final float pointSize) {
+        this.pointSize = pointSize;
     }
 
     @Override

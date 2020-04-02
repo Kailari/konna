@@ -1,7 +1,5 @@
 package fi.jakojaannos.roguelite.game.systems.characters.movement;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
@@ -17,7 +15,6 @@ import fi.jakojaannos.roguelite.game.data.components.character.WalkingMovementAb
 import fi.jakojaannos.roguelite.game.systems.SystemGroups;
 import fi.jakojaannos.roguelite.game.systems.physics.ApplyFrictionSystem;
 
-@Slf4j
 public class CharacterMovementSystem implements ECSSystem {
     private static final float INPUT_EPSILON = 0.001f;
 

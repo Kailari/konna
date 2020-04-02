@@ -1,9 +1,8 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import org.lwjgl.system.MemoryStack;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
@@ -16,12 +15,22 @@ import static org.lwjgl.opengl.GL12.GL_CLAMP_TO_EDGE;
 // TODO: Get rid of the BufferedImage to get rid of the java.desktop module read
 //  stb provides some image loading functionality, use that
 
-@Slf4j
-@EqualsAndHashCode
 public class LWJGLTexture implements Texture {
+    private static final Logger LOG = LoggerFactory.getLogger(LWJGLTexture.class);
+
     private final int texture;
-    @Getter private final int width;
-    @Getter private final int height;
+    private final int width;
+    private final int height;
+
+    @Override
+    public int getWidth() {
+        return this.width;
+    }
+
+    @Override
+    public int getHeight() {
+        return this.height;
+    }
 
     public LWJGLTexture(
             final int width,
@@ -81,5 +90,4 @@ public class LWJGLTexture implements Texture {
 
         return buffer;
     }
-
 }

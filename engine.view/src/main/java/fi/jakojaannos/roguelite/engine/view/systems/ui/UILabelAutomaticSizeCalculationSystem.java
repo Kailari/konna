@@ -1,7 +1,5 @@
 package fi.jakojaannos.roguelite.engine.view.systems.ui;
 
-import lombok.RequiredArgsConstructor;
-
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.ecs.*;
@@ -15,9 +13,12 @@ import fi.jakojaannos.roguelite.engine.view.data.resources.ui.UIHierarchy;
 import fi.jakojaannos.roguelite.engine.view.data.resources.ui.UIRoot;
 import fi.jakojaannos.roguelite.engine.view.ui.ProportionValue;
 
-@RequiredArgsConstructor
 public class UILabelAutomaticSizeCalculationSystem implements ECSSystem {
     private final TextSizeProvider font;
+
+    public UILabelAutomaticSizeCalculationSystem(final TextSizeProvider font) {
+        this.font = font;
+    }
 
     private static int getFontSize(
             final EntityManager entityManager,
@@ -58,7 +59,7 @@ public class UILabelAutomaticSizeCalculationSystem implements ECSSystem {
             final var fontSize = getFontSize(entityManager, entity, hierarchy, uiRoot);
             final var textComponent = entityManager.getComponentOf(entity, Text.class)
                                                    .orElseThrow();
-            final var text = textComponent.text;
+            final var text = textComponent.getText();
             final var font = this.font; // TODO: Get font from hierarchy like the font size is get
 
             entityManager.addComponentIfAbsent(entity, BoundWidth.class,
@@ -66,11 +67,11 @@ public class UILabelAutomaticSizeCalculationSystem implements ECSSystem {
             entityManager.addComponentIfAbsent(entity, BoundHeight.class,
                                                () -> new BoundHeight(ProportionValue.absolute(0)));
 
-            int width = (int) font.getStringWidthInPixels(fontSize, text);
+            final int width = (int) font.getStringWidthInPixels(fontSize, text);
             final var widthBound = entityManager.getComponentOf(entity, BoundWidth.class).orElseThrow();
             widthBound.value = ProportionValue.absolute(width);
 
-            int height = (int) font.getStringHeightInPixels(fontSize, text);
+            final int height = (int) font.getStringHeightInPixels(fontSize, text);
             final var heightBound = entityManager.getComponentOf(entity, BoundHeight.class).orElseThrow();
             heightBound.value = ProportionValue.absolute(height);
         });

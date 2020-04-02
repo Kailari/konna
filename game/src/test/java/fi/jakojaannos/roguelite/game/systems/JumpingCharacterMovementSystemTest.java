@@ -10,6 +10,8 @@ import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.archetypes.PlayerArchetype;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
 import fi.jakojaannos.roguelite.game.data.components.character.JumpingMovementAbility;
@@ -30,8 +32,7 @@ public class JumpingCharacterMovementSystemTest {
         final var entityManager = EntityManager.createNew(256, 32);
         final var world = World.createNew(entityManager);
 
-        Time time = mock(Time.class);
-        when(time.getTimeStepInSeconds()).thenReturn(0.02);
+        final var time = new Time(new SimpleTimeManager(20));
         world.provideResource(Time.class, time);
 
         final var playerPos = new Transform(10, 10);

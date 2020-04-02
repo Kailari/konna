@@ -1,6 +1,6 @@
 package fi.jakojaannos.roguelite.game.data;
 
-import lombok.RequiredArgsConstructor;
+import javax.annotation.Nullable;
 
 public interface DamageSource<TKiller> {
     /**
@@ -10,28 +10,34 @@ public interface DamageSource<TKiller> {
      */
     TKiller getKiller();
 
-    @RequiredArgsConstructor
     enum Generic implements DamageSource<Object> {
         WORLD(null),
         UNDEFINED(null);
 
         private static final Object UNKNOWN_KILLER = new Object();
 
-        private final Object killer;
+        @Nullable private final Object killer;
 
         @Override
         public Object getKiller() {
             return this.killer == null ? UNKNOWN_KILLER : this.killer;
         }
+
+        Generic(@Nullable final Object killer) {
+            this.killer = killer;
+        }
     }
 
-    @RequiredArgsConstructor
     class Entity implements DamageSource<fi.jakojaannos.roguelite.engine.ecs.Entity> {
         private final fi.jakojaannos.roguelite.engine.ecs.Entity player;
 
         @Override
         public fi.jakojaannos.roguelite.engine.ecs.Entity getKiller() {
             return this.player;
+        }
+
+        public Entity(final fi.jakojaannos.roguelite.engine.ecs.Entity player) {
+            this.player = player;
         }
     }
 }

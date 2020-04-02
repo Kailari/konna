@@ -1,8 +1,5 @@
 package fi.jakojaannos.roguelite.engine.input;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
@@ -135,7 +132,6 @@ public interface InputButton {
         KEY_RIGHT_SUPER(347),
         KEY_MENU(348);
 
-        public static final int NUM_KEYS = KEY_MENU.ordinal() + 1;
         private static final Keyboard[] KEY_LOOKUP = new Keyboard[349];
 
         static {
@@ -144,12 +140,7 @@ public interface InputButton {
                   .forEach(key -> KEY_LOOKUP[key.key] = key);
         }
 
-        @Getter
         private final int key;
-
-        Keyboard(final int key) {
-            this.key = key;
-        }
 
         public static Optional<Keyboard> get(final int key) {
             Keyboard result = null;
@@ -159,37 +150,32 @@ public interface InputButton {
 
             return Optional.ofNullable(result);
         }
+
+        public int getKey() {
+            return this.key;
+        }
+
+        Keyboard(final int key) {
+            this.key = key;
+        }
     }
 
-    @EqualsAndHashCode
-    final class Mouse implements InputButton {
+    final record Mouse(int index) implements InputButton {
         private static final Map<Integer, Mouse> buttonInstances = new TreeMap<>();
-
-        private final int index;
-
-        private Mouse(final int index) {
-            this.index = index;
-        }
 
         public static Mouse button(final int index) {
             return buttonInstances.computeIfAbsent(index, integer -> new Mouse(index));
         }
 
         public String getName() {
-            switch (this.index) {
-                case 0:
-                    return "Mouse Left";
-                case 1:
-                    return "Mouse Right";
-                case 2:
-                    return "Mouse Middle";
-                case 3:
-                    return "Thumb 1";
-                case 4:
-                    return "Thumb 2";
-                default:
-                    return "Mouse Button #" + (this.index + 1);
-            }
+            return switch (this.index) {
+                case 0 -> "Mouse Left";
+                case 1 -> "Mouse Right";
+                case 2 -> "Mouse Middle";
+                case 3 -> "Thumb 1";
+                case 4 -> "Thumb 2";
+                default -> "Mouse Button #" + (this.index + 1);
+            };
         }
     }
 }

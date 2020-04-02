@@ -1,8 +1,8 @@
 package fi.jakojaannos.roguelite.engine.view.content;
 
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -21,8 +21,9 @@ import fi.jakojaannos.roguelite.engine.view.rendering.sprite.serialization.Sprit
 /**
  * Handles loading sprites from assets-directory.
  */
-@Slf4j
 public class SpriteRegistry extends AbstractAssetRegistry<Sprite> {
+    private static final Logger LOG = LoggerFactory.getLogger(SpriteRegistry.class);
+
     private final Path assetRoot;
 
     private final TextureRegistry textures;
@@ -47,15 +48,15 @@ public class SpriteRegistry extends AbstractAssetRegistry<Sprite> {
 
     @Override
     protected Optional<Sprite> loadAsset(final AssetHandle handle) {
-        Gson gson = new GsonBuilder()
-                .registerTypeAdapter(Sprite.class, new SpriteDeserializer<>(textures))
+        final var gson = new GsonBuilder()
+                .registerTypeAdapter(Sprite.class, new SpriteDeserializer<>(this.textures))
                 .create();
-        final var path = assetRoot.resolve(handle.getName() + ".json");
+        final var path = this.assetRoot.resolve(handle.name() + ".json");
         try (final var reader = new InputStreamReader(Files.newInputStream(path, StandardOpenOption.READ))) {
             LOG.trace(LogCategories.SPRITE_SERIALIZATION,
                       "Loading sprite {}", path.toString());
             return Optional.ofNullable(gson.fromJson(reader, Sprite.class));
-        } catch (IOException e) {
+        } catch (final IOException e) {
             LOG.error("Reading sprite \"{}\" failed!", handle);
             LOG.error("Exception: ", e);
             return Optional.empty();

@@ -1,7 +1,5 @@
 package fi.jakojaannos.roguelite.engine.lwjgl;
 
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLUtil;
@@ -14,10 +12,12 @@ import fi.jakojaannos.roguelite.engine.state.GameState;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 
-@Slf4j
 public class LWJGLGameRunner<TGame extends Game> extends GameRunner<TGame> {
-    @Getter
     private final LWJGLWindow window;
+
+    public LWJGLWindow getWindow() {
+        return this.window;
+    }
 
     public LWJGLGameRunner(final boolean debugModeEnabled, final int windowWidth, final int windowHeight) {
         GLFWErrorCallback.createPrint(System.err).set();

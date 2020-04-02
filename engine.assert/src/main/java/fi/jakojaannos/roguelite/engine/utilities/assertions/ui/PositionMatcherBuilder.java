@@ -1,17 +1,23 @@
 package fi.jakojaannos.roguelite.engine.utilities.assertions.ui;
 
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.engine.view.ui.query.UIPropertyMatcher;
 
-@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public class PositionMatcherBuilder {
     private final int uiSize;
     private final UIProperty<Integer> minProperty;
     private final UIProperty<Integer> sizeProperty;
+
+    PositionMatcherBuilder(
+            final int uiSize,
+            final UIProperty<Integer> minProperty,
+            final UIProperty<Integer> sizeProperty
+    ) {
+        this.uiSize = uiSize;
+        this.minProperty = minProperty;
+        this.sizeProperty = sizeProperty;
+    }
 
     public static PositionMatcherBuilder isHorizontallyIn(final UserInterface ui) {
         return new PositionMatcherBuilder(ui.getWidth(), UIProperty.MIN_X, UIProperty.WIDTH);

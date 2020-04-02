@@ -1,7 +1,7 @@
 package fi.jakojaannos.roguelite.engine;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.function.Supplier;
 
@@ -14,9 +14,9 @@ import fi.jakojaannos.roguelite.engine.state.GameState;
  *
  * @param <TGame> Type of the game to run
  */
-@Slf4j
-@RequiredArgsConstructor
 public class GameRunner<TGame extends Game> implements AutoCloseable {
+    private static final Logger LOG = LoggerFactory.getLogger(GameRunner.class);
+
     protected long getMaxFrameTime() {
         return 250L;
     }
@@ -82,7 +82,7 @@ public class GameRunner<TGame extends Game> implements AutoCloseable {
                 accumulator += frameElapsedTime;
                 while (accumulator >= game.getTime().getTimeStep()) {
                     inputProvider.pollEvents()
-                                 .forEach(events.getInput()::fire);
+                                 .forEach(events.input()::fire);
 
                     state.getWorld().provideResource(Events.class, events);
                     state = simulateTick(state, game, events);

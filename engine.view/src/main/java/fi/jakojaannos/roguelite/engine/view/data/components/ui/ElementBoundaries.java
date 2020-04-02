@@ -1,7 +1,5 @@
 package fi.jakojaannos.roguelite.engine.view.data.components.ui;
 
-import lombok.Getter;
-import lombok.Setter;
 import org.joml.Vector2i;
 
 import fi.jakojaannos.roguelite.engine.ecs.Component;
@@ -16,12 +14,60 @@ import fi.jakojaannos.roguelite.engine.ecs.Component;
 public class ElementBoundaries implements Component {
     public static int INVALID_VALUE = Integer.MIN_VALUE;
 
-    @Getter @Setter public int minX;
-    @Getter @Setter public int maxX;
-    @Getter @Setter public int minY;
-    @Getter @Setter public int maxY;
-    @Getter @Setter public int width;
-    @Getter @Setter public int height;
+    public int minX;
+    public int maxX;
+    public int minY;
+    public int maxY;
+    public int width;
+    public int height;
+
+    public int getMinX() {
+        return this.minX;
+    }
+
+    public void setMinX(final int minX) {
+        this.minX = minX;
+    }
+
+    public int getMaxX() {
+        return this.maxX;
+    }
+
+    public void setMaxX(final int maxX) {
+        this.maxX = maxX;
+    }
+
+    public int getMinY() {
+        return this.minY;
+    }
+
+    public void setMinY(final int minY) {
+        this.minY = minY;
+    }
+
+    public int getMaxY() {
+        return this.maxY;
+    }
+
+    public void setMaxY(final int maxY) {
+        this.maxY = maxY;
+    }
+
+    public int getWidth() {
+        return this.width;
+    }
+
+    public void setWidth(final int width) {
+        this.width = width;
+    }
+
+    public int getHeight() {
+        return this.height;
+    }
+
+    public void setHeight(final int height) {
+        this.height = height;
+    }
 
     public void invalidate() {
         this.minX = ElementBoundaries.INVALID_VALUE;

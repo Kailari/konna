@@ -1,8 +1,12 @@
 package fi.jakojaannos.roguelite.engine.ecs.components;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -12,16 +16,27 @@ import fi.jakojaannos.roguelite.engine.ecs.ComponentGroup;
 import fi.jakojaannos.roguelite.engine.ecs.entities.EntityImpl;
 import fi.jakojaannos.roguelite.engine.utilities.BitMaskUtils;
 
-@Slf4j
 public class ComponentStorage {
+    private static final Logger LOG = LoggerFactory.getLogger(ComponentStorage.class);
+
     private final int maxComponentTypes;
     @SuppressWarnings("rawtypes")
     private final Map<Integer, ComponentMap> componentTypes = new HashMap<>();
     private final Map<Class<? extends Component>, Integer> componentTypeIndices = new HashMap<>();
     private final Map<ComponentGroup, Integer> componentGroupIndices = new HashMap<>();
 
-    private int registeredTypeIndices = 0;
+    private int registeredTypeIndices;
     private int entityCapacity;
+
+    private int getNextComponentTypeIndex() {
+        final var index = this.registeredTypeIndices;
+        ++this.registeredTypeIndices;
+
+        if (index >= this.maxComponentTypes) {
+            throw new IllegalStateException("Too many component types registered!");
+        }
+        return index;
+    }
 
     public ComponentStorage(final int entityCapacity, final int maxComponentTypes) {
         this.entityCapacity = entityCapacity;
@@ -50,9 +65,9 @@ public class ComponentStorage {
             final EntityImpl entity,
             final Collection<Class<? extends Component>> except
     ) {
-        List<Integer> allowedIndices = except.stream()
-                                             .map(this::getComponentTypeIndexFor)
-                                             .collect(Collectors.toList());
+        final var allowedIndices = except.stream()
+                                         .map(this::getComponentTypeIndexFor)
+                                         .collect(Collectors.toList());
         IntStream.range(0, this.componentTypes.size())
                  .filter(i -> !allowedIndices.contains(i))
                  .forEach(index -> removeComponentByIndex(entity, index));
@@ -109,7 +124,7 @@ public class ComponentStorage {
             return Optional.empty();
         }
 
-        final var componentStorage = componentTypes.get(componentTypeIndex);
+        final var componentStorage = this.componentTypes.get(componentTypeIndex);
         // noinspection unchecked
         return (Optional<TComponent>) Optional.ofNullable(componentStorage.getComponent(entity));
     }
@@ -172,18 +187,8 @@ public class ComponentStorage {
         return getNextComponentTypeIndex();
     }
 
-    private int getNextComponentTypeIndex() {
-        final var index = this.registeredTypeIndices;
-        ++this.registeredTypeIndices;
-
-        if (index >= this.maxComponentTypes) {
-            throw new IllegalStateException("Too many component types registered!");
-        }
-        return index;
-    }
-
     private int createNewComponentStorage(final Class<? extends Component> componentClass) {
-        int index = getNextComponentTypeIndex();
+        final int index = getNextComponentTypeIndex();
         this.componentTypes.put(index, new ComponentMap<>(
                 this.entityCapacity,
                 componentClass

@@ -1,9 +1,5 @@
 package fi.jakojaannos.roguelite.engine.view.ui;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 import java.util.function.Function;
 
 import fi.jakojaannos.roguelite.engine.view.data.components.ui.ElementBoundaries;
@@ -24,10 +20,17 @@ public abstract class ProportionValue {
 
     // TODO: "em"-style proportional-to-font-size proportion value
 
-    @RequiredArgsConstructor
     private static final class PercentOf extends ProportionValue {
         private final double value;
         private final Function<Context, Integer> sizeFunction;
+
+        private PercentOf(
+                final double value,
+                final Function<Context, Integer> sizeFunction
+        ) {
+            this.value = value;
+            this.sizeFunction = sizeFunction;
+        }
 
         @Override
         public int getValue(final Context context) {
@@ -35,11 +38,24 @@ public abstract class ProportionValue {
         }
     }
 
-    @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
     public static final class PercentOfSelf extends ProportionValue {
         private final double value;
-        @Getter private final boolean horizontal;
+        private final boolean horizontal;
         private final Function<Context, Integer> sizeFunction;
+
+        public boolean isHorizontal() {
+            return this.horizontal;
+        }
+
+        private PercentOfSelf(
+                final double value,
+                final boolean horizontal,
+                final Function<Context, Integer> sizeFunction
+        ) {
+            this.value = value;
+            this.horizontal = horizontal;
+            this.sizeFunction = sizeFunction;
+        }
 
         @Override
         public int getValue(final Context context) {
@@ -52,9 +68,12 @@ public abstract class ProportionValue {
         }
     }
 
-    @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
     private static class Absolute extends ProportionValue {
         private final int value;
+
+        private Absolute(final int value) {
+            this.value = value;
+        }
 
         @Override
         public int getValue(final Context context) {
@@ -62,11 +81,11 @@ public abstract class ProportionValue {
         }
     }
 
-    @RequiredArgsConstructor
-    public static final class Context {
-        @Getter private final int fontSize;
-        @Getter private final ElementBoundaries parentBounds;
-        @Getter private final ElementBoundaries ownBounds;
+    public static final record Context(
+            int fontSize,
+            ElementBoundaries parentBounds,
+            ElementBoundaries ownBounds
+    ) {
     }
 
     public static final class PercentBuilder {

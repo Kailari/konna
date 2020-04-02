@@ -1,9 +1,9 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.shader;
 
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryStack;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,11 +16,12 @@ import static org.lwjgl.opengl.GL30.glBindFragDataLocation;
 import static org.lwjgl.opengl.GL31.glGetUniformBlockIndex;
 import static org.lwjgl.opengl.GL31.glUniformBlockBinding;
 
-@Slf4j
-class LWJGLShaderProgram implements AutoCloseable, ShaderProgram {
-    @Getter private final int shaderProgram;
+class LWJGLShaderProgram implements ShaderProgram {
+    private static final Logger LOG = LoggerFactory.getLogger(LWJGLShaderProgram.class);
+
+    private final int shaderProgram;
     private final Collection<Shader> shaders;
-    private Map<String, Integer> uniformLocations = new HashMap<>();
+    private final Map<String, Integer> uniformLocations = new HashMap<>();
 
     LWJGLShaderProgram(
             final int programPtr,
@@ -48,7 +49,7 @@ class LWJGLShaderProgram implements AutoCloseable, ShaderProgram {
 
     @Override
     public void bindUniformBlock(final String blockName, final int uniformObjectIndex) {
-        int blockIndex = glGetUniformBlockIndex(this.shaderProgram, blockName);
+        final int blockIndex = glGetUniformBlockIndex(this.shaderProgram, blockName);
         glUniformBlockBinding(this.shaderProgram, blockIndex, uniformObjectIndex);
     }
 

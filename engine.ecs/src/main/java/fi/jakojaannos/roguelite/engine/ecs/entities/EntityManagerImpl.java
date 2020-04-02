@@ -1,6 +1,7 @@
 package fi.jakojaannos.roguelite.engine.ecs.entities;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayDeque;
 import java.util.Collection;
@@ -18,14 +19,20 @@ import fi.jakojaannos.roguelite.engine.utilities.BitMaskUtils;
 /**
  * Default {@link EntityManager} implementation.
  */
-@Slf4j
 public class EntityManagerImpl implements EntityManager {
+    private static final Logger LOG = LoggerFactory.getLogger(EntityManagerImpl.class);
+
     private final int maxComponentTypes;
     private final EntityStorage entityStorage;
     private final ComponentStorage componentStorage;
     private final Queue<StorageTask> taskQueue = new ArrayDeque<>();
 
     private int entityCapacity;
+
+    @Override
+    public Stream<Entity> getAllEntities() {
+        return this.entityStorage.stream().map(Entity.class::cast);
+    }
 
     public EntityManagerImpl(final int entityCapacity, final int maxComponentTypes) {
         this(entityCapacity, maxComponentTypes, new EntityStorage(entityCapacity),
@@ -47,11 +54,6 @@ public class EntityManagerImpl implements EntityManager {
     @Override
     public int entityCount() {
         return this.entityStorage.count();
-    }
-
-    @Override
-    public Stream<Entity> getAllEntities() {
-        return this.entityStorage.stream().map(Entity.class::cast);
     }
 
     @Override

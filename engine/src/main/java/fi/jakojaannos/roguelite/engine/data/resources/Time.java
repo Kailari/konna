@@ -1,15 +1,36 @@
 package fi.jakojaannos.roguelite.engine.data.resources;
 
-import lombok.Getter;
-import lombok.experimental.Delegate;
-
 import fi.jakojaannos.roguelite.engine.ecs.ProvidedResource;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 
-public class Time implements ProvidedResource, TimeManager {
-    @Getter @Delegate private final TimeManager timeManager;
+public record Time(TimeManager timeManager) implements ProvidedResource, TimeManager {
+    @Override
+    public long getTimeStep() {
+        return this.timeManager.getTimeStep();
+    }
 
-    public Time(final TimeManager timeManager) {
-        this.timeManager = timeManager;
+    @Override
+    public double getTimeStepInSeconds() {
+        return this.timeManager.getTimeStepInSeconds();
+    }
+
+    @Override
+    public long getCurrentGameTime() {
+        return this.timeManager.getCurrentGameTime();
+    }
+
+    @Override
+    public double getTicksPerSecond() {
+        return this.timeManager.getTicksPerSecond();
+    }
+
+    @Override
+    public long convertToTicks(final double seconds) {
+        return this.timeManager.convertToTicks(seconds);
+    }
+
+    @Override
+    public double convertToSeconds(final long ticks) {
+        return this.timeManager.convertToSeconds(ticks);
     }
 }

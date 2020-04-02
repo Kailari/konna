@@ -1,15 +1,16 @@
 package fi.jakojaannos.roguelite.launcher.arguments;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-
 import fi.jakojaannos.roguelite.launcher.arguments.parameters.Parameter;
 
 public class ArgumentParameters {
     private final int beginIndex;
     private final String[] args;
 
-    @Getter(AccessLevel.PACKAGE) private int consumed;
+    private int consumed;
+
+    int getConsumed() {
+        return this.consumed;
+    }
 
     ArgumentParameters(final int beginIndex, final String[] args) {
         this.beginIndex = beginIndex;

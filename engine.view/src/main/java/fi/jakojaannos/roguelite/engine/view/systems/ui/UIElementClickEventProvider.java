@@ -47,7 +47,7 @@ public class UIElementClickEventProvider implements ECSSystem {
                 if (clicked.releasedSince) {
                     clicked.releasedSince = false;
                     clicked.timestamp = timeManager.getCurrentGameTime();
-                    events.getUi().fire(new UIEvent(name, UIEvent.Type.CLICK));
+                    events.ui().fire(new UIEvent(name, UIEvent.Type.CLICK));
                 }
             } else if (entityManager.hasComponent(entity, ClickTimestamp.class)) {
                 final var clicked = entityManager.getComponentOf(entity, ClickTimestamp.class).orElseThrow();

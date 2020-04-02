@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class ChunkMap<TTile> {
     private final TTile defaultTile;
-    private Map<Long, Chunk<TTile>> chunks = new HashMap<>();
+    private final Map<Long, Chunk<TTile>> chunks = new HashMap<>();
 
     public ChunkMap(final TTile defaultTile) {
         this.defaultTile = defaultTile;
@@ -23,6 +23,6 @@ public class ChunkMap<TTile> {
 
     public Chunk<TTile> getByChunkCoordinates(final int chunkX, final int chunkY) {
         return this.chunks.computeIfAbsent(packCoordinate(chunkX, chunkY),
-                                           key -> new Chunk<>(chunkX, chunkY, defaultTile));
+                                           key -> new Chunk<>(this.defaultTile));
     }
 }

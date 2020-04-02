@@ -1,15 +1,9 @@
 package fi.jakojaannos.roguelite.engine.network.message;
 
-import lombok.RequiredArgsConstructor;
-
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
-@RequiredArgsConstructor
-public
-class HelloMessage implements NetworkMessage {
-    public final String hello;
-
+public record HelloMessage(String hello) implements NetworkMessage {
     public static class Type implements NetworkMessageType<HelloMessage> {
         @Override
         public int getTypeId() {

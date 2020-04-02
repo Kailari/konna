@@ -1,12 +1,14 @@
 package fi.jakojaannos.roguelite.game.data.components;
 
-import lombok.NoArgsConstructor;
 import org.joml.Vector2d;
 
 import fi.jakojaannos.roguelite.engine.ecs.Component;
 
-@NoArgsConstructor
 public class Velocity extends Vector2d implements Component {
+    public Velocity() {
+        super(0.0, 0.0);
+    }
+
     public Velocity(final Vector2d source) {
         super(source.x(), source.y());
     }

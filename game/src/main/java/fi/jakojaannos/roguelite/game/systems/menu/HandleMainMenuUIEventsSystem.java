@@ -1,6 +1,7 @@
 package fi.jakojaannos.roguelite.game.systems.menu;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.stream.Stream;
@@ -16,8 +17,9 @@ import fi.jakojaannos.roguelite.engine.network.client.ClientNetworkManager;
 import fi.jakojaannos.roguelite.engine.ui.UIEvent;
 import fi.jakojaannos.roguelite.game.state.GameplayGameState;
 
-@Slf4j
 public class HandleMainMenuUIEventsSystem implements ECSSystem {
+    private static final Logger LOG = LoggerFactory.getLogger(HandleMainMenuUIEventsSystem.class);
+
     @Nullable public String host;
     public int port;
 
@@ -34,15 +36,15 @@ public class HandleMainMenuUIEventsSystem implements ECSSystem {
             final World world
     ) {
         final var gameStateManager = world.getOrCreateResource(GameStateManager.class);
-        final var events = world.getResource(Events.class).getUi();
+        final var events = world.getResource(Events.class).ui();
         while (events.hasEvents()) {
             final var event = events.pollEvent();
-            if (event.getType() == UIEvent.Type.CLICK) {
-                if (event.getElement().equalsIgnoreCase("play_button")) {
+            if (event.type() == UIEvent.Type.CLICK) {
+                if (event.element().equalsIgnoreCase("play_button")) {
                     gameStateManager.queueStateChange(createGameplayState(world));
-                } else if (event.getElement().equalsIgnoreCase("quit_button")) {
+                } else if (event.element().equalsIgnoreCase("quit_button")) {
                     gameStateManager.quitGame();
-                } else if (event.getElement().equalsIgnoreCase("connect_button")) {
+                } else if (event.element().equalsIgnoreCase("connect_button")) {
                     if (this.host == null) {
                         return;
                     }
@@ -66,6 +68,6 @@ public class HandleMainMenuUIEventsSystem implements ECSSystem {
     private GameplayGameState createGameplayState(final World world) {
         return new GameplayGameState(System.nanoTime(),
                                      World.createNew(EntityManager.createNew(256, 64)),
-                                     world.getResource(Time.class).getTimeManager());
+                                     world.getResource(Time.class).timeManager());
     }
 }

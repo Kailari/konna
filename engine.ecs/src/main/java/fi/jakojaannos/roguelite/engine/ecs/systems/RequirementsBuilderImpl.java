@@ -1,25 +1,30 @@
 package fi.jakojaannos.roguelite.engine.ecs.systems;
 
-import lombok.RequiredArgsConstructor;
-
 import fi.jakojaannos.roguelite.engine.ecs.*;
 
 /**
  * Default {@link RequirementsBuilder} implementation. Handles delegating system/group/component relations and/or
  * requirements to other internal classes.
  */
-@RequiredArgsConstructor
 public class RequirementsBuilderImpl implements RequirementsBuilder {
     private final SystemRequirements.Builder requirements = SystemRequirements.builder();
     private final SystemDependencyResolver dependencyBuilder;
     private final ECSSystem instance;
     private final SystemContext.Builder builder = new SystemContext.Builder();
 
+    public RequirementsBuilderImpl(
+            final SystemDependencyResolver dependencyBuilder,
+            final ECSSystem instance
+    ) {
+        this.dependencyBuilder = dependencyBuilder;
+        this.instance = instance;
+    }
+
     public SystemContext build() {
-        return builder.instance(this.instance)
-                      .requirements(this.requirements.build())
-                      .dependencies(this.dependencyBuilder.buildFor(this.instance))
-                      .build();
+        return this.builder.instance(this.instance)
+                           .requirements(this.requirements.build())
+                           .dependencies(this.dependencyBuilder.buildFor(this.instance))
+                           .build();
     }
 
     @Override

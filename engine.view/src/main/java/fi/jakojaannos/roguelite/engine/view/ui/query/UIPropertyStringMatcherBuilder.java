@@ -1,15 +1,17 @@
 package fi.jakojaannos.roguelite.engine.view.ui.query;
 
-import lombok.RequiredArgsConstructor;
-
 import java.util.Arrays;
 
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 
-@RequiredArgsConstructor
 public class UIPropertyStringMatcherBuilder {
     private final UIElementMatcher parent;
     private final UIProperty<String> property;
+
+    public UIPropertyStringMatcherBuilder(final UIElementMatcher parent, final UIProperty<String> property) {
+        this.parent = parent;
+        this.property = property;
+    }
 
     public UIElementMatcher whichContains(final String... strings) {
         return this.parent.matching(UIPropertyMatcher.match(this.property)

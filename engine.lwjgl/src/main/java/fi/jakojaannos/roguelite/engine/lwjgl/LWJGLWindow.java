@@ -1,10 +1,10 @@
 package fi.jakojaannos.roguelite.engine.lwjgl;
 
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import org.lwjgl.glfw.GLFWWindowSizeCallback;
 import org.lwjgl.system.Callback;
 import org.lwjgl.system.MemoryStack;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -19,13 +19,13 @@ import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
-@Slf4j
 public class LWJGLWindow implements Window {
-    @Getter
+    private static final Logger LOG = LoggerFactory.getLogger(LWJGLWindow.class);
+
     private final long id;
     private final List<ResizeCallback> resizeCallbacks = new ArrayList<>();
-    @Getter private int width;
-    @Getter private int height;
+    private int width;
+    private int height;
 
     public LWJGLWindow(final int width, final int height) {
         glfwDefaultWindowHints();
@@ -74,6 +74,20 @@ public class LWJGLWindow implements Window {
                                                              (videoMode.width() - pWidth.get(0)) / 2,
                                                              (videoMode.height() - pHeight.get(0)) / 2));
         }
+    }
+
+    public long getId() {
+        return this.id;
+    }
+
+    @Override
+    public int getWidth() {
+        return this.width;
+    }
+
+    @Override
+    public int getHeight() {
+        return this.height;
     }
 
     @Override

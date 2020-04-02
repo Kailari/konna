@@ -1,6 +1,7 @@
 package fi.jakojaannos.roguelite.game.app;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 
@@ -17,8 +18,9 @@ import fi.jakojaannos.roguelite.game.RogueliteGame;
 import fi.jakojaannos.roguelite.game.state.MainMenuGameState;
 import fi.jakojaannos.roguelite.game.view.RogueliteGameRenderer;
 
-@Slf4j
 public class RogueliteClient {
+    private static final Logger LOG = LoggerFactory.getLogger(RogueliteClient.class);
+
     public static void run(
             final Path assetRoot,
             final String host,

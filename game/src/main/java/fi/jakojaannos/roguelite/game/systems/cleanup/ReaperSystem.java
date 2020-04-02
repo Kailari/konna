@@ -1,6 +1,7 @@
 package fi.jakojaannos.roguelite.game.systems.cleanup;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.stream.Stream;
 
@@ -12,8 +13,9 @@ import fi.jakojaannos.roguelite.game.LogCategories;
 import fi.jakojaannos.roguelite.game.data.components.character.DeadTag;
 import fi.jakojaannos.roguelite.game.systems.SystemGroups;
 
-@Slf4j
 public class ReaperSystem implements ECSSystem {
+    private static final Logger LOG = LoggerFactory.getLogger(ReaperSystem.class);
+
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.CLEANUP)

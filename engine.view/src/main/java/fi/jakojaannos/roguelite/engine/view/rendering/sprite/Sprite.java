@@ -1,19 +1,18 @@
 package fi.jakojaannos.roguelite.engine.view.rendering.sprite;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.List;
 import java.util.Map;
 
 import fi.jakojaannos.roguelite.engine.view.rendering.TextureRegion;
 
-@Slf4j
-@RequiredArgsConstructor
 public final class Sprite {
-    @Getter private final List<TextureRegion> frames;
-    @Getter private final Map<String, Animation> animations;
+    private final List<TextureRegion> frames;
+    private final Map<String, Animation> animations;
+
+    public Sprite(final List<TextureRegion> frames, final Map<String, Animation> animations) {
+        this.frames = frames;
+        this.animations = animations;
+    }
 
     public static Sprite ofSingleFrame(final TextureRegion region) {
         return new Sprite(List.of(region),

@@ -1,6 +1,7 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.shader;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -10,8 +11,9 @@ import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL32.GL_GEOMETRY_SHADER;
 import static org.lwjgl.opengl.GL43.GL_COMPUTE_SHADER;
 
-@Slf4j
 public class Shader implements AutoCloseable {
+    private static final Logger LOG = LoggerFactory.getLogger(Shader.class);
+
     private final int shaderPtr;
 
     public Shader(final int programPtr, final Path sourcePath, final int shaderType) {
@@ -34,23 +36,18 @@ public class Shader implements AutoCloseable {
         glAttachShader(programPtr, this.shaderPtr);
     }
 
-    private static String shaderTypeToString(final int shaderType) {
-        switch (shaderType) {
-            case GL_GEOMETRY_SHADER:
-                return "GL_GEOMETRY_SHADER";
-            case GL_VERTEX_SHADER:
-                return "GL_VERTEX_SHADER";
-            case GL_FRAGMENT_SHADER:
-                return "GL_FRAGMENT_SHADER";
-            case GL_COMPUTE_SHADER:
-                return "GL_COMPUTE_SHADER";
-            default:
-                return "UNKNOWN_SHADER_TYPE";
-        }
-    }
-
     @Override
     public void close() {
         glDeleteShader(this.shaderPtr);
+    }
+
+    private static String shaderTypeToString(final int shaderType) {
+        return switch (shaderType) {
+            case GL_GEOMETRY_SHADER -> "GL_GEOMETRY_SHADER";
+            case GL_VERTEX_SHADER -> "GL_VERTEX_SHADER";
+            case GL_FRAGMENT_SHADER -> "GL_FRAGMENT_SHADER";
+            case GL_COMPUTE_SHADER -> "GL_COMPUTE_SHADER";
+            default -> "UNKNOWN_SHADER_TYPE";
+        };
     }
 }

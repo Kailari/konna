@@ -54,7 +54,7 @@ public class GlobalState {
     }
 
     public static void simulateTick() {
-        inputEvents.forEach(events.getInput()::fire);
+        inputEvents.forEach(events.input()::fire);
         state = game.tick(state, events);
         game.updateTime();
 

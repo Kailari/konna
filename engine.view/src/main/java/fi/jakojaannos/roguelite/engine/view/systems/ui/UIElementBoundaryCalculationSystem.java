@@ -1,10 +1,5 @@
 package fi.jakojaannos.roguelite.engine.view.systems.ui;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.Optional;
@@ -37,7 +32,6 @@ import fi.jakojaannos.roguelite.engine.view.ui.ProportionValue;
  * In another words: if we know two of "min", "max" and "size", we can easily calculate the third. If more than two are
  * defined, there is a high risk of contradiction.
  */
-@Slf4j
 public class UIElementBoundaryCalculationSystem implements ECSSystem {
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private static Supplier<Integer> createBoundSupplier(
@@ -353,15 +347,23 @@ public class UIElementBoundaryCalculationSystem implements ECSSystem {
                                                     .orElseGet(() -> Stream.of(maybeHeight)));
     }
 
-    @NoArgsConstructor
     private static class Lazy<T> {
-        @Setter @Nullable private T value;
-        @Setter @Nullable private Consumer<T> onComputedCallback;
-        @Nullable private Supplier<T> supplier;
-        @Getter private boolean computing;
+        private final Consumer<T> onComputedCallback;
 
-        Lazy(@Nullable final Consumer<T> onComputedCallback) {
+        @Nullable private T value;
+        @Nullable private Supplier<T> supplier;
+        private boolean computing;
+
+        public boolean isComputing() {
+            return this.computing;
+        }
+
+        Lazy(final Consumer<T> onComputedCallback) {
             this.onComputedCallback = onComputedCallback;
+        }
+
+        public void setValue(@Nullable final T value) {
+            this.value = value;
         }
 
         public void setSupplier(final Supplier<T> supplier) {
@@ -398,9 +400,7 @@ public class UIElementBoundaryCalculationSystem implements ECSSystem {
 
             this.computing = true;
             this.value = this.supplier.get();
-            if (this.onComputedCallback != null) {
-                this.onComputedCallback.accept(this.value);
-            }
+            this.onComputedCallback.accept(this.value);
             this.computing = false;
         }
     }

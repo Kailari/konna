@@ -55,7 +55,7 @@ class RogueliteGameTest {
             boolean down
     ) {
         Events events = new Events();
-        events.getInput().fire(new InputEvent(new ButtonInput(InputButton.Keyboard.valueOf(key), ButtonInput.Action.PRESS)));
+        events.input().fire(InputEvent.button(new ButtonInput(InputButton.Keyboard.valueOf(key), ButtonInput.Action.PRESS)));
 
         roguelite.tick(state, events);
 
@@ -86,7 +86,7 @@ class RogueliteGameTest {
         }
 
         Events events = new Events();
-        events.getInput().fire(new InputEvent(new AxialInput(axisPos, newPos)));
+        events.input().fire(InputEvent.axial(new AxialInput(axisPos, newPos)));
 
         roguelite.tick(state, events);
 
@@ -96,7 +96,7 @@ class RogueliteGameTest {
     @Test
     void mouseButtonEventsUpdateGameState() {
         Events events = new Events();
-        events.getInput().fire(ButtonInput.pressed(InputButton.Mouse.button(0)));
+        events.input().fire(ButtonInput.pressed(InputButton.Mouse.button(0)));
 
         roguelite.tick(state, events);
 
@@ -107,10 +107,10 @@ class RogueliteGameTest {
     @Test
     void mouseButtonEventsDoNotUpdateGameStateIfButtonIsWrong() {
         Events events = new Events();
-        events.getInput().fire(ButtonInput.pressed(InputButton.Mouse.button(1)));
-        events.getInput().fire(ButtonInput.pressed(InputButton.Mouse.button(2)));
-        events.getInput().fire(ButtonInput.pressed(InputButton.Mouse.button(3)));
-        events.getInput().fire(ButtonInput.pressed(InputButton.Mouse.button(4)));
+        events.input().fire(ButtonInput.pressed(InputButton.Mouse.button(1)));
+        events.input().fire(ButtonInput.pressed(InputButton.Mouse.button(2)));
+        events.input().fire(ButtonInput.pressed(InputButton.Mouse.button(3)));
+        events.input().fire(ButtonInput.pressed(InputButton.Mouse.button(4)));
 
         roguelite.tick(state, events);
 
@@ -123,11 +123,11 @@ class RogueliteGameTest {
         Events events = new Events();
 
         // Pressed
-        events.getInput().fire(ButtonInput.pressed(InputButton.Mouse.button(0)));
+        events.input().fire(ButtonInput.pressed(InputButton.Mouse.button(0)));
         roguelite.tick(state, events);
 
         // Released
-        events.getInput().fire(ButtonInput.released(InputButton.Mouse.button(0)));
+        events.input().fire(ButtonInput.released(InputButton.Mouse.button(0)));
         roguelite.tick(state, events);
 
         Inputs inputs = state.getWorld().getOrCreateResource(Inputs.class);

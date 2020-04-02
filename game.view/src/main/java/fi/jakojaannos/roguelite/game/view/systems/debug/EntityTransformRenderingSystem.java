@@ -1,6 +1,5 @@
 package fi.jakojaannos.roguelite.game.view.systems.debug;
 
-import lombok.extern.slf4j.Slf4j;
 import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryStack;
 
@@ -25,7 +24,6 @@ import fi.jakojaannos.roguelite.game.view.systems.RenderSystemGroups;
 
 // FIXME: Use batching
 
-@Slf4j
 public class EntityTransformRenderingSystem implements ECSSystem, AutoCloseable {
     private final Camera camera;
     private final ShaderProgram shader;
@@ -84,7 +82,8 @@ public class EntityTransformRenderingSystem implements ECSSystem, AutoCloseable 
                         return;
                     }
 
-                    final Transform transform = entityManager.getComponentOf(entity, Transform.class).orElseThrow();
+                    final Transform transform = entityManager.getComponentOf(entity, Transform.class)
+                                                             .orElseThrow();
                     this.shader.setUniformMat4x4("model",
                                                  this.modelMatrix.identity()
                                                                  .translate((float) transform.position.x,

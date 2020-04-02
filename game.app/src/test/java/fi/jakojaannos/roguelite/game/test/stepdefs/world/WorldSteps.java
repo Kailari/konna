@@ -80,7 +80,7 @@ public class WorldSteps {
         state.getWorld()
              .getEntityManager()
              .getEntitiesWith(PlayerTag.class)
-             .map(EntityManager.EntityComponentPair::getEntity)
+             .map(EntityManager.EntityComponentPair::entity)
              .map(player -> getComponentOf(player, Transform.class).orElseThrow().position)
              .flatMap(playerPosition -> Stream.of(playerPosition.add(2.0, 0.0, new Vector2d()),
                                                   playerPosition.add(-2.0, 0.0, new Vector2d()),
@@ -101,7 +101,7 @@ public class WorldSteps {
         state.getWorld()
              .getEntityManager()
              .getEntitiesWith(ObstacleTag.class)
-             .map(EntityManager.EntityComponentPair::getEntity)
+             .map(EntityManager.EntityComponentPair::entity)
              .forEach(state.getWorld().getEntityManager()::destroyEntity);
         state.getWorld().getEntityManager().applyModifications();
     }
@@ -111,8 +111,8 @@ public class WorldSteps {
         state.getWorld()
              .getEntityManager()
              .getEntitiesWith(SpriteInfo.class)
-             .filter(pair -> pair.getComponent().spriteName.equals("sprites/turret"))
-             .map(EntityManager.EntityComponentPair::getEntity)
+             .filter(pair -> pair.component().spriteName.equals("sprites/turret"))
+             .map(EntityManager.EntityComponentPair::entity)
              .forEach(state.getWorld().getEntityManager()::destroyEntity);
         state.getWorld().getEntityManager().applyModifications();
     }
@@ -122,7 +122,7 @@ public class WorldSteps {
         state.getWorld()
              .getEntityManager()
              .getEntitiesWith(SpawnerComponent.class)
-             .map(EntityManager.EntityComponentPair::getEntity)
+             .map(EntityManager.EntityComponentPair::entity)
              .forEach(state.getWorld().getEntityManager()::destroyEntity);
         state.getWorld().getEntityManager().applyModifications();
     }

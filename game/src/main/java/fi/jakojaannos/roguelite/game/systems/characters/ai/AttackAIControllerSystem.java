@@ -124,7 +124,7 @@ public class AttackAIControllerSystem implements ECSSystem {
     ) {
         return entityManager
                 .getEntitiesWith(ai.targetTagClass)
-                .map(EntityManager.EntityComponentPair::getEntity)
+                .map(EntityManager.EntityComponentPair::entity)
                 .filter(entity -> isTargetValid(entityManager, entity, position, ai))
                 .findAny();
     }

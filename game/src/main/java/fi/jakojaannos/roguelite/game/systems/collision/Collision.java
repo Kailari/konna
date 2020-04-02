@@ -1,31 +1,17 @@
 package fi.jakojaannos.roguelite.game.systems.collision;
 
-import lombok.Getter;
-
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 
 public abstract class Collision {
-    @Getter private final Type type;
-    @Getter private final Mode mode;
+    private final Type type;
+    private final Mode mode;
 
-    private Collision(
-            final Type type,
-            final Mode mode
-    ) {
-        this.type = type;
-        this.mode = mode;
+    public Type getType() {
+        return this.type;
     }
 
-    public static Collision tile(
-            final Mode mode,
-            final double tileX,
-            final double tileY
-    ) {
-        return new TileCollision(mode, tileX, tileY);
-    }
-
-    public static Collision entity(final Mode mode, final Entity other) {
-        return new EntityCollision(mode, other);
+    public Mode getMode() {
+        return this.mode;
     }
 
     public final boolean isEntity() {
@@ -52,6 +38,26 @@ public abstract class Collision {
         return (TileCollision) this;
     }
 
+    private Collision(
+            final Type type,
+            final Mode mode
+    ) {
+        this.type = type;
+        this.mode = mode;
+    }
+
+    public static Collision tile(
+            final Mode mode,
+            final double tileX,
+            final double tileY
+    ) {
+        return new TileCollision(mode, tileX, tileY);
+    }
+
+    public static Collision entity(final Mode mode, final Entity other) {
+        return new EntityCollision(mode, other);
+    }
+
     public enum Type {
         ENTITY,
         TILE
@@ -63,7 +69,11 @@ public abstract class Collision {
     }
 
     public static class EntityCollision extends Collision {
-        @Getter private final Entity other;
+        private final Entity other;
+
+        public Entity getOther() {
+            return this.other;
+        }
 
         private EntityCollision(final Mode mode, final Entity other) {
             super(Type.ENTITY, mode);
@@ -72,8 +82,16 @@ public abstract class Collision {
     }
 
     public static class TileCollision extends Collision {
-        @Getter private final double tileX;
-        @Getter private final double tileY;
+        private final double tileX;
+        private final double tileY;
+
+        public double getTileX() {
+            return this.tileX;
+        }
+
+        public double getTileY() {
+            return this.tileY;
+        }
 
         private TileCollision(final Mode mode, final double tileX, final double tileY) {
             super(Type.TILE, mode);

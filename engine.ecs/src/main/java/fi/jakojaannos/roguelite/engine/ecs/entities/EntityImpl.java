@@ -1,13 +1,26 @@
 package fi.jakojaannos.roguelite.engine.ecs.entities;
 
-import lombok.Getter;
-
+import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.utilities.BitMaskUtils;
 
-public class EntityImpl implements fi.jakojaannos.roguelite.engine.ecs.Entity {
-    @Getter private final int id;
-    @Getter private final byte[] componentBitmask;
-    @Getter private boolean markedForRemoval;
+public final class EntityImpl implements Entity {
+    private final int id;
+    private final byte[] componentBitmask;
+    private boolean markedForRemoval;
+
+    @Override
+    public int getId() {
+        return this.id;
+    }
+
+    public byte[] getComponentBitmask() {
+        return this.componentBitmask;
+    }
+
+    @Override
+    public boolean isMarkedForRemoval() {
+        return this.markedForRemoval;
+    }
 
     public EntityImpl(final int id, final int maxComponentTypes) {
         this.id = id;

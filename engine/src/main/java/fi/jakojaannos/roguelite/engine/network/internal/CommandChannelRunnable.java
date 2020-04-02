@@ -1,6 +1,7 @@
 package fi.jakojaannos.roguelite.engine.network.internal;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -16,13 +17,18 @@ import fi.jakojaannos.roguelite.engine.network.message.serialization.MessageDeco
 import fi.jakojaannos.roguelite.engine.network.message.serialization.MessageEncoder;
 import fi.jakojaannos.roguelite.engine.network.message.serialization.TypedNetworkMessage;
 
-@Slf4j
 public abstract class CommandChannelRunnable implements Runnable, AutoCloseable {
+    private static final Logger LOG = LoggerFactory.getLogger(CommandChannelRunnable.class);
+
     protected final NetworkMessageHandlerMap messageHandlers;
     protected final Selector selector;
     private final MessageEncoder messageEncoder;
     private final MessageDecoder messageDecoder;
     private final Object writeLock = new Object();
+
+    public boolean isConnected() {
+        return this.selector != null && this.selector.isOpen();
+    }
 
     protected CommandChannelRunnable(
             final NetworkMessageHandlerMap messageHandlers,
@@ -35,10 +41,6 @@ public abstract class CommandChannelRunnable implements Runnable, AutoCloseable 
 
         LOG.trace("Opening socket selector...");
         this.selector = Selector.open();
-    }
-
-    public boolean isConnected() {
-        return this.selector != null && this.selector.isOpen();
     }
 
     @Override

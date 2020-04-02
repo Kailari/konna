@@ -1,7 +1,7 @@
 package fi.jakojaannos.roguelite.game.app;
 
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -9,14 +9,39 @@ import java.util.Optional;
 
 import fi.jakojaannos.roguelite.game.DebugConfig;
 
-@Slf4j
 public class RogueliteApplication {
-    @Setter private boolean debugStackTraces;
-    @Setter private int windowWidth = -1;
-    @Setter private int windowHeight = -1;
-    @Setter private String host = "localhost";
-    @Setter private int port = 18181;
-    @Setter private Path assetRoot;
+    private static final Logger LOG = LoggerFactory.getLogger(RogueliteApplication.class);
+
+    private boolean debugStackTraces;
+    private int windowWidth = -1;
+    private int windowHeight = -1;
+    private String host = "localhost";
+    private int port = 18181;
+    private Path assetRoot;
+
+    public void setDebugStackTraces(final boolean debugStackTraces) {
+        this.debugStackTraces = debugStackTraces;
+    }
+
+    public void setWindowWidth(final int windowWidth) {
+        this.windowWidth = windowWidth;
+    }
+
+    public void setWindowHeight(final int windowHeight) {
+        this.windowHeight = windowHeight;
+    }
+
+    public void setHost(final String host) {
+        this.host = host;
+    }
+
+    public void setPort(final int port) {
+        this.port = port;
+    }
+
+    public void setAssetRoot(final Path assetRoot) {
+        this.assetRoot = assetRoot;
+    }
 
     public void setDebugMode(final boolean state) {
         setDebugStackTraces(state);

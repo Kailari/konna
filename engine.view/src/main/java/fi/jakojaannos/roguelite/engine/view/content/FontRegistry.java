@@ -29,7 +29,7 @@ public class FontRegistry extends AbstractAssetRegistry<Font> {
 
     @Override
     protected Optional<Font> loadAsset(final AssetHandle handle) {
-        final var path = this.assetRoot.resolve(handle.getName());
+        final var path = this.assetRoot.resolve(handle.name());
         return Optional.of(this.fontLoader.load(path, 1.0f, 1.0f));
     }
 

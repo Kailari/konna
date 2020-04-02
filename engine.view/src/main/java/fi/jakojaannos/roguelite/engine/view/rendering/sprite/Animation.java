@@ -1,15 +1,11 @@
 package fi.jakojaannos.roguelite.engine.view.rendering.sprite;
 
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-@Slf4j
 public final class Animation {
     private final List<Frame> frames;
     private final double totalDuration;
@@ -87,11 +83,8 @@ public final class Animation {
         return this.frames.get(i).index;
     }
 
-    public static class Frame {
-        @Getter private final int index;
-        @Getter private final double duration;
-
-        public Frame(final int index, final double duration) {
+    public static record Frame(int index, double duration) {
+        public Frame {
             this.index = index;
             this.duration = duration < 0
                     ? Double.POSITIVE_INFINITY

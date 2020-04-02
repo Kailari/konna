@@ -1,7 +1,5 @@
 package fi.jakojaannos.roguelite.engine.view.rendering.ui;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.nio.file.Path;
 
 import fi.jakojaannos.roguelite.engine.content.AssetRegistry;
@@ -17,7 +15,6 @@ import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 // TODO: Render UI elements to cached render targets so that they can be cached (only updated/dirty
 //  parts should be re-rendered)
 
-@Slf4j
 public class UserInterfaceRenderer implements AutoCloseable {
     private static final int DEFAULT_BORDER_SIZE = 5;
     private static final int ROOT_FONT_SIZE = 12;

@@ -1,6 +1,7 @@
 package fi.jakojaannos.roguelite.engine.network.client.internal;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -22,13 +23,19 @@ import fi.jakojaannos.roguelite.engine.network.message.serialization.MessageDeco
 import fi.jakojaannos.roguelite.engine.network.message.serialization.MessageEncoder;
 import fi.jakojaannos.roguelite.engine.network.message.serialization.TypedNetworkMessage;
 
-@Slf4j
 public class ClientCommandChannelRunnable extends CommandChannelRunnable {
+    private static final Logger LOG = LoggerFactory.getLogger(ClientCommandChannelRunnable.class);
+
     protected final ByteBuffer readBuffer;
     protected final ByteBuffer writeBuffer;
     private final Queue<TypedNetworkMessage<?>> receiveQueue = new ArrayDeque<>();
     private final MessageHandlingContext context;
     @Nullable protected SocketChannel channel;
+
+    @Override
+    public boolean isConnected() {
+        return super.isConnected() && this.channel != null && this.channel.isConnected();
+    }
 
     public ClientCommandChannelRunnable(
             final String host,
@@ -55,11 +62,6 @@ public class ClientCommandChannelRunnable extends CommandChannelRunnable {
 
         LOG.info("Connection successful.");
         this.channel.register(this.selector, SelectionKey.OP_READ);
-    }
-
-    @Override
-    public boolean isConnected() {
-        return super.isConnected() && this.channel != null && this.channel.isConnected();
     }
 
     public void send(final NetworkMessage message) {

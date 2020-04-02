@@ -1,6 +1,7 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.input;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayDeque;
 import java.util.Optional;
@@ -11,8 +12,9 @@ import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLWindow;
 
 import static org.lwjgl.glfw.GLFW.*;
 
-@Slf4j
 public class LWJGLInputProvider implements InputProvider {
+    private static final Logger LOG = LoggerFactory.getLogger(LWJGLInputProvider.class);
+
     private static final double MOUSE_EPSILON = 0.0001;
     private final Queue<InputEvent> inputEvents;
 
@@ -44,8 +46,8 @@ public class LWJGLInputProvider implements InputProvider {
 
         // In case we just resized, update cached position and skip sending delta-events
         if (this.justResized) {
-            this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.X_POS, x)));
-            this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.Y_POS, y)));
+            this.inputEvents.offer(InputEvent.axial(new AxialInput(InputAxis.Mouse.X_POS, x)));
+            this.inputEvents.offer(InputEvent.axial(new AxialInput(InputAxis.Mouse.Y_POS, y)));
             this.mouseX = x;
             this.mouseY = y;
             this.justResized = false;
@@ -54,15 +56,15 @@ public class LWJGLInputProvider implements InputProvider {
 
         final var deltaX = this.mouseX - x;
         if (Math.abs(deltaX) > MOUSE_EPSILON) {
-            this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.X, deltaX)));
-            this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.X_POS, x)));
+            this.inputEvents.offer(InputEvent.axial(new AxialInput(InputAxis.Mouse.X, deltaX)));
+            this.inputEvents.offer(InputEvent.axial(new AxialInput(InputAxis.Mouse.X_POS, x)));
             this.mouseX = x;
         }
 
         final var deltaY = this.mouseY - y;
         if (Math.abs(deltaY) > MOUSE_EPSILON) {
-            this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.Y, deltaY)));
-            this.inputEvents.offer(new InputEvent(new AxialInput(InputAxis.Mouse.Y_POS, y)));
+            this.inputEvents.offer(InputEvent.axial(new AxialInput(InputAxis.Mouse.Y, deltaY)));
+            this.inputEvents.offer(InputEvent.axial(new AxialInput(InputAxis.Mouse.Y_POS, y)));
             this.mouseY = y;
         }
     }

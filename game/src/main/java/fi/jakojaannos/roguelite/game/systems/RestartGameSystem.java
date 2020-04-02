@@ -37,11 +37,11 @@ public class RestartGameSystem implements ECSSystem {
             world.getOrCreateResource(GameStateManager.class)
                  .queueStateChange(new GameplayGameState(System.nanoTime(),
                                                          World.createNew(EntityManager.createNew(256, 32)),
-                                                         world.getResource(Time.class).getTimeManager()));
+                                                         world.getResource(Time.class).timeManager()));
         } else if (inputs.inputMenu) {
             world.getOrCreateResource(GameStateManager.class)
                  .queueStateChange(new MainMenuGameState(World.createNew(EntityManager.createNew(256, 32)),
-                                                         world.getResource(Time.class).getTimeManager()));
+                                                         world.getResource(Time.class).timeManager()));
         }
     }
 }

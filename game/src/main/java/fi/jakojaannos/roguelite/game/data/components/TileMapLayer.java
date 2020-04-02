@@ -1,16 +1,23 @@
 package fi.jakojaannos.roguelite.game.data.components;
 
-import lombok.Getter;
-
 import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
 
 public class TileMapLayer implements Component {
-    @Getter public TileMap<TileType> tileMap;
-    @Getter public boolean collisionEnabled = true;
+    public TileMap<TileType> tileMap;
+    public boolean collisionEnabled;
 
-    public TileMapLayer(final TileMap<TileType> tileMap) {
+    public TileMap<TileType> getTileMap() {
+        return this.tileMap;
+    }
+
+    public boolean isCollisionEnabled() {
+        return this.collisionEnabled;
+    }
+
+    public TileMapLayer(final TileMap<TileType> tileMap, final boolean collisionEnabled) {
         this.tileMap = tileMap;
+        this.collisionEnabled = collisionEnabled;
     }
 }

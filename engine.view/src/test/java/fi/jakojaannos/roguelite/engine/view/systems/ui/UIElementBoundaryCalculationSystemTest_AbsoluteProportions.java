@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.event.Events;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
@@ -33,11 +34,11 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
         UserInterface userInterface = uiBuilder
                 .element("a",
                          UIElementType.PANEL,
-                         builder -> { })
+                         builder -> {})
                 .build();
-        userInterface.update(mock(Time.class), new Mouse(), mock(Events.class));
+        userInterface.update(new Time(mock(TimeManager.class)), new Mouse(), new Events());
 
-        final var element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
+        final var element = userInterface.findElements(that -> that.hasName().equalTo("a"))
                                          .findFirst().orElseThrow();
         assertEquals(0, element.getProperty(UIProperty.MIN_X).orElseThrow());
         assertEquals(VIEWPORT_WIDTH, element.getProperty(UIProperty.MAX_X).orElseThrow());
@@ -53,9 +54,9 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
                          builder -> builder.left(absolute(10))
                                            .bottom(absolute(100)))
                 .build();
-        userInterface.update(mock(Time.class), new Mouse(), mock(Events.class));
+        userInterface.update(new Time(mock(TimeManager.class)), new Mouse(), new Events());
 
-        final var element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
+        final var element = userInterface.findElements(that -> that.hasName().equalTo("a"))
                                          .findFirst().orElseThrow();
         assertEquals(10, element.getProperty(UIProperty.MIN_X).orElseThrow());
         assertEquals(VIEWPORT_WIDTH, element.getProperty(UIProperty.MAX_X).orElseThrow());
@@ -71,11 +72,12 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
                          builder -> builder.left(absolute(10))
                                            .right(absolute(100)))
                 .build();
-        userInterface.update(mock(Time.class), new Mouse(), mock(Events.class));
+        userInterface.update(new Time(mock(TimeManager.class)), new Mouse(), new Events());
 
-        final var element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
+        final var element = userInterface.findElements(that -> that.hasName().equalTo("a"))
                                          .findFirst().orElseThrow();
-        assertEquals(VIEWPORT_WIDTH - (10 + 100), element.getProperty(UIProperty.WIDTH).orElseThrow());
+        assertEquals(VIEWPORT_WIDTH - (10 + 100), element.getProperty(UIProperty.WIDTH)
+                                                         .orElseThrow());
     }
 
     @Test
@@ -86,11 +88,12 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
                          builder -> builder.top(absolute(42))
                                            .bottom(absolute(24)))
                 .build();
-        userInterface.update(mock(Time.class), new Mouse(), mock(Events.class));
+        userInterface.update(new Time(mock(TimeManager.class)), new Mouse(), new Events());
 
-        final var element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
+        final var element = userInterface.findElements(that -> that.hasName().equalTo("a"))
                                          .findFirst().orElseThrow();
-        assertEquals(VIEWPORT_HEIGHT - (42 + 24), element.getProperty(UIProperty.HEIGHT).orElseThrow());
+        assertEquals(VIEWPORT_HEIGHT - (42 + 24), element.getProperty(UIProperty.HEIGHT)
+                                                         .orElseThrow());
     }
 
     @Test
@@ -101,9 +104,9 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
                          builder -> builder.left(absolute(24))
                                            .width(absolute(42)))
                 .build();
-        userInterface.update(mock(Time.class), new Mouse(), mock(Events.class));
+        userInterface.update(new Time(mock(TimeManager.class)), new Mouse(), new Events());
 
-        final var element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
+        final var element = userInterface.findElements(that -> that.hasName().equalTo("a"))
                                          .findFirst().orElseThrow();
         assertEquals(24, element.getProperty(UIProperty.MIN_X).orElseThrow());
         assertEquals(66, element.getProperty(UIProperty.MAX_X).orElseThrow());
@@ -117,10 +120,10 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
                          builder -> builder.right(absolute(24))
                                            .width(absolute(42)))
                 .build();
-        userInterface.update(mock(Time.class), new Mouse(), mock(Events.class));
+        userInterface.update(new Time(mock(TimeManager.class)), new Mouse(), new Events());
 
 
-        final var element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
+        final var element = userInterface.findElements(that -> that.hasName().equalTo("a"))
                                          .findFirst().orElseThrow();
         assertEquals(VIEWPORT_WIDTH - 66, element.getProperty(UIProperty.MIN_X).orElseThrow());
         assertEquals(VIEWPORT_WIDTH - 24, element.getProperty(UIProperty.MAX_X).orElseThrow());
@@ -134,9 +137,9 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
                          builder -> builder.top(absolute(24))
                                            .height(absolute(42)))
                 .build();
-        userInterface.update(mock(Time.class), new Mouse(), mock(Events.class));
+        userInterface.update(new Time(mock(TimeManager.class)), new Mouse(), new Events());
 
-        final var element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
+        final var element = userInterface.findElements(that -> that.hasName().equalTo("a"))
                                          .findFirst().orElseThrow();
         assertEquals(24, element.getProperty(UIProperty.MIN_Y).orElseThrow());
         assertEquals(66, element.getProperty(UIProperty.MAX_Y).orElseThrow());
@@ -150,9 +153,9 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
                          builder -> builder.bottom(absolute(24))
                                            .height(absolute(42)))
                 .build();
-        userInterface.update(mock(Time.class), new Mouse(), mock(Events.class));
+        userInterface.update(new Time(mock(TimeManager.class)), new Mouse(), new Events());
 
-        final var element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
+        final var element = userInterface.findElements(that -> that.hasName().equalTo("a"))
                                          .findFirst().orElseThrow();
         assertEquals(VIEWPORT_HEIGHT - 66, element.getProperty(UIProperty.MIN_Y).orElseThrow());
         assertEquals(VIEWPORT_HEIGHT - 24, element.getProperty(UIProperty.MAX_Y).orElseThrow());
@@ -167,9 +170,9 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
                                            .right(absolute(200))
                                            .width(absolute(20_000_000)))
                 .build();
-        userInterface.update(mock(Time.class), new Mouse(), mock(Events.class));
+        userInterface.update(new Time(mock(TimeManager.class)), new Mouse(), new Events());
 
-        final var element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
+        final var element = userInterface.findElements(that -> that.hasName().equalTo("a"))
                                          .findFirst().orElseThrow();
         assertEquals(100, element.getProperty(UIProperty.MIN_X).orElseThrow());
         assertEquals(VIEWPORT_WIDTH - 200, element.getProperty(UIProperty.MAX_X).orElseThrow());
@@ -185,9 +188,9 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
                                            .bottom(absolute(200))
                                            .height(absolute(20_000_000)))
                 .build();
-        userInterface.update(mock(Time.class), new Mouse(), mock(Events.class));
+        userInterface.update(new Time(mock(TimeManager.class)), new Mouse(), new Events());
 
-        final var element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
+        final var element = userInterface.findElements(that -> that.hasName().equalTo("a"))
                                          .findFirst().orElseThrow();
         assertEquals(100, element.getProperty(UIProperty.MIN_Y).orElseThrow());
         assertEquals(VIEWPORT_HEIGHT - 200, element.getProperty(UIProperty.MAX_Y).orElseThrow());
@@ -202,9 +205,9 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
                          builder -> builder.anchorX(absolute(100))
                                            .left(absolute(200)))
                 .build();
-        userInterface.update(mock(Time.class), new Mouse(), mock(Events.class));
+        userInterface.update(new Time(mock(TimeManager.class)), new Mouse(), new Events());
 
-        final var element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
+        final var element = userInterface.findElements(that -> that.hasName().equalTo("a"))
                                          .findFirst().orElseThrow();
         assertEquals(300, element.getProperty(UIProperty.MIN_X).orElseThrow());
     }
@@ -217,9 +220,9 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
                          builder -> builder.anchorY(absolute(100))
                                            .top(absolute(200)))
                 .build();
-        userInterface.update(mock(Time.class), new Mouse(), mock(Events.class));
+        userInterface.update(new Time(mock(TimeManager.class)), new Mouse(), new Events());
 
-        final var element = userInterface.findElementsWithMatchingProperty(UIProperty.NAME, name -> name.equals("a"))
+        final var element = userInterface.findElements(that -> that.hasName().equalTo("a"))
                                          .findFirst().orElseThrow();
         assertEquals(300, element.getProperty(UIProperty.MIN_Y).orElseThrow());
     }

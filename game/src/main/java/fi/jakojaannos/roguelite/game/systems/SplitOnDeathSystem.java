@@ -1,6 +1,5 @@
 package fi.jakojaannos.roguelite.game.systems;
 
-import lombok.extern.slf4j.Slf4j;
 import org.joml.Vector2d;
 
 import java.util.Random;
@@ -20,7 +19,6 @@ import fi.jakojaannos.roguelite.game.data.components.character.enemy.SlimeShared
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.SplitOnDeath;
 import fi.jakojaannos.roguelite.game.systems.cleanup.ReaperSystem;
 
-@Slf4j
 public class SplitOnDeathSystem implements ECSSystem {
     private final Random random = new Random(System.nanoTime());
     private final Vector2d tempDir = new Vector2d();
@@ -54,32 +52,36 @@ public class SplitOnDeathSystem implements ECSSystem {
                 entityManager.removeComponentIfPresent(entity, SlimeSharedAI.class);
             }
 
-            if (split.offspringAmount <= 1) return;
+            if (split.offspringAmount <= 1) {
+                return;
+            }
 
             final var preservedSizeRatio = 1.0 - split.sizeLossPercentage;
             final var preservedSize = split.size * preservedSizeRatio;
             final var childSize = preservedSize / split.offspringAmount;
-            if (childSize < 0.75) return;
+            if (childSize < 0.75) {
+                return;
+            }
 
             for (int i = 0; i < split.offspringAmount; i++) {
-                final var xSpread = random.nextDouble() * 2.0 - 1.0;
-                final var ySpread = random.nextDouble() * 2.0 - 1.0;
+                final var xSpread = this.random.nextDouble() * 2.0 - 1.0;
+                final var ySpread = this.random.nextDouble() * 2.0 - 1.0;
                 final var force = getSpawnForce(split);
                 final var flightDur = getFlightDuration(split);
 
-                tempDir.set(xSpread, ySpread);
-                if (tempDir.lengthSquared() != 0.0) {
-                    tempDir.normalize(force);
+                this.tempDir.set(xSpread, ySpread);
+                if (this.tempDir.lengthSquared() != 0.0) {
+                    this.tempDir.normalize(force);
                 }
 
                 // FIXME: Add field to component for defining the factory
-                Entity child = SlimeArchetype.createSlimeOfSize(entityManager,
-                                                                myPos.position.x,
-                                                                myPos.position.y,
-                                                                childSize);
+                final Entity child = SlimeArchetype.createSlimeOfSize(entityManager,
+                                                                      myPos.position.x,
+                                                                      myPos.position.y,
+                                                                      childSize);
 
                 entityManager.getComponentOf(child, Physics.class)
-                             .ifPresent(physics -> physics.applyForce(tempDir.mul(physics.mass)));
+                             .ifPresent(physics -> physics.applyForce(this.tempDir.mul(physics.mass)));
 
                 entityManager.addComponentTo(child, new InAir(timeManager.getCurrentGameTime(), flightDur));
             }
@@ -87,11 +89,11 @@ public class SplitOnDeathSystem implements ECSSystem {
     }
 
     private double getSpawnForce(final SplitOnDeath split) {
-        return random.nextDouble() * (split.maxSpawnForce - split.minSpawnForce) + split.minSpawnForce;
+        return this.random.nextDouble() * (split.maxSpawnForce - split.minSpawnForce) + split.minSpawnForce;
     }
 
     private int getFlightDuration(final SplitOnDeath split) {
         final var bound = split.maxSpawnFlightDurationInTicks - split.minSpawnFlightDurationInTicks;
-        return random.nextInt(bound) + split.minSpawnFlightDurationInTicks;
+        return this.random.nextInt(bound) + split.minSpawnFlightDurationInTicks;
     }
 }

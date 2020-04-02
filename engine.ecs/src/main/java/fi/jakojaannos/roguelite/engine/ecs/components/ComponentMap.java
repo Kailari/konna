@@ -1,14 +1,11 @@
 package fi.jakojaannos.roguelite.engine.ecs.components;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.lang.reflect.Array;
 import java.util.Arrays;
 
 import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.ecs.entities.EntityImpl;
 
-@Slf4j
 class ComponentMap<TComponent extends Component> {
     private int entityCapacity;
     private TComponent[] components;

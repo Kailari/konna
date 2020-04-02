@@ -1,7 +1,8 @@
 package fi.jakojaannos.roguelite.engine.view.rendering.sprite.serialization;
 
 import com.google.gson.*;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -18,9 +19,8 @@ import fi.jakojaannos.roguelite.engine.view.rendering.TextureRegion;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.Animation;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.Sprite;
 
-@Slf4j
-public class SpriteDeserializer<TTexture extends Texture>
-        implements JsonDeserializer<Sprite> {
+public class SpriteDeserializer<TTexture extends Texture> implements JsonDeserializer<Sprite> {
+    private static final Logger LOG = LoggerFactory.getLogger(SpriteDeserializer.class);
 
     private final AssetRegistry<TTexture> textures;
 

@@ -1,6 +1,7 @@
 package fi.jakojaannos.roguelite.engine.view.content;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -13,8 +14,9 @@ import fi.jakojaannos.roguelite.engine.content.AbstractAssetRegistry;
 import fi.jakojaannos.roguelite.engine.content.AssetHandle;
 import fi.jakojaannos.roguelite.engine.view.rendering.Texture;
 
-@Slf4j
 public class TextureRegistry extends AbstractAssetRegistry<Texture> {
+    private static final Logger LOG = LoggerFactory.getLogger(TextureRegistry.class);
+
     private final Path assetRoot;
     private final TextureLoader<Texture> textureLoader;
     private final Texture defaultTexture;
@@ -32,7 +34,7 @@ public class TextureRegistry extends AbstractAssetRegistry<Texture> {
 
     @Override
     protected Optional<Texture> loadAsset(final AssetHandle handle) {
-        final var path = this.assetRoot.resolve(handle.getName());
+        final var path = this.assetRoot.resolve(handle.name());
         try (final var inputStream = Files.newInputStream(path)) {
             final var image = ImageIO.read(inputStream);
             final var width = image.getWidth();

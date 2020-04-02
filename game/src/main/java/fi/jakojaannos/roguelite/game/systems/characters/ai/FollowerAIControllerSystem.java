@@ -1,6 +1,5 @@
 package fi.jakojaannos.roguelite.game.systems.characters.ai;
 
-import lombok.extern.slf4j.Slf4j;
 import org.joml.Vector2d;
 
 import java.util.Random;
@@ -16,7 +15,6 @@ import fi.jakojaannos.roguelite.game.data.components.character.enemy.FollowerAI;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 import fi.jakojaannos.roguelite.game.systems.SystemGroups;
 
-@Slf4j
 public class FollowerAIControllerSystem implements ECSSystem {
     private final Random random = new Random(123456);
 

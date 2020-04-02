@@ -1,7 +1,7 @@
 package fi.jakojaannos.roguelite.engine;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -12,17 +12,21 @@ import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.utilities.UpdateableTimeManager;
 
-@Slf4j
-@RequiredArgsConstructor
 public abstract class GameBase implements Game, MainThread {
+    private static final Logger LOG = LoggerFactory.getLogger(GameBase.class);
+
     private final Object taskQueueLock = new Object();
     private final Queue<MainThreadTask> mainThreadTaskQueue = new ArrayDeque<>();
     private final UpdateableTimeManager timeManager;
-    private boolean disposed = false;
-    private boolean finished = false;
+    private boolean disposed;
+    private boolean finished;
 
     public GameBase() {
         this(new SimpleTimeManager(20L));
+    }
+
+    public GameBase(final UpdateableTimeManager timeManager) {
+        this.timeManager = timeManager;
     }
 
     @Override

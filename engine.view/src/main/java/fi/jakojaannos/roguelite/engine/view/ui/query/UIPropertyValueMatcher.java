@@ -1,7 +1,5 @@
 package fi.jakojaannos.roguelite.engine.view.ui.query;
 
-import lombok.RequiredArgsConstructor;
-
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -14,19 +12,26 @@ import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
  *
  * @param <T>
  */
-@RequiredArgsConstructor
 public class UIPropertyValueMatcher<T> implements UIPropertyMatcher<T> {
     private final UIProperty<T> property;
     private final Predicate<Optional<T>> matcher;
+
+    public UIPropertyValueMatcher(final UIProperty<T> property, final Predicate<Optional<T>> matcher) {
+        this.property = property;
+        this.matcher = matcher;
+    }
 
     @Override
     public boolean evaluate(final UIElement uiElement) {
         return this.matcher.test(uiElement.getProperty(this.property));
     }
 
-    @RequiredArgsConstructor
     public static class Builder<T> {
         private final UIProperty<T> property;
+
+        public Builder(final UIProperty<T> property) {
+            this.property = property;
+        }
 
         public UIPropertyValueMatcher<T> isUndefinedOr(final T value) {
             return new UIPropertyValueMatcher<>(this.property,

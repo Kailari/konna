@@ -1,7 +1,5 @@
 package fi.jakojaannos.roguelite.engine.network;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.io.IOException;
 
 import fi.jakojaannos.roguelite.engine.MainThread;
@@ -11,7 +9,6 @@ import fi.jakojaannos.roguelite.engine.network.message.NetworkMessage;
 import fi.jakojaannos.roguelite.engine.network.message.serialization.MessageDecoder;
 import fi.jakojaannos.roguelite.engine.network.message.serialization.MessageEncoder;
 
-@Slf4j
 public class ServerNetworkManager extends NetworkManager<ServerCommandChannelRunnable> {
     public ServerNetworkManager(final int port, final MainThread mainThread) throws IOException {
         super(new ServerCommandChannelRunnable(port,

@@ -1,7 +1,7 @@
 package fi.jakojaannos.roguelite.engine.network.message.serialization;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 
@@ -9,10 +9,14 @@ import fi.jakojaannos.roguelite.engine.network.message.NetworkMessage;
 import fi.jakojaannos.roguelite.engine.network.message.NetworkMessageType;
 import fi.jakojaannos.roguelite.engine.network.message.NetworkMessageTypeMap;
 
-@Slf4j
-@RequiredArgsConstructor
 public class MessageEncoder {
+    private static final Logger LOG = LoggerFactory.getLogger(MessageEncoder.class);
+
     private final NetworkMessageTypeMap typeMap;
+
+    public MessageEncoder(final NetworkMessageTypeMap typeMap) {
+        this.typeMap = typeMap;
+    }
 
     public void encodeToBuffer(
             final NetworkMessage message,

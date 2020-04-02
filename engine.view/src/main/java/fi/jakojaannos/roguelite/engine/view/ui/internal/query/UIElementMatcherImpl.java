@@ -1,7 +1,5 @@
 package fi.jakojaannos.roguelite.engine.view.ui.internal.query;
 
-import lombok.RequiredArgsConstructor;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -11,7 +9,6 @@ import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
 import fi.jakojaannos.roguelite.engine.view.ui.query.UIElementMatcher;
 import fi.jakojaannos.roguelite.engine.view.ui.query.UIMatcher;
 
-@RequiredArgsConstructor
 public class UIElementMatcherImpl implements UIElementMatcher {
     private final List<UIMatcher> matchers = new ArrayList<>();
 
