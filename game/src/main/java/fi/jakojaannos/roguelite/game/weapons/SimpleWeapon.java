@@ -6,7 +6,8 @@ public class SimpleWeapon implements Weapon<
         ProjectileFiringMechanism,
         ClipMagazineState,
         AutomaticTriggerState,
-        ProjectileFiringState> {
+        ProjectileFiringState
+        > {
 
     private final ClipMagazineHandler magazine;
     private final AutomaticTriggerMechanism trigger;

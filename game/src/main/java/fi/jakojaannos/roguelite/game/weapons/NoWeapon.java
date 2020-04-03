@@ -17,7 +17,8 @@ public class NoWeapon implements Weapon<
         NoFiringMechanism,
         NoState,
         NoState,
-        NoState> {
+        NoState
+        > {
 
     private final NoMagazineHandler magazine;
     private final NoTriggerMechanism trigger;
@@ -44,8 +45,7 @@ public class NoWeapon implements Weapon<
         return this.firing;
     }
 
-    public static class NoState {
-
+    public static class NoState implements WeaponMagazineState, WeaponTriggerState, WeaponFiringState {
     }
 
     public static class NoMagazineHandler implements Weapon.MagazineHandler<NoState> {
@@ -57,7 +57,7 @@ public class NoWeapon implements Weapon<
 
     public static class NoTriggerMechanism implements Weapon.TriggerMechanism<NoState> {
         @Override
-        public NoState createTriggerState() {
+        public NoState createState() {
             return new NoState();
         }
 
@@ -100,7 +100,9 @@ public class NoWeapon implements Weapon<
 
         @Override
         public boolean isReadyToFire(
-                final TimeManager timeManager, final NoState firingState, final WeaponStats stats
+                final TimeManager timeManager,
+                final NoState firingState,
+                final WeaponStats stats
         ) {
             return false;
         }
