@@ -43,17 +43,15 @@ public class FollowerArchetype {
         entityManager.addComponentTo(entity, new AttackAbility(new DamageSource.Entity(entity),
                                                                CollisionLayer.ENEMY,
                                                                0.0,
-                                                               0.0,
-                                                               entityManager,
-                                                               entity));
-        entityManager.addComponentTo(entity, WeaponStats.builder()
+                                                               0.0));
+        /*entityManager.addComponentTo(entity, WeaponStats.builder()
                                                         .timeBetweenShots(20)
                                                         .projectileSpeed(10.0)
                                                         .spread(2.0)
                                                         .projectileSpeedNoise(0.0)
                                                         .projectileLifetimeInTicks(10)
                                                         .projectilePushForce(0.0)
-                                                        .build());
+                                                        .build());*/
 
         return entity;
     }

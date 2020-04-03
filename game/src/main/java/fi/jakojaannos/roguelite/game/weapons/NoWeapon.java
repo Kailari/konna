@@ -6,49 +6,69 @@ import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponStats;
 
+import static fi.jakojaannos.roguelite.game.weapons.NoWeapon.*;
+
 /*
  * Baruuk's weapon of choice.
  */
-public class NoWeapon implements Weapon {
-    private final TriggerMechanism triggerMechanism;
-    private final FiringMechanism firingMechanism;
+public class NoWeapon implements Weapon<
+        NoMagazineHandler,
+        NoTriggerMechanism,
+        NoFiringMechanism,
+        NoState,
+        NoState,
+        NoState> {
+
+    private final NoMagazineHandler magazine;
+    private final NoTriggerMechanism trigger;
+    private final NoFiringMechanism firing;
 
     public NoWeapon() {
-        this.triggerMechanism = new NoTriggerMechanism();
-        this.firingMechanism = new NoFiringMechanism();
+        this.magazine = new NoMagazineHandler();
+        this.trigger = new NoTriggerMechanism();
+        this.firing = new NoFiringMechanism();
     }
 
     @Override
-    public boolean canFire(
-            final EntityManager entityManager,
-            final Entity owner,
-            final TimeManager timeManager,
-            final AttackAbility attackAbility,
-            final WeaponStats weaponStats
-    ) {
-        return false;
+    public NoMagazineHandler getMagazineHandler() {
+        return this.magazine;
     }
 
     @Override
-    public TriggerMechanism getTrigger() {
-        return this.triggerMechanism;
+    public NoTriggerMechanism getTrigger() {
+        return this.trigger;
     }
 
     @Override
-    public FiringMechanism getFiringMechanism() {
-        return this.firingMechanism;
+    public NoFiringMechanism getFiringMechanism() {
+        return this.firing;
     }
 
-    private static class NoTriggerMechanism implements TriggerMechanism {
+    public static class NoState {
+
+    }
+
+    public static class NoMagazineHandler implements Weapon.MagazineHandler<NoState> {
+        @Override
+        public NoState createState() {
+            return new NoState();
+        }
+    }
+
+    public static class NoTriggerMechanism implements Weapon.TriggerMechanism<NoState> {
+        @Override
+        public NoState createTriggerState() {
+            return new NoState();
+        }
 
         @Override
         public void pull(
                 final EntityManager entityManager,
                 final Entity owner,
                 final TimeManager timeManager,
-                final AttackAbility attackAbility,
-                final WeaponStats weaponStats
+                final NoState triggerState
         ) {
+
         }
 
         @Override
@@ -56,9 +76,9 @@ public class NoWeapon implements Weapon {
                 final EntityManager entityManager,
                 final Entity owner,
                 final TimeManager timeManager,
-                final AttackAbility attackAbility,
-                final WeaponStats weaponStats
+                final NoState triggerState
         ) {
+
         }
 
         @Override
@@ -66,26 +86,21 @@ public class NoWeapon implements Weapon {
                 final EntityManager entityManager,
                 final Entity owner,
                 final TimeManager timeManager,
-                final AttackAbility attackAbility,
-                final WeaponStats weaponStats
+                final NoState triggerState
         ) {
             return false;
         }
-
-        @Override
-        public void equip(final EntityManager entityManager, final Entity owner) {
-        }
-
-        @Override
-        public void unequip(final EntityManager entityManager, final Entity owner) {
-        }
     }
 
-    private static class NoFiringMechanism implements FiringMechanism {
+    public static class NoFiringMechanism implements Weapon.FiringMechanism<NoState> {
+        @Override
+        public NoState createState() {
+            return new NoState();
+        }
 
         @Override
         public boolean isReadyToFire(
-                final TimeManager timeManager, final AttackAbility attackAbility, final WeaponStats weaponStats
+                final TimeManager timeManager, final NoState firingState, final WeaponStats stats
         ) {
             return false;
         }
@@ -93,21 +108,12 @@ public class NoWeapon implements Weapon {
         @Override
         public void fire(
                 final EntityManager entityManager,
-                final WeaponStats weaponStats,
+                final Entity shooter,
                 final TimeManager timeManager,
-                final AttackAbility attackAbility,
-                final Entity shooter
+                final NoState firingState,
+                final WeaponStats stats,
+                final AttackAbility attackAbility
         ) {
-        }
-
-        @Override
-        public void equip(final EntityManager entityManager, final Entity owner) {
-
-        }
-
-        @Override
-        public void unequip(final EntityManager entityManager, final Entity owner) {
-
         }
     }
 }

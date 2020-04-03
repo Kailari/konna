@@ -1,21 +1,35 @@
 package fi.jakojaannos.roguelite.game.weapons;
 
-public class SimpleWeapon implements Weapon {
-    private final Weapon.TriggerMechanism triggerMechanism;
-    private final FiringMechanism firingMechanism;
+public class SimpleWeapon implements Weapon<
+        ClipMagazineHandler,
+        AutomaticTriggerMechanism,
+        ProjectileFiringMechanism,
+        ClipMagazineState,
+        AutomaticTriggerState,
+        ProjectileFiringState> {
+
+    private final ClipMagazineHandler magazine;
+    private final AutomaticTriggerMechanism trigger;
+    private final ProjectileFiringMechanism firing;
 
     public SimpleWeapon() {
-        this.triggerMechanism = new AutomaticTriggerMechanism();
-        this.firingMechanism = new ProjectileFiringMechanism();
+        this.magazine = new ClipMagazineHandler();
+        this.trigger = new AutomaticTriggerMechanism();
+        this.firing = new ProjectileFiringMechanism();
     }
 
     @Override
-    public TriggerMechanism getTrigger() {
-        return this.triggerMechanism;
+    public ClipMagazineHandler getMagazineHandler() {
+        return this.magazine;
     }
 
     @Override
-    public FiringMechanism getFiringMechanism() {
-        return this.firingMechanism;
+    public AutomaticTriggerMechanism getTrigger() {
+        return this.trigger;
+    }
+
+    @Override
+    public ProjectileFiringMechanism getFiringMechanism() {
+        return this.firing;
     }
 }

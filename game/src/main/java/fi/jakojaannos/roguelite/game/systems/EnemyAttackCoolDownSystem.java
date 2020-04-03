@@ -28,7 +28,7 @@ public class EnemyAttackCoolDownSystem implements ECSSystem {
         final var delta = world.getResource(Time.class).getTimeStepInSeconds();
 
         final var entityManager = world.getEntityManager();
-        entities.forEach(entity -> entityManager.getComponentOf(entity, AttackAbility.class)
-                                                .orElseThrow().lastAttackTimestamp += delta);
+        /*entities.forEach(entity -> entityManager.getComponentOf(entity, AttackAbility.class)
+                                                .orElseThrow().lastAttackTimestamp += delta);*/
     }
 }
