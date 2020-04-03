@@ -6,7 +6,7 @@ import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 
 public class AutomaticTriggerMechanism implements Weapon.TriggerMechanism<AutomaticTriggerState> {
     @Override
-    public AutomaticTriggerState createTriggerState() {
+    public AutomaticTriggerState createState() {
         return new AutomaticTriggerState();
     }
 

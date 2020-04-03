@@ -40,15 +40,15 @@ public class CharacterAttackSystem implements ECSSystem {
             final var inventory = entityManager.getComponentOf(entity, WeaponInventory.class)
                                                .orElseThrow();
             final var equippedSlot = attackAbility.equippedSlot;
-            final var weapon = inventory.getWeaponAtSlot(equippedSlot);
+            final var equippedWeapon = inventory.getWeaponAtSlot(equippedSlot);
 
             if (input.attack && !input.previousAttack) {
-                weapon.getWeapon().getTrigger().pull(entityManager, entity, timeManager, weapon.getState().getTrigger());
+                equippedWeapon.getWeapon().getTrigger().pull(entityManager, entity, timeManager, equippedWeapon.getState().getTrigger());
             } else if (!input.attack && input.previousAttack) {
-                weapon.getWeapon().getTrigger().release(entityManager, entity, timeManager, weapon.getState().getTrigger());
+                equippedWeapon.getWeapon().getTrigger().release(entityManager, entity, timeManager, equippedWeapon.getState().getTrigger());
             }
 
-            weapon.getWeapon().fireIfReady(entityManager, entity, timeManager, weapon, attackAbility);
+            equippedWeapon.getWeapon().fireIfReady(entityManager, entity, timeManager, equippedWeapon, attackAbility);
 
             input.previousAttack = input.attack;
         });

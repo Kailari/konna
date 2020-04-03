@@ -1,7 +1,5 @@
 package fi.jakojaannos.roguelite.game.weapons;
 
-import java.util.function.Supplier;
-
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
@@ -12,7 +10,10 @@ public interface Weapon<
         M extends Weapon.MagazineHandler<MS>,
         T extends Weapon.TriggerMechanism<TS>,
         F extends Weapon.FiringMechanism<FS>,
-        MS, TS, FS> {
+        MS extends Weapon.WeaponMagazineState,
+        TS extends Weapon.WeaponTriggerState,
+        FS extends Weapon.WeaponFiringState
+        > {
     T getTrigger();
 
     F getFiringMechanism();
@@ -49,19 +50,18 @@ public interface Weapon<
         // magazine.isReadyToFire..
     }
 
-    interface MagazineHandler<TState> {
+    interface MagazineHandler<TState extends WeaponMagazineState> {
         TState createState();
-
     }
 
-    interface TriggerMechanism<TState> {
-        TState createTriggerState();
+    interface TriggerMechanism<TState extends WeaponTriggerState> {
+        TState createState();
 
         void pull(
                 EntityManager entityManager,
                 Entity owner,
                 TimeManager timeManager,
-                TState triggerState
+                TState state
         );
 
         void release(
@@ -79,7 +79,7 @@ public interface Weapon<
         );
     }
 
-    interface FiringMechanism<TState> {
+    interface FiringMechanism<TState extends WeaponFiringState> {
         TState createState();
 
         boolean isReadyToFire(
@@ -96,5 +96,14 @@ public interface Weapon<
                 WeaponStats stats,
                 AttackAbility attackAbility
         );
+    }
+
+    interface WeaponMagazineState {
+    }
+
+    interface WeaponTriggerState {
+    }
+
+    interface WeaponFiringState {
     }
 }

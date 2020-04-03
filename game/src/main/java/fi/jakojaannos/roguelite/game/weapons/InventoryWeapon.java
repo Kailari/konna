@@ -6,7 +6,9 @@ public class InventoryWeapon<
         M extends Weapon.MagazineHandler<MS>,
         T extends Weapon.TriggerMechanism<TS>,
         F extends Weapon.FiringMechanism<FS>,
-        MS, TS, FS> {
+        MS extends Weapon.WeaponMagazineState,
+        TS extends Weapon.WeaponTriggerState,
+        FS extends Weapon.WeaponFiringState> {
     private final Weapon<M, T, F, MS, TS, FS> weapon;
     private final WeaponStats stats;
     private final WeaponState<MS, TS, FS> state;
@@ -15,7 +17,7 @@ public class InventoryWeapon<
         this.weapon = weapon;
         this.stats = stats;
         this.state = new WeaponState<>(weapon.getMagazineHandler().createState(),
-                                       weapon.getTrigger().createTriggerState(),
+                                       weapon.getTrigger().createState(),
                                        weapon.getFiringMechanism().createState());
     }
 

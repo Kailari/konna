@@ -1,6 +1,9 @@
 package fi.jakojaannos.roguelite.game.weapons;
 
-public class WeaponState<MS, TS, FS> {
+public class WeaponState<
+        MS extends Weapon.WeaponMagazineState,
+        TS extends Weapon.WeaponTriggerState,
+        FS extends Weapon.WeaponFiringState> {
     private final MS magazine;
     private final TS trigger;
     private final FS firing;
