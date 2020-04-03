@@ -1,25 +1,40 @@
 package fi.jakojaannos.roguelite.game.weapons;
 
+import java.util.function.Supplier;
+
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponStats;
 
-public interface Weapon {
-    TriggerMechanism getTrigger();
+public interface Weapon<
+        M extends Weapon.MagazineHandler<MS>,
+        T extends Weapon.TriggerMechanism<TS>,
+        F extends Weapon.FiringMechanism<FS>,
+        MS, TS, FS> {
+    T getTrigger();
 
-    FiringMechanism getFiringMechanism();
+    F getFiringMechanism();
+
+    M getMagazineHandler();
 
     default void fireIfReady(
             final EntityManager entityManager,
-            final AttackAbility attackAbility,
-            final WeaponStats weaponStats,
+            final Entity entity,
             final TimeManager timeManager,
-            final Entity entity
+            final InventoryWeapon<M, T, F, MS, TS, FS> weapon,
+            final AttackAbility attackAbility
     ) {
-        if (canFire(entityManager, entity, timeManager, attackAbility, weaponStats)) {
-            getFiringMechanism().fire(entityManager, weaponStats, timeManager, attackAbility, entity);
+        if (canFire(entityManager, entity, timeManager, weapon)) {
+            getFiringMechanism().fire(
+                    entityManager,
+                    entity,
+                    timeManager,
+                    weapon.getState().getFiring(),
+                    weapon.getStats(),
+                    attackAbility);
+            // magazine.expendAmmo
         }
     }
 
@@ -27,66 +42,59 @@ public interface Weapon {
             final EntityManager entityManager,
             final Entity owner,
             final TimeManager timeManager,
-            final AttackAbility attackAbility,
-            final WeaponStats weaponStats
+            final InventoryWeapon<M, T, F, MS, TS, FS> weapon
     ) {
-        return getTrigger().shouldTrigger(entityManager, owner, timeManager, attackAbility, weaponStats)
-                && getFiringMechanism().isReadyToFire(timeManager, attackAbility, weaponStats);
+        return getTrigger().shouldTrigger(entityManager, owner, timeManager, weapon.getState().getTrigger())
+                && getFiringMechanism().isReadyToFire(timeManager, weapon.getState().getFiring(), weapon.getStats());
+        // magazine.isReadyToFire..
     }
 
-    default void equip(final EntityManager entityManager, final Entity owner) {
-        getTrigger().equip(entityManager, owner);
-        getFiringMechanism().equip(entityManager, owner);
+    interface MagazineHandler<TState> {
+        TState createState();
+
     }
 
-    default void unequip(final EntityManager entityManager, final Entity owner) {
-        getTrigger().unequip(entityManager, owner);
-        getFiringMechanism().unequip(entityManager, owner);
-    }
+    interface TriggerMechanism<TState> {
+        TState createTriggerState();
 
-    interface TriggerMechanism {
         void pull(
                 EntityManager entityManager,
                 Entity owner,
                 TimeManager timeManager,
-                AttackAbility attackAbility,
-                WeaponStats weaponStats
+                TState triggerState
         );
 
         void release(
                 EntityManager entityManager,
                 Entity owner,
                 TimeManager timeManager,
-                AttackAbility attackAbility,
-                WeaponStats weaponStats
+                TState triggerState
         );
 
         boolean shouldTrigger(
                 EntityManager entityManager,
                 Entity owner,
                 TimeManager timeManager,
-                AttackAbility attackAbility,
-                WeaponStats weaponStats
+                TState triggerState
         );
-
-        void equip(EntityManager entityManager, Entity owner);
-
-        void unequip(EntityManager entityManager, Entity owner);
     }
 
-    interface FiringMechanism {
-        boolean isReadyToFire(TimeManager timeManager, AttackAbility attackAbility, WeaponStats weaponStats);
+    interface FiringMechanism<TState> {
+        TState createState();
+
+        boolean isReadyToFire(
+                TimeManager timeManager,
+                TState firingState,
+                WeaponStats stats
+        );
 
         void fire(
                 EntityManager entityManager,
-                WeaponStats weaponStats,
+                Entity shooter,
                 TimeManager timeManager,
-                AttackAbility attackAbility,
-                Entity shooter
+                TState firingState,
+                WeaponStats stats,
+                AttackAbility attackAbility
         );
-
-        void equip(EntityManager entityManager, Entity owner);
-
-        void unequip(EntityManager entityManager, Entity owner);
     }
 }

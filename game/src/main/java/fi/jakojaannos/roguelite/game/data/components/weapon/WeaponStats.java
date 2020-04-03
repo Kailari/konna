@@ -1,22 +1,12 @@
 package fi.jakojaannos.roguelite.game.data.components.weapon;
 
-import fi.jakojaannos.roguelite.engine.ecs.Component;
-
-public class WeaponStats implements Component {
+public class WeaponStats {
     public final double spread;
     public double projectileSpeed;
     public double projectileSpeedNoise;
     public double timeBetweenShots;
     public long projectileLifetimeInTicks;
     public double projectilePushForce;
-
-    /**
-     * @deprecated Use component builder instead
-     */
-    @Deprecated
-    public WeaponStats() {
-        this(20, 40.0, 2.5, 4.0, -1, 0.0);
-    }
 
     private WeaponStats(
             final long timeBetweenShots,

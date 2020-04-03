@@ -13,7 +13,7 @@ import fi.jakojaannos.roguelite.game.data.archetypes.ProjectileArchetype;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponStats;
 
-public class ProjectileFiringMechanism implements Weapon.FiringMechanism {
+public class ProjectileFiringMechanism implements Weapon.FiringMechanism<ProjectileFiringState> {
     private final Vector2d tmpSpreadOffset = new Vector2d();
     private final Vector2d tmpProjectilePos = new Vector2d();
     private final Vector2d tmpDirection = new Vector2d();
@@ -21,22 +21,18 @@ public class ProjectileFiringMechanism implements Weapon.FiringMechanism {
     private final Random random = new Random(1337);
 
     @Override
-    public boolean isReadyToFire(
-            final TimeManager timeManager,
-            final AttackAbility attackAbility,
-            final WeaponStats stats
-    ) {
-        final var timeSinceLastAttack = timeManager.getCurrentGameTime() - attackAbility.lastAttackTimestamp;
-        return timeSinceLastAttack >= stats.timeBetweenShots;
+    public ProjectileFiringState createState() {
+        return new ProjectileFiringState();
     }
 
     @Override
     public void fire(
             final EntityManager entityManager,
-            final WeaponStats weaponStats,
+            final Entity shooter,
             final TimeManager timeManager,
-            final AttackAbility attackAbility,
-            final Entity shooter
+            final ProjectileFiringState state,
+            final WeaponStats stats,
+            final AttackAbility attackAbility
     ) {
         final var shooterTransform = entityManager.getComponentOf(shooter, Transform.class)
                                                   .orElseThrow();
@@ -56,13 +52,13 @@ public class ProjectileFiringMechanism implements Weapon.FiringMechanism {
             direction.normalize();
         }
 
-        final var spreadAmount = (this.random.nextDouble() * 2.0 - 1.0) * weaponStats.spread;
+        final var spreadAmount = (this.random.nextDouble() * 2.0 - 1.0) * stats.spread;
         final var spreadOffset = this.tmpSpreadOffset.set(direction)
                                                      .perpendicular()
                                                      .mul(spreadAmount);
 
-        final var speedNoise = (this.random.nextDouble() * 2.0 - 1.0) * weaponStats.projectileSpeedNoise;
-        final var actualSpeed = weaponStats.projectileSpeed + speedNoise;
+        final var speedNoise = (this.random.nextDouble() * 2.0 - 1.0) * stats.projectileSpeedNoise;
+        final var actualSpeed = stats.projectileSpeed + speedNoise;
 
         final var timestamp = timeManager.getCurrentGameTime();
         ProjectileArchetype.create(entityManager,
@@ -72,17 +68,19 @@ public class ProjectileFiringMechanism implements Weapon.FiringMechanism {
                                    attackAbility.damageSource,
                                    attackAbility.projectileLayer,
                                    timestamp,
-                                   weaponStats.projectileLifetimeInTicks,
-                                   weaponStats.projectilePushForce);
+                                   stats.projectileLifetimeInTicks,
+                                   stats.projectilePushForce);
 
-        attackAbility.lastAttackTimestamp = timestamp;
+        state.lastAttackTimestamp = timestamp;
     }
 
     @Override
-    public void equip(final EntityManager entityManager, final Entity owner) {
-    }
-
-    @Override
-    public void unequip(final EntityManager entityManager, final Entity owner) {
+    public boolean isReadyToFire(
+            final TimeManager timeManager,
+            final ProjectileFiringState state,
+            final WeaponStats stats
+    ) {
+        final var timeSinceLastAttack = timeManager.getCurrentGameTime() - state.lastAttackTimestamp;
+        return timeSinceLastAttack >= stats.timeBetweenShots;
     }
 }

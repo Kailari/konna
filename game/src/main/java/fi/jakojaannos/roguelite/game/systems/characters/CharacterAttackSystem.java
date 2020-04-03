@@ -10,10 +10,11 @@ import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.WeaponInput;
-import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponStats;
 import fi.jakojaannos.roguelite.game.systems.SystemGroups;
+import fi.jakojaannos.roguelite.game.weapons.WeaponInventory;
 
 public class CharacterAttackSystem implements ECSSystem {
+
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.CHARACTER_TICK)
@@ -21,7 +22,7 @@ public class CharacterAttackSystem implements ECSSystem {
                     .withComponent(Transform.class)
                     .withComponent(WeaponInput.class)
                     .withComponent(AttackAbility.class)
-                    .withComponent(WeaponStats.class);
+                    .withComponent(WeaponInventory.class);
     }
 
     @Override
@@ -34,19 +35,20 @@ public class CharacterAttackSystem implements ECSSystem {
         final var entityManager = world.getEntityManager();
         entities.forEach(entity -> {
             final var input = entityManager.getComponentOf(entity, WeaponInput.class).orElseThrow();
-            final var weaponStats = entityManager.getComponentOf(entity, WeaponStats.class)
-                                                 .orElseThrow();
             final var attackAbility = entityManager.getComponentOf(entity, AttackAbility.class)
                                                    .orElseThrow();
-            final var weapon = attackAbility.equippedWeapon;
+            final var inventory = entityManager.getComponentOf(entity, WeaponInventory.class)
+                                               .orElseThrow();
+            final var equippedSlot = attackAbility.equippedSlot;
+            final var weapon = inventory.getWeaponAtSlot(equippedSlot);
 
             if (input.attack && !input.previousAttack) {
-                weapon.getTrigger().pull(entityManager, entity, timeManager, attackAbility, weaponStats);
+                weapon.getWeapon().getTrigger().pull(entityManager, entity, timeManager, weapon.getState().getTrigger());
             } else if (!input.attack && input.previousAttack) {
-                weapon.getTrigger().release(entityManager, entity, timeManager, attackAbility, weaponStats);
+                weapon.getWeapon().getTrigger().release(entityManager, entity, timeManager, weapon.getState().getTrigger());
             }
 
-            weapon.fireIfReady(entityManager, attackAbility, weaponStats, timeManager, entity);
+            weapon.getWeapon().fireIfReady(entityManager, entity, timeManager, weapon, attackAbility);
 
             input.previousAttack = input.attack;
         });

@@ -12,8 +12,6 @@ import fi.jakojaannos.roguelite.game.data.components.character.MovementInput;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
 import fi.jakojaannos.roguelite.game.data.components.character.WeaponInput;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
-import fi.jakojaannos.roguelite.game.weapons.Weapon;
-import fi.jakojaannos.roguelite.game.weapons.Weapons;
 
 public class PlayerInputSystem implements ECSSystem {
     private final Vector2d tmpCursorPos = new Vector2d();
@@ -27,8 +25,7 @@ public class PlayerInputSystem implements ECSSystem {
                     .withComponent(PlayerTag.class)
                     .requireResource(Inputs.class)
                     .requireResource(Mouse.class)
-                    .requireResource(CameraProperties.class)
-                    .requireProvidedResource(Weapons.class);
+                    .requireResource(CameraProperties.class);
     }
 
     @Override
@@ -40,7 +37,6 @@ public class PlayerInputSystem implements ECSSystem {
         final var inputs = world.getOrCreateResource(Inputs.class);
         final var mouse = world.getOrCreateResource(Mouse.class);
         final var cameraProperties = world.getOrCreateResource(CameraProperties.class);
-        final var weapons = world.getResource(Weapons.class);
 
         final var entityManager = world.getEntityManager();
         mouse.calculateCursorPositionRelativeToCamera(entityManager, cameraProperties, this.tmpCursorPos);
@@ -60,38 +56,36 @@ public class PlayerInputSystem implements ECSSystem {
             attackAbility.targetPosition.set(this.tmpCursorPos);
 
             if (inputs.inputWeaponSlot0) {
-                equipWeapon(weapons.unarmed, entityManager, entity, attackAbility);
+                equipWeaponAtSlot(0, entityManager, entity, attackAbility);
             } else if (inputs.inputWeaponSlot1) {
-                equipWeapon(weapons.simpleWeapon, entityManager, entity, attackAbility);
+                equipWeaponAtSlot(1, entityManager, entity, attackAbility);
             } else if (inputs.inputWeaponSlot2) {
-                equipWeapon(weapons.unarmed, entityManager, entity, attackAbility);
+                equipWeaponAtSlot(2, entityManager, entity, attackAbility);
             } else if (inputs.inputWeaponSlot3) {
-                equipWeapon(weapons.unarmed, entityManager, entity, attackAbility);
+                equipWeaponAtSlot(3, entityManager, entity, attackAbility);
             } else if (inputs.inputWeaponSlot4) {
-                equipWeapon(weapons.unarmed, entityManager, entity, attackAbility);
+                equipWeaponAtSlot(4, entityManager, entity, attackAbility);
             } else if (inputs.inputWeaponSlot5) {
-                equipWeapon(weapons.unarmed, entityManager, entity, attackAbility);
+                equipWeaponAtSlot(5, entityManager, entity, attackAbility);
             } else if (inputs.inputWeaponSlot6) {
-                equipWeapon(weapons.unarmed, entityManager, entity, attackAbility);
+                equipWeaponAtSlot(6, entityManager, entity, attackAbility);
             } else if (inputs.inputWeaponSlot7) {
-                equipWeapon(weapons.unarmed, entityManager, entity, attackAbility);
+                equipWeaponAtSlot(7, entityManager, entity, attackAbility);
             } else if (inputs.inputWeaponSlot8) {
-                equipWeapon(weapons.unarmed, entityManager, entity, attackAbility);
+                equipWeaponAtSlot(8, entityManager, entity, attackAbility);
             } else if (inputs.inputWeaponSlot9) {
-                equipWeapon(weapons.unarmed, entityManager, entity, attackAbility);
+                equipWeaponAtSlot(9, entityManager, entity, attackAbility);
             }
 
         });
     }
 
-    private void equipWeapon(
-            final Weapon weapon,
+    private void equipWeaponAtSlot(
+            final int slot,
             final EntityManager entityManager,
             final Entity entity,
             final AttackAbility attackAbility
     ) {
-        attackAbility.equippedWeapon.unequip(entityManager, entity);
-        attackAbility.equippedWeapon = weapon;
-        attackAbility.equippedWeapon.equip(entityManager, entity);
+        attackAbility.equippedSlot = slot;
     }
 }
