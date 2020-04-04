@@ -13,6 +13,8 @@ import java.util.function.Function;
 import java.util.stream.StreamSupport;
 
 import fi.jakojaannos.roguelite.engine.ecs.newimpl.EcsSystem;
+import fi.jakojaannos.roguelite.engine.ecs.newimpl.components.ComponentStorage;
+import fi.jakojaannos.roguelite.engine.ecs.newimpl.resources.ResourceStorage;
 
 public class Main {
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
@@ -21,57 +23,66 @@ public class Main {
         final List<EcsSystem<?, ?, ?>> systems = List.of(new AdderSystem(),
                                                          new PrintSystem());
 
-final var componentAs = new ValueComponent[]{
-        new ValueComponent(10),
-        new ValueComponent(5),
-        new ValueComponent(42),
-        new ValueComponent(0),
-        new ValueComponent(Integer.MAX_VALUE),
-};
-final var componentBs = new AmountComponent[]{
-        new AmountComponent(-1),
-        new AmountComponent(1),
-        null,
-        new AmountComponent(2),
-        new AmountComponent(Short.MIN_VALUE),
-};
-
         final int entityCount = 5;
+        final var resources = new ResourceStorage();
+        resources.register(new Multiplier(2));
+
+        final var components = new ComponentStorage();
+        components.register(ValueComponent.class,
+                            new ValueComponent[]{
+                                    new ValueComponent(10),
+                                    new ValueComponent(5),
+                                    new ValueComponent(42),
+                                    new ValueComponent(0),
+                                    new ValueComponent(Integer.MAX_VALUE),
+                            });
+        components.register(AmountComponent.class,
+                            new AmountComponent[]{
+                                    new AmountComponent(-1),
+                                    new AmountComponent(1),
+                                    null,
+                                    new AmountComponent(2),
+                                    new AmountComponent(Short.MIN_VALUE),
+                            });
+
+        final var threadPool = new ForkJoinPool(4,
+                                                Main::workerThreadFactory,
+                                                null,
+                                                false);
         LOG.info("Initial state");
-        dispatch(componentAs, componentBs, entityCount, systems.get(1));
+        dispatch(components, resources, entityCount, systems.get(1), threadPool);
 
         final var ticksToRun = 2;
         for (int i = 0; i < ticksToRun; i++) {
             LOG.info("Tick #{}", i);
             for (final EcsSystem<?, ?, ?> system : systems) {
-                dispatch(componentAs, componentBs, entityCount, system);
+                dispatch(components, resources, entityCount, system, threadPool);
             }
         }
     }
 
     private static <TResources, TEntityData, TEvents> void dispatch(
-            final ValueComponent[] componentAs,
-            final AmountComponent[] componentBs,
+            final ComponentStorage components,
+            final ResourceStorage resources,
             final int entityCount,
-            final EcsSystem<TResources, TEntityData, TEvents> system
+            final EcsSystem<TResources, TEntityData, TEvents> system,
+            final ForkJoinPool threadPool
     ) {
         final var requirements = system.declareRequirements();
 
-        final var componentTypes = requirements.getEntityDataComponentTypes();
-        final var paramStorages = fetchStorages(componentAs, componentBs, componentTypes);
+        final var systemResources = instantiateResources(
+                resources.fetchResources(requirements.resourceComponentTypes()),
+                requirements.resourceConstructor()
+        );
+        final var entitySpliterator = new EntitySpliterator<>(
+                components.fetchStorages(requirements.entityDataComponentTypes()),
+                entityCount,
+                createEntityDataFactory(requirements.entityDataConstructor())
+        );
 
-        final var constructor = requirements.getEntityDataConstructor();
-        final var entitySpliterator = new EntitySpliterator<>(paramStorages,
-                                                              entityCount,
-                                                              createEntityDataFactory(constructor));
-
-        final ForkJoinPool threadPool = new ForkJoinPool(4,
-                                                         Main::workerThreadFactory,
-                                                         null,
-                                                         false);
         try {
             threadPool.submit(
-                    () -> system.tick(null,
+                    () -> system.tick(systemResources,
                                       StreamSupport.stream(entitySpliterator, true),
                                       null)
             ).get();
@@ -88,6 +99,17 @@ final var componentBs = new AmountComponent[]{
         return worker;
     }
 
+    private static <TResources> TResources instantiateResources(
+            final Object[] resources,
+            final Constructor<TResources> constructor
+    ) {
+        try {
+            return constructor.newInstance(resources);
+        } catch (final InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            throw new IllegalStateException("Could not instantiate resources!");
+        }
+    }
+
     private static <TEntityData> Function<Object[], TEntityData> createEntityDataFactory(
             final Constructor<TEntityData> constructor
     ) {
@@ -98,26 +120,5 @@ final var componentBs = new AmountComponent[]{
                 throw new IllegalStateException("Could not instantiate entity data!");
             }
         };
-    }
-
-    private static Object[][] fetchStorages(
-            final ValueComponent[] componentAs,
-            final AmountComponent[] componentBs,
-            final Class<?>[] componentTypes
-    ) {
-        final var paramStorages = new Object[componentTypes.length][];
-
-        for (int paramIndex = 0; paramIndex < paramStorages.length; ++paramIndex) {
-            final Class<?> paramType = componentTypes[paramIndex];
-
-            if (paramType.isAssignableFrom(ValueComponent.class)) {
-                paramStorages[paramIndex] = componentAs;
-            } else if (paramType.isAssignableFrom(AmountComponent.class)) {
-                paramStorages[paramIndex] = componentBs;
-            } else {
-                throw new IllegalStateException("Unknown parameter type!");
-            }
-        }
-        return paramStorages;
     }
 }

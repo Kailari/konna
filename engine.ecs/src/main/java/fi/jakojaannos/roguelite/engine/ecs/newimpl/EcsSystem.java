@@ -1,6 +1,5 @@
 package fi.jakojaannos.roguelite.engine.ecs.newimpl;
 
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 /**
@@ -20,9 +19,14 @@ import java.util.stream.Stream;
  * @param <TEntityData> container class for holding components of required entities
  * @param <TEvents>     container class for holding instances of required events
  */
-@SuppressWarnings("unused")
 public interface EcsSystem<TResources, TEntityData, TEvents> {
-    Requirements<TEntityData> declareRequirements();
+    default Requirements<TResources, TEntityData, TEvents> declareRequirements() {
+        return declareRequirements(Requirements.builder());
+    }
+
+    Requirements<TResources, TEntityData, TEvents> declareRequirements(
+            Requirements.Builder<TResources, TEntityData, TEvents> require
+    );
 
     void tick(
             TResources resources,
@@ -40,20 +44,20 @@ public interface EcsSystem<TResources, TEntityData, TEvents> {
      * Utility tag for creating systems without resource requirements. Substitute this for <code>TResources</code> to
      * inform the dispatcher that this system requires no resources.
      */
-    final class NoResources {
+    record NoResources() {
     }
 
     /**
      * Utility tag for creating systems without entity requirements. Substitute this for <code>TEntities</code> to
      * inform the dispatcher that this system requires no entities.
      */
-    final class NoEntities {
+    record NoEntities() {
     }
 
     /**
      * Utility tag for creating systems without event requirements. Substitute this for <code>TEvents</code> to inform
      * the dispatcher that this system requires no events.
      */
-    final class NoEvents {
+    record NoEvents() {
     }
 }
