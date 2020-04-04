@@ -30,9 +30,17 @@ public class LegacyEntityWrapper implements Entity {
         return component;
     }
 
+    public void removeComponent(final Class<? extends Component> componentClass) {
+        this.entityHandle.removeComponent(componentClass);
+    }
+
     public <TComponent extends Component> Optional<TComponent> getComponent(
             final Class<TComponent> componentClass
     ) {
         return this.entityHandle.getComponent(componentClass);
+    }
+
+    public boolean hasComponent(final Class<? extends Component> componentClass) {
+        return this.entityHandle.hasComponent(componentClass);
     }
 }

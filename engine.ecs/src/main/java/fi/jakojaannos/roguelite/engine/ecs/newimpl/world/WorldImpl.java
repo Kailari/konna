@@ -1,5 +1,8 @@
 package fi.jakojaannos.roguelite.engine.ecs.newimpl.world;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import fi.jakojaannos.roguelite.engine.ecs.newimpl.EntityHandle;
 import fi.jakojaannos.roguelite.engine.ecs.newimpl.World;
 import fi.jakojaannos.roguelite.engine.ecs.newimpl.components.ComponentStorage;
@@ -15,6 +18,8 @@ public class WorldImpl implements World {
     private final int capacity;
 
     private int nEntities;
+    private int idEstimate;
+    private List<Runnable> entityTasks = new ArrayList<>();
 
     @Override
     public LegacyCompat getCompatibilityLayer() {
@@ -34,6 +39,7 @@ public class WorldImpl implements World {
     public WorldImpl() {
         this.capacity = 256;
         this.nEntities = 0;
+        this.idEstimate = 0;
 
         this.resourceStorage = new ResourceStorage();
         this.componentStorage = new ComponentStorage(this.capacity);
@@ -53,9 +59,29 @@ public class WorldImpl implements World {
 
     @Override
     public EntityHandle createEntity(final Object... components) {
-        final var handle = new EntityHandleImpl(this.nEntities, this.componentStorage);
-        this.nEntities++;
+        final var handle = new FutureEntityHandle(this.idEstimate);
+        this.idEstimate++;
+
+        this.entityTasks.add(() -> {
+            handle.create(this.nEntities, this.componentStorage);
+            this.nEntities++;
+        });
         return handle;
+    }
+
+    @Override
+    public void destroyEntity(final int id) {
+        this.entityTasks.add(() -> {
+            this.nEntities--;
+            this.idEstimate--;
+            this.componentStorage.move(this.nEntities, id);
+        });
+    }
+
+    @Override
+    public void runEntityTasks() {
+        this.entityTasks.forEach(Runnable::run);
+        this.entityTasks.clear();
     }
 
     @Override

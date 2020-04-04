@@ -26,12 +26,12 @@ public class EntityHandleImpl implements EntityHandle {
 
     @Override
     public <TComponent> boolean removeComponent(final Class<TComponent> componentClass) {
-        return false;
+        return this.componentStorage.remove(this.id, componentClass);
     }
 
     @Override
     public <TComponent> boolean hasComponent(final Class<TComponent> componentClass) {
-        return false;
+        return this.componentStorage.has(this.id, componentClass);
     }
 
     @Override

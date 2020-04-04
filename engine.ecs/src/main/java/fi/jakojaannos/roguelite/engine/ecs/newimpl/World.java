@@ -31,6 +31,10 @@ public interface World extends fi.jakojaannos.roguelite.engine.ecs.World {
 
     <TResource> TResource fetchResource(Class<?> resourceClass);
 
+    void destroyEntity(int id);
+
+    void runEntityTasks();
+
     @Override
     default <TResource extends Resource> TResource getOrCreateResource(
             final Class<TResource> resourceType

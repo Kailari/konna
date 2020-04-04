@@ -102,12 +102,12 @@ public class LegacyCompat implements fi.jakojaannos.roguelite.engine.ecs.World {
 
         @Override
         public void destroyEntity(final Entity entity) {
-
+            LegacyCompat.this.world.destroyEntity(entity.getId());
         }
 
         @Override
         public void applyModifications() {
-
+            LegacyCompat.this.world.runEntityTasks();
         }
 
         @Override
@@ -123,7 +123,7 @@ public class LegacyCompat implements fi.jakojaannos.roguelite.engine.ecs.World {
                 final Entity entity,
                 final Class<? extends Component> componentClass
         ) {
-
+            ((LegacyEntityWrapper) entity).removeComponent(componentClass);
         }
 
         @Override
@@ -136,9 +136,10 @@ public class LegacyCompat implements fi.jakojaannos.roguelite.engine.ecs.World {
 
         @Override
         public boolean hasComponent(
-                final Entity entity, final Class<? extends Component> componentClass
+                final Entity entity,
+                final Class<? extends Component> componentClass
         ) {
-            return false;
+            return ((LegacyEntityWrapper) entity).hasComponent(componentClass);
         }
 
         @Override
