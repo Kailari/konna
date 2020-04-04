@@ -3,25 +3,29 @@ package fi.jakojaannos.roguelite.engine.ecs.newimpl;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.ProvidedResource;
 import fi.jakojaannos.roguelite.engine.ecs.Resource;
-import fi.jakojaannos.roguelite.engine.ecs.newimpl.resources.ResourceStorage;
+import fi.jakojaannos.roguelite.engine.ecs.newimpl.components.ComponentStorage;
 import fi.jakojaannos.roguelite.engine.ecs.newimpl.world.LegacyCompat;
 import fi.jakojaannos.roguelite.engine.ecs.newimpl.world.WorldImpl;
 
 public interface World extends fi.jakojaannos.roguelite.engine.ecs.World {
     LegacyCompat getCompatibilityLayer();
 
+    ComponentStorage getComponents();
+
     @Override
     default EntityManager getEntityManager() {
         return getCompatibilityLayer().getEntityManager();
     }
 
-    void registerResource(Object resource);
-
-    <TResource> void registerResource(Class<TResource> resourceClass, TResource resource);
+    int getEntityCount();
 
     static World createNew() {
         return new WorldImpl();
     }
+
+    void registerResource(Object resource);
+
+    <TResource> void registerResource(Class<TResource> resourceClass, TResource resource);
 
     EntityHandle createEntity(Object... components);
 
