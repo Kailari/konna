@@ -60,6 +60,7 @@ public class GameRunner<TGame extends Game> implements AutoCloseable {
 
         // Loop
         var state = defaultStateSupplier.get();
+        state.getWorld().getEntityManager().applyModifications();
         final var initialTime = System.currentTimeMillis();
         var previousFrameTime = initialTime;
         var accumulator = 0L;

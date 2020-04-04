@@ -50,6 +50,16 @@ public final class ComponentStorage {
         return true;
     }
 
+    public <TComponent> boolean remove(final int id, final Class<TComponent> componentClass) {
+        final var storage = getStorage(componentClass);
+        if (storage[id] == null) {
+            return false;
+        }
+
+        storage[id] = null;
+        return true;
+    }
+
     public <TComponent> Optional<TComponent> get(final int id, final Class<TComponent> componentClass) {
         return Optional.ofNullable(getStorage(componentClass)[id]);
     }
@@ -63,6 +73,12 @@ public final class ComponentStorage {
         return (TComponent[])
                 this.components.computeIfAbsent(componentClass,
                                                 key -> constructComponentArray(key, this.capacity));
+    }
+
+    public void move(final int from, final int to) {
+        for (final var storage : this.components.values()) {
+            storage[to] = storage[from];
+        }
     }
 
     @SuppressWarnings("unchecked")
