@@ -4,7 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.ecs.*;
@@ -67,6 +69,11 @@ public class LegacyCompat implements fi.jakojaannos.roguelite.engine.ecs.World {
     ) {
         if (LOG_PROVIDE) {
             LOG.warn("provideResource called!");
+        }
+
+        try {
+            this.world.registerResource(resourceClass, resource);
+        } catch (final Throwable ignored) {
         }
     }
 
@@ -136,7 +143,9 @@ public class LegacyCompat implements fi.jakojaannos.roguelite.engine.ecs.World {
 
         @Override
         public <TComponent extends Component> Stream<EntityComponentPair<TComponent>> getEntitiesWith(final Class<? extends TComponent> componentType) {
-            return null;
+            return getEntitiesWith(List.of(componentType), List.of())
+                    .map(entity -> new EntityComponentPair<>(entity,
+                                                             getComponentOf(entity, componentType).orElseThrow()));
         }
 
         @Override
@@ -144,8 +153,13 @@ public class LegacyCompat implements fi.jakojaannos.roguelite.engine.ecs.World {
                 final Collection<Class<? extends Component>> required,
                 final Collection<Class<? extends Component>> excluded
         ) {
-            // TODO
-            return null;
+            final var componentStorage = LegacyCompat.this.world.getComponents();
+            return IntStream.range(0, LegacyCompat.this.world.getEntityCount())
+                            .filter(id -> required.stream()
+                                                  .allMatch(c -> componentStorage.has(id, c)))
+                            .filter(id -> excluded.stream()
+                                                  .noneMatch(c -> componentStorage.has(id, c)))
+                            .mapToObj(id -> new LegacyEntityWrapper(new EntityHandleImpl(id, componentStorage)));
         }
     }
 }

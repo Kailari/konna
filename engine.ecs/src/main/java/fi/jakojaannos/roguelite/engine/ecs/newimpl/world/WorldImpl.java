@@ -21,6 +21,16 @@ public class WorldImpl implements World {
         return this.compat;
     }
 
+    @Override
+    public int getEntityCount() {
+        return this.nEntities;
+    }
+
+    @Override
+    public ComponentStorage getComponents() {
+        return this.componentStorage;
+    }
+
     public WorldImpl() {
         this.capacity = 256;
         this.nEntities = 0;

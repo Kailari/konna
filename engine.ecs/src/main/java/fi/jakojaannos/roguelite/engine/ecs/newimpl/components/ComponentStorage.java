@@ -50,15 +50,19 @@ public final class ComponentStorage {
         return true;
     }
 
+    public <TComponent> Optional<TComponent> get(final int id, final Class<TComponent> componentClass) {
+        return Optional.ofNullable(getStorage(componentClass)[id]);
+    }
+
+    public boolean has(final int id, final Class<?> componentClass) {
+        return get(id, componentClass).isPresent();
+    }
+
     @SuppressWarnings("unchecked")
     private <TComponent> TComponent[] getStorage(final Class<TComponent> componentClass) {
         return (TComponent[])
                 this.components.computeIfAbsent(componentClass,
                                                 key -> constructComponentArray(key, this.capacity));
-    }
-
-    public <TComponent> Optional<TComponent> get(final int id, final Class<TComponent> componentClass) {
-        return Optional.ofNullable(getStorage(componentClass)[id]);
     }
 
     @SuppressWarnings("unchecked")
