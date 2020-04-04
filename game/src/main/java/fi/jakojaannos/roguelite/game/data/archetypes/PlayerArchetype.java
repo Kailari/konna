@@ -55,7 +55,7 @@ public class PlayerArchetype {
                                         .projectileLifetimeInTicks(-1)
                                         .projectilePushForce(10.0)
                                         .build();
-        wepInv.equip(1, new InventoryWeapon(new SimpleWeapon(), wepStats));
+        wepInv.equip(1, new InventoryWeapon<>(new SimpleWeapon(), wepStats));
         entityManager.addComponentTo(player, new SpriteInfo("sprites/player"));
         entityManager.addComponentTo(player, new Health(10));
         return player;

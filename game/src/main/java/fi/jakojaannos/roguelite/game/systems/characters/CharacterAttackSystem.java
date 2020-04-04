@@ -11,6 +11,7 @@ import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.WeaponInput;
 import fi.jakojaannos.roguelite.game.systems.SystemGroups;
+import fi.jakojaannos.roguelite.game.weapons.InventoryWeapon;
 import fi.jakojaannos.roguelite.game.weapons.WeaponInventory;
 
 public class CharacterAttackSystem implements ECSSystem {
@@ -40,15 +41,18 @@ public class CharacterAttackSystem implements ECSSystem {
             final var inventory = entityManager.getComponentOf(entity, WeaponInventory.class)
                                                .orElseThrow();
             final var equippedSlot = attackAbility.equippedSlot;
-            final var equippedWeapon = inventory.getWeaponAtSlot(equippedSlot);
+            final InventoryWeapon<?, ?, ?> equippedWeapon = inventory.getWeaponAtSlot(equippedSlot);
 
             if (input.attack && !input.previousAttack) {
-                equippedWeapon.getWeapon().getTrigger().pull(entityManager, entity, timeManager, equippedWeapon.getState().getTrigger());
+                equippedWeapon.pullTrigger(entityManager, entity, timeManager);
+                //equippedWeapon.getWeapon().getTrigger().pull(entityManager, entity, timeManager, equippedWeapon.getState().getTrigger());
             } else if (!input.attack && input.previousAttack) {
-                equippedWeapon.getWeapon().getTrigger().release(entityManager, entity, timeManager, equippedWeapon.getState().getTrigger());
+                equippedWeapon.releaseTrigger(entityManager, entity, timeManager);
+                //equippedWeapon.getWeapon().getTrigger().release(entityManager, entity, timeManager, equippedWeapon.getState().getTrigger());
             }
 
-            equippedWeapon.getWeapon().fireIfReady(entityManager, entity, timeManager, equippedWeapon, attackAbility);
+            equippedWeapon.fireIfReady(entityManager, entity, timeManager, attackAbility);
+            //equippedWeapon.getWeapon().fireIfReady(entityManager, entity, timeManager, equippedWeapon, attackAbility);
 
             input.previousAttack = input.attack;
         });

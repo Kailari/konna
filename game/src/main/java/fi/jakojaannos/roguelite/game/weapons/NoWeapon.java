@@ -11,14 +11,7 @@ import static fi.jakojaannos.roguelite.game.weapons.NoWeapon.*;
 /*
  * Baruuk's weapon of choice.
  */
-public class NoWeapon implements Weapon<
-        NoMagazineHandler,
-        NoTriggerMechanism,
-        NoFiringMechanism,
-        NoState,
-        NoState,
-        NoState
-        > {
+public class NoWeapon implements Weapon<NoState, NoState, NoState> {
 
     private final NoMagazineHandler magazine;
     private final NoTriggerMechanism trigger;
@@ -45,7 +38,7 @@ public class NoWeapon implements Weapon<
         return this.firing;
     }
 
-    public static class NoState implements WeaponMagazineState, WeaponTriggerState, WeaponFiringState {
+    public static class NoState {
     }
 
     public static class NoMagazineHandler implements Weapon.MagazineHandler<NoState> {

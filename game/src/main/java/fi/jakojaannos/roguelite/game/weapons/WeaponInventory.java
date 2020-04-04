@@ -3,8 +3,11 @@ package fi.jakojaannos.roguelite.game.weapons;
 import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponStats;
 
+import static fi.jakojaannos.roguelite.game.weapons.NoWeapon.NoState;
+
+@SuppressWarnings("rawtypes")
 public class WeaponInventory implements Component {
-    private static final InventoryWeapon UNARMED = new InventoryWeapon<>(new NoWeapon(), WeaponStats.builder().build());
+    private static final InventoryWeapon<NoState, NoState, NoState> UNARMED = new InventoryWeapon<>(new NoWeapon(), WeaponStats.builder().build());
 
     private final InventoryWeapon[] slots;
 
