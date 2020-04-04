@@ -14,6 +14,9 @@ import fi.jakojaannos.roguelite.game.data.components.character.WeaponInput;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.AttackAI;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.EnemyTag;
 import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponStats;
+import fi.jakojaannos.roguelite.game.weapons.InventoryWeapon;
+import fi.jakojaannos.roguelite.game.weapons.SimpleWeapon;
+import fi.jakojaannos.roguelite.game.weapons.WeaponInventory;
 
 public class TurretArchetype {
     public static Entity create(
@@ -33,14 +36,17 @@ public class TurretArchetype {
                                                                CollisionLayer.PLAYER_PROJECTILE,
                                                                0.375,
                                                                -1.0));
-        /*entityManager.addComponentTo(turret, WeaponStats.builder()
-                                                        .timeBetweenShots(timeManager.convertToTicks(1.0 / 5.0))
-                                                        .projectileSpeed(50.0)
-                                                        .spread(5.0)
-                                                        .projectileSpeedNoise(5.0)
-                                                        .projectileLifetimeInTicks(-1)
-                                                        .projectilePushForce(0.0)
-                                                        .build());*/
+        final var wepInv = new WeaponInventory(10);
+        entityManager.addComponentTo(turret, wepInv);
+        final var wepStats = WeaponStats.builder()
+                                        .timeBetweenShots(timeManager.convertToTicks(1.0 / 5.0))
+                                        .projectileSpeed(50.0)
+                                        .spread(5.0)
+                                        .projectileSpeedNoise(5.0)
+                                        .projectileLifetimeInTicks(-1)
+                                        .projectilePushForce(0.0)
+                                        .build();
+        wepInv.equip(0, new InventoryWeapon<>(new SimpleWeapon(), wepStats));
 
         return turret;
     }
