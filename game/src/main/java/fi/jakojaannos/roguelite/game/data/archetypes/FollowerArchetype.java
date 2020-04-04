@@ -11,6 +11,9 @@ import fi.jakojaannos.roguelite.game.data.components.character.enemy.AttackAI;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.EnemyTag;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.FollowerAI;
 import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponStats;
+import fi.jakojaannos.roguelite.game.weapons.InventoryWeapon;
+import fi.jakojaannos.roguelite.game.weapons.SimpleWeapon;
+import fi.jakojaannos.roguelite.game.weapons.WeaponInventory;
 
 public class FollowerArchetype {
     public static Entity spawnFollower(
@@ -44,14 +47,17 @@ public class FollowerArchetype {
                                                                CollisionLayer.ENEMY,
                                                                0.0,
                                                                0.0));
-        /*entityManager.addComponentTo(entity, WeaponStats.builder()
-                                                        .timeBetweenShots(20)
-                                                        .projectileSpeed(10.0)
-                                                        .spread(2.0)
-                                                        .projectileSpeedNoise(0.0)
-                                                        .projectileLifetimeInTicks(10)
-                                                        .projectilePushForce(0.0)
-                                                        .build());*/
+        final var wepInv = new WeaponInventory(1);
+        entityManager.addComponentTo(entity, wepInv);
+        final var wepStats = WeaponStats.builder()
+                                        .timeBetweenShots(20)
+                                        .projectileSpeed(10.0)
+                                        .spread(2.0)
+                                        .projectileSpeedNoise(0.0)
+                                        .projectileLifetimeInTicks(10)
+                                        .projectilePushForce(0.0)
+                                        .build();
+        wepInv.equip(0, new InventoryWeapon<>(new SimpleWeapon(), wepStats));
 
         return entity;
     }

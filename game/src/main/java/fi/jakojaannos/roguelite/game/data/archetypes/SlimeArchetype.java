@@ -12,6 +12,9 @@ import fi.jakojaannos.roguelite.game.data.components.character.enemy.EnemyTag;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.FollowerAI;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.SplitOnDeath;
 import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponStats;
+import fi.jakojaannos.roguelite.game.weapons.InventoryWeapon;
+import fi.jakojaannos.roguelite.game.weapons.SimpleWeapon;
+import fi.jakojaannos.roguelite.game.weapons.WeaponInventory;
 
 public class SlimeArchetype {
     public static final double LARGE_SLIME_SIZE = 16.0;
@@ -100,14 +103,17 @@ public class SlimeArchetype {
                                                                CollisionLayer.ENEMY,
                                                                0.0,
                                                                0.0));
-        /*entityManager.addComponentTo(entity, WeaponStats.builder()
-                                                        .timeBetweenShots(20)
-                                                        .projectileSpeed(10.0)
-                                                        .spread(2.0)
-                                                        .projectileSpeedNoise(0.0)
-                                                        .projectileLifetimeInTicks(15)
-                                                        .projectilePushForce(0.0)
-                                                        .build());*/
+        final var wepInv = new WeaponInventory(10);
+        entityManager.addComponentTo(entity, wepInv);
+        final var wepStats = WeaponStats.builder()
+                                        .timeBetweenShots(20)
+                                        .projectileSpeed(10.0)
+                                        .spread(2.0)
+                                        .projectileSpeedNoise(0.0)
+                                        .projectileLifetimeInTicks(15)
+                                        .projectilePushForce(0.0)
+                                        .build();
+        wepInv.equip(0, new InventoryWeapon<>(new SimpleWeapon(), wepStats));
 
         return entity;
     }
