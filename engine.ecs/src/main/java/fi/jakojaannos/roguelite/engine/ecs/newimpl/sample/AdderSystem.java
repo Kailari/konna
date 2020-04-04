@@ -4,19 +4,20 @@ import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.ecs.newimpl.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.newimpl.Requirements;
-import fi.jakojaannos.roguelite.engine.ecs.newimpl.systemdata.RequirementsImpl;
 
-public class AdderSystem implements EcsSystem<EcsSystem.NoResources, AdderSystem.EntityData, EcsSystem.NoEvents> {
+public class AdderSystem implements EcsSystem<AdderSystem.Resources, AdderSystem.EntityData, EcsSystem.NoEvents> {
     @Override
-    public Requirements<EntityData> declareRequirements() {
-        final var require = new RequirementsImpl<EntityData>();
-        require.entityData(EntityData.class);
-        return require;
+    public Requirements<Resources, EntityData, NoEvents> declareRequirements(
+            final Requirements.Builder<Resources, EntityData, NoEvents> require
+    ) {
+        return require.entityData(EntityData.class)
+                      .resources(Resources.class)
+                      .build();
     }
 
     @Override
     public void tick(
-            final NoResources resources,
+            final Resources resources,
             final Stream<EntityDataHandle<EntityData>> entities,
             final NoEvents events
     ) {
@@ -24,13 +25,18 @@ public class AdderSystem implements EcsSystem<EcsSystem.NoResources, AdderSystem
             final var componentA = entity.getData().a;
             final var componentB = entity.getData().b;
 
-            componentA.value += componentB.value;
+            componentA.value += componentB.value * resources.multiplier().value;
         });
     }
 
     public static record EntityData(
             ValueComponent a,
             AmountComponent b
+    ) {
+    }
+
+    public static record Resources(
+            Multiplier multiplier
     ) {
     }
 }
