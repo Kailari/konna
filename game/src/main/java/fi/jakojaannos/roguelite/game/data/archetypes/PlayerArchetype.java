@@ -13,6 +13,7 @@ import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.game.data.components.character.*;
 import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponStats;
 import fi.jakojaannos.roguelite.game.weapons.InventoryWeapon;
+import fi.jakojaannos.roguelite.game.weapons.ShotgunWeapon;
 import fi.jakojaannos.roguelite.game.weapons.SimpleWeapon;
 import fi.jakojaannos.roguelite.game.weapons.WeaponInventory;
 
@@ -48,7 +49,18 @@ public class PlayerArchetype {
                                         .magazineCapacity(10)
                                         .reloadTimeInTicks(timeManager.convertToTicks(2.0))
                                         .build();
+        final var shotgunStats = WeaponStats.builder()
+                                            .timeBetweenShots(timeManager.convertToTicks(1.0 / 1.5))
+                                            .projectileSpeed(50.0)
+                                            .spread(10.0)
+                                            .projectileSpeedNoise(1.0)
+                                            .projectileLifetimeInTicks(10)
+                                            .projectilePushForce(25.0)
+                                            .magazineCapacity(6)
+                                            .reloadTimeInTicks(timeManager.convertToTicks(0.8))
+                                            .build();
         wepInv.equip(0, new InventoryWeapon<>(new SimpleWeapon(), wepStats));
+        wepInv.equip(1, new InventoryWeapon<>(new ShotgunWeapon(), shotgunStats));
         entityManager.addComponentTo(player, new SpriteInfo("sprites/player"));
         entityManager.addComponentTo(player, new Health(10));
         return player;
