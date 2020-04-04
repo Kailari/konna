@@ -44,7 +44,7 @@ public class NewCharacterAttackSystem implements EcsSystem<NewCharacterAttackSys
                 weapon.getTrigger().release(timeManager, attackAbility, weaponStats);
             }
 
-            weapon.fireIfReady(entityHandle, attackAbility, weaponStats, timeManager);
+            //weapon.fireIfReady(entityHandle, attackAbility, weaponStats, timeManager);
 
             input.previousAttack = input.attack;
         });

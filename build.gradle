@@ -8,6 +8,13 @@ allprojects {
     repositories {
         mavenCentral()
     }
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'jacoco'
+    apply plugin: 'org.javamodularity.moduleplugin'
+    //apply plugin: 'checkstyle'
 
     compileJava {
         sourceCompatibility = 14
@@ -22,18 +29,6 @@ allprojects {
     }
     tasks.withType(Test) {
         jvmArgs += "--enable-preview"
-    }
-}
-
-subprojects {
-    apply plugin: 'java'
-    apply plugin: 'jacoco'
-    apply plugin: 'org.javamodularity.moduleplugin'
-    //apply plugin: 'checkstyle'
-
-    compileJava {
-        sourceCompatibility = 14
-        targetCompatibility = 14
     }
 
     /*checkstyle {

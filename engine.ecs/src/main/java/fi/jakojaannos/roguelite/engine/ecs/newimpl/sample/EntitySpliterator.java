@@ -1,5 +1,6 @@
 package fi.jakojaannos.roguelite.engine.ecs.newimpl.sample;
 
+import java.util.Optional;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -138,6 +139,11 @@ public class EntitySpliterator<TEntityData> implements Spliterator<EcsSystem.Ent
         @Override
         public <TComponent> boolean hasComponent(final Class<TComponent> componentClass) {
             return false;
+        }
+
+        @Override
+        public <TComponent> Optional<TComponent> getComponent(final Class<TComponent> componentClass) {
+            return Optional.empty();
         }
 
         @Override

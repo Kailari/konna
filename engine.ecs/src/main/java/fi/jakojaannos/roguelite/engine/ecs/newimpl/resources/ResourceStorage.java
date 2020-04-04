@@ -12,17 +12,31 @@ public class ResourceStorage {
     }
 
     public <TResource> void register(final Class<TResource> resourceClass, final TResource resource) {
-        assert !this.resources.containsKey(resourceClass) : "Resource type " + resourceClass.getSimpleName() + "is already registered!";
+        if (this.resources.containsKey(resourceClass)) {
+            throw new IllegalArgumentException(String.format(
+                    "Resource type %s is already registered!",
+                    resourceClass.getSimpleName()));
+        }
         this.resources.put(resourceClass, resource);
     }
 
-    public Object[] fetchResources(final Class<?>[] resourceTypes) {
-        final var paramResources = new Object[resourceTypes.length];
+    @SuppressWarnings("unchecked")
+    public <TResource> TResource fetch(final Class<?> resourceClass) {
+        if (!this.resources.containsKey(resourceClass)) {
+            throw new IllegalArgumentException(String.format(
+                    "Unregistered resource type %s!",
+                    resourceClass.getSimpleName()));
+        }
+
+        return (TResource) this.resources.get(resourceClass);
+    }
+
+    public Object[] fetch(final Class<?>[] resourceClasses) {
+        final var paramResources = new Object[resourceClasses.length];
 
         for (int paramIndex = 0; paramIndex < paramResources.length; ++paramIndex) {
-            final Class<?> resourceType = resourceTypes[paramIndex];
-            assert this.resources.containsKey(resourceType) : "Unregistered resource type: " + resourceType.getSimpleName();
-            paramResources[paramIndex] = this.resources.get(resourceType);
+            final Class<?> resourceClass = resourceClasses[paramIndex];
+            paramResources[paramIndex] = fetch(resourceClass);
         }
 
         return paramResources;

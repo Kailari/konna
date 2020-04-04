@@ -76,26 +76,6 @@ public interface RequirementsBuilder {
     RequirementsBuilder withoutComponent(Class<? extends Component> componentClass);
 
     /**
-     * Marks requirement for all entities this system handles to have at least one component from the given group.
-     *
-     * @param componentGroup the group of components to require
-     *
-     * @return the builder for chaining
-     */
-    RequirementsBuilder withComponentFrom(ComponentGroup componentGroup);
-
-    /**
-     * Marks requirement for all entities this system handles to not have any components from the given group. This
-     * means that any entities with any components from the group are excluded from being passed into {@link
-     * ECSSystem#tick(Stream, World)} for the system.
-     *
-     * @param componentGroup the group of components to exclude
-     *
-     * @return the builder for chaining
-     */
-    RequirementsBuilder withoutComponentsFrom(ComponentGroup componentGroup);
-
-    /**
      * Marks requirement for a resource to be available for this system to be able to tick.
      *
      * @param resource type of the required resource

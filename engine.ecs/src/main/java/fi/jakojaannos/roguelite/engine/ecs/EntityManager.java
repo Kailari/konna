@@ -12,16 +12,17 @@ import fi.jakojaannos.roguelite.engine.ecs.entities.EntityManagerImpl;
  * entity-related data mutations happen through the <code>EntityManager</code>.
  */
 public interface EntityManager {
-    static EntityManager createNew(int entityCapacity, int maxComponentTypes) {
+    /**
+     * Gets a stream containing ALL of the entities in the world. Heavy performance cost if whole stream is iterated,
+     * use sparingly and only when absolutely necessary.
+     *
+     * @return stream of all the entities in the world
+     */
+    Stream<Entity> getAllEntities();
+
+    static EntityManager createNew(final int entityCapacity, final int maxComponentTypes) {
         return new EntityManagerImpl(entityCapacity, maxComponentTypes);
     }
-
-    /**
-     * Registers a new component group. Should be called only before any entities are created.
-     *
-     * @param group group to be registered.
-     */
-    void registerComponentGroup(ComponentGroup group);
 
     /**
      * Creates a new entity. The created entity is added to the game world during the next {@link
@@ -80,15 +81,15 @@ public interface EntityManager {
     /**
      * Gets the component of given type from the entity.
      *
+     * @param <TComponent>   Type of the component
      * @param entity         Entity to get components from
      * @param componentClass Component class to get
-     * @param <TComponent>   Type of the component
      *
      * @return If component exists, component optional of the component. Otherwise, an empty optional
      */
     <TComponent extends Component> Optional<TComponent> getComponentOf(
             Entity entity,
-            Class<? extends TComponent> componentClass
+            Class<TComponent> componentClass
     );
 
     /**
@@ -100,36 +101,6 @@ public interface EntityManager {
      * @return <code>true</code> if the entity has the component, <code>false</code> otherwise
      */
     boolean hasComponent(Entity entity, Class<? extends Component> componentClass);
-
-    /**
-     * Checks whether or not the given entity has any component from the specified component group.
-     *
-     * @param entity entity to check
-     * @param group  component group to check
-     *
-     * @return <code>true</code> if the entity has any of the components, <code>false</code>
-     * otherwise
-     */
-    boolean hasAnyComponentFromGroup(Entity entity, ComponentGroup group);
-
-    /**
-     * Removes all components except the component of given type
-     *
-     * @param entity        the entity to remove components from
-     * @param componentType type of the component not to remove
-     */
-    void clearComponentsExcept(Entity entity, Class<? extends Component> componentType);
-
-    /**
-     * Removes all components except ones in the given list
-     *
-     * @param entity         the entity to remove components from
-     * @param componentTypes types of the components not to remove
-     */
-    void clearComponentsExcept(
-            Entity entity,
-            Collection<Class<? extends Component>> componentTypes
-    );
 
     /**
      * Gets all entities with given component.
@@ -144,32 +115,17 @@ public interface EntityManager {
     );
 
     /**
-     * Gets all entities with components of all given types.
-     *
-     * @param componentTypes types of the components to look for
-     *
-     * @return Stream of entities with all given component types
-     */
-    Stream<Entity> getEntitiesWith(
-            Collection<Class<? extends Component>> componentTypes
-    );
-
-    /**
      * Gets all entities which have all components specified in <code>required</code> and none of the components
      * specified in <code>excluded</code>.
      *
-     * @param required       required component types
-     * @param excluded       excluded component types
-     * @param requiredGroups required component groups
-     * @param excludedGroups excluded component groups
+     * @param required required component types
+     * @param excluded excluded component types
      *
      * @return Stream of entities matching the given criteria
      */
     Stream<Entity> getEntitiesWith(
             Collection<Class<? extends Component>> required,
-            Collection<Class<? extends Component>> excluded,
-            Collection<ComponentGroup> requiredGroups,
-            Collection<ComponentGroup> excludedGroups
+            Collection<Class<? extends Component>> excluded
     );
 
     /**
@@ -180,7 +136,8 @@ public interface EntityManager {
      * @param componentSupplier Supplier used to get a component to add
      * @param <TComponent>      Type of the component
      *
-     * @return The existing component for the entity or the added if the entity did not have component of given type yet
+     * @return The existing component for the entity or the added if the entity did not have component of given type
+     *         yet
      */
     default <TComponent extends Component> TComponent addComponentIfAbsent(
             final Entity entity,
@@ -211,21 +168,6 @@ public interface EntityManager {
         removeComponentFrom(entity, componentClass);
         return true;
     }
-
-    /**
-     * Counts how many entities there are currently present in the world.
-     *
-     * @return the number of entities present
-     */
-    int entityCount();
-
-    /**
-     * Gets a stream containing ALL of the entities in the world. Heavy performance cost if whole stream is iterated,
-     * use sparingly and only when absolutely necessary.
-     *
-     * @return stream of all the entities in the world
-     */
-    Stream<Entity> getAllEntities();
 
     /**
      * Marks all entities for removal.

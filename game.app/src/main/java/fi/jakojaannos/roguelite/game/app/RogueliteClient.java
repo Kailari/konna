@@ -6,8 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.nio.file.Path;
 
 import fi.jakojaannos.roguelite.engine.Game;
-import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.ecs.newimpl.World;
 import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLAssetManager;
 import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLGameRunner;
 import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLRenderingBackend;
@@ -15,7 +14,7 @@ import fi.jakojaannos.roguelite.engine.lwjgl.input.LWJGLInputProvider;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.game.DebugConfig;
 import fi.jakojaannos.roguelite.game.RogueliteGame;
-import fi.jakojaannos.roguelite.game.state.MainMenuGameState;
+import fi.jakojaannos.roguelite.game.state.GameplayGameState;
 import fi.jakojaannos.roguelite.game.view.RogueliteGameRenderer;
 
 public class RogueliteClient {
@@ -32,6 +31,7 @@ public class RogueliteClient {
         LOG.debug("asset root: {}", assetRoot);
 
         try (final var runner = new LWJGLGameRunner<RogueliteGame>(DebugConfig.debugModeEnabled,
+                                                                   DebugConfig.openGLDebugEnabled,
                                                                    windowWidth,
                                                                    windowHeight);
              final var assetManager = new LWJGLAssetManager(assetRoot);
@@ -52,7 +52,11 @@ public class RogueliteClient {
         // FIXME: Do not pass the host and the port to main menu. Instead, connect and start game if
         //  host is given
         LOG.trace("Creating main menu game state with host and port {}:{}", host, port);
-        return new MainMenuGameState(World.createNew(EntityManager.createNew(256, 64)),
-                                     game.getTime(), host, port);
+//        return new MainMenuGameState(World.createNew(EntityManager.createNew(256, 64)),
+//                                     game.getTime(), host, port);
+
+        return new GameplayGameState(42,
+                                     World.createNew(),
+                                     game.getTime());
     }
 }

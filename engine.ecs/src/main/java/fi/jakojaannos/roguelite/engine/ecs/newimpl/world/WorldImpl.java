@@ -1,45 +1,55 @@
 package fi.jakojaannos.roguelite.engine.ecs.newimpl.world;
 
-import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.ProvidedResource;
-import fi.jakojaannos.roguelite.engine.ecs.Resource;
+import fi.jakojaannos.roguelite.engine.ecs.newimpl.EntityHandle;
 import fi.jakojaannos.roguelite.engine.ecs.newimpl.World;
 import fi.jakojaannos.roguelite.engine.ecs.newimpl.components.ComponentStorage;
+import fi.jakojaannos.roguelite.engine.ecs.newimpl.resources.ResourceStorage;
 
 public class WorldImpl implements World {
+    @Deprecated
+    private final LegacyCompat compat;
+
     private final ComponentStorage componentStorage;
+    private final ResourceStorage resourceStorage;
+
+    private final int capacity;
+
+    private int nEntities;
 
     @Override
-    public EntityManager getEntityManager() {
-        return null;
+    public LegacyCompat getCompatibilityLayer() {
+        return this.compat;
     }
 
     public WorldImpl() {
-        this.componentStorage = new ComponentStorage();
+        this.capacity = 256;
+        this.nEntities = 0;
+
+        this.resourceStorage = new ResourceStorage();
+        this.componentStorage = new ComponentStorage(this.capacity);
+
+        this.compat = new LegacyCompat(this);
     }
 
     @Override
-    public <TResource extends Resource> TResource getOrCreateResource(final Class<TResource> resourceType) {
-        return null;
+    public void registerResource(final Object resource) {
+        this.resourceStorage.register(resource);
     }
 
     @Override
-    public <TResource extends Resource> void createOrReplaceResource(
-            final Class<TResource> tResourceClass,
-            final TResource resource
-    ) {
-
+    public <TResource> void registerResource(final Class<TResource> resourceClass, final TResource resource) {
+        this.resourceStorage.register(resourceClass, resource);
     }
 
     @Override
-    public <TResource extends ProvidedResource> void provideResource(
-            final Class<TResource> tResourceClass, final TResource resource
-    ) {
-
+    public EntityHandle createEntity(final Object... components) {
+        final var handle = new EntityHandleImpl(this.nEntities, this.componentStorage);
+        this.nEntities++;
+        return handle;
     }
 
     @Override
-    public <TResource extends ProvidedResource> TResource getResource(final Class<TResource> resourceType) {
-        return null;
+    public <TResource> TResource fetchResource(final Class<?> resourceClass) {
+        return this.resourceStorage.fetch(resourceClass);
     }
 }

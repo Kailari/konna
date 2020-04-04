@@ -10,7 +10,6 @@ import java.util.Queue;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.ecs.Component;
-import fi.jakojaannos.roguelite.engine.ecs.ComponentGroup;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.components.ComponentStorage;
@@ -49,16 +48,6 @@ public class EntityManagerImpl implements EntityManager {
         this.entityCapacity = entityCapacity;
         this.maxComponentTypes = maxComponentTypes;
         this.componentStorage = componentStorage;
-    }
-
-    @Override
-    public int entityCount() {
-        return this.entityStorage.count();
-    }
-
-    @Override
-    public void registerComponentGroup(final ComponentGroup group) {
-        this.componentStorage.registerGroup(group);
     }
 
     @Override
@@ -110,7 +99,7 @@ public class EntityManagerImpl implements EntityManager {
     @Override
     public <TComponent extends Component> Optional<TComponent> getComponentOf(
             final Entity entity,
-            final Class<? extends TComponent> componentClass
+            final Class<TComponent> componentClass
     ) {
         return this.componentStorage.get((EntityImpl) entity, componentClass);
     }
@@ -121,14 +110,6 @@ public class EntityManagerImpl implements EntityManager {
             final Class<? extends Component> componentClass
     ) {
         return this.componentStorage.exists((EntityImpl) entity, componentClass);
-    }
-
-    @Override
-    public boolean hasAnyComponentFromGroup(
-            final Entity entity,
-            final ComponentGroup group
-    ) {
-        return this.componentStorage.anyExists((EntityImpl) entity, group);
     }
 
     @Override
@@ -143,43 +124,15 @@ public class EntityManagerImpl implements EntityManager {
 
     @Override
     public Stream<Entity> getEntitiesWith(
-            final Collection<Class<? extends Component>> componentTypes
-    ) {
-        final var requiredMask = this.componentStorage.createComponentBitmask(componentTypes);
-        return this.entityStorage.stream()
-                                 .filter(e -> BitMaskUtils.hasAllBitsOf(e.getComponentBitmask(), requiredMask))
-                                 .map(Entity.class::cast);
-    }
-
-    @Override
-    public Stream<Entity> getEntitiesWith(
             final Collection<Class<? extends Component>> required,
-            final Collection<Class<? extends Component>> excluded,
-            final Collection<ComponentGroup> requiredGroups,
-            final Collection<ComponentGroup> excludedGroups
+            final Collection<Class<? extends Component>> excluded
     ) {
-        final var requiredMask = this.componentStorage.createComponentBitmask(required, requiredGroups);
-        final var excludedMask = this.componentStorage.createComponentBitmask(excluded, excludedGroups);
+        final var requiredMask = this.componentStorage.createComponentBitmask(required);
+        final var excludedMask = this.componentStorage.createComponentBitmask(excluded);
         return this.entityStorage.stream()
                                  .filter(e -> BitMaskUtils.hasNoneOfTheBitsOf(e.getComponentBitmask(), excludedMask))
                                  .filter(e -> BitMaskUtils.hasAllBitsOf(e.getComponentBitmask(), requiredMask))
                                  .map(Entity.class::cast);
-    }
-
-    @Override
-    public void clearComponentsExcept(
-            final Entity entity,
-            final Class<? extends Component> componentType
-    ) {
-        this.componentStorage.clear((EntityImpl) entity, componentType);
-    }
-
-    @Override
-    public void clearComponentsExcept(
-            final Entity entity,
-            final Collection<Class<? extends Component>> allowedComponentTypes
-    ) {
-        this.componentStorage.clear((EntityImpl) entity, allowedComponentTypes);
     }
 
     private void resize(final int entityCapacity) {

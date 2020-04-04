@@ -27,23 +27,18 @@ public class Main {
         final var resources = new ResourceStorage();
         resources.register(new Multiplier(2));
 
-        final var components = new ComponentStorage();
-        components.register(ValueComponent.class,
-                            new ValueComponent[]{
-                                    new ValueComponent(10),
-                                    new ValueComponent(5),
-                                    new ValueComponent(42),
-                                    new ValueComponent(0),
-                                    new ValueComponent(Integer.MAX_VALUE),
-                            });
-        components.register(AmountComponent.class,
-                            new AmountComponent[]{
-                                    new AmountComponent(-1),
-                                    new AmountComponent(1),
-                                    null,
-                                    new AmountComponent(2),
-                                    new AmountComponent(Short.MIN_VALUE),
-                            });
+        final var components = new ComponentStorage(5);
+        components.register(ValueComponent.class);
+        components.add(0, new ValueComponent(10));
+        components.add(1, new ValueComponent(5));
+        components.add(2, new ValueComponent(42));
+        components.add(3, new ValueComponent(0));
+        components.add(4, new ValueComponent(Integer.MAX_VALUE));
+        components.register(AmountComponent.class);
+        components.add(0, new AmountComponent(-1));
+        components.add(1, new AmountComponent(1));
+        components.add(3, new AmountComponent(2));
+        components.add(4, new AmountComponent(Short.MIN_VALUE));
 
         final var threadPool = new ForkJoinPool(4,
                                                 Main::workerThreadFactory,
@@ -71,7 +66,7 @@ public class Main {
         final var requirements = system.declareRequirements();
 
         final var systemResources = instantiateResources(
-                resources.fetchResources(requirements.resourceComponentTypes()),
+                resources.fetch(requirements.resourceComponentTypes()),
                 requirements.resourceConstructor()
         );
         final var entitySpliterator = new EntitySpliterator<>(

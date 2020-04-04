@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -20,29 +19,9 @@ import static org.mockito.Mockito.*;
 
 class SystemDispatcherTest {
     private final Object callOrderLock = new Object();
-    private final ComponentGroup componentGroup = new ComponentGroup() {
-        @Override
-        public int getId() {
-            return 0;
-        }
-
-        @Override
-        public String getName() {
-            return "test";
-        }
-
-        @Override
-        public Collection<Class<? extends Component>> getComponentTypes() {
-            return List.of(ComponentD.class, ComponentC.class);
-        }
-    };
     private World world;
     private EntityManager entityManager;
     private List<ECSSystem> callOrder;
-
-    private static <T> Stream<T> streamThat(ArgumentMatcher<Stream<T>> matcher) {
-        return argThat(new SafeStreamMatcher<>(matcher));
-    }
 
     @BeforeEach
     void beforeEach() {
@@ -51,7 +30,6 @@ class SystemDispatcherTest {
         entityManager = EntityManager.createNew(256, 32);
         when(world.getEntityManager()).thenReturn(entityManager);
 
-        entityManager.registerComponentGroup(componentGroup);
         final Entity entityA = entityManager.createEntity();
         entityManager.addComponentTo(entityA, new ComponentA());
         final Entity entityB = entityManager.createEntity();
@@ -333,114 +311,7 @@ class SystemDispatcherTest {
         verify(systemA, times(1))
                 .tick(streamThat(entities -> entities.allMatch(
                         entity -> entityManager.hasComponent(entity, ComponentA.class)
-                                && entityManager.hasComponent(entity, ComponentB.class))),
-                      any());
-    }
-
-    @Test
-    void systemWithRequiredGroupsReceivesEntities() {
-        ECSSystem systemA = spy(new SystemA() {
-            @Override
-            public void declareRequirements(RequirementsBuilder requirements) {
-                requirements.withComponentFrom(componentGroup);
-            }
-        });
-
-        SystemDispatcher dispatcher = SystemDispatcher.builder()
-                                                      .withSystem(systemA)
-                                                      .build();
-        dispatcher.dispatch(world);
-
-        verify(systemA, times(1))
-                .tick(streamThat(entities -> entities.count() > 0),
-                      any());
-    }
-
-    @Test
-    void systemReceivesEntitiesWithComponentsFromRequiredGroup() {
-        ECSSystem systemA = spy(new SystemA() {
-            @Override
-            public void declareRequirements(RequirementsBuilder requirements) {
-                requirements.withComponentFrom(componentGroup);
-            }
-        });
-
-        SystemDispatcher dispatcher = SystemDispatcher.builder()
-                                                      .withSystem(systemA)
-                                                      .build();
-        dispatcher.dispatch(world);
-
-        verify(systemA, times(1))
-                .tick(streamThat(entities -> entities.allMatch(
-                        entity -> entityManager.hasComponent(entity, ComponentC.class)
-                                || entityManager.hasComponent(entity, ComponentD.class))),
-                      any());
-    }
-
-    @Test
-    void systemWithRequiredGroupsAndComponentsReceivesEntities() {
-        ECSSystem systemA = spy(new SystemA() {
-            @Override
-            public void declareRequirements(RequirementsBuilder requirements) {
-                requirements.withComponentFrom(componentGroup)
-                            .withComponent(ComponentB.class);
-            }
-        });
-
-        SystemDispatcher dispatcher = SystemDispatcher.builder()
-                                                      .withSystem(systemA)
-                                                      .build();
-        dispatcher.dispatch(world);
-
-        verify(systemA, times(1))
-                .tick(streamThat(entities -> entities.count() > 0),
-                      any());
-    }
-
-    @Test
-    void systemReceivesEntitiesWithAllRequiredGroupsAndComponents() {
-        ECSSystem systemA = spy(new SystemA() {
-            @Override
-            public void declareRequirements(RequirementsBuilder requirements) {
-                requirements.withComponentFrom(componentGroup)
-                            .withComponent(ComponentB.class);
-            }
-        });
-
-        SystemDispatcher dispatcher = SystemDispatcher.builder()
-                                                      .withSystem(systemA)
-                                                      .build();
-        dispatcher.dispatch(world);
-
-        verify(systemA, times(1))
-                .tick(streamThat(entities -> entities.allMatch(
-                        entity -> (entityManager.hasComponent(entity, ComponentC.class)
-                                || entityManager.hasComponent(entity, ComponentD.class))
-                                && entityManager.hasComponent(entity, ComponentB.class))),
-                      any());
-    }
-
-    @Test
-    void systemReceivesEntitiesWithAllRequiredComponentsAndSomeOtherComponents() {
-        ECSSystem systemA = spy(new SystemA() {
-            @Override
-            public void declareRequirements(RequirementsBuilder requirements) {
-                requirements.withComponentFrom(componentGroup);
-                //.withComponent(ComponentB.class);
-            }
-        });
-
-        SystemDispatcher dispatcher = SystemDispatcher.builder()
-                                                      .withSystem(systemA)
-                                                      .build();
-        dispatcher.dispatch(world);
-
-        verify(systemA, times(1))
-                .tick(streamThat(entities -> entities.anyMatch(
-                        entity -> (entityManager.hasComponent(entity, ComponentC.class)
-                                || entityManager.hasComponent(entity, ComponentD.class))
-                                && entityManager.hasComponent(entity, ComponentB.class)
-                                && entityManager.hasComponent(entity, ComponentA.class))),
+                                  && entityManager.hasComponent(entity, ComponentB.class))),
                       any());
     }
 
@@ -501,31 +372,12 @@ class SystemDispatcherTest {
         verify(systemA, times(1))
                 .tick(streamThat(entities -> entities.allMatch(
                         entity -> entityManager.hasComponent(entity, ComponentB.class)
-                                && !entityManager.hasComponent(entity, ComponentD.class))),
+                                  && !entityManager.hasComponent(entity, ComponentD.class))),
                       any());
     }
 
-    @Test
-    void systemReceivesEntitiesWithAllRequiredComponentsAndNoExcludedGroups() {
-        ECSSystem systemA = spy(new SystemA() {
-            @Override
-            public void declareRequirements(RequirementsBuilder requirements) {
-                requirements.withComponent(ComponentB.class)
-                            .withoutComponentsFrom(componentGroup);
-            }
-        });
-
-        SystemDispatcher dispatcher = SystemDispatcher.builder()
-                                                      .withSystem(systemA)
-                                                      .build();
-        dispatcher.dispatch(world);
-
-        verify(systemA, times(1))
-                .tick(streamThat(entities -> entities.allMatch(
-                        entity -> entityManager.hasComponent(entity, ComponentB.class)
-                                && !entityManager.hasComponent(entity, ComponentD.class)
-                                && !entityManager.hasComponent(entity, ComponentC.class))),
-                      any());
+    private static <T> Stream<T> streamThat(ArgumentMatcher<Stream<T>> matcher) {
+        return argThat(new SafeStreamMatcher<>(matcher));
     }
 
     static class ComponentA implements Component {

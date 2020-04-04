@@ -81,18 +81,6 @@ class EntityManagerTest {
     }
 
     @Test
-    void getEntitiesWithDoesNotReturnNonAppliedEntities_ListParameter() {
-        Entity entity = entityManager.createEntity();
-        Component componentA = new ComponentA();
-        Component componentB = new ComponentB();
-        entityManager.addComponentTo(entity, componentA);
-        entityManager.addComponentTo(entity, componentB);
-
-        assertTrue(entityManager.getEntitiesWith(List.of(ComponentA.class, ComponentB.class))
-                                .noneMatch(e -> e.getId() == entity.getId()));
-    }
-
-    @Test
     void checkingComponentsOfNonAppliedEntitiesWorks() {
         Entity entity = entityManager.createEntity();
         ComponentA component = new ComponentA();
@@ -155,45 +143,6 @@ class EntityManagerTest {
     }
 
     @Test
-    void clearComponentsExceptRemovesAllButGivenComponentWhenProvidedWithSingleComponent() {
-        Entity entity = entityManager.createEntity();
-        Component componentA = new ComponentA();
-        Component componentB = new ComponentB();
-        Component componentC = new ComponentC();
-        entityManager.addComponentTo(entity, componentA);
-        entityManager.addComponentTo(entity, componentB);
-        entityManager.addComponentTo(entity, componentC);
-        entityManager.applyModifications();
-
-        entityManager.clearComponentsExcept(entity, ComponentB.class);
-
-        assertFalse(entityManager.hasComponent(entity, ComponentA.class));
-        assertTrue(entityManager.hasComponent(entity, ComponentB.class));
-        assertFalse(entityManager.hasComponent(entity, ComponentC.class));
-    }
-
-    @Test
-    void clearComponentsExceptRemovesAllButGivenComponentsWhenProvidedWithListOfComponents() {
-        Entity entity = entityManager.createEntity();
-        Component componentA = new ComponentA();
-        Component componentB = new ComponentB();
-        Component componentC = new ComponentC();
-        Component componentD = new ComponentD();
-        entityManager.addComponentTo(entity, componentA);
-        entityManager.addComponentTo(entity, componentB);
-        entityManager.addComponentTo(entity, componentC);
-        entityManager.addComponentTo(entity, componentD);
-        entityManager.applyModifications();
-
-        entityManager.clearComponentsExcept(entity, List.of(ComponentA.class, ComponentB.class));
-
-        assertTrue(entityManager.hasComponent(entity, ComponentA.class));
-        assertTrue(entityManager.hasComponent(entity, ComponentB.class));
-        assertFalse(entityManager.hasComponent(entity, ComponentC.class));
-        assertFalse(entityManager.hasComponent(entity, ComponentD.class));
-    }
-
-    @Test
     void getEntitiesWithReturnsAllExpectedEntities_SingleParameter() {
         Entity entityA = entityManager.createEntity();
         Entity entityB = entityManager.createEntity();
@@ -208,24 +157,6 @@ class EntityManagerTest {
 
         assertTrue(entityManager.getEntitiesWith(ComponentA.class).anyMatch(e -> e.entity().getId() == entityA.getId()));
         assertTrue(entityManager.getEntitiesWith(ComponentA.class).anyMatch(e -> e.entity().getId() == entityB.getId()));
-    }
-
-    @Test
-    void getEntitiesWithReturnsAllExpectedEntities_ListParameter() {
-        Entity entityA = entityManager.createEntity();
-        Entity entityB = entityManager.createEntity();
-        Entity entityC = entityManager.createEntity();
-        Entity entityD = entityManager.createEntity();
-        entityManager.addComponentTo(entityA, new ComponentA());
-        entityManager.addComponentTo(entityA, new ComponentB());
-        entityManager.addComponentTo(entityB, new ComponentA());
-        entityManager.addComponentTo(entityB, new ComponentB());
-        entityManager.addComponentTo(entityC, new ComponentC());
-        entityManager.addComponentTo(entityD, new ComponentD());
-        entityManager.applyModifications();
-
-        assertTrue(entityManager.getEntitiesWith(List.of(ComponentA.class, ComponentB.class)).anyMatch(e -> e.getId() == entityA.getId()));
-        assertTrue(entityManager.getEntitiesWith(List.of(ComponentA.class, ComponentB.class)).anyMatch(e -> e.getId() == entityB.getId()));
     }
 
     @Test

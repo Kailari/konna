@@ -41,9 +41,8 @@ public class WorldImpl implements World {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <TResource extends Resource> TResource getOrCreateResource(final Class<TResource> resourceType) {
-        return (TResource) this.resourceStorage.computeIfAbsent(resourceType,
-                                                                rt -> constructResource(resourceType, rt));
+    public <TResource extends Resource> TResource getOrCreateResource(final Class<TResource> resourceClass) {
+        return (TResource) this.resourceStorage.computeIfAbsent(resourceClass, WorldImpl::constructResource);
     }
 
     @Override
@@ -57,31 +56,30 @@ public class WorldImpl implements World {
         return (TResource) this.providedResourceStorage.get(resourceType);
     }
 
-    private <TResource extends Resource> Resource constructResource(
-            final Class<? extends TResource> resourceType,
-            final Class<? extends Resource> rt
+    public static  <TResource extends Resource> TResource constructResource(
+            final Class<? extends TResource> resourceClass
     ) {
         try {
-            return resourceType.getConstructor().newInstance();
+            return resourceClass.getConstructor().newInstance();
         } catch (final InstantiationException e) {
             throw new IllegalStateException(String.format(
                     "Resource type %s represents an abstract class!",
-                    rt.getSimpleName()
+                    resourceClass.getSimpleName()
             ), e);
         } catch (final IllegalAccessException e) {
             throw new IllegalStateException(String.format(
                     "Resource type %s default constructor is not accessible!",
-                    rt.getSimpleName()
+                    resourceClass.getSimpleName()
             ), e);
         } catch (final InvocationTargetException e) {
             throw new IllegalStateException(String.format(
                     "Error creating resource of type %s, constructor threw an exception",
-                    rt.getSimpleName()
+                    resourceClass.getSimpleName()
             ), e);
         } catch (final NoSuchMethodException e) {
             throw new IllegalStateException(String.format(
                     "Resource type %s does not define a default constructor!",
-                    rt.getSimpleName()
+                    resourceClass.getSimpleName()
             ));
         }
     }
