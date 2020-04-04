@@ -97,7 +97,6 @@ public class GameplayGameState extends GameState {
                .withSystem(new RotatePlayerTowardsAttackTargetSystem())
                .withSystem(new RotateTowardsVelocitySystem())
                .withSystem(new CameraControlSystem())
-               .withSystem(new EnemyAttackCoolDownSystem())
                .withSystem(new SplitOnDeathSystem())
                .withSystem(new SpawnerSystem())
                .withSystem(new HealthUpdateSystem())

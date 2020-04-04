@@ -9,7 +9,7 @@ import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponStats;
 public interface Weapon<MS, TS, FS> {
     TriggerMechanism<TS> getTrigger();
 
-    Weapon.FiringMechanism<FS> getFiringMechanism();
+    FiringMechanism<FS> getFiringMechanism();
 
     MagazineHandler<MS> getMagazineHandler();
 
