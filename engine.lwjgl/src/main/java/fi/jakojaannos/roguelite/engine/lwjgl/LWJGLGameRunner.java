@@ -3,6 +3,9 @@ package fi.jakojaannos.roguelite.engine.lwjgl;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLUtil;
+import org.lwjgl.system.Callback;
+
+import javax.annotation.Nullable;
 
 import fi.jakojaannos.roguelite.engine.Game;
 import fi.jakojaannos.roguelite.engine.GameRunner;
@@ -14,12 +17,18 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class LWJGLGameRunner<TGame extends Game> extends GameRunner<TGame> {
     private final LWJGLWindow window;
+    @Nullable private final Callback debugCallback;
 
     public LWJGLWindow getWindow() {
         return this.window;
     }
 
-    public LWJGLGameRunner(final boolean debugModeEnabled, final int windowWidth, final int windowHeight) {
+    public LWJGLGameRunner(
+            final boolean debugModeEnabled,
+            final boolean openGLDebugEnabled,
+            final int windowWidth,
+            final int windowHeight
+    ) {
         GLFWErrorCallback.createPrint(System.err).set();
 
         if (!glfwInit()) {
@@ -39,9 +48,9 @@ public class LWJGLGameRunner<TGame extends Game> extends GameRunner<TGame> {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glfwPollEvents();
 
-        if (debugModeEnabled) {
-            GLUtil.setupDebugMessageCallback();
-        }
+        this.debugCallback = debugModeEnabled && openGLDebugEnabled
+                ? GLUtil.setupDebugMessageCallback()
+                : null;
     }
 
     @Override
@@ -66,6 +75,10 @@ public class LWJGLGameRunner<TGame extends Game> extends GameRunner<TGame> {
 
     @Override
     public void close() {
+        if (this.debugCallback != null) {
+            this.debugCallback.close();
+        }
+
         this.window.close();
         glfwTerminate();
     }

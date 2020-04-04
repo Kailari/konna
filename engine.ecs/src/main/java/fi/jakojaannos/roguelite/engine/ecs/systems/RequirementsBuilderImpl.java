@@ -71,18 +71,6 @@ public class RequirementsBuilderImpl implements RequirementsBuilder {
     }
 
     @Override
-    public RequirementsBuilder withComponentFrom(final ComponentGroup componentGroup) {
-        this.requirements.requiredGroup(componentGroup);
-        return this;
-    }
-
-    @Override
-    public RequirementsBuilder withoutComponentsFrom(final ComponentGroup componentGroup) {
-        this.requirements.excludedGroup(componentGroup);
-        return this;
-    }
-
-    @Override
     public RequirementsBuilder requireResource(final Class<? extends Resource> resource) {
         this.requirements.requiredResource(resource);
         return this;

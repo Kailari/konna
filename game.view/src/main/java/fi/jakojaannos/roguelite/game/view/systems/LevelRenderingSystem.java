@@ -43,9 +43,9 @@ public class LevelRenderingSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
+        final var cameraEntity = world.getOrCreateResource(CameraProperties.class).cameraEntity;
         final var cameraTransform = world.getEntityManager()
-                                         .getComponentOf(world.getOrCreateResource(CameraProperties.class).cameraEntity,
-                                                         Transform.class)
+                                         .getComponentOf(cameraEntity, Transform.class)
                                          .orElseThrow();
 
         final var regionX = (int) Math.floor(cameraTransform.position.x - this.camera.getVisibleAreaWidth() / 2.0);

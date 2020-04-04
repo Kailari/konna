@@ -36,8 +36,6 @@ public interface EcsSystem<TResources, TEntityData, TEvents> {
 
     interface EntityDataHandle<TEntityData> extends EntityHandle {
         TEntityData getData();
-
-        int getId();
     }
 
     /**

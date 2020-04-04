@@ -1,6 +1,19 @@
 package fi.jakojaannos.roguelite.engine.ecs.newimpl;
 
+import java.util.Optional;
+
 public interface EntityHandle {
+    /**
+     * Gets the unique identifier for this entity. These are not guaranteed to be stable and e.g. may change between
+     * ticks.
+     *
+     * @return the unique identifier for this entity.
+     *
+     * @deprecated due for removal once legacy ECS is cleaned up
+     */
+    @Deprecated
+    int getId();
+
     /**
      * Tries to add a component to the entity. If entity already has a component of the specified type, the method does
      * nothing.
@@ -34,6 +47,19 @@ public interface EntityHandle {
      * @return <code>true</code> if the entity has the component, otherwise <code>false</code>.
      */
     <TComponent> boolean hasComponent(Class<TComponent> componentClass);
+
+    /**
+     * Gets a component from this entity. If the entity does not have the given entity, this method returns an empty
+     * optional.
+     * <p>
+     * <b>USE OF THIS METHOD IS HEAVILY DISCOURAGED. ALWAYS PREFER USING SYSTEM ENTITY DATA, WHEN POSSIBLE.</b>
+     *
+     * @param componentClass type of the component
+     * @param <TComponent>   type of the component
+     *
+     * @return the requested component or an empty optional if one does not exist
+     */
+    <TComponent> Optional<TComponent> getComponent(Class<TComponent> componentClass);
 
     /**
      * Destroys this entity. Entities are not immediately destroyed, rather they are marked for removal after the

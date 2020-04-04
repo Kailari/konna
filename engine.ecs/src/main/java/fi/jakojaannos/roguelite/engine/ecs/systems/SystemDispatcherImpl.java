@@ -58,9 +58,8 @@ public class SystemDispatcherImpl implements SystemDispatcher {
         systemContext.getInstance()
                      .tick(world.getEntityManager()
                                 .getEntitiesWith(systemContext.getRequirements().requiredComponents(),
-                                                 systemContext.getRequirements().excludedComponents(),
-                                                 systemContext.getRequirements().requiredGroups(),
-                                                 systemContext.getRequirements().excludedGroups()),
+                                                 systemContext.getRequirements().excludedComponents()
+                                ),
                            world);
         dispatchContext.setDispatched(systemContext);
     }
