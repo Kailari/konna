@@ -3,6 +3,7 @@ package fi.jakojaannos.roguelite.game.weapons;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponStats;
 
@@ -14,9 +15,9 @@ public class InventoryWeapon<MS, TS, FS> {
     public InventoryWeapon(final Weapon<MS, TS, FS> weapon, final WeaponStats stats) {
         this.weapon = weapon;
         this.stats = stats;
-        this.state = new WeaponState<>(weapon.getMagazineHandler().createState(),
-                                       weapon.getTrigger().createState(),
-                                       weapon.getFiringMechanism().createState());
+        this.state = new WeaponState<>(weapon.getMagazineHandler().createState(stats),
+                                       weapon.getTrigger().createState(stats),
+                                       weapon.getFiringMechanism().createState(stats));
     }
 
     public Weapon<MS, TS, FS> getWeapon() {
@@ -50,5 +51,9 @@ public class InventoryWeapon<MS, TS, FS> {
             final AttackAbility attackAbility
     ) {
         this.weapon.fireIfReady(entityManager, entity, timeManager, this.state, this.stats, attackAbility);
+    }
+
+    public void reload(final TimeManager timeManager) {
+        this.weapon.getMagazineHandler().reload(this.state.getMagazine(), this.stats, timeManager);
     }
 }

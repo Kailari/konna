@@ -7,6 +7,8 @@ public class WeaponStats {
     public double timeBetweenShots;
     public long projectileLifetimeInTicks;
     public double projectilePushForce;
+    public int magazineCapacity;
+    public long reloadTimeInTicks;
 
     private WeaponStats(
             final long timeBetweenShots,
@@ -14,7 +16,9 @@ public class WeaponStats {
             final double spread,
             final double projectileSpeedNoise,
             final long projectileLifetimeInTicks,
-            final double projectilePushForce
+            final double projectilePushForce,
+            final int magazineCapacity,
+            final long reloadTimeInTicks
     ) {
         this.projectileSpeed = projectileSpeed;
         this.spread = spread;
@@ -22,6 +26,8 @@ public class WeaponStats {
         this.projectileLifetimeInTicks = projectileLifetimeInTicks;
         this.projectileSpeedNoise = projectileSpeedNoise;
         this.projectilePushForce = projectilePushForce;
+        this.magazineCapacity = magazineCapacity;
+        this.reloadTimeInTicks = reloadTimeInTicks;
     }
 
     public static Builder builder() {
@@ -35,6 +41,8 @@ public class WeaponStats {
         private double projectileSpeedNoise;
         private long projectileLifetimeInTicks = -1;
         private double projectilePushForce;
+        private int magazineCapacity = 30;
+        private long reloadTimeInTicks = 0;
 
         public Builder timeBetweenShots(final long timeBetweenShots) {
             this.timeBetweenShots = timeBetweenShots;
@@ -66,13 +74,25 @@ public class WeaponStats {
             return this;
         }
 
+        public Builder magazineCapacity(final int magazineCapacity) {
+            this.magazineCapacity = magazineCapacity;
+            return this;
+        }
+
+        public Builder reloadTimeInTicks(final long reloadTimeInTicks) {
+            this.reloadTimeInTicks = reloadTimeInTicks;
+            return this;
+        }
+
         public WeaponStats build() {
             return new WeaponStats(this.timeBetweenShots,
                                    this.projectileSpeed,
                                    this.spread,
                                    this.projectileSpeedNoise,
                                    this.projectileLifetimeInTicks,
-                                   this.projectilePushForce);
+                                   this.projectilePushForce,
+                                   this.magazineCapacity,
+                                   this.reloadTimeInTicks);
         }
 
     }

@@ -19,6 +19,9 @@ import fi.jakojaannos.roguelite.game.data.components.character.WeaponInput;
 import fi.jakojaannos.roguelite.game.data.components.weapon.ProjectileStats;
 import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponStats;
 import fi.jakojaannos.roguelite.game.systems.characters.CharacterAttackSystem;
+import fi.jakojaannos.roguelite.game.weapons.InventoryWeapon;
+import fi.jakojaannos.roguelite.game.weapons.SimpleWeapon;
+import fi.jakojaannos.roguelite.game.weapons.WeaponInventory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -46,15 +49,15 @@ class CharacterAttackSystemTest {
                 new DamageSource.Entity(entity),
                 CollisionLayer.PLAYER,
                 0.0,
-                0.0,
-                entityManager,
-                entity);
+                0.0);
         this.weaponStats = WeaponStats.builder().build();
         entityManager.addComponentTo(entity, new Transform(0.0, 0.0));
         entityManager.addComponentTo(entity, new Velocity());
         entityManager.addComponentTo(entity, this.weaponInput);
         entityManager.addComponentTo(entity, this.attackAbility);
-        entityManager.addComponentTo(entity, this.weaponStats);
+        final var wepInv = new WeaponInventory(1);
+        wepInv.equip(0, new InventoryWeapon<>(new SimpleWeapon(), weaponStats));
+        entityManager.addComponentTo(entity, wepInv);
 
         entityManager.applyModifications();
 

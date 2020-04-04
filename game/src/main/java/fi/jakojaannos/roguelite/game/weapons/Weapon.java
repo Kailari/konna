@@ -29,7 +29,7 @@ public interface Weapon<MS, TS, FS> {
                     state.getFiring(),
                     stats,
                     attackAbility);
-            // magazine.expendAmmo
+            getMagazineHandler().expendAmmo(state.getMagazine(), stats);
         }
     }
 
@@ -41,16 +41,26 @@ public interface Weapon<MS, TS, FS> {
             final WeaponStats stats
     ) {
         return getTrigger().shouldTrigger(entityManager, owner, timeManager, state.getTrigger())
-                && getFiringMechanism().isReadyToFire(timeManager, state.getFiring(), stats);
-        // magazine.isReadyToFire..
+                && getFiringMechanism().isReadyToFire(timeManager, state.getFiring(), stats)
+                && getMagazineHandler().canFire(state.getMagazine(), stats, timeManager);
     }
 
     interface MagazineHandler<TState> {
-        TState createState();
+        TState createState(WeaponStats stats);
+
+        boolean canFire(
+                TState state,
+                WeaponStats stats,
+                TimeManager timeManager
+        );
+
+        void expendAmmo(TState state, WeaponStats stats);
+
+        void reload(TState state, WeaponStats stats, TimeManager timeManager);
     }
 
     interface TriggerMechanism<TState> {
-        TState createState();
+        TState createState(WeaponStats stats);
 
         void pull(
                 EntityManager entityManager,
@@ -75,7 +85,7 @@ public interface Weapon<MS, TS, FS> {
     }
 
     interface FiringMechanism<TState> {
-        TState createState();
+        TState createState(WeaponStats stats);
 
         boolean isReadyToFire(
                 TimeManager timeManager,
