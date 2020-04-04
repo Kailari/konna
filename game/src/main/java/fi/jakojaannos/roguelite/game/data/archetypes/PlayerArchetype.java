@@ -45,6 +45,8 @@ public class PlayerArchetype {
                                         .projectileSpeedNoise(4.0)
                                         .projectileLifetimeInTicks(-1)
                                         .projectilePushForce(10.0)
+                                        .magazineCapacity(10)
+                                        .reloadTimeInTicks(timeManager.convertToTicks(2.0))
                                         .build();
         wepInv.equip(0, new InventoryWeapon<>(new SimpleWeapon(), wepStats));
         entityManager.addComponentTo(player, new SpriteInfo("sprites/player"));

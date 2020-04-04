@@ -6,7 +6,7 @@ import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponStats;
 
-import static fi.jakojaannos.roguelite.game.weapons.NoWeapon.*;
+import static fi.jakojaannos.roguelite.game.weapons.NoWeapon.NoState;
 
 /*
  * Baruuk's weapon of choice.
@@ -43,14 +43,35 @@ public class NoWeapon implements Weapon<NoState, NoState, NoState> {
 
     public static class NoMagazineHandler implements Weapon.MagazineHandler<NoState> {
         @Override
-        public NoState createState() {
+        public NoState createState(final WeaponStats stats) {
             return new NoState();
+        }
+
+        @Override
+        public boolean canFire(
+                final NoState noState,
+                final WeaponStats stats,
+                final TimeManager timeManager
+        ) {
+            return false;
+        }
+
+        @Override
+        public void expendAmmo(final NoState noState, final WeaponStats stats) {
+        }
+
+        @Override
+        public void reload(
+                final NoState noState,
+                final WeaponStats stats,
+                final TimeManager timeManager
+        ) {
         }
     }
 
     public static class NoTriggerMechanism implements Weapon.TriggerMechanism<NoState> {
         @Override
-        public NoState createState() {
+        public NoState createState(final WeaponStats stats) {
             return new NoState();
         }
 
@@ -87,7 +108,7 @@ public class NoWeapon implements Weapon<NoState, NoState, NoState> {
 
     public static class NoFiringMechanism implements Weapon.FiringMechanism<NoState> {
         @Override
-        public NoState createState() {
+        public NoState createState(final WeaponStats stats) {
             return new NoState();
         }
 

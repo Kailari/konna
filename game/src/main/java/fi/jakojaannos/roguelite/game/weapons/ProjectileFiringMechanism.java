@@ -21,7 +21,7 @@ public class ProjectileFiringMechanism implements Weapon.FiringMechanism<Project
     private final Random random = new Random(1337);
 
     @Override
-    public ProjectileFiringState createState() {
+    public ProjectileFiringState createState(final WeaponStats stats) {
         return new ProjectileFiringState();
     }
 

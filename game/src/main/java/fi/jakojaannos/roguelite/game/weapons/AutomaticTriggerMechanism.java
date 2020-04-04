@@ -3,10 +3,11 @@ package fi.jakojaannos.roguelite.game.weapons;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponStats;
 
 public class AutomaticTriggerMechanism implements Weapon.TriggerMechanism<AutomaticTriggerState> {
     @Override
-    public AutomaticTriggerState createState() {
+    public AutomaticTriggerState createState(final WeaponStats stats) {
         return new AutomaticTriggerState();
     }
 

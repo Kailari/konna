@@ -77,6 +77,8 @@ public class PlayerInputSystem implements ECSSystem {
                 equipWeaponAtSlot(9, entityManager, entity, attackAbility);
             }
 
+            attackInput.reload = inputs.inputReload;
+
         });
     }
 

@@ -43,9 +43,7 @@ class PlayerInputSystemTest {
         this.abilities = new AttackAbility(new DamageSource.Entity(player),
                                            CollisionLayer.PLAYER,
                                            0.0,
-                                           0.0,
-                                           entityManager,
-                                           player);
+                                           0.0);
         entityManager.addComponentTo(player, movementInput = new MovementInput());
         entityManager.addComponentTo(player, weaponInput = new WeaponInput());
         entityManager.addComponentTo(player, this.abilities);
