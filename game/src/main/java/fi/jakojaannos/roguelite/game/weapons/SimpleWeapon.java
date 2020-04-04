@@ -1,13 +1,6 @@
 package fi.jakojaannos.roguelite.game.weapons;
 
-public class SimpleWeapon implements Weapon<
-        ClipMagazineHandler,
-        AutomaticTriggerMechanism,
-        ProjectileFiringMechanism,
-        ClipMagazineState,
-        AutomaticTriggerState,
-        ProjectileFiringState
-        > {
+public class SimpleWeapon implements Weapon<ClipMagazineState, AutomaticTriggerState, ProjectileFiringState> {
 
     private final ClipMagazineHandler magazine;
     private final AutomaticTriggerMechanism trigger;
