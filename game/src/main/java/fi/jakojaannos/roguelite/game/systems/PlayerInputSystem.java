@@ -6,7 +6,10 @@ import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
-import fi.jakojaannos.roguelite.engine.ecs.*;
+import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
+import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.MovementInput;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
@@ -56,38 +59,28 @@ public class PlayerInputSystem implements ECSSystem {
             attackAbility.targetPosition.set(this.tmpCursorPos);
 
             if (inputs.inputWeaponSlot0) {
-                equipWeaponAtSlot(0, entityManager, entity, attackAbility);
+                attackAbility.equippedSlot = 0;
             } else if (inputs.inputWeaponSlot1) {
-                equipWeaponAtSlot(1, entityManager, entity, attackAbility);
+                attackAbility.equippedSlot = 1;
             } else if (inputs.inputWeaponSlot2) {
-                equipWeaponAtSlot(2, entityManager, entity, attackAbility);
+                attackAbility.equippedSlot = 2;
             } else if (inputs.inputWeaponSlot3) {
-                equipWeaponAtSlot(3, entityManager, entity, attackAbility);
+                attackAbility.equippedSlot = 3;
             } else if (inputs.inputWeaponSlot4) {
-                equipWeaponAtSlot(4, entityManager, entity, attackAbility);
+                attackAbility.equippedSlot = 4;
             } else if (inputs.inputWeaponSlot5) {
-                equipWeaponAtSlot(5, entityManager, entity, attackAbility);
+                attackAbility.equippedSlot = 5;
             } else if (inputs.inputWeaponSlot6) {
-                equipWeaponAtSlot(6, entityManager, entity, attackAbility);
+                attackAbility.equippedSlot = 6;
             } else if (inputs.inputWeaponSlot7) {
-                equipWeaponAtSlot(7, entityManager, entity, attackAbility);
+                attackAbility.equippedSlot = 7;
             } else if (inputs.inputWeaponSlot8) {
-                equipWeaponAtSlot(8, entityManager, entity, attackAbility);
+                attackAbility.equippedSlot = 8;
             } else if (inputs.inputWeaponSlot9) {
-                equipWeaponAtSlot(9, entityManager, entity, attackAbility);
+                attackAbility.equippedSlot = 9;
             }
 
             attackInput.reload = inputs.inputReload;
-
         });
-    }
-
-    private void equipWeaponAtSlot(
-            final int slot,
-            final EntityManager entityManager,
-            final Entity entity,
-            final AttackAbility attackAbility
-    ) {
-        attackAbility.equippedSlot = slot;
     }
 }
