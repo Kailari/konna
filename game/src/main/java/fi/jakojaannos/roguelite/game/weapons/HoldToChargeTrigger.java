@@ -5,16 +5,16 @@ import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponStats;
 
-public class HoldToChargeTrigger implements Weapon.TriggerMechanism<HoldToChargeTriggerState> {
+public class HoldToChargeTrigger implements Weapon.TriggerMechanism<ChargedTriggerState> {
 
-    private final HoldToChargeTriggerState charge;
+    private final ChargedTriggerState charge;
 
-    public HoldToChargeTrigger(final HoldToChargeTriggerState state) {
+    public HoldToChargeTrigger(final ChargedTriggerState state) {
         this.charge = state;
     }
 
     @Override
-    public HoldToChargeTriggerState createState(final WeaponStats stats) {
+    public ChargedTriggerState createState(final WeaponStats stats) {
         return this.charge;
     }
 
@@ -23,15 +23,15 @@ public class HoldToChargeTrigger implements Weapon.TriggerMechanism<HoldToCharge
             final EntityManager entityManager,
             final Entity owner,
             final TimeManager timeManager,
-            final HoldToChargeTriggerState state,
+            final ChargedTriggerState state,
             final WeaponStats stats
     ) {
         if (!state.isTriggerReadyToCharge(timeManager, stats)) return;
 
-        state.isCharging = true;
-        state.isTriggerReadyToFire = false;
-        state.hasFired = false;
-        state.chargeStartTimestamp = timeManager.getCurrentGameTime();
+        state.setCharging(true);
+        state.setTriggerReadyToFire(false);
+        state.setHasFired(false);
+        state.setChargeStartTimestamp(timeManager.getCurrentGameTime());
     }
 
     @Override
@@ -39,13 +39,13 @@ public class HoldToChargeTrigger implements Weapon.TriggerMechanism<HoldToCharge
             final EntityManager entityManager,
             final Entity owner,
             final TimeManager timeManager,
-            final HoldToChargeTriggerState state
+            final ChargedTriggerState state
     ) {
-        if (!state.isCharging) return;
+        if (!state.isCharging()) return;
 
-        state.isCharging = false;
-        state.isTriggerReadyToFire = true;
-        state.chargeEndTimestamp = timeManager.getCurrentGameTime();
+        state.setCharging(false);
+        state.setTriggerReadyToFire(true);
+        state.setChargeEndTimestamp(timeManager.getCurrentGameTime());
     }
 
     @Override
@@ -53,8 +53,8 @@ public class HoldToChargeTrigger implements Weapon.TriggerMechanism<HoldToCharge
             final EntityManager entityManager,
             final Entity owner,
             final TimeManager timeManager,
-            final HoldToChargeTriggerState state
+            final ChargedTriggerState state
     ) {
-        return state.isTriggerReadyToFire && !state.hasFired;
+        return state.isTriggerReadyToFire() && !state.hasFired();
     }
 }

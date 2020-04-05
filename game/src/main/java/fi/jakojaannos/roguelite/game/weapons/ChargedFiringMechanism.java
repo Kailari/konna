@@ -13,31 +13,31 @@ import fi.jakojaannos.roguelite.game.data.archetypes.ProjectileArchetype;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponStats;
 
-public class ChargedFiringMechanism implements Weapon.FiringMechanism<HoldToChargeTriggerState> {
+public class ChargedFiringMechanism implements Weapon.FiringMechanism<ChargedFiringState> {
     private final Vector2d tmpSpreadOffset = new Vector2d();
     private final Vector2d tmpProjectilePos = new Vector2d();
     private final Vector2d tmpDirection = new Vector2d();
 
     private final Random random = new Random(1337);
 
-    private final HoldToChargeTriggerState charge;
+    private final ChargedFiringState charge;
 
-    public ChargedFiringMechanism(final HoldToChargeTriggerState state) {
+    public ChargedFiringMechanism(final ChargedFiringState state) {
         this.charge = state;
     }
 
     @Override
-    public HoldToChargeTriggerState createState(final WeaponStats stats) {
+    public ChargedFiringState createState(final WeaponStats stats) {
         return this.charge;
     }
 
     @Override
     public boolean isReadyToFire(
             final TimeManager timeManager,
-            final HoldToChargeTriggerState state,
+            final ChargedFiringState state,
             final WeaponStats stats
     ) {
-        final var timeSinceLastAttack = timeManager.getCurrentGameTime() - state.lastAttackTimestamp;
+        final var timeSinceLastAttack = timeManager.getCurrentGameTime() - state.getLastAttackTimestamp();
         return timeSinceLastAttack >= stats.timeBetweenShots;
     }
 
@@ -46,7 +46,7 @@ public class ChargedFiringMechanism implements Weapon.FiringMechanism<HoldToChar
             final EntityManager entityManager,
             final Entity shooter,
             final TimeManager timeManager,
-            final HoldToChargeTriggerState state,
+            final ChargedFiringState state,
             final WeaponStats stats,
             final AttackAbility attackAbility
     ) {
@@ -87,8 +87,10 @@ public class ChargedFiringMechanism implements Weapon.FiringMechanism<HoldToChar
                                    getProjectileLifetime(state, stats),
                                    stats.projectilePushForce);
 
-        state.lastAttackTimestamp = timestamp;
-        state.hasFired = true;
+        //state.lastAttackTimestamp = timestamp;
+        state.setLastAttackTimestamp(timestamp);
+        //state.hasFired = true;
+        state.setHasFired(true);
     }
 
     // TODO: this is more of an proof of concept version of a system that takes in some variable
@@ -98,11 +100,11 @@ public class ChargedFiringMechanism implements Weapon.FiringMechanism<HoldToChar
     private final Vector2d temp = new Vector2d();
 
     private long getProjectileLifetime(
-            final HoldToChargeTriggerState state,
+            final ChargedFiringState state,
             final WeaponStats stats
     ) {
-        final var timeCharged = state.chargeEndTimestamp - state.chargeStartTimestamp;
-        this.tempMinVal.lerp(this.tempMaxVal, timeCharged / this.tempMaxVal.x, this.temp);
+        //final var timeCharged = state.chargeEndTimestamp - state.chargeStartTimestamp;
+        this.tempMinVal.lerp(this.tempMaxVal, state.getChargeTime() / this.tempMaxVal.x, this.temp);
         return (long) this.temp.y;
     }
 }
