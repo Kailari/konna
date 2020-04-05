@@ -12,10 +12,7 @@ import fi.jakojaannos.roguelite.game.data.components.SpriteInfo;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.game.data.components.character.*;
 import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponStats;
-import fi.jakojaannos.roguelite.game.weapons.InventoryWeapon;
-import fi.jakojaannos.roguelite.game.weapons.ShotgunWeapon;
-import fi.jakojaannos.roguelite.game.weapons.SimpleWeapon;
-import fi.jakojaannos.roguelite.game.weapons.WeaponInventory;
+import fi.jakojaannos.roguelite.game.weapons.*;
 
 public class PlayerArchetype {
     public static Entity create(
@@ -59,8 +56,19 @@ public class PlayerArchetype {
                                             .magazineCapacity(6)
                                             .reloadTimeInTicks(timeManager.convertToTicks(0.8))
                                             .build();
+        final var grenadeStats = WeaponStats.builder()
+                                            .timeBetweenShots(timeManager.convertToTicks(3.0))
+                                            .projectileSpeed(1.0)
+                                            .spread(0.0)
+                                            .projectileSpeedNoise(0.0)
+                                            .projectileLifetimeInTicks(-1)
+                                            .projectilePushForce(0.0)
+                                            .magazineCapacity(100)
+                                            .reloadTimeInTicks(timeManager.convertToTicks(0.8))
+                                            .build();
         wepInv.equip(0, new InventoryWeapon<>(new SimpleWeapon(), wepStats));
         wepInv.equip(1, new InventoryWeapon<>(new ShotgunWeapon(), shotgunStats));
+        wepInv.equip(2, new InventoryWeapon<>(new GrenadeWeapon(), grenadeStats));
         entityManager.addComponentTo(player, new SpriteInfo("sprites/player"));
         entityManager.addComponentTo(player, new Health(10));
         return player;

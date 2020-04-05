@@ -80,7 +80,8 @@ public class NoWeapon implements Weapon<NoState, NoState, NoState> {
                 final EntityManager entityManager,
                 final Entity owner,
                 final TimeManager timeManager,
-                final NoState triggerState
+                final NoState triggerState,
+                final WeaponStats stats
         ) {
 
         }

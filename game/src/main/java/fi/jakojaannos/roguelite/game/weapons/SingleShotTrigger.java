@@ -16,7 +16,8 @@ public class SingleShotTrigger implements Weapon.TriggerMechanism<SingleShotTrig
             final EntityManager entityManager,
             final Entity owner,
             final TimeManager timeManager,
-            final SingleShotTriggerState state
+            final SingleShotTriggerState state,
+            final WeaponStats stats
     ) {
         state.triggerDown = true;
     }

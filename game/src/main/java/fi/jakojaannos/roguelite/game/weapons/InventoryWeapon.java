@@ -33,7 +33,7 @@ public class InventoryWeapon<MS, TS, FS> {
             final Entity entity,
             final Time timeManager
     ) {
-        this.weapon.getTrigger().pull(entityManager, entity, timeManager, this.state.getTrigger());
+        this.weapon.getTrigger().pull(entityManager, entity, timeManager, this.state.getTrigger(), this.stats);
     }
 
     public void releaseTrigger(
