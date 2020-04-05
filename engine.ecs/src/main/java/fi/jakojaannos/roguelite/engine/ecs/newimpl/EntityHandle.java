@@ -14,6 +14,8 @@ public interface EntityHandle {
     @Deprecated
     int getId();
 
+    boolean isPendingRemoval();
+
     /**
      * Tries to add a component to the entity. If entity already has a component of the specified type, the method does
      * nothing.

@@ -17,16 +17,6 @@ public final class ComponentStorage {
         this.capacity = capacity;
     }
 
-    public <TComponent> void register(final Class<TComponent> componentClass) {
-        if (this.components.containsKey(componentClass)) {
-            throw new IllegalArgumentException(String.format(
-                    "Component type %s is already registered!",
-                    componentClass.getSimpleName()));
-        }
-        this.components.put(componentClass,
-                            constructComponentArray(componentClass, this.capacity));
-    }
-
     public Object[][] fetchStorages(
             final Class<?>[] componentClasses
     ) {
@@ -75,9 +65,16 @@ public final class ComponentStorage {
                                                 key -> constructComponentArray(key, this.capacity));
     }
 
-    public void move(final int from, final int to) {
-        for (final var storage : this.components.values()) {
-            storage[to] = storage[from];
+    public void moveAndClear(final int from, final int to) {
+        if (from == to) {
+            for (final var storage : this.components.values()) {
+                storage[from] = null;
+            }
+        } else {
+            for (final var storage : this.components.values()) {
+                storage[to] = storage[from];
+                storage[from] = null;
+            }
         }
     }
 

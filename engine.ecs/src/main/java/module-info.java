@@ -6,4 +6,7 @@ module roguelite.engine.ecs {
 
     exports fi.jakojaannos.roguelite.engine.ecs;
     exports fi.jakojaannos.roguelite.engine.ecs.newimpl;
+
+    // TODO: remove this
+    exports fi.jakojaannos.roguelite.engine.ecs.newimpl.world;
 }

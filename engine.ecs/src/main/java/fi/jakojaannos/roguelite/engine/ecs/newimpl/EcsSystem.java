@@ -1,5 +1,6 @@
 package fi.jakojaannos.roguelite.engine.ecs.newimpl;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -34,8 +35,45 @@ public interface EcsSystem<TResources, TEntityData, TEvents> {
             TEvents events
     );
 
-    interface EntityDataHandle<TEntityData> extends EntityHandle {
+    interface EntityDataHandle<TEntityData> {
         TEntityData getData();
+
+        /**
+         * @see EntityHandle#isPendingRemoval()
+         */
+        boolean isPendingRemoval();
+
+        /**
+         * @see EntityHandle#getId()
+         */
+        int getId();
+
+        EntityHandle getHandle();
+
+        /**
+         * @see EntityHandle#addComponent(Object)
+         */
+        <TComponent> boolean addComponent(TComponent component);
+
+        /**
+         * @see EntityHandle#removeComponent(Class)
+         */
+        <TComponent> boolean removeComponent(Class<TComponent> componentClass);
+
+        /**
+         * @see EntityHandle#hasComponent(Class)
+         */
+        <TComponent> boolean hasComponent(Class<TComponent> componentClass);
+
+        /**
+         * @see EntityHandle#getComponent(Class)
+         */
+        <TComponent> Optional<TComponent> getComponent(Class<TComponent> componentClass);
+
+        /**
+         * @see EntityHandle#destroy()
+         */
+        void destroy();
     }
 
     /**
