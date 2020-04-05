@@ -13,8 +13,7 @@ import java.util.function.Function;
 import java.util.stream.StreamSupport;
 
 import fi.jakojaannos.roguelite.engine.ecs.newimpl.EcsSystem;
-import fi.jakojaannos.roguelite.engine.ecs.newimpl.components.ComponentStorage;
-import fi.jakojaannos.roguelite.engine.ecs.newimpl.resources.ResourceStorage;
+import fi.jakojaannos.roguelite.engine.ecs.newimpl.World;
 
 public class Main {
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
@@ -23,55 +22,46 @@ public class Main {
         final List<EcsSystem<?, ?, ?>> systems = List.of(new AdderSystem(),
                                                          new PrintSystem());
 
-        final int entityCount = 5;
-        final var resources = new ResourceStorage();
-        resources.register(new Multiplier(2));
+        final var world = World.createNew();
+        world.registerResource(new Multiplier(2));
 
-        final var components = new ComponentStorage(5);
-        components.register(ValueComponent.class);
-        components.add(0, new ValueComponent(10));
-        components.add(1, new ValueComponent(5));
-        components.add(2, new ValueComponent(42));
-        components.add(3, new ValueComponent(0));
-        components.add(4, new ValueComponent(Integer.MAX_VALUE));
-        components.register(AmountComponent.class);
-        components.add(0, new AmountComponent(-1));
-        components.add(1, new AmountComponent(1));
-        components.add(3, new AmountComponent(2));
-        components.add(4, new AmountComponent(Short.MIN_VALUE));
+        world.createEntity(new ValueComponent(10), new AmountComponent(-1));
+        world.createEntity(new ValueComponent(5), new AmountComponent(1));
+        world.createEntity(new ValueComponent(42));
+        world.createEntity(new ValueComponent(0), new AmountComponent(2));
+        world.createEntity(new ValueComponent(Integer.MAX_VALUE), new AmountComponent(Short.MIN_VALUE));
 
+        world.commitEntityModifications();
         final var threadPool = new ForkJoinPool(4,
                                                 Main::workerThreadFactory,
                                                 null,
                                                 false);
         LOG.info("Initial state");
-        dispatch(components, resources, entityCount, systems.get(1), threadPool);
+        dispatch(world, systems.get(1), threadPool);
 
         final var ticksToRun = 2;
         for (int i = 0; i < ticksToRun; i++) {
             LOG.info("Tick #{}", i);
             for (final EcsSystem<?, ?, ?> system : systems) {
-                dispatch(components, resources, entityCount, system, threadPool);
+                dispatch(world, system, threadPool);
             }
         }
     }
 
     private static <TResources, TEntityData, TEvents> void dispatch(
-            final ComponentStorage components,
-            final ResourceStorage resources,
-            final int entityCount,
+            final World world,
             final EcsSystem<TResources, TEntityData, TEvents> system,
             final ForkJoinPool threadPool
     ) {
         final var requirements = system.declareRequirements();
 
         final var systemResources = instantiateResources(
-                resources.fetch(requirements.resourceComponentTypes()),
+                world.getResources().fetch(requirements.resourceComponentTypes()),
                 requirements.resourceConstructor()
         );
         final var entitySpliterator = new EntitySpliterator<>(
-                components.fetchStorages(requirements.entityDataComponentTypes()),
-                entityCount,
+                requirements.entityDataComponentTypes(),
+                world,
                 createEntityDataFactory(requirements.entityDataConstructor())
         );
 

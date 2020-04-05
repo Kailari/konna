@@ -16,7 +16,7 @@ public interface World {
     EntityManager getEntityManager();
 
     @Deprecated
-    static World createNew(EntityManager entityManager) {
+    static World createNew(final EntityManager entityManager) {
         return new WorldImpl(entityManager);
     }
 

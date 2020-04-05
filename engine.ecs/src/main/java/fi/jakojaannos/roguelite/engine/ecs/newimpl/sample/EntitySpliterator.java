@@ -6,35 +6,41 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import fi.jakojaannos.roguelite.engine.ecs.newimpl.EcsSystem;
+import fi.jakojaannos.roguelite.engine.ecs.newimpl.EntityHandle;
+import fi.jakojaannos.roguelite.engine.ecs.newimpl.World;
 
 public class EntitySpliterator<TEntityData> implements Spliterator<EcsSystem.EntityDataHandle<TEntityData>> {
     private final Object[][] paramStorages;
     private final Object[] parameters;
+    private final World world;
 
-    private final int entityCount;
     private final Function<Object[], TEntityData> factory;
 
     private int startIndex;
     private int endIndex;
 
     public EntitySpliterator(
-            final Object[][] paramStorages,
-            final int entityCount,
+            final Class<?>[] componentClasses,
+            final World world,
             final Function<Object[], TEntityData> factory
     ) {
-        this(paramStorages, entityCount, factory, 0, entityCount);
+        this(world.getComponents().fetchStorages(componentClasses),
+             world,
+             factory,
+             0,
+             world.getEntityCount());
     }
 
     private EntitySpliterator(
             final Object[][] paramStorages,
-            final int entityCount,
+            final World world,
             final Function<Object[], TEntityData> factory,
             final int startIndex,
             final int endIndex
     ) {
         this.parameters = new Object[paramStorages.length];
         this.paramStorages = paramStorages;
-        this.entityCount = entityCount;
+        this.world = world;
         this.factory = factory;
         this.startIndex = startIndex;
         this.endIndex = endIndex;
@@ -56,7 +62,8 @@ public class EntitySpliterator<TEntityData> implements Spliterator<EcsSystem.Ent
             }
         }
 
-        action.accept(new EntityDataHandleImpl<>(this.factory.apply(this.parameters), this.startIndex));
+        action.accept(new EntityDataHandleImpl<>(this.factory.apply(this.parameters),
+                                                 this.world.getEntity(this.startIndex)));
         this.startIndex++;
         return true;
     }
@@ -69,7 +76,7 @@ public class EntitySpliterator<TEntityData> implements Spliterator<EcsSystem.Ent
             this.endIndex = this.startIndex + remaining / 2;
 
             return new EntitySpliterator<>(this.paramStorages,
-                                           this.entityCount,
+                                           this.world,
                                            this.factory,
                                            this.endIndex,
                                            oldEndIndex);
@@ -109,11 +116,21 @@ public class EntitySpliterator<TEntityData> implements Spliterator<EcsSystem.Ent
 
     private static class EntityDataHandleImpl<TEntityData> implements EcsSystem.EntityDataHandle<TEntityData> {
         private final TEntityData data;
-        private final int id;
+        private final EntityHandle handle;
+
+        @Override
+        public boolean isPendingRemoval() {
+            return this.handle.isPendingRemoval();
+        }
 
         @Override
         public int getId() {
-            return this.id;
+            return this.handle.getId();
+        }
+
+        @Override
+        public EntityHandle getHandle() {
+            return this.handle;
         }
 
         @Override
@@ -121,34 +138,34 @@ public class EntitySpliterator<TEntityData> implements Spliterator<EcsSystem.Ent
             return this.data;
         }
 
-        private EntityDataHandleImpl(final TEntityData data, final int id) {
+        private EntityDataHandleImpl(final TEntityData data, final EntityHandle handle) {
             this.data = data;
-            this.id = id;
+            this.handle = handle;
         }
 
         @Override
         public <TComponent> boolean addComponent(final TComponent component) {
-            return false;
+            return this.handle.addComponent(component);
         }
 
         @Override
         public <TComponent> boolean removeComponent(final Class<TComponent> componentClass) {
-            return false;
+            return this.handle.removeComponent(componentClass);
         }
 
         @Override
         public <TComponent> boolean hasComponent(final Class<TComponent> componentClass) {
-            return false;
+            return this.handle.hasComponent(componentClass);
         }
 
         @Override
         public <TComponent> Optional<TComponent> getComponent(final Class<TComponent> componentClass) {
-            return Optional.empty();
+            return this.handle.getComponent(componentClass);
         }
 
         @Override
         public void destroy() {
-
+            this.handle.destroy();
         }
     }
 }

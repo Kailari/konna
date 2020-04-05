@@ -21,7 +21,7 @@ public class Collisions implements Resource {
      * @return collection containing all the collision events
      */
     public Collection<CollisionEvent> getEventsFor(final Entity entity) {
-        return collisionEvents.getOrDefault(entity, List.of());
+        return this.collisionEvents.getOrDefault(entity, List.of());
     }
 
     /**
@@ -42,4 +42,5 @@ public class Collisions implements Resource {
     public void clear() {
         this.collisionEvents.clear();
     }
+
 }

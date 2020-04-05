@@ -16,9 +16,8 @@ import fi.jakojaannos.roguelite.engine.ecs.world.WorldImpl;
 public class LegacyCompat implements fi.jakojaannos.roguelite.engine.ecs.World {
     private static final Logger LOG = LoggerFactory.getLogger(LegacyCompat.class);
 
-    private static final boolean LOG_GET_OR_CREATE = true;
-    private static final boolean LOG_CREATE_OR_REPLACE = true;
-    private static final boolean LOG_PROVIDE = true;
+    private static final boolean LOG_GET_OR_CREATE = false;
+    private static final boolean LOG_PROVIDE = false;
     private static final boolean LOG_GET = false;
 
     private final World world;
@@ -45,20 +44,12 @@ public class LegacyCompat implements fi.jakojaannos.roguelite.engine.ecs.World {
 
         try {
             return this.world.fetchResource(resourceClass);
-        } catch (final Throwable ignored) {
+        } catch (final Throwable e) {
+            //LOG.warn("getOrCreateResource with fetchResource failed with exception: ", e);
+
             final var newInstance = WorldImpl.constructResource(resourceClass);
             this.world.registerResource(newInstance);
             return newInstance;
-        }
-    }
-
-    @Override
-    public <TResource extends Resource> void createOrReplaceResource(
-            final Class<TResource> resourceClass,
-            final TResource resource
-    ) {
-        if (LOG_CREATE_OR_REPLACE) {
-            LOG.warn("createOrReplaceResource called!");
         }
     }
 
@@ -82,10 +73,18 @@ public class LegacyCompat implements fi.jakojaannos.roguelite.engine.ecs.World {
             final Class<TResource> resourceType
     ) {
         if (LOG_GET) {
-            LOG.warn("provideResource called!");
+            LOG.warn("getResource called!");
         }
 
         return this.world.fetchResource(resourceType);
+    }
+
+    @Override
+    public <TResource extends Resource> void createOrReplaceResource(
+            final Class<TResource> resourceClass,
+            final TResource resource
+    ) {
+        throw new UnsupportedOperationException();
     }
 
     private class EntityManagerImpl implements EntityManager {
@@ -96,18 +95,17 @@ public class LegacyCompat implements fi.jakojaannos.roguelite.engine.ecs.World {
 
         @Override
         public Entity createEntity() {
-            final var handle = LegacyCompat.this.world.createEntity();
-            return new LegacyEntityWrapper(handle);
+            return (LegacyEntityHandleImpl) LegacyCompat.this.world.createEntity();
         }
 
         @Override
         public void destroyEntity(final Entity entity) {
-            LegacyCompat.this.world.destroyEntity(entity.getId());
+            ((LegacyEntityHandleImpl) entity).destroy();
         }
 
         @Override
         public void applyModifications() {
-            LegacyCompat.this.world.runEntityTasks();
+            LegacyCompat.this.world.commitEntityModifications();
         }
 
         @Override
@@ -115,7 +113,8 @@ public class LegacyCompat implements fi.jakojaannos.roguelite.engine.ecs.World {
                 final Entity entity,
                 final TComponent component
         ) {
-            return ((LegacyEntityWrapper) entity).addComponent(component);
+            ((LegacyEntityHandleImpl) entity).addComponent(component);
+            return component;
         }
 
         @Override
@@ -123,7 +122,7 @@ public class LegacyCompat implements fi.jakojaannos.roguelite.engine.ecs.World {
                 final Entity entity,
                 final Class<? extends Component> componentClass
         ) {
-            ((LegacyEntityWrapper) entity).removeComponent(componentClass);
+            ((LegacyEntityHandleImpl) entity).removeComponent(componentClass);
         }
 
         @Override
@@ -131,7 +130,7 @@ public class LegacyCompat implements fi.jakojaannos.roguelite.engine.ecs.World {
                 final Entity entity,
                 final Class<TComponent> componentClass
         ) {
-            return ((LegacyEntityWrapper) entity).getComponent(componentClass);
+            return ((LegacyEntityHandleImpl) entity).getComponent(componentClass);
         }
 
         @Override
@@ -139,7 +138,7 @@ public class LegacyCompat implements fi.jakojaannos.roguelite.engine.ecs.World {
                 final Entity entity,
                 final Class<? extends Component> componentClass
         ) {
-            return ((LegacyEntityWrapper) entity).hasComponent(componentClass);
+            return ((LegacyEntityHandleImpl) entity).hasComponent(componentClass);
         }
 
         @Override
@@ -160,7 +159,7 @@ public class LegacyCompat implements fi.jakojaannos.roguelite.engine.ecs.World {
                                                   .allMatch(c -> componentStorage.has(id, c)))
                             .filter(id -> excluded.stream()
                                                   .noneMatch(c -> componentStorage.has(id, c)))
-                            .mapToObj(id -> new LegacyEntityWrapper(new EntityHandleImpl(id, componentStorage)));
+                            .mapToObj(id -> (LegacyEntityHandleImpl) LegacyCompat.this.world.getEntity(id));
         }
     }
 }
