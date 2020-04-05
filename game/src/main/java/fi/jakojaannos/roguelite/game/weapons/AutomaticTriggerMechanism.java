@@ -16,7 +16,8 @@ public class AutomaticTriggerMechanism implements Weapon.TriggerMechanism<Automa
             final EntityManager entityManager,
             final Entity owner,
             final TimeManager timeManager,
-            final AutomaticTriggerState state
+            final AutomaticTriggerState state,
+            final WeaponStats stats
     ) {
         state.triggerDown = true;
     }

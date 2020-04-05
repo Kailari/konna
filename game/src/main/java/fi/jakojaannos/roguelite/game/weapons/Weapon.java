@@ -66,7 +66,8 @@ public interface Weapon<MS, TS, FS> {
                 EntityManager entityManager,
                 Entity owner,
                 TimeManager timeManager,
-                TState state
+                TState state,
+                WeaponStats stats
         );
 
         void release(
