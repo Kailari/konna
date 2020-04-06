@@ -9,5 +9,6 @@ package fi.jakojaannos.roguelite.engine.ecs;
  * not quite there yet), meaning that components should be as compact as possible. Storing arrays or any variable sized
  * data-types in components should be avoided, and might be prohibited in near future.
  */
+@Deprecated
 public interface Component {
 }

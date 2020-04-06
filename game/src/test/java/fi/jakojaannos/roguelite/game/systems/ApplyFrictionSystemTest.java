@@ -32,7 +32,7 @@ public class ApplyFrictionSystemTest {
 
     @BeforeEach
     void beforeEach() {
-        world = fi.jakojaannos.roguelite.engine.ecs.newimpl.World.createNew();
+        world = fi.jakojaannos.roguelite.engine.ecs.newecs.World.createNew();
         entityManager = world.getEntityManager();
         system = new ApplyFrictionSystem();
 

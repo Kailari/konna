@@ -38,7 +38,7 @@ class CharacterMovementSystemTest {
     void beforeEach() {
         this.system = new CharacterMovementSystem();
         this.applyVelocity = new ApplyVelocitySystem();
-        this.world = fi.jakojaannos.roguelite.engine.ecs.newimpl.World.createNew();
+        this.world = fi.jakojaannos.roguelite.engine.ecs.newecs.World.createNew();
         EntityManager entityManager = world.getEntityManager();
 
         final var time = new Time(new SimpleTimeManager(20));

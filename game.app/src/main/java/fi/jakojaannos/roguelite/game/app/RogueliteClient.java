@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.nio.file.Path;
 
 import fi.jakojaannos.roguelite.engine.Game;
-import fi.jakojaannos.roguelite.engine.ecs.newimpl.World;
+import fi.jakojaannos.roguelite.engine.ecs.newecs.World;
 import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLAssetManager;
 import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLGameRunner;
 import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLRenderingBackend;

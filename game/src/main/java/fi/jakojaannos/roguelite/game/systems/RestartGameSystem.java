@@ -36,11 +36,11 @@ public class RestartGameSystem implements ECSSystem {
         if (inputs.inputRestart) {
             world.getOrCreateResource(GameStateManager.class)
                  .queueStateChange(new GameplayGameState(System.nanoTime(),
-                                                         fi.jakojaannos.roguelite.engine.ecs.newimpl.World.createNew(),
+                                                         fi.jakojaannos.roguelite.engine.ecs.newecs.World.createNew(),
                                                          world.getResource(Time.class).timeManager()));
         } else if (inputs.inputMenu) {
             world.getOrCreateResource(GameStateManager.class)
-                 .queueStateChange(new MainMenuGameState(fi.jakojaannos.roguelite.engine.ecs.newimpl.World.createNew(),
+                 .queueStateChange(new MainMenuGameState(fi.jakojaannos.roguelite.engine.ecs.newecs.World.createNew(),
                                                          world.getResource(Time.class).timeManager()));
         }
     }

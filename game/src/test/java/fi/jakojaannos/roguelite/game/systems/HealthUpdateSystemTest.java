@@ -35,7 +35,7 @@ public class HealthUpdateSystemTest {
             double damage,
             boolean shouldBeRemoved
     ) {
-        World world = fi.jakojaannos.roguelite.engine.ecs.newimpl.World.createNew();
+        World world = fi.jakojaannos.roguelite.engine.ecs.newecs.World.createNew();
         EntityManager entityManager = world.getEntityManager();
         HealthUpdateSystem system = new HealthUpdateSystem();
 

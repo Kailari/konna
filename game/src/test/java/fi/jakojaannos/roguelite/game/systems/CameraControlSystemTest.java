@@ -25,7 +25,7 @@ class CameraControlSystemTest {
     @BeforeEach
     void beforeEach() {
         system = new CameraControlSystem();
-        world = fi.jakojaannos.roguelite.engine.ecs.newimpl.World.createNew();
+        world = fi.jakojaannos.roguelite.engine.ecs.newecs.World.createNew();
 
         final var time = new Time(new SimpleTimeManager(20));
         world.provideResource(Time.class, time);

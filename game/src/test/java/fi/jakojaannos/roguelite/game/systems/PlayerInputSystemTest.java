@@ -35,7 +35,7 @@ class PlayerInputSystemTest {
     @BeforeEach
     void beforeEach() {
         system = new PlayerInputSystem();
-        this.world = fi.jakojaannos.roguelite.engine.ecs.newimpl.World.createNew();
+        this.world = fi.jakojaannos.roguelite.engine.ecs.newecs.World.createNew();
         EntityManager entityManager = world.getEntityManager();
         world.provideResource(Weapons.class, new Weapons());
 

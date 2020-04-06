@@ -4,9 +4,8 @@ import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
-import fi.jakojaannos.roguelite.engine.ecs.newimpl.EcsSystem;
-import fi.jakojaannos.roguelite.engine.ecs.newimpl.Requirements;
-import fi.jakojaannos.roguelite.game.data.components.InAir;
+import fi.jakojaannos.roguelite.engine.ecs.newecs.EcsSystem;
+import fi.jakojaannos.roguelite.engine.ecs.newecs.Requirements;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.WeaponInput;
 import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponStats;

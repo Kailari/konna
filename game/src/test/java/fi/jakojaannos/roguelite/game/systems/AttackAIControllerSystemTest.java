@@ -31,7 +31,7 @@ public class AttackAIControllerSystemTest {
 
     @BeforeEach
     void beforeEach() {
-        world = fi.jakojaannos.roguelite.engine.ecs.newimpl.World.createNew();
+        world = fi.jakojaannos.roguelite.engine.ecs.newecs.World.createNew();
         entityManager = world.getEntityManager();
         world.provideResource(Time.class, new Time(new SimpleTimeManager(20)));
 

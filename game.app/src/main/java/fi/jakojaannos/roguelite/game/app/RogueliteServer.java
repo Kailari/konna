@@ -5,8 +5,8 @@ import java.util.Queue;
 import java.util.function.Supplier;
 
 import fi.jakojaannos.roguelite.engine.GameRunner;
-import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
-import fi.jakojaannos.roguelite.engine.ecs.newimpl.World;
+import fi.jakojaannos.roguelite.engine.ecs.dispatcher.SystemDispatcher;
+import fi.jakojaannos.roguelite.engine.ecs.newecs.World;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.network.ServerNetworkManager;
@@ -36,7 +36,7 @@ public class RogueliteServer {
     }
 
     private static ServerGameState createInitialGameState() {
-        return new ServerGameState(fi.jakojaannos.roguelite.engine.ecs.newimpl.World.createNew(),
+        return new ServerGameState(fi.jakojaannos.roguelite.engine.ecs.newecs.World.createNew(),
                                    new SimpleTimeManager(20L));
     }
 

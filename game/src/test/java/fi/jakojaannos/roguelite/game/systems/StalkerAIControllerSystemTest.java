@@ -37,7 +37,7 @@ public class StalkerAIControllerSystemTest {
     @BeforeEach
     void beforeEach() {
         system = new StalkerAIControllerSystem();
-        this.world = fi.jakojaannos.roguelite.engine.ecs.newimpl.World.createNew();
+        this.world = fi.jakojaannos.roguelite.engine.ecs.newecs.World.createNew();
         entityManager = world.getEntityManager();
         timeManager = new SimpleTimeManager(20);
         world.provideResource(Time.class, new Time(timeManager));

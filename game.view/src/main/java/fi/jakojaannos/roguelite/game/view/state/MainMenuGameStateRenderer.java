@@ -3,7 +3,7 @@ package fi.jakojaannos.roguelite.game.view.state;
 import java.nio.file.Path;
 
 import fi.jakojaannos.roguelite.engine.content.AssetManager;
-import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
+import fi.jakojaannos.roguelite.engine.ecs.dispatcher.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.Sprite;
@@ -13,7 +13,6 @@ import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.game.DebugConfig;
 import fi.jakojaannos.roguelite.game.view.systems.NetworkHUDSystem;
-import fi.jakojaannos.roguelite.game.view.systems.RenderSystemGroups;
 import fi.jakojaannos.roguelite.game.view.systems.UserInterfaceRenderingSystem;
 import fi.jakojaannos.roguelite.game.view.systems.debug.EntityCollisionBoundsRenderingSystem;
 import fi.jakojaannos.roguelite.game.view.systems.debug.EntityTransformRenderingSystem;
@@ -44,29 +43,25 @@ public class MainMenuGameStateRenderer extends GameStateRenderer {
 
         final var textRenderer = backend.getTextRenderer();
 
-        final var builder =
-                SystemDispatcher.builder()
-                                .withGroups(RenderSystemGroups.values())
-                                .addGroupDependencies(RenderSystemGroups.DEBUG, RenderSystemGroups.UI,
-                                                      RenderSystemGroups.OVERLAY, RenderSystemGroups.ENTITIES,
-                                                      RenderSystemGroups.LEVEL)
-                                .addGroupDependencies(RenderSystemGroups.UI, RenderSystemGroups.OVERLAY,
-                                                      RenderSystemGroups.ENTITIES, RenderSystemGroups.LEVEL)
-                                .addGroupDependencies(RenderSystemGroups.OVERLAY, RenderSystemGroups.ENTITIES,
-                                                      RenderSystemGroups.LEVEL)
-                                .addGroupDependencies(RenderSystemGroups.ENTITIES, RenderSystemGroups.LEVEL)
-                                .withSystem(new NetworkHUDSystem(userInterface))
-                                .withSystem(new UserInterfaceRenderingSystem(assetRoot,
-                                                                             camera,
-                                                                             fontRegistry,
-                                                                             spriteRegistry,
-                                                                             textRenderer,
-                                                                             userInterface,
-                                                                             backend));
+        final var builder = SystemDispatcher.builder();
+        final var ui = builder.group("menu-ui")
+                              .withSystem(new NetworkHUDSystem(userInterface))
+                              .withSystem(new UserInterfaceRenderingSystem(assetRoot,
+                                                                           camera,
+                                                                           fontRegistry,
+                                                                           spriteRegistry,
+                                                                           textRenderer,
+                                                                           userInterface,
+                                                                           backend))
+                              .dependsOn()
+                              .buildGroup();
 
         if (DebugConfig.debugModeEnabled) {
-            builder.withSystem(new EntityTransformRenderingSystem(assetRoot, camera, backend));
-            builder.withSystem(new EntityCollisionBoundsRenderingSystem(assetRoot, camera, backend));
+            builder.group("debug")
+                   .withSystem(new EntityCollisionBoundsRenderingSystem(assetRoot, camera, backend))
+                   .withSystem(new EntityTransformRenderingSystem(assetRoot, camera, backend))
+                   .dependsOn(ui)
+                   .buildGroup();
         }
 
         return builder.build();

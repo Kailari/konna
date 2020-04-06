@@ -37,7 +37,7 @@ class CharacterAttackSystemTest {
     @BeforeEach
     void beforeEach() {
         this.system = new CharacterAttackSystem();
-        this.world = fi.jakojaannos.roguelite.engine.ecs.newimpl.World.createNew();
+        this.world = fi.jakojaannos.roguelite.engine.ecs.newecs.World.createNew();
         EntityManager entityManager = world.getEntityManager();
 
         world.provideResource(Time.class, new Time(time = new SimpleTimeManager(20L)));

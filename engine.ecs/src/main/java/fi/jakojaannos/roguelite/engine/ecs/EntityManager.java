@@ -9,6 +9,7 @@ import java.util.stream.Stream;
  * Allows manipulating entities and their components. Accessor to a {@link World world's} entity storage. All
  * entity-related data mutations happen through the <code>EntityManager</code>.
  */
+@Deprecated
 public interface EntityManager {
     /**
      * Gets a stream containing ALL of the entities in the world. Heavy performance cost if whole stream is iterated,
@@ -16,6 +17,7 @@ public interface EntityManager {
      *
      * @return stream of all the entities in the world
      */
+    @Deprecated
     Stream<Entity> getAllEntities();
 
     /**
@@ -24,6 +26,7 @@ public interface EntityManager {
      *
      * @return the entity created
      */
+    @Deprecated
     Entity createEntity();
 
     /**
@@ -32,12 +35,14 @@ public interface EntityManager {
      *
      * @param entity the entity to mark for removal
      */
+    @Deprecated
     void destroyEntity(Entity entity);
 
     /**
      * Applies all entity mutations. Executes all tasks queued with {@link #createEntity()} and {@link
      * #destroyEntity(Entity)}
      */
+    @Deprecated
     void applyModifications();
 
     /**
@@ -49,6 +54,7 @@ public interface EntityManager {
      *
      * @return The added component
      */
+    @Deprecated
     <TComponent extends Component> TComponent addComponentTo(Entity entity, TComponent component);
 
     /**
@@ -57,6 +63,7 @@ public interface EntityManager {
      * @param entity    Entity to remove the component from
      * @param component Component to remove
      */
+    @Deprecated
     default <TComponent extends Component> void removeComponentFrom(
             final Entity entity,
             final TComponent component
@@ -70,6 +77,7 @@ public interface EntityManager {
      * @param entity         Entity to remove the component from
      * @param componentClass Type of the component to remove
      */
+    @Deprecated
     void removeComponentFrom(Entity entity, Class<? extends Component> componentClass);
 
     /**
@@ -81,6 +89,7 @@ public interface EntityManager {
      *
      * @return If component exists, component optional of the component. Otherwise, an empty optional
      */
+    @Deprecated
     <TComponent extends Component> Optional<TComponent> getComponentOf(
             Entity entity,
             Class<TComponent> componentClass
@@ -94,6 +103,7 @@ public interface EntityManager {
      *
      * @return <code>true</code> if the entity has the component, <code>false</code> otherwise
      */
+    @Deprecated
     boolean hasComponent(Entity entity, Class<? extends Component> componentClass);
 
     /**
@@ -104,6 +114,7 @@ public interface EntityManager {
      *
      * @return <code>EntityComponentPair</code>s of all the entities and their respective components
      */
+    @Deprecated
     <TComponent extends Component> Stream<EntityComponentPair<TComponent>> getEntitiesWith(
             Class<? extends TComponent> componentType
     );
@@ -117,6 +128,7 @@ public interface EntityManager {
      *
      * @return Stream of entities matching the given criteria
      */
+    @Deprecated
     Stream<Entity> getEntitiesWith(
             Collection<Class<? extends Component>> required,
             Collection<Class<? extends Component>> excluded
@@ -133,6 +145,7 @@ public interface EntityManager {
      * @return The existing component for the entity or the added if the entity did not have component of given type
      *         yet
      */
+    @Deprecated
     default <TComponent extends Component> TComponent addComponentIfAbsent(
             final Entity entity,
             final Class<TComponent> componentClass,
@@ -151,6 +164,7 @@ public interface EntityManager {
      *
      * @return <code>true</code> if the component was removed, <code>false</code> otherwise
      */
+    @Deprecated
     default boolean removeComponentIfPresent(
             final Entity entity,
             final Class<? extends Component> componentClass
@@ -166,10 +180,11 @@ public interface EntityManager {
     /**
      * Marks all entities for removal.
      */
+    @Deprecated
     default void clearEntities() {
         getAllEntities().forEach(this::destroyEntity);
     }
 
-    record EntityComponentPair<TComponent extends Component>(Entity entity, TComponent component) {
+    @Deprecated record EntityComponentPair<TComponent extends Component>(Entity entity, TComponent component) {
     }
 }

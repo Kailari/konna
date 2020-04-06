@@ -2,8 +2,8 @@ package fi.jakojaannos.roguelite.game.state;
 
 import javax.annotation.Nullable;
 
-import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
-import fi.jakojaannos.roguelite.engine.ecs.newimpl.World;
+import fi.jakojaannos.roguelite.engine.ecs.dispatcher.SystemDispatcher;
+import fi.jakojaannos.roguelite.engine.ecs.newecs.World;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.systems.menu.HandleMainMenuUIEventsSystem;
@@ -33,9 +33,11 @@ public class MainMenuGameState extends GameState {
 
     @Override
     protected SystemDispatcher createDispatcher() {
-        return SystemDispatcher.builder()
-                               .withSystem(this.uiEventsSystem = new HandleMainMenuUIEventsSystem())
-                               .build();
+        final var builder = SystemDispatcher.builder();
+        final var group = builder.group("main-menu")
+                                 .withSystem(this.uiEventsSystem = new HandleMainMenuUIEventsSystem())
+                                 .buildGroup();
+        return builder.build();
     }
 
 }

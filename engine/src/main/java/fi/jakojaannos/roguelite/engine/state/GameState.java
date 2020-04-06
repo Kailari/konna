@@ -6,8 +6,8 @@ import javax.annotation.Nullable;
 import fi.jakojaannos.roguelite.engine.MainThread;
 import fi.jakojaannos.roguelite.engine.data.resources.Network;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
-import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
-import fi.jakojaannos.roguelite.engine.ecs.newimpl.World;
+import fi.jakojaannos.roguelite.engine.ecs.dispatcher.SystemDispatcher;
+import fi.jakojaannos.roguelite.engine.ecs.newecs.World;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.network.NetworkManager;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
@@ -66,7 +66,7 @@ public abstract class GameState implements WorldProvider, AutoCloseable {
         this.world.provideResource(MainThread.class, mainThread);
         this.world.provideResource(Events.class, events);
 
-        this.dispatcher.dispatch(this.world);
+        this.dispatcher.tick(this.world);
         this.world.getEntityManager().applyModifications();
     }
 

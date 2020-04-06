@@ -7,10 +7,10 @@ import java.util.stream.Stream;
  * components} based on groupings called {@link Entity entities}. Provides a {@link #tick(Stream, World) tick}-method
  * for applying the state update on compatible entities.
  * <p>
- * Systems should never be manually ticked outside of a test environment. Instead, a {@link SystemDispatcher dispatcher}
+ * Systems should never be manually ticked outside of a test environment. Instead, a SystemDispatcher
  * should be used, as it automatically handles managing dependencies and resource requirements. All system instances
  * must be registered when constructing the
- * <code>SystemDispatcher</code> with the {@link SystemDispatcher#builder() Dispatcher builder}.
+ * <code>SystemDispatcher</code> with the SystemDispatcher#builder().
  * <p>
  * Systems are stateless. Having any persistent per-world state-full data on systems is strictly prohibited. If you need
  * cached results for an expensive calculation, use a {@link Resource}. It is allowed, however, to have fields for
@@ -34,8 +34,8 @@ import java.util.stream.Stream;
  * @see Component
  * @see Entity
  * @see SystemGroup
- * @see SystemDispatcher
  */
+@Deprecated
 public interface ECSSystem {
     /**
      * Declares dependency- and resource -requirements for this system. All components and resources required for
@@ -62,6 +62,7 @@ public interface ECSSystem {
      *
      * @param requirements Requirements builder for declaring the requirements
      */
+    @Deprecated
     void declareRequirements(RequirementsBuilder requirements);
 
     /**
@@ -71,5 +72,6 @@ public interface ECSSystem {
      * @param entities stream of matching entities to operate on
      * @param world    world the entities belong to
      */
+    @Deprecated
     void tick(Stream<Entity> entities, World world);
 }

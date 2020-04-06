@@ -23,7 +23,7 @@ class ColliderDataCollectorSystemTest {
 
     @BeforeEach
     void beforeEach() {
-        world = fi.jakojaannos.roguelite.engine.ecs.newimpl.World.createNew();
+        world = fi.jakojaannos.roguelite.engine.ecs.newecs.World.createNew();
         final EntityManager entityManager = world.getEntityManager();
 
         entityA = entityManager.createEntity();
