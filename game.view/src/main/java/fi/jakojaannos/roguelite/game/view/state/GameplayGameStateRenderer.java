@@ -3,7 +3,7 @@ package fi.jakojaannos.roguelite.game.view.state;
 import java.nio.file.Path;
 
 import fi.jakojaannos.roguelite.engine.content.AssetManager;
-import fi.jakojaannos.roguelite.engine.ecs.dispatcher.SystemDispatcher;
+import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.Sprite;

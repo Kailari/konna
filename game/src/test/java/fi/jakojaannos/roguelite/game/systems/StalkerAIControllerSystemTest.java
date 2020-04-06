@@ -9,9 +9,9 @@ import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.World;
 import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
 import fi.jakojaannos.roguelite.game.data.components.InAir;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
@@ -37,7 +37,7 @@ public class StalkerAIControllerSystemTest {
     @BeforeEach
     void beforeEach() {
         system = new StalkerAIControllerSystem();
-        this.world = fi.jakojaannos.roguelite.engine.ecs.newecs.World.createNew();
+        this.world = fi.jakojaannos.roguelite.engine.ecs.World.createNew();
         entityManager = world.getEntityManager();
         timeManager = new SimpleTimeManager(20);
         world.provideResource(Time.class, new Time(timeManager));

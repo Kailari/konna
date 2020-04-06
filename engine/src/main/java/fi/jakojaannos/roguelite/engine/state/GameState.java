@@ -6,11 +6,10 @@ import javax.annotation.Nullable;
 import fi.jakojaannos.roguelite.engine.MainThread;
 import fi.jakojaannos.roguelite.engine.data.resources.Network;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
-import fi.jakojaannos.roguelite.engine.ecs.dispatcher.SystemDispatcher;
-import fi.jakojaannos.roguelite.engine.ecs.newecs.World;
+import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.network.NetworkManager;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 
 public abstract class GameState implements WorldProvider, AutoCloseable {
     private final World world;
@@ -33,12 +32,10 @@ public abstract class GameState implements WorldProvider, AutoCloseable {
     }
 
     public GameState(
-            final World world,
-            final TimeManager timeManager
+            final World world
     ) {
         this.world = world;
-        this.world.provideResource(Time.class, new Time(timeManager));
-        this.world.provideResource(Network.class, new Network() {
+        this.world.registerResource(Network.class, new Network() {
             @Nullable private String error;
 
             @Override
@@ -62,10 +59,7 @@ public abstract class GameState implements WorldProvider, AutoCloseable {
 
     protected abstract SystemDispatcher createDispatcher();
 
-    public void tick(final Events events, final MainThread mainThread) {
-        this.world.provideResource(MainThread.class, mainThread);
-        this.world.provideResource(Events.class, events);
-
+    public void tick() {
         this.dispatcher.tick(this.world);
         this.world.getEntityManager().applyModifications();
     }

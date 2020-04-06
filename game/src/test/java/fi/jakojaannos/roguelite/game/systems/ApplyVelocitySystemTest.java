@@ -8,9 +8,9 @@ import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.World;
 import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
 import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
@@ -35,7 +35,7 @@ class ApplyVelocitySystemTest {
 
     @BeforeEach
     void beforeEach() {
-        world = fi.jakojaannos.roguelite.engine.ecs.newecs.World.createNew();
+        world = fi.jakojaannos.roguelite.engine.ecs.World.createNew();
         entityManager = world.getEntityManager();
 
         final var time = new Time(new SimpleTimeManager(20));
@@ -80,7 +80,7 @@ class ApplyVelocitySystemTest {
 
     @Test
     void entityWithoutColliderDoesNotMoveWhenVelocityIsZero() {
-        World world = fi.jakojaannos.roguelite.engine.ecs.newecs.World.createNew();
+        World world = fi.jakojaannos.roguelite.engine.ecs.World.createNew();
         EntityManager entityManager = world.getEntityManager();
 
         final var time = new Time(new SimpleTimeManager(20));
@@ -100,7 +100,7 @@ class ApplyVelocitySystemTest {
 
     @Test
     void entityWithoutColliderMovesWhenVelocityIsNonZero() {
-        World world = fi.jakojaannos.roguelite.engine.ecs.newecs.World.createNew();
+        World world = fi.jakojaannos.roguelite.engine.ecs.World.createNew();
         EntityManager entityManager = world.getEntityManager();
 
         final var time = new Time(new SimpleTimeManager(20));

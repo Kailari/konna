@@ -4,8 +4,8 @@ import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
-import fi.jakojaannos.roguelite.engine.ecs.newecs.EcsSystem;
-import fi.jakojaannos.roguelite.engine.ecs.newecs.Requirements;
+import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
+import fi.jakojaannos.roguelite.engine.ecs.Requirements;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.WeaponInput;
 import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponStats;
@@ -14,11 +14,10 @@ import fi.jakojaannos.roguelite.game.weapons.WeaponInventory;
 public class NewCharacterAttackSystem implements EcsSystem<NewCharacterAttackSystem.Resources, NewCharacterAttackSystem.EntityData, EcsSystem.NoEvents> {
     @Override
     public Requirements<Resources, EntityData, NoEvents> declareRequirements(
-            final Requirements.Builder<Resources, EntityData, NoEvents> require
+            final Requirements<Resources, EntityData, NoEvents> require
     ) {
         return require.entityData(EntityData.class)
-                      .resources(Resources.class)
-                      .build();
+                      .resources(Resources.class);
     }
 
     @Override

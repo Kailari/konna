@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 
-import fi.jakojaannos.roguelite.engine.ecs.Resource;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Resource;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 
 public class GameStateManager implements Resource {

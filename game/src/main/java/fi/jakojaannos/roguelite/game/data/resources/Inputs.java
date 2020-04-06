@@ -1,6 +1,6 @@
 package fi.jakojaannos.roguelite.game.data.resources;
 
-import fi.jakojaannos.roguelite.engine.ecs.Resource;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Resource;
 
 public class Inputs implements Resource {
     public boolean inputLeft = false;

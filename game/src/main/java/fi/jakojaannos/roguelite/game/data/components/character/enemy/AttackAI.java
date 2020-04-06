@@ -3,8 +3,8 @@ package fi.jakojaannos.roguelite.game.data.components.character.enemy;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
-import fi.jakojaannos.roguelite.engine.ecs.Component;
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
 
 public class AttackAI implements Component {

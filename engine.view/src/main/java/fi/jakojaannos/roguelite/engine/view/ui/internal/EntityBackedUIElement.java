@@ -3,8 +3,8 @@ package fi.jakojaannos.roguelite.engine.view.ui.internal;
 import java.util.*;
 import javax.annotation.Nullable;
 
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
 
 public class EntityBackedUIElement implements UIElement {

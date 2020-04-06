@@ -9,8 +9,8 @@ import java.util.stream.Stream;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.World;
 import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
 import fi.jakojaannos.roguelite.game.data.components.CameraFollowTargetTag;
 
@@ -25,7 +25,7 @@ class CameraControlSystemTest {
     @BeforeEach
     void beforeEach() {
         system = new CameraControlSystem();
-        world = fi.jakojaannos.roguelite.engine.ecs.newecs.World.createNew();
+        world = fi.jakojaannos.roguelite.engine.ecs.World.createNew();
 
         final var time = new Time(new SimpleTimeManager(20));
         world.provideResource(Time.class, time);

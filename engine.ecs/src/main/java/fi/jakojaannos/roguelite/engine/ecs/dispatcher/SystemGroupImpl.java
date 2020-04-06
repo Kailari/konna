@@ -9,8 +9,9 @@ import java.util.Collection;
 import java.util.Objects;
 import javax.annotation.Nullable;
 
-import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
-import fi.jakojaannos.roguelite.engine.ecs.newecs.EcsSystem;
+import fi.jakojaannos.roguelite.engine.ecs.SystemGroup;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
+import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 
 public class SystemGroupImpl implements SystemGroup {
     private static final Logger LOG = LoggerFactory.getLogger(SystemGroupImpl.class);

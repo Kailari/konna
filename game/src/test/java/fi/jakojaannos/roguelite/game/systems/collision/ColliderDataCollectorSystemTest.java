@@ -6,9 +6,9 @@ import org.junit.jupiter.api.Test;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.World;
 import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.resources.collision.Colliders;
@@ -23,7 +23,7 @@ class ColliderDataCollectorSystemTest {
 
     @BeforeEach
     void beforeEach() {
-        world = fi.jakojaannos.roguelite.engine.ecs.newecs.World.createNew();
+        world = fi.jakojaannos.roguelite.engine.ecs.World.createNew();
         final EntityManager entityManager = world.getEntityManager();
 
         entityA = entityManager.createEntity();

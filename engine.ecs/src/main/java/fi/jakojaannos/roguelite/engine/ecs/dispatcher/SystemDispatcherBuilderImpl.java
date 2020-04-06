@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
+import fi.jakojaannos.roguelite.engine.ecs.SystemGroup;
+
 public class SystemDispatcherBuilderImpl implements SystemDispatcher.Builder {
     private final Collection<SystemGroupImpl.Builder> groups = new ArrayList<>();
 

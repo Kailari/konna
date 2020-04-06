@@ -5,9 +5,5 @@ module roguelite.engine.ecs {
     requires roguelite.engine.utilities;
 
     exports fi.jakojaannos.roguelite.engine.ecs;
-    exports fi.jakojaannos.roguelite.engine.ecs.newecs;
-
-    // TODO: remove these
-    exports fi.jakojaannos.roguelite.engine.ecs.newecs.world;
-    exports fi.jakojaannos.roguelite.engine.ecs.dispatcher;
+    exports fi.jakojaannos.roguelite.engine.ecs.legacy;
 }

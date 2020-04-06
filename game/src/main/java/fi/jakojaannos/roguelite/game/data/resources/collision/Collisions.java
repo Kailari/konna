@@ -2,8 +2,8 @@ package fi.jakojaannos.roguelite.game.data.resources.collision;
 
 import java.util.*;
 
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.Resource;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Resource;
 import fi.jakojaannos.roguelite.game.systems.collision.CollisionEvent;
 
 /**

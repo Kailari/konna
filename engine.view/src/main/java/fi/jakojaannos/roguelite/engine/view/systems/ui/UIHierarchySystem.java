@@ -3,7 +3,7 @@ package fi.jakojaannos.roguelite.engine.view.systems.ui;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
-import fi.jakojaannos.roguelite.engine.ecs.*;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.*;
 import fi.jakojaannos.roguelite.engine.view.data.components.internal.Parent;
 import fi.jakojaannos.roguelite.engine.view.data.resources.ui.UIHierarchy;
 

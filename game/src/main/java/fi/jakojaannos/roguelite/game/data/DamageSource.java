@@ -28,15 +28,15 @@ public interface DamageSource<TKiller> {
         }
     }
 
-    class Entity implements DamageSource<fi.jakojaannos.roguelite.engine.ecs.Entity> {
-        private final fi.jakojaannos.roguelite.engine.ecs.Entity player;
+    class Entity implements DamageSource<fi.jakojaannos.roguelite.engine.ecs.legacy.Entity> {
+        private final fi.jakojaannos.roguelite.engine.ecs.legacy.Entity player;
 
         @Override
-        public fi.jakojaannos.roguelite.engine.ecs.Entity getKiller() {
+        public fi.jakojaannos.roguelite.engine.ecs.legacy.Entity getKiller() {
             return this.player;
         }
 
-        public Entity(final fi.jakojaannos.roguelite.engine.ecs.Entity player) {
+        public Entity(final fi.jakojaannos.roguelite.engine.ecs.legacy.Entity player) {
             this.player = player;
         }
     }

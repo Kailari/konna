@@ -1,6 +1,6 @@
 package fi.jakojaannos.roguelite.game.weapons;
 
-import fi.jakojaannos.roguelite.engine.ecs.Component;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
 import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponStats;
 
 import static fi.jakojaannos.roguelite.game.weapons.NoWeapon.NoState;

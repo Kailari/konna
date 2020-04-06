@@ -5,8 +5,8 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
 import fi.jakojaannos.roguelite.engine.view.data.components.internal.ProportionValueComponent;
 import fi.jakojaannos.roguelite.engine.view.data.components.ui.ElementBoundaries;
 import fi.jakojaannos.roguelite.engine.view.ui.ProportionValue;
