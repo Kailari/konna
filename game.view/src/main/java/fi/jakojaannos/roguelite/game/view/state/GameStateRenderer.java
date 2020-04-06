@@ -3,8 +3,8 @@ package fi.jakojaannos.roguelite.game.view.state;
 import java.nio.file.Path;
 
 import fi.jakojaannos.roguelite.engine.content.AssetManager;
-import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
-import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.ecs.dispatcher.SystemDispatcher;
+import fi.jakojaannos.roguelite.engine.ecs.newecs.World;
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
@@ -41,7 +41,7 @@ public abstract class GameStateRenderer implements AutoCloseable {
     );
 
     public void render(final World world) {
-        this.rendererDispatcher.dispatch(world);
+        this.rendererDispatcher.tick(world);
     }
 
     @Override

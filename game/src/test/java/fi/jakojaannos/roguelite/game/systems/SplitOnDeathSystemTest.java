@@ -20,7 +20,7 @@ public class SplitOnDeathSystemTest {
     @Test
     void largeSlimeSpawnsMultipleSlimesOnDeath() {
         SplitOnDeathSystem system = new SplitOnDeathSystem();
-        World world = fi.jakojaannos.roguelite.engine.ecs.newimpl.World.createNew();
+        World world = fi.jakojaannos.roguelite.engine.ecs.newecs.World.createNew();
         EntityManager entityManager = world.getEntityManager();
 
         final var time = new Time(new SimpleTimeManager(20));

@@ -7,8 +7,8 @@ import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
-import fi.jakojaannos.roguelite.engine.ecs.newimpl.World;
+import fi.jakojaannos.roguelite.engine.ecs.dispatcher.SystemDispatcher;
+import fi.jakojaannos.roguelite.engine.ecs.newecs.World;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.ui.TextSizeProvider;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
@@ -31,27 +31,6 @@ public class UserInterfaceImpl implements UserInterface {
     private final Viewport viewport;
     private final ECSSystem hierarchySystem;
 
-    public UserInterfaceImpl(
-            final Viewport viewport,
-            final TextSizeProvider textSizeProvider
-    ) {
-        this.viewport = viewport;
-        this.uiWorld = World.createNew();
-
-        this.uiDispatcher = SystemDispatcher.builder()
-                                            .withGroups(UISystemGroups.values())
-                                            .addGroupDependency(UISystemGroups.EVENTS, UISystemGroups.PREPARATIONS)
-                                            .withSystem(this.hierarchySystem = new UIHierarchySystem())
-                                            .withSystem(new UILabelAutomaticSizeCalculationSystem(textSizeProvider))
-                                            .withSystem(new UIElementBoundaryCalculationSystem())
-                                            .withSystem(new UIElementHoverEventProvider())
-                                            .withSystem(new UIElementClickEventProvider())
-                                            .build();
-
-        this.uiWorld.provideResource(UIRoot.class, new UIRoot(viewport));
-        this.uiWorld.provideResource(UIHierarchy.class, new UIHierarchy());
-    }
-
     @Override
     public int getWidth() {
         return this.viewport.getWidthInPixels();
@@ -64,6 +43,41 @@ public class UserInterfaceImpl implements UserInterface {
 
     public EntityManager getEntityManager() {
         return this.uiWorld.getEntityManager();
+    }
+
+    @Override
+    public Stream<UIElement> getRoots() {
+        return this.uiWorld.getResource(UIHierarchy.class)
+                           .getRoots();
+    }
+
+    public UserInterfaceImpl(
+            final Viewport viewport,
+            final TextSizeProvider textSizeProvider
+    ) {
+        this.viewport = viewport;
+        this.uiWorld = World.createNew();
+
+        final var builder = SystemDispatcher.builder();
+        final var preparations = builder.group("preparations")
+                                        .withSystem(this.hierarchySystem = new UIHierarchySystem())
+                                        .withSystem(new UILabelAutomaticSizeCalculationSystem(textSizeProvider))
+                                        .withSystem(new UIElementBoundaryCalculationSystem())
+                                        .buildGroup();
+
+        final var events = builder.group("events")
+                                  .withSystem(new UIElementHoverEventProvider())
+                                  .withSystem(new UIElementClickEventProvider())
+                                  .dependsOn(preparations)
+                                  .buildGroup();
+
+        final var cleanup = builder.group("cleanup")
+                                   .dependsOn(preparations, events)
+                                   .buildGroup();
+
+        this.uiDispatcher = builder.build();
+        this.uiWorld.provideResource(UIRoot.class, new UIRoot(viewport));
+        this.uiWorld.provideResource(UIHierarchy.class, new UIHierarchy());
     }
 
     @Override
@@ -88,12 +102,6 @@ public class UserInterfaceImpl implements UserInterface {
     }
 
     @Override
-    public Stream<UIElement> getRoots() {
-        return this.uiWorld.getResource(UIHierarchy.class)
-                           .getRoots();
-    }
-
-    @Override
     public Stream<UIElement> allElements() {
         return this.uiWorld.getResource(UIHierarchy.class)
                            .getElements();
@@ -106,7 +114,7 @@ public class UserInterfaceImpl implements UserInterface {
         this.uiWorld.provideResource(Events.class, events);
         this.uiWorld.createOrReplaceResource(Mouse.class, mouse);
 
-        this.uiDispatcher.dispatch(this.uiWorld);
+        this.uiDispatcher.tick(this.uiWorld);
         this.uiWorld.getEntityManager().applyModifications();
     }
 

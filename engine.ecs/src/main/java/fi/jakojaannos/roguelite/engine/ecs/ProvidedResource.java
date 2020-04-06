@@ -7,5 +7,6 @@ package fi.jakojaannos.roguelite.engine.ecs;
  *
  * @see Resource
  */
+@Deprecated
 public interface ProvidedResource {
 }

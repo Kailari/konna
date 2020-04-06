@@ -20,12 +20,14 @@ package fi.jakojaannos.roguelite.engine.ecs;
  * @see EntityManager
  * @see ECSSystem
  */
+@Deprecated
 public interface Entity {
     /**
      * Gets the unique identifier for this entity. Entity IDs are guaranteed to be unique.
      *
      * @return the unique ID of this entity.
      */
+    @Deprecated
     int getId();
 
     /**
@@ -35,5 +37,6 @@ public interface Entity {
      * @return <code>true</code> if this entity is removed or will be removed during the next
      * modification tick. <code>false</code> otherwise.
      */
+    @Deprecated
     boolean isMarkedForRemoval();
 }

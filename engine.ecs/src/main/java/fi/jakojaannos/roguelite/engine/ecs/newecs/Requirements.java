@@ -1,0 +1,29 @@
+package fi.jakojaannos.roguelite.engine.ecs.newecs;
+
+import java.lang.reflect.Constructor;
+
+import fi.jakojaannos.roguelite.engine.ecs.newecs.systemdata.RequirementsBuilderImpl;
+
+public interface Requirements<TResources, TEntityData, TEvents> {
+    static <TResources, TEntityData, TEvents> Builder<TResources, TEntityData, TEvents> builder() {
+        return new RequirementsBuilderImpl<>();
+    }
+
+    TEntityData entityDataFactory(Object[] params);
+
+    Class<?>[] entityDataComponentTypes();
+
+    Constructor<TResources> resourceConstructor();
+
+    Class<?>[] resourceComponentTypes();
+
+    interface Builder<TResources, TEntityData, TEvents> {
+        Builder<TResources, TEntityData, TEvents> entityData(Class<TEntityData> dataClass);
+
+        Builder<TResources, TEntityData, TEvents> resources(Class<TResources> resourcesClass);
+
+        Builder<TResources, TEntityData, TEvents> events(Class<TEvents> eventsClass);
+
+        Requirements<TResources, TEntityData, TEvents> build();
+    }
+}

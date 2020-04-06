@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Test;
 import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.newimpl.World;
-import fi.jakojaannos.roguelite.engine.ecs.newimpl.world.LegacyCompat;
+import fi.jakojaannos.roguelite.engine.ecs.newecs.World;
+import fi.jakojaannos.roguelite.engine.ecs.newecs.world.LegacyCompat;
 
 import static org.junit.jupiter.api.Assertions.*;
 

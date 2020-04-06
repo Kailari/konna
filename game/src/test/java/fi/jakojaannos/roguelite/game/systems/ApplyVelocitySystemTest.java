@@ -35,7 +35,7 @@ class ApplyVelocitySystemTest {
 
     @BeforeEach
     void beforeEach() {
-        world = fi.jakojaannos.roguelite.engine.ecs.newimpl.World.createNew();
+        world = fi.jakojaannos.roguelite.engine.ecs.newecs.World.createNew();
         entityManager = world.getEntityManager();
 
         final var time = new Time(new SimpleTimeManager(20));
@@ -80,7 +80,7 @@ class ApplyVelocitySystemTest {
 
     @Test
     void entityWithoutColliderDoesNotMoveWhenVelocityIsZero() {
-        World world = fi.jakojaannos.roguelite.engine.ecs.newimpl.World.createNew();
+        World world = fi.jakojaannos.roguelite.engine.ecs.newecs.World.createNew();
         EntityManager entityManager = world.getEntityManager();
 
         final var time = new Time(new SimpleTimeManager(20));
@@ -100,7 +100,7 @@ class ApplyVelocitySystemTest {
 
     @Test
     void entityWithoutColliderMovesWhenVelocityIsNonZero() {
-        World world = fi.jakojaannos.roguelite.engine.ecs.newimpl.World.createNew();
+        World world = fi.jakojaannos.roguelite.engine.ecs.newecs.World.createNew();
         EntityManager entityManager = world.getEntityManager();
 
         final var time = new Time(new SimpleTimeManager(20));

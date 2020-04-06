@@ -28,7 +28,7 @@ public class SpawnerSystemTest {
     @BeforeEach
     void beforeEach() {
         this.spawnerSystem = new SpawnerSystem();
-        this.world = fi.jakojaannos.roguelite.engine.ecs.newimpl.World.createNew();
+        this.world = fi.jakojaannos.roguelite.engine.ecs.newecs.World.createNew();
         this.entityManager = world.getEntityManager();
 
         final var time = new Time(new SimpleTimeManager(20));

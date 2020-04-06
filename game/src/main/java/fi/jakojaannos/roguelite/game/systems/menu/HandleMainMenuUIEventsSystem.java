@@ -70,7 +70,7 @@ public class HandleMainMenuUIEventsSystem implements ECSSystem {
 
     private GameplayGameState createGameplayState(final World world) {
         return new GameplayGameState(System.nanoTime(),
-                                     fi.jakojaannos.roguelite.engine.ecs.newimpl.World.createNew(),
+                                     fi.jakojaannos.roguelite.engine.ecs.newecs.World.createNew(),
                                      world.getResource(Time.class).timeManager());
     }
 }

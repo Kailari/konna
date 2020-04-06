@@ -3,7 +3,7 @@ package fi.jakojaannos.roguelite.game.view.state;
 import java.nio.file.Path;
 
 import fi.jakojaannos.roguelite.engine.content.AssetManager;
-import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
+import fi.jakojaannos.roguelite.engine.ecs.dispatcher.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.Sprite;
@@ -47,35 +47,38 @@ public class GameplayGameStateRenderer extends GameStateRenderer {
         final var spriteRegistry = assetManager.getAssetRegistry(Sprite.class);
         final var textRenderer = backend.getTextRenderer();
 
-        final var builder =
-                SystemDispatcher.builder()
-                                .withGroups(RenderSystemGroups.values())
-                                .addGroupDependencies(RenderSystemGroups.DEBUG, RenderSystemGroups.UI,
-                                                      RenderSystemGroups.OVERLAY, RenderSystemGroups.ENTITIES,
-                                                      RenderSystemGroups.LEVEL)
-                                .addGroupDependencies(RenderSystemGroups.UI, RenderSystemGroups.OVERLAY,
-                                                      RenderSystemGroups.ENTITIES, RenderSystemGroups.LEVEL)
-                                .addGroupDependencies(RenderSystemGroups.OVERLAY, RenderSystemGroups.ENTITIES,
-                                                      RenderSystemGroups.LEVEL)
-                                .addGroupDependencies(RenderSystemGroups.ENTITIES, RenderSystemGroups.LEVEL)
-                                .withSystem(new LevelRenderingSystem(assetRoot, camera, spriteRegistry, backend))
-                                .withSystem(new SpriteRenderingSystem(assetRoot, camera, spriteRegistry, backend))
-                                .withSystem(new TurretRenderingSystem(assetRoot, backend, spriteRegistry, camera))
-                                .withSystem(new UpdateHUDSystem(userInterface))
-                                .withSystem(new UpdateGameOverSplashSystem(userInterface))
-                                .withSystem(new HealthBarUpdateSystem(camera, userInterface))
-                                .withSystem(new NetworkHUDSystem(userInterface))
-                                .withSystem(new UserInterfaceRenderingSystem(assetRoot,
-                                                                             camera,
-                                                                             fontRegistry,
-                                                                             spriteRegistry,
-                                                                             textRenderer,
-                                                                             userInterface,
-                                                                             backend));
+        final var builder = SystemDispatcher.builder();
+        final var level = builder.group("level")
+                                 .withSystem(new LevelRenderingSystem(assetRoot, camera, spriteRegistry, backend))
+                                 .buildGroup();
+
+        final var entities = builder.group("entities")
+                                    .withSystem(new SpriteRenderingSystem(assetRoot, camera, spriteRegistry, backend))
+                                    .withSystem(new TurretRenderingSystem(assetRoot, backend, spriteRegistry, camera))
+                                    .dependsOn(level)
+                                    .buildGroup();
+
+        final var ui = builder.group("ui")
+                              .withSystem(new UpdateHUDSystem(userInterface))
+                              .withSystem(new UpdateGameOverSplashSystem(userInterface))
+                              .withSystem(new HealthBarUpdateSystem(camera, userInterface))
+                              .withSystem(new NetworkHUDSystem(userInterface))
+                              .withSystem(new UserInterfaceRenderingSystem(assetRoot,
+                                                                           camera,
+                                                                           fontRegistry,
+                                                                           spriteRegistry,
+                                                                           textRenderer,
+                                                                           userInterface,
+                                                                           backend))
+                              .dependsOn(entities, level)
+                              .buildGroup();
 
         if (DebugConfig.debugModeEnabled) {
-            builder.withSystem(new EntityCollisionBoundsRenderingSystem(assetRoot, camera, backend));
-            builder.withSystem(new EntityTransformRenderingSystem(assetRoot, camera, backend));
+            builder.group("debug")
+                   .withSystem(new EntityCollisionBoundsRenderingSystem(assetRoot, camera, backend))
+                   .withSystem(new EntityTransformRenderingSystem(assetRoot, camera, backend))
+                   .dependsOn(ui, entities, level)
+                   .buildGroup();
         }
 
         return builder.build();

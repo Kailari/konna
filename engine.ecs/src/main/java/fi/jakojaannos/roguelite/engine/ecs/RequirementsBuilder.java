@@ -9,6 +9,7 @@ import java.util.stream.Stream;
  *
  * @see ECSSystem#declareRequirements(RequirementsBuilder)
  */
+@Deprecated
 public interface RequirementsBuilder {
     /**
      * Adds a dependency for this system to be ticked after given <code>other</code> system.
@@ -17,6 +18,7 @@ public interface RequirementsBuilder {
      *
      * @return the builder for chaining
      */
+    @Deprecated
     RequirementsBuilder tickAfter(Class<? extends ECSSystem> other);
 
     /**
@@ -26,6 +28,7 @@ public interface RequirementsBuilder {
      *
      * @return the builder for chaining
      */
+    @Deprecated
     RequirementsBuilder tickBefore(Class<? extends ECSSystem> other);
 
     /**
@@ -35,6 +38,7 @@ public interface RequirementsBuilder {
      *
      * @return the builder for chaining
      */
+    @Deprecated
     RequirementsBuilder tickAfter(SystemGroup group);
 
     /**
@@ -44,6 +48,7 @@ public interface RequirementsBuilder {
      *
      * @return the builder for chaining
      */
+    @Deprecated
     RequirementsBuilder tickBefore(SystemGroup group);
 
     /**
@@ -53,6 +58,7 @@ public interface RequirementsBuilder {
      *
      * @return the builder for chaining
      */
+    @Deprecated
     RequirementsBuilder addToGroup(SystemGroup group);
 
     /**
@@ -62,6 +68,7 @@ public interface RequirementsBuilder {
      *
      * @return the builder for chaining
      */
+    @Deprecated
     RequirementsBuilder withComponent(Class<? extends Component> componentClass);
 
     /**
@@ -73,6 +80,7 @@ public interface RequirementsBuilder {
      *
      * @return the builder for chaining
      */
+    @Deprecated
     RequirementsBuilder withoutComponent(Class<? extends Component> componentClass);
 
     /**
@@ -82,6 +90,7 @@ public interface RequirementsBuilder {
      *
      * @return the builder for chaining
      */
+    @Deprecated
     RequirementsBuilder requireResource(Class<? extends Resource> resource);
 
     /**
@@ -91,5 +100,6 @@ public interface RequirementsBuilder {
      *
      * @return the builder for chaining
      */
+    @Deprecated
     RequirementsBuilder requireProvidedResource(Class<? extends ProvidedResource> resource);
 }
