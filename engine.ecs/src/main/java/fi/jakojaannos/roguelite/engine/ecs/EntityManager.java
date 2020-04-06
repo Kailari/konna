@@ -5,8 +5,6 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import fi.jakojaannos.roguelite.engine.ecs.entities.EntityManagerImpl;
-
 /**
  * Allows manipulating entities and their components. Accessor to a {@link World world's} entity storage. All
  * entity-related data mutations happen through the <code>EntityManager</code>.
@@ -19,10 +17,6 @@ public interface EntityManager {
      * @return stream of all the entities in the world
      */
     Stream<Entity> getAllEntities();
-
-    static EntityManager createNew(final int entityCapacity, final int maxComponentTypes) {
-        return new EntityManagerImpl(entityCapacity, maxComponentTypes);
-    }
 
     /**
      * Creates a new entity. The created entity is added to the game world during the next {@link

@@ -2,16 +2,17 @@ package fi.jakojaannos.roguelite.engine.ecs.newimpl.components;
 
 // TODO: add/remove must happen *after* iteration (of a single system) has finished. Otherwise
 //       execution order might affect which entities are iterated
+//          -   handle with a bitmask? Save changes to storage on-the-go but flip bits only *after* the execution has
+//              finished?
+//          -   is this a non-issue? Should modifying components that affect iteration of the system itself be
+//              prohibited?
 
 import java.lang.reflect.Array;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 public final class ComponentStorage {
     private final Map<Class<?>, Object[]> components = new HashMap<>();
-    private final int capacity;
+    private int capacity;
 
     public ComponentStorage(final int capacity) {
         this.capacity = capacity;
@@ -76,6 +77,11 @@ public final class ComponentStorage {
                 storage[from] = null;
             }
         }
+    }
+
+    public void resize(final int newCapacity) {
+        this.capacity = newCapacity;
+        this.components.replaceAll((componentClass, storage) -> Arrays.copyOf(storage, newCapacity));
     }
 
     @SuppressWarnings("unchecked")

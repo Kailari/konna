@@ -25,7 +25,7 @@ public class Players implements Resource {
         return Optional.ofNullable(this.localPlayer);
     }
 
-    public void setLocalPlayer(final Entity player) {
+    public void setLocalPlayer(@Nullable final Entity player) {
         this.localPlayer = player;
     }
 

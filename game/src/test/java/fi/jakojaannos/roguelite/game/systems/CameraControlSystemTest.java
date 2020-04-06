@@ -10,16 +10,12 @@ import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.CameraFollowTargetTag;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class CameraControlSystemTest {
     private CameraControlSystem system;
@@ -29,7 +25,7 @@ class CameraControlSystemTest {
     @BeforeEach
     void beforeEach() {
         system = new CameraControlSystem();
-        world = World.createNew(EntityManager.createNew(256, 32));
+        world = fi.jakojaannos.roguelite.engine.ecs.newimpl.World.createNew();
 
         final var time = new Time(new SimpleTimeManager(20));
         world.provideResource(Time.class, time);

@@ -17,8 +17,8 @@ public class ReaperSystemTest {
 
     @Test
     void reaperSystemRemovesEntityItReceives() {
-        EntityManager entityManager = EntityManager.createNew(256, 32);
-        World world = World.createNew(entityManager);
+        World world = fi.jakojaannos.roguelite.engine.ecs.newimpl.World.createNew();
+        EntityManager entityManager = world.getEntityManager();
         ReaperSystem system = new ReaperSystem();
 
         Entity entity = entityManager.createEntity();
@@ -32,8 +32,8 @@ public class ReaperSystemTest {
 
     @Test
     void reaperSystemRemovesAllEntitiesItReceives() {
-        EntityManager entityManager = EntityManager.createNew(256, 32);
-        World world = World.createNew(entityManager);
+        World world = fi.jakojaannos.roguelite.engine.ecs.newimpl.World.createNew();
+        EntityManager entityManager = world.getEntityManager();
         ReaperSystem system = new ReaperSystem();
 
         Entity e1 = entityManager.createEntity();

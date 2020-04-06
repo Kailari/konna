@@ -16,6 +16,7 @@ public interface World extends fi.jakojaannos.roguelite.engine.ecs.World {
     ResourceStorage getResources();
 
     @Override
+    @Deprecated
     default EntityManager getEntityManager() {
         return getCompatibilityLayer().getEntityManager();
     }
@@ -32,15 +33,16 @@ public interface World extends fi.jakojaannos.roguelite.engine.ecs.World {
 
     EntityHandle createEntity(Object... components);
 
-    <TResource> TResource fetchResource(Class<?> resourceClass);
+    <TResource> TResource fetchResource(Class<TResource> resourceClass);
 
     void destroyEntity(EntityHandle handle);
 
     void commitEntityModifications();
 
-    EntityHandle getEntity(int startIndex);
+    EntityHandle getEntity(int entityId);
 
     @Override
+    @Deprecated
     default <TResource extends Resource> TResource getOrCreateResource(
             final Class<TResource> resourceType
     ) {
@@ -48,15 +50,16 @@ public interface World extends fi.jakojaannos.roguelite.engine.ecs.World {
     }
 
     @Override
+    @Deprecated
     default <TResource extends Resource> void createOrReplaceResource(
             final Class<TResource> resourceClass,
             final TResource resource
     ) {
-        throw new UnsupportedOperationException("createOrReplaceResource is now deprecated, "
-                                                + "use new fetchResource instead!");
+        getCompatibilityLayer().createOrReplaceResource(resourceClass, resource);
     }
 
     @Override
+    @Deprecated
     default <TResource extends ProvidedResource> void provideResource(
             final Class<TResource> resourceClass,
             final TResource resource
@@ -65,6 +68,7 @@ public interface World extends fi.jakojaannos.roguelite.engine.ecs.World {
     }
 
     @Override
+    @Deprecated
     default <TResource extends ProvidedResource> TResource getResource(
             final Class<TResource> resourceType
     ) {

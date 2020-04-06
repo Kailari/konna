@@ -12,14 +12,12 @@ import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.game.systems.physics.ApplyFrictionSystem;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class ApplyFrictionSystemTest {
 
@@ -34,8 +32,8 @@ public class ApplyFrictionSystemTest {
 
     @BeforeEach
     void beforeEach() {
-        entityManager = EntityManager.createNew(256, 32);
-        world = World.createNew(entityManager);
+        world = fi.jakojaannos.roguelite.engine.ecs.newimpl.World.createNew();
+        entityManager = world.getEntityManager();
         system = new ApplyFrictionSystem();
 
         final var time = new Time(new SimpleTimeManager(20));

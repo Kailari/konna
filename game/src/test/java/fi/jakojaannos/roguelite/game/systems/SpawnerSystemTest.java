@@ -12,7 +12,6 @@ import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.SpawnerComponent;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.FollowerAI;
 
@@ -29,8 +28,8 @@ public class SpawnerSystemTest {
     @BeforeEach
     void beforeEach() {
         this.spawnerSystem = new SpawnerSystem();
-        this.entityManager = EntityManager.createNew(256, 32);
-        this.world = World.createNew(entityManager);
+        this.world = fi.jakojaannos.roguelite.engine.ecs.newimpl.World.createNew();
+        this.entityManager = world.getEntityManager();
 
         final var time = new Time(new SimpleTimeManager(20));
         world.provideResource(Time.class, time);

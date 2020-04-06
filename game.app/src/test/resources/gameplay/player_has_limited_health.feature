@@ -9,7 +9,7 @@ Feature: The player has limited health and dies if taking too much damage.
   Scenario: The player should not be able to survive for a longer periods of time if they do nothing.
     Given the game world just finished loading
     When player does nothing
-    And the game runs for 20 seconds
+    And the game runs for 60 seconds
     Then the player should be dead.
 
   Scenario: The player should die if they are surrounded by follower enemies and do nothing.

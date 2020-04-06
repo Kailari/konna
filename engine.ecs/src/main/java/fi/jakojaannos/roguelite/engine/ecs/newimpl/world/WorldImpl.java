@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import fi.jakojaannos.roguelite.engine.ecs.newimpl.EntityHandle;
@@ -19,10 +20,10 @@ public class WorldImpl implements World {
 
     private final ComponentStorage componentStorage;
     private final ResourceStorage resourceStorage;
-
-    private final EntityHandleImpl[] entities;
-    private final int capacity;
     private final List<Runnable> entityRemoveTasks = new ArrayList<>();
+
+    private EntityHandleImpl[] entities;
+    private int capacity;
 
     private int idCounter;
     private int nEntities;
@@ -74,6 +75,10 @@ public class WorldImpl implements World {
         final var id = this.idCounter;
         this.idCounter++;
 
+        if (id == this.entities.length) {
+            resize(this.capacity + 256);
+        }
+
         // TODO: Change to EntityHandleImpl
         this.entities[id] = new LegacyEntityHandleImpl(id, this);
         for (final var component : components) {
@@ -82,6 +87,12 @@ public class WorldImpl implements World {
 
         LOG.debug("Created entity with ID {}", id);
         return this.entities[id];
+    }
+
+    private void resize(final int newCapacity) {
+        this.capacity = newCapacity;
+        this.entities = Arrays.copyOf(this.entities, newCapacity);
+        this.componentStorage.resize(newCapacity);
     }
 
     @Override
@@ -124,7 +135,7 @@ public class WorldImpl implements World {
     }
 
     @Override
-    public <TResource> TResource fetchResource(final Class<?> resourceClass) {
+    public <TResource> TResource fetchResource(final Class<TResource> resourceClass) {
         return this.resourceStorage.fetch(resourceClass);
     }
 }

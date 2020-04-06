@@ -20,6 +20,11 @@ public class ResourceStorage {
         this.resources.put(resourceClass, resource);
     }
 
+    @Deprecated
+    public <TResource> void registerOrReplace(final Class<TResource> resourceClass, final TResource resource) {
+        this.resources.put(resourceClass, resource);
+    }
+
     @SuppressWarnings("unchecked")
     public <TResource> TResource fetch(final Class<?> resourceClass) {
         if (!this.resources.containsKey(resourceClass)) {
