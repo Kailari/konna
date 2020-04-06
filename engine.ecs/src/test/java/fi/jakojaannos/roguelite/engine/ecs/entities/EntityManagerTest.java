@@ -3,11 +3,12 @@ package fi.jakojaannos.roguelite.engine.ecs.entities;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import fi.jakojaannos.roguelite.engine.ecs.Component;
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.newecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.newecs.world.LegacyCompat;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.ecs.world.LegacyCompat;
+import fi.jakojaannos.roguelite.engine.ecs.world.WorldImpl;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -16,7 +17,7 @@ class EntityManagerTest {
 
     @BeforeEach
     void beforeEach() {
-        entityManager = new LegacyCompat(World.createNew()).getEntityManager();
+        entityManager = new LegacyCompat((WorldImpl) World.createNew()).getEntityManager();
     }
 
     @Test

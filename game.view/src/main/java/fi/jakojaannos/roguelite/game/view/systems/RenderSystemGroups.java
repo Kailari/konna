@@ -1,6 +1,6 @@
 package fi.jakojaannos.roguelite.game.view.systems;
 
-import fi.jakojaannos.roguelite.engine.ecs.SystemGroup;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.SystemGroup;
 
 public enum RenderSystemGroups implements SystemGroup {
     LEVEL,

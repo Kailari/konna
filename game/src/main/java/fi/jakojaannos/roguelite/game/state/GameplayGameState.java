@@ -2,8 +2,8 @@ package fi.jakojaannos.roguelite.game.state;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
-import fi.jakojaannos.roguelite.engine.ecs.dispatcher.SystemDispatcher;
-import fi.jakojaannos.roguelite.engine.ecs.newecs.World;
+import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
@@ -39,7 +39,7 @@ public class GameplayGameState extends GameState {
             final World world,
             final TimeManager timeManager
     ) {
-        super(world, timeManager);
+        super(world);
         world.provideResource(Weapons.class, new Weapons());
 
         final var entityManager = world.getEntityManager();

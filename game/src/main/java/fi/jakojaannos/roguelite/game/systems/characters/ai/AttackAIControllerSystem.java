@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.*;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.*;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
 import fi.jakojaannos.roguelite.game.data.components.character.WeaponInput;

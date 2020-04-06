@@ -8,9 +8,9 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.stream.Stream;
 
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.World;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.game.systems.physics.ApplyForceSystem;
@@ -30,7 +30,7 @@ public class ApplyForceSystemTest {
 
     @BeforeEach
     void beforeEach() {
-        world = fi.jakojaannos.roguelite.engine.ecs.newecs.World.createNew();
+        world = fi.jakojaannos.roguelite.engine.ecs.World.createNew();
         entityManager = world.getEntityManager();
         system = new ApplyForceSystem();
 

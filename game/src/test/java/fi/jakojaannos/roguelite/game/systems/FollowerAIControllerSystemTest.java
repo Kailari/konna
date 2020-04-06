@@ -7,9 +7,9 @@ import org.junit.jupiter.params.provider.CsvSource;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.World;
 import fi.jakojaannos.roguelite.game.data.components.character.MovementInput;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.FollowerAI;
@@ -28,7 +28,7 @@ public class FollowerAIControllerSystemTest {
     @BeforeEach
     void beforeEach() {
         system = new FollowerAIControllerSystem();
-        this.world = fi.jakojaannos.roguelite.engine.ecs.newecs.World.createNew();
+        this.world = fi.jakojaannos.roguelite.engine.ecs.World.createNew();
         EntityManager entityManager = world.getEntityManager();
 
         final Entity player = entityManager.createEntity();

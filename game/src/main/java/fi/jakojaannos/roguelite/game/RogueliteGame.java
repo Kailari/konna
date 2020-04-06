@@ -90,7 +90,7 @@ public class RogueliteGame extends GameBase {
         // NOTE: It is important that state is ticked first! state.tick(...) sets some engine -level
         // default provided resources which might be needed while flushing the task queue, which in
         // turn happens in the super.tick(...)
-        state.tick(events, this);
+        state.tick();
         super.tick(state, events);
 
         if (inputs.inputForceCloseA && inputs.inputForceCloseB) {
@@ -100,6 +100,7 @@ public class RogueliteGame extends GameBase {
         return selectNextState(state);
     }
 
+    // TODO: Move to engine level system
     protected GameState selectNextState(final GameState state) {
         final var stateManager = state.getWorld().getOrCreateResource(GameStateManager.class);
         if (stateManager.shouldShutDown()) {

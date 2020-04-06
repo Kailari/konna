@@ -5,7 +5,7 @@ import org.joml.Vector2d;
 import java.util.Optional;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 
 public class GlobalGameState {

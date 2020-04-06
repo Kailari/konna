@@ -2,8 +2,8 @@ package fi.jakojaannos.roguelite.engine.data.resources;
 
 import org.joml.Vector2d;
 
-import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.Resource;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Resource;
 
 public class Mouse implements Resource {
     public final Vector2d position = new Vector2d(-999.0, -999.0);

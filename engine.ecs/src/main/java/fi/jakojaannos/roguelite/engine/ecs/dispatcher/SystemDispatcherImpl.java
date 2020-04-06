@@ -3,8 +3,6 @@ package fi.jakojaannos.roguelite.engine.ecs.dispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
@@ -12,13 +10,14 @@ import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.function.Predicate;
 import java.util.stream.StreamSupport;
 
-import fi.jakojaannos.roguelite.engine.ecs.*;
-import fi.jakojaannos.roguelite.engine.ecs.newecs.EcsSystem;
-import fi.jakojaannos.roguelite.engine.ecs.newecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.newecs.sample.EntitySpliterator;
+import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
+import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.*;
+import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.ecs.systemdata.RequirementsBuilder;
 
 @SuppressWarnings("deprecation")
-public class SystemDispatcherImpl implements SystemDispatcher, AutoCloseable {
+public class SystemDispatcherImpl implements SystemDispatcher {
     private static final Logger LOG = LoggerFactory.getLogger(SystemDispatcherImpl.class);
     private static final boolean LOG_SYSTEM_TICK = false;
     private static final boolean LOG_GROUP_TICK = false;
@@ -26,11 +25,11 @@ public class SystemDispatcherImpl implements SystemDispatcher, AutoCloseable {
 
 
     private final ForkJoinPool threadPool;
-    private final List<SystemGroup> systemGroups;
+    private final List<fi.jakojaannos.roguelite.engine.ecs.SystemGroup> systemGroups;
 
     private int tick = 0;
 
-    public SystemDispatcherImpl(final List<SystemGroup> systemGroups) {
+    public SystemDispatcherImpl(final List<fi.jakojaannos.roguelite.engine.ecs.SystemGroup> systemGroups) {
         this.systemGroups = systemGroups;
 
         this.threadPool = new ForkJoinPool(4,
@@ -43,8 +42,8 @@ public class SystemDispatcherImpl implements SystemDispatcher, AutoCloseable {
     public void tick(final World world) {
         final var queue = new HashSet<>(this.systemGroups);
 
-        final Predicate<SystemGroup> isReadyToTick = (group) -> group.isEnabled()
-                                                                && group.getDependencies()
+        final Predicate<fi.jakojaannos.roguelite.engine.ecs.SystemGroup> isReadyToTick = (group) -> group.isEnabled()
+                                                                                                    && group.getDependencies()
                                                                         .stream()
                                                                         .noneMatch(queue::contains);
 
@@ -52,7 +51,7 @@ public class SystemDispatcherImpl implements SystemDispatcher, AutoCloseable {
             LOG.debug("Tick #{}", this.tick);
         }
         this.tick++;
-        final var ticked = new ArrayList<SystemGroup>(queue.size());
+        final var ticked = new ArrayList<fi.jakojaannos.roguelite.engine.ecs.SystemGroup>(queue.size());
         while (queue.stream().anyMatch(isReadyToTick)) {
             queue.stream() // TODO: locks on entity/component storage and make this parallel?
                  .filter(isReadyToTick)
@@ -66,7 +65,7 @@ public class SystemDispatcherImpl implements SystemDispatcher, AutoCloseable {
         }
     }
 
-    private void tick(final SystemGroup group, final World world) {
+    private void tick(final fi.jakojaannos.roguelite.engine.ecs.SystemGroup group, final World world) {
         if (LOG_GROUP_TICK) {
             LOG.debug("Ticking group \"{}\"", group.getName());
         }
@@ -126,15 +125,15 @@ public class SystemDispatcherImpl implements SystemDispatcher, AutoCloseable {
             final EcsSystem<TResources, TEntityData, TEvents> system,
             final ForkJoinPool threadPool
     ) {
-        final var requirements = system.declareRequirements();
+        // TODO: Move elsewhere
+        final var requirementsBuilder = new RequirementsBuilder<TResources, TEntityData, TEvents>();
+        system.declareRequirements(requirementsBuilder);
+        final var requirements = requirementsBuilder.build();
 
-        final var systemResources = instantiateResources(
-                world.getResources().fetch(requirements.resourceComponentTypes()),
-                requirements.resourceConstructor()
-        );
-        final var entitySpliterator = new EntitySpliterator<>(requirements.entityDataComponentTypes(),
+        final var systemResources = requirements.constructResources(world.getResources());
+        final var entitySpliterator = new EntitySpliterator<>(requirements.entityData().componentTypes(),
                                                               world,
-                                                              requirements::entityDataFactory);
+                                                              requirements::constructEntityData);
 
         try {
             threadPool.submit(
@@ -149,17 +148,6 @@ public class SystemDispatcherImpl implements SystemDispatcher, AutoCloseable {
         }
     }
 
-    private static <TResources> TResources instantiateResources(
-            final Object[] resources,
-            final Constructor<TResources> constructor
-    ) {
-        try {
-            return constructor.newInstance(resources);
-        } catch (final InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            throw new IllegalStateException("Could not instantiate resources!");
-        }
-    }
-
     private static ForkJoinWorkerThread workerThreadFactory(final ForkJoinPool pool) {
         final var worker = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool);
         worker.setName("ecs-worker-" + worker.getPoolIndex());
@@ -169,55 +157,55 @@ public class SystemDispatcherImpl implements SystemDispatcher, AutoCloseable {
     private static record ComponentOnlyRequirementsBuilder(
             List<Class<? extends Component>>required,
             List<Class<? extends Component>>excluded
-    ) implements RequirementsBuilder {
+    ) implements fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder {
         public ComponentOnlyRequirementsBuilder() {
             this(new ArrayList<>(), new ArrayList<>());
         }
 
         @Override
-        public RequirementsBuilder withComponent(final Class<? extends Component> componentClass) {
+        public fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder withComponent(final Class<? extends Component> componentClass) {
             this.required.add(componentClass);
             return this;
         }
 
         @Override
-        public RequirementsBuilder withoutComponent(final Class<? extends Component> componentClass) {
+        public fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder withoutComponent(final Class<? extends Component> componentClass) {
             this.excluded.add(componentClass);
             return this;
         }
 
         @Override
-        public RequirementsBuilder tickAfter(final Class<? extends ECSSystem> other) {
+        public fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder tickAfter(final Class<? extends ECSSystem> other) {
             return this;
         }
 
         @Override
-        public RequirementsBuilder tickBefore(final Class<? extends ECSSystem> other) {
+        public fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder tickBefore(final Class<? extends ECSSystem> other) {
             return this;
         }
 
         @Override
-        public RequirementsBuilder tickAfter(final fi.jakojaannos.roguelite.engine.ecs.SystemGroup group) {
+        public fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder tickAfter(final fi.jakojaannos.roguelite.engine.ecs.legacy.SystemGroup group) {
             return this;
         }
 
         @Override
-        public RequirementsBuilder tickBefore(final fi.jakojaannos.roguelite.engine.ecs.SystemGroup group) {
+        public fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder tickBefore(final fi.jakojaannos.roguelite.engine.ecs.legacy.SystemGroup group) {
             return this;
         }
 
         @Override
-        public RequirementsBuilder addToGroup(final fi.jakojaannos.roguelite.engine.ecs.SystemGroup group) {
+        public fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder addToGroup(final fi.jakojaannos.roguelite.engine.ecs.legacy.SystemGroup group) {
             return this;
         }
 
         @Override
-        public RequirementsBuilder requireResource(final Class<? extends Resource> resource) {
+        public fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder requireResource(final Class<? extends Resource> resource) {
             return this;
         }
 
         @Override
-        public RequirementsBuilder requireProvidedResource(final Class<? extends ProvidedResource> resource) {
+        public fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder requireProvidedResource(final Class<? extends ProvidedResource> resource) {
             return this;
         }
     }

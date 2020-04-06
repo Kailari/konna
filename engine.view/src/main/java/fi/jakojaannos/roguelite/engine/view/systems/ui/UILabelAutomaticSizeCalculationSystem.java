@@ -2,7 +2,7 @@ package fi.jakojaannos.roguelite.engine.view.systems.ui;
 
 import java.util.stream.Stream;
 
-import fi.jakojaannos.roguelite.engine.ecs.*;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.*;
 import fi.jakojaannos.roguelite.engine.ui.TextSizeProvider;
 import fi.jakojaannos.roguelite.engine.view.data.components.internal.AutomaticSizeTag;
 import fi.jakojaannos.roguelite.engine.view.data.components.internal.BoundHeight;

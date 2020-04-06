@@ -11,8 +11,8 @@ import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
 import fi.jakojaannos.roguelite.game.data.archetypes.FollowerArchetype;
 import fi.jakojaannos.roguelite.game.data.components.NoDrawTag;
 import fi.jakojaannos.roguelite.game.data.components.ObstacleTag;

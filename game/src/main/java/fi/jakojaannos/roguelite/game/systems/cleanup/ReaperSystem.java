@@ -5,10 +5,10 @@ import org.slf4j.LoggerFactory;
 
 import java.util.stream.Stream;
 
-import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
-import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.World;
 import fi.jakojaannos.roguelite.game.LogCategories;
 import fi.jakojaannos.roguelite.game.data.components.character.DeadTag;
 import fi.jakojaannos.roguelite.game.systems.SystemGroups;

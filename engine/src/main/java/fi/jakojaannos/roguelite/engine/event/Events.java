@@ -1,6 +1,6 @@
 package fi.jakojaannos.roguelite.engine.event;
 
-import fi.jakojaannos.roguelite.engine.ecs.ProvidedResource;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.ProvidedResource;
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.ui.UIEvent;
 

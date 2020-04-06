@@ -5,10 +5,10 @@ import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
-import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
-import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.dispatcher.SystemDispatcher;
-import fi.jakojaannos.roguelite.engine.ecs.newecs.World;
+import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
+import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.ui.TextSizeProvider;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
@@ -57,6 +57,7 @@ public class UserInterfaceImpl implements UserInterface {
     ) {
         this.viewport = viewport;
         this.uiWorld = World.createNew();
+        this.uiWorld.registerResource(Mouse.class, new Mouse());
 
         final var builder = SystemDispatcher.builder();
         final var preparations = builder.group("preparations")
@@ -71,9 +72,9 @@ public class UserInterfaceImpl implements UserInterface {
                                   .dependsOn(preparations)
                                   .buildGroup();
 
-        final var cleanup = builder.group("cleanup")
-                                   .dependsOn(preparations, events)
-                                   .buildGroup();
+        builder.group("cleanup")
+               .dependsOn(preparations, events)
+               .buildGroup();
 
         this.uiDispatcher = builder.build();
         this.uiWorld.provideResource(UIRoot.class, new UIRoot(viewport));
@@ -112,7 +113,9 @@ public class UserInterfaceImpl implements UserInterface {
         this.uiWorld.getEntityManager().applyModifications();
         this.uiWorld.provideResource(Time.class, new Time(time));
         this.uiWorld.provideResource(Events.class, events);
-        this.uiWorld.createOrReplaceResource(Mouse.class, mouse);
+        final var uiMouse = this.uiWorld.fetchResource(Mouse.class);
+        uiMouse.clicked = mouse.clicked;
+        uiMouse.position.set(mouse.position);
 
         this.uiDispatcher.tick(this.uiWorld);
         this.uiWorld.getEntityManager().applyModifications();

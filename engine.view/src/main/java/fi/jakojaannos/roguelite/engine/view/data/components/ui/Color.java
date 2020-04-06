@@ -1,6 +1,6 @@
 package fi.jakojaannos.roguelite.engine.view.data.components.ui;
 
-import fi.jakojaannos.roguelite.engine.ecs.Component;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
 
 public class Color implements Component {
     public double r;

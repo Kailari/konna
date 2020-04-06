@@ -2,7 +2,7 @@ package fi.jakojaannos.roguelite.engine.data.components;
 
 import org.joml.Vector2d;
 
-import fi.jakojaannos.roguelite.engine.ecs.Component;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
 
 public final class Transform implements Component {
     public Vector2d position = new Vector2d();

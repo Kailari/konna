@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.function.Supplier;
 
+import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.input.InputProvider;
 import fi.jakojaannos.roguelite.engine.state.GameState;
@@ -31,7 +32,7 @@ public class GameRunner<TGame extends Game> implements AutoCloseable {
      * @param game game to check running status for
      *
      * @return <code>true</code> if runner should continue with the game loop. <code>false</code> to
-     * break from the loop.
+     *         break from the loop.
      */
     protected boolean shouldContinueLoop(final TGame game) {
         return !game.isFinished();
@@ -69,6 +70,7 @@ public class GameRunner<TGame extends Game> implements AutoCloseable {
 
         LOG.info("Entering main loop");
         final var events = new Events();
+        onStateChange(state, events, game);
         try {
             while (shouldContinueLoop(game)) {
                 final var currentFrameTime = System.currentTimeMillis();
@@ -85,8 +87,11 @@ public class GameRunner<TGame extends Game> implements AutoCloseable {
                     inputProvider.pollEvents()
                                  .forEach(events.input()::fire);
 
-                    state.getWorld().provideResource(Events.class, events);
+                    final var oldState = state;
                     state = simulateTick(state, game, events);
+                    if (oldState != state) {
+                        onStateChange(state, events, game);
+                    }
                     accumulator -= game.getTime().getTimeStep();
                     ++ticks;
                 }
@@ -119,6 +124,12 @@ public class GameRunner<TGame extends Game> implements AutoCloseable {
         LOG.info("\tFrames:\t\t{}", frames);
         LOG.info("\tAvg. TPF:\t{}", avgTimePerFrame);
         LOG.info("\tAvg. FPS:\t{}", avgFramesPerSecond);
+    }
+
+    private void onStateChange(final GameState state, final Events events, final TGame game) {
+        state.getWorld().registerResource(events);
+        state.getWorld().registerResource(Time.class, new Time(game.getTime()));
+        state.getWorld().registerResource(MainThread.class, game);
     }
 
     private void limitFramerate() {

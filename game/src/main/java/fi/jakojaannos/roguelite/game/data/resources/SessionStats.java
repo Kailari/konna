@@ -3,7 +3,7 @@ package fi.jakojaannos.roguelite.game.data.resources;
 import java.util.HashMap;
 import java.util.Map;
 
-import fi.jakojaannos.roguelite.engine.ecs.Resource;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Resource;
 import fi.jakojaannos.roguelite.game.data.DamageSource;
 
 public class SessionStats implements Resource {

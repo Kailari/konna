@@ -1,6 +1,6 @@
 package fi.jakojaannos.roguelite.engine.data.resources;
 
-import fi.jakojaannos.roguelite.engine.ecs.ProvidedResource;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.ProvidedResource;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 
 public record Time(TimeManager timeManager) implements ProvidedResource, TimeManager {

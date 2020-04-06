@@ -2,7 +2,7 @@ package fi.jakojaannos.roguelite.engine.view.data.components.ui;
 
 import org.joml.Vector2i;
 
-import fi.jakojaannos.roguelite.engine.ecs.Component;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
 
 /**
  * Cached read-only view of a component's boundaries.

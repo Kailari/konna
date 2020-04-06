@@ -5,7 +5,7 @@ import io.cucumber.java.en.Then;
 import org.joml.Vector2d;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
 import fi.jakojaannos.roguelite.game.data.components.character.WalkingMovementAbility;
 import fi.jakojaannos.roguelite.game.test.global.GlobalGameState;

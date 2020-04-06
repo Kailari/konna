@@ -1,53 +1,68 @@
 package fi.jakojaannos.roguelite.engine.ecs;
 
-/**
- * @deprecated This interface is deprecated. The new implementation should be used instead.
- */
-@Deprecated
-public interface World {
-    /**
-     * Gets the entity/component manager for this world.
-     *
-     * @return entity/component manager instance for this world
-     */
-    @Deprecated
-    EntityManager getEntityManager();
+import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.ProvidedResource;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Resource;
+import fi.jakojaannos.roguelite.engine.ecs.world.LegacyCompat;
+import fi.jakojaannos.roguelite.engine.ecs.world.WorldImpl;
+import fi.jakojaannos.roguelite.engine.ecs.world.storage.ComponentStorage;
+import fi.jakojaannos.roguelite.engine.ecs.world.storage.ResourceStorage;
 
-    /**
-     * Creates or gets the resource of given type.
-     *
-     * @param resourceType class of the resource to get
-     * @param <TResource>  type of the resource to get
-     *
-     * @return the resource of given type
-     */
-    @Deprecated
-    <TResource extends Resource> TResource getOrCreateResource(Class<TResource> resourceType);
+public interface World extends fi.jakojaannos.roguelite.engine.ecs.legacy.World {
+    LegacyCompat getCompatibilityLayer();
 
-    /**
-     * Manually assigns a resource to a specific value.
-     *
-     * @param resourceClass type of the resource to create
-     * @param resource      resource to create
-     */
-    @Deprecated
-    <TResource extends Resource> void createOrReplaceResource(
-            Class<TResource> resourceClass,
-            TResource resource
-    );
+    ComponentStorage getComponents();
 
-    /**
-     * Manually assigns a provided resource to a specific value.
-     *
-     * @param resourceClass type of the resource to create
-     * @param resource      resource to create
-     */
-    @Deprecated
-    <TResource extends ProvidedResource> void provideResource(
-            Class<TResource> resourceClass,
-            TResource resource
-    );
+    ResourceStorage getResources();
 
+    @Override
     @Deprecated
-    <TResource extends ProvidedResource> TResource getResource(Class<TResource> resourceType);
+    default EntityManager getEntityManager() {
+        return getCompatibilityLayer().getEntityManager();
+    }
+
+    int getEntityCount();
+
+    static World createNew() {
+        return new WorldImpl();
+    }
+
+    void registerResource(Object resource);
+
+    <TResource> void registerResource(Class<? super TResource> resourceClass, TResource resource);
+
+    EntityHandle createEntity(Object... components);
+
+    <TResource> TResource fetchResource(Class<TResource> resourceClass);
+
+    void destroyEntity(EntityHandle handle);
+
+    void commitEntityModifications();
+
+    EntityHandle getEntity(int entityId);
+
+    @Override
+    @Deprecated
+    default <TResource extends Resource> TResource getOrCreateResource(
+            final Class<TResource> resourceType
+    ) {
+        return getCompatibilityLayer().getOrCreateResource(resourceType);
+    }
+
+    @Override
+    @Deprecated
+    default <TResource extends ProvidedResource> void provideResource(
+            final Class<TResource> resourceClass,
+            final TResource resource
+    ) {
+        getCompatibilityLayer().provideResource(resourceClass, resource);
+    }
+
+    @Override
+    @Deprecated
+    default <TResource extends ProvidedResource> TResource getResource(
+            final Class<TResource> resourceType
+    ) {
+        return getCompatibilityLayer().getResource(resourceType);
+    }
 }

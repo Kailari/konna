@@ -5,8 +5,8 @@ import org.joml.Vector2d;
 import java.util.Random;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.World;
 import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
 import fi.jakojaannos.roguelite.game.data.archetypes.FollowerArchetype;
 import fi.jakojaannos.roguelite.game.data.archetypes.ObstacleArchetype;

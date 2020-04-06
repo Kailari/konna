@@ -1,6 +1,6 @@
 package fi.jakojaannos.roguelite.engine.view.data.resources.ui;
 
-import fi.jakojaannos.roguelite.engine.ecs.ProvidedResource;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.ProvidedResource;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.data.components.ui.ElementBoundaries;
 

@@ -8,7 +8,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
-import fi.jakojaannos.roguelite.engine.ecs.*;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.*;
 import fi.jakojaannos.roguelite.game.data.components.Lifetime;
 import fi.jakojaannos.roguelite.game.systems.SystemGroups;
 

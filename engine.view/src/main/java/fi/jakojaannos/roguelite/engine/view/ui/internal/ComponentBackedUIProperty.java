@@ -5,9 +5,9 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import fi.jakojaannos.roguelite.engine.ecs.Component;
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
 
 public class ComponentBackedUIProperty<T, C extends Component> extends EntityBackedUIProperty<T> {
     public ComponentBackedUIProperty(

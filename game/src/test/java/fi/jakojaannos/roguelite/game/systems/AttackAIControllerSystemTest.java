@@ -9,9 +9,9 @@ import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.World;
 import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
 import fi.jakojaannos.roguelite.game.data.DamageSource;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
@@ -31,7 +31,7 @@ public class AttackAIControllerSystemTest {
 
     @BeforeEach
     void beforeEach() {
-        world = fi.jakojaannos.roguelite.engine.ecs.newecs.World.createNew();
+        world = fi.jakojaannos.roguelite.engine.ecs.World.createNew();
         entityManager = world.getEntityManager();
         world.provideResource(Time.class, new Time(new SimpleTimeManager(20)));
 

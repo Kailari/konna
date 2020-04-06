@@ -2,7 +2,7 @@ package fi.jakojaannos.roguelite.game.data.components;
 
 import org.joml.Vector2d;
 
-import fi.jakojaannos.roguelite.engine.ecs.Component;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
 
 public class Physics implements Component {
     public final Vector2d acceleration = new Vector2d(0.0, 0.0);

@@ -6,7 +6,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
-import fi.jakojaannos.roguelite.engine.ecs.newecs.World;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.input.*;
 import fi.jakojaannos.roguelite.engine.state.GameState;

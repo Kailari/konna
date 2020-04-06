@@ -2,7 +2,7 @@ package fi.jakojaannos.roguelite.game.data.components.character;
 
 import org.joml.Vector2d;
 
-import fi.jakojaannos.roguelite.engine.ecs.Component;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
 import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.DamageSource;
 

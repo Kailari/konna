@@ -1,6 +1,6 @@
 package fi.jakojaannos.roguelite.game.systems;
 
-import fi.jakojaannos.roguelite.engine.ecs.SystemGroup;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.SystemGroup;
 
 @Deprecated
 public enum SystemGroups implements SystemGroup {

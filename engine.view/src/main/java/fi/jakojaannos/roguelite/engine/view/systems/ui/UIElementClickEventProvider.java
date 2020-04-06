@@ -4,10 +4,10 @@ import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
-import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
-import fi.jakojaannos.roguelite.engine.ecs.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
-import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.World;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.ui.UIEvent;
 import fi.jakojaannos.roguelite.engine.view.data.components.internal.Name;
