@@ -6,8 +6,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
-import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.ecs.newimpl.World;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.input.*;
 import fi.jakojaannos.roguelite.engine.state.GameState;
@@ -24,7 +23,7 @@ class RogueliteGameTest {
     void beforeEach() {
         roguelite = new RogueliteGame();
         state = new GameplayGameState(6969,
-                                      World.createNew(EntityManager.createNew(256, 32)),
+                                      World.createNew(),
                                       roguelite.getTime());
     }
 
@@ -55,7 +54,8 @@ class RogueliteGameTest {
             boolean down
     ) {
         Events events = new Events();
-        events.input().fire(InputEvent.button(new ButtonInput(InputButton.Keyboard.valueOf(key), ButtonInput.Action.PRESS)));
+        events.input()
+              .fire(InputEvent.button(new ButtonInput(InputButton.Keyboard.valueOf(key), ButtonInput.Action.PRESS)));
 
         roguelite.tick(state, events);
 

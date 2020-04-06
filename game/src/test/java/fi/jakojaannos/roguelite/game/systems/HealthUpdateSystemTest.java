@@ -35,8 +35,8 @@ public class HealthUpdateSystemTest {
             double damage,
             boolean shouldBeRemoved
     ) {
-        EntityManager entityManager = EntityManager.createNew(256, 32);
-        World world = World.createNew(entityManager);
+        World world = fi.jakojaannos.roguelite.engine.ecs.newimpl.World.createNew();
+        EntityManager entityManager = world.getEntityManager();
         HealthUpdateSystem system = new HealthUpdateSystem();
 
         Entity entity = entityManager.createEntity();

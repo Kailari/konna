@@ -3,7 +3,7 @@ package fi.jakojaannos.roguelite.game.state;
 import javax.annotation.Nullable;
 
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
-import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.ecs.newimpl.World;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.systems.menu.HandleMainMenuUIEventsSystem;

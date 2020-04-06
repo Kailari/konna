@@ -11,7 +11,10 @@ import fi.jakojaannos.roguelite.engine.MainThread;
 import fi.jakojaannos.roguelite.engine.data.resources.GameStateManager;
 import fi.jakojaannos.roguelite.engine.data.resources.Network;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
-import fi.jakojaannos.roguelite.engine.ecs.*;
+import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
+import fi.jakojaannos.roguelite.engine.ecs.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.RequirementsBuilder;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.network.client.ClientNetworkManager;
 import fi.jakojaannos.roguelite.engine.ui.UIEvent;
@@ -67,7 +70,7 @@ public class HandleMainMenuUIEventsSystem implements ECSSystem {
 
     private GameplayGameState createGameplayState(final World world) {
         return new GameplayGameState(System.nanoTime(),
-                                     World.createNew(EntityManager.createNew(256, 64)),
+                                     fi.jakojaannos.roguelite.engine.ecs.newimpl.World.createNew(),
                                      world.getResource(Time.class).timeManager());
     }
 }

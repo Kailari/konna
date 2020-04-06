@@ -28,8 +28,8 @@ public class FollowerAIControllerSystemTest {
     @BeforeEach
     void beforeEach() {
         system = new FollowerAIControllerSystem();
-        EntityManager entityManager = EntityManager.createNew(256, 32);
-        this.world = World.createNew(entityManager);
+        this.world = fi.jakojaannos.roguelite.engine.ecs.newimpl.World.createNew();
+        EntityManager entityManager = world.getEntityManager();
 
         final Entity player = entityManager.createEntity();
         this.playerTransform = new Transform();

@@ -3,6 +3,7 @@ package fi.jakojaannos.roguelite.engine.ecs.newimpl.world;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -11,7 +12,6 @@ import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.ecs.*;
 import fi.jakojaannos.roguelite.engine.ecs.newimpl.World;
-import fi.jakojaannos.roguelite.engine.ecs.world.WorldImpl;
 
 public class LegacyCompat implements fi.jakojaannos.roguelite.engine.ecs.World {
     private static final Logger LOG = LoggerFactory.getLogger(LegacyCompat.class);
@@ -34,6 +34,34 @@ public class LegacyCompat implements fi.jakojaannos.roguelite.engine.ecs.World {
         this.em = new EntityManagerImpl();
     }
 
+    public static  <TResource extends Resource> TResource constructResource(
+            final Class<? extends TResource> resourceClass
+    ) {
+        try {
+            return resourceClass.getConstructor().newInstance();
+        } catch (final InstantiationException e) {
+            throw new IllegalStateException(String.format(
+                    "Resource type %s represents an abstract class!",
+                    resourceClass.getSimpleName()
+            ), e);
+        } catch (final IllegalAccessException e) {
+            throw new IllegalStateException(String.format(
+                    "Resource type %s default constructor is not accessible!",
+                    resourceClass.getSimpleName()
+            ), e);
+        } catch (final InvocationTargetException e) {
+            throw new IllegalStateException(String.format(
+                    "Error creating resource of type %s, constructor threw an exception",
+                    resourceClass.getSimpleName()
+            ), e);
+        } catch (final NoSuchMethodException e) {
+            throw new IllegalStateException(String.format(
+                    "Resource type %s does not define a default constructor!",
+                    resourceClass.getSimpleName()
+            ));
+        }
+    }
+
     @Override
     public <TResource extends Resource> TResource getOrCreateResource(
             final Class<TResource> resourceClass
@@ -47,7 +75,7 @@ public class LegacyCompat implements fi.jakojaannos.roguelite.engine.ecs.World {
         } catch (final Throwable e) {
             //LOG.warn("getOrCreateResource with fetchResource failed with exception: ", e);
 
-            final var newInstance = WorldImpl.constructResource(resourceClass);
+            final var newInstance = constructResource(resourceClass);
             this.world.registerResource(newInstance);
             return newInstance;
         }
@@ -84,13 +112,14 @@ public class LegacyCompat implements fi.jakojaannos.roguelite.engine.ecs.World {
             final Class<TResource> resourceClass,
             final TResource resource
     ) {
-        throw new UnsupportedOperationException();
+        this.world.getResources().registerOrReplace(resourceClass, resource);
     }
 
     private class EntityManagerImpl implements EntityManager {
         @Override
         public Stream<Entity> getAllEntities() {
-            return null;
+            return IntStream.range(0, LegacyCompat.this.world.getEntityCount())
+                            .mapToObj(i -> (LegacyEntityHandleImpl) LegacyCompat.this.world.getEntity(i));
         }
 
         @Override

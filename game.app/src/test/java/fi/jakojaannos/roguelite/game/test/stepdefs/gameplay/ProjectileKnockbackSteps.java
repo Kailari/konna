@@ -6,6 +6,7 @@ import io.cucumber.java.en.When;
 import org.joml.Vector2d;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.game.data.CollisionLayer;
@@ -15,8 +16,10 @@ import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.InAir;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
+import fi.jakojaannos.roguelite.game.data.resources.Players;
 
-import static fi.jakojaannos.roguelite.game.test.global.GlobalState.*;
+import static fi.jakojaannos.roguelite.game.test.global.GlobalState.simulateSeconds;
+import static fi.jakojaannos.roguelite.game.test.global.GlobalState.state;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -30,16 +33,21 @@ public class ProjectileKnockbackSteps {
     public void theWorldIsBlank() {
         state.getWorld().getEntityManager().clearEntities();
         state.getWorld().getEntityManager().applyModifications();
+        state.getWorld().fetchResource(Players.class).setLocalPlayer(null);
+        state.getWorld().fetchResource(CameraProperties.class).cameraEntity = null;
     }
 
     @Given("there is an enemy and a projectile heading towards it")
     public void thereIsAnEnemyAndAProjectileHeadingTowardsIt() {
         EntityManager entityManager = state.getWorld().getEntityManager();
         target = entityManager.createEntity();
-        entityManager.addComponentTo(target, targetTransform = new Transform(25.0, 25.0));
-        entityManager.addComponentTo(target, new Velocity());
-        entityManager.addComponentTo(target, Physics.builder().mass(1.0).friction(50.0).build());
-        entityManager.addComponentTo(target, new Collider(CollisionLayer.ENEMY));
+        state.getWorld().createEntity(targetTransform = new Transform(25.0, 25.0),
+                                      new Velocity(),
+                                      Physics.builder()
+                                             .mass(1.0)
+                                             .friction(50.0)
+                                             .build(),
+                                      new Collider(CollisionLayer.ENEMY));
 
         ProjectileArchetype.createWeaponProjectile(entityManager,
                                                    new Vector2d(22.0, 22.0),

@@ -1,7 +1,5 @@
 package fi.jakojaannos.roguelite.engine.ecs;
 
-import fi.jakojaannos.roguelite.engine.ecs.world.WorldImpl;
-
 /**
  * @deprecated This interface is deprecated. The new implementation should be used instead.
  */
@@ -14,11 +12,6 @@ public interface World {
      */
     @Deprecated
     EntityManager getEntityManager();
-
-    @Deprecated
-    static World createNew(final EntityManager entityManager) {
-        return new WorldImpl(entityManager);
-    }
 
     /**
      * Creates or gets the resource of given type.

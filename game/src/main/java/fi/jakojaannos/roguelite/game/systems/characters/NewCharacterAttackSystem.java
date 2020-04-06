@@ -10,6 +10,7 @@ import fi.jakojaannos.roguelite.game.data.components.InAir;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.WeaponInput;
 import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponStats;
+import fi.jakojaannos.roguelite.game.weapons.WeaponInventory;
 
 public class NewCharacterAttackSystem implements EcsSystem<NewCharacterAttackSystem.Resources, NewCharacterAttackSystem.EntityData, EcsSystem.NoEvents> {
     @Override
@@ -33,16 +34,17 @@ public class NewCharacterAttackSystem implements EcsSystem<NewCharacterAttackSys
             final var attackAbility = entityHandle.getData().attackAbility;
             final var input = entityHandle.getData().weaponInput;
             final var weaponStats = entityHandle.getData().weaponStats;
+            final var inventory = entityHandle.getData().inventory;
 
-            final var weapon = attackAbility.equippedWeapon;
+            final var weapon = inventory.getWeaponAtSlot(attackAbility.equippedSlot);
             if (weapon == null) {
                 return;
             }
 
             if (input.attack && !input.previousAttack) {
-                weapon.getTrigger().pull(timeManager, attackAbility, weaponStats);
+                //weapon.pullTrigger(entityManager, entity, timeManager);
             } else if (!input.attack && input.previousAttack) {
-                weapon.getTrigger().release(timeManager, attackAbility, weaponStats);
+                //weapon.releaseTrigger(entityManager, entity, timeManager);
             }
 
             //weapon.fireIfReady(entityHandle, attackAbility, weaponStats, timeManager);
@@ -57,6 +59,7 @@ public class NewCharacterAttackSystem implements EcsSystem<NewCharacterAttackSys
             Transform transform,
             WeaponInput weaponInput,
             AttackAbility attackAbility,
+            WeaponInventory inventory,
             WeaponStats weaponStats
     ) {}
 }

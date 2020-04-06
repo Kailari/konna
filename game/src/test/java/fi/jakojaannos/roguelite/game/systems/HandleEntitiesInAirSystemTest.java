@@ -18,8 +18,8 @@ public class HandleEntitiesInAirSystemTest {
 
     @Test
     void inAirComponentIsRemovedAfterExpiring() {
-        EntityManager entityManager = EntityManager.createNew(256, 32);
-        World world = World.createNew(entityManager);
+        World world = fi.jakojaannos.roguelite.engine.ecs.newimpl.World.createNew();
+        EntityManager entityManager = world.getEntityManager();
         SimpleTimeManager timeManager = new SimpleTimeManager(20);
         world.provideResource(Time.class, new Time(timeManager));
         HandleEntitiesInAirSystem system = new HandleEntitiesInAirSystem();
@@ -38,8 +38,8 @@ public class HandleEntitiesInAirSystemTest {
 
     @Test
     void inAirComponentIsNotRemovedBeforeExpiring() {
-        EntityManager entityManager = EntityManager.createNew(256, 32);
-        World world = World.createNew(entityManager);
+        World world = fi.jakojaannos.roguelite.engine.ecs.newimpl.World.createNew();
+        EntityManager entityManager = world.getEntityManager();
         SimpleTimeManager timeManager = new SimpleTimeManager(20);
         world.provideResource(Time.class, new Time(timeManager));
         HandleEntitiesInAirSystem system = new HandleEntitiesInAirSystem();
@@ -58,8 +58,8 @@ public class HandleEntitiesInAirSystemTest {
 
     @Test
     void inAirComponentIsRemovedOnExactCorrectTick() {
-        EntityManager entityManager = EntityManager.createNew(256, 32);
-        World world = World.createNew(entityManager);
+        World world = fi.jakojaannos.roguelite.engine.ecs.newimpl.World.createNew();
+        EntityManager entityManager = world.getEntityManager();
         SimpleTimeManager timeManager = new SimpleTimeManager(20);
         world.provideResource(Time.class, new Time(timeManager));
         HandleEntitiesInAirSystem system = new HandleEntitiesInAirSystem();

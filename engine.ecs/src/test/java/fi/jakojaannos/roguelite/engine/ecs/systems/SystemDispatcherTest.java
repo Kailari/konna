@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.ecs.*;
+import fi.jakojaannos.roguelite.engine.ecs.newimpl.World;
+import fi.jakojaannos.roguelite.engine.ecs.newimpl.world.LegacyCompat;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -26,9 +28,8 @@ class SystemDispatcherTest {
     @BeforeEach
     void beforeEach() {
         callOrder = new ArrayList<>();
-        world = mock(World.class);
-        entityManager = EntityManager.createNew(256, 32);
-        when(world.getEntityManager()).thenReturn(entityManager);
+        world = World.createNew();
+        entityManager = new LegacyCompat(world).getEntityManager();
 
         final Entity entityA = entityManager.createEntity();
         entityManager.addComponentTo(entityA, new ComponentA());
@@ -415,7 +416,7 @@ class SystemDispatcherTest {
 
         @Override
         public void tick(
-                Stream<Entity> entities, World world
+                Stream<Entity> entities, fi.jakojaannos.roguelite.engine.ecs.World world
         ) {
             synchronized (callOrderLock) {
                 callOrder.add(this);

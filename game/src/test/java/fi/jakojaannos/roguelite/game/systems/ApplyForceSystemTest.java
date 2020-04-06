@@ -30,8 +30,8 @@ public class ApplyForceSystemTest {
 
     @BeforeEach
     void beforeEach() {
-        entityManager = EntityManager.createNew(256, 32);
-        world = World.createNew(entityManager);
+        world = fi.jakojaannos.roguelite.engine.ecs.newimpl.World.createNew();
+        entityManager = world.getEntityManager();
         system = new ApplyForceSystem();
 
         entity = entityManager.createEntity();

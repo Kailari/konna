@@ -8,7 +8,7 @@ import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
-import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.ecs.newimpl.World;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.ui.TextSizeProvider;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
@@ -36,7 +36,7 @@ public class UserInterfaceImpl implements UserInterface {
             final TextSizeProvider textSizeProvider
     ) {
         this.viewport = viewport;
-        this.uiWorld = World.createNew(EntityManager.createNew(256, 32));
+        this.uiWorld = World.createNew();
 
         this.uiDispatcher = SystemDispatcher.builder()
                                             .withGroups(UISystemGroups.values())

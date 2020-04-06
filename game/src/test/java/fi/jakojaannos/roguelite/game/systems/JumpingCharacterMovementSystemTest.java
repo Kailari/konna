@@ -11,7 +11,6 @@ import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.archetypes.PlayerArchetype;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
 import fi.jakojaannos.roguelite.game.data.components.character.JumpingMovementAbility;
@@ -21,7 +20,6 @@ import fi.jakojaannos.roguelite.game.systems.characters.movement.JumpingCharacte
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class JumpingCharacterMovementSystemTest {
     private static final double EPSILON = 0.001;
@@ -29,8 +27,8 @@ public class JumpingCharacterMovementSystemTest {
     @Test
     void slimeHopsTowardsPlayer() {
         final var system = new JumpingCharacterMovementSystem();
-        final var entityManager = EntityManager.createNew(256, 32);
-        final var world = World.createNew(entityManager);
+        final var world = (World) fi.jakojaannos.roguelite.engine.ecs.newimpl.World.createNew();
+        final var entityManager = world.getEntityManager();
 
         final var time = new Time(new SimpleTimeManager(20));
         world.provideResource(Time.class, time);

@@ -3,28 +3,20 @@ package fi.jakojaannos.roguelite.engine.ecs.entities;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-
 import fi.jakojaannos.roguelite.engine.ecs.Component;
 import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.components.ComponentStorage;
+import fi.jakojaannos.roguelite.engine.ecs.newimpl.World;
+import fi.jakojaannos.roguelite.engine.ecs.newimpl.world.LegacyCompat;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
 
 class EntityManagerTest {
     private EntityManager entityManager;
-    private EntityStorage entityStorage;
 
     @BeforeEach
     void beforeEach() {
-        entityStorage = spy(new EntityStorage(16));
-        entityManager = new EntityManagerImpl(16,
-                                              34,
-                                              entityStorage,
-                                              new ComponentStorage(16, 34));
+        entityManager = new LegacyCompat(World.createNew()).getEntityManager();
     }
 
     @Test
@@ -107,42 +99,6 @@ class EntityManagerTest {
     }
 
     @Test
-    void destroyEntityDoesNotImmediatelyRemoveTheEntity() {
-        Entity entity = entityManager.createEntity();
-        ComponentA component = new ComponentA();
-        entityManager.addComponentTo(entity, component);
-        entityManager.applyModifications();
-        entityManager.destroyEntity(entity);
-
-        assertTrue(entity.isMarkedForRemoval());
-        verify(entityStorage, times(0)).remove(eq((EntityImpl) entity));
-    }
-
-    @Test
-    void entitiesAreDestroyedOnApplyModifications() {
-        Entity entity = entityManager.createEntity();
-        ComponentA component = new ComponentA();
-        entityManager.addComponentTo(entity, component);
-        entityManager.applyModifications();
-        entityManager.destroyEntity(entity);
-        entityManager.applyModifications();
-
-        verify(entityStorage, times(1)).remove(eq((EntityImpl) entity));
-    }
-
-    @Test
-    void entitiesSpawnedAndDestroyedOnSameFrameAreDestroyedOnApplyModifications() {
-        Entity entity = entityManager.createEntity();
-        ComponentA component = new ComponentA();
-        entityManager.addComponentTo(entity, component);
-
-        entityManager.destroyEntity(entity);
-        entityManager.applyModifications();
-
-        verify(entityStorage, times(1)).remove(eq((EntityImpl) entity));
-    }
-
-    @Test
     void getEntitiesWithReturnsAllExpectedEntities_SingleParameter() {
         Entity entityA = entityManager.createEntity();
         Entity entityB = entityManager.createEntity();
@@ -155,8 +111,10 @@ class EntityManagerTest {
         entityManager.addComponentTo(entityD, new ComponentD());
         entityManager.applyModifications();
 
-        assertTrue(entityManager.getEntitiesWith(ComponentA.class).anyMatch(e -> e.entity().getId() == entityA.getId()));
-        assertTrue(entityManager.getEntitiesWith(ComponentA.class).anyMatch(e -> e.entity().getId() == entityB.getId()));
+        assertTrue(entityManager.getEntitiesWith(ComponentA.class)
+                                .anyMatch(e -> e.entity().getId() == entityA.getId()));
+        assertTrue(entityManager.getEntitiesWith(ComponentA.class)
+                                .anyMatch(e -> e.entity().getId() == entityB.getId()));
     }
 
     @Test
@@ -199,83 +157,6 @@ class EntityManagerTest {
 
         entityManager.removeComponentIfPresent(entity, ComponentA.class);
         assertFalse(entityManager.hasComponent(entity, ComponentA.class));
-    }
-
-    @Test
-    void registeringTooManyComponentTypesFails() {
-        Entity entity = entityManager.createEntity();
-        assertThrows(IllegalStateException.class, () -> {
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-            entityManager.addComponentTo(entity, new Component() {
-            });
-        });
     }
 
     private static class ComponentA implements Component {
