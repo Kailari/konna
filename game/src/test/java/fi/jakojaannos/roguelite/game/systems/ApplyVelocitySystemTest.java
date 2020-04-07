@@ -8,9 +8,10 @@ import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.World;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.LegacyWorld;
 import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
 import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
@@ -27,7 +28,7 @@ import static org.mockito.Mockito.mock;
 class ApplyVelocitySystemTest {
     private ColliderDataCollectorSystem dataCollectorSystem;
     private ApplyVelocitySystem system;
-    private World world;
+    private LegacyWorld world;
     private EntityManager entityManager;
     private Entity entity;
     private Velocity velocity;
@@ -35,7 +36,7 @@ class ApplyVelocitySystemTest {
 
     @BeforeEach
     void beforeEach() {
-        world = fi.jakojaannos.roguelite.engine.ecs.World.createNew();
+        world = World.createNew();
         entityManager = world.getEntityManager();
 
         final var time = new Time(new SimpleTimeManager(20));
@@ -80,7 +81,7 @@ class ApplyVelocitySystemTest {
 
     @Test
     void entityWithoutColliderDoesNotMoveWhenVelocityIsZero() {
-        World world = fi.jakojaannos.roguelite.engine.ecs.World.createNew();
+        LegacyWorld world = World.createNew();
         EntityManager entityManager = world.getEntityManager();
 
         final var time = new Time(new SimpleTimeManager(20));
@@ -100,7 +101,7 @@ class ApplyVelocitySystemTest {
 
     @Test
     void entityWithoutColliderMovesWhenVelocityIsNonZero() {
-        World world = fi.jakojaannos.roguelite.engine.ecs.World.createNew();
+        LegacyWorld world = World.createNew();
         EntityManager entityManager = world.getEntityManager();
 
         final var time = new Time(new SimpleTimeManager(20));

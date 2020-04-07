@@ -4,10 +4,10 @@ import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.World;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.WeaponInput;
 import fi.jakojaannos.roguelite.game.systems.SystemGroups;
@@ -31,7 +31,7 @@ public class CharacterAttackSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
-        final var timeManager = world.getResource(Time.class);
+        final var timeManager = world.fetchResource(Time.class);
 
         final var entityManager = world.getEntityManager();
         entities.forEach(entity -> {

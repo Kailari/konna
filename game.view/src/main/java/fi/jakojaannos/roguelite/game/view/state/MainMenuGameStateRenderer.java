@@ -4,6 +4,7 @@ import java.nio.file.Path;
 
 import fi.jakojaannos.roguelite.engine.content.AssetManager;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.Sprite;
@@ -22,12 +23,12 @@ public class MainMenuGameStateRenderer extends GameStateRenderer {
     public static final String TITLE_LABEL_NAME = "title_label";
 
     public MainMenuGameStateRenderer(
-            final Path assetRoot,
+            final TimeManager timeManager, final Path assetRoot,
             final Camera camera,
             final AssetManager assetManager,
             final RenderingBackend backend
     ) {
-        super(assetRoot, camera, assetManager, backend);
+        super(timeManager, assetRoot, camera, assetManager, backend);
     }
 
     @Override
@@ -69,7 +70,7 @@ public class MainMenuGameStateRenderer extends GameStateRenderer {
 
     @Override
     protected UserInterface createUserInterface(
-            final Camera camera,
+            final TimeManager timeManager, final Camera camera,
             final AssetManager assetManager
     ) {
         final var fontRegistry = assetManager.getAssetRegistry(Font.class);
@@ -79,7 +80,7 @@ public class MainMenuGameStateRenderer extends GameStateRenderer {
         final var height = 100;
         final var borderSize = 25;
         return UserInterface
-                .builder(camera.getViewport(), font)
+                .builder(timeManager, camera.getViewport(), font)
                 .element("play_button",
                          UIElementType.PANEL,
                          builder -> builder.anchorX(ProportionValue.percentOf().parentWidth(0.5))

@@ -17,6 +17,7 @@ import javax.annotation.Nullable;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.*;
 import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
@@ -79,7 +80,7 @@ public class ApplyVelocitySystem implements ECSSystem {
         final var entityManager = world.getEntityManager();
         final var entitiesWithCollider = world.getOrCreateResource(Colliders.class);
         final var collisionEvents = world.getOrCreateResource(Collisions.class);
-        final var delta = world.getResource(Time.class).getTimeStepInSeconds();
+        final var delta = world.fetchResource(Time.class).getTimeStepInSeconds();
 
         final var tileMapLayers = getTileMapLayersWithCollision(world);
 
@@ -166,7 +167,7 @@ public class ApplyVelocitySystem implements ECSSystem {
 
     private void moveWithCollision(
             final Collisions collisionEvents,
-            final World world,
+            final LegacyWorld world,
             final Entity entity,
             final Transform transform,
             final Velocity velocity,
@@ -400,7 +401,7 @@ public class ApplyVelocitySystem implements ECSSystem {
 
     private void fireCollisionEvent(
             final Collisions collisions,
-            final World world,
+            final LegacyWorld world,
             final Entity entity,
             final CollisionCandidate candidate,
             final Collision.Mode mode
@@ -434,7 +435,7 @@ public class ApplyVelocitySystem implements ECSSystem {
         transform.position.add(velocity.mul(delta, this.tmpVelocity));
     }
 
-    private List<TileMap<TileType>> getTileMapLayersWithCollision(final World world) {
+    private List<TileMap<TileType>> getTileMapLayersWithCollision(final LegacyWorld world) {
         return world.getEntityManager()
                     .getEntitiesWith(TileMapLayer.class)
                     .map(EntityManager.EntityComponentPair::component)

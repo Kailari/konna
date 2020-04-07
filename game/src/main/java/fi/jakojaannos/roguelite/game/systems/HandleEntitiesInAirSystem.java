@@ -3,10 +3,10 @@ package fi.jakojaannos.roguelite.game.systems;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.World;
 import fi.jakojaannos.roguelite.game.data.components.InAir;
 
 public class HandleEntitiesInAirSystem implements ECSSystem {
@@ -22,7 +22,7 @@ public class HandleEntitiesInAirSystem implements ECSSystem {
             final World world
     ) {
         final var entityManager = world.getEntityManager();
-        final var time = world.getResource(Time.class);
+        final var time = world.fetchResource(Time.class);
 
         entities.forEach(entity -> {
             final var inAir = entityManager.getComponentOf(entity, InAir.class).orElseThrow();

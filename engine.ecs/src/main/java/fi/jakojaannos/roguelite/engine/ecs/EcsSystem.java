@@ -1,6 +1,7 @@
 package fi.jakojaannos.roguelite.engine.ecs;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
@@ -52,6 +53,11 @@ public interface EcsSystem<TResources, TEntityData, TEvents> {
         <TComponent> boolean addComponent(TComponent component);
 
         /**
+         * @see EntityHandle#addOrGet(Supplier)
+         */
+        <TComponent> TComponent addOrGet(Class<TComponent> componentClass, Supplier<TComponent> component);
+
+        /**
          * @see EntityHandle#removeComponent(Class)
          */
         <TComponent> boolean removeComponent(Class<TComponent> componentClass);
@@ -91,5 +97,11 @@ public interface EcsSystem<TResources, TEntityData, TEvents> {
      * the dispatcher that this system requires no events.
      */
     record NoEvents() {
+    }
+
+    /**
+     * Tag for iterating all entities without any components
+     */
+    record AllEntities() {
     }
 }

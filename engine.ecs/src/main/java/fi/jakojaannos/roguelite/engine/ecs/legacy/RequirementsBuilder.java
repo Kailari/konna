@@ -2,6 +2,8 @@ package fi.jakojaannos.roguelite.engine.ecs.legacy;
 
 import java.util.stream.Stream;
 
+import fi.jakojaannos.roguelite.engine.ecs.World;
+
 /**
  * One-stop solution to all yur configuring-systems-is-a-PITA needs! Define system dependencies, requirements, etc.
  * conveniently with a single builder instance. Most likely ends up making system configuration even worse, but I have

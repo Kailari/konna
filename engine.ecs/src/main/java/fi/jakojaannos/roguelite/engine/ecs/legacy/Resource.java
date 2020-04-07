@@ -1,7 +1,7 @@
 package fi.jakojaannos.roguelite.engine.ecs.legacy;
 
 /**
- * A shared resource. Scope of resources is per-{@link World world}, so that each world has their own resource
+ * A shared resource. Scope of resources is per-{@link LegacyWorld world}, so that each world has their own resource
  * instances. This means that all systems during a SystemDispatcher#dispatch(World) share the same
  * resource instances.
  * <p>
@@ -9,7 +9,7 @@ package fi.jakojaannos.roguelite.engine.ecs.legacy;
  * hold.
  *
  * @see ProvidedResource
- * @see World#getOrCreateResource(Class)
+ * @see LegacyWorld#getOrCreateResource(Class)
  * @see RequirementsBuilder#requireResource(Class)
  */
 @Deprecated

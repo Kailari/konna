@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.ecs.legacy.*;
 
-public class LegacyCompat implements fi.jakojaannos.roguelite.engine.ecs.legacy.World {
+public class LegacyCompat implements LegacyWorld {
     private static final Logger LOG = LoggerFactory.getLogger(LegacyCompat.class);
 
     private static final boolean LOG_GET_OR_CREATE = true;
@@ -67,6 +67,7 @@ public class LegacyCompat implements fi.jakojaannos.roguelite.engine.ecs.legacy.
     ) {
         if (LOG_GET_OR_CREATE) {
             LOG.warn("getOrCreateResource called!");
+            //throw new IllegalStateException();
         }
 
         try {
@@ -93,17 +94,6 @@ public class LegacyCompat implements fi.jakojaannos.roguelite.engine.ecs.legacy.
             this.world.registerResource(resourceClass, resource);
         } catch (final Throwable ignored) {
         }
-    }
-
-    @Override
-    public <TResource extends ProvidedResource> TResource getResource(
-            final Class<TResource> resourceType
-    ) {
-        if (LOG_GET) {
-            LOG.warn("getResource called!");
-        }
-
-        return this.world.fetchResource(resourceType);
     }
 
     private class EntityManagerImpl implements EntityManager {

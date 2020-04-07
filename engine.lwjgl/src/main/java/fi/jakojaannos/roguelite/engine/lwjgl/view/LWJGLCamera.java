@@ -132,7 +132,7 @@ public class LWJGLCamera extends Camera {
         super.updateConfigurationFromState(state);
 
         final var world = state.getWorld();
-        final var cameraProperties = world.getOrCreateResource(CameraProperties.class);
+        final var cameraProperties = world.fetchResource(CameraProperties.class);
         refreshTargetScreenSizeInUnits(cameraProperties.targetViewportSizeInWorldUnits,
                                        cameraProperties.targetViewportSizeRespectiveToMinorAxis);
         refreshMatricesIfDirty();

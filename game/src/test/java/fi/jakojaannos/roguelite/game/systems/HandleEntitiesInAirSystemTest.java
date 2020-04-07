@@ -5,9 +5,10 @@ import org.junit.jupiter.api.Test;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.World;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.LegacyWorld;
 import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
 import fi.jakojaannos.roguelite.game.data.components.InAir;
 
@@ -18,7 +19,7 @@ public class HandleEntitiesInAirSystemTest {
 
     @Test
     void inAirComponentIsRemovedAfterExpiring() {
-        World world = fi.jakojaannos.roguelite.engine.ecs.World.createNew();
+        LegacyWorld world = World.createNew();
         EntityManager entityManager = world.getEntityManager();
         SimpleTimeManager timeManager = new SimpleTimeManager(20);
         world.provideResource(Time.class, new Time(timeManager));
@@ -38,7 +39,7 @@ public class HandleEntitiesInAirSystemTest {
 
     @Test
     void inAirComponentIsNotRemovedBeforeExpiring() {
-        World world = fi.jakojaannos.roguelite.engine.ecs.World.createNew();
+        LegacyWorld world = World.createNew();
         EntityManager entityManager = world.getEntityManager();
         SimpleTimeManager timeManager = new SimpleTimeManager(20);
         world.provideResource(Time.class, new Time(timeManager));
@@ -58,7 +59,7 @@ public class HandleEntitiesInAirSystemTest {
 
     @Test
     void inAirComponentIsRemovedOnExactCorrectTick() {
-        World world = fi.jakojaannos.roguelite.engine.ecs.World.createNew();
+        LegacyWorld world = World.createNew();
         EntityManager entityManager = world.getEntityManager();
         SimpleTimeManager timeManager = new SimpleTimeManager(20);
         world.provideResource(Time.class, new Time(timeManager));

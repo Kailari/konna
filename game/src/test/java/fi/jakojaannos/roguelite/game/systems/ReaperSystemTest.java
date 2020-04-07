@@ -4,9 +4,10 @@ import org.junit.jupiter.api.Test;
 
 import java.util.stream.Stream;
 
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.World;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.LegacyWorld;
 import fi.jakojaannos.roguelite.game.data.components.character.DeadTag;
 import fi.jakojaannos.roguelite.game.systems.cleanup.ReaperSystem;
 
@@ -17,7 +18,7 @@ public class ReaperSystemTest {
 
     @Test
     void reaperSystemRemovesEntityItReceives() {
-        World world = fi.jakojaannos.roguelite.engine.ecs.World.createNew();
+        LegacyWorld world = World.createNew();
         EntityManager entityManager = world.getEntityManager();
         ReaperSystem system = new ReaperSystem();
 
@@ -32,7 +33,7 @@ public class ReaperSystemTest {
 
     @Test
     void reaperSystemRemovesAllEntitiesItReceives() {
-        World world = fi.jakojaannos.roguelite.engine.ecs.World.createNew();
+        LegacyWorld world = World.createNew();
         EntityManager entityManager = world.getEntityManager();
         ReaperSystem system = new ReaperSystem();
 

@@ -3,12 +3,9 @@ package fi.jakojaannos.roguelite.engine.state;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
-import fi.jakojaannos.roguelite.engine.MainThread;
 import fi.jakojaannos.roguelite.engine.data.resources.Network;
-import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.network.NetworkManager;
 
 public abstract class GameState implements WorldProvider, AutoCloseable {

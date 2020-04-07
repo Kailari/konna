@@ -3,10 +3,10 @@ package fi.jakojaannos.roguelite.engine.view.systems.ui;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.World;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.ui.UIEvent;
 import fi.jakojaannos.roguelite.engine.view.data.components.internal.Name;
@@ -29,8 +29,8 @@ public class UIElementHoverEventProvider implements ECSSystem {
             final World world
     ) {
         final var entityManager = world.getEntityManager();
-        final var events = world.getResource(Events.class);
-        final var mouse = world.getOrCreateResource(Mouse.class);
+        final var events = world.fetchResource(Events.class);
+        final var mouse = world.fetchResource(Mouse.class);
 
         entities.forEach(entity -> {
             final var name = entityManager.getComponentOf(entity, Name.class)

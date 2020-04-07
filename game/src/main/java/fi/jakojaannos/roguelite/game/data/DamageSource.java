@@ -2,6 +2,8 @@ package fi.jakojaannos.roguelite.game.data;
 
 import javax.annotation.Nullable;
 
+import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
+
 public interface DamageSource<TKiller> {
     /**
      * Whom the kills done by this damage source should be awarded to
@@ -28,7 +30,7 @@ public interface DamageSource<TKiller> {
         }
     }
 
-    class Entity implements DamageSource<fi.jakojaannos.roguelite.engine.ecs.legacy.Entity> {
+    class LegacyEntity implements DamageSource<fi.jakojaannos.roguelite.engine.ecs.legacy.Entity> {
         private final fi.jakojaannos.roguelite.engine.ecs.legacy.Entity player;
 
         @Override
@@ -36,8 +38,21 @@ public interface DamageSource<TKiller> {
             return this.player;
         }
 
-        public Entity(final fi.jakojaannos.roguelite.engine.ecs.legacy.Entity player) {
+        public LegacyEntity(final fi.jakojaannos.roguelite.engine.ecs.legacy.Entity player) {
             this.player = player;
+        }
+    }
+
+    class Entity implements DamageSource<EntityHandle> {
+        private final EntityHandle entityHandle;
+
+        @Override
+        public EntityHandle getKiller() {
+            return this.entityHandle;
+        }
+
+        public Entity(final EntityHandle entityHandle) {
+            this.entityHandle = entityHandle;
         }
     }
 }

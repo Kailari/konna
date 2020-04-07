@@ -11,6 +11,11 @@ public class SessionStats implements Resource {
     public long beginTimeStamp;
     public long endTimeStamp;
 
+    public SessionStats(final long timestamp) {
+        this.beginTimeStamp = timestamp;
+        this.endTimeStamp = timestamp;
+    }
+
     public int getKillsOf(final DamageSource<?> source) {
         return this.kills.getOrDefault(source.getKiller(), 0);
     }

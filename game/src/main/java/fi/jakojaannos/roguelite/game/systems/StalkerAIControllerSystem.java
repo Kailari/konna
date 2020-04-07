@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.*;
 import fi.jakojaannos.roguelite.game.data.components.InAir;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
@@ -38,7 +39,7 @@ public class StalkerAIControllerSystem implements ECSSystem {
             final World world
     ) {
         final var entityManager = world.getEntityManager();
-        final var timeManager = world.getResource(Time.class);
+        final var timeManager = world.fetchResource(Time.class);
         final var optPlayer = world.getOrCreateResource(Players.class).getLocalPlayer();
         final var playerPos = optPlayer.isPresent()
                 ? entityManager.getComponentOf(optPlayer.get(), Transform.class).orElseThrow().position

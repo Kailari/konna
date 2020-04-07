@@ -10,10 +10,9 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.World;
+import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
+import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
+import fi.jakojaannos.roguelite.engine.ecs.Requirements;
 import fi.jakojaannos.roguelite.engine.utilities.OptionalUtil;
 import fi.jakojaannos.roguelite.engine.view.data.components.internal.*;
 import fi.jakojaannos.roguelite.engine.view.data.components.ui.ElementBoundaries;
@@ -32,7 +31,202 @@ import fi.jakojaannos.roguelite.engine.view.ui.ProportionValue;
  * In another words: if we know two of "min", "max" and "size", we can easily calculate the third. If more than two are
  * defined, there is a high risk of contradiction.
  */
-public class UIElementBoundaryCalculationSystem implements ECSSystem {
+public class UIElementBoundaryCalculationSystem implements EcsSystem<UIElementBoundaryCalculationSystem.Resources, UIElementBoundaryCalculationSystem.EntityData, EcsSystem.NoEvents> {
+    @Override
+    public Requirements<Resources, EntityData, NoEvents> declareRequirements(
+            final Requirements<Resources, EntityData, NoEvents> require
+    ) {
+        return require.entityData(EntityData.class)
+                      .resources(Resources.class);
+    }
+
+    @Override
+    public void tick(
+            final Resources resources,
+            final Stream<EntityDataHandle<EntityData>> entities,
+            final NoEvents noEvents
+    ) {
+        final var hierarchy = resources.hierarchy;
+        final var uiRoot = resources.uiRoot;
+
+        final var boundaryLookup = new HashMap<EntityHandle, ElementBoundaries>();
+        final var fontSizeLookup = new HashMap<EntityHandle, Integer>();
+        entities.sorted((a, b) -> hierarchy.parentsFirst(a.getHandle(), b.getHandle()))
+                .forEachOrdered(entity -> {
+                    final var parentBounds = hierarchy.getParentOf(entity.getHandle())
+                                                      .map(boundaryLookup::get)
+                                                      .orElseGet(uiRoot::getBoundaries);
+
+                    final var bounds = entity.getComponent(ElementBoundaries.class).orElseThrow();
+                    bounds.invalidate();
+
+                    final var fontSize = entity.getComponent(FontSize.class)
+                                               .map(fs -> fs.value)
+                                               .orElseGet(() -> hierarchy.getParentOf(entity.getHandle())
+                                                                         .map(fontSizeLookup::get)
+                                                                         .orElseGet(uiRoot::getFontSize));
+                    boundaryLookup.put(entity.getHandle(), bounds);
+                    fontSizeLookup.put(entity.getHandle(), fontSize);
+                    final var context = new ProportionValue.Context(fontSize, parentBounds, bounds);
+
+                    final Optional<ProportionValue> maybeLeft = entity.getComponent(BoundLeft.class)
+                                                                      .map(ProportionValueComponent::getValue);
+                    final Optional<ProportionValue> maybeRight = entity.getComponent(BoundRight.class)
+                                                                       .map(ProportionValueComponent::getValue);
+                    final Optional<ProportionValue> maybeWidth = OptionalUtil.ifAnyEmptyOptional(
+                            entity.getComponent(BoundWidth.class),
+                            maybeLeft,
+                            maybeRight
+                    ).map(ProportionValueComponent::getValue);
+
+                    final Optional<ProportionValue> maybeTop = entity.getComponent(BoundTop.class)
+                                                                     .map(ProportionValueComponent::getValue);
+                    final Optional<ProportionValue> maybeBottom =
+                            entity.getComponent(BoundBottom.class)
+                                  .map(ProportionValueComponent::getValue);
+                    final Optional<ProportionValue> maybeHeight = OptionalUtil.ifAnyEmptyOptional(
+                            entity.getComponent(BoundHeight.class),
+                            maybeTop,
+                            maybeBottom
+                    ).map(ProportionValueComponent::getValue);
+
+                    ensureDependenciesAreValid(maybeLeft, maybeRight, maybeWidth, maybeTop, maybeBottom, maybeHeight);
+
+                    final Lazy<Integer> lazyLeft = new Lazy<>(bounds::setMinX);
+                    final Lazy<Integer> lazyRight = new Lazy<>(bounds::setMaxX);
+                    final Lazy<Integer> lazyWidth = new Lazy<>(bounds::setWidth);
+
+                    final Lazy<Integer> lazyTop = new Lazy<>(bounds::setMinY);
+                    final Lazy<Integer> lazyBottom = new Lazy<>(bounds::setMaxY);
+                    final Lazy<Integer> lazyHeight = new Lazy<>(bounds::setHeight);
+                    createSuppliersForComputedValues(parentBounds, context,
+                                                     maybeLeft, maybeRight, maybeWidth,
+                                                     maybeTop, maybeBottom, maybeHeight,
+                                                     lazyLeft, lazyRight, lazyWidth,
+                                                     lazyTop, lazyBottom, lazyHeight);
+                    bounds.minX = lazyLeft.get();
+                    bounds.maxX = lazyRight.get();
+                    bounds.minY = lazyTop.get();
+                    bounds.maxY = lazyBottom.get();
+                    bounds.width = lazyWidth.get();
+                    bounds.height = lazyHeight.get();
+
+                    entity.getComponent(BoundAnchorX.class)
+                          .map(boundAnchorX -> boundAnchorX.value)
+                          .ifPresent(anchorX -> {
+                              final var anchorOffset = anchorX.getValue(context);
+                              bounds.minX += anchorOffset;
+                              bounds.maxX += anchorOffset;
+                          });
+                    entity.getComponent(BoundAnchorY.class)
+                          .map(boundAnchorY -> boundAnchorY.value)
+                          .ifPresent(anchorY -> {
+                              final var anchorOffset = anchorY.getValue(context);
+                              bounds.minY += anchorOffset;
+                              bounds.maxY += anchorOffset;
+                          });
+                });
+    }
+
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private void createSuppliersForComputedValues(
+            final ElementBoundaries parentBounds,
+            final ProportionValue.Context context,
+            final Optional<ProportionValue> maybeLeft,
+            final Optional<ProportionValue> maybeRight,
+            final Optional<ProportionValue> maybeWidth,
+            final Optional<ProportionValue> maybeTop,
+            final Optional<ProportionValue> maybeBottom,
+            final Optional<ProportionValue> maybeHeight,
+            final Lazy<Integer> computedLeft,
+            final Lazy<Integer> computedRight,
+            final Lazy<Integer> computedWidth,
+            final Lazy<Integer> computedTop,
+            final Lazy<Integer> computedBottom,
+            final Lazy<Integer> computedHeight
+    ) {
+        // If width is not available, set fallback left/right if needed
+        // (without width we cannot compute e.g. "left = right - width")
+        if (maybeWidth.isEmpty()) {
+            if (maybeRight.isEmpty()) {
+                computedRight.setValue(parentBounds.maxX);
+            }
+
+            if (maybeLeft.isEmpty()) {
+                computedLeft.setValue(parentBounds.minX);
+            }
+        }
+
+        // If height is not available, set fallback top/bottom if needed
+        if (maybeHeight.isEmpty()) {
+            if (maybeTop.isEmpty()) {
+                computedTop.setValue(parentBounds.minY);
+            }
+
+            if (maybeBottom.isEmpty()) {
+                computedBottom.setValue(parentBounds.maxY);
+            }
+        }
+
+        // Width/Height
+        computedWidth.setSupplier(createBoundSupplier(maybeWidth, computedWidth, computedHeight,
+                                                      context,
+                                                      parentBounds.getWidth(),
+                                                      (ignored, width) -> width,
+                                                      createSizeComputeSupplier(computedLeft, computedRight)));
+        computedHeight.setSupplier(createBoundSupplier(maybeHeight, computedWidth, computedHeight,
+                                                       context,
+                                                       parentBounds.getHeight(),
+                                                       (ignored, height) -> height,
+                                                       createSizeComputeSupplier(computedTop, computedBottom)));
+
+        // Left/Right
+        computedLeft.setSupplier(createBoundSupplier(maybeLeft, computedWidth, computedHeight,
+                                                     context,
+                                                     parentBounds.getMinX(),
+                                                     Integer::sum,
+                                                     createMinComputeSupplier(computedRight, computedWidth)));
+        computedRight.setSupplier(createBoundSupplier(maybeRight, computedWidth, computedHeight,
+                                                      context,
+                                                      parentBounds.getMaxX(),
+                                                      (parentMaxX, right) -> parentMaxX - right,
+                                                      createMaxComputeSupplier(computedLeft, computedWidth)));
+
+        // Top/Bottom
+        computedTop.setSupplier(createBoundSupplier(maybeTop, computedWidth, computedHeight,
+                                                    context,
+                                                    parentBounds.getMinY(),
+                                                    Integer::sum,
+                                                    createMinComputeSupplier(computedBottom, computedHeight)));
+        computedBottom.setSupplier(createBoundSupplier(maybeBottom, computedWidth, computedHeight,
+                                                       context,
+                                                       parentBounds.getMaxY(),
+                                                       (parentMaxY, bottom) -> parentMaxY - bottom,
+                                                       createMaxComputeSupplier(computedTop, computedHeight)));
+    }
+
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private void ensureDependenciesAreValid(
+            final Optional<ProportionValue> maybeLeft,
+            final Optional<ProportionValue> maybeRight,
+            final Optional<ProportionValue> maybeWidth,
+            final Optional<ProportionValue> maybeTop,
+            final Optional<ProportionValue> maybeBottom,
+            final Optional<ProportionValue> maybeHeight
+    ) {
+        if (maybeWidth.isPresent() && maybeHeight.isPresent()) {
+            ensureWidthAndHeightAreNotCyclic(maybeWidth.get(), maybeHeight.get());
+        }
+        ensureWidthRelatedAreNotCyclic(OptionalUtil.ifAllPresent(Stream.of(maybeWidth, maybeLeft, maybeRight),
+                                                                 maybeLeft,
+                                                                 maybeRight)
+                                                   .orElseGet(() -> Stream.of(maybeWidth)));
+        ensureHeightRelatedAreNotCyclic(OptionalUtil.ifAllPresent(Stream.of(maybeHeight, maybeTop, maybeBottom),
+                                                                  maybeTop,
+                                                                  maybeBottom)
+                                                    .orElseGet(() -> Stream.of(maybeHeight)));
+    }
+
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private static Supplier<Integer> createBoundSupplier(
             final Optional<ProportionValue> maybeProportion,
@@ -150,201 +344,15 @@ public class UIElementBoundaryCalculationSystem implements ECSSystem {
         }
     }
 
-    @Override
-    public void declareRequirements(final RequirementsBuilder requirements) {
-        requirements.addToGroup(UISystemGroups.PREPARATIONS)
-                    .tickAfter(UIHierarchySystem.class)
-                    .requireProvidedResource(UIHierarchy.class)
-                    .requireProvidedResource(UIRoot.class)
-                    .withComponent(ElementBoundaries.class);
+    public static record EntityData(
+            ElementBoundaries elementBoundaries
+    ) {
     }
 
-    @Override
-    public void tick(
-            final Stream<Entity> entities,
-            final World world
+    public static record Resources(
+            UIHierarchy hierarchy,
+            UIRoot uiRoot
     ) {
-        final var hierarchy = world.getResource(UIHierarchy.class);
-        final var uiRoot = world.getResource(UIRoot.class);
-
-        final var entityManager = world.getEntityManager();
-        final var boundaryLookup = new HashMap<Entity, ElementBoundaries>();
-        final var fontSizeLookup = new HashMap<Entity, Integer>();
-        entities.sorted(hierarchy::parentsFirst)
-                .forEach(entity -> {
-                    final var parentBounds = hierarchy.getParentOf(entity)
-                                                      .map(boundaryLookup::get)
-                                                      .orElseGet(uiRoot::getBoundaries);
-
-                    final var bounds = entityManager.getComponentOf(entity, ElementBoundaries.class).orElseThrow();
-                    bounds.invalidate();
-
-                    final var fontSize = entityManager.getComponentOf(entity, FontSize.class)
-                                                      .map(fs -> fs.value)
-                                                      .orElseGet(() -> hierarchy.getParentOf(entity)
-                                                                                .map(fontSizeLookup::get)
-                                                                                .orElseGet(uiRoot::getFontSize));
-                    boundaryLookup.put(entity, bounds);
-                    fontSizeLookup.put(entity, fontSize);
-                    final var context = new ProportionValue.Context(fontSize, parentBounds, bounds);
-
-                    final Optional<ProportionValue> maybeLeft = entityManager.getComponentOf(entity, BoundLeft.class)
-                                                                             .map(ProportionValueComponent::getValue);
-                    final Optional<ProportionValue> maybeRight = entityManager.getComponentOf(entity, BoundRight.class)
-                                                                              .map(ProportionValueComponent::getValue);
-                    final Optional<ProportionValue> maybeWidth = OptionalUtil.ifAnyEmptyOptional(
-                            entityManager.getComponentOf(entity, BoundWidth.class),
-                            maybeLeft,
-                            maybeRight
-                    ).map(ProportionValueComponent::getValue);
-
-                    final Optional<ProportionValue> maybeTop = entityManager.getComponentOf(entity, BoundTop.class)
-                                                                            .map(ProportionValueComponent::getValue);
-                    final Optional<ProportionValue> maybeBottom =
-                            entityManager.getComponentOf(entity, BoundBottom.class)
-                                         .map(ProportionValueComponent::getValue);
-                    final Optional<ProportionValue> maybeHeight = OptionalUtil.ifAnyEmptyOptional(
-                            entityManager.getComponentOf(entity, BoundHeight.class),
-                            maybeTop,
-                            maybeBottom
-                    ).map(ProportionValueComponent::getValue);
-
-                    ensureDependenciesAreValid(maybeLeft, maybeRight, maybeWidth, maybeTop, maybeBottom, maybeHeight);
-
-                    final Lazy<Integer> lazyLeft = new Lazy<>(bounds::setMinX);
-                    final Lazy<Integer> lazyRight = new Lazy<>(bounds::setMaxX);
-                    final Lazy<Integer> lazyWidth = new Lazy<>(bounds::setWidth);
-
-                    final Lazy<Integer> lazyTop = new Lazy<>(bounds::setMinY);
-                    final Lazy<Integer> lazyBottom = new Lazy<>(bounds::setMaxY);
-                    final Lazy<Integer> lazyHeight = new Lazy<>(bounds::setHeight);
-                    createSuppliersForComputedValues(parentBounds, context,
-                                                     maybeLeft, maybeRight, maybeWidth,
-                                                     maybeTop, maybeBottom, maybeHeight,
-                                                     lazyLeft, lazyRight, lazyWidth,
-                                                     lazyTop, lazyBottom, lazyHeight);
-
-                    bounds.minX = lazyLeft.get();
-                    bounds.maxX = lazyRight.get();
-                    bounds.minY = lazyTop.get();
-                    bounds.maxY = lazyBottom.get();
-                    bounds.width = lazyWidth.get();
-                    bounds.height = lazyHeight.get();
-
-                    entityManager.getComponentOf(entity, BoundAnchorX.class)
-                                 .map(boundAnchorX -> boundAnchorX.value)
-                                 .ifPresent(anchorX -> {
-                                     final var anchorOffset = anchorX.getValue(context);
-                                     bounds.minX += anchorOffset;
-                                     bounds.maxX += anchorOffset;
-                                 });
-                    entityManager.getComponentOf(entity, BoundAnchorY.class)
-                                 .map(boundAnchorY -> boundAnchorY.value)
-                                 .ifPresent(anchorY -> {
-                                     final var anchorOffset = anchorY.getValue(context);
-                                     bounds.minY += anchorOffset;
-                                     bounds.maxY += anchorOffset;
-                                 });
-                });
-    }
-
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private void createSuppliersForComputedValues(
-            final ElementBoundaries parentBounds,
-            final ProportionValue.Context context,
-            final Optional<ProportionValue> maybeLeft,
-            final Optional<ProportionValue> maybeRight,
-            final Optional<ProportionValue> maybeWidth,
-            final Optional<ProportionValue> maybeTop,
-            final Optional<ProportionValue> maybeBottom,
-            final Optional<ProportionValue> maybeHeight,
-            final Lazy<Integer> computedLeft,
-            final Lazy<Integer> computedRight,
-            final Lazy<Integer> computedWidth,
-            final Lazy<Integer> computedTop,
-            final Lazy<Integer> computedBottom,
-            final Lazy<Integer> computedHeight
-    ) {
-        // If width is not available, set fallback left/right if needed
-        // (without width we cannot compute e.g. "left = right - width")
-        if (maybeWidth.isEmpty()) {
-            if (maybeRight.isEmpty()) {
-                computedRight.setValue(parentBounds.maxX);
-            }
-
-            if (maybeLeft.isEmpty()) {
-                computedLeft.setValue(parentBounds.minX);
-            }
-        }
-
-        // If height is not available, set fallback top/bottom if needed
-        if (maybeHeight.isEmpty()) {
-            if (maybeTop.isEmpty()) {
-                computedTop.setValue(parentBounds.minY);
-            }
-
-            if (maybeBottom.isEmpty()) {
-                computedBottom.setValue(parentBounds.maxY);
-            }
-        }
-
-        // Width/Height
-        computedWidth.setSupplier(createBoundSupplier(maybeWidth, computedWidth, computedHeight,
-                                                      context,
-                                                      parentBounds.getWidth(),
-                                                      (ignored, width) -> width,
-                                                      createSizeComputeSupplier(computedLeft, computedRight)));
-        computedHeight.setSupplier(createBoundSupplier(maybeHeight, computedWidth, computedHeight,
-                                                       context,
-                                                       parentBounds.getHeight(),
-                                                       (ignored, height) -> height,
-                                                       createSizeComputeSupplier(computedTop, computedBottom)));
-
-        // Left/Right
-        computedLeft.setSupplier(createBoundSupplier(maybeLeft, computedWidth, computedHeight,
-                                                     context,
-                                                     parentBounds.getMinX(),
-                                                     Integer::sum,
-                                                     createMinComputeSupplier(computedRight, computedWidth)));
-        computedRight.setSupplier(createBoundSupplier(maybeRight, computedWidth, computedHeight,
-                                                      context,
-                                                      parentBounds.getMaxX(),
-                                                      (parentMaxX, right) -> parentMaxX - right,
-                                                      createMaxComputeSupplier(computedLeft, computedWidth)));
-
-        // Top/Bottom
-        computedTop.setSupplier(createBoundSupplier(maybeTop, computedWidth, computedHeight,
-                                                    context,
-                                                    parentBounds.getMinY(),
-                                                    Integer::sum,
-                                                    createMinComputeSupplier(computedBottom, computedHeight)));
-        computedBottom.setSupplier(createBoundSupplier(maybeBottom, computedWidth, computedHeight,
-                                                       context,
-                                                       parentBounds.getMaxY(),
-                                                       (parentMaxY, bottom) -> parentMaxY - bottom,
-                                                       createMaxComputeSupplier(computedTop, computedHeight)));
-    }
-
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private void ensureDependenciesAreValid(
-            final Optional<ProportionValue> maybeLeft,
-            final Optional<ProportionValue> maybeRight,
-            final Optional<ProportionValue> maybeWidth,
-            final Optional<ProportionValue> maybeTop,
-            final Optional<ProportionValue> maybeBottom,
-            final Optional<ProportionValue> maybeHeight
-    ) {
-        if (maybeWidth.isPresent() && maybeHeight.isPresent()) {
-            ensureWidthAndHeightAreNotCyclic(maybeWidth.get(), maybeHeight.get());
-        }
-        ensureWidthRelatedAreNotCyclic(OptionalUtil.ifAllPresent(Stream.of(maybeWidth, maybeLeft, maybeRight),
-                                                                 maybeLeft,
-                                                                 maybeRight)
-                                                   .orElseGet(() -> Stream.of(maybeWidth)));
-        ensureHeightRelatedAreNotCyclic(OptionalUtil.ifAllPresent(Stream.of(maybeHeight, maybeTop, maybeBottom),
-                                                                  maybeTop,
-                                                                  maybeBottom)
-                                                    .orElseGet(() -> Stream.of(maybeHeight)));
     }
 
     private static class Lazy<T> {
@@ -382,7 +390,7 @@ public class UIElementBoundaryCalculationSystem implements ECSSystem {
         public T get() {
             if (this.computing) {
                 throw new IllegalStateException("Tried to compute value of a Lazy wrapper while computation was" +
-                                                        "already in progress!");
+                                                "already in progress!");
             }
 
             compute();

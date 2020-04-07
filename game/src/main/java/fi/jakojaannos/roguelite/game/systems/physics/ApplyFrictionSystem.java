@@ -5,10 +5,10 @@ import org.joml.Vector2d;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.World;
 import fi.jakojaannos.roguelite.game.data.components.InAir;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
@@ -29,7 +29,7 @@ public class ApplyFrictionSystem implements ECSSystem {
             final World world
     ) {
         final var entityManager = world.getEntityManager();
-        final var delta = world.getResource(Time.class).getTimeStepInSeconds();
+        final var delta = world.fetchResource(Time.class).getTimeStepInSeconds();
 
         entities.forEach(entity -> {
             final var physics = entityManager.getComponentOf(entity, Physics.class).orElseThrow();

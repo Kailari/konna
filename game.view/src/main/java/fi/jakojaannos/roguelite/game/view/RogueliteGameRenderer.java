@@ -12,6 +12,7 @@ import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.state.GameState;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.GameRenderer;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
@@ -34,6 +35,7 @@ public class RogueliteGameRenderer implements GameRenderer {
     }
 
     public RogueliteGameRenderer(
+            final TimeManager timeManager,
             final Path assetRoot,
             final Window window,
             final RenderingBackend backend,
@@ -49,11 +51,13 @@ public class RogueliteGameRenderer implements GameRenderer {
         this.camera.resize(window.getWidth(), window.getHeight());
 
         this.stateRenderers = Map.ofEntries(
-                Map.entry(GameplayGameState.class, new GameplayGameStateRenderer(assetRoot,
+                Map.entry(GameplayGameState.class, new GameplayGameStateRenderer(timeManager,
+                                                                                 assetRoot,
                                                                                  this.camera,
                                                                                  assetManager,
                                                                                  backend)),
-                Map.entry(MainMenuGameState.class, new MainMenuGameStateRenderer(assetRoot,
+                Map.entry(MainMenuGameState.class, new MainMenuGameStateRenderer(timeManager,
+                                                                                 assetRoot,
                                                                                  this.camera,
                                                                                  assetManager,
                                                                                  backend))
@@ -70,7 +74,7 @@ public class RogueliteGameRenderer implements GameRenderer {
         // Snap camera to active camera
         final var world = state.getWorld();
         final var entityManager = world.getEntityManager();
-        Optional.ofNullable(world.getOrCreateResource(CameraProperties.class).cameraEntity)
+        Optional.ofNullable(world.fetchResource(CameraProperties.class).cameraEntity)
                 .flatMap(cameraEntity -> entityManager.getComponentOf(cameraEntity, Transform.class))
                 .ifPresent(cameraTransform -> this.camera.setPosition(cameraTransform.position.x,
                                                                       cameraTransform.position.y));

@@ -2,6 +2,8 @@ package fi.jakojaannos.roguelite.engine.ecs.legacy;
 
 import java.util.stream.Stream;
 
+import fi.jakojaannos.roguelite.engine.ecs.World;
+
 /**
  * A single stateless logical unit, performing a data transformation procedure on collections of {@link Component
  * components} based on groupings called {@link Entity entities}. Provides a {@link #tick(Stream, World) tick}-method
@@ -66,12 +68,10 @@ public interface ECSSystem {
     void declareRequirements(RequirementsBuilder requirements);
 
     /**
-     * Performs the state manipulation on given {@link World}. All entities are guaranteed to match requirements
+     * Performs the state manipulation on given {@link LegacyWorld}. All entities are guaranteed to match requirements
      * specified in {@link #declareRequirements(RequirementsBuilder)}.
-     *
-     * @param entities stream of matching entities to operate on
-     * @param world    world the entities belong to
-     */
+     *  @param entities stream of matching entities to operate on
+     * @param world    world the entities belong to*/
     @Deprecated
     void tick(Stream<Entity> entities, World world);
 }

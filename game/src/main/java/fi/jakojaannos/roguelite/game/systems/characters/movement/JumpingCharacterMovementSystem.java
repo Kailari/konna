@@ -5,6 +5,7 @@ import org.joml.Vector2d;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.*;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.InAir;
@@ -32,7 +33,7 @@ public class JumpingCharacterMovementSystem implements ECSSystem {
             final World world
     ) {
         final var entityManager = world.getEntityManager();
-        final var timeManager = world.getResource(Time.class);
+        final var timeManager = world.fetchResource(Time.class);
 
         entities.forEach(entity -> {
             final var movementAbility = entityManager.getComponentOf(entity, JumpingMovementAbility.class)

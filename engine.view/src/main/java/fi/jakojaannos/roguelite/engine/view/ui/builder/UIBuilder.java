@@ -3,6 +3,7 @@ package fi.jakojaannos.roguelite.engine.view.ui.builder;
 import java.util.function.Consumer;
 
 import fi.jakojaannos.roguelite.engine.ui.TextSizeProvider;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
@@ -12,10 +13,11 @@ public class UIBuilder {
     private final UserInterfaceImpl userInterface;
 
     public UIBuilder(
+            final TimeManager timeManager,
             final Viewport viewport,
             final TextSizeProvider fontSizeProvider
     ) {
-        this.userInterface = new UserInterfaceImpl(viewport, fontSizeProvider);
+        this.userInterface = new UserInterfaceImpl(timeManager, viewport, fontSizeProvider);
     }
 
     public <T extends UIElementType<TBuilder>, TBuilder extends UIElementBuilder<TBuilder>> UIBuilder element(
@@ -28,7 +30,7 @@ public class UIBuilder {
     }
 
     public UserInterface build() {
-        this.userInterface.getEntityManager().applyModifications();
+        this.userInterface.getWorld().commitEntityModifications();
         this.userInterface.updateHierarchy();
         return this.userInterface;
     }

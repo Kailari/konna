@@ -1,16 +1,15 @@
 package fi.jakojaannos.roguelite.engine.view.ui.internal;
 
 import java.util.Optional;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 
 public class EntityBackedUIProperty<T> implements UIProperty<T> {
     private final String name;
-    private final BiFunction<Entity, EntityManager, Optional<T>> valueGetter;
+    private final Function<EntityHandle, Optional<T>> valueGetter;
     private final ValueSetter<T> valueSetter;
 
     @Override
@@ -20,7 +19,7 @@ public class EntityBackedUIProperty<T> implements UIProperty<T> {
 
     public EntityBackedUIProperty(
             final String name,
-            final BiFunction<Entity, EntityManager, Optional<T>> valueGetter,
+            final Function<EntityHandle, Optional<T>> valueGetter,
             final ValueSetter<T> valueSetter
     ) {
         this.name = name;
@@ -31,28 +30,25 @@ public class EntityBackedUIProperty<T> implements UIProperty<T> {
     @Override
     public Optional<T> getFor(final UIElement uiElement) {
         if (uiElement instanceof EntityBackedUIElement entityBackedUiElement) {
-            return this.valueGetter.apply(entityBackedUiElement.getEntity(),
-                                          entityBackedUiElement.getEntityManager());
+            return this.valueGetter.apply(entityBackedUiElement.getEntity());
         }
 
         throw new IllegalStateException("Unknown type of UI Element: \"" +
-                                                uiElement.getClass().getSimpleName() + "\"");
+                                        uiElement.getClass().getSimpleName() + "\"");
     }
 
     @Override
     public void set(final UIElement uiElement, final T value) {
         if (uiElement instanceof EntityBackedUIElement entityBackedUiElement) {
-            this.valueSetter.accept(entityBackedUiElement.getEntity(),
-                                    entityBackedUiElement.getEntityManager(),
-                                    value);
+            this.valueSetter.accept(entityBackedUiElement.getEntity(), value);
             return;
         }
 
         throw new IllegalStateException("Unknown type of UI Element: \"" +
-                                                uiElement.getClass().getSimpleName() + "\"");
+                                        uiElement.getClass().getSimpleName() + "\"");
     }
 
     public interface ValueSetter<T> {
-        void accept(Entity entity, EntityManager entityManager, T value);
+        void accept(EntityHandle entity, T value);
     }
 }

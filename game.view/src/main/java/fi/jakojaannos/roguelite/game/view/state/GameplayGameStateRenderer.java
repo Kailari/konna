@@ -4,6 +4,7 @@ import java.nio.file.Path;
 
 import fi.jakojaannos.roguelite.engine.content.AssetManager;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.Sprite;
@@ -27,12 +28,13 @@ public class GameplayGameStateRenderer extends GameStateRenderer {
     private static final String GAME_OVER_HELP_TEXT = "Press <SPACE> to restart, <ESC> to return to menu";
 
     public GameplayGameStateRenderer(
+            final TimeManager timeManager,
             final Path assetRoot,
             final Camera camera,
             final AssetManager assetManager,
             final RenderingBackend backend
     ) {
-        super(assetRoot, camera, assetManager, backend);
+        super(timeManager, assetRoot, camera, assetManager, backend);
     }
 
     @Override
@@ -86,13 +88,14 @@ public class GameplayGameStateRenderer extends GameStateRenderer {
 
     @Override
     protected UserInterface createUserInterface(
+            final TimeManager timeManager,
             final Camera camera,
             final AssetManager assetManager
     ) {
         final var fontRegistry = assetManager.getAssetRegistry(Font.class);
 
         final var font = fontRegistry.getByAssetName("fonts/VCR_OSD_MONO.ttf");
-        return UserInterface.builder(camera.getViewport(), font)
+        return UserInterface.builder(timeManager, camera.getViewport(), font)
                             .element(TIME_PLAYED_LABEL_NAME,
                                      UIElementType.LABEL,
                                      GameplayGameStateRenderer::buildTimePlayedTimer)

@@ -2,17 +2,15 @@ package fi.jakojaannos.roguelite.engine.view.ui.internal;
 
 import java.util.Optional;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
 
 public class ComponentBackedUIProperty<T, C extends Component> extends EntityBackedUIProperty<T> {
     public ComponentBackedUIProperty(
             final String name,
-            final Class<? extends C> componentClass,
+            final Class<C> componentClass,
             final Function<C, T> componentToValueMapper,
             final BiConsumer<C, T> componentValueSetter
     ) {
@@ -21,20 +19,20 @@ public class ComponentBackedUIProperty<T, C extends Component> extends EntityBac
               createSetter(componentClass, componentValueSetter));
     }
 
-    private static <T, C extends Component> BiFunction<Entity, EntityManager, Optional<T>> createGetter(
+    private static <T, C> Function<EntityHandle, Optional<T>> createGetter(
             final Class<? extends C> componentClass,
             final Function<C, T> componentToValueMapper
     ) {
-        return (entity, entityManager) -> entityManager.getComponentOf(entity, componentClass)
-                                                       .map(componentToValueMapper);
+        return (entityHandle) -> entityHandle.getComponent(componentClass)
+                                             .map(componentToValueMapper);
     }
 
-    private static <T, C extends Component> ValueSetter<T> createSetter(
-            final Class<? extends C> componentClass,
+    private static <T, C> ValueSetter<T> createSetter(
+            final Class<C> componentClass,
             final BiConsumer<C, T> componentValueSetter
     ) {
-        return (entity, entityManager, value) ->
-                entityManager.getComponentOf(entity, componentClass)
-                             .ifPresent(component -> componentValueSetter.accept(component, value));
+        return (entity, value) ->
+                entity.getComponent(componentClass)
+                      .ifPresent(component -> componentValueSetter.accept(component, value));
     }
 }

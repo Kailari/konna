@@ -7,8 +7,7 @@ import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.World;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
 import fi.jakojaannos.roguelite.game.data.archetypes.PlayerArchetype;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
@@ -18,7 +17,6 @@ import fi.jakojaannos.roguelite.game.data.resources.Players;
 import fi.jakojaannos.roguelite.game.systems.characters.movement.JumpingCharacterMovementSystem;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
 
 public class JumpingCharacterMovementSystemTest {
     private static final double EPSILON = 0.001;
@@ -26,39 +24,39 @@ public class JumpingCharacterMovementSystemTest {
     @Test
     void slimeHopsTowardsPlayer() {
         final var system = new JumpingCharacterMovementSystem();
-        final var world = (World) fi.jakojaannos.roguelite.engine.ecs.World.createNew();
-        final var entityManager = world.getEntityManager();
+        final var world = World.createNew();
 
         final var time = new Time(new SimpleTimeManager(20));
-        world.provideResource(Time.class, time);
+        world.registerResource(Time.class, time);
 
         final var playerPos = new Transform(10, 10);
-        world.getOrCreateResource(Players.class)
-             .setLocalPlayer(PlayerArchetype.create(entityManager, time, playerPos));
+        final var players = new Players();
+        players.setLocalPlayer(PlayerArchetype.create(world, time, playerPos).asLegacyEntity());
+        world.registerResource(Players.class, players);
 
-        Entity slime = entityManager.createEntity();
+        final var slime = world.createEntity();
         JumpingMovementAbility split = JumpingMovementAbility.builder().jumpForce(5.0)
                                                              .build();
-        entityManager.addComponentTo(slime, split);
+        slime.addComponent(split);
 
         final var slimePos = new Transform(3, 6);
-        entityManager.addComponentTo(slime, slimePos);
+        slime.addComponent(slimePos);
 
         final var input = new MovementInput();
-        entityManager.addComponentTo(slime, input);
+        slime.addComponent(input);
 
         final var expectedDir = new Vector2d(playerPos.position)
                 .sub(slimePos.position)
                 .normalize();
         input.move = expectedDir;
 
-        Physics physics = Physics.builder()
-                                 .mass(2.5)
-                                 .build();
-        entityManager.addComponentTo(slime, physics);
+        final var physics = Physics.builder()
+                                   .mass(2.5)
+                                   .build();
+        slime.addComponent(physics);
 
-        entityManager.applyModifications();
-        system.tick(Stream.of(slime), world);
+        world.commitEntityModifications();
+        system.tick(Stream.of(slime.asLegacyEntity()), world);
 
         final var expectedAcceleration = expectedDir.normalize(split.jumpForce / physics.mass, new Vector2d());
 

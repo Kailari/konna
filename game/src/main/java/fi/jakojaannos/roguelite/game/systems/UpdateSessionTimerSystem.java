@@ -3,10 +3,10 @@ package fi.jakojaannos.roguelite.game.systems;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.World;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
 import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
 
@@ -28,7 +28,7 @@ public class UpdateSessionTimerSystem implements ECSSystem {
             return;
         }
 
-        final var timeManager = world.getResource(Time.class);
+        final var timeManager = world.fetchResource(Time.class);
         final var sessionStats = world.getOrCreateResource(SessionStats.class);
         sessionStats.endTimeStamp = timeManager.getCurrentGameTime();
     }

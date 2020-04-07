@@ -9,10 +9,10 @@ import java.util.stream.Stream;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.World;
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
@@ -53,7 +53,7 @@ public class HealthBarUpdateSystem implements ECSSystem {
         final var cameraProperties = world.getOrCreateResource(CameraProperties.class);
 
         final var entityManager = world.getEntityManager();
-        final var timeManager = world.getResource(Time.class);
+        final var timeManager = world.fetchResource(Time.class);
         final var healthbarDurationInTicks = timeManager.convertToTicks(5.0);
 
         for (final var uiElement : this.healthBars.values()) {
@@ -117,7 +117,6 @@ public class HealthBarUpdateSystem implements ECSSystem {
     private UIElement createHealthBarForEntity(final Integer entityId) {
         return this.userInterface.addElement("healthbar#" + entityId,
                                              UIElementType.PROGRESS_BAR,
-                                             builder -> {
-                                             });
+                                             builder -> { });
     }
 }

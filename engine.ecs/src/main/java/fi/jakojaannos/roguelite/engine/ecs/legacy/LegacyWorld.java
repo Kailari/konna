@@ -4,7 +4,7 @@ package fi.jakojaannos.roguelite.engine.ecs.legacy;
  * @deprecated This interface is deprecated. The new implementation should be used instead.
  */
 @Deprecated
-public interface World {
+public interface LegacyWorld {
     /**
      * Gets the entity/component manager for this world.
      *
@@ -35,7 +35,4 @@ public interface World {
             Class<TResource> resourceClass,
             TResource resource
     );
-
-    @Deprecated
-    <TResource extends ProvidedResource> TResource getResource(Class<TResource> resourceType);
 }

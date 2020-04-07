@@ -1,7 +1,7 @@
 package fi.jakojaannos.roguelite.engine.state;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.World;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.LegacyWorld;
 
 public interface WorldProvider {
-    World getWorld();
+    LegacyWorld getWorld();
 }

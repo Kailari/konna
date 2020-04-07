@@ -7,10 +7,17 @@ package fi.jakojaannos.roguelite.engine.ecs.world.storage;
 //          -   is this a non-issue? Should modifying components that affect iteration of the system itself be
 //              prohibited?
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.reflect.Array;
+import java.lang.reflect.ParameterizedType;
 import java.util.*;
+import java.util.function.Supplier;
 
 public final class ComponentStorage {
+    private static final Logger LOG = LoggerFactory.getLogger(ComponentStorage.class);
+
     private final Map<Class<?>, Object[]> components = new HashMap<>();
     private int capacity;
 
@@ -39,6 +46,19 @@ public final class ComponentStorage {
 
         storage[id] = component;
         return true;
+    }
+
+    public <TComponent> TComponent addOrGet(
+            final int id,
+            final Class<TComponent> componentClass,
+            final Supplier<TComponent> supplier
+    ) {
+        final var storage = getStorage(componentClass);
+        if (storage[id] == null) {
+            storage[id] = supplier.get();
+        }
+
+        return storage[id];
     }
 
     public <TComponent> boolean remove(final int id, final Class<TComponent> componentClass) {

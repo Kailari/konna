@@ -2,6 +2,8 @@ package fi.jakojaannos.roguelite.game.state;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
+import fi.jakojaannos.roguelite.engine.data.resources.GameStateManager;
+import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.state.GameState;
@@ -11,6 +13,7 @@ import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.archetypes.PlayerArchetype;
 import fi.jakojaannos.roguelite.game.data.archetypes.TurretArchetype;
 import fi.jakojaannos.roguelite.game.data.components.*;
+import fi.jakojaannos.roguelite.game.data.resources.Inputs;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
 import fi.jakojaannos.roguelite.game.systems.*;
@@ -40,21 +43,23 @@ public class GameplayGameState extends GameState {
             final TimeManager timeManager
     ) {
         super(world);
-        world.provideResource(Weapons.class, new Weapons());
+        world.registerResource(new Weapons());
+        world.registerResource(CameraProperties.class, new CameraProperties(world.createEntity(new Transform(),
+                                                                                               new NoDrawTag())
+                                                                                 .asLegacyEntity()));
+        world.registerResource(new SessionStats(timeManager.getCurrentGameTime()));
+        world.registerResource(new Mouse());
+        world.registerResource(new Inputs());
+        world.registerResource(new GameStateManager());
+
+        final var player = PlayerArchetype.create(world, timeManager, new Transform(0, 0));
+        player.addComponent(new CameraFollowTargetTag());
+
+        final var players = new Players();
+        players.setLocalPlayer(player.asLegacyEntity());
+        world.registerResource(players);
 
         final var entityManager = world.getEntityManager();
-
-        final var player = PlayerArchetype.create(entityManager,
-                                                  timeManager,
-                                                  new Transform(0, 0));
-        world.getOrCreateResource(Players.class).setLocalPlayer(player);
-        entityManager.addComponentTo(player, new CameraFollowTargetTag());
-
-        final var camera = entityManager.createEntity();
-        entityManager.addComponentTo(camera, new Transform());
-        entityManager.addComponentTo(camera, new NoDrawTag());
-        world.getOrCreateResource(CameraProperties.class).cameraEntity = camera;
-
         final var crosshair = entityManager.createEntity();
         entityManager.addComponentTo(crosshair, new Transform(-999.0, -999.0));
         entityManager.addComponentTo(crosshair, new CrosshairTag());
@@ -74,8 +79,6 @@ public class GameplayGameState extends GameState {
         final var layer = new TileMapLayer(generator.getTileMap(), true);
         entityManager.addComponentTo(levelEntity, layer);
 
-        final var sessionStats = world.getOrCreateResource(SessionStats.class);
-        sessionStats.endTimeStamp = sessionStats.beginTimeStamp = timeManager.getCurrentGameTime();
         TurretArchetype.create(entityManager, timeManager, new Transform(2.0, 0.0));
 
         entityManager.applyModifications();

@@ -3,10 +3,10 @@ package fi.jakojaannos.roguelite.game.view.systems;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.World;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
@@ -42,7 +42,7 @@ public class UpdateHUDSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
-        final var timeManager = world.getResource(Time.class);
+        final var timeManager = world.fetchResource(Time.class);
         final var sessionStats = world.getOrCreateResource(SessionStats.class);
         world.getOrCreateResource(Players.class)
              .getLocalPlayer()
