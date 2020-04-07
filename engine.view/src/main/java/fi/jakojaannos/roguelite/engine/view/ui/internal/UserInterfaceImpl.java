@@ -8,12 +8,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
-import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.event.EventBus;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.ui.TextSizeProvider;
+import fi.jakojaannos.roguelite.engine.ui.UIEvent;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.data.resources.ui.UIHierarchy;
@@ -57,7 +58,7 @@ public class UserInterfaceImpl implements UserInterface {
     }
 
     public UserInterfaceImpl(
-            final TimeManager timeManager,
+            final Events events,
             final Viewport viewport,
             final TextSizeProvider textSizeProvider
     ) {
@@ -66,7 +67,7 @@ public class UserInterfaceImpl implements UserInterface {
         this.hierarchy = new UIHierarchy();
         this.uiWorld.registerResource(UIHierarchy.class, this.hierarchy);
         this.uiWorld.registerResource(Mouse.class, new Mouse());
-        this.uiWorld.registerResource(Time.class, new Time(timeManager));
+        this.uiWorld.registerResource(UIEventBus.class, ((EventBus<UIEvent>) events.ui())::fire);
 
         final var builder = SystemDispatcher.builder();
         final var preparations = builder.group("preparations")
@@ -75,14 +76,14 @@ public class UserInterfaceImpl implements UserInterface {
                                         .withSystem(new UIElementBoundaryCalculationSystem())
                                         .buildGroup();
 
-        final var events = builder.group("events")
-                                  .withSystem(new UIElementHoverEventProvider())
-                                  .withSystem(new UIElementClickEventProvider())
-                                  .dependsOn(preparations)
-                                  .buildGroup();
+        final var uiEvents = builder.group("ui-events")
+                                    .withSystem(new UIElementHoverEventProvider())
+                                    .withSystem(new UIElementClickEventProvider())
+                                    .dependsOn(preparations)
+                                    .buildGroup();
 
         builder.group("cleanup")
-               .dependsOn(preparations, events)
+               .dependsOn(preparations, uiEvents)
                .buildGroup();
 
         this.uiDispatcher = builder.build();

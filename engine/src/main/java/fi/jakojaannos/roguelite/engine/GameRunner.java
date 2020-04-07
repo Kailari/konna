@@ -3,20 +3,38 @@ package fi.jakojaannos.roguelite.engine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.function.Supplier;
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.Optional;
+import java.util.Queue;
 
+import fi.jakojaannos.roguelite.engine.data.resources.Network;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
+import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.event.EventBus;
 import fi.jakojaannos.roguelite.engine.event.Events;
+import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.input.InputProvider;
-import fi.jakojaannos.roguelite.engine.state.GameState;
+import fi.jakojaannos.roguelite.engine.network.NetworkManager;
+import fi.jakojaannos.roguelite.engine.state.StateEvent;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 
 /**
- * Game simulation runner. Utility for running the game simulation.
- *
- * @param <TGame> Type of the game to run
+ * Game simulation runner. Utility for running the main simulation loop.
  */
-public class GameRunner<TGame extends Game> implements AutoCloseable {
+public abstract class GameRunner implements MainThread {
     private static final Logger LOG = LoggerFactory.getLogger(GameRunner.class);
+    private final GameRunnerTimeManager timeManager;
+    private final EventBus<StateEvent> stateBus;
+    private final EventBus<InputEvent> inputBus;
+    private final Events events;
+
+    private final Object taskQueueLock = new Object();
+    private final Queue<MainThreadTask> mainThreadTaskQueue = new ArrayDeque<>();
+
+    private GameMode activeGameMode;
+    private boolean running;
 
     protected long getMaxFrameTime() {
         return 250L;
@@ -26,99 +44,80 @@ public class GameRunner<TGame extends Game> implements AutoCloseable {
         return -1L;
     }
 
-    /**
-     * Should the game loop continue running
-     *
-     * @param game game to check running status for
-     *
-     * @return <code>true</code> if runner should continue with the game loop. <code>false</code> to
-     *         break from the loop.
-     */
-    protected boolean shouldContinueLoop(final TGame game) {
-        return !game.isFinished();
+    public Events getEvents() {
+        return this.events;
+    }
+
+    protected GameRunner() {
+        this.stateBus = new EventBus<>();
+        this.inputBus = new EventBus<>();
+        this.events = new Events(new EventBus<>(), this.inputBus, this.stateBus);
+        this.timeManager = new GameRunnerTimeManager(20L);
+    }
+
+    @Override
+    public void queueTask(final MainThreadTask task) {
+        synchronized (this.taskQueueLock) {
+            this.mainThreadTaskQueue.offer(task);
+        }
     }
 
     /**
      * Runs the game. The main entry-point for the game, the first and only call launcher should need to make on the
      * instance.
      *
-     * @param game          Game to run
-     * @param inputProvider Input provider for gathering input
-     * @param renderer      Renderer to use for presenting the game. NOP-renderer is used if provided renderer is
-     *                      <code>null</code>.
+     * @param defaultGameMode Game mode to run
+     * @param inputProvider   Input provider for gathering input
      */
     public void run(
-            final Supplier<GameState> defaultStateSupplier,
-            final TGame game,
-            final InputProvider inputProvider,
-            final RendererFunction renderer
+            final GameMode defaultGameMode,
+            final InputProvider inputProvider
     ) {
-        if (game.isDisposed()) {
-            throw new IllegalStateException("Tried running an already disposed game!");
-        }
-
         LOG.info("Runner starting...");
 
         // Loop
-        var state = defaultStateSupplier.get();
-        state.getWorld().getEntityManager().applyModifications();
+        final var accumulator = new Accumulator();
         final var initialTime = System.currentTimeMillis();
         var previousFrameTime = initialTime;
-        var accumulator = 0L;
-        var ticks = 0;
         var frames = 0;
 
         LOG.info("Entering main loop");
-        final var events = new Events();
-        onStateChange(state, events, game);
+        this.activeGameMode = defaultGameMode;
+        var state = createStateForActiveGameMode();
+        onModeChange(this.activeGameMode);
         try {
-            while (shouldContinueLoop(game)) {
+            this.running = true;
+            while (this.running && shouldContinueLoop()) {
                 final var currentFrameTime = System.currentTimeMillis();
-                var frameElapsedTime = currentFrameTime - previousFrameTime;
-                if (frameElapsedTime > getMaxFrameTime()) {
-                    LOG.warn("Last tick took over 250 ms! Slowing down simulation to catch up!");
-                    frameElapsedTime = getMaxFrameTime();
-                }
-
+                final var frameElapsedTime = getTimeSinceLastTick(previousFrameTime, currentFrameTime);
                 previousFrameTime = currentFrameTime;
+                accumulator.accumulate(frameElapsedTime);
 
-                accumulator += frameElapsedTime;
-                while (accumulator >= game.getTime().getTimeStep()) {
-                    inputProvider.pollEvents()
-                                 .forEach(events.input()::fire);
-
-                    final var oldState = state;
-                    state = simulateTick(state, game, events);
-                    if (oldState != state) {
-                        onStateChange(state, events, game);
-                    }
-                    accumulator -= game.getTime().getTimeStep();
-                    ++ticks;
-                }
-
-                final var partialTickAlpha = accumulator / (double) game.getTime().getTimeStep();
-                presentGameState(state, renderer, partialTickAlpha, events);
+                state = simulateFrame(state, accumulator, inputProvider);
                 frames++;
 
                 limitFramerate();
             }
         } finally {
-            try {
-                state.close();
-            } catch (final Exception e) {
-                LOG.warn("Destroying the game state failed:", e);
+            if (this.activeGameMode instanceof Closeable closeable) {
+                try {
+                    closeable.close();
+                } catch (final Exception e) {
+                    LOG.warn("Cleaning up the game mode failed:", e);
+                }
             }
         }
+
         final var totalTime = System.currentTimeMillis() - initialTime;
         final var totalTimeSeconds = totalTime / 1000.0;
 
-        final var avgTimePerTick = totalTime / (double) ticks;
-        final var avgTicksPerSecond = ticks / totalTimeSeconds;
+        final var avgTimePerTick = totalTime / (double) this.timeManager.getCurrentGameTime();
+        final var avgTicksPerSecond = this.timeManager.getCurrentGameTime() / totalTimeSeconds;
 
         final var avgTimePerFrame = totalTime / (double) frames;
         final var avgFramesPerSecond = frames / totalTimeSeconds;
         LOG.info("Finished execution after {} seconds", totalTimeSeconds);
-        LOG.info("\tTicks:\t\t{}", ticks);
+        LOG.info("\tTicks:\t\t{}", this.timeManager.getCurrentGameTime());
         LOG.info("\tAvg. TPT:\t{}", avgTimePerTick);
         LOG.info("\tAvg. TPS:\t{}", avgTicksPerSecond);
         LOG.info("\tFrames:\t\t{}", frames);
@@ -126,10 +125,74 @@ public class GameRunner<TGame extends Game> implements AutoCloseable {
         LOG.info("\tAvg. FPS:\t{}", avgFramesPerSecond);
     }
 
-    private void onStateChange(final GameState state, final Events events, final TGame game) {
-        state.getWorld().registerResource(events);
-        state.getWorld().registerResource(Time.class, new Time(game.getTime()));
-        state.getWorld().registerResource(MainThread.class, game);
+    protected GameState simulateFrame(
+            final GameState state,
+            final Accumulator accumulator,
+            final InputProvider inputProvider
+    ) {
+        synchronized (this.taskQueueLock) {
+            while (!this.mainThreadTaskQueue.isEmpty()) {
+                this.mainThreadTaskQueue.poll().execute(state);
+            }
+        }
+
+        var stateHasChanged = false;
+        var modeHasChanged = false;
+        var activeState = state;
+        while (accumulator.canSimulateTick(this.timeManager.getTimeStep())) {
+            pollInputEvents(inputProvider);
+
+            LOG.debug("Time: {}", this.timeManager.getCurrentGameTime());
+            this.activeGameMode.tick(state);
+            accumulator.nextTick(this.timeManager.getTimeStep());
+            this.timeManager.nextTick();
+
+            while (this.stateBus.hasEvents()) {
+                final var stateEvent = this.stateBus.pollEvent();
+                if (stateEvent instanceof StateEvent.ChangeState changeState) {
+                    activeState = changeState.gameState();
+                    stateHasChanged = true;
+                } else if (stateEvent instanceof StateEvent.ChangeMode changeMode) {
+                    if (this.activeGameMode instanceof Closeable closeable) {
+                        try {
+                            closeable.close();
+                        } catch (final IOException e) {
+                            LOG.error("Error while cleaning up old game mode: " + e.getMessage());
+                        }
+                    }
+                    this.activeGameMode = changeMode.gameMode();
+                    activeState = createStateForActiveGameMode();
+                    modeHasChanged = true;
+                } else if (stateEvent instanceof StateEvent.Shutdown) {
+                    this.running = false;
+                }
+            }
+        }
+
+        if (modeHasChanged) {
+            onModeChange(this.activeGameMode);
+        }
+
+        if (stateHasChanged) {
+            onStateChange(state);
+        }
+
+        return activeState;
+    }
+
+    protected abstract boolean shouldContinueLoop();
+
+    protected abstract void onStateChange(final GameState state);
+
+    protected abstract void onModeChange(final GameMode gameMode);
+
+    protected long getTimeSinceLastTick(final long previousFrameTime, final long currentFrameTime) {
+        var frameElapsedTime = currentFrameTime - previousFrameTime;
+        if (frameElapsedTime > getMaxFrameTime()) {
+            LOG.warn("Last tick took over 250 ms! Slowing down simulation to catch up!");
+            frameElapsedTime = getMaxFrameTime();
+        }
+        return frameElapsedTime;
     }
 
     private void limitFramerate() {
@@ -143,47 +206,55 @@ public class GameRunner<TGame extends Game> implements AutoCloseable {
         }
     }
 
-    /**
-     * Simulates the game for a single tick.
-     *
-     * @param game   Game to simulate
-     * @param events Events to process during this tick
-     */
-    public GameState simulateTick(
-            final GameState state,
-            final TGame game,
-            final Events events
-    ) {
-        if (game.isDisposed()) {
-            throw new IllegalStateException("Simulating tick for already disposed game!");
+    private GameState createStateForActiveGameMode() {
+        final var world = World.createNew();
+        world.registerResource(Events.class, this.events);
+        world.registerResource(TimeManager.class, this.timeManager);
+        world.registerResource(MainThread.class, this);
+
+        // FIXME: Get rid of this
+        world.registerResource(Time.class, new Time(this.timeManager));
+
+        // FIXME: Figure out something smarter
+        world.registerResource(Network.class, new Network() {
+            @Override
+            public Optional<NetworkManager<?>> getNetworkManager() {
+                return Optional.empty();
+            }
+
+            @Override
+            public Optional<String> getConnectionError() {
+                return Optional.empty();
+            }
+
+            @Override
+            public void setConnectionError(final String error) {
+            }
+        });
+        return this.activeGameMode.createState(world);
+    }
+
+    private void pollInputEvents(final InputProvider inputProvider) {
+        inputProvider.pollEvents().forEach(this.inputBus::fire);
+    }
+
+    public static final class Accumulator {
+        private long value;
+
+        public void accumulate(final long amount) {
+            this.value += amount;
         }
 
-        final var newState = game.tick(state, events);
-        game.updateTime();
-        return newState;
-    }
+        public void nextTick(final long timeStep) {
+            this.value -= timeStep;
+        }
 
-    /**
-     * Presents the current game state to the user.
-     *
-     * @param state            Game state which to present
-     * @param partialTickAlpha Time blending factor between the last two frames we should render at
-     */
-    public void presentGameState(
-            final GameState state,
-            final RendererFunction renderer,
-            final double partialTickAlpha,
-            final Events events
-    ) {
-        renderer.render(state, partialTickAlpha, events);
-    }
+        public boolean canSimulateTick(final long timeStep) {
+            return this.value > timeStep;
+        }
 
-    @Override
-    @SuppressWarnings("RedundantThrows")
-    public void close() throws Exception {
-    }
-
-    public interface RendererFunction {
-        void render(GameState state, double partialTickAlpha, Events events);
+        public long get() {
+            return this.value;
+        }
     }
 }

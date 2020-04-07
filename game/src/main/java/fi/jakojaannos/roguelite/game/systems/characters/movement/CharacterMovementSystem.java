@@ -20,9 +20,7 @@ public class CharacterMovementSystem implements ECSSystem {
 
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
-        requirements.addToGroup(SystemGroups.CHARACTER_TICK)
-                    .tickAfter(ApplyFrictionSystem.class)
-                    .withComponent(Transform.class)
+        requirements.withComponent(Transform.class)
                     .withComponent(Velocity.class)
                     .withComponent(MovementInput.class)
                     .withComponent(WalkingMovementAbility.class)

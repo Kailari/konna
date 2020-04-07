@@ -13,6 +13,7 @@ import fi.jakojaannos.roguelite.engine.ui.UIEvent;
 import fi.jakojaannos.roguelite.engine.view.data.components.internal.Name;
 import fi.jakojaannos.roguelite.engine.view.data.components.internal.events.ActiveTag;
 import fi.jakojaannos.roguelite.engine.view.data.components.internal.events.ClickTimestamp;
+import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 
 public class UIElementClickEventProvider implements ECSSystem {
     @Override
@@ -32,9 +33,8 @@ public class UIElementClickEventProvider implements ECSSystem {
             final World world
     ) {
         final var entityManager = world.getEntityManager();
-        final var events = world.fetchResource(Events.class);
+        final var eventBus = world.fetchResource(UserInterface.UIEventBus.class);
         final var mouse = world.fetchResource(Mouse.class);
-        final var timeManager = world.fetchResource(Time.class);
 
         entities.forEach(entity -> {
             final var name = entityManager.getComponentOf(entity, Name.class)
@@ -46,8 +46,7 @@ public class UIElementClickEventProvider implements ECSSystem {
                                                                        ClickTimestamp::new);
                 if (clicked.releasedSince) {
                     clicked.releasedSince = false;
-                    clicked.timestamp = timeManager.getCurrentGameTime();
-                    events.ui().fire(new UIEvent(name, UIEvent.Type.CLICK));
+                    eventBus.fire(new UIEvent(name, UIEvent.Type.CLICK));
                 }
             } else if (entityManager.hasComponent(entity, ClickTimestamp.class)) {
                 final var clicked = entityManager.getComponentOf(entity, ClickTimestamp.class).orElseThrow();

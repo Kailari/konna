@@ -9,8 +9,8 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 
+import fi.jakojaannos.roguelite.engine.GameState;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
-import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.rendering.shader.EngineUniformBufferObjectIndices;
@@ -131,7 +131,7 @@ public class LWJGLCamera extends Camera {
     public void updateConfigurationFromState(final GameState state) {
         super.updateConfigurationFromState(state);
 
-        final var world = state.getWorld();
+        final var world = state.world();
         final var cameraProperties = world.fetchResource(CameraProperties.class);
         refreshTargetScreenSizeInUnits(cameraProperties.targetViewportSizeInWorldUnits,
                                        cameraProperties.targetViewportSizeRespectiveToMinorAxis);

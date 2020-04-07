@@ -2,25 +2,26 @@ package fi.jakojaannos.roguelite.game.systems;
 
 import java.util.stream.Stream;
 
-import fi.jakojaannos.roguelite.engine.data.resources.GameStateManager;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
+import fi.jakojaannos.roguelite.engine.event.Events;
+import fi.jakojaannos.roguelite.engine.state.StateEvent;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
 import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
-import fi.jakojaannos.roguelite.game.state.GameplayGameState;
-import fi.jakojaannos.roguelite.game.state.MainMenuGameState;
+import fi.jakojaannos.roguelite.game.state.GameplayGameMode;
+import fi.jakojaannos.roguelite.game.state.MainMenuGameMode;
 
+// TODO: Use "Player dead event" to enable this system
 public class RestartGameSystem implements ECSSystem {
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.CLEANUP)
                     .requireResource(Inputs.class)
                     .requireResource(SessionStats.class)
-                    .requireResource(GameStateManager.class)
                     .requireProvidedResource(Time.class)
                     .withComponent(PlayerTag.class);
     }
@@ -37,13 +38,13 @@ public class RestartGameSystem implements ECSSystem {
 
         final var inputs = world.fetchResource(Inputs.class);
         if (inputs.inputRestart) {
-            world.fetchResource(GameStateManager.class)
-                 .queueStateChange(new GameplayGameState(System.nanoTime(),
-                                                         World.createNew(),
-                                                         world.fetchResource(Time.class).timeManager()));
+            world.fetchResource(Events.class)
+                 .state()
+                 .fire(new StateEvent.ChangeMode(new GameplayGameMode(System.nanoTime())));
         } else if (inputs.inputMenu) {
-            world.fetchResource(GameStateManager.class)
-                 .queueStateChange(new MainMenuGameState(World.createNew()));
+            world.fetchResource(Events.class)
+                 .state()
+                 .fire(new StateEvent.ChangeMode(new MainMenuGameMode()));
         }
     }
 }

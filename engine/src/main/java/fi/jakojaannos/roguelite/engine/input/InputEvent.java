@@ -3,6 +3,8 @@ package fi.jakojaannos.roguelite.engine.input;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
+import fi.jakojaannos.roguelite.engine.event.EventReceiver;
+
 public record InputEvent(@Nullable AxialInput axialInput, @Nullable ButtonInput buttonInput) {
     public static InputEvent axial(final AxialInput input) {
         return new InputEvent(input, null);

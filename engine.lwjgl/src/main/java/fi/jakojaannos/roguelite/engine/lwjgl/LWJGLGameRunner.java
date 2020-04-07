@@ -7,17 +7,19 @@ import org.lwjgl.system.Callback;
 
 import javax.annotation.Nullable;
 
-import fi.jakojaannos.roguelite.engine.Game;
+import fi.jakojaannos.roguelite.engine.GameMode;
 import fi.jakojaannos.roguelite.engine.GameRunner;
-import fi.jakojaannos.roguelite.engine.event.Events;
-import fi.jakojaannos.roguelite.engine.state.GameState;
+import fi.jakojaannos.roguelite.engine.GameState;
+import fi.jakojaannos.roguelite.engine.input.InputProvider;
+import fi.jakojaannos.roguelite.engine.view.GameRenderer;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 
-public class LWJGLGameRunner<TGame extends Game> extends GameRunner<TGame> {
+public class LWJGLGameRunner extends GameRunner implements AutoCloseable {
     private final LWJGLWindow window;
     @Nullable private final Callback debugCallback;
+    private GameRenderer renderer;
 
     public LWJGLWindow getWindow() {
         return this.window;
@@ -53,21 +55,48 @@ public class LWJGLGameRunner<TGame extends Game> extends GameRunner<TGame> {
                 : null;
     }
 
-    @Override
-    protected boolean shouldContinueLoop(final TGame game) {
-        return super.shouldContinueLoop(game) && !glfwWindowShouldClose(this.window.getId());
+    public void run(
+            final GameMode defaultGameMode,
+            final InputProvider inputProvider,
+            final GameRenderer renderer
+    ) {
+        this.renderer = renderer;
+        super.run(defaultGameMode, inputProvider);
+        this.renderer = null;
     }
 
     @Override
+    protected boolean shouldContinueLoop() {
+        return !glfwWindowShouldClose(this.window.getId());
+    }
+
+    @Override
+    protected void onStateChange(final GameState state) {
+    }
+
+    @Override
+    protected void onModeChange(final GameMode gameMode) {
+        this.renderer.changeGameMode(gameMode);
+    }
+
+    @Override
+    protected GameState simulateFrame(
+            final GameState state,
+            final Accumulator accumulator,
+            final InputProvider inputProvider
+    ) {
+        final var newState = super.simulateFrame(state, accumulator, inputProvider);
+        presentGameState(newState, accumulator.get());
+        return newState;
+    }
+
     public void presentGameState(
             final GameState state,
-            final RendererFunction renderer,
-            final double partialTickAlpha,
-            final Events events
+            final long accumulator
     ) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        super.presentGameState(state, renderer, partialTickAlpha, events);
+        this.renderer.render(state, accumulator);
 
         glfwSwapBuffers(this.window.getId());
         glfwPollEvents();

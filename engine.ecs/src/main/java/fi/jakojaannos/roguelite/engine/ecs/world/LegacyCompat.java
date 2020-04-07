@@ -15,9 +15,8 @@ import fi.jakojaannos.roguelite.engine.ecs.legacy.*;
 public class LegacyCompat implements LegacyWorld {
     private static final Logger LOG = LoggerFactory.getLogger(LegacyCompat.class);
 
-    private static final boolean LOG_GET_OR_CREATE = true;
-    private static final boolean LOG_PROVIDE = true;
-    private static final boolean LOG_GET = false;
+    private static final boolean LOG_GET_OR_CREATE = false;
+    private static final boolean LOG_PROVIDE = false;
 
     private final WorldImpl world;
 
@@ -67,7 +66,6 @@ public class LegacyCompat implements LegacyWorld {
     ) {
         if (LOG_GET_OR_CREATE) {
             LOG.warn("getOrCreateResource called!");
-            //throw new IllegalStateException();
         }
 
         try {
@@ -88,6 +86,7 @@ public class LegacyCompat implements LegacyWorld {
     ) {
         if (LOG_PROVIDE) {
             LOG.warn("provideResource called!");
+            //throw new IllegalStateException();
         }
 
         try {

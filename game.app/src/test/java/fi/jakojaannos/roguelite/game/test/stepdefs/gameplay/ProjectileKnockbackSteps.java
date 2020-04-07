@@ -31,23 +31,23 @@ public class ProjectileKnockbackSteps {
 
     @Given("the world is blank")
     public void theWorldIsBlank() {
-        state.getWorld().getEntityManager().clearEntities();
-        state.getWorld().getEntityManager().applyModifications();
-        state.getWorld().fetchResource(Players.class).setLocalPlayer(null);
-        state.getWorld().fetchResource(CameraProperties.class).cameraEntity = null;
+        state.world().getEntityManager().clearEntities();
+        state.world().getEntityManager().applyModifications();
+        state.world().fetchResource(Players.class).setLocalPlayer(null);
+        state.world().fetchResource(CameraProperties.class).cameraEntity = null;
     }
 
     @Given("there is an enemy and a projectile heading towards it")
     public void thereIsAnEnemyAndAProjectileHeadingTowardsIt() {
-        EntityManager entityManager = state.getWorld().getEntityManager();
+        EntityManager entityManager = state.world().getEntityManager();
         target = entityManager.createEntity();
-        state.getWorld().createEntity(targetTransform = new Transform(25.0, 25.0),
-                                      new Velocity(),
-                                      Physics.builder()
+        state.world().createEntity(targetTransform = new Transform(25.0, 25.0),
+                                   new Velocity(),
+                                   Physics.builder()
                                              .mass(1.0)
                                              .friction(50.0)
                                              .build(),
-                                      new Collider(CollisionLayer.ENEMY));
+                                   new Collider(CollisionLayer.ENEMY));
 
         ProjectileArchetype.createWeaponProjectile(entityManager,
                                                    new Vector2d(22.0, 22.0),
@@ -74,7 +74,7 @@ public class ProjectileKnockbackSteps {
 
     @Given("there is an enemy flying in straight line and a projectile heading towards it")
     public void thereIsAnEnemyFlyingInStraightLineAndAProjectileHeadingTowardsIt() {
-        EntityManager entityManager = state.getWorld().getEntityManager();
+        EntityManager entityManager = state.world().getEntityManager();
         target = entityManager.createEntity();
         entityManager.addComponentTo(target, targetTransform = new Transform(0.0, 0.0));
         entityManager.addComponentTo(target, targetVelocity = new Velocity(15.0, 0.0));

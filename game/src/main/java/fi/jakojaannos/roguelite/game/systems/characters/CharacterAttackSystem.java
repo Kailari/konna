@@ -15,7 +15,6 @@ import fi.jakojaannos.roguelite.game.weapons.InventoryWeapon;
 import fi.jakojaannos.roguelite.game.weapons.WeaponInventory;
 
 public class CharacterAttackSystem implements ECSSystem {
-
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.CHARACTER_TICK)

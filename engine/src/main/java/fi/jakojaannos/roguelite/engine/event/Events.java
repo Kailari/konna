@@ -2,10 +2,19 @@ package fi.jakojaannos.roguelite.engine.event;
 
 import fi.jakojaannos.roguelite.engine.ecs.legacy.ProvidedResource;
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
+import fi.jakojaannos.roguelite.engine.state.StateEvent;
 import fi.jakojaannos.roguelite.engine.ui.UIEvent;
 
-public record Events(EventBus<UIEvent>ui, EventBus<InputEvent>input) implements ProvidedResource {
-    public Events() {
-        this(new EventBus<>(), new EventBus<>());
-    }
+/**
+ * TODO: IDEA does not recognize record javadoc properly. Remove whitespace once it is fixed
+ *
+ * @ param ui       Event bus for receiving events <strong>from</strong> the UI for the game
+ * @ param input    Event bus for receiving input events for the game
+ * @ param state    Event bus for receiving/sending game state events for the game
+ */
+public record Events(
+        EventReceiver<UIEvent>ui,
+        EventReceiver<InputEvent>input,
+        EventSender<StateEvent>state
+) implements ProvidedResource {
 }

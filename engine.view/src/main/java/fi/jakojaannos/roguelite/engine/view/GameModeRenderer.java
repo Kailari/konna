@@ -1,32 +1,32 @@
-package fi.jakojaannos.roguelite.game.view.state;
+package fi.jakojaannos.roguelite.engine.view;
 
 import java.nio.file.Path;
 
+import fi.jakojaannos.roguelite.engine.GameMode;
 import fi.jakojaannos.roguelite.engine.content.AssetManager;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
-import fi.jakojaannos.roguelite.engine.view.Camera;
-import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
+import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 
-public abstract class GameStateRenderer implements AutoCloseable {
+public abstract class GameModeRenderer<TGameMode extends GameMode> implements AutoCloseable {
     private final SystemDispatcher rendererDispatcher;
     private final UserInterface userInterface;
 
-    protected GameStateRenderer(
-            final TimeManager timeManager,
+    public UserInterface getUserInterface() {
+        return this.userInterface;
+    }
+
+    protected GameModeRenderer(
+            final Events events,
+            final TGameMode gameMode,
             final Path assetRoot,
             final Camera camera,
             final AssetManager assetManager,
             final RenderingBackend backend
     ) {
-        this.userInterface = createUserInterface(timeManager, camera, assetManager);
+        this.userInterface = createUserInterface(events, gameMode, camera, assetManager);
         this.rendererDispatcher = createRenderDispatcher(this.userInterface, assetRoot, camera, assetManager, backend);
-    }
-
-    public UserInterface getUserInterface() {
-        return this.userInterface;
     }
 
     protected abstract SystemDispatcher createRenderDispatcher(
@@ -38,7 +38,8 @@ public abstract class GameStateRenderer implements AutoCloseable {
     );
 
     protected abstract UserInterface createUserInterface(
-            TimeManager timeManager,
+            Events events,
+            TGameMode game,
             Camera camera,
             AssetManager assetManager
     );

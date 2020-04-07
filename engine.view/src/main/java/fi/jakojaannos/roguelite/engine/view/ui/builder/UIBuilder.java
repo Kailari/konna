@@ -2,7 +2,10 @@ package fi.jakojaannos.roguelite.engine.view.ui.builder;
 
 import java.util.function.Consumer;
 
+import fi.jakojaannos.roguelite.engine.event.EventSender;
+import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.ui.TextSizeProvider;
+import fi.jakojaannos.roguelite.engine.ui.UIEvent;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
@@ -13,11 +16,11 @@ public class UIBuilder {
     private final UserInterfaceImpl userInterface;
 
     public UIBuilder(
-            final TimeManager timeManager,
+            final Events events,
             final Viewport viewport,
             final TextSizeProvider fontSizeProvider
     ) {
-        this.userInterface = new UserInterfaceImpl(timeManager, viewport, fontSizeProvider);
+        this.userInterface = new UserInterfaceImpl(events, viewport, fontSizeProvider);
     }
 
     public <T extends UIElementType<TBuilder>, TBuilder extends UIElementBuilder<TBuilder>> UIBuilder element(

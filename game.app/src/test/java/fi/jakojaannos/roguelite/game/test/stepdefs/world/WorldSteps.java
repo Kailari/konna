@@ -31,14 +31,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class WorldSteps {
     @Given("the world is blank with {int} enemies with {int} hp each scattered about")
     public void theWorldIsBlankWithEnemiesScatteredAbout(int numberOfEnemies, int initialHealth) {
-        state.getWorld()
+        state.world()
              .getEntityManager()
              .clearEntities();
 
-        final var camera = state.getWorld().getEntityManager().createEntity();
-        state.getWorld().getEntityManager().addComponentTo(camera, new Transform());
-        state.getWorld().getEntityManager().addComponentTo(camera, new NoDrawTag());
-        state.getWorld().getOrCreateResource(CameraProperties.class).cameraEntity = camera;
+        final var camera = state.world().getEntityManager().createEntity();
+        state.world().getEntityManager().addComponentTo(camera, new Transform());
+        state.world().getEntityManager().addComponentTo(camera, new NoDrawTag());
+        state.world().getOrCreateResource(CameraProperties.class).cameraEntity = camera;
 
         final var areaWidth = 20;
         final var areaHeight = 20;
@@ -46,16 +46,16 @@ public class WorldSteps {
                  .mapToObj(ignored -> new Vector2d((random.nextDouble() * 2.0 - 1.0) * areaWidth,
                                                    (random.nextDouble() * 2.0 - 1.0) * areaHeight))
                  .forEach(enemyPosition -> {
-                     final var entity = FollowerArchetype.create(state.getWorld().getEntityManager(),
+                     final var entity = FollowerArchetype.create(state.world().getEntityManager(),
                                                                  new Transform(enemyPosition.x, enemyPosition.y));
-                     final var health = state.getWorld()
+                     final var health = state.world()
                                              .getEntityManager()
                                              .getComponentOf(entity, Health.class)
                                              .orElseThrow();
                      health.maxHealth = initialHealth;
                      health.currentHealth = initialHealth;
                  });
-        state.getWorld().getEntityManager().applyModifications();
+        state.world().getEntityManager().applyModifications();
     }
 
     @Given("the player has no kills")
@@ -77,7 +77,7 @@ public class WorldSteps {
 
     @Given("the player is surrounded by follower enemies")
     public void the_player_is_surrounded_by_follower_enemies() {
-        state.getWorld()
+        state.world()
              .getEntityManager()
              .getEntitiesWith(PlayerTag.class)
              .map(EntityManager.EntityComponentPair::entity)
@@ -90,41 +90,41 @@ public class WorldSteps {
                                                   playerPosition.add(-1.5, 0.0, new Vector2d()),
                                                   playerPosition.add(0.0, 1.5, new Vector2d()),
                                                   playerPosition.add(0.0, -1.5, new Vector2d())))
-             .forEach(enemyPosition -> FollowerArchetype.create(state.getWorld().getEntityManager(),
+             .forEach(enemyPosition -> FollowerArchetype.create(state.world().getEntityManager(),
                                                                 new Transform(enemyPosition.x,
                                                                               enemyPosition.y)));
-        state.getWorld().getEntityManager().applyModifications();
+        state.world().getEntityManager().applyModifications();
     }
 
     @Given("there are no obstacles")
     public void there_are_no_obstacles() {
-        state.getWorld()
+        state.world()
              .getEntityManager()
              .getEntitiesWith(ObstacleTag.class)
              .map(EntityManager.EntityComponentPair::entity)
-             .forEach(state.getWorld().getEntityManager()::destroyEntity);
-        state.getWorld().getEntityManager().applyModifications();
+             .forEach(state.world().getEntityManager()::destroyEntity);
+        state.world().getEntityManager().applyModifications();
     }
 
     @And("there are no turrets")
     public void thereAreNoTurrets() {
-        state.getWorld()
+        state.world()
              .getEntityManager()
              .getEntitiesWith(SpriteInfo.class)
              .filter(pair -> pair.component().spriteName.equals("sprites/turret"))
              .map(EntityManager.EntityComponentPair::entity)
-             .forEach(state.getWorld().getEntityManager()::destroyEntity);
-        state.getWorld().getEntityManager().applyModifications();
+             .forEach(state.world().getEntityManager()::destroyEntity);
+        state.world().getEntityManager().applyModifications();
     }
 
     @Given("there are no spawners")
     public void there_are_no_spawners() {
-        state.getWorld()
+        state.world()
              .getEntityManager()
              .getEntitiesWith(SpawnerComponent.class)
              .map(EntityManager.EntityComponentPair::entity)
-             .forEach(state.getWorld().getEntityManager()::destroyEntity);
-        state.getWorld().getEntityManager().applyModifications();
+             .forEach(state.world().getEntityManager()::destroyEntity);
+        state.world().getEntityManager().applyModifications();
     }
 
     @Then("the player should still be alive.")
@@ -142,7 +142,7 @@ public class WorldSteps {
         Optional<Entity> player = getLocalPlayer();
 
         if (player.isPresent()) {
-            Health health = state.getWorld().getEntityManager().getComponentOf(player.get(), Health.class).orElseThrow();
+            Health health = state.world().getEntityManager().getComponentOf(player.get(), Health.class).orElseThrow();
             assertFalse(health.currentHealth > 0);
         }
     }
@@ -151,7 +151,7 @@ public class WorldSteps {
         final var localPlayerDamageSource = getComponentOf(getLocalPlayer().orElseThrow(), AttackAbility.class)
                 .orElseThrow()
                 .damageSource;
-        state.getWorld()
+        state.world()
              .getOrCreateResource(SessionStats.class)
              .setKillsOf(localPlayerDamageSource, amount);
     }

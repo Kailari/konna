@@ -1,31 +1,22 @@
 package fi.jakojaannos.roguelite.game;
 
-import fi.jakojaannos.roguelite.engine.GameBase;
-import fi.jakojaannos.roguelite.engine.data.resources.GameStateManager;
+import fi.jakojaannos.roguelite.engine.GameState;
 import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.input.ButtonInput;
 import fi.jakojaannos.roguelite.engine.input.InputAxis;
 import fi.jakojaannos.roguelite.engine.input.InputButton;
-import fi.jakojaannos.roguelite.engine.state.GameState;
-import fi.jakojaannos.roguelite.engine.utilities.UpdateableTimeManager;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
 
-public class RogueliteGame extends GameBase {
-    public RogueliteGame() {
-    }
-
-    public RogueliteGame(final UpdateableTimeManager timeManager) {
-        super(timeManager);
-    }
-
-    @Override
-    public GameState tick(
-            final GameState state,
-            final Events events
-    ) {
-        final var inputs = state.getWorld().fetchResource(Inputs.class);
-        final var mouse = state.getWorld().fetchResource(Mouse.class);
+/**
+ * @deprecated Leftover legacy input handling
+ */
+@Deprecated
+public class RogueliteGame {
+    public static void tickInputs(final GameState state) {
+        final var inputs = state.world().fetchResource(Inputs.class);
+        final var mouse = state.world().fetchResource(Mouse.class);
+        final var events = state.world().fetchResource(Events.class);
         final var inputEvents = events.input();
 
         // FIXME: Input handling should happen in some engine-level system and provide actual inputs
@@ -86,27 +77,5 @@ public class RogueliteGame extends GameBase {
                 }
             });
         }
-
-        // NOTE: It is important that state is ticked first! state.tick(...) sets some engine -level
-        // default provided resources which might be needed while flushing the task queue, which in
-        // turn happens in the super.tick(...)
-        state.tick();
-        super.tick(state, events);
-
-        if (inputs.inputForceCloseA && inputs.inputForceCloseB) {
-            this.setFinished(true);
-        }
-
-        return selectNextState(state);
-    }
-
-    // TODO: Move to engine level system
-    protected GameState selectNextState(final GameState state) {
-        final var stateManager = state.getWorld().fetchResource(GameStateManager.class);
-        if (stateManager.shouldShutDown()) {
-            this.setFinished(true);
-        }
-
-        return stateManager.getNextState(state);
     }
 }

@@ -13,7 +13,7 @@ public class GlobalGameState {
     public static Vector2d playerPositionBeforeRun;
 
     public static Optional<Entity> getLocalPlayer() {
-        return Optional.ofNullable(GlobalState.state.getWorld()
+        return Optional.ofNullable(GlobalState.state.world()
                                                     .getOrCreateResource(Players.class).getPlayer());
     }
 
