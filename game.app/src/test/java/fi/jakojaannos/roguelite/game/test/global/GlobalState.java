@@ -99,12 +99,12 @@ public class GlobalState {
                                    glfwMakeContextCurrent(lwjglWindow.getId());
                                    GL.createCapabilities();
                                    glfwSwapInterval(0);
-                                   return new RogueliteGameRenderer(assetRoot,
+                                   return new RogueliteGameRenderer(game.getTime(), assetRoot,
                                                                     window,
                                                                     new LWJGLRenderingBackend(assetRoot),
                                                                     new LWJGLAssetManager(assetRoot));
                                })
-                               .orElseGet(() -> new RogueliteGameRenderer(assetRoot,
+                               .orElseGet(() -> new RogueliteGameRenderer(game.getTime(), assetRoot,
                                                                           window = new TestWindow(800, 600),
                                                                           new TestRenderingBackend(),
                                                                           new TestAssetManager(assetRoot)));

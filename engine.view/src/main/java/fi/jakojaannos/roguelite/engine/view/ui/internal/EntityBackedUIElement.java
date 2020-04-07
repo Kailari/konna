@@ -3,22 +3,16 @@ package fi.jakojaannos.roguelite.engine.view.ui.internal;
 import java.util.*;
 import javax.annotation.Nullable;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
 
 public class EntityBackedUIElement implements UIElement {
-    private final Entity entity;
-    private final EntityManager entityManager;
+    private final EntityHandle entity;
     private final Set<UIElement> children = new HashSet<>();
     @Nullable private UIElement parent;
 
-    public Entity getEntity() {
+    public EntityHandle getEntity() {
         return this.entity;
-    }
-
-    public EntityManager getEntityManager() {
-        return this.entityManager;
     }
 
     @Override
@@ -35,9 +29,8 @@ public class EntityBackedUIElement implements UIElement {
         return this.children;
     }
 
-    public EntityBackedUIElement(final Entity entity, final EntityManager entityManager) {
+    public EntityBackedUIElement(final EntityHandle entity) {
         this.entity = entity;
-        this.entityManager = entityManager;
     }
 
     public void addChild(final UIElement child) {

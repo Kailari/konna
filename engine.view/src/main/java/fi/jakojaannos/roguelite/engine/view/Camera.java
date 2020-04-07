@@ -61,7 +61,7 @@ public abstract class Camera implements AutoCloseable {
 
     public void updateConfigurationFromState(final GameState state) {
         final var world = state.getWorld();
-        final var cameraProperties = world.getOrCreateResource(CameraProperties.class);
+        final var cameraProperties = world.fetchResource(CameraProperties.class);
 
         // FIXME: THIS BREAKS MVC ENCAPSULATION. Technically, we should queue task on the controller
         //  to make the change as we NEVER should mutate state on the view.

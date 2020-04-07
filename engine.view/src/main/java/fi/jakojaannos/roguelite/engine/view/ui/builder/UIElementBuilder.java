@@ -2,8 +2,7 @@ package fi.jakojaannos.roguelite.engine.view.ui.builder;
 
 import java.util.function.Consumer;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
 import fi.jakojaannos.roguelite.engine.view.data.components.internal.*;
 import fi.jakojaannos.roguelite.engine.view.data.components.ui.Color;
 import fi.jakojaannos.roguelite.engine.view.data.components.ui.ElementBoundaries;
@@ -13,15 +12,15 @@ import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 
 @SuppressWarnings("unchecked")
 public class UIElementBuilder<TBuilder extends UIElementBuilder<TBuilder>> {
-    protected final Consumer<Component> componentConsumer;
+    protected final Consumer<Object> componentConsumer;
     private final UserInterface userInterface;
-    private final Entity entity;
+    private final EntityHandle entity;
 
     public UIElementBuilder(
             final UserInterface userInterface,
-            final Entity entity,
+            final EntityHandle entity,
             final String name,
-            final Consumer<Component> componentConsumer
+            final Consumer<Object> componentConsumer
     ) {
         this.userInterface = userInterface;
         this.entity = entity;
@@ -83,8 +82,10 @@ public class UIElementBuilder<TBuilder extends UIElementBuilder<TBuilder>> {
     ) {
         this.userInterface.addElement(name,
                                       childType,
-                                      builderConsumer.andThen(builder -> builder.componentConsumer
-                                              .accept(new Parent(this.entity))));
+                                      builderConsumer.andThen(
+                                              builder ->
+                                                      builder.componentConsumer
+                                                              .accept(new Parent(this.entity))));
         return (TBuilder) this;
     }
 }

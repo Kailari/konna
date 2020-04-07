@@ -39,7 +39,7 @@ public class StalkerArchetype {
         entityManager.addComponentTo(entity, new WalkingMovementAbility(1.0, 250.0));
 
         entityManager.addComponentTo(entity, new AttackAI(1.25));
-        entityManager.addComponentTo(entity, new AttackAbility(new DamageSource.Entity(entity),
+        entityManager.addComponentTo(entity, new AttackAbility(new DamageSource.LegacyEntity(entity),
                                                                CollisionLayer.ENEMY,
                                                                0.0,
                                                                0.0));

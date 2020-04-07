@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinWorkerThread;
@@ -12,8 +13,13 @@ import java.util.stream.StreamSupport;
 
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.*;
+import fi.jakojaannos.roguelite.engine.ecs.SystemGroup;
 import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.ProvidedResource;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Resource;
+import fi.jakojaannos.roguelite.engine.ecs.systemdata.ParsedRequirements;
 import fi.jakojaannos.roguelite.engine.ecs.systemdata.RequirementsBuilder;
 
 @SuppressWarnings("deprecation")
@@ -25,12 +31,20 @@ public class SystemDispatcherImpl implements SystemDispatcher {
 
 
     private final ForkJoinPool threadPool;
-    private final List<fi.jakojaannos.roguelite.engine.ecs.SystemGroup> systemGroups;
+    private final List<SystemGroup> systemGroups;
 
-    private int tick = 0;
+    @SuppressWarnings("rawtypes")
+    private final Map<Class<? extends EcsSystem>, ParsedRequirements> systemRequirements = new ConcurrentHashMap<>();
 
-    public SystemDispatcherImpl(final List<fi.jakojaannos.roguelite.engine.ecs.SystemGroup> systemGroups) {
+    private int tick;
+
+    public SystemDispatcherImpl(final List<SystemGroup> systemGroups) {
         this.systemGroups = systemGroups;
+        this.systemGroups.stream()
+                         .flatMap(group -> group.getSystems().stream())
+                         .filter(system -> EcsSystem.class.isAssignableFrom(system.getClass()))
+                         .map(EcsSystem.class::cast)
+                         .forEach(this::resolveRequirements);
 
         this.threadPool = new ForkJoinPool(4,
                                            SystemDispatcherImpl::workerThreadFactory,
@@ -38,12 +52,19 @@ public class SystemDispatcherImpl implements SystemDispatcher {
                                            false);
     }
 
+    private <TResources, TEntityData, TEvents> void resolveRequirements(final EcsSystem<TResources, TEntityData, TEvents> system) {
+        final var requirementsBuilder = new RequirementsBuilder<TResources, TEntityData, TEvents>();
+        system.declareRequirements(requirementsBuilder);
+        final var requirements = requirementsBuilder.build();
+        this.systemRequirements.put(system.getClass(), requirements);
+    }
+
     @Override
     public void tick(final World world) {
         final var queue = new HashSet<>(this.systemGroups);
 
-        final Predicate<fi.jakojaannos.roguelite.engine.ecs.SystemGroup> isReadyToTick = (group) -> group.isEnabled()
-                                                                                                    && group.getDependencies()
+        final Predicate<SystemGroup> isReadyToTick = (group) -> group.isEnabled()
+                                                                && group.getDependencies()
                                                                         .stream()
                                                                         .noneMatch(queue::contains);
 
@@ -70,7 +91,7 @@ public class SystemDispatcherImpl implements SystemDispatcher {
             LOG.debug("Ticking group \"{}\"", group.getName());
         }
 
-        // XXX: This has to be sequential by the spec. The system execution order must match the registration order
+        // XXX: This has to be sequential by the spec. "The system execution order must match the registration order"
         group.getSystems()
              .forEach(systemObj -> {
                  if (LOG_SYSTEM_TICK) {
@@ -98,6 +119,38 @@ public class SystemDispatcherImpl implements SystemDispatcher {
         return true;
     }
 
+    @SuppressWarnings("unchecked")
+    private <TEvents, TEntityData, TResources> ParsedRequirements<TResources, TEntityData, TEvents> requirementsFor(
+            final EcsSystem<TResources, TEntityData, TEvents> system
+    ) {
+        return this.systemRequirements.get(system.getClass());
+    }
+
+    private <TResources, TEntityData, TEvents> void dispatch(
+            final World world,
+            final EcsSystem<TResources, TEntityData, TEvents> system,
+            final ForkJoinPool threadPool
+    ) {
+        final var requirements = requirementsFor(system);
+        final var systemResources = requirements.constructResources(world.getResources());
+        final var entitySpliterator = new EntitySpliterator<>(requirements.entityData().componentTypes(),
+                                                              world,
+                                                              requirements::constructEntityData);
+
+        try {
+            threadPool.submit(
+                    () -> system.tick(systemResources,
+                                      StreamSupport.stream(entitySpliterator, true),
+                                      null)
+            ).get();
+        } catch (final InterruptedException e) {
+            LOG.warn("System \"" + system.getClass().getSimpleName() + "\" was interrupted!");
+        } catch (final ExecutionException e) {
+            LOG.error("System \"" + system.getClass().getSimpleName() + "\" failure!", e);
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     public void close() throws Exception {
         final var exceptions = this.systemGroups.stream()
@@ -120,34 +173,6 @@ public class SystemDispatcherImpl implements SystemDispatcher {
         }
     }
 
-    private static <TResources, TEntityData, TEvents> void dispatch(
-            final World world,
-            final EcsSystem<TResources, TEntityData, TEvents> system,
-            final ForkJoinPool threadPool
-    ) {
-        // TODO: Move elsewhere
-        final var requirementsBuilder = new RequirementsBuilder<TResources, TEntityData, TEvents>();
-        system.declareRequirements(requirementsBuilder);
-        final var requirements = requirementsBuilder.build();
-
-        final var systemResources = requirements.constructResources(world.getResources());
-        final var entitySpliterator = new EntitySpliterator<>(requirements.entityData().componentTypes(),
-                                                              world,
-                                                              requirements::constructEntityData);
-
-        try {
-            threadPool.submit(
-                    () -> system.tick(systemResources,
-                                      StreamSupport.stream(entitySpliterator, true),
-                                      null)
-            ).get();
-        } catch (final InterruptedException e) {
-            LOG.warn("System \"" + system.getClass().getSimpleName() + "\" was interrupted!");
-        } catch (final ExecutionException e) {
-            throw new IllegalStateException("System \"" + system.getClass().getSimpleName() + "\" failure!", e);
-        }
-    }
-
     private static ForkJoinWorkerThread workerThreadFactory(final ForkJoinPool pool) {
         final var worker = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool);
         worker.setName("ecs-worker-" + worker.getPoolIndex());
@@ -158,6 +183,7 @@ public class SystemDispatcherImpl implements SystemDispatcher {
             List<Class<? extends Component>>required,
             List<Class<? extends Component>>excluded
     ) implements fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder {
+
         public ComponentOnlyRequirementsBuilder() {
             this(new ArrayList<>(), new ArrayList<>());
         }

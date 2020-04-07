@@ -36,8 +36,8 @@ public class RogueliteClient {
                                                                    windowHeight);
              final var assetManager = new LWJGLAssetManager(assetRoot);
              final var backend = new LWJGLRenderingBackend(assetRoot);
-             final var renderer = new RogueliteGameRenderer(assetRoot, runner.getWindow(), backend, assetManager);
-             final var game = new RogueliteGame()
+             final var game = new RogueliteGame();
+             final var renderer = new RogueliteGameRenderer(game.getTime(), assetRoot, runner.getWindow(), backend, assetManager);
         ) {
             final var inputProvider = new LWJGLInputProvider(runner.getWindow());
             runner.run(() -> createInitialState(game, host, port), game, inputProvider, renderer::render);
@@ -52,6 +52,6 @@ public class RogueliteClient {
         // FIXME: Do not pass the host and the port to main menu. Instead, connect and start game if
         //  host is given
         LOG.trace("Creating main menu game state with host and port {}:{}", host, port);
-        return new MainMenuGameState(World.createNew(), game.getTime(), host, port);
+        return new MainMenuGameState(World.createNew(), host, port);
     }
 }

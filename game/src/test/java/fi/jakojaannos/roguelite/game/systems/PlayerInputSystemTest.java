@@ -10,9 +10,10 @@ import java.util.stream.Stream;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.World;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.LegacyWorld;
 import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.DamageSource;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
@@ -26,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class PlayerInputSystemTest {
     private PlayerInputSystem system;
-    private World world;
+    private LegacyWorld world;
     private MovementInput movementInput;
     private WeaponInput weaponInput;
     private Entity player;
@@ -35,12 +36,12 @@ class PlayerInputSystemTest {
     @BeforeEach
     void beforeEach() {
         system = new PlayerInputSystem();
-        this.world = fi.jakojaannos.roguelite.engine.ecs.World.createNew();
+        this.world = World.createNew();
         EntityManager entityManager = world.getEntityManager();
         world.provideResource(Weapons.class, new Weapons());
 
         player = entityManager.createEntity();
-        this.abilities = new AttackAbility(new DamageSource.Entity(player),
+        this.abilities = new AttackAbility(new DamageSource.LegacyEntity(player),
                                            CollisionLayer.PLAYER,
                                            0.0,
                                            0.0);

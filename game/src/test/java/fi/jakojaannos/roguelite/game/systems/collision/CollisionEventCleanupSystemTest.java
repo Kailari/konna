@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.World;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.LegacyWorld;
 import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.RecentCollisionTag;
@@ -21,14 +21,14 @@ import static org.mockito.Mockito.*;
 class CollisionEventCleanupSystemTest {
     private CollisionEventCleanupSystem system;
     private Collisions collisions;
-    private World world;
+    private LegacyWorld world;
     private EntityManager entityManager;
     private Entity entity;
 
     @BeforeEach
     void beforeEach() {
         system = new CollisionEventCleanupSystem();
-        world = mock(World.class);
+        world = mock(LegacyWorld.class);
         entity = mock(Entity.class);
 
         Collider collider = new Collider(CollisionLayer.COLLIDE_ALL);

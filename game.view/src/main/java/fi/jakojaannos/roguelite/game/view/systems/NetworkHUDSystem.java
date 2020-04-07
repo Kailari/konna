@@ -3,10 +3,10 @@ package fi.jakojaannos.roguelite.game.view.systems;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.resources.Network;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.World;
 import fi.jakojaannos.roguelite.engine.network.NetworkManager;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
@@ -47,7 +47,7 @@ public class NetworkHUDSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
-        final var network = world.getResource(Network.class);
+        final var network = world.fetchResource(Network.class);
         final var isConnected = network.getNetworkManager()
                                        .map(NetworkManager::isConnected)
                                        .orElse(false);

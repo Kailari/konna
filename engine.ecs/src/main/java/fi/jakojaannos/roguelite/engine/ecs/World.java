@@ -1,6 +1,7 @@
 package fi.jakojaannos.roguelite.engine.ecs;
 
 import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.LegacyWorld;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.ProvidedResource;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Resource;
 import fi.jakojaannos.roguelite.engine.ecs.world.LegacyCompat;
@@ -8,7 +9,7 @@ import fi.jakojaannos.roguelite.engine.ecs.world.WorldImpl;
 import fi.jakojaannos.roguelite.engine.ecs.world.storage.ComponentStorage;
 import fi.jakojaannos.roguelite.engine.ecs.world.storage.ResourceStorage;
 
-public interface World extends fi.jakojaannos.roguelite.engine.ecs.legacy.World {
+public interface World extends LegacyWorld {
     LegacyCompat getCompatibilityLayer();
 
     ComponentStorage getComponents();
@@ -56,13 +57,5 @@ public interface World extends fi.jakojaannos.roguelite.engine.ecs.legacy.World 
             final TResource resource
     ) {
         getCompatibilityLayer().provideResource(resourceClass, resource);
-    }
-
-    @Override
-    @Deprecated
-    default <TResource extends ProvidedResource> TResource getResource(
-            final Class<TResource> resourceType
-    ) {
-        return getCompatibilityLayer().getResource(resourceType);
     }
 }

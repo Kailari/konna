@@ -11,10 +11,11 @@ import fi.jakojaannos.roguelite.engine.MainThread;
 import fi.jakojaannos.roguelite.engine.data.resources.GameStateManager;
 import fi.jakojaannos.roguelite.engine.data.resources.Network;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.World;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.LegacyWorld;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.network.client.ClientNetworkManager;
 import fi.jakojaannos.roguelite.engine.ui.UIEvent;
@@ -38,8 +39,8 @@ public class HandleMainMenuUIEventsSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
-        final var gameStateManager = world.getOrCreateResource(GameStateManager.class);
-        final var events = world.getResource(Events.class).ui();
+        final var gameStateManager = world.fetchResource(GameStateManager.class);
+        final var events = world.fetchResource(Events.class).ui();
         while (events.hasEvents()) {
             final var event = events.pollEvent();
             if (event.type() == UIEvent.Type.CLICK) {
@@ -56,11 +57,11 @@ public class HandleMainMenuUIEventsSystem implements ECSSystem {
                         final var state = createGameplayState(world);
                         state.setNetworkManager(new ClientNetworkManager(this.host,
                                                                          this.port,
-                                                                         world.getResource(MainThread.class)));
+                                                                         world.fetchResource(MainThread.class)));
                         gameStateManager.queueStateChange(state);
                     } catch (final IOException e) {
                         LOG.error("Error connecting to server:", e);
-                        world.getResource(Network.class)
+                        world.fetchResource(Network.class)
                              .setConnectionError(e.getMessage());
                     }
                 }
@@ -70,7 +71,7 @@ public class HandleMainMenuUIEventsSystem implements ECSSystem {
 
     private GameplayGameState createGameplayState(final World world) {
         return new GameplayGameState(System.nanoTime(),
-                                     fi.jakojaannos.roguelite.engine.ecs.World.createNew(),
-                                     world.getResource(Time.class).timeManager());
+                                     World.createNew(),
+                                     world.fetchResource(Time.class).timeManager());
     }
 }

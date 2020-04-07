@@ -26,7 +26,7 @@ public class UIElementBoundaryCalculationSystemTest_ParentRelativeProportions {
 
     @BeforeEach
     void beforeEach() {
-        uiBuilder = UserInterface.builder(new Viewport(VIEWPORT_WIDTH, VIEWPORT_HEIGHT),
+        uiBuilder = UserInterface.builder(timeManager, new Viewport(VIEWPORT_WIDTH, VIEWPORT_HEIGHT),
                                           (fontSize, text) -> fontSize / 1.5 * text.length());
     }
 

@@ -4,7 +4,7 @@ package fi.jakojaannos.roguelite.engine.ecs.legacy;
  * Some 'thing' in the game world. Conceptually entities are collections of components. Technically they are identifiers
  * which can be used to fetch components associated with the ID.
  * <p>
- * Everything in the game {@link World world} is an entity in some way. Enemies are entities. The Player is an entity.
+ * Everything in the game {@link LegacyWorld world} is an entity in some way. Enemies are entities. The Player is an entity.
  * As of writing this, the level geometry is one huge complex entity. That being said, as stated above, entities
  * themselves are simple. They are just an ID for a collection of components.
  * <p>

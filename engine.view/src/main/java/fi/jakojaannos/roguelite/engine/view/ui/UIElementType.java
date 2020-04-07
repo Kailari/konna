@@ -2,8 +2,7 @@ package fi.jakojaannos.roguelite.engine.view.ui;
 
 import java.util.function.Consumer;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.*;
 
 public final class UIElementType<TBuilder extends UIElementBuilder<TBuilder>> {
@@ -19,19 +18,18 @@ public final class UIElementType<TBuilder extends UIElementBuilder<TBuilder>> {
 
     public TBuilder getBuilder(
             final UserInterface userInterface,
-            final Entity entity,
-            final String name,
-            final Consumer<Component> componentConsumer
+            final EntityHandle entity,
+            final String name
     ) {
-        return this.builderFactory.apply(userInterface, entity, name, componentConsumer);
+        return this.builderFactory.apply(userInterface, entity, name, entity::addComponent);
     }
 
     public interface BuilderFactory<TBuilder> {
         TBuilder apply(
                 UserInterface userInterface,
-                Entity entity,
+                EntityHandle entity,
                 String name,
-                Consumer<Component> componentConsumer
+                Consumer<Object> componentConsumer
         );
     }
 }

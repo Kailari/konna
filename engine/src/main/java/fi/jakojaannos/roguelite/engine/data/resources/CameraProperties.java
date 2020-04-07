@@ -18,6 +18,10 @@ public class CameraProperties implements Resource {
 
     public Entity cameraEntity;
 
+    public CameraProperties(final Entity cameraEntity) {
+        this.cameraEntity = cameraEntity;
+    }
+
     public Vector2d offsetByCameraPosition(
             final Vector2d position,
             final EntityManager entityManager,

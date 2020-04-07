@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
@@ -146,6 +147,14 @@ class EntitySpliterator<TEntityData> implements Spliterator<EcsSystem.EntityData
         @Override
         public <TComponent> boolean addComponent(final TComponent component) {
             return this.handle.addComponent(component);
+        }
+
+        @Override
+        public <TComponent> TComponent addOrGet(
+                final Class<TComponent> componentClass,
+                final Supplier<TComponent> supplier
+        ) {
+            return this.handle.addOrGet(componentClass, supplier);
         }
 
         @Override

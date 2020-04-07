@@ -14,8 +14,7 @@ import fi.jakojaannos.roguelite.engine.view.ui.internal.ComponentBackedUIPropert
 import fi.jakojaannos.roguelite.engine.view.ui.internal.ElementBoundaryUIProperty;
 import fi.jakojaannos.roguelite.engine.view.ui.internal.InstanceMappedUIProperty;
 
-// HACK: For suppressing checkstyle warnings about line length
-@SuppressWarnings({"UnnecessaryInterfaceModifier", "checkstyle:RedundantModifier", "CheckStyle"})
+@SuppressWarnings({"UnnecessaryInterfaceModifier"})
 public interface UIProperty<T> {
     // Generic
     public static final UIProperty<UIElementType<?>> TYPE = new InstanceMappedUIProperty<>("type", UIElementType.NONE);

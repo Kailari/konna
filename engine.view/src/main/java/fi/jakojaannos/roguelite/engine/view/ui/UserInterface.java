@@ -16,10 +16,11 @@ import fi.jakojaannos.roguelite.engine.view.ui.query.UIPropertyMatcher;
 
 public interface UserInterface {
     static UIBuilder builder(
+            final TimeManager timeManager,
             final Viewport viewport,
             final TextSizeProvider fontSizeProvider
     ) {
-        return new UIBuilder(viewport, fontSizeProvider);
+        return new UIBuilder(timeManager, viewport, fontSizeProvider);
     }
 
     int getHeight();

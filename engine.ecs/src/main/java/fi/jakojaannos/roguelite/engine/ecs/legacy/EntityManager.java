@@ -6,7 +6,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
- * Allows manipulating entities and their components. Accessor to a {@link World world's} entity storage. All
+ * Allows manipulating entities and their components. Accessor to a {@link LegacyWorld world's} entity storage. All
  * entity-related data mutations happen through the <code>EntityManager</code>.
  */
 @Deprecated

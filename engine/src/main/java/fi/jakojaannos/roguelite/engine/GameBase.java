@@ -12,7 +12,7 @@ import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.utilities.UpdateableTimeManager;
 
-public abstract class GameBase implements Game, MainThread {
+public abstract class GameBase implements Game {
     private static final Logger LOG = LoggerFactory.getLogger(GameBase.class);
 
     private final Object taskQueueLock = new Object();

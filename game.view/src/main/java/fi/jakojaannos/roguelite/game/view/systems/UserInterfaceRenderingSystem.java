@@ -6,10 +6,10 @@ import java.util.stream.Stream;
 import fi.jakojaannos.roguelite.engine.content.AssetRegistry;
 import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.World;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
@@ -55,14 +55,14 @@ public class UserInterfaceRenderingSystem implements ECSSystem, AutoCloseable {
             final Stream<Entity> entities,
             final World world
     ) {
-        final var rawMouse = world.getOrCreateResource(Mouse.class);
+        final var rawMouse = world.fetchResource(Mouse.class);
         final var mouse = new Mouse();
         mouse.clicked = rawMouse.clicked;
         mouse.position.set(rawMouse.position)
                       .mul(this.camera.getViewport().getWidthInPixels(),
                            this.camera.getViewport().getHeightInPixels());
-        final var events = world.getResource(Events.class);
-        this.userInterface.update(world.getResource(Time.class).timeManager(),
+        final var events = world.fetchResource(Events.class);
+        this.userInterface.update(world.fetchResource(Time.class).timeManager(),
                                   mouse,
                                   events);
 

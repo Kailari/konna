@@ -99,7 +99,7 @@ public class SlimeArchetype {
 
         entityManager.addComponentTo(entity, new AttackAI(spriteSize * 0.6));
         entityManager.addComponentTo(entity, new WeaponInput());
-        entityManager.addComponentTo(entity, new AttackAbility(new DamageSource.Entity(entity),
+        entityManager.addComponentTo(entity, new AttackAbility(new DamageSource.LegacyEntity(entity),
                                                                CollisionLayer.ENEMY,
                                                                0.0,
                                                                0.0));

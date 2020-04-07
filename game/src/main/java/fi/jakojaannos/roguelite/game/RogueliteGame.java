@@ -24,8 +24,8 @@ public class RogueliteGame extends GameBase {
             final GameState state,
             final Events events
     ) {
-        final var inputs = state.getWorld().getOrCreateResource(Inputs.class);
-        final var mouse = state.getWorld().getOrCreateResource(Mouse.class);
+        final var inputs = state.getWorld().fetchResource(Inputs.class);
+        final var mouse = state.getWorld().fetchResource(Mouse.class);
         final var inputEvents = events.input();
 
         // FIXME: Input handling should happen in some engine-level system and provide actual inputs
@@ -102,7 +102,7 @@ public class RogueliteGame extends GameBase {
 
     // TODO: Move to engine level system
     protected GameState selectNextState(final GameState state) {
-        final var stateManager = state.getWorld().getOrCreateResource(GameStateManager.class);
+        final var stateManager = state.getWorld().fetchResource(GameStateManager.class);
         if (stateManager.shouldShutDown()) {
             this.setFinished(true);
         }

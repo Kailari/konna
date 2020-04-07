@@ -4,10 +4,10 @@ import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.resources.GameStateManager;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.World;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
 import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
@@ -35,16 +35,15 @@ public class RestartGameSystem implements ECSSystem {
             return;
         }
 
-        final var inputs = world.getOrCreateResource(Inputs.class);
+        final var inputs = world.fetchResource(Inputs.class);
         if (inputs.inputRestart) {
-            world.getOrCreateResource(GameStateManager.class)
+            world.fetchResource(GameStateManager.class)
                  .queueStateChange(new GameplayGameState(System.nanoTime(),
-                                                         fi.jakojaannos.roguelite.engine.ecs.World.createNew(),
-                                                         world.getResource(Time.class).timeManager()));
+                                                         World.createNew(),
+                                                         world.fetchResource(Time.class).timeManager()));
         } else if (inputs.inputMenu) {
-            world.getOrCreateResource(GameStateManager.class)
-                 .queueStateChange(new MainMenuGameState(fi.jakojaannos.roguelite.engine.ecs.World.createNew(),
-                                                         world.getResource(Time.class).timeManager()));
+            world.fetchResource(GameStateManager.class)
+                 .queueStateChange(new MainMenuGameState(World.createNew()));
         }
     }
 }

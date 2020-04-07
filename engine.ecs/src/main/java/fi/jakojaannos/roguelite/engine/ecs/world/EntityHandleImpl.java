@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
 
@@ -25,6 +26,11 @@ public class EntityHandleImpl implements EntityHandle {
         return this.pendingRemoval;
     }
 
+    @Override
+    public boolean isDestroyed() {
+        return this.destroyed;
+    }
+
     public EntityHandleImpl(final int id, final WorldImpl world) {
         this.id = id;
         this.world = world;
@@ -33,6 +39,14 @@ public class EntityHandleImpl implements EntityHandle {
     @Override
     public <TComponent> boolean addComponent(final TComponent component) {
         return this.world.getComponents().add(this.id, component);
+    }
+
+    @Override
+    public <TComponent> TComponent addOrGet(
+            final Class<TComponent> componentClass,
+            final Supplier<TComponent> supplier
+    ) {
+        return this.world.getComponents().addOrGet(this.id, componentClass, supplier);
     }
 
     @Override

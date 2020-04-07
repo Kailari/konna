@@ -8,9 +8,10 @@ import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.World;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.LegacyWorld;
 import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.game.data.components.character.MovementInput;
@@ -27,7 +28,7 @@ class CharacterMovementSystemTest {
 
     private CharacterMovementSystem system;
     private ApplyVelocitySystem applyVelocity;
-    private World world;
+    private LegacyWorld world;
     private Entity entity;
     private Velocity velocity;
     private Transform transform;
@@ -38,7 +39,7 @@ class CharacterMovementSystemTest {
     void beforeEach() {
         this.system = new CharacterMovementSystem();
         this.applyVelocity = new ApplyVelocitySystem();
-        this.world = fi.jakojaannos.roguelite.engine.ecs.World.createNew();
+        this.world = World.createNew();
         EntityManager entityManager = world.getEntityManager();
 
         final var time = new Time(new SimpleTimeManager(20));
