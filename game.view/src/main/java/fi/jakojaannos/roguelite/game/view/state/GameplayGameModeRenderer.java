@@ -4,8 +4,9 @@ import java.nio.file.Path;
 
 import fi.jakojaannos.roguelite.engine.content.AssetManager;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.view.Camera;
+import fi.jakojaannos.roguelite.engine.view.GameModeRenderer;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.Sprite;
 import fi.jakojaannos.roguelite.engine.view.rendering.text.Font;
@@ -14,6 +15,7 @@ import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.GenericUIElementBuilder;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.UILabelBuilder;
 import fi.jakojaannos.roguelite.game.DebugConfig;
+import fi.jakojaannos.roguelite.game.state.GameplayGameMode;
 import fi.jakojaannos.roguelite.game.view.systems.*;
 import fi.jakojaannos.roguelite.game.view.systems.debug.EntityCollisionBoundsRenderingSystem;
 import fi.jakojaannos.roguelite.game.view.systems.debug.EntityTransformRenderingSystem;
@@ -21,20 +23,21 @@ import fi.jakojaannos.roguelite.game.view.systems.debug.EntityTransformRendering
 import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.absolute;
 import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.percentOf;
 
-public class GameplayGameStateRenderer extends GameStateRenderer {
+public class GameplayGameModeRenderer extends GameModeRenderer<GameplayGameMode> {
     public static final String TIME_PLAYED_LABEL_NAME = "time-played-timer";
 
     private static final String GAME_OVER_MESSAGE = "Game Over";
     private static final String GAME_OVER_HELP_TEXT = "Press <SPACE> to restart, <ESC> to return to menu";
 
-    public GameplayGameStateRenderer(
-            final TimeManager timeManager,
+    public GameplayGameModeRenderer(
+            final Events events,
+            final GameplayGameMode gameMode,
             final Path assetRoot,
             final Camera camera,
             final AssetManager assetManager,
             final RenderingBackend backend
     ) {
-        super(timeManager, assetRoot, camera, assetManager, backend);
+        super(events, gameMode, assetRoot, camera, assetManager, backend);
     }
 
     @Override
@@ -88,23 +91,24 @@ public class GameplayGameStateRenderer extends GameStateRenderer {
 
     @Override
     protected UserInterface createUserInterface(
-            final TimeManager timeManager,
+            final Events events,
+            final GameplayGameMode gameMode,
             final Camera camera,
             final AssetManager assetManager
     ) {
         final var fontRegistry = assetManager.getAssetRegistry(Font.class);
 
         final var font = fontRegistry.getByAssetName("fonts/VCR_OSD_MONO.ttf");
-        return UserInterface.builder(timeManager, camera.getViewport(), font)
+        return UserInterface.builder(events, camera.getViewport(), font)
                             .element(TIME_PLAYED_LABEL_NAME,
                                      UIElementType.LABEL,
-                                     GameplayGameStateRenderer::buildTimePlayedTimer)
+                                     GameplayGameModeRenderer::buildTimePlayedTimer)
                             .element("score-kills",
                                      UIElementType.LABEL,
-                                     GameplayGameStateRenderer::buildKillsCounter)
+                                     GameplayGameModeRenderer::buildKillsCounter)
                             .element("game-over-container",
                                      UIElementType.NONE,
-                                     GameplayGameStateRenderer::buildGameOverSplash)
+                                     GameplayGameModeRenderer::buildGameOverSplash)
                             .build();
     }
 

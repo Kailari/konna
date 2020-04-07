@@ -11,7 +11,7 @@ import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.input.*;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
-import fi.jakojaannos.roguelite.game.state.GameplayGameState;
+import fi.jakojaannos.roguelite.game.state.GameplayGameMode;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,9 +22,9 @@ class RogueliteGameTest {
     @BeforeEach
     void beforeEach() {
         roguelite = new RogueliteGame();
-        state = new GameplayGameState(6969,
-                                      World.createNew(),
-                                      roguelite.getTime());
+        state = new GameplayGameMode(6969,
+                                     World.createNew(),
+                                     roguelite.getTime());
     }
 
     @Test

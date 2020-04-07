@@ -3,6 +3,7 @@ package fi.jakojaannos.roguelite.engine.network.message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fi.jakojaannos.roguelite.engine.data.resources.Network;
 import fi.jakojaannos.roguelite.engine.network.ServerNetworkManager;
 import fi.jakojaannos.roguelite.engine.network.client.ClientNetworkManager;
 
@@ -18,7 +19,9 @@ public abstract class MessageHandler<TMessage extends NetworkMessage> {
                     LOG.info("Received HelloMessage: {}", message.hello());
                     context.mainThread().queueTask(state -> {
                         LOG.info("Handling on server!");
-                        state.getNetworkManager()
+                        state.world()
+                             .fetchResource(Network.class)
+                             .getNetworkManager()
                              .map(ServerNetworkManager.class::cast)
                              .ifPresent(networkManager ->
                                                 networkManager.send(context.connection(),
@@ -37,7 +40,9 @@ public abstract class MessageHandler<TMessage extends NetworkMessage> {
                     LOG.info("Received HelloMessage: {}", message.hello());
                     context.mainThread().queueTask(state -> {
                         LOG.info("On main thread?");
-                        state.getNetworkManager()
+                        state.world()
+                             .fetchResource(Network.class)
+                             .getNetworkManager()
                              .map(ClientNetworkManager.class::cast)
                              .ifPresent(networkManager -> networkManager.send(
                                      new HelloMessage("Ping-Pong from client")));

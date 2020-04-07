@@ -1,82 +1,51 @@
 package fi.jakojaannos.roguelite.game.app;
 
+import java.io.IOException;
 import java.util.ArrayDeque;
+import java.util.Optional;
 import java.util.Queue;
-import java.util.function.Supplier;
+import javax.annotation.Nullable;
 
+import fi.jakojaannos.roguelite.engine.GameMode;
 import fi.jakojaannos.roguelite.engine.GameRunner;
-import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
+import fi.jakojaannos.roguelite.engine.GameState;
+import fi.jakojaannos.roguelite.engine.data.resources.Network;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
+import fi.jakojaannos.roguelite.engine.input.InputProvider;
+import fi.jakojaannos.roguelite.engine.network.NetworkManager;
 import fi.jakojaannos.roguelite.engine.network.ServerNetworkManager;
-import fi.jakojaannos.roguelite.engine.state.GameState;
-import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
-import fi.jakojaannos.roguelite.game.RogueliteGame;
 
 public class RogueliteServer {
     public static void run(
             final int port
-    ) throws Exception {
-        try (final var game = new RogueliteGame()) {
-            try (final var networkManager = new ServerNetworkManager(port, game);
-                 final var runner = new ServerGameRunner(networkManager)
-            ) {
-                final Queue<InputEvent> dummyInputQueue = new ArrayDeque<>();
-                final GameRunner.RendererFunction dummyRenderer = (state, partialTickAlpha, events) -> {};
-                final Supplier<GameState> initialStateSupplier = RogueliteServer::createInitialGameState;
-
-                runner.run(initialStateSupplier,
-                           game,
-                           () -> dummyInputQueue,
-                           dummyRenderer);
-            }
+    ) {
+        try (final var runner = new ServerGameRunner(port)) {
+            final Queue<InputEvent> dummyInputQueue = new ArrayDeque<>();
+            runner.run(new ServerGameMode(), () -> dummyInputQueue);
         }
-    }
-
-    private static ServerGameState createInitialGameState() {
-        return new ServerGameState(World.createNew(),
-                                   new SimpleTimeManager(20L));
     }
 
     // FIXME: Get rid of this
-    private static class ServerGameState extends GameState {
-        ServerGameState(
-                final World world,
-                final TimeManager timeManager
-        ) {
-            super(world);
+    private static class ServerGameMode implements GameMode {
+        @Override
+        public GameState createState(final World world) {
+            return new GameState(world);
         }
 
         @Override
-        protected SystemDispatcher createDispatcher() {
-            return SystemDispatcher.builder()
-                                   .build();
+        public void tick(final GameState state) {
+        }
+
+        @Override
+        public void close() {
         }
     }
 
-    private static class ServerGameRunner extends GameRunner<RogueliteGame> {
-        private final ServerNetworkManager networkManager;
+    private static class ServerGameRunner extends GameRunner implements AutoCloseable {
+        private final int port;
 
-        ServerGameRunner(final ServerNetworkManager networkManager) {
-            this.networkManager = networkManager;
-        }
-
-        @Override
-        protected boolean shouldContinueLoop(final RogueliteGame game) {
-            return super.shouldContinueLoop(game) && this.networkManager.isConnected();
-        }
-
-        @Override
-        public GameState simulateTick(
-                final GameState state,
-                final RogueliteGame game,
-                final Events events
-        ) {
-            state.setNetworkManager(this.networkManager);
-            return super.simulateTick(state, game, events);
-        }
+        private ServerNetworkManager networkManager;
 
         @Override
         protected long getFramerateLimit() {
@@ -86,6 +55,56 @@ public class RogueliteServer {
         @Override
         protected long getMaxFrameTime() {
             return 2000L;
+        }
+
+        ServerGameRunner(final int port) {
+            this.port = port;
+        }
+
+        @Override
+        protected boolean shouldContinueLoop() {
+            return this.networkManager.isConnected();
+        }
+
+        @Override
+        public void run(final GameMode defaultGameMode, final InputProvider inputProvider) {
+            try {
+                this.networkManager = new ServerNetworkManager(this.port, this);
+            } catch (final IOException e) {
+                throw new IllegalStateException("Server network manager initialization crashed: " + e);
+            }
+            super.run(defaultGameMode, inputProvider);
+        }
+
+        @Override
+        protected void onStateChange(final GameState state) {
+            state.world().registerResource(Network.class, new Network() {
+                @Nullable private String error;
+
+                @Override
+                public Optional<NetworkManager<?>> getNetworkManager() {
+                    return Optional.of(ServerGameRunner.this.networkManager);
+                }
+
+                @Override
+                public Optional<String> getConnectionError() {
+                    return Optional.ofNullable(this.error);
+                }
+
+                @Override
+                public void setConnectionError(final String error) {
+                    this.error = error;
+                }
+            });
+        }
+
+        @Override
+        protected void onModeChange(final GameMode gameMode) {
+        }
+
+        @Override
+        public void close() {
+            this.networkManager.close();
         }
     }
 }

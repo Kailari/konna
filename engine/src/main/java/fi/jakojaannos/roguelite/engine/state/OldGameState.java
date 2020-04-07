@@ -8,7 +8,7 @@ import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.network.NetworkManager;
 
-public abstract class GameState implements WorldProvider, AutoCloseable {
+public abstract class OldGameState implements WorldProvider, AutoCloseable {
     private final World world;
     private final SystemDispatcher dispatcher;
     @Nullable private NetworkManager<?> networkManager;
@@ -28,7 +28,7 @@ public abstract class GameState implements WorldProvider, AutoCloseable {
         // this.networkManager.onDisconnect(this::handleNetworkManagerDisconnect);
     }
 
-    public GameState(
+    public OldGameState(
             final World world
     ) {
         this.world = world;
@@ -37,7 +37,7 @@ public abstract class GameState implements WorldProvider, AutoCloseable {
 
             @Override
             public Optional<NetworkManager<?>> getNetworkManager() {
-                return GameState.this.getNetworkManager();
+                return OldGameState.this.getNetworkManager();
             }
 
             @Override

@@ -1,14 +1,15 @@
 package fi.jakojaannos.roguelite.game.state;
 
+import fi.jakojaannos.roguelite.engine.GameMode;
+import fi.jakojaannos.roguelite.engine.GameState;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
-import fi.jakojaannos.roguelite.engine.data.resources.GameStateManager;
 import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.roguelite.game.RogueliteGame;
 import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.archetypes.PlayerArchetype;
 import fi.jakojaannos.roguelite.game.data.archetypes.TurretArchetype;
@@ -36,56 +37,13 @@ import fi.jakojaannos.roguelite.game.systems.physics.ApplyVelocitySystem;
 import fi.jakojaannos.roguelite.game.weapons.Weapons;
 import fi.jakojaannos.roguelite.game.world.WorldGenerator;
 
-public class GameplayGameState extends GameState {
-    public GameplayGameState(
-            final long seed,
-            final World world,
-            final TimeManager timeManager
-    ) {
-        super(world);
-        world.registerResource(new Weapons());
-        world.registerResource(CameraProperties.class, new CameraProperties(world.createEntity(new Transform(),
-                                                                                               new NoDrawTag())
-                                                                                 .asLegacyEntity()));
-        world.registerResource(new SessionStats(timeManager.getCurrentGameTime()));
-        world.registerResource(new Mouse());
-        world.registerResource(new Inputs());
-        world.registerResource(new GameStateManager());
+public class GameplayGameMode implements GameMode {
+    private final long seed;
+    private final SystemDispatcher systemDispatcher;
 
-        final var player = PlayerArchetype.create(world, timeManager, new Transform(0, 0));
-        player.addComponent(new CameraFollowTargetTag());
+    public GameplayGameMode(final long seed) {
+        this.seed = seed;
 
-        final var players = new Players();
-        players.setLocalPlayer(player.asLegacyEntity());
-        world.registerResource(players);
-
-        final var entityManager = world.getEntityManager();
-        final var crosshair = entityManager.createEntity();
-        entityManager.addComponentTo(crosshair, new Transform(-999.0, -999.0));
-        entityManager.addComponentTo(crosshair, new CrosshairTag());
-        final var crosshairCollider = new Collider(CollisionLayer.NONE);
-        crosshairCollider.width = 0.3;
-        crosshairCollider.height = 0.3;
-        crosshairCollider.origin.set(0.15);
-        entityManager.addComponentTo(crosshair, crosshairCollider);
-
-        final var emptiness = new TileType(0, false);
-        final var floor = new TileType(1, false);
-        final var wall = new TileType(2, true);
-        final var generator = new WorldGenerator<>(emptiness);
-        generator.prepareInitialRoom(seed, world, floor, wall, 25, 45, 5, 5, 2);
-
-        final var levelEntity = entityManager.createEntity();
-        final var layer = new TileMapLayer(generator.getTileMap(), true);
-        entityManager.addComponentTo(levelEntity, layer);
-
-        TurretArchetype.create(entityManager, timeManager, new Transform(2.0, 0.0));
-
-        entityManager.applyModifications();
-    }
-
-    @Override
-    protected SystemDispatcher createDispatcher() {
         final var builder = SystemDispatcher.builder();
         final var input = builder.group("input")
                                  .withSystem(new FollowerAIControllerSystem())
@@ -130,18 +88,75 @@ public class GameplayGameState extends GameState {
                                     .dependsOn(input, earlyTick, characterTick, physicsTick, collisionHandler)
                                     .buildGroup();
 
-        final var cleanup = builder.group("cleanup")
-                                   .withSystem(new HandleEntitiesInAirSystem())
-                                   .withSystem(new CollisionEventCleanupSystem())
-                                   .withSystem(new RestartGameSystem())
-                                   .withSystem(new UpdateSessionTimerSystem())
-                                   .withSystem(new CleanUpDeadPlayersSystem())
-                                   .withSystem(new CleanUpDeadEnemyKillsSystem())
-                                   .withSystem(new CleanUpEntitiesWithLifetime())
-                                   .withSystem(new ReaperSystem())
-                                   .dependsOn(input, earlyTick, characterTick, physicsTick, collisionHandler, lateTick)
-                                   .buildGroup();
+        builder.group("cleanup")
+               .withSystem(new HandleEntitiesInAirSystem())
+               .withSystem(new CollisionEventCleanupSystem())
+               .withSystem(new RestartGameSystem())
+               .withSystem(new UpdateSessionTimerSystem())
+               .withSystem(new CleanUpDeadPlayersSystem())
+               .withSystem(new CleanUpDeadEnemyKillsSystem())
+               .withSystem(new CleanUpEntitiesWithLifetime())
+               .withSystem(new ReaperSystem())
+               .dependsOn(input, earlyTick, characterTick, physicsTick, collisionHandler, lateTick)
+               .buildGroup();
 
-        return builder.build();
+        this.systemDispatcher = builder.build();
+    }
+
+    @Override
+    public GameState createState(final World world) {
+        final var timeManager = world.fetchResource(TimeManager.class);
+
+        world.registerResource(new Weapons());
+        world.registerResource(CameraProperties.class, new CameraProperties(world.createEntity(new Transform(),
+                                                                                               new NoDrawTag())
+                                                                                 .asLegacyEntity()));
+        world.registerResource(new SessionStats(timeManager.getCurrentGameTime()));
+        world.registerResource(new Mouse());
+        world.registerResource(new Inputs());
+
+        final var player = PlayerArchetype.create(world, timeManager, new Transform(0, 0));
+        player.addComponent(new CameraFollowTargetTag());
+
+        final var players = new Players();
+        players.setLocalPlayer(player.asLegacyEntity());
+        world.registerResource(players);
+
+        final var entityManager = world.getEntityManager();
+        final var crosshair = entityManager.createEntity();
+        entityManager.addComponentTo(crosshair, new Transform(-999.0, -999.0));
+        entityManager.addComponentTo(crosshair, new CrosshairTag());
+        final var crosshairCollider = new Collider(CollisionLayer.NONE);
+        crosshairCollider.width = 0.3;
+        crosshairCollider.height = 0.3;
+        crosshairCollider.origin.set(0.15);
+        entityManager.addComponentTo(crosshair, crosshairCollider);
+
+        final var emptiness = new TileType(0, false);
+        final var floor = new TileType(1, false);
+        final var wall = new TileType(2, true);
+        final var generator = new WorldGenerator<>(emptiness);
+        generator.prepareInitialRoom(this.seed, world, floor, wall, 25, 45, 5, 5, 2);
+
+        final var levelEntity = entityManager.createEntity();
+        final var layer = new TileMapLayer(generator.getTileMap(), true);
+        entityManager.addComponentTo(levelEntity, layer);
+
+        TurretArchetype.create(entityManager, timeManager, new Transform(2.0, 0.0));
+
+        entityManager.applyModifications();
+
+        return new GameState(world);
+    }
+
+    @Override
+    public void tick(final GameState state) {
+        RogueliteGame.tickInputs(state);
+        this.systemDispatcher.tick(state.world());
+    }
+
+    @Override
+    public void close() throws Exception {
+        this.systemDispatcher.close();
     }
 }

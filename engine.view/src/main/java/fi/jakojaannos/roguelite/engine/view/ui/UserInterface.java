@@ -5,8 +5,10 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
+import fi.jakojaannos.roguelite.engine.event.EventSender;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.ui.TextSizeProvider;
+import fi.jakojaannos.roguelite.engine.ui.UIEvent;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.UIBuilder;
@@ -16,11 +18,11 @@ import fi.jakojaannos.roguelite.engine.view.ui.query.UIPropertyMatcher;
 
 public interface UserInterface {
     static UIBuilder builder(
-            final TimeManager timeManager,
+            final Events events,
             final Viewport viewport,
             final TextSizeProvider fontSizeProvider
     ) {
-        return new UIBuilder(timeManager, viewport, fontSizeProvider);
+        return new UIBuilder(events, viewport, fontSizeProvider);
     }
 
     int getHeight();
@@ -76,4 +78,6 @@ public interface UserInterface {
 
         element.getChildren().forEach(child -> addIfMatching(matcher, streamBuilder, child));
     }
+
+    interface UIEventBus extends EventSender<UIEvent> {}
 }

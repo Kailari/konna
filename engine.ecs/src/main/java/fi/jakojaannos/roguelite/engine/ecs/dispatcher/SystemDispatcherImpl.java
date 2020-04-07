@@ -25,14 +25,16 @@ import fi.jakojaannos.roguelite.engine.ecs.systemdata.RequirementsBuilder;
 @SuppressWarnings("deprecation")
 public class SystemDispatcherImpl implements SystemDispatcher {
     private static final Logger LOG = LoggerFactory.getLogger(SystemDispatcherImpl.class);
-    private static final boolean LOG_SYSTEM_TICK = false;
-    private static final boolean LOG_GROUP_TICK = false;
-    private static final boolean LOG_TICK = false;
+    private static final boolean LOG_SYSTEM_TICK = true;
+    private static final boolean LOG_GROUP_TICK = true;
+    private static final boolean LOG_TICK = true;
 
 
     private final ForkJoinPool threadPool;
     private final List<SystemGroup> systemGroups;
 
+    // TODO: Move to SystemContext which contains the requirements and enabled status
+    //       - possibly move the system there, too, and make groups rely on SystemIds
     @SuppressWarnings("rawtypes")
     private final Map<Class<? extends EcsSystem>, ParsedRequirements> systemRequirements = new ConcurrentHashMap<>();
 
@@ -55,8 +57,7 @@ public class SystemDispatcherImpl implements SystemDispatcher {
     private <TResources, TEntityData, TEvents> void resolveRequirements(final EcsSystem<TResources, TEntityData, TEvents> system) {
         final var requirementsBuilder = new RequirementsBuilder<TResources, TEntityData, TEvents>();
         system.declareRequirements(requirementsBuilder);
-        final var requirements = requirementsBuilder.build();
-        this.systemRequirements.put(system.getClass(), requirements);
+        this.systemRequirements.put(system.getClass(), requirementsBuilder.build());
     }
 
     @Override
@@ -69,7 +70,7 @@ public class SystemDispatcherImpl implements SystemDispatcher {
                                                                         .noneMatch(queue::contains);
 
         if (LOG_TICK) {
-            LOG.debug("Tick #{}", this.tick);
+            LOG.debug("Tick #{} (Dispatcher {})", this.tick, this);
         }
         this.tick++;
         final var ticked = new ArrayList<fi.jakojaannos.roguelite.engine.ecs.SystemGroup>(queue.size());
@@ -86,7 +87,7 @@ public class SystemDispatcherImpl implements SystemDispatcher {
         }
     }
 
-    private void tick(final fi.jakojaannos.roguelite.engine.ecs.SystemGroup group, final World world) {
+    private void tick(final SystemGroup group, final World world) {
         if (LOG_GROUP_TICK) {
             LOG.debug("Ticking group \"{}\"", group.getName());
         }
@@ -105,13 +106,15 @@ public class SystemDispatcherImpl implements SystemDispatcher {
                                                                 requirements.excluded());
                      legacySystem.tick(entities, world);
                  } else if (systemObj instanceof EcsSystem<?, ?, ?> system) {
-                     // XXX: This cannot be filter as that would possibly prevent tick in situations where previous system enables the next system
+                     // XXX: This cannot be filter as that would possibly prevent tick in situations where previous
+                     //      system enables the next system
                      if (isEnabled(system)) {
                          dispatch(world, system, this.threadPool);
                      }
                  } else {
                      throw new IllegalStateException("Invalid system type: " + systemObj.getClass().getSimpleName());
                  }
+                 world.commitEntityModifications();
              });
     }
 

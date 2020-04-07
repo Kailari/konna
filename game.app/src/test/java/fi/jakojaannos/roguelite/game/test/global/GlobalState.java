@@ -11,14 +11,15 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.Random;
 
+import fi.jakojaannos.roguelite.engine.GameState;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
+import fi.jakojaannos.roguelite.engine.event.EventBus;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLAssetManager;
 import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLRenderingBackend;
 import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLWindow;
-import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.engine.view.Window;
 import fi.jakojaannos.roguelite.game.RogueliteGame;
 import fi.jakojaannos.roguelite.game.test.content.TestAssetManager;
@@ -48,13 +49,13 @@ public class GlobalState {
             Entity player,
             Class<T> componentClass
     ) {
-        return state.getWorld()
+        return state.world()
                     .getEntityManager()
                     .getComponentOf(player, componentClass);
     }
 
     public static void simulateTick() {
-        inputEvents.forEach(events.input()::fire);
+        inputEvents.forEach(((EventBus<InputEvent>) events.input())::fire);
         state = game.tick(state, events);
         game.updateTime();
 
@@ -129,6 +130,7 @@ public class GlobalState {
             if (window instanceof LWJGLWindow) {
                 glfwTerminate();
             }
-        } catch (Exception ignored) { }
+        } catch (Exception ignored) {
+        }
     }
 }

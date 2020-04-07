@@ -12,6 +12,7 @@ import fi.jakojaannos.roguelite.engine.ui.UIEvent;
 import fi.jakojaannos.roguelite.engine.view.data.components.internal.Name;
 import fi.jakojaannos.roguelite.engine.view.data.components.internal.events.ActiveTag;
 import fi.jakojaannos.roguelite.engine.view.data.components.ui.ElementBoundaries;
+import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 
 public class UIElementHoverEventProvider implements ECSSystem {
     @Override
@@ -29,7 +30,7 @@ public class UIElementHoverEventProvider implements ECSSystem {
             final World world
     ) {
         final var entityManager = world.getEntityManager();
-        final var events = world.fetchResource(Events.class);
+        final var eventBus = world.fetchResource(UserInterface.UIEventBus.class);
         final var mouse = world.fetchResource(Mouse.class);
 
         entities.forEach(entity -> {
@@ -39,12 +40,12 @@ public class UIElementHoverEventProvider implements ECSSystem {
             final var bounds = entityManager.getComponentOf(entity, ElementBoundaries.class).orElseThrow();
             if (isInside(mouse, bounds)) {
                 if (!entityManager.hasComponent(entity, ActiveTag.class)) {
-                    events.ui().fire(new UIEvent(name, UIEvent.Type.START_HOVER));
+                    eventBus.fire(new UIEvent(name, UIEvent.Type.START_HOVER));
                     entityManager.addComponentTo(entity, new ActiveTag());
                 }
             } else {
                 if (entityManager.hasComponent(entity, ActiveTag.class)) {
-                    events.ui().fire(new UIEvent(name, UIEvent.Type.END_HOVER));
+                    eventBus.fire(new UIEvent(name, UIEvent.Type.END_HOVER));
                     entityManager.removeComponentFrom(entity, new ActiveTag());
                 }
             }
@@ -53,6 +54,6 @@ public class UIElementHoverEventProvider implements ECSSystem {
 
     private boolean isInside(final Mouse mouse, final ElementBoundaries bounds) {
         return mouse.position.x > bounds.minX && mouse.position.x < bounds.maxX
-                && mouse.position.y > bounds.minY && mouse.position.y < bounds.maxY;
+               && mouse.position.y > bounds.minY && mouse.position.y < bounds.maxY;
     }
 }

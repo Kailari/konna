@@ -4,8 +4,9 @@ import java.nio.file.Path;
 
 import fi.jakojaannos.roguelite.engine.content.AssetManager;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.view.Camera;
+import fi.jakojaannos.roguelite.engine.view.GameModeRenderer;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.Sprite;
 import fi.jakojaannos.roguelite.engine.view.rendering.text.Font;
@@ -13,22 +14,25 @@ import fi.jakojaannos.roguelite.engine.view.ui.ProportionValue;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.game.DebugConfig;
+import fi.jakojaannos.roguelite.game.state.MainMenuGameMode;
 import fi.jakojaannos.roguelite.game.view.systems.NetworkHUDSystem;
 import fi.jakojaannos.roguelite.game.view.systems.UserInterfaceRenderingSystem;
 import fi.jakojaannos.roguelite.game.view.systems.debug.EntityCollisionBoundsRenderingSystem;
 import fi.jakojaannos.roguelite.game.view.systems.debug.EntityTransformRenderingSystem;
 
-public class MainMenuGameStateRenderer extends GameStateRenderer {
+public class MainMenuGameModeRenderer extends GameModeRenderer<MainMenuGameMode> {
 
     public static final String TITLE_LABEL_NAME = "title_label";
 
-    public MainMenuGameStateRenderer(
-            final TimeManager timeManager, final Path assetRoot,
+    public MainMenuGameModeRenderer(
+            final Events events,
+            final MainMenuGameMode gameMode,
+            final Path assetRoot,
             final Camera camera,
             final AssetManager assetManager,
             final RenderingBackend backend
     ) {
-        super(timeManager, assetRoot, camera, assetManager, backend);
+        super(events, gameMode, assetRoot, camera, assetManager, backend);
     }
 
     @Override
@@ -70,7 +74,9 @@ public class MainMenuGameStateRenderer extends GameStateRenderer {
 
     @Override
     protected UserInterface createUserInterface(
-            final TimeManager timeManager, final Camera camera,
+            final Events events,
+            final MainMenuGameMode gameMode,
+            final Camera camera,
             final AssetManager assetManager
     ) {
         final var fontRegistry = assetManager.getAssetRegistry(Font.class);
@@ -80,7 +86,7 @@ public class MainMenuGameStateRenderer extends GameStateRenderer {
         final var height = 100;
         final var borderSize = 25;
         return UserInterface
-                .builder(timeManager, camera.getViewport(), font)
+                .builder(events, camera.getViewport(), font)
                 .element("play_button",
                          UIElementType.PANEL,
                          builder -> builder.anchorX(ProportionValue.percentOf().parentWidth(0.5))
