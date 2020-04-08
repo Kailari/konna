@@ -35,7 +35,7 @@ public class InputSteps {
 
     @When("player does nothing")
     public void player_does_nothing() {
-        Inputs inputs = state.world().getOrCreateResource(Inputs.class);
+        Inputs inputs = state.world().fetchResource(Inputs.class);
         inputs.inputAttack = false;
         inputs.inputDown = false;
         inputs.inputLeft = false;

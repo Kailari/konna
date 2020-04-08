@@ -16,6 +16,8 @@ import fi.jakojaannos.roguelite.game.data.components.*;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
+import fi.jakojaannos.roguelite.game.data.resources.collision.Colliders;
+import fi.jakojaannos.roguelite.game.data.resources.collision.Collisions;
 import fi.jakojaannos.roguelite.game.systems.*;
 import fi.jakojaannos.roguelite.game.systems.characters.CharacterAttackSystem;
 import fi.jakojaannos.roguelite.game.systems.characters.ai.AttackAIControllerSystem;
@@ -49,6 +51,8 @@ public final class GameplayGameMode {
     private static GameState createState(final World world, final long seed) {
         final var timeManager = world.fetchResource(TimeManager.class);
 
+        world.registerResource(new Colliders());
+        world.registerResource(new Collisions());
         world.registerResource(new Weapons());
         world.registerResource(CameraProperties.class, new CameraProperties(world.createEntity(new Transform(),
                                                                                                new NoDrawTag())

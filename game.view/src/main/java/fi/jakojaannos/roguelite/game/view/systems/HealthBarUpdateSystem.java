@@ -50,7 +50,7 @@ public class HealthBarUpdateSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
-        final var cameraProperties = world.getOrCreateResource(CameraProperties.class);
+        final var cameraProperties = world.fetchResource(CameraProperties.class);
 
         final var entityManager = world.getEntityManager();
         final var timeManager = world.fetchResource(TimeManager.class);

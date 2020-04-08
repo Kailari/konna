@@ -32,7 +32,7 @@ public class MenuSteps {
                                               .flatMap(element -> element.getProperty(UIProperty.CENTER))
                                               .orElseThrow();
 
-        final var mouse = state.world().getOrCreateResource(Mouse.class);
+        final var mouse = state.world().fetchResource(Mouse.class);
         mouse.position.set(buttonCenter)
                       .mul(1.0 / gameRenderer.getCamera().getViewport().getWidthInPixels(),
                            1.0 / gameRenderer.getCamera().getViewport().getHeightInPixels());

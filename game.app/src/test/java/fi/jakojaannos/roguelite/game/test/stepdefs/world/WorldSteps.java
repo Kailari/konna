@@ -38,7 +38,7 @@ public class WorldSteps {
         final var camera = state.world().getEntityManager().createEntity();
         state.world().getEntityManager().addComponentTo(camera, new Transform());
         state.world().getEntityManager().addComponentTo(camera, new NoDrawTag());
-        state.world().getOrCreateResource(CameraProperties.class).cameraEntity = camera;
+        state.world().fetchResource(CameraProperties.class).cameraEntity = camera;
 
         final var areaWidth = 20;
         final var areaHeight = 20;
@@ -152,7 +152,7 @@ public class WorldSteps {
                 .orElseThrow()
                 .damageSource;
         state.world()
-             .getOrCreateResource(SessionStats.class)
+             .fetchResource(SessionStats.class)
              .setKillsOf(localPlayerDamageSource, amount);
     }
 }

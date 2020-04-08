@@ -17,7 +17,7 @@ class EntityManagerTest {
 
     @BeforeEach
     void beforeEach() {
-        entityManager = new LegacyCompat((WorldImpl) World.createNew()).getEntityManager();
+        entityManager = new LegacyCompat((WorldImpl) World.createNew());
     }
 
     @Test

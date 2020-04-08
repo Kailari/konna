@@ -81,8 +81,8 @@ public class ApplyVelocitySystem implements ECSSystem {
             final World world
     ) {
         final var entityManager = world.getEntityManager();
-        final var entitiesWithCollider = world.getOrCreateResource(Colliders.class);
-        final var collisionEvents = world.getOrCreateResource(Collisions.class);
+        final var entitiesWithCollider = world.fetchResource(Colliders.class);
+        final var collisionEvents = world.fetchResource(Collisions.class);
         final var delta = world.fetchResource(TimeManager.class).getTimeStepInSeconds();
 
         final var tileMapLayers = getTileMapLayersWithCollision(world);

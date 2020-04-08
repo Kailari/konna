@@ -23,7 +23,7 @@ public class CameraControlSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
-        final var cameraEntity = world.getOrCreateResource(CameraProperties.class).cameraEntity;
+        final var cameraEntity = world.fetchResource(CameraProperties.class).cameraEntity;
         if (cameraEntity == null) {
             return;
         }

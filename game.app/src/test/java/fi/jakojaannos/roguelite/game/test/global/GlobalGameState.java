@@ -14,7 +14,7 @@ public class GlobalGameState {
 
     public static Optional<Entity> getLocalPlayer() {
         return Optional.ofNullable(GlobalState.state.world()
-                                                    .getOrCreateResource(Players.class).getPlayer());
+                                                    .fetchResource(Players.class).getPlayer());
     }
 
     public static void updatePlayerPositionBeforeRun() {
