@@ -3,9 +3,12 @@ package fi.jakojaannos.roguelite.game.systems;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.*;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.SpawnerComponent;
 
 public class SpawnerSystem implements ECSSystem {
@@ -21,7 +24,7 @@ public class SpawnerSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
-        final var delta = world.fetchResource(Time.class).getTimeStepInSeconds();
+        final var delta = world.fetchResource(TimeManager.class).getTimeStepInSeconds();
         final EntityManager cluster = world.getEntityManager();
 
         entities.forEach(entity -> {

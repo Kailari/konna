@@ -2,11 +2,11 @@ package fi.jakojaannos.roguelite.engine;
 
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 
-public final class GameRunnerTimeManager implements TimeManager {
+public class GameRunnerTimeManager implements TimeManager {
     private final long timeStep;
     private final double timeStepInSeconds;
 
-    private long currentTick;
+    protected long currentTick;
 
     @Override
     public long getTimeStep() {

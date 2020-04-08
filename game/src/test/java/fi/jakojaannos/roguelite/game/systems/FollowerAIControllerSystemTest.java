@@ -10,7 +10,6 @@ import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.LegacyWorld;
 import fi.jakojaannos.roguelite.game.data.components.character.MovementInput;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.FollowerAI;
@@ -21,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FollowerAIControllerSystemTest {
     private FollowerAIControllerSystem system;
-    private LegacyWorld world;
+    private World world;
     private Entity follower;
     private Transform playerTransform, followerPos;
     private MovementInput followerInput;
@@ -74,8 +73,9 @@ public class FollowerAIControllerSystemTest {
 
         this.system.tick(Stream.of(follower), this.world);
 
-        if (followerInput.move.length() != 0)
+        if (followerInput.move.length() != 0) {
             followerInput.move.normalize();
+        }
 
         assertEquals(expectedDirectionX, followerInput.move.x, 0.0001f);
         assertEquals(expectedDirectionY, followerInput.move.y, 0.0001f);

@@ -16,11 +16,14 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.*;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.GJK2D;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import fi.jakojaannos.roguelite.game.data.resources.collision.Colliders;
@@ -30,9 +33,9 @@ import fi.jakojaannos.roguelite.game.systems.collision.Collision;
 import fi.jakojaannos.roguelite.game.systems.collision.CollisionEvent;
 
 /**
- * Applies velocity read from the {@link Velocity} component to character {@link Transform},
- * handling collisions and firing {@link CollisionEvent Collision Events} whenever necessary.
- * Backbone of the physics and collision detection of characters and other simple moving entities.
+ * Applies velocity read from the {@link Velocity} component to character {@link Transform}, handling collisions and
+ * firing {@link CollisionEvent Collision Events} whenever necessary. Backbone of the physics and collision detection of
+ * characters and other simple moving entities.
  *
  * @see CollisionEvent
  * @see Collision
@@ -51,14 +54,14 @@ public class ApplyVelocitySystem implements ECSSystem {
     private static final int MAX_ITERATIONS = 25;
 
     /**
-     * Should an entity move less than this value during an movement iteration, we may consider it
-     * being still and can stop trying to move.
+     * Should an entity move less than this value during an movement iteration, we may consider it being still and can
+     * stop trying to move.
      */
     private static final double MOVE_EPSILON = 0.00001;
 
     /**
-     * The size of a single movement step. When near collision, this is the resolution at which
-     * entities are allowed to move.
+     * The size of a single movement step. When near collision, this is the resolution at which entities are allowed to
+     * move.
      */
     private static final double STEP_SIZE = 0.01;
     private final Vector2d tmpVelocity = new Vector2d();
@@ -80,7 +83,7 @@ public class ApplyVelocitySystem implements ECSSystem {
         final var entityManager = world.getEntityManager();
         final var entitiesWithCollider = world.getOrCreateResource(Colliders.class);
         final var collisionEvents = world.getOrCreateResource(Collisions.class);
-        final var delta = world.fetchResource(Time.class).getTimeStepInSeconds();
+        final var delta = world.fetchResource(TimeManager.class).getTimeStepInSeconds();
 
         final var tileMapLayers = getTileMapLayersWithCollision(world);
 
@@ -167,7 +170,7 @@ public class ApplyVelocitySystem implements ECSSystem {
 
     private void moveWithCollision(
             final Collisions collisionEvents,
-            final LegacyWorld world,
+            final World world,
             final Entity entity,
             final Transform transform,
             final Velocity velocity,
@@ -320,12 +323,12 @@ public class ApplyVelocitySystem implements ECSSystem {
         for (int b = maxSteps; b >= 1; b /= 2) {
             // borderline case of full distance leading to collision and maxSteps not colliding
             while (stepsToTake <= maxSteps
-                    && (collision = collisionsAfterMoving((stepsToTake + b) * STEP_SIZE,
-                                                          direction,
-                                                          transform,
-                                                          translatedTransform,
-                                                          translatedCollider,
-                                                          collisionTargets)).isEmpty()
+                   && (collision = collisionsAfterMoving((stepsToTake + b) * STEP_SIZE,
+                                                         direction,
+                                                         transform,
+                                                         translatedTransform,
+                                                         translatedCollider,
+                                                         collisionTargets)).isEmpty()
             ) {
                 stepsToTake += b;
             }
@@ -401,7 +404,7 @@ public class ApplyVelocitySystem implements ECSSystem {
 
     private void fireCollisionEvent(
             final Collisions collisions,
-            final LegacyWorld world,
+            final World world,
             final Entity entity,
             final CollisionCandidate candidate,
             final Collision.Mode mode
@@ -435,7 +438,7 @@ public class ApplyVelocitySystem implements ECSSystem {
         transform.position.add(velocity.mul(delta, this.tmpVelocity));
     }
 
-    private List<TileMap<TileType>> getTileMapLayersWithCollision(final LegacyWorld world) {
+    private List<TileMap<TileType>> getTileMapLayersWithCollision(final World world) {
         return world.getEntityManager()
                     .getEntitiesWith(TileMapLayer.class)
                     .map(EntityManager.EntityComponentPair::component)

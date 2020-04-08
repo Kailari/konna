@@ -6,11 +6,11 @@ import java.util.Random;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.archetypes.SlimeArchetype;
 import fi.jakojaannos.roguelite.game.data.components.InAir;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
@@ -39,7 +39,7 @@ public class SplitOnDeathSystem implements ECSSystem {
             final World world
     ) {
         final var entityManager = world.getEntityManager();
-        final var timeManager = world.fetchResource(Time.class);
+        final var timeManager = world.fetchResource(TimeManager.class);
 
         entities.forEach(entity -> {
             final var split = entityManager.getComponentOf(entity, SplitOnDeath.class).orElseThrow();

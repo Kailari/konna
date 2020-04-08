@@ -3,7 +3,6 @@ package fi.jakojaannos.roguelite.game.systems.menu;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
-import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
@@ -11,6 +10,7 @@ import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.state.StateEvent;
 import fi.jakojaannos.roguelite.engine.ui.UIEvent;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;
 
 public class HandleMainMenuUIEventsSystem implements ECSSystem {
@@ -19,7 +19,7 @@ public class HandleMainMenuUIEventsSystem implements ECSSystem {
 
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
-        requirements.requireProvidedResource(Time.class)
+        requirements.requireProvidedResource(TimeManager.class)
                     .requireProvidedResource(Events.class);
     }
 

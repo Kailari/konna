@@ -7,12 +7,11 @@ import org.junit.jupiter.params.provider.CsvSource;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.LegacyWorld;
 import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.game.data.components.character.MovementInput;
 import fi.jakojaannos.roguelite.game.data.components.character.WalkingMovementAbility;
@@ -20,7 +19,6 @@ import fi.jakojaannos.roguelite.game.systems.characters.movement.CharacterMoveme
 import fi.jakojaannos.roguelite.game.systems.physics.ApplyVelocitySystem;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
 
 class CharacterMovementSystemTest {
     private static final double EPSILON = 0.01;
@@ -28,7 +26,7 @@ class CharacterMovementSystemTest {
 
     private CharacterMovementSystem system;
     private ApplyVelocitySystem applyVelocity;
-    private LegacyWorld world;
+    private World world;
     private Entity entity;
     private Velocity velocity;
     private Transform transform;
@@ -42,8 +40,7 @@ class CharacterMovementSystemTest {
         this.world = World.createNew();
         EntityManager entityManager = world.getEntityManager();
 
-        final var time = new Time(new SimpleTimeManager(20));
-        world.provideResource(Time.class, time);
+        world.registerResource(TimeManager.class, new SimpleTimeManager(20));
 
         entity = entityManager.createEntity();
         this.movementInput = new MovementInput();

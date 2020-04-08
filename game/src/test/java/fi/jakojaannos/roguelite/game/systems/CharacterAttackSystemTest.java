@@ -6,12 +6,11 @@ import org.junit.jupiter.api.Test;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.LegacyWorld;
 import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.DamageSource;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
@@ -28,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CharacterAttackSystemTest {
     private CharacterAttackSystem system;
-    private LegacyWorld world;
+    private World world;
     private Entity entity;
     private WeaponInput weaponInput;
     private AttackAbility attackAbility;
@@ -41,7 +40,7 @@ class CharacterAttackSystemTest {
         this.world = World.createNew();
         EntityManager entityManager = world.getEntityManager();
 
-        world.provideResource(Time.class, new Time(time = new SimpleTimeManager(20L)));
+        world.registerResource(TimeManager.class, time = new SimpleTimeManager(20));
 
         entity = entityManager.createEntity();
         this.weaponInput = new WeaponInput();

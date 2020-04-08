@@ -79,22 +79,6 @@ public class LegacyCompat implements LegacyWorld {
         }
     }
 
-    @Override
-    public <TResource extends ProvidedResource> void provideResource(
-            final Class<TResource> resourceClass,
-            final TResource resource
-    ) {
-        if (LOG_PROVIDE) {
-            LOG.warn("provideResource called!");
-            //throw new IllegalStateException();
-        }
-
-        try {
-            this.world.registerResource(resourceClass, resource);
-        } catch (final Throwable ignored) {
-        }
-    }
-
     private class EntityManagerImpl implements EntityManager {
         @Override
         public Stream<Entity> getAllEntities() {

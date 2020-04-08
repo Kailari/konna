@@ -59,6 +59,7 @@ public class UserInterfaceImpl implements UserInterface {
 
     public UserInterfaceImpl(
             final Events events,
+            final TimeManager timeManager,
             final Viewport viewport,
             final TextSizeProvider textSizeProvider
     ) {
@@ -68,6 +69,7 @@ public class UserInterfaceImpl implements UserInterface {
         this.uiWorld.registerResource(UIHierarchy.class, this.hierarchy);
         this.uiWorld.registerResource(Mouse.class, new Mouse());
         this.uiWorld.registerResource(UIEventBus.class, ((EventBus<UIEvent>) events.ui())::fire);
+        this.uiWorld.registerResource(TimeManager.class, timeManager);
 
         final var builder = SystemDispatcher.builder();
         final var preparations = builder.group("preparations")
@@ -109,20 +111,12 @@ public class UserInterfaceImpl implements UserInterface {
     }
 
     @Override
-    public Stream<UIElement> allElements() {
-        return this.uiWorld.fetchResource(UIHierarchy.class)
-                           .getElements();
-    }
-
-    @Override
-    public void update(final TimeManager time, final Mouse mouse, final Events events) {
+    public void update(final Mouse mouse) {
         this.uiWorld.commitEntityModifications();
         this.elementEntities = this.elementEntities.stream()
                                                    .filter(Predicate.not(EntityHandle::isDestroyed))
                                                    .filter(Predicate.not(EntityHandle::isPendingRemoval))
                                                    .collect(Collectors.toCollection(ArrayList::new));
-
-        this.uiWorld.provideResource(Events.class, events); // FIXME: Resources should be registered once
 
         final var uiMouse = this.uiWorld.fetchResource(Mouse.class);
         uiMouse.clicked = mouse.clicked;

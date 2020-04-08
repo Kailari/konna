@@ -4,28 +4,25 @@ import org.junit.jupiter.api.Test;
 
 import java.util.stream.Stream;
 
-import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.LegacyWorld;
 import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.archetypes.SlimeArchetype;
 import fi.jakojaannos.roguelite.game.data.components.character.DeadTag;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.SplitOnDeath;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
 
 public class SplitOnDeathSystemTest {
     @Test
     void largeSlimeSpawnsMultipleSlimesOnDeath() {
         SplitOnDeathSystem system = new SplitOnDeathSystem();
-        LegacyWorld world = World.createNew();
+        World world = World.createNew();
         EntityManager entityManager = world.getEntityManager();
 
-        final var time = new Time(new SimpleTimeManager(20));
-        world.provideResource(Time.class, time);
+        world.registerResource(TimeManager.class, new SimpleTimeManager(20));
 
         Entity slime = SlimeArchetype.createLargeSlime(entityManager, 0.0, 0.0);
         entityManager.addComponentTo(slime, new DeadTag());

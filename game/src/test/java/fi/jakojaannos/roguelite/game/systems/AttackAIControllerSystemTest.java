@@ -8,12 +8,11 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.LegacyWorld;
 import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.DamageSource;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.WeaponInput;
@@ -21,11 +20,12 @@ import fi.jakojaannos.roguelite.game.data.components.character.enemy.AttackAI;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.EnemyTag;
 import fi.jakojaannos.roguelite.game.systems.characters.ai.AttackAIControllerSystem;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AttackAIControllerSystemTest {
     private EntityManager entityManager;
-    private LegacyWorld world;
+    private World world;
     private AttackAIControllerSystem system;
     private Entity turret;
     private AttackAI attackAi;
@@ -34,7 +34,7 @@ public class AttackAIControllerSystemTest {
     void beforeEach() {
         world = World.createNew();
         entityManager = world.getEntityManager();
-        world.provideResource(Time.class, new Time(new SimpleTimeManager(20)));
+        world.registerResource(TimeManager.class, new SimpleTimeManager(20));
 
         system = new AttackAIControllerSystem();
         turret = entityManager.createEntity();

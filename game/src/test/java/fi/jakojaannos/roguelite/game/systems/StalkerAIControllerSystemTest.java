@@ -8,12 +8,11 @@ import org.junit.jupiter.params.provider.CsvSource;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.LegacyWorld;
 import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.InAir;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
 import fi.jakojaannos.roguelite.game.data.components.character.MovementInput;
@@ -25,11 +24,10 @@ import fi.jakojaannos.roguelite.game.data.resources.Players;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class StalkerAIControllerSystemTest {
-
     private EntityManager entityManager;
     private SimpleTimeManager timeManager;
     private StalkerAIControllerSystem system;
-    private LegacyWorld world;
+    private World world;
     private Transform playerPos, stalkerPos;
     private Entity stalker;
     private WalkingMovementAbility movementStats;
@@ -40,8 +38,7 @@ public class StalkerAIControllerSystemTest {
         system = new StalkerAIControllerSystem();
         this.world = World.createNew();
         entityManager = world.getEntityManager();
-        timeManager = new SimpleTimeManager(20);
-        world.provideResource(Time.class, new Time(timeManager));
+        world.registerResource(TimeManager.class, timeManager = new SimpleTimeManager(20));
 
         Entity player = entityManager.createEntity();
         this.playerPos = new Transform();

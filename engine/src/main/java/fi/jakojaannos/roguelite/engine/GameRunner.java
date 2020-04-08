@@ -8,7 +8,6 @@ import java.util.Optional;
 import java.util.Queue;
 
 import fi.jakojaannos.roguelite.engine.data.resources.Network;
-import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.event.EventBus;
 import fi.jakojaannos.roguelite.engine.event.Events;
@@ -34,6 +33,10 @@ public abstract class GameRunner implements MainThread {
     private GameMode activeGameMode;
     private boolean running;
 
+    public boolean isRunning() {
+        return this.running;
+    }
+
     protected long getMaxFrameTime() {
         return 250L;
     }
@@ -46,11 +49,19 @@ public abstract class GameRunner implements MainThread {
         return this.events;
     }
 
+    public TimeManager getTimeManager() {
+        return this.timeManager;
+    }
+
     protected GameRunner() {
+        this(new GameRunnerTimeManager(20L));
+    }
+
+    protected GameRunner(final GameRunnerTimeManager timeManager) {
         this.stateBus = new EventBus<>();
         this.inputBus = new EventBus<>();
         this.events = new Events(new EventBus<>(), this.inputBus, this.stateBus);
-        this.timeManager = new GameRunnerTimeManager(20L);
+        this.timeManager = timeManager;
     }
 
     @Override
@@ -80,8 +91,7 @@ public abstract class GameRunner implements MainThread {
         var frames = 0;
 
         LOG.info("Entering main loop");
-        this.activeGameMode = defaultGameMode;
-        var state = createStateForActiveGameMode();
+        var state = setActiveGameMode(defaultGameMode);
         onModeChange(this.activeGameMode);
         try {
             this.running = true;
@@ -123,7 +133,12 @@ public abstract class GameRunner implements MainThread {
         LOG.info("\tAvg. FPS:\t{}", avgFramesPerSecond);
     }
 
-    protected GameState simulateFrame(
+    public GameState setActiveGameMode(final GameMode defaultGameMode) {
+        this.activeGameMode = defaultGameMode;
+        return createStateFor(this.activeGameMode);
+    }
+
+    public GameState simulateFrame(
             final GameState state,
             final Accumulator accumulator,
             final InputProvider inputProvider
@@ -157,8 +172,7 @@ public abstract class GameRunner implements MainThread {
                             LOG.error("Error while cleaning up old game mode: " + e.getMessage());
                         }
                     }
-                    this.activeGameMode = changeMode.gameMode();
-                    activeState = createStateForActiveGameMode();
+                    activeState = setActiveGameMode(changeMode.gameMode());
                     modeHasChanged = true;
                 } else if (stateEvent instanceof StateEvent.Shutdown) {
                     this.running = false;
@@ -203,14 +217,11 @@ public abstract class GameRunner implements MainThread {
         }
     }
 
-    private GameState createStateForActiveGameMode() {
+    public GameState createStateFor(final GameMode gameMode) {
         final var world = World.createNew();
         world.registerResource(Events.class, this.events);
         world.registerResource(TimeManager.class, this.timeManager);
         world.registerResource(MainThread.class, this);
-
-        // FIXME: Get rid of this
-        world.registerResource(Time.class, new Time(this.timeManager));
 
         // FIXME: Figure out something smarter
         world.registerResource(Network.class, new Network() {
@@ -228,7 +239,7 @@ public abstract class GameRunner implements MainThread {
             public void setConnectionError(final String error) {
             }
         });
-        return this.activeGameMode.stateFactory().apply(world);
+        return gameMode.stateFactory().apply(world);
     }
 
     private void pollInputEvents(final InputProvider inputProvider) {
@@ -247,7 +258,7 @@ public abstract class GameRunner implements MainThread {
         }
 
         public boolean canSimulateTick(final long timeStep) {
-            return this.value > timeStep;
+            return this.value >= timeStep;
         }
 
         public long get() {

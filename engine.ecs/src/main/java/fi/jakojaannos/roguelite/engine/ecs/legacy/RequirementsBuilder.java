@@ -103,5 +103,5 @@ public interface RequirementsBuilder {
      * @return the builder for chaining
      */
     @Deprecated
-    RequirementsBuilder requireProvidedResource(Class<? extends ProvidedResource> resource);
+    RequirementsBuilder requireProvidedResource(Class<?> resource);
 }

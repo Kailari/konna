@@ -3,17 +3,15 @@ package fi.jakojaannos.roguelite.game.systems.characters.movement;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.InAir;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.game.data.components.character.MovementInput;
 import fi.jakojaannos.roguelite.game.data.components.character.WalkingMovementAbility;
-import fi.jakojaannos.roguelite.game.systems.SystemGroups;
-import fi.jakojaannos.roguelite.game.systems.physics.ApplyFrictionSystem;
 
 public class CharacterMovementSystem implements ECSSystem {
     private static final float INPUT_EPSILON = 0.001f;
@@ -33,7 +31,7 @@ public class CharacterMovementSystem implements ECSSystem {
             final World world
     ) {
         final var entityManager = world.getEntityManager();
-        final var delta = world.fetchResource(Time.class).getTimeStepInSeconds();
+        final var delta = world.fetchResource(TimeManager.class).getTimeStepInSeconds();
 
         entities.forEach(entity -> {
             final var input = entityManager.getComponentOf(entity, MovementInput.class).orElseThrow();

@@ -80,7 +80,7 @@ public class LWJGLGameRunner extends GameRunner implements AutoCloseable {
     }
 
     @Override
-    protected GameState simulateFrame(
+    public GameState simulateFrame(
             final GameState state,
             final Accumulator accumulator,
             final InputProvider inputProvider

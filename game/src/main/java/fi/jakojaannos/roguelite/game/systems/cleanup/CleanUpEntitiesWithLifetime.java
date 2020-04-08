@@ -7,9 +7,12 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.*;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.Lifetime;
 import fi.jakojaannos.roguelite.game.systems.SystemGroups;
 
@@ -19,7 +22,7 @@ public class CleanUpEntitiesWithLifetime implements ECSSystem {
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.CLEANUP)
-                    .requireProvidedResource(Time.class)
+                    .requireProvidedResource(TimeManager.class)
                     .withComponent(Lifetime.class)
                     .tickBefore(ReaperSystem.class);
     }
@@ -30,13 +33,13 @@ public class CleanUpEntitiesWithLifetime implements ECSSystem {
             final World world
     ) {
         final var entityManager = world.getEntityManager();
-        final var timeManager = world.fetchResource(Time.class);
+        final var timeManager = world.fetchResource(TimeManager.class);
 
         entities.filter(onlyExpired(entityManager, timeManager))
                 .forEach(entityManager::destroyEntity);
     }
 
-    private Predicate<Entity> onlyExpired(final EntityManager entityManager, final Time timeManager) {
+    private Predicate<Entity> onlyExpired(final EntityManager entityManager, final TimeManager timeManager) {
         final var currentTick = timeManager.getCurrentGameTime();
         return entity -> entityManager.getComponentOf(entity, Lifetime.class)
                                       .map(toLifetimeRemainingOn(currentTick))

@@ -17,7 +17,6 @@ import fi.jakojaannos.roguelite.engine.ecs.SystemGroup;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.ProvidedResource;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Resource;
 import fi.jakojaannos.roguelite.engine.ecs.systemdata.ParsedRequirements;
 import fi.jakojaannos.roguelite.engine.ecs.systemdata.RequirementsBuilder;
@@ -148,9 +147,13 @@ public class SystemDispatcherImpl implements SystemDispatcher {
             ).get();
         } catch (final InterruptedException e) {
             LOG.warn("System \"" + system.getClass().getSimpleName() + "\" was interrupted!");
-        } catch (final ExecutionException e) {
-            LOG.error("System \"" + system.getClass().getSimpleName() + "\" failure!", e);
-            throw new RuntimeException(e);
+        } catch (final ExecutionException ee) {
+            LOG.error("System \"" + system.getClass().getSimpleName() + "\" failure!", ee);
+            if (ee.getCause() instanceof RuntimeException e) {
+                throw e;
+            } else {
+                throw new RuntimeException("Assuming unrecoverable error, dispatcher is going crashing down!", ee);
+            }
         }
     }
 
@@ -234,7 +237,7 @@ public class SystemDispatcherImpl implements SystemDispatcher {
         }
 
         @Override
-        public fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder requireProvidedResource(final Class<? extends ProvidedResource> resource) {
+        public fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder requireProvidedResource(final Class<?> resource) {
             return this;
         }
     }

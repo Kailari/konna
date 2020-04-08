@@ -23,16 +23,4 @@ public interface LegacyWorld {
      */
     @Deprecated
     <TResource extends Resource> TResource getOrCreateResource(Class<TResource> resourceType);
-
-    /**
-     * Manually assigns a provided resource to a specific value.
-     *
-     * @param resourceClass type of the resource to create
-     * @param resource      resource to create
-     */
-    @Deprecated
-    <TResource extends ProvidedResource> void provideResource(
-            Class<TResource> resourceClass,
-            TResource resource
-    );
 }
