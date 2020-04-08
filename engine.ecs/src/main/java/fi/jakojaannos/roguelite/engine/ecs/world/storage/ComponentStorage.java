@@ -7,17 +7,11 @@ package fi.jakojaannos.roguelite.engine.ecs.world.storage;
 //          -   is this a non-issue? Should modifying components that affect iteration of the system itself be
 //              prohibited?
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.lang.reflect.Array;
-import java.lang.reflect.ParameterizedType;
 import java.util.*;
 import java.util.function.Supplier;
 
 public final class ComponentStorage {
-    private static final Logger LOG = LoggerFactory.getLogger(ComponentStorage.class);
-
     private final Map<Class<?>, Object[]> components = new HashMap<>();
     private int capacity;
 
@@ -102,6 +96,13 @@ public final class ComponentStorage {
     public void resize(final int newCapacity) {
         this.capacity = newCapacity;
         this.components.replaceAll((componentClass, storage) -> Arrays.copyOf(storage, newCapacity));
+    }
+
+    public void clear() {
+        // HACK: getStorage re-constructs the component storages after clearing. Clear should be so
+        //       rare op that the implied performance cost should not matter. In case this becomes
+        //       an issue, do something smarter here.
+        this.components.clear();
     }
 
     @SuppressWarnings("unchecked")

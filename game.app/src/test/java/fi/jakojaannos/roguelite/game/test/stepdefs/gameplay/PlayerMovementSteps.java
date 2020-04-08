@@ -5,12 +5,11 @@ import io.cucumber.java.en.Then;
 import org.joml.Vector2d;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
 import fi.jakojaannos.roguelite.game.data.components.character.WalkingMovementAbility;
 import fi.jakojaannos.roguelite.game.test.global.GlobalGameState;
 
-import static fi.jakojaannos.roguelite.game.test.global.GlobalState.getComponentOf;
+import static fi.jakojaannos.roguelite.engine.utilities.assertions.junitextension.Assertions.assertEqualsExt;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
@@ -24,11 +23,11 @@ public class PlayerMovementSteps {
             double acceleration,
             double friction
     ) {
-        Entity player = GlobalGameState.getLocalPlayer().orElseThrow();
-        final var stats = getComponentOf(player, WalkingMovementAbility.class).orElseThrow();
+        final var player = GlobalGameState.getLocalPlayer().orElseThrow();
+        final var stats = player.getComponent(WalkingMovementAbility.class).orElseThrow();
         stats.maxSpeed = speed;
         stats.acceleration = acceleration;
-        final var physics = getComponentOf(player, Physics.class).orElseThrow();
+        final var physics = player.getComponent(Physics.class).orElseThrow();
         physics.friction = friction;
     }
 
@@ -37,8 +36,8 @@ public class PlayerMovementSteps {
             double distance,
             String axis
     ) {
-        Entity player = GlobalGameState.getLocalPlayer().orElseThrow();
-        Transform transform = getComponentOf(player, Transform.class).orElseThrow();
+        final var player = GlobalGameState.getLocalPlayer().orElseThrow();
+        Transform transform = player.getComponent(Transform.class).orElseThrow();
 
         Vector2d delta = transform.position.sub(GlobalGameState.playerInitialPosition, new Vector2d());
 
@@ -50,8 +49,8 @@ public class PlayerMovementSteps {
 
     @Then("the player should not have moved at all on the axis {string}")
     public void the_player_should_not_have_moved_at_all_on_the_axis(String axis) {
-        Entity player = GlobalGameState.getLocalPlayer().orElseThrow();
-        Transform transform = getComponentOf(player, Transform.class).orElseThrow();
+        final var player = GlobalGameState.getLocalPlayer().orElseThrow();
+        final var transform = player.getComponent(Transform.class).orElseThrow();
 
         boolean horizontal = axis.equalsIgnoreCase("horizontal");
         double posOnAxis = horizontal ? transform.position.x : transform.position.y;
@@ -61,8 +60,8 @@ public class PlayerMovementSteps {
 
     @Then("the player should have moved on the {string} axis while the game ran for the last time")
     public void the_player_should_have_moved_on_the_axis(String axis) {
-        Entity player = GlobalGameState.getLocalPlayer().orElseThrow();
-        Transform transform = getComponentOf(player, Transform.class).orElseThrow();
+        final var player = GlobalGameState.getLocalPlayer().orElseThrow();
+        final var transform = player.getComponent(Transform.class).orElseThrow();
 
         boolean horizontal = axis.equalsIgnoreCase("horizontal");
         double posOnAxis = horizontal ? transform.position.x : transform.position.y;
@@ -72,10 +71,9 @@ public class PlayerMovementSteps {
 
     @Then("the player should not have moved at all while the game ran for the last time")
     public void the_player_should_not_have_moved_at_all() {
-        Entity player = GlobalGameState.getLocalPlayer().orElseThrow();
-        Transform transform = getComponentOf(player, Transform.class).orElseThrow();
+        final var player = GlobalGameState.getLocalPlayer().orElseThrow();
+        final var transform = player.getComponent(Transform.class).orElseThrow();
 
-        assertEquals(GlobalGameState.playerPositionBeforeRun.x, transform.position.x, NO_MOVEMENT_EPSILON);
-        assertEquals(GlobalGameState.playerPositionBeforeRun.y, transform.position.y, NO_MOVEMENT_EPSILON);
+        assertEqualsExt(GlobalGameState.playerPositionBeforeRun, transform.position, NO_MOVEMENT_EPSILON);
     }
 }

@@ -1,8 +1,5 @@
 package fi.jakojaannos.roguelite.engine.ecs.world;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -13,8 +10,6 @@ import fi.jakojaannos.roguelite.engine.ecs.world.storage.ComponentStorage;
 import fi.jakojaannos.roguelite.engine.ecs.world.storage.ResourceStorage;
 
 public class WorldImpl implements World {
-    private static final Logger LOG = LoggerFactory.getLogger(WorldImpl.class);
-
     @Deprecated
     private final LegacyCompat compat;
 
@@ -124,6 +119,23 @@ public class WorldImpl implements World {
             }
             this.entities[this.idCounter] = null;
         });
+    }
+
+    @Override
+    public void clearAllEntities() {
+        this.entityRemoveTasks.clear();
+        this.componentStorage.clear();
+        for (int i = 0; i < this.entities.length; i++) {
+            if (this.entities[i] != null) {
+                this.entities[i].markPendingRemoval();
+                this.entities[i].markDestroyed();
+                this.entities[i].moveTo(-1);
+            }
+
+            this.entities[i] = null;
+        }
+        this.idCounter = 0;
+        this.nEntities = 0;
     }
 
     @Override

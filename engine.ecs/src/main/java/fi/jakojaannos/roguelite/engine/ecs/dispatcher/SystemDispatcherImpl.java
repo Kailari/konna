@@ -233,7 +233,7 @@ public class SystemDispatcherImpl implements SystemDispatcher {
         }
 
         @Override
-        public fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder requireResource(final Class<? extends Resource> resource) {
+        public fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder requireResource(final Class<?> resource) {
             return this;
         }
 

@@ -47,9 +47,8 @@ public class UpdateHUDSystem implements ECSSystem {
         world.fetchResource(Players.class)
              .getLocalPlayer()
              .ifPresent(localPlayer -> {
-                 final var localPlayerAbilities = world.getEntityManager()
-                                                       .getComponentOf(localPlayer, AttackAbility.class)
-                                                       .orElseThrow();
+                 final var localPlayerAbilities = localPlayer.getComponent(AttackAbility.class)
+                                                             .orElseThrow();
                  final var localPlayerKills = sessionStats.getKillsOf(localPlayerAbilities.damageSource);
                  this.killsCounter.setProperty(UIProperty.TEXT, String.format("Kills: %02d",
                                                                               localPlayerKills));

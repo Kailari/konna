@@ -34,8 +34,8 @@ public class FollowerAIControllerSystem implements ECSSystem {
     ) {
         final var entityManager = world.getEntityManager();
         final var maybePlayer = world.fetchResource(Players.class).getLocalPlayer();
-        final var playerPos = maybePlayer.map(player -> entityManager.getComponentOf(player, Transform.class)
-                                                                     .orElseThrow().position)
+        final var playerPos = maybePlayer.flatMap(player -> player.getComponent(Transform.class))
+                                         .map(transform -> transform.position)
                                          .orElse(new Vector2d(0.0));
 
         entities.forEach(entity -> {

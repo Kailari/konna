@@ -5,13 +5,12 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import org.joml.Vector2d;
 
-import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
 import fi.jakojaannos.roguelite.game.data.archetypes.FollowerArchetype;
 import fi.jakojaannos.roguelite.game.data.components.NoDrawTag;
@@ -21,6 +20,7 @@ import fi.jakojaannos.roguelite.game.data.components.SpriteInfo;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.Health;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
+import fi.jakojaannos.roguelite.game.data.resources.Players;
 import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
 
 import static fi.jakojaannos.roguelite.game.test.global.GlobalGameState.getLocalPlayer;
@@ -34,6 +34,9 @@ public class WorldSteps {
         state.world()
              .getEntityManager()
              .clearEntities();
+        state.world()
+             .fetchResource(Players.class)
+             .setLocalPlayer(null);
 
         final var camera = state.world().getEntityManager().createEntity();
         state.world().getEntityManager().addComponentTo(camera, new Transform());
@@ -70,9 +73,8 @@ public class WorldSteps {
 
     @Given("the player has {int} health")
     public void thePlayerHasHealth(int health) {
-        getComponentOf(getLocalPlayer().orElseThrow(), Health.class)
-                .orElseThrow()
-                .currentHealth = health;
+        getLocalPlayer().flatMap(player -> player.getComponent(Health.class))
+                        .orElseThrow().currentHealth = health;
     }
 
     @Given("the player is surrounded by follower enemies")
@@ -129,7 +131,7 @@ public class WorldSteps {
 
     @Then("the player should still be alive.")
     public void the_player_should_still_be_alive() {
-        Optional<Entity> player = getLocalPlayer();
+        final var player = getLocalPlayer().map(EntityHandle::asLegacyEntity);
 
         assertTrue(player.isPresent());
 
@@ -139,7 +141,7 @@ public class WorldSteps {
 
     @Then("the player should be dead.")
     public void the_player_should_be_dead() {
-        Optional<Entity> player = getLocalPlayer();
+        final var player = getLocalPlayer().map(EntityHandle::asLegacyEntity);
 
         if (player.isPresent()) {
             Health health = state.world().getEntityManager().getComponentOf(player.get(), Health.class).orElseThrow();
@@ -148,9 +150,9 @@ public class WorldSteps {
     }
 
     private static void setPlayerKills(final int amount) {
-        final var localPlayerDamageSource = getComponentOf(getLocalPlayer().orElseThrow(), AttackAbility.class)
-                .orElseThrow()
-                .damageSource;
+        final var localPlayerDamageSource = getLocalPlayer()
+                .flatMap(player -> player.getComponent(AttackAbility.class))
+                .orElseThrow().damageSource;
         state.world()
              .fetchResource(SessionStats.class)
              .setKillsOf(localPlayerDamageSource, amount);
