@@ -136,6 +136,7 @@ public class SystemDispatcherImpl implements SystemDispatcher {
         final var requirements = requirementsFor(system);
         final var systemResources = requirements.constructResources(world.getResources());
         final var entitySpliterator = new EntitySpliterator<>(requirements.entityData().componentTypes(),
+                                                              requirements.entityData().excluded(),
                                                               world,
                                                               requirements::constructEntityData);
 

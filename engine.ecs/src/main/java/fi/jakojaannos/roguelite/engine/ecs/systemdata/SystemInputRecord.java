@@ -4,9 +4,12 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.RecordComponent;
 import java.util.Arrays;
 
+import fi.jakojaannos.roguelite.engine.ecs.Without;
+
 public record SystemInputRecord<T>(
         Constructor<T>constructor,
-        Class<?>[]componentTypes
+        Class<?>[]componentTypes,
+        boolean[]excluded
 ) {
     @SuppressWarnings("unchecked")
     public static <T> SystemInputRecord<T> createFor(final Class<T> dataClass) {
@@ -26,10 +29,16 @@ public record SystemInputRecord<T>(
         final var selectedConstructor = (Constructor<T>) constructors[0];
         validateConstructor(dataClass, selectedConstructor, recordComponents);
 
-        return new SystemInputRecord<>(selectedConstructor,
-                                       Arrays.stream(recordComponents)
-                                             .map(RecordComponent::getType)
-                                             .toArray(Class<?>[]::new));
+        final var componentTypes = Arrays.stream(recordComponents)
+                                         .map(RecordComponent::getType)
+                                         .toArray(Class<?>[]::new);
+
+        final boolean[] excluded = new boolean[recordComponents.length];
+        for (var i = 0; i < recordComponents.length; ++i) {
+            excluded[i] = recordComponents[i].isAnnotationPresent(Without.class);
+        }
+
+        return new SystemInputRecord<>(selectedConstructor, componentTypes, excluded);
     }
 
     private static void validateIsRecord(final Class<?> dataClass) {
