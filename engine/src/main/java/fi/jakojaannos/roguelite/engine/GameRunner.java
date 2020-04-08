@@ -142,7 +142,6 @@ public abstract class GameRunner implements MainThread {
         while (accumulator.canSimulateTick(this.timeManager.getTimeStep())) {
             pollInputEvents(inputProvider);
 
-            LOG.debug("Time: {}", this.timeManager.getCurrentGameTime());
             this.activeGameMode.tick(state);
             accumulator.nextTick(this.timeManager.getTimeStep());
             this.timeManager.nextTick();

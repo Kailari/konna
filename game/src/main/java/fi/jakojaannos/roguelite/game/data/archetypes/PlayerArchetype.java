@@ -46,7 +46,7 @@ public class PlayerArchetype {
                                                  .spread(2.5)
                                                  .projectileSpeedNoise(4.0)
                                                  .projectileLifetimeInTicks(-1)
-                                                 .projectilePushForce(10.0)
+                                                 .projectilePushForce(20.0)
                                                  .magazineCapacity(10)
                                                  .reloadTimeInTicks(timeManager.convertToTicks(2.0))
                                                  .build();

@@ -9,6 +9,9 @@ import fi.jakojaannos.roguelite.engine.ecs.legacy.Resource;
 public class Players implements Resource {
     @Nullable private Entity localPlayer;
 
+    public Players() {
+    }
+
     @Deprecated
     @Nullable
     public Entity getPlayer() {

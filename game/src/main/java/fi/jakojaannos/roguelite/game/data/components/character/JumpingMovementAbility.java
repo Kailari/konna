@@ -22,7 +22,7 @@ public class JumpingMovementAbility implements Component {
         this.jumpDurationInTicks = jumpDurationInTicks;
         this.jumpForce = jumpForce;
 
-        this.lastJumpTimeStamp = -100;
+        this.lastJumpTimeStamp = -100000000;
     }
 
     public static class Builder {

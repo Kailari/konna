@@ -29,8 +29,9 @@ public class ApplyForceSystem implements ECSSystem {
         entities.forEach(entity -> {
             final var physics = entityManager.getComponentOf(entity, Physics.class).orElseThrow();
             final var velocity = entityManager.getComponentOf(entity, Velocity.class).orElseThrow();
-
-            velocity.add(physics.acceleration);
+            if (physics.acceleration.lengthSquared() > 0) {
+                velocity.add(physics.acceleration);
+            }
             physics.acceleration.set(0.0);
         });
     }

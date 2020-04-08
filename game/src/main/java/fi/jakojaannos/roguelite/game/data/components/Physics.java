@@ -1,10 +1,13 @@
 package fi.jakojaannos.roguelite.game.data.components;
 
 import org.joml.Vector2d;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
 
 public class Physics implements Component {
+    private static final Logger LOG = LoggerFactory.getLogger(Physics.class);
     public final Vector2d acceleration = new Vector2d(0.0, 0.0);
     public double mass;
     public double friction;
@@ -28,7 +31,9 @@ public class Physics implements Component {
     }
 
     public void applyForce(final Vector2d force) {
-        if (this.mass == 0.0) return;
+        if (this.mass == 0.0) {
+            return;
+        }
         this.acceleration.add(force.mul(1.0 / this.mass));
     }
 
