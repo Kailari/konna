@@ -10,6 +10,13 @@ module roguelite.game {
     requires transitive roguelite.engine.lwjgl;
 
     opens fi.jakojaannos.roguelite.game.systems to roguelite.engine.ecs;
+    opens fi.jakojaannos.roguelite.game.systems.characters to roguelite.engine.ecs;
+    opens fi.jakojaannos.roguelite.game.systems.cleanup to roguelite.engine.ecs;
+    opens fi.jakojaannos.roguelite.game.systems.collision to roguelite.engine.ecs;
+    opens fi.jakojaannos.roguelite.game.systems.menu to roguelite.engine.ecs;
+    opens fi.jakojaannos.roguelite.game.systems.physics to roguelite.engine.ecs;
+    opens fi.jakojaannos.roguelite.game.systems.characters.ai to roguelite.engine.ecs;
+    opens fi.jakojaannos.roguelite.game.systems.characters.movement to roguelite.engine.ecs;
     opens fi.jakojaannos.roguelite.game.data.resources to roguelite.engine.ecs;
     opens fi.jakojaannos.roguelite.game.data.resources.collision to roguelite.engine.ecs;
 

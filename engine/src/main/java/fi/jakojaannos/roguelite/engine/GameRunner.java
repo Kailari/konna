@@ -49,6 +49,10 @@ public abstract class GameRunner implements MainThread {
         return this.events;
     }
 
+    public GameMode getActiveGameMode() {
+        return this.activeGameMode;
+    }
+
     public TimeManager getTimeManager() {
         return this.timeManager;
     }
@@ -133,8 +137,8 @@ public abstract class GameRunner implements MainThread {
         LOG.info("\tAvg. FPS:\t{}", avgFramesPerSecond);
     }
 
-    public GameState setActiveGameMode(final GameMode defaultGameMode) {
-        this.activeGameMode = defaultGameMode;
+    public GameState setActiveGameMode(final GameMode gameMode) {
+        this.activeGameMode = gameMode;
         return createStateFor(this.activeGameMode);
     }
 

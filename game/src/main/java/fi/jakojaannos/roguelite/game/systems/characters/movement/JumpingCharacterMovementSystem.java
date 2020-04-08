@@ -4,81 +4,66 @@ import org.joml.Vector2d;
 
 import java.util.stream.Stream;
 
-import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
+import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
+import fi.jakojaannos.roguelite.engine.ecs.Requirements;
+import fi.jakojaannos.roguelite.engine.ecs.Without;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.InAir;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
 import fi.jakojaannos.roguelite.game.data.components.character.JumpingMovementAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.MovementInput;
-import fi.jakojaannos.roguelite.game.systems.SystemGroups;
 
-public class JumpingCharacterMovementSystem implements ECSSystem {
-    private final Vector2d tmpForce = new Vector2d();
-
+public class JumpingCharacterMovementSystem implements EcsSystem<JumpingCharacterMovementSystem.Resources, JumpingCharacterMovementSystem.EntityData, EcsSystem.NoEvents> {
     @Override
-    public void declareRequirements(final RequirementsBuilder requirements) {
-        requirements.addToGroup(SystemGroups.CHARACTER_TICK)
-                    .requireProvidedResource(TimeManager.class)
-                    .withComponent(JumpingMovementAbility.class)
-                    .withComponent(MovementInput.class)
-                    .withComponent(Physics.class)
-                    .withoutComponent(InAir.class);
+    public Requirements<Resources, EntityData, NoEvents> declareRequirements(
+            final Requirements<Resources, EntityData, NoEvents> require
+    ) {
+        return require.resources(Resources.class)
+                      .entityData(EntityData.class);
     }
 
     @Override
     public void tick(
-            final Stream<Entity> entities,
-            final World world
+            final Resources resources,
+            final Stream<EntityDataHandle<EntityData>> entities,
+            final NoEvents noEvents
     ) {
-        final var entityManager = world.getEntityManager();
-        final var timeManager = world.fetchResource(TimeManager.class);
-
-        entities.forEach(entity -> {
-            final var movementAbility = entityManager.getComponentOf(entity, JumpingMovementAbility.class)
-                                                     .orElseThrow();
-            final var input = entityManager.getComponentOf(entity, MovementInput.class)
-                                           .orElseThrow();
-
-            if (isReadyToJump(timeManager, movementAbility)) {
-                hopTowardsInputDirection(entity, entityManager, movementAbility, timeManager, input.move);
-            }
-        });
+        entities.filter(this::wantsToMove)
+                .filter(entity -> isReadyToJump(resources, entity))
+                .forEach(entity -> hopTowardsInputDirection(resources, entity));
     }
 
-    private boolean isReadyToJump(
-            final TimeManager timeManager,
-            final JumpingMovementAbility movementAbility
-    ) {
-        final var timeSinceLastJump = timeManager.getCurrentGameTime() - movementAbility.lastJumpTimeStamp;
-        return timeSinceLastJump >= movementAbility.jumpCoolDownInTicks;
+    private boolean wantsToMove(final EntityDataHandle<EntityData> entity) {
+        return entity.getData().input.move.lengthSquared() > 0;
+    }
+
+    private boolean isReadyToJump(final Resources resources, final EntityDataHandle<EntityData> entity) {
+        final var ability = entity.getData().ability;
+
+        final var timeSinceLastJump = resources.timeManager.getCurrentGameTime() - ability.lastJumpTimeStamp;
+        return timeSinceLastJump >= ability.jumpCoolDownInTicks;
     }
 
     private void hopTowardsInputDirection(
-            final Entity entity,
-            final EntityManager entityManager,
-            final JumpingMovementAbility movementAbility,
-            final TimeManager timeManager,
-            final Vector2d input
+            final Resources resources,
+            final EntityDataHandle<EntityData> entity
     ) {
-        if (input.lengthSquared() == 0) {
-            return;
-        }
+        final var ability = entity.getData().ability;
+        final var input = entity.getData().input;
 
-        final var physics = entityManager.getComponentOf(entity, Physics.class)
-                                         .orElseThrow();
+        entity.getData().physics.applyForce(input.move.normalize(ability.jumpForce, new Vector2d()));
 
-        tmpForce.set(input)
-                .normalize(movementAbility.jumpForce);
-
-        physics.applyForce(tmpForce);
-        final var currentGameTime = timeManager.getCurrentGameTime();
-        movementAbility.lastJumpTimeStamp = currentGameTime;
-        entityManager.addComponentTo(entity,
-                                     new InAir(currentGameTime,
-                                               movementAbility.jumpDurationInTicks));
+        final var timestamp = resources.timeManager.getCurrentGameTime();
+        ability.lastJumpTimeStamp = timestamp;
+        entity.addComponent(new InAir(timestamp, ability.jumpDurationInTicks));
     }
+
+    public static record Resources(TimeManager timeManager) {}
+
+    public static record EntityData(
+            JumpingMovementAbility ability,
+            MovementInput input,
+            Physics physics,
+            @Without InAir noInAir
+    ) {}
 }

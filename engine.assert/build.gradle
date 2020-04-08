@@ -1,6 +1,8 @@
 dependencies {
     implementation project(":engine.utilities")
     implementation project(":engine.view")
+    implementation project(":engine.ecs")
+    implementation project(":engine")
 
     implementation "org.junit.jupiter:junit-jupiter-api:${jUnitVersion}"
 }

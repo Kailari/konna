@@ -74,7 +74,6 @@ public class GlobalState {
     }
 
     public static void simulateTick() {
-        inputEvents.forEach(((EventBus<InputEvent>) events.input())::fire);
         final var accumulator = new GameRunner.Accumulator();
         accumulator.accumulate(timeManager.getTimeStep());
         state = gameRunner.simulateFrame(state, accumulator, () -> inputEvents);
@@ -82,7 +81,6 @@ public class GlobalState {
     }
 
     public static void simulateSeconds(double seconds) {
-        inputEvents.forEach(((EventBus<InputEvent>) events.input())::fire);
         final var accumulator = new GameRunner.Accumulator();
         final var ticks = timeManager.convertToTicks(seconds);
         accumulator.accumulate(ticks * timeManager.getTimeStep());

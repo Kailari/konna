@@ -13,6 +13,7 @@ import fi.jakojaannos.roguelite.engine.ecs.World;
 class EntitySpliterator<TEntityData> implements Spliterator<EcsSystem.EntityDataHandle<TEntityData>> {
     private final Object[][] paramStorages;
     private final Object[] parameters;
+    private final boolean[] excluded;
     private final World world;
 
     private final Function<Object[], TEntityData> factory;
@@ -22,10 +23,12 @@ class EntitySpliterator<TEntityData> implements Spliterator<EcsSystem.EntityData
 
     EntitySpliterator(
             final Class<?>[] componentClasses,
+            final boolean[] excluded,
             final World world,
             final Function<Object[], TEntityData> factory
     ) {
         this(world.getComponents().fetchStorages(componentClasses),
+             excluded,
              world,
              factory,
              0,
@@ -34,6 +37,7 @@ class EntitySpliterator<TEntityData> implements Spliterator<EcsSystem.EntityData
 
     private EntitySpliterator(
             final Object[][] paramStorages,
+            final boolean[] excluded,
             final World world,
             final Function<Object[], TEntityData> factory,
             final int startIndex,
@@ -41,6 +45,7 @@ class EntitySpliterator<TEntityData> implements Spliterator<EcsSystem.EntityData
     ) {
         this.parameters = new Object[paramStorages.length];
         this.paramStorages = paramStorages;
+        this.excluded = excluded;
         this.world = world;
         this.factory = factory;
         this.startIndex = startIndex;
@@ -77,6 +82,7 @@ class EntitySpliterator<TEntityData> implements Spliterator<EcsSystem.EntityData
             this.endIndex = this.startIndex + remaining / 2;
 
             return new EntitySpliterator<>(this.paramStorages,
+                                           this.excluded,
                                            this.world,
                                            this.factory,
                                            this.endIndex,
@@ -107,7 +113,8 @@ class EntitySpliterator<TEntityData> implements Spliterator<EcsSystem.EntityData
         for (int paramIndex = 0; paramIndex < this.parameters.length; ++paramIndex) {
             this.parameters[paramIndex] = this.paramStorages[paramIndex][entityId];
 
-            if (this.parameters[paramIndex] == null) {
+            final var isNull = this.parameters[paramIndex] == null;
+            if (isNull != this.excluded[paramIndex]) {
                 return true;
             }
         }
