@@ -35,8 +35,8 @@ public class SimulationBuilderImpl implements SimulationBuilder, SimulationRunne
     }
 
     @Override
-    public SimulationInspector runsForSingleTick() {
-        return build().runsForSingleTick();
+    public SimulationInspector runsSingleTick() {
+        return build().runsSingleTick();
     }
 
     @Override

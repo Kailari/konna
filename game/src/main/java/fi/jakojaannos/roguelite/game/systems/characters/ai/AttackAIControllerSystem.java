@@ -8,8 +8,12 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.*;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
 import fi.jakojaannos.roguelite.game.data.components.character.WeaponInput;
@@ -18,8 +22,6 @@ import fi.jakojaannos.roguelite.game.data.resources.Players;
 import fi.jakojaannos.roguelite.game.systems.SystemGroups;
 
 public class AttackAIControllerSystem implements ECSSystem {
-    private static final Logger LOG = LoggerFactory.getLogger(AttackAIControllerSystem.class);
-
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.INPUT)
@@ -44,7 +46,8 @@ public class AttackAIControllerSystem implements ECSSystem {
                                               .orElseThrow().position;
 
             if (ai.targetTagClass.equals(PlayerTag.class)) {
-                maybeLocalPlayer.filter(player -> isTargetValid(entityManager, player, position, ai))
+                maybeLocalPlayer.map(EntityHandle::asLegacyEntity)
+                                .filter(player -> isTargetValid(entityManager, player, position, ai))
                                 .ifPresentOrElse(ai::setAttackTarget, ai::clearAttackTarget);
             } else {
                 findOrUpdateTarget(entityManager, ai, position);
@@ -109,9 +112,15 @@ public class AttackAIControllerSystem implements ECSSystem {
             final Vector2d position,
             final AttackAI ai
     ) {
-        if (target.isMarkedForRemoval()) return false;
-        if (!entityManager.hasComponent(target, Transform.class)) return false;
-        if (!entityManager.hasComponent(target, ai.targetTagClass)) return false;
+        if (target.isMarkedForRemoval()) {
+            return false;
+        }
+        if (!entityManager.hasComponent(target, Transform.class)) {
+            return false;
+        }
+        if (!entityManager.hasComponent(target, ai.targetTagClass)) {
+            return false;
+        }
 
         final var targetPosition = entityManager.getComponentOf(target, Transform.class)
                                                 .orElseThrow().position;

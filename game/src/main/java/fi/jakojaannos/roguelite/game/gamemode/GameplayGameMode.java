@@ -64,8 +64,7 @@ public final class GameplayGameMode {
         final var player = PlayerArchetype.create(world, timeManager, new Transform(0, 0));
         player.addComponent(new CameraFollowTargetTag());
 
-        final var players = new Players();
-        players.setLocalPlayer(player.asLegacyEntity());
+        final var players = new Players(player);
         world.registerResource(players);
 
         final var entityManager = world.getEntityManager();

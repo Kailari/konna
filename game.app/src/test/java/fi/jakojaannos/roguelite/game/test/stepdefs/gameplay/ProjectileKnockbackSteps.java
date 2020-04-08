@@ -31,8 +31,7 @@ public class ProjectileKnockbackSteps {
 
     @Given("the world is blank")
     public void theWorldIsBlank() {
-        state.world().getEntityManager().clearEntities();
-        state.world().getEntityManager().applyModifications();
+        state.world().clearAllEntities();
         state.world().fetchResource(Players.class).setLocalPlayer(null);
         state.world().fetchResource(CameraProperties.class).cameraEntity = null;
     }

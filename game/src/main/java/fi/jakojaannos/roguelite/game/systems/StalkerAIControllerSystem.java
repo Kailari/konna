@@ -44,9 +44,9 @@ public class StalkerAIControllerSystem implements ECSSystem {
         final var entityManager = world.getEntityManager();
         final var timeManager = world.fetchResource(TimeManager.class);
         final var optPlayer = world.fetchResource(Players.class).getLocalPlayer();
-        final var playerPos = optPlayer.isPresent()
-                ? entityManager.getComponentOf(optPlayer.get(), Transform.class).orElseThrow().position
-                : this.emptyPos;
+        final var playerPos = optPlayer.flatMap(player -> player.getComponent(Transform.class))
+                                       .map(transform -> transform.position)
+                                       .orElse(this.emptyPos);
 
         entities.forEach(entity -> {
             final var stalkerAI = entityManager.getComponentOf(entity, StalkerAI.class).orElseThrow();

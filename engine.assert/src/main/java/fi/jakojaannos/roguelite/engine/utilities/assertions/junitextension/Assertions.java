@@ -8,7 +8,7 @@ public final class Assertions {
     private Assertions() {
     }
 
-    public static void assertEquals(final Vector2d expected, final Vector2d actual, final double delta) {
+    public static void assertEqualsExt(final Vector2d expected, final Vector2d actual, final double delta) {
         AssertEquals.assertEquals(expected, actual, delta);
     }
 }

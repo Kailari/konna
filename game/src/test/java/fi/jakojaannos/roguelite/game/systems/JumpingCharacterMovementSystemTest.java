@@ -15,7 +15,7 @@ import fi.jakojaannos.roguelite.game.data.components.character.MovementInput;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 import fi.jakojaannos.roguelite.game.systems.characters.movement.JumpingCharacterMovementSystem;
 
-import static fi.jakojaannos.roguelite.engine.utilities.assertions.junitextension.Assertions.assertEquals;
+import static fi.jakojaannos.roguelite.engine.utilities.assertions.junitextension.Assertions.assertEqualsExt;
 import static fi.jakojaannos.roguelite.engine.utilities.assertions.world.GameExpect.expectEntity;
 import static fi.jakojaannos.roguelite.engine.utilities.assertions.world.GameExpect.whenGame;
 
@@ -27,14 +27,12 @@ public class JumpingCharacterMovementSystemTest {
     void initialState(final World world) {
         final var time = world.fetchResource(TimeManager.class);
 
-        final var playerPos = new Transform(10, 10);
-        final var players = new Players();
-        players.setLocalPlayer(PlayerArchetype.create(world, time, playerPos).asLegacyEntity());
-        world.registerResource(Players.class, players);
+        final var playerTransform = new Transform(10, 10);
+        world.registerResource(new Players(PlayerArchetype.create(world, time, playerTransform)));
 
         final var slimeTransform = new Transform(3, 6);
         final var input = new MovementInput();
-        this.expectedDirection = new Vector2d(playerPos.position).sub(slimeTransform.position)
+        this.expectedDirection = new Vector2d(playerTransform.position).sub(slimeTransform.position)
                                                                  .normalize();
         input.move = expectedDirection;
         this.slime = world.createEntity(slimeTransform,
@@ -51,12 +49,12 @@ public class JumpingCharacterMovementSystemTest {
     void slimeHopsTowardsPlayer() {
         whenGame().withSystems(new JumpingCharacterMovementSystem())
                   .withState(this::initialState)
-                  .runsForSingleTick()
+                  .runsSingleTick()
                   .expect(state -> {
                       expectEntity(slime).toHaveComponent(Physics.class)
-                                         .which(physics -> assertEquals(expectedDirection,
-                                                                        physics.acceleration.normalize(),
-                                                                        EPSILON));
+                                         .which(physics -> assertEqualsExt(expectedDirection,
+                                                                           physics.acceleration.normalize(),
+                                                                           EPSILON));
                       expectEntity(slime).toHaveComponent(InAir.class);
                   });
     }

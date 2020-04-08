@@ -11,11 +11,10 @@ public interface EntityHandle {
      * Gets the unique identifier for this entity. These are not guaranteed to be stable and e.g. may change between
      * ticks.
      *
-     * @return the unique identifier for this entity.
+     * <strong>These are unstable, do not save to fields and/or cache the returned value.</strong>
      *
-     * @deprecated due for removal once legacy ECS is cleaned up
+     * @return the unique identifier for this entity.
      */
-    @Deprecated
     int getId();
 
     /**

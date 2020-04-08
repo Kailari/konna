@@ -17,7 +17,7 @@ public class SimulationSteps {
         state = gameRunner.setActiveGameMode(mode);
         gameRenderer.changeGameMode(mode);
 
-        playerInitialPosition = getLocalPlayer().flatMap(entity -> getComponentOf(entity, Transform.class))
+        playerInitialPosition = getLocalPlayer().flatMap(player -> player.getComponent(Transform.class))
                                                 .map(transform -> new Vector2d(transform.position))
                                                 .orElseThrow();
         playerPositionBeforeRun = new Vector2d(playerInitialPosition);

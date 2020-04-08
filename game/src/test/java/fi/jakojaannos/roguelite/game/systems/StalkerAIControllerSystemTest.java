@@ -1,17 +1,12 @@
 package fi.jakojaannos.roguelite.game.systems;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import java.util.stream.Stream;
-
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
-import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.InAir;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
@@ -21,49 +16,38 @@ import fi.jakojaannos.roguelite.game.data.components.character.WalkingMovementAb
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.StalkerAI;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static fi.jakojaannos.roguelite.engine.utilities.assertions.world.GameExpect.expectEntity;
+import static fi.jakojaannos.roguelite.engine.utilities.assertions.world.GameExpect.whenGame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class StalkerAIControllerSystemTest {
-    private EntityManager entityManager;
-    private SimpleTimeManager timeManager;
-    private StalkerAIControllerSystem system;
-    private World world;
-    private Transform playerPos, stalkerPos;
-    private Entity stalker;
+    private Transform playerTransform;
+    private Transform stalkerTransform;
+    private EntityHandle stalker;
     private WalkingMovementAbility movementStats;
     private StalkerAI stalkerAI;
 
-    @BeforeEach
-    void beforeEach() {
-        system = new StalkerAIControllerSystem();
-        this.world = World.createNew();
-        entityManager = world.getEntityManager();
-        world.registerResource(TimeManager.class, timeManager = new SimpleTimeManager(20));
+    void beforeEach(final World world) {
+        playerTransform = new Transform();
+        final var player = world.createEntity(playerTransform, new PlayerTag());
 
-        Entity player = entityManager.createEntity();
-        this.playerPos = new Transform();
-        entityManager.addComponentTo(player, playerPos);
-        entityManager.addComponentTo(player, new PlayerTag());
+        final var players = new Players(player);
+        world.registerResource(players);
 
-        final var players = new Players();
-        players.setLocalPlayer(player);
-        this.world.registerResource(players);
-
-        stalker = entityManager.createEntity();
-        this.stalkerAI = new StalkerAI();
-        this.stalkerAI.moveSpeedWalk = 4.5;
-        this.stalkerAI.moveSpeedSneak = 1.5;
-        entityManager.addComponentTo(stalker, stalkerAI);
-        entityManager.addComponentTo(stalker, new MovementInput());
-        this.stalkerPos = new Transform();
-        entityManager.addComponentTo(stalker, stalkerPos);
+        stalkerAI = new StalkerAI();
+        stalkerAI.moveSpeedWalk = 4.5;
+        stalkerAI.moveSpeedSneak = 1.5;
         movementStats = new WalkingMovementAbility(1.0, 250.0);
-        entityManager.addComponentTo(stalker, movementStats);
-        entityManager.addComponentTo(stalker, Physics.builder()
-                                                     .friction(200)
-                                                     .build());
-
-        entityManager.applyModifications();
+        stalkerTransform = new Transform();
+        stalker = world.createEntity(stalkerAI,
+                                     stalkerTransform,
+                                     movementStats,
+                                     new MovementInput(),
+                                     new WalkingMovementAbility(1.0, 250.0),
+                                     Physics.builder()
+                                            .friction(200)
+                                            .build());
+        world.commitEntityModifications();
     }
 
     @ParameterizedTest
@@ -79,14 +63,16 @@ public class StalkerAIControllerSystemTest {
             double stalkerY,
             double expectedSpeed
     ) {
-        this.playerPos.position.set(playerX, playerY);
-        this.stalkerPos.position.set(stalkerX, stalkerY);
-        this.stalkerAI.jumpCoolDownInTicks = 10000;
-        this.stalkerAI.lastJumpTimeStamp = 10000;
-
-        this.system.tick(Stream.of(stalker), this.world);
-
-        assertEquals(expectedSpeed, movementStats.maxSpeed, 0.001f);
+        whenGame().withSystems(new StalkerAIControllerSystem())
+                  .withState(this::beforeEach)
+                  .withState(world -> {
+                      this.playerTransform.position.set(playerX, playerY);
+                      this.stalkerTransform.position.set(stalkerX, stalkerY);
+                      this.stalkerAI.jumpCoolDownInTicks = 10000;
+                      this.stalkerAI.lastJumpTimeStamp = 10000;
+                  })
+                  .runsSingleTick()
+                  .expect(state -> assertEquals(expectedSpeed, movementStats.maxSpeed, 0.001f));
     }
 
     @ParameterizedTest
@@ -103,35 +89,50 @@ public class StalkerAIControllerSystemTest {
             double stalkerY,
             boolean expectedToUseAbility
     ) {
-        this.playerPos.position.set(playerX, playerY);
-        this.stalkerPos.position.set(stalkerX, stalkerY);
-        this.stalkerAI.leapRadiusSquared = 50.0;
-        this.stalkerAI.lastJumpTimeStamp = -100;
-        this.stalkerAI.jumpCoolDownInTicks = 50;
-
-        this.system.tick(Stream.of(stalker), this.world);
-        entityManager.applyModifications();
-
-        assertEquals(expectedToUseAbility, entityManager.hasComponent(stalker, InAir.class));
+        whenGame().withSystems(new StalkerAIControllerSystem())
+                  .withState(this::beforeEach)
+                  .withState(world -> {
+                      this.playerTransform.position.set(playerX, playerY);
+                      this.stalkerTransform.position.set(stalkerX, stalkerY);
+                      this.stalkerAI.leapRadiusSquared = 50.0;
+                      this.stalkerAI.lastJumpTimeStamp = -100;
+                      this.stalkerAI.jumpCoolDownInTicks = 50;
+                  })
+                  .runsSingleTick()
+                  .expect(state -> {
+                      if (expectedToUseAbility) {
+                          expectEntity(stalker).toHaveComponent(InAir.class);
+                      } else {
+                          expectEntity(stalker).toNotHaveComponent(InAir.class);
+                      }
+                  });
     }
-
 
     @Test
     void leapAbilityIsNotUsedWhileOnCooldown() {
-        this.stalkerAI.jumpCoolDownInTicks = 20;
-        this.stalkerAI.lastJumpTimeStamp = -100;
+        whenGame().withSystems(new StalkerAIControllerSystem())
+                  .withState(this::beforeEach)
+                  .withState(world -> {
+                      this.stalkerAI.jumpCoolDownInTicks = 20;
 
-        this.system.tick(Stream.of(stalker), this.world);
-        entityManager.applyModifications();
-        assertTrue(entityManager.hasComponent(stalker, InAir.class));
+                      final var timeManager = world.fetchResource(TimeManager.class);
+                      this.stalkerAI.lastJumpTimeStamp = timeManager.getCurrentGameTime();
+                  })
+                  .runsSingleTick()
+                  .expect(state -> expectEntity(stalker).toNotHaveComponent(InAir.class));
+    }
 
-        entityManager.removeComponentFrom(stalker, InAir.class);
-        for (int i = 0; i < 10; i++) {
-            timeManager.refresh();
-        }
+    @Test
+    void leapAbilityIsUsedAfterOnCooldown() {
+        whenGame().withSystems(new StalkerAIControllerSystem())
+                  .withState(this::beforeEach)
+                  .withState(world -> {
+                      this.stalkerAI.jumpCoolDownInTicks = 5;
 
-        this.system.tick(Stream.of(stalker), this.world);
-        entityManager.applyModifications();
-        assertFalse(entityManager.hasComponent(stalker, InAir.class));
+                      final var timeManager = world.fetchResource(TimeManager.class);
+                      this.stalkerAI.lastJumpTimeStamp = timeManager.getCurrentGameTime();
+                  })
+                  .runsForTicks(7)
+                  .expect(state -> expectEntity(stalker).toHaveComponent(InAir.class));
     }
 }

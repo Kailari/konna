@@ -93,7 +93,7 @@ public interface RequirementsBuilder {
      * @return the builder for chaining
      */
     @Deprecated
-    RequirementsBuilder requireResource(Class<? extends Resource> resource);
+    RequirementsBuilder requireResource(Class<?> resource);
 
     /**
      * Marks requirement for a provided resource to be available for this system to be able to tick.

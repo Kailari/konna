@@ -3,36 +3,27 @@ package fi.jakojaannos.roguelite.game.data.resources;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Resource;
+import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
 
-public class Players implements Resource {
-    @Nullable private Entity localPlayer;
+public class Players {
+    @Nullable private EntityHandle localPlayer;
+
+    public Optional<EntityHandle> getLocalPlayer() {
+        return Optional.ofNullable(this.localPlayer);
+    }
+
+    public void setLocalPlayer(@Nullable final EntityHandle player) {
+        this.localPlayer = player;
+    }
 
     public Players() {
     }
 
-    @Deprecated
-    @Nullable
-    public Entity getPlayer() {
-        // FIXME: Add an additional "removed" state for entities and use that instead. Currently,
-        //  the player can be nulled during the last tick they are considered alive
-        if (this.localPlayer != null && this.localPlayer.isMarkedForRemoval()) {
-            this.localPlayer = null;
-        }
-
-        return this.localPlayer;
+    public Players(final EntityHandle localPlayer) {
+        this.localPlayer = localPlayer;
     }
 
-    public Optional<Entity> getLocalPlayer() {
-        return Optional.ofNullable(this.localPlayer);
-    }
-
-    public void setLocalPlayer(@Nullable final Entity player) {
-        this.localPlayer = player;
-    }
-
-    public void removePlayer(final Entity entity) {
+    public void removePlayer(final EntityHandle entity) {
         if (this.localPlayer == null) {
             return;
         }

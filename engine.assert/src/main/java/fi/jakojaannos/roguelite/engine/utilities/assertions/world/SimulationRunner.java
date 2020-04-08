@@ -5,7 +5,7 @@ public interface SimulationRunner<TRunner> {
 
     TRunner runsForSeconds(double seconds);
 
-    default TRunner runsForSingleTick() {
+    default TRunner runsSingleTick() {
         return runsForTicks(1);
     }
 }

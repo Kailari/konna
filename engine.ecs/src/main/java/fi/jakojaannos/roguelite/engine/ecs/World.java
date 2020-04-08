@@ -37,4 +37,6 @@ public interface World {
     void commitEntityModifications();
 
     EntityHandle getEntity(int entityId);
+
+    void clearAllEntities();
 }
