@@ -61,15 +61,16 @@ public class ProjectileFiringMechanism implements Weapon.FiringMechanism<Project
         final var actualSpeed = stats.projectileSpeed + speedNoise;
 
         final var timestamp = timeManager.getCurrentGameTime();
-        ProjectileArchetype.create(entityManager,
-                                   projectilePos,
-                                   direction.normalize(actualSpeed)
-                                            .add(spreadOffset),
-                                   attackAbility.damageSource,
-                                   attackAbility.projectileLayer,
-                                   timestamp,
-                                   stats.projectileLifetimeInTicks,
-                                   stats.projectilePushForce);
+        ProjectileArchetype.createWeaponProjectile(entityManager,
+                                                   projectilePos,
+                                                   direction.normalize(actualSpeed)
+                                                            .add(spreadOffset),
+                                                   attackAbility.damageSource,
+                                                   attackAbility.projectileLayer,
+                                                   timestamp,
+                                                   stats.projectileLifetimeInTicks,
+                                                   stats.projectilePushForce,
+                                                   stats.damage);
 
         state.lastAttackTimestamp = timestamp;
     }

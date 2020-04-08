@@ -77,15 +77,15 @@ public class ChargedFiringMechanism implements Weapon.FiringMechanism<ChargedFir
         final var actualSpeed = stats.projectileSpeed + speedNoise;
 
         final var timestamp = timeManager.getCurrentGameTime();
-        ProjectileArchetype.create(entityManager,
-                                   projectilePos,
-                                   direction.normalize(actualSpeed)
+        ProjectileArchetype.createWeaponProjectile(entityManager,
+                                                   projectilePos,
+                                                   direction.normalize(actualSpeed)
                                             .add(spreadOffset),
-                                   attackAbility.damageSource,
-                                   attackAbility.projectileLayer,
-                                   timestamp,
-                                   getProjectileLifetime(state, stats),
-                                   stats.projectilePushForce);
+                                                   attackAbility.damageSource,
+                                                   attackAbility.projectileLayer,
+                                                   timestamp,
+                                                   getProjectileLifetime(state, stats),
+                                                   stats.projectilePushForce);
 
         //state.lastAttackTimestamp = timestamp;
         state.setLastAttackTimestamp(timestamp);

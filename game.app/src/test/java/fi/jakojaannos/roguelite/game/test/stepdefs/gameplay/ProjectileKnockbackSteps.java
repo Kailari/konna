@@ -1,6 +1,5 @@
 package fi.jakojaannos.roguelite.game.test.stepdefs.gameplay;
 
-import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -16,8 +15,6 @@ import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.InAir;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
-import fi.jakojaannos.roguelite.game.data.components.character.Health;
-import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
 
 import static fi.jakojaannos.roguelite.game.test.global.GlobalState.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,14 +41,14 @@ public class ProjectileKnockbackSteps {
         entityManager.addComponentTo(target, Physics.builder().mass(1.0).friction(50.0).build());
         entityManager.addComponentTo(target, new Collider(CollisionLayer.ENEMY));
 
-        ProjectileArchetype.create(entityManager,
-                                   new Vector2d(22.0, 22.0),
-                                   new Vector2d(6.0, 6.0),
-                                   DamageSource.Generic.UNDEFINED,
-                                   CollisionLayer.PLAYER_PROJECTILE,
-                                   0,
-                                   -1,
-                                   25);
+        ProjectileArchetype.createWeaponProjectile(entityManager,
+                                                   new Vector2d(22.0, 22.0),
+                                                   new Vector2d(6.0, 6.0),
+                                                   DamageSource.Generic.UNDEFINED,
+                                                   CollisionLayer.PLAYER_PROJECTILE,
+                                                   0,
+                                                   -1,
+                                                   25);
 
         entityManager.applyModifications();
     }
@@ -77,14 +74,14 @@ public class ProjectileKnockbackSteps {
         entityManager.addComponentTo(target, new Collider(CollisionLayer.ENEMY));
         entityManager.addComponentTo(target, new InAir(0, 69420666));
 
-        ProjectileArchetype.create(entityManager,
-                                   new Vector2d(30.0, -12),
-                                   new Vector2d(0.0, 6.0),
-                                   DamageSource.Generic.UNDEFINED,
-                                   CollisionLayer.PLAYER_PROJECTILE,
-                                   0,
-                                   -1,
-                                   25);
+        ProjectileArchetype.createWeaponProjectile(entityManager,
+                                                   new Vector2d(30.0, -12),
+                                                   new Vector2d(0.0, 6.0),
+                                                   DamageSource.Generic.UNDEFINED,
+                                                   CollisionLayer.PLAYER_PROJECTILE,
+                                                   0,
+                                                   -1,
+                                                   25);
 
         entityManager.applyModifications();
     }

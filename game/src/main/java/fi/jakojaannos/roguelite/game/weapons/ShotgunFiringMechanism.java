@@ -44,9 +44,7 @@ public class ShotgunFiringMechanism implements Weapon.FiringMechanism<ShotgunFir
                                                                       new Vector2d());
         final var timestamp = timeManager.getCurrentGameTime();
 
-        final int slugs = 12; // TODO: move to WeaponStats
-        // FIXME: if multiple slugs hit a single target, every slug registers a kill, hmm
-        for (int i = 0; i < slugs; i++) {
+        for (int i = 0; i < stats.pelletCount; i++) {
             final var projectilePos = this.tmpProjectilePos.set(shooterTransform.position)
                                                            .add(weaponOffset);
             final var direction = attackAbility.targetPosition.sub(projectilePos, this.tmpDirection);
@@ -64,15 +62,16 @@ public class ShotgunFiringMechanism implements Weapon.FiringMechanism<ShotgunFir
             final var speedNoise = (this.random.nextDouble() * 2.0 - 1.0) * stats.projectileSpeedNoise;
             final var actualSpeed = stats.projectileSpeed + speedNoise;
 
-            ProjectileArchetype.create(entityManager,
-                                       projectilePos,
-                                       direction.normalize(actualSpeed)
-                                                .add(spreadOffset),
-                                       attackAbility.damageSource,
-                                       attackAbility.projectileLayer,
-                                       timestamp,
-                                       stats.projectileLifetimeInTicks,
-                                       stats.projectilePushForce);
+            ProjectileArchetype.createShotgunProjectile(entityManager,
+                                                        projectilePos,
+                                                        direction.normalize(actualSpeed)
+                                                                 .add(spreadOffset),
+                                                        attackAbility.damageSource,
+                                                        attackAbility.projectileLayer,
+                                                        timestamp,
+                                                        stats.projectileLifetimeInTicks,
+                                                        stats.projectilePushForce,
+                                                        stats.damage);
         }
 
         state.lastAttackTimestamp = timestamp;
