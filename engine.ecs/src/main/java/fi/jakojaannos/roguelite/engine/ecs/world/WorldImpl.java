@@ -85,7 +85,6 @@ public class WorldImpl implements World {
             this.entities[id].addComponent(component);
         }
 
-        LOG.debug("Created entity with ID {}", id);
         return this.entities[id];
     }
 

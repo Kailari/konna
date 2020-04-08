@@ -6,7 +6,10 @@ import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.*;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.InAir;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
@@ -33,7 +36,7 @@ public class JumpingCharacterMovementSystem implements ECSSystem {
             final World world
     ) {
         final var entityManager = world.getEntityManager();
-        final var timeManager = world.fetchResource(Time.class);
+        final var timeManager = world.fetchResource(TimeManager.class);
 
         entities.forEach(entity -> {
             final var movementAbility = entityManager.getComponentOf(entity, JumpingMovementAbility.class)
@@ -48,7 +51,7 @@ public class JumpingCharacterMovementSystem implements ECSSystem {
     }
 
     private boolean isReadyToJump(
-            final Time timeManager,
+            final TimeManager timeManager,
             final JumpingMovementAbility movementAbility
     ) {
         final var timeSinceLastJump = timeManager.getCurrentGameTime() - movementAbility.lastJumpTimeStamp;
@@ -62,6 +65,10 @@ public class JumpingCharacterMovementSystem implements ECSSystem {
             final TimeManager timeManager,
             final Vector2d input
     ) {
+        if (input.lengthSquared() == 0) {
+            return;
+        }
+
         final var physics = entityManager.getComponentOf(entity, Physics.class)
                                          .orElseThrow();
 

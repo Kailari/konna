@@ -5,8 +5,8 @@ import org.joml.Vector2d;
 import java.util.Random;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.LegacyWorld;
 import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
 import fi.jakojaannos.roguelite.game.data.archetypes.FollowerArchetype;
 import fi.jakojaannos.roguelite.game.data.archetypes.ObstacleArchetype;
@@ -18,17 +18,17 @@ public class WorldGenerator<TTile> {
     private final TileMap<TTile> tileMap;
     private final Random random = new Random();
 
-    public WorldGenerator(final TTile defaultTile) {
-        this.tileMap = new TileMap<>(defaultTile);
-    }
-
     public TileMap<TTile> getTileMap() {
         return this.tileMap;
     }
 
+    public WorldGenerator(final TTile defaultTile) {
+        this.tileMap = new TileMap<>(defaultTile);
+    }
+
     public void prepareInitialRoom(
             final long seed,
-            final LegacyWorld world,
+            final World world,
             final TTile floor,
             final TTile wall,
             final int mainRoomSizeMin,

@@ -76,7 +76,7 @@ public final class ComponentStorage {
     }
 
     public boolean has(final int id, final Class<?> componentClass) {
-        return get(id, componentClass).isPresent();
+        return getStorage(componentClass)[id] != null;
     }
 
     @SuppressWarnings("unchecked")

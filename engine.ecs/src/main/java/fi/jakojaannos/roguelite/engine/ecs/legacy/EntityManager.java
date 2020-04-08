@@ -20,21 +20,9 @@ public interface EntityManager {
     @Deprecated
     Stream<Entity> getAllEntities();
 
-    /**
-     * Creates a new entity. The created entity is added to the game world during the next {@link
-     * #applyModifications()}
-     *
-     * @return the entity created
-     */
     @Deprecated
     Entity createEntity();
 
-    /**
-     * Destroys an entity. The entity is marked for removal instantly, and destroyed during the next {@link
-     * #applyModifications()}
-     *
-     * @param entity the entity to mark for removal
-     */
     @Deprecated
     void destroyEntity(Entity entity);
 
@@ -185,6 +173,7 @@ public interface EntityManager {
         getAllEntities().forEach(this::destroyEntity);
     }
 
-    @Deprecated record EntityComponentPair<TComponent extends Component>(Entity entity, TComponent component) {
+    @Deprecated
+            record EntityComponentPair<TComponent extends Component>(Entity entity, TComponent component) {
     }
 }

@@ -78,6 +78,7 @@ public class SlimeArchetype {
             final double slimeSize
     ) {
         final var entity = entityManager.createEntity();
+        //entityManager.addComponentTo(entity, new InAir(-1000000, 0));
 
         entityManager.addComponentTo(entity, new Health(maxHp));
         entityManager.addComponentTo(entity, new SplitOnDeath(slimeSize));
@@ -91,7 +92,7 @@ public class SlimeArchetype {
 
         entityManager.addComponentTo(entity, new Transform(xPos, yPos));
         entityManager.addComponentTo(entity, new Velocity());
-        entityManager.addComponentTo(entity, Physics.builder().friction(100.0).mass(mass).build());
+        entityManager.addComponentTo(entity, Physics.builder().friction(10.0).mass(mass).build());
 
         entityManager.addComponentTo(entity, new FollowerAI(100, 1));
         entityManager.addComponentTo(entity, new MovementInput());

@@ -25,9 +25,9 @@ import fi.jakojaannos.roguelite.engine.ecs.systemdata.RequirementsBuilder;
 @SuppressWarnings("deprecation")
 public class SystemDispatcherImpl implements SystemDispatcher {
     private static final Logger LOG = LoggerFactory.getLogger(SystemDispatcherImpl.class);
-    private static final boolean LOG_SYSTEM_TICK = true;
-    private static final boolean LOG_GROUP_TICK = true;
-    private static final boolean LOG_TICK = true;
+    private static final boolean LOG_SYSTEM_TICK = false;
+    private static final boolean LOG_GROUP_TICK = false;
+    private static final boolean LOG_TICK = false;
 
 
     private final ForkJoinPool threadPool;
@@ -143,7 +143,7 @@ public class SystemDispatcherImpl implements SystemDispatcher {
         try {
             threadPool.submit(
                     () -> system.tick(systemResources,
-                                      StreamSupport.stream(entitySpliterator, true),
+                                      StreamSupport.stream(entitySpliterator, false),
                                       null)
             ).get();
         } catch (final InterruptedException e) {
