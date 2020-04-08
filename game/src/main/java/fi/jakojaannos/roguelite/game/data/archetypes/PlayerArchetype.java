@@ -52,9 +52,11 @@ public class PlayerArchetype {
                                             .spread(10.0)
                                             .projectileSpeedNoise(1.0)
                                             .projectileLifetimeInTicks(10)
-                                            .projectilePushForce(25.0)
+                                            .projectilePushForce(7.5)
                                             .magazineCapacity(6)
                                             .reloadTimeInTicks(timeManager.convertToTicks(0.8))
+                                            .pelletCount(12)
+                                            .damage(0.35)
                                             .build();
         final var grenadeStats = WeaponStats.builder()
                                             .timeBetweenShots(timeManager.convertToTicks(3.0))

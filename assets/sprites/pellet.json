@@ -1,0 +1,11 @@
+{
+  "frames": [
+    {
+      "texture": "textures/shotgun_pellet.png",
+      "x": 0,
+      "y": 0,
+      "w": 4,
+      "h": 4
+    }
+  ]
+}

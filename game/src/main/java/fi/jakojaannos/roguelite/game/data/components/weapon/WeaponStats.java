@@ -9,6 +9,8 @@ public class WeaponStats {
     public double projectilePushForce;
     public int magazineCapacity;
     public long reloadTimeInTicks;
+    public int pelletCount;
+    public double damage;
 
     private WeaponStats(
             final long timeBetweenShots,
@@ -18,7 +20,9 @@ public class WeaponStats {
             final long projectileLifetimeInTicks,
             final double projectilePushForce,
             final int magazineCapacity,
-            final long reloadTimeInTicks
+            final long reloadTimeInTicks,
+            final int pelletCount,
+            final double damage
     ) {
         this.projectileSpeed = projectileSpeed;
         this.spread = spread;
@@ -28,6 +32,8 @@ public class WeaponStats {
         this.projectilePushForce = projectilePushForce;
         this.magazineCapacity = magazineCapacity;
         this.reloadTimeInTicks = reloadTimeInTicks;
+        this.pelletCount = pelletCount;
+        this.damage = damage;
     }
 
     public static Builder builder() {
@@ -42,7 +48,9 @@ public class WeaponStats {
         private long projectileLifetimeInTicks = -1;
         private double projectilePushForce;
         private int magazineCapacity = 30;
-        private long reloadTimeInTicks = 0;
+        private long reloadTimeInTicks;
+        private int pelletCount = 1;
+        private double damage = 1.0;
 
         public Builder timeBetweenShots(final long timeBetweenShots) {
             this.timeBetweenShots = timeBetweenShots;
@@ -84,6 +92,16 @@ public class WeaponStats {
             return this;
         }
 
+        public Builder pelletCount(final int pelletCount) {
+            this.pelletCount = pelletCount;
+            return this;
+        }
+
+        public Builder damage(final double damage) {
+            this.damage = damage;
+            return this;
+        }
+
         public WeaponStats build() {
             return new WeaponStats(this.timeBetweenShots,
                                    this.projectileSpeed,
@@ -92,7 +110,9 @@ public class WeaponStats {
                                    this.projectileLifetimeInTicks,
                                    this.projectilePushForce,
                                    this.magazineCapacity,
-                                   this.reloadTimeInTicks);
+                                   this.reloadTimeInTicks,
+                                   this.pelletCount,
+                                   this.damage);
         }
 
     }
