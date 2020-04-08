@@ -12,7 +12,10 @@ import fi.jakojaannos.roguelite.game.data.components.SpriteInfo;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.game.data.components.character.*;
 import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponStats;
-import fi.jakojaannos.roguelite.game.weapons.*;
+import fi.jakojaannos.roguelite.game.weapons.GrenadeWeapon;
+import fi.jakojaannos.roguelite.game.weapons.InventoryWeapon;
+import fi.jakojaannos.roguelite.game.weapons.SimpleWeapon;
+import fi.jakojaannos.roguelite.game.weapons.WeaponInventory;
 
 public class PlayerArchetype {
     public static Entity create(
@@ -68,8 +71,8 @@ public class PlayerArchetype {
                                             .magazineCapacity(100)
                                             .reloadTimeInTicks(timeManager.convertToTicks(0.8))
                                             .build();
-        wepInv.equip(0, new InventoryWeapon<>(new SimpleWeapon(), wepStats));
-        wepInv.equip(1, new InventoryWeapon<>(new ShotgunWeapon(), shotgunStats));
+        wepInv.equip(0, new InventoryWeapon<>(SimpleWeapon.createBasicWeapon(), wepStats));
+        wepInv.equip(1, new InventoryWeapon<>(SimpleWeapon.createShotgunWeapon(), shotgunStats));
         wepInv.equip(2, new InventoryWeapon<>(new GrenadeWeapon(), grenadeStats));
         entityManager.addComponentTo(player, new SpriteInfo("sprites/player"));
         entityManager.addComponentTo(player, new Health(10));

@@ -56,7 +56,7 @@ class CharacterAttackSystemTest {
         entityManager.addComponentTo(entity, this.weaponInput);
         entityManager.addComponentTo(entity, this.attackAbility);
         final var wepInv = new WeaponInventory(1);
-        wepInv.equip(0, new InventoryWeapon<>(new SimpleWeapon(), weaponStats));
+        wepInv.equip(0, new InventoryWeapon<>(SimpleWeapon.createBasicWeapon(), weaponStats));
         entityManager.addComponentTo(entity, wepInv);
 
         entityManager.applyModifications();
