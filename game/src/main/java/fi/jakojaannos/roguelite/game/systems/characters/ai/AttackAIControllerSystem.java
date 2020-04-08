@@ -37,7 +37,7 @@ public class AttackAIControllerSystem implements ECSSystem {
     ) {
         final var entityManager = world.getEntityManager();
 
-        final var maybeLocalPlayer = world.getOrCreateResource(Players.class).getLocalPlayer();
+        final var maybeLocalPlayer = world.fetchResource(Players.class).getLocalPlayer();
         entities.forEach(entity -> {
             final var ai = entityManager.getComponentOf(entity, AttackAI.class).orElseThrow();
             final var position = entityManager.getComponentOf(entity, Transform.class)

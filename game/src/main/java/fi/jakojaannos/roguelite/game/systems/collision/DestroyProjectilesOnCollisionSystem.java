@@ -26,7 +26,7 @@ public class DestroyProjectilesOnCollisionSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
-        final var collisions = world.getOrCreateResource(Collisions.class);
+        final var collisions = world.fetchResource(Collisions.class);
 
         entities.forEach(entity -> {
             if (collisions.getEventsFor(entity)

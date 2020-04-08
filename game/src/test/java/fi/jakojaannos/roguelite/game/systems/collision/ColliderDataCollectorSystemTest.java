@@ -24,6 +24,7 @@ class ColliderDataCollectorSystemTest {
     @BeforeEach
     void beforeEach() {
         world = World.createNew();
+        world.registerResource(new Colliders());
         final EntityManager entityManager = world.getEntityManager();
 
         entityA = entityManager.createEntity();
@@ -48,7 +49,7 @@ class ColliderDataCollectorSystemTest {
     void entityWithColliderIsAddedToRelevantLists() {
         system.tick(Stream.of(entityA, entityB), world);
 
-        Colliders colliders = world.getOrCreateResource(Colliders.class);
+        Colliders colliders = world.fetchResource(Colliders.class);
         assertTrue(colliders.overlapsWithLayer.get(CollisionLayer.PLAYER_PROJECTILE)
                                               .stream()
                                               .anyMatch(e -> e.entity().getId() == entityA.getId()));

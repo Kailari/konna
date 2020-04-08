@@ -37,9 +37,9 @@ public class PlayerInputSystem implements ECSSystem {
             final World world
     ) {
 
-        final var inputs = world.getOrCreateResource(Inputs.class);
-        final var mouse = world.getOrCreateResource(Mouse.class);
-        final var cameraProperties = world.getOrCreateResource(CameraProperties.class);
+        final var inputs = world.fetchResource(Inputs.class);
+        final var mouse = world.fetchResource(Mouse.class);
+        final var cameraProperties = world.fetchResource(CameraProperties.class);
 
         final var entityManager = world.getEntityManager();
         mouse.calculateCursorPositionRelativeToCamera(entityManager, cameraProperties, this.tmpCursorPos);

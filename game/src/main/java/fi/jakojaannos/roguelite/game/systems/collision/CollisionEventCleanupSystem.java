@@ -31,7 +31,7 @@ public class CollisionEventCleanupSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
-        world.getOrCreateResource(Collisions.class).clear();
+        world.fetchResource(Collisions.class).clear();
         entities.forEach(entity -> world.getEntityManager().removeComponentFrom(entity, RecentCollisionTag.class));
     }
 }

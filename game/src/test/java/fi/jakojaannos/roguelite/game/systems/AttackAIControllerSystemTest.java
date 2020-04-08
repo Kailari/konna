@@ -18,6 +18,7 @@ import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.WeaponInput;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.AttackAI;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.EnemyTag;
+import fi.jakojaannos.roguelite.game.data.resources.Players;
 import fi.jakojaannos.roguelite.game.systems.characters.ai.AttackAIControllerSystem;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,6 +35,7 @@ public class AttackAIControllerSystemTest {
     void beforeEach() {
         world = World.createNew();
         entityManager = world.getEntityManager();
+        world.registerResource(new Players());
         world.registerResource(TimeManager.class, new SimpleTimeManager(20));
 
         system = new AttackAIControllerSystem();

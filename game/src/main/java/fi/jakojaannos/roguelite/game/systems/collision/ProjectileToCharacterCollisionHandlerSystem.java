@@ -37,7 +37,7 @@ public class ProjectileToCharacterCollisionHandlerSystem implements ECSSystem {
     ) {
         final var timeManager = world.fetchResource(TimeManager.class);
         final var entityManager = world.getEntityManager();
-        final var collisions = world.getOrCreateResource(Collisions.class);
+        final var collisions = world.fetchResource(Collisions.class);
 
         entities.forEach(entity -> {
             final var stats = entityManager.getComponentOf(entity, ProjectileStats.class)

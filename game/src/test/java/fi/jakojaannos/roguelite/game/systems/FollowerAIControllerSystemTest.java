@@ -35,7 +35,10 @@ public class FollowerAIControllerSystemTest {
         this.playerTransform = new Transform();
         entityManager.addComponentTo(player, playerTransform);
         entityManager.addComponentTo(player, new PlayerTag());
-        this.world.getOrCreateResource(Players.class).setLocalPlayer(player);
+
+        final var players = new Players();
+        players.setLocalPlayer(player);
+        this.world.registerResource(players);
 
         this.follower = entityManager.createEntity();
         this.followerInput = new MovementInput();

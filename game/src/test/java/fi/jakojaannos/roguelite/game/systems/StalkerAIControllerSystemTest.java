@@ -44,7 +44,10 @@ public class StalkerAIControllerSystemTest {
         this.playerPos = new Transform();
         entityManager.addComponentTo(player, playerPos);
         entityManager.addComponentTo(player, new PlayerTag());
-        this.world.getOrCreateResource(Players.class).setLocalPlayer(player);
+
+        final var players = new Players();
+        players.setLocalPlayer(player);
+        this.world.registerResource(players);
 
         stalker = entityManager.createEntity();
         this.stalkerAI = new StalkerAI();

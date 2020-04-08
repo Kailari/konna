@@ -25,7 +25,7 @@ public class CleanUpDeadPlayersSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
-        final var players = world.getOrCreateResource(Players.class);
+        final var players = world.fetchResource(Players.class);
         entities.forEach(players::removePlayer);
     }
 }

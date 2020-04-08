@@ -27,7 +27,7 @@ public class ColliderDataCollectorSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
-        final var colliders = world.getOrCreateResource(Colliders.class);
+        final var colliders = world.fetchResource(Colliders.class);
 
         colliders.solidForLayer.clear();
         colliders.overlapsWithLayer.clear();

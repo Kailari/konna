@@ -43,8 +43,8 @@ public class UpdateHUDSystem implements ECSSystem {
             final World world
     ) {
         final var timeManager = world.fetchResource(TimeManager.class);
-        final var sessionStats = world.getOrCreateResource(SessionStats.class);
-        world.getOrCreateResource(Players.class)
+        final var sessionStats = world.fetchResource(SessionStats.class);
+        world.fetchResource(Players.class)
              .getLocalPlayer()
              .ifPresent(localPlayer -> {
                  final var localPlayerAbilities = world.getEntityManager()

@@ -15,6 +15,8 @@ import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.game.data.components.character.MovementInput;
 import fi.jakojaannos.roguelite.game.data.components.character.WalkingMovementAbility;
+import fi.jakojaannos.roguelite.game.data.resources.collision.Colliders;
+import fi.jakojaannos.roguelite.game.data.resources.collision.Collisions;
 import fi.jakojaannos.roguelite.game.systems.characters.movement.CharacterMovementSystem;
 import fi.jakojaannos.roguelite.game.systems.physics.ApplyVelocitySystem;
 
@@ -38,6 +40,8 @@ class CharacterMovementSystemTest {
         this.system = new CharacterMovementSystem();
         this.applyVelocity = new ApplyVelocitySystem();
         this.world = World.createNew();
+        world.registerResource(new Colliders());
+        world.registerResource(new Collisions());
         EntityManager entityManager = world.getEntityManager();
 
         world.registerResource(TimeManager.class, new SimpleTimeManager(20));

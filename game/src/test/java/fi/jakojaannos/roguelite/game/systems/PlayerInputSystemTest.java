@@ -36,9 +36,10 @@ class PlayerInputSystemTest {
     void beforeEach() {
         system = new PlayerInputSystem();
         this.world = World.createNew();
-        world.registerResource(Inputs.class, new Inputs());
+        world.registerResource(new Inputs());
+        world.registerResource(new Mouse());
+        world.registerResource(new Weapons());
         EntityManager entityManager = world.getEntityManager();
-        world.registerResource(Weapons.class, new Weapons());
 
         player = entityManager.createEntity();
         this.abilities = new AttackAbility(new DamageSource.LegacyEntity(player),
@@ -93,10 +94,9 @@ class PlayerInputSystemTest {
             double expectedX,
             double expectedY
     ) {
-        Mouse mouse = new Mouse();
+        Mouse mouse = world.fetchResource(Mouse.class);
         mouse.position.x = mouseX;
         mouse.position.y = mouseY;
-        world.registerResource(Mouse.class, mouse);
 
         final var cameraEntity = world.getEntityManager().createEntity();
         this.world.getEntityManager().addComponentTo(cameraEntity, new Transform());

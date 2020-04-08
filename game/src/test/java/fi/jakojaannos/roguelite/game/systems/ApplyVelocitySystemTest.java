@@ -18,6 +18,8 @@ import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.TileMapLayer;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
+import fi.jakojaannos.roguelite.game.data.resources.collision.Colliders;
+import fi.jakojaannos.roguelite.game.data.resources.collision.Collisions;
 import fi.jakojaannos.roguelite.game.systems.collision.ColliderDataCollectorSystem;
 import fi.jakojaannos.roguelite.game.systems.physics.ApplyVelocitySystem;
 
@@ -37,6 +39,8 @@ class ApplyVelocitySystemTest {
         world = World.createNew();
         entityManager = world.getEntityManager();
 
+        world.registerResource(new Collisions());
+        world.registerResource(new Colliders());
         world.registerResource(TimeManager.class, new SimpleTimeManager(20));
 
         entity = entityManager.createEntity();
@@ -79,6 +83,8 @@ class ApplyVelocitySystemTest {
     @Test
     void entityWithoutColliderDoesNotMoveWhenVelocityIsZero() {
         World world = World.createNew();
+        world.registerResource(new Collisions());
+        world.registerResource(new Colliders());
         EntityManager entityManager = world.getEntityManager();
 
         world.registerResource(TimeManager.class, new SimpleTimeManager(20));
@@ -98,6 +104,8 @@ class ApplyVelocitySystemTest {
     @Test
     void entityWithoutColliderMovesWhenVelocityIsNonZero() {
         final var world = World.createNew();
+        world.registerResource(new Collisions());
+        world.registerResource(new Colliders());
         EntityManager entityManager = world.getEntityManager();
 
         world.registerResource(TimeManager.class, new SimpleTimeManager(20));

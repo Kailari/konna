@@ -28,7 +28,7 @@ public class CleanUpDeadEnemyKillsSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
-        final var sessionStats = world.getOrCreateResource(SessionStats.class);
+        final var sessionStats = world.fetchResource(SessionStats.class);
         entities.map(entity -> world.getEntityManager().getComponentOf(entity, AttackAbility.class).orElseThrow())
                 .map(abilities -> abilities.damageSource)
                 .forEach(sessionStats::clearKillsOf);

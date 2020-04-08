@@ -29,7 +29,7 @@ public class HealthUpdateSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
-        final var sessionStats = world.getOrCreateResource(SessionStats.class);
+        final var sessionStats = world.fetchResource(SessionStats.class);
         final var entityManager = world.getEntityManager();
 
         entities.forEach(entity -> {
