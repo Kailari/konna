@@ -8,19 +8,21 @@ import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.archetypes.PlayerArchetype;
+import fi.jakojaannos.roguelite.game.data.components.InAir;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
 import fi.jakojaannos.roguelite.game.data.components.character.JumpingMovementAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.MovementInput;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 import fi.jakojaannos.roguelite.game.systems.characters.movement.JumpingCharacterMovementSystem;
 
+import static fi.jakojaannos.roguelite.engine.utilities.assertions.junitextension.Assertions.assertEquals;
+import static fi.jakojaannos.roguelite.engine.utilities.assertions.world.GameExpect.expectEntity;
 import static fi.jakojaannos.roguelite.engine.utilities.assertions.world.GameExpect.whenGame;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JumpingCharacterMovementSystemTest {
     private static final double EPSILON = 0.001;
     private EntityHandle slime;
-    private Vector2d expectedDir;
+    private Vector2d expectedDirection;
 
     void initialState(final World world) {
         final var time = world.fetchResource(TimeManager.class);
@@ -32,10 +34,9 @@ public class JumpingCharacterMovementSystemTest {
 
         final var slimeTransform = new Transform(3, 6);
         final var input = new MovementInput();
-        this.expectedDir = new Vector2d(playerPos.position)
-                .sub(slimeTransform.position)
-                .normalize();
-        input.move = expectedDir;
+        this.expectedDirection = new Vector2d(playerPos.position).sub(slimeTransform.position)
+                                                                 .normalize();
+        input.move = expectedDirection;
         this.slime = world.createEntity(slimeTransform,
                                         input,
                                         Physics.builder()
@@ -49,16 +50,14 @@ public class JumpingCharacterMovementSystemTest {
     @Test
     void slimeHopsTowardsPlayer() {
         whenGame().withSystems(new JumpingCharacterMovementSystem())
-                  .withInitialState(this::initialState)
+                  .withState(this::initialState)
                   .runsForSingleTick()
                   .expect(state -> {
-                      final var ability = slime.getComponent(JumpingMovementAbility.class).orElseThrow();
-                      final var physics = slime.getComponent(Physics.class).orElseThrow();
-                      final var expectedAcceleration = expectedDir.normalize(ability.jumpForce / physics.mass,
-                                                                             new Vector2d());
-
-                      assertEquals(expectedAcceleration.x, physics.acceleration.x, EPSILON);
-                      assertEquals(expectedAcceleration.y, physics.acceleration.y, EPSILON);
+                      expectEntity(slime).toHaveComponent(Physics.class)
+                                         .which(physics -> assertEquals(expectedDirection,
+                                                                        physics.acceleration.normalize(),
+                                                                        EPSILON));
+                      expectEntity(slime).toHaveComponent(InAir.class);
                   });
     }
 }

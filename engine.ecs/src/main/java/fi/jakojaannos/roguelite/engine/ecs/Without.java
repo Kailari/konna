@@ -1,11 +1,6 @@
 package fi.jakojaannos.roguelite.engine.ecs;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nullable;
+import java.lang.annotation.*;
 
 /**
  * Inverts a input entity data requirement of a system. Mark record component with this annotation to make the system
@@ -14,8 +9,7 @@ import javax.annotation.Nullable;
  *
  * @see EcsSystem
  */
-@Nullable
-@CheckForNull
+@Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.RECORD_COMPONENT)
 public @interface Without {

@@ -5,6 +5,8 @@ dependencies {
     implementation project(":engine")
 
     implementation "org.junit.jupiter:junit-jupiter-api:${jUnitVersion}"
+
+    implementation "org.joml:joml:${jomlVersion}"
 }
 
 test {

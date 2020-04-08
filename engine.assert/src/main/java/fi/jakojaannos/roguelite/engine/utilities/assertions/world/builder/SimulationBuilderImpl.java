@@ -18,7 +18,7 @@ public class SimulationBuilderImpl implements SimulationBuilder, SimulationRunne
     private Consumer<World> initialStateFactory = world -> {};
 
     @Override
-    public SimulationBuilder withInitialState(final Consumer<World> builder) {
+    public SimulationBuilder withState(final Consumer<World> builder) {
         this.initialStateFactory = this.initialStateFactory.andThen(builder);
         return this;
     }

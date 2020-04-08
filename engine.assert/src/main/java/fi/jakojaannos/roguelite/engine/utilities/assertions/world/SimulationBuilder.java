@@ -8,7 +8,7 @@ import fi.jakojaannos.roguelite.engine.ecs.SystemGroup;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 
 public interface SimulationBuilder extends SimulationRunner<SimulationInspector> {
-    SimulationBuilder withInitialState(Consumer<World> builder);
+    SimulationBuilder withState(Consumer<World> builder);
 
     SimulationBuilder withSystemGroup(
             String name,
