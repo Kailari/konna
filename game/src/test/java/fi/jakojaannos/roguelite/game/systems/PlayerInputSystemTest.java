@@ -13,7 +13,6 @@ import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.LegacyWorld;
 import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.DamageSource;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
@@ -27,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class PlayerInputSystemTest {
     private PlayerInputSystem system;
-    private LegacyWorld world;
+    private World world;
     private MovementInput movementInput;
     private WeaponInput weaponInput;
     private Entity player;
@@ -37,8 +36,9 @@ class PlayerInputSystemTest {
     void beforeEach() {
         system = new PlayerInputSystem();
         this.world = World.createNew();
+        world.registerResource(Inputs.class, new Inputs());
         EntityManager entityManager = world.getEntityManager();
-        world.provideResource(Weapons.class, new Weapons());
+        world.registerResource(Weapons.class, new Weapons());
 
         player = entityManager.createEntity();
         this.abilities = new AttackAbility(new DamageSource.LegacyEntity(player),
@@ -72,7 +72,8 @@ class PlayerInputSystemTest {
             boolean up,
             boolean down
     ) {
-        Inputs inputs = this.world.getOrCreateResource(Inputs.class);
+        world.registerResource(new CameraProperties(null));
+        Inputs inputs = this.world.fetchResource(Inputs.class);
         inputs.inputLeft = left;
         inputs.inputRight = right;
         inputs.inputUp = up;
@@ -92,16 +93,19 @@ class PlayerInputSystemTest {
             double expectedX,
             double expectedY
     ) {
-        Mouse mouse = this.world.getOrCreateResource(Mouse.class);
-        CameraProperties cameraProperties = this.world.getOrCreateResource(CameraProperties.class);
-        cameraProperties.viewportWidthInWorldUnits = 32.0f;
-        cameraProperties.viewportHeightInWorldUnits = 32.0f;
+        Mouse mouse = new Mouse();
         mouse.position.x = mouseX;
         mouse.position.y = mouseY;
+        world.registerResource(Mouse.class, mouse);
 
         final var cameraEntity = world.getEntityManager().createEntity();
         this.world.getEntityManager().addComponentTo(cameraEntity, new Transform());
-        cameraProperties.cameraEntity = cameraEntity;
+
+        final var cameraProperties = new CameraProperties(cameraEntity);
+        cameraProperties.viewportWidthInWorldUnits = 32.0f;
+        cameraProperties.viewportHeightInWorldUnits = 32.0f;
+        this.world.registerResource(CameraProperties.class, cameraProperties);
+
         this.world.getEntityManager().applyModifications();
 
 
@@ -114,7 +118,8 @@ class PlayerInputSystemTest {
 
     @Test
     void havingInputAttackSetUpdatesAttack() {
-        Inputs inputs = this.world.getOrCreateResource(Inputs.class);
+        world.registerResource(new CameraProperties(null));
+        Inputs inputs = this.world.fetchResource(Inputs.class);
         inputs.inputAttack = false;
 
         system.tick(Stream.of(player), this.world);

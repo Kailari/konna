@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import fi.jakojaannos.roguelite.engine.content.AssetManager;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.event.Events;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.GameModeRenderer;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
@@ -33,12 +34,13 @@ public final class GameplayGameModeRenderer {
 
     public static GameModeRenderer create(
             final Events events,
+            final TimeManager timeManager,
             final Path assetRoot,
             final Camera camera,
             final AssetManager assetManager,
             final RenderingBackend backend
     ) {
-        final var userInterface = createUserInterface(events, camera, assetManager);
+        final var userInterface = createUserInterface(events, timeManager, camera, assetManager);
         final var dispatcher = createRenderDispatcher(userInterface, assetRoot, camera, assetManager, backend);
         return new GameModeRenderer(dispatcher, userInterface);
     }
@@ -93,13 +95,14 @@ public final class GameplayGameModeRenderer {
 
     private static UserInterface createUserInterface(
             final Events events,
+            final TimeManager timeManager,
             final Camera camera,
             final AssetManager assetManager
     ) {
         final var fontRegistry = assetManager.getAssetRegistry(Font.class);
 
         final var font = fontRegistry.getByAssetName("fonts/VCR_OSD_MONO.ttf");
-        return UserInterface.builder(events, camera.getViewport(), font)
+        return UserInterface.builder(events, timeManager, camera.getViewport(), font)
                             .element(TIME_PLAYED_LABEL_NAME,
                                      UIElementType.LABEL,
                                      GameplayGameModeRenderer::buildTimePlayedTimer)

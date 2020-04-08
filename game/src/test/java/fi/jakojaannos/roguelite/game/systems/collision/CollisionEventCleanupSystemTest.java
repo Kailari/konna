@@ -6,9 +6,9 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.LegacyWorld;
 import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.RecentCollisionTag;
@@ -21,14 +21,14 @@ import static org.mockito.Mockito.*;
 class CollisionEventCleanupSystemTest {
     private CollisionEventCleanupSystem system;
     private Collisions collisions;
-    private LegacyWorld world;
+    private World world;
     private EntityManager entityManager;
     private Entity entity;
 
     @BeforeEach
     void beforeEach() {
         system = new CollisionEventCleanupSystem();
-        world = mock(LegacyWorld.class);
+        world = mock(World.class);
         entity = mock(Entity.class);
 
         Collider collider = new Collider(CollisionLayer.COLLIDE_ALL);

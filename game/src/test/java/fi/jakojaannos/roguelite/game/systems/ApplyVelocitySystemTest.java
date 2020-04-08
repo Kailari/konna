@@ -7,28 +7,26 @@ import java.time.Duration;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.LegacyWorld;
 import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
 import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.TileMapLayer;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.game.systems.collision.ColliderDataCollectorSystem;
-import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.systems.physics.ApplyVelocitySystem;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
 
 class ApplyVelocitySystemTest {
     private ColliderDataCollectorSystem dataCollectorSystem;
     private ApplyVelocitySystem system;
-    private LegacyWorld world;
+    private World world;
     private EntityManager entityManager;
     private Entity entity;
     private Velocity velocity;
@@ -39,8 +37,7 @@ class ApplyVelocitySystemTest {
         world = World.createNew();
         entityManager = world.getEntityManager();
 
-        final var time = new Time(new SimpleTimeManager(20));
-        world.provideResource(Time.class, time);
+        world.registerResource(TimeManager.class, new SimpleTimeManager(20));
 
         entity = entityManager.createEntity();
         entityManager.addComponentTo(entity, velocity = new Velocity());
@@ -81,11 +78,10 @@ class ApplyVelocitySystemTest {
 
     @Test
     void entityWithoutColliderDoesNotMoveWhenVelocityIsZero() {
-        LegacyWorld world = World.createNew();
+        World world = World.createNew();
         EntityManager entityManager = world.getEntityManager();
 
-        final var time = new Time(new SimpleTimeManager(20));
-        world.provideResource(Time.class, time);
+        world.registerResource(TimeManager.class, new SimpleTimeManager(20));
 
         Entity entity = entityManager.createEntity();
         entityManager.addComponentTo(entity, velocity = new Velocity());
@@ -101,11 +97,10 @@ class ApplyVelocitySystemTest {
 
     @Test
     void entityWithoutColliderMovesWhenVelocityIsNonZero() {
-        LegacyWorld world = World.createNew();
+        final var world = World.createNew();
         EntityManager entityManager = world.getEntityManager();
 
-        final var time = new Time(new SimpleTimeManager(20));
-        world.provideResource(Time.class, time);
+        world.registerResource(TimeManager.class, new SimpleTimeManager(20));
 
         Entity entity = entityManager.createEntity();
         entityManager.addComponentTo(entity, velocity = new Velocity());

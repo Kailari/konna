@@ -8,11 +8,11 @@ import java.util.stream.Stream;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.LegacyWorld;
 import fi.jakojaannos.roguelite.game.data.DamageInstance;
 import fi.jakojaannos.roguelite.game.data.DamageSource;
 import fi.jakojaannos.roguelite.game.data.components.character.DeadTag;
 import fi.jakojaannos.roguelite.game.data.components.character.Health;
+import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -36,7 +36,8 @@ public class HealthUpdateSystemTest {
             double damage,
             boolean shouldBeRemoved
     ) {
-        LegacyWorld world = World.createNew();
+        World world = World.createNew();
+        world.registerResource(new SessionStats(0));
         EntityManager entityManager = world.getEntityManager();
         HealthUpdateSystem system = new HealthUpdateSystem();
 

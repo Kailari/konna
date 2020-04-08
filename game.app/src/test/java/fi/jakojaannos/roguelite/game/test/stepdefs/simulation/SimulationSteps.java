@@ -5,8 +5,6 @@ import io.cucumber.java.en.When;
 import org.joml.Vector2d;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;
 
 import static fi.jakojaannos.roguelite.game.test.global.GlobalGameState.*;
@@ -15,10 +13,9 @@ import static fi.jakojaannos.roguelite.game.test.global.GlobalState.*;
 public class SimulationSteps {
     @Given("the game world just finished loading")
     public void the_game_world_just_finished_loading() {
-        state = new GameplayGameMode(6969,
-                                     World.createNew(),
-                                     game.getTime());
-        state.world().registerResource(Events.class, events);
+        mode = GameplayGameMode.create(6969);
+        state = gameRunner.setActiveGameMode(mode);
+        gameRenderer.changeGameMode(mode);
 
         playerInitialPosition = getLocalPlayer().flatMap(entity -> getComponentOf(entity, Transform.class))
                                                 .map(transform -> new Vector2d(transform.position))

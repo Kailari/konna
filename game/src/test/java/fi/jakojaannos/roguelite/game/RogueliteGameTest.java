@@ -5,33 +5,48 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import java.util.ArrayDeque;
+
+import fi.jakojaannos.roguelite.engine.GameMode;
+import fi.jakojaannos.roguelite.engine.GameRunner;
+import fi.jakojaannos.roguelite.engine.GameState;
 import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
-import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.input.*;
-import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
 import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class RogueliteGameTest {
-    private RogueliteGame roguelite;
+    private GameRunner gameRunner;
     private GameState state;
 
     @BeforeEach
     void beforeEach() {
-        roguelite = new RogueliteGame();
-        state = new GameplayGameMode(6969,
-                                     World.createNew(),
-                                     roguelite.getTime());
+        gameRunner = new GameRunner() {
+            @Override
+            protected boolean shouldContinueLoop() {
+                return true;
+            }
+
+            @Override
+            protected void onStateChange(final GameState state) {
+            }
+
+            @Override
+            protected void onModeChange(final GameMode gameMode) {
+            }
+        };
+        state = gameRunner.setActiveGameMode(GameplayGameMode.create(6969));
     }
 
     @Test
     void inputsAreFalseByDefault() {
-        roguelite.tick(state, new Events());
+        final var accumulator = new GameRunner.Accumulator();
+        accumulator.accumulate(20);
+        gameRunner.simulateFrame(state, accumulator, ArrayDeque::new);
 
-        Inputs inputs = state.getWorld().getOrCreateResource(Inputs.class);
+        Inputs inputs = state.world().fetchResource(Inputs.class);
         assertFalse(inputs.inputLeft);
         assertFalse(inputs.inputRight);
         assertFalse(inputs.inputUp);
@@ -53,13 +68,14 @@ class RogueliteGameTest {
             boolean up,
             boolean down
     ) {
-        Events events = new Events();
-        events.input()
-              .fire(InputEvent.button(new ButtonInput(InputButton.Keyboard.valueOf(key), ButtonInput.Action.PRESS)));
+        final var inputQueue = new ArrayDeque<InputEvent>();
+        inputQueue.addLast(InputEvent.button(new ButtonInput(InputButton.Keyboard.valueOf(key), ButtonInput.Action.PRESS)));
 
-        roguelite.tick(state, events);
+        final var accumulator = new GameRunner.Accumulator();
+        accumulator.accumulate(20);
+        gameRunner.simulateFrame(state, accumulator, () -> inputQueue);
 
-        Inputs inputs = state.getWorld().getOrCreateResource(Inputs.class);
+        Inputs inputs = state.world().fetchResource(Inputs.class);
         assertEquals(inputs.inputLeft, left);
         assertEquals(inputs.inputRight, right);
         assertEquals(inputs.inputUp, up);
@@ -78,59 +94,69 @@ class RogueliteGameTest {
             double newPos
     ) {
         InputAxis.Mouse axisPos = horizontal ? InputAxis.Mouse.X_POS : InputAxis.Mouse.Y_POS;
-        Mouse mouse = state.getWorld().getOrCreateResource(Mouse.class);
+        Mouse mouse = state.world().fetchResource(Mouse.class);
         if (horizontal) {
             mouse.position.x = initial;
         } else {
             mouse.position.y = initial;
         }
 
-        Events events = new Events();
-        events.input().fire(InputEvent.axial(new AxialInput(axisPos, newPos)));
+        final var inputQueue = new ArrayDeque<InputEvent>();
+        inputQueue.addLast(InputEvent.axial(new AxialInput(axisPos, newPos)));
 
-        roguelite.tick(state, events);
+        final var accumulator = new GameRunner.Accumulator();
+        accumulator.accumulate(20);
+        gameRunner.simulateFrame(state, accumulator, () -> inputQueue);
 
         assertEquals(newPos, horizontal ? mouse.position.x : mouse.position.y);
     }
 
     @Test
     void mouseButtonEventsUpdateGameState() {
-        Events events = new Events();
-        events.input().fire(ButtonInput.pressed(InputButton.Mouse.button(0)));
+        final var inputQueue = new ArrayDeque<InputEvent>();
+        inputQueue.addLast(ButtonInput.pressed(InputButton.Mouse.button(0)));
 
-        roguelite.tick(state, events);
+        final var accumulator = new GameRunner.Accumulator();
+        accumulator.accumulate(20);
+        gameRunner.simulateFrame(state, accumulator, () -> inputQueue);
 
-        Inputs inputs = state.getWorld().getOrCreateResource(Inputs.class);
+        Inputs inputs = state.world().fetchResource(Inputs.class);
         assertTrue(inputs.inputAttack);
     }
 
     @Test
     void mouseButtonEventsDoNotUpdateGameStateIfButtonIsWrong() {
-        Events events = new Events();
-        events.input().fire(ButtonInput.pressed(InputButton.Mouse.button(1)));
-        events.input().fire(ButtonInput.pressed(InputButton.Mouse.button(2)));
-        events.input().fire(ButtonInput.pressed(InputButton.Mouse.button(3)));
-        events.input().fire(ButtonInput.pressed(InputButton.Mouse.button(4)));
+        final var inputQueue = new ArrayDeque<InputEvent>();
+        inputQueue.addLast(ButtonInput.pressed(InputButton.Mouse.button(1)));
+        inputQueue.addLast(ButtonInput.pressed(InputButton.Mouse.button(2)));
+        inputQueue.addLast(ButtonInput.pressed(InputButton.Mouse.button(3)));
+        inputQueue.addLast(ButtonInput.pressed(InputButton.Mouse.button(4)));
 
-        roguelite.tick(state, events);
+        final var accumulator = new GameRunner.Accumulator();
+        accumulator.accumulate(20);
+        gameRunner.simulateFrame(state, accumulator, () -> inputQueue);
 
-        Inputs inputs = state.getWorld().getOrCreateResource(Inputs.class);
+        Inputs inputs = state.world().fetchResource(Inputs.class);
         assertFalse(inputs.inputAttack);
     }
 
     @Test
     void releasingMouseButtonDisablesInput() {
-        Events events = new Events();
+        final var inputQueue = new ArrayDeque<InputEvent>();
 
         // Pressed
-        events.input().fire(ButtonInput.pressed(InputButton.Mouse.button(0)));
-        roguelite.tick(state, events);
+        inputQueue.addLast(ButtonInput.pressed(InputButton.Mouse.button(0)));
+        final var accumulator = new GameRunner.Accumulator();
+        accumulator.accumulate(20);
+        gameRunner.simulateFrame(state, accumulator, () -> inputQueue);
+        inputQueue.clear();
 
         // Released
-        events.input().fire(ButtonInput.released(InputButton.Mouse.button(0)));
-        roguelite.tick(state, events);
+        inputQueue.addLast(ButtonInput.released(InputButton.Mouse.button(0)));
+        accumulator.accumulate(20);
+        gameRunner.simulateFrame(state, accumulator, () -> inputQueue);
 
-        Inputs inputs = state.getWorld().getOrCreateResource(Inputs.class);
+        Inputs inputs = state.world().fetchResource(Inputs.class);
         assertFalse(inputs.inputAttack);
     }
 }

@@ -4,7 +4,6 @@ import org.joml.Vector2d;
 
 import java.util.stream.Stream;
 
-import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
@@ -23,7 +22,7 @@ public class JumpingCharacterMovementSystem implements ECSSystem {
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.CHARACTER_TICK)
-                    .requireProvidedResource(Time.class)
+                    .requireProvidedResource(TimeManager.class)
                     .withComponent(JumpingMovementAbility.class)
                     .withComponent(MovementInput.class)
                     .withComponent(Physics.class)

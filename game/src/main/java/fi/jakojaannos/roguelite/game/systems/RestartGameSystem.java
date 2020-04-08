@@ -2,13 +2,13 @@ package fi.jakojaannos.roguelite.game.systems;
 
 import java.util.stream.Stream;
 
-import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.state.StateEvent;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
 import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
@@ -22,7 +22,7 @@ public class RestartGameSystem implements ECSSystem {
         requirements.addToGroup(SystemGroups.CLEANUP)
                     .requireResource(Inputs.class)
                     .requireResource(SessionStats.class)
-                    .requireProvidedResource(Time.class)
+                    .requireProvidedResource(TimeManager.class)
                     .withComponent(PlayerTag.class);
     }
 

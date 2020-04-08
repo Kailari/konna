@@ -65,7 +65,7 @@ public class HudSteps {
 
     @Then("there is a timer label on the top-middle of the screen")
     public void thereIsATimerLabelOnTheTopMiddleOfTheScreen() {
-        final var ui = gameRenderer.getUserInterfaceForMode(state);
+        final var ui = gameRenderer.getCurrentUserInterface();
         assertUI(ui)
                 .hasExactlyOneElement(that -> that.hasName().equalTo(TIMER_LABEL_NAME)
                                                   .matching(isVerticallyIn(ui).min())
@@ -75,7 +75,7 @@ public class HudSteps {
 
     @And("the timer label reads {string}")
     public void theTimerLabelReads(String expected) {
-        assertUI(gameRenderer.getUserInterfaceForMode(state))
+        assertUI(gameRenderer.getCurrentUserInterface())
                 .hasExactlyOneElement(that -> that.hasName().equalTo(TIMER_LABEL_NAME)
                                                   .isLabel()
                                                   .hasText().equalTo(expected));
@@ -83,21 +83,21 @@ public class HudSteps {
 
     @Then("the game over splash should be hidden.")
     public void theGameOverSplashShouldBeHidden() {
-        assertUI(gameRenderer.getUserInterfaceForMode(state))
+        assertUI(gameRenderer.getCurrentUserInterface())
                 .hasExactlyOneElement(that -> that.hasName().equalTo(GAME_OVER_CONTAINER_NAME)
                                                   .isHidden());
     }
 
     @Then("the game over splash should be visible")
     public void theGameOverSplashShouldBeVisible() {
-        assertUI(gameRenderer.getUserInterfaceForMode(state))
+        assertUI(gameRenderer.getCurrentUserInterface())
                 .hasExactlyOneElement(that -> that.hasName().equalTo(GAME_OVER_CONTAINER_NAME)
                                                   .isVisible());
     }
 
     @Then("the game over splash should have text {string}.")
     public void theGameOverSplashShouldHaveText(String text) {
-        assertUI(gameRenderer.getUserInterfaceForMode(state))
+        assertUI(gameRenderer.getCurrentUserInterface())
                 .hasExactlyOneElement(that -> that.hasName().equalTo(GAME_OVER_CONTAINER_NAME)
                                                   .hasChildMatching(child -> child.isLabel()
                                                                                   .hasText().equalTo(text)));
@@ -105,7 +105,7 @@ public class HudSteps {
 
     @Then("the game over splash should have text {string} and {string}.")
     public void theGameOverSplashShouldHaveTextAnd(String a, String b) {
-        assertUI(gameRenderer.getUserInterfaceForMode(state))
+        assertUI(gameRenderer.getCurrentUserInterface())
                 .hasExactlyOneElement(that -> that.hasName().equalTo(GAME_OVER_CONTAINER_NAME)
                                                   .hasChildMatching(child -> child.isLabel()
                                                                                   .hasText().whichContains(a, b)));
@@ -113,7 +113,7 @@ public class HudSteps {
 
     @Then("the kill counter has text {string}")
     public void theKillCounterHasText(String text) {
-        assertUI(gameRenderer.getUserInterfaceForMode(state))
+        assertUI(gameRenderer.getCurrentUserInterface())
                 .hasExactlyOneElement(that -> that.hasName().equalTo("score-kills")
                                                   .isLabel()
                                                   .hasText().whichContains(text));
@@ -121,14 +121,14 @@ public class HudSteps {
 
     @Then("there should be no health-bars rendered")
     public void thereShouldBeNoHealthBarsRendered() {
-        assertUI(gameRenderer.getUserInterfaceForMode(state))
+        assertUI(gameRenderer.getCurrentUserInterface())
                 .hasNoElementMatching(that -> that.hasName().whichStartsWith("healthbar")
                                                   .isProgressBar());
     }
 
     @Then("there should be one health-bar visible")
     public void thereShouldBeOneHealthBarVisible() {
-        assertUI(gameRenderer.getUserInterfaceForMode(state))
+        assertUI(gameRenderer.getCurrentUserInterface())
                 .hasExactlyOneElement(that -> that.hasName().whichStartsWith("healthbar")
                                                   .isVisible()
                                                   .isProgressBar());
@@ -136,7 +136,7 @@ public class HudSteps {
 
     @Then("there should be {int} health-bars visible")
     public void thereShouldBeHealthBarsVisible(int n) {
-        assertUI(gameRenderer.getUserInterfaceForMode(state))
+        assertUI(gameRenderer.getCurrentUserInterface())
                 .hasElements(n, that -> that.hasName().whichStartsWith("healthbar")
                                             .isVisible()
                                             .isProgressBar());
@@ -144,7 +144,7 @@ public class HudSteps {
 
     @Then("the health-bar should be close to the damaged enemy")
     public void theHealthBarShouldBeCloseToTheDamagedEnemy() {
-        assertTrue(gameRenderer.getUserInterfaceForMode(state)
+        assertTrue(gameRenderer.getCurrentUserInterface()
                                .findElements(that -> that.hasName().whichStartsWith("healthbar")
                                                          .isVisible()
                                                          .isProgressBar())
@@ -153,7 +153,7 @@ public class HudSteps {
 
     @Then("each health-bar should be close to a damaged enemy")
     public void eachHealthBarShouldBeCloseToADamagedEnemy() {
-        assertTrue(gameRenderer.getUserInterfaceForMode(state)
+        assertTrue(gameRenderer.getCurrentUserInterface()
                                .findElements(that -> that.hasName().whichStartsWith("healthbar")
                                                          .isVisible()
                                                          .isProgressBar())

@@ -33,7 +33,12 @@ public class RogueliteClient {
                                                     windowHeight);
              final var assetManager = new LWJGLAssetManager(assetRoot);
              final var backend = new LWJGLRenderingBackend(assetRoot);
-             final var renderer = new RogueliteGameRenderer(runner.getEvents(), assetRoot, runner.getWindow(), backend, assetManager);
+             final var renderer = new RogueliteGameRenderer(runner.getEvents(),
+                                                            runner.getTimeManager(),
+                                                            assetRoot,
+                                                            runner.getWindow(),
+                                                            backend,
+                                                            assetManager);
         ) {
             final var inputProvider = new LWJGLInputProvider(runner.getWindow());
             runner.run(createInitialGameMode(host, port), inputProvider, renderer);

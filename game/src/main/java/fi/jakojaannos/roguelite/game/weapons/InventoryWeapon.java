@@ -1,6 +1,5 @@
 package fi.jakojaannos.roguelite.game.weapons;
 
-import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
@@ -12,14 +11,6 @@ public class InventoryWeapon<MS, TS, FS> {
     private final WeaponStats stats;
     private final WeaponState<MS, TS, FS> state;
 
-    public InventoryWeapon(final Weapon<MS, TS, FS> weapon, final WeaponStats stats) {
-        this.weapon = weapon;
-        this.stats = stats;
-        this.state = new WeaponState<>(weapon.getMagazineHandler().createState(stats),
-                                       weapon.getTrigger().createState(stats),
-                                       weapon.getFiringMechanism().createState(stats));
-    }
-
     public Weapon<MS, TS, FS> getWeapon() {
         return this.weapon;
     }
@@ -28,10 +19,18 @@ public class InventoryWeapon<MS, TS, FS> {
         return this.state;
     }
 
+    public InventoryWeapon(final Weapon<MS, TS, FS> weapon, final WeaponStats stats) {
+        this.weapon = weapon;
+        this.stats = stats;
+        this.state = new WeaponState<>(weapon.getMagazineHandler().createState(stats),
+                                       weapon.getTrigger().createState(stats),
+                                       weapon.getFiringMechanism().createState(stats));
+    }
+
     public void pullTrigger(
             final EntityManager entityManager,
             final Entity entity,
-            final Time timeManager
+            final TimeManager timeManager
     ) {
         this.weapon.getTrigger().pull(entityManager, entity, timeManager, this.state.getTrigger(), this.stats);
     }
@@ -39,7 +38,7 @@ public class InventoryWeapon<MS, TS, FS> {
     public void releaseTrigger(
             final EntityManager entityManager,
             final Entity entity,
-            final Time timeManager
+            final TimeManager timeManager
     ) {
         this.weapon.getTrigger().release(entityManager, entity, timeManager, this.state.getTrigger());
     }
@@ -47,7 +46,7 @@ public class InventoryWeapon<MS, TS, FS> {
     public void fireIfReady(
             final EntityManager entityManager,
             final Entity entity,
-            final Time timeManager,
+            final TimeManager timeManager,
             final AttackAbility attackAbility
     ) {
         this.weapon.fireIfReady(entityManager, entity, timeManager, this.state, this.stats, attackAbility);

@@ -8,11 +8,10 @@ import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
-import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.LegacyWorld;
 import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.CameraFollowTargetTag;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -20,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CameraControlSystemTest {
     private CameraControlSystem system;
-    private LegacyWorld world;
+    private World world;
     private Transform cameraTransform;
 
     @BeforeEach
@@ -28,13 +27,12 @@ class CameraControlSystemTest {
         system = new CameraControlSystem();
         world = World.createNew();
 
-        final var time = new Time(new SimpleTimeManager(20));
-        world.provideResource(Time.class, time);
+        world.registerResource(TimeManager.class, new SimpleTimeManager(20));
 
         final Entity cameraEntity = world.getEntityManager().createEntity();
         world.getEntityManager().addComponentTo(cameraEntity, cameraTransform = new Transform());
 
-        world.getOrCreateResource(CameraProperties.class).cameraEntity = cameraEntity;
+        world.registerResource(CameraProperties.class, new CameraProperties(cameraEntity));
         world.getEntityManager().applyModifications();
     }
 

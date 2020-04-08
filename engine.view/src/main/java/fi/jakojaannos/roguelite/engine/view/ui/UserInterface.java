@@ -19,21 +19,20 @@ import fi.jakojaannos.roguelite.engine.view.ui.query.UIPropertyMatcher;
 public interface UserInterface {
     static UIBuilder builder(
             final Events events,
+            final TimeManager timeManager,
             final Viewport viewport,
             final TextSizeProvider fontSizeProvider
     ) {
-        return new UIBuilder(events, viewport, fontSizeProvider);
+        return new UIBuilder(events, timeManager, viewport, fontSizeProvider);
     }
 
     int getHeight();
 
     int getWidth();
 
-    void update(TimeManager time, Mouse mouse, Events events);
+    void update(Mouse mouse);
 
     Stream<UIElement> getRoots();
-
-    Stream<UIElement> allElements();
 
     /**
      * @deprecated Use {@link #findElements(Consumer)} with {@link UIPropertyMatcher} static methods instead

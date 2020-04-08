@@ -6,9 +6,9 @@ import org.junit.jupiter.api.Test;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.archetypes.PlayerArchetype;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
 import fi.jakojaannos.roguelite.game.data.components.character.JumpingMovementAbility;
@@ -26,8 +26,8 @@ public class JumpingCharacterMovementSystemTest {
         final var system = new JumpingCharacterMovementSystem();
         final var world = World.createNew();
 
-        final var time = new Time(new SimpleTimeManager(20));
-        world.registerResource(Time.class, time);
+        final var time = new SimpleTimeManager(20);
+        world.registerResource(TimeManager.class, time);
 
         final var playerPos = new Transform(10, 10);
         final var players = new Players();

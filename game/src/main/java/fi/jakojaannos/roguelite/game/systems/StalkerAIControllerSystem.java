@@ -6,9 +6,12 @@ import java.util.Random;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.data.resources.Time;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.*;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.InAir;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
 import fi.jakojaannos.roguelite.game.data.components.character.MovementInput;
@@ -39,7 +42,7 @@ public class StalkerAIControllerSystem implements ECSSystem {
             final World world
     ) {
         final var entityManager = world.getEntityManager();
-        final var timeManager = world.fetchResource(Time.class);
+        final var timeManager = world.fetchResource(TimeManager.class);
         final var optPlayer = world.getOrCreateResource(Players.class).getLocalPlayer();
         final var playerPos = optPlayer.isPresent()
                 ? entityManager.getComponentOf(optPlayer.get(), Transform.class).orElseThrow().position
@@ -98,7 +101,7 @@ public class StalkerAIControllerSystem implements ECSSystem {
             final WalkingMovementAbility stats,
             final Physics physics,
             final StalkerAI ai,
-            final Time time,
+            final TimeManager time,
             final Vector2d myPos,
             final Vector2d playerPos
     ) {
@@ -116,7 +119,7 @@ public class StalkerAIControllerSystem implements ECSSystem {
             final Entity entity,
             final Physics physics,
             final StalkerAI ai,
-            final Time time,
+            final TimeManager time,
             final Vector2d myPos,
             final Vector2d playerPos
     ) {

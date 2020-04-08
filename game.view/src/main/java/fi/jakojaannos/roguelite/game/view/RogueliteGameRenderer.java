@@ -13,6 +13,7 @@ import fi.jakojaannos.roguelite.engine.content.AssetManager;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.engine.event.Events;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.view.*;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;
@@ -33,8 +34,15 @@ public class RogueliteGameRenderer implements GameRenderer {
         return this.camera;
     }
 
+    public UserInterface getCurrentUserInterface() {
+        return Optional.ofNullable(this.stateRenderer)
+                       .map(GameModeRenderer::userInterface)
+                       .orElseThrow(() -> new IllegalStateException("Cannot fetch UI: No active game mode!"));
+    }
+
     public RogueliteGameRenderer(
             final Events events,
+            final TimeManager timeManager,
             final Path assetRoot,
             final Window window,
             final RenderingBackend backend,
@@ -51,12 +59,14 @@ public class RogueliteGameRenderer implements GameRenderer {
 
         this.stateRenderers.register(GameplayGameMode.GAME_MODE_ID,
                                      (mode) -> GameplayGameModeRenderer.create(events,
+                                                                               timeManager,
                                                                                assetRoot,
                                                                                this.camera,
                                                                                assetManager,
                                                                                backend));
         this.stateRenderers.register(MainMenuGameMode.GAME_MODE_ID,
                                      (mode) -> MainMenuGameModeRenderer.create(events,
+                                                                               timeManager,
                                                                                assetRoot,
                                                                                this.camera,
                                                                                assetManager,
@@ -86,12 +96,6 @@ public class RogueliteGameRenderer implements GameRenderer {
     @Override
     public void changeGameMode(final GameMode gameMode) {
         this.stateRenderer = this.stateRenderers.get(gameMode);
-    }
-
-    public UserInterface getUserInterfaceForMode(final GameMode mode) {
-        return Optional.ofNullable(this.stateRenderers.get(mode))
-                       .map(GameModeRenderer::userInterface)
-                       .orElseThrow();
     }
 
     @Override
