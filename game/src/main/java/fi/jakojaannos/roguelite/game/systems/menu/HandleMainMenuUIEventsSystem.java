@@ -11,7 +11,7 @@ import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.state.StateEvent;
 import fi.jakojaannos.roguelite.engine.ui.UIEvent;
-import fi.jakojaannos.roguelite.game.state.GameplayGameMode;
+import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;
 
 public class HandleMainMenuUIEventsSystem implements ECSSystem {
     @Nullable public String host;
@@ -34,7 +34,7 @@ public class HandleMainMenuUIEventsSystem implements ECSSystem {
             final var event = uiEvents.pollEvent();
             if (event.type() == UIEvent.Type.CLICK) {
                 if (event.element().equalsIgnoreCase("play_button")) {
-                    stateEvents.fire(new StateEvent.ChangeMode(new GameplayGameMode(System.nanoTime())));
+                    stateEvents.fire(new StateEvent.ChangeMode(GameplayGameMode.create(System.nanoTime())));
                 } else if (event.element().equalsIgnoreCase("quit_button")) {
                     stateEvents.fire(new StateEvent.Shutdown());
                 } else if (event.element().equalsIgnoreCase("connect_button")) {

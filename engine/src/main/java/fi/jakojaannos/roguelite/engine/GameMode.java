@@ -1,10 +1,17 @@
 package fi.jakojaannos.roguelite.engine;
 
+import java.util.function.Function;
+
+import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.event.Events;
 
-public interface GameMode extends AutoCloseable {
-    GameState createState(World world);
-
-    void tick(GameState state);
+public record GameMode(
+        int id,
+        SystemDispatcher systemDispatcher,
+        Function<World, GameState>stateFactory
+) implements AutoCloseable {
+    @Override
+    public void close() throws Exception {
+        this.systemDispatcher.close();
+    }
 }

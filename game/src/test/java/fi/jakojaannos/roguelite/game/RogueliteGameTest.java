@@ -11,7 +11,7 @@ import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.input.*;
 import fi.jakojaannos.roguelite.engine.state.GameState;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
-import fi.jakojaannos.roguelite.game.state.GameplayGameMode;
+import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;
 
 import static org.junit.jupiter.api.Assertions.*;
 

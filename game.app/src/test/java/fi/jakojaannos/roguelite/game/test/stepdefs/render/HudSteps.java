@@ -14,7 +14,7 @@ import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 import fi.jakojaannos.roguelite.game.data.components.character.Health;
-import fi.jakojaannos.roguelite.game.view.state.GameplayGameModeRenderer;
+import fi.jakojaannos.roguelite.game.view.gamemode.GameplayGameModeRenderer;
 
 import static fi.jakojaannos.roguelite.engine.utilities.assertions.ui.AssertUI.assertUI;
 import static fi.jakojaannos.roguelite.engine.utilities.assertions.ui.PositionMatcherBuilder.isHorizontallyIn;

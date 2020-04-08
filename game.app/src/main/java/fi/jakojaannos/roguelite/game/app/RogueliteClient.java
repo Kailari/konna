@@ -11,7 +11,7 @@ import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLGameRunner;
 import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLRenderingBackend;
 import fi.jakojaannos.roguelite.engine.lwjgl.input.LWJGLInputProvider;
 import fi.jakojaannos.roguelite.game.DebugConfig;
-import fi.jakojaannos.roguelite.game.state.MainMenuGameMode;
+import fi.jakojaannos.roguelite.game.gamemode.MainMenuGameMode;
 import fi.jakojaannos.roguelite.game.view.RogueliteGameRenderer;
 
 public class RogueliteClient {
@@ -47,6 +47,6 @@ public class RogueliteClient {
         // FIXME: Do not pass the host and the port to main menu. Instead, connect and start game if
         //  host is given
         LOG.trace("Creating main menu game state with host and port {}:{}", host, port);
-        return new MainMenuGameMode(host, port);
+        return MainMenuGameMode.create(host, port);
     }
 }

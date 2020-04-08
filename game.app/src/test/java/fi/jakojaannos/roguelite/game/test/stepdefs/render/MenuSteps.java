@@ -7,8 +7,8 @@ import io.cucumber.java.en.When;
 import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
-import fi.jakojaannos.roguelite.game.state.GameplayGameMode;
-import fi.jakojaannos.roguelite.game.state.MainMenuGameMode;
+import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;
+import fi.jakojaannos.roguelite.game.gamemode.MainMenuGameMode;
 
 import static fi.jakojaannos.roguelite.engine.utilities.assertions.ui.AssertUI.assertUI;
 import static fi.jakojaannos.roguelite.game.test.global.GlobalState.*;
