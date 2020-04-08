@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.game.view.state;
+package fi.jakojaannos.roguelite.game.view.gamemode;
 
 import java.nio.file.Path;
 
@@ -15,7 +15,6 @@ import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.GenericUIElementBuilder;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.UILabelBuilder;
 import fi.jakojaannos.roguelite.game.DebugConfig;
-import fi.jakojaannos.roguelite.game.state.GameplayGameMode;
 import fi.jakojaannos.roguelite.game.view.systems.*;
 import fi.jakojaannos.roguelite.game.view.systems.debug.EntityCollisionBoundsRenderingSystem;
 import fi.jakojaannos.roguelite.game.view.systems.debug.EntityTransformRenderingSystem;
@@ -23,25 +22,28 @@ import fi.jakojaannos.roguelite.game.view.systems.debug.EntityTransformRendering
 import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.absolute;
 import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.percentOf;
 
-public class GameplayGameModeRenderer extends GameModeRenderer<GameplayGameMode> {
+public final class GameplayGameModeRenderer {
     public static final String TIME_PLAYED_LABEL_NAME = "time-played-timer";
 
     private static final String GAME_OVER_MESSAGE = "Game Over";
     private static final String GAME_OVER_HELP_TEXT = "Press <SPACE> to restart, <ESC> to return to menu";
 
-    public GameplayGameModeRenderer(
+    private GameplayGameModeRenderer() {
+    }
+
+    public static GameModeRenderer create(
             final Events events,
-            final GameplayGameMode gameMode,
             final Path assetRoot,
             final Camera camera,
             final AssetManager assetManager,
             final RenderingBackend backend
     ) {
-        super(events, gameMode, assetRoot, camera, assetManager, backend);
+        final var userInterface = createUserInterface(events, camera, assetManager);
+        final var dispatcher = createRenderDispatcher(userInterface, assetRoot, camera, assetManager, backend);
+        return new GameModeRenderer(dispatcher, userInterface);
     }
 
-    @Override
-    protected SystemDispatcher createRenderDispatcher(
+    private static SystemDispatcher createRenderDispatcher(
             final UserInterface userInterface,
             final Path assetRoot,
             final Camera camera,
@@ -89,10 +91,8 @@ public class GameplayGameModeRenderer extends GameModeRenderer<GameplayGameMode>
         return builder.build();
     }
 
-    @Override
-    protected UserInterface createUserInterface(
+    private static UserInterface createUserInterface(
             final Events events,
-            final GameplayGameMode gameMode,
             final Camera camera,
             final AssetManager assetManager
     ) {

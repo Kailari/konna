@@ -8,32 +8,27 @@ import fi.jakojaannos.roguelite.engine.GameMode;
 import fi.jakojaannos.roguelite.engine.view.GameModeRenderer;
 
 public class GameModeRendererFactory {
-    @SuppressWarnings("rawtypes")
-    private final Map<Class<? extends GameMode>, Factory> renderers;
+    private final Map<Integer, Factory> factories;
 
     public GameModeRendererFactory() {
-        this.renderers = new HashMap<>();
+        this.factories = new HashMap<>();
     }
 
-    public <TGameMode extends GameMode> void register(
-            final Class<TGameMode> modeClass,
-            final Factory<TGameMode> factory
-    ) {
-        this.renderers.put(modeClass, factory);
+    public void register(final int modeId, final Factory factory) {
+        this.factories.put(modeId, factory);
     }
 
     @Nullable
-    @SuppressWarnings("unchecked")
-    public <TGameMode extends GameMode> GameModeRenderer<TGameMode> get(final TGameMode mode) {
-        final var modeClass = mode.getClass();
-        if (!this.renderers.containsKey(modeClass)) {
+    public GameModeRenderer get(final GameMode mode) {
+        if (!this.factories.containsKey(mode.id())) {
             return null;
         }
 
-        return (GameModeRenderer<TGameMode>) this.renderers.get(modeClass).get(mode);
+        final var factory = this.factories.get(mode.id());
+        return factory.get(mode);
     }
 
-    public interface Factory<TGameMode extends GameMode> {
-        GameModeRenderer<TGameMode> get(TGameMode gameMode);
+    public interface Factory {
+        GameModeRenderer get(GameMode gameMode);
     }
 }

@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.game.view.state;
+package fi.jakojaannos.roguelite.game.view.gamemode;
 
 import java.nio.file.Path;
 
@@ -14,29 +14,30 @@ import fi.jakojaannos.roguelite.engine.view.ui.ProportionValue;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.game.DebugConfig;
-import fi.jakojaannos.roguelite.game.state.MainMenuGameMode;
 import fi.jakojaannos.roguelite.game.view.systems.NetworkHUDSystem;
 import fi.jakojaannos.roguelite.game.view.systems.UserInterfaceRenderingSystem;
 import fi.jakojaannos.roguelite.game.view.systems.debug.EntityCollisionBoundsRenderingSystem;
 import fi.jakojaannos.roguelite.game.view.systems.debug.EntityTransformRenderingSystem;
 
-public class MainMenuGameModeRenderer extends GameModeRenderer<MainMenuGameMode> {
-
+public final class MainMenuGameModeRenderer {
     public static final String TITLE_LABEL_NAME = "title_label";
 
-    public MainMenuGameModeRenderer(
+    private MainMenuGameModeRenderer() {
+    }
+
+    public static GameModeRenderer create(
             final Events events,
-            final MainMenuGameMode gameMode,
             final Path assetRoot,
             final Camera camera,
             final AssetManager assetManager,
             final RenderingBackend backend
     ) {
-        super(events, gameMode, assetRoot, camera, assetManager, backend);
+        final var userInterface = createUserInterface(events, camera, assetManager);
+        final var dispatcher = createRenderDispatcher(userInterface, assetRoot, camera, assetManager, backend);
+        return new GameModeRenderer(dispatcher, userInterface);
     }
 
-    @Override
-    protected SystemDispatcher createRenderDispatcher(
+    private static SystemDispatcher createRenderDispatcher(
             final UserInterface userInterface,
             final Path assetRoot,
             final Camera camera,
@@ -72,10 +73,8 @@ public class MainMenuGameModeRenderer extends GameModeRenderer<MainMenuGameMode>
         return builder.build();
     }
 
-    @Override
-    protected UserInterface createUserInterface(
+    private static UserInterface createUserInterface(
             final Events events,
-            final MainMenuGameMode gameMode,
             final Camera camera,
             final AssetManager assetManager
     ) {

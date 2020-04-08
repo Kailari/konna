@@ -10,7 +10,7 @@ import fi.jakojaannos.roguelite.engine.GameMode;
 import fi.jakojaannos.roguelite.engine.GameRunner;
 import fi.jakojaannos.roguelite.engine.GameState;
 import fi.jakojaannos.roguelite.engine.data.resources.Network;
-import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.input.InputProvider;
 import fi.jakojaannos.roguelite.engine.network.NetworkManager;
@@ -22,23 +22,8 @@ public class RogueliteServer {
     ) {
         try (final var runner = new ServerGameRunner(port)) {
             final Queue<InputEvent> dummyInputQueue = new ArrayDeque<>();
-            runner.run(new ServerGameMode(), () -> dummyInputQueue);
-        }
-    }
-
-    // FIXME: Get rid of this
-    private static class ServerGameMode implements GameMode {
-        @Override
-        public GameState createState(final World world) {
-            return new GameState(world);
-        }
-
-        @Override
-        public void tick(final GameState state) {
-        }
-
-        @Override
-        public void close() {
+            runner.run(new GameMode(-1, SystemDispatcher.builder().build(), GameState::new),
+                       () -> dummyInputQueue);
         }
     }
 

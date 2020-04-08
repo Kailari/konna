@@ -7,7 +7,7 @@ import org.joml.Vector2d;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.event.Events;
-import fi.jakojaannos.roguelite.game.state.GameplayGameMode;
+import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;
 
 import static fi.jakojaannos.roguelite.game.test.global.GlobalGameState.*;
 import static fi.jakojaannos.roguelite.game.test.global.GlobalState.*;

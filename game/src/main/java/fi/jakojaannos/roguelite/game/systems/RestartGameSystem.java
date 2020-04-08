@@ -12,8 +12,8 @@ import fi.jakojaannos.roguelite.engine.state.StateEvent;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
 import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
-import fi.jakojaannos.roguelite.game.state.GameplayGameMode;
-import fi.jakojaannos.roguelite.game.state.MainMenuGameMode;
+import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;
+import fi.jakojaannos.roguelite.game.gamemode.MainMenuGameMode;
 
 // TODO: Use "Player dead event" to enable this system
 public class RestartGameSystem implements ECSSystem {
@@ -40,11 +40,11 @@ public class RestartGameSystem implements ECSSystem {
         if (inputs.inputRestart) {
             world.fetchResource(Events.class)
                  .state()
-                 .fire(new StateEvent.ChangeMode(new GameplayGameMode(System.nanoTime())));
+                 .fire(new StateEvent.ChangeMode(GameplayGameMode.create(System.nanoTime())));
         } else if (inputs.inputMenu) {
             world.fetchResource(Events.class)
                  .state()
-                 .fire(new StateEvent.ChangeMode(new MainMenuGameMode()));
+                 .fire(new StateEvent.ChangeMode(MainMenuGameMode.create()));
         }
     }
 }

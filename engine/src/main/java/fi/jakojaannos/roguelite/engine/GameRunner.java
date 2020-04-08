@@ -3,8 +3,6 @@ package fi.jakojaannos.roguelite.engine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Optional;
 import java.util.Queue;
@@ -99,9 +97,9 @@ public abstract class GameRunner implements MainThread {
                 limitFramerate();
             }
         } finally {
-            if (this.activeGameMode instanceof Closeable closeable) {
+            if (this.activeGameMode != null) {
                 try {
-                    closeable.close();
+                    this.activeGameMode.close();
                 } catch (final Exception e) {
                     LOG.warn("Cleaning up the game mode failed:", e);
                 }
@@ -142,7 +140,7 @@ public abstract class GameRunner implements MainThread {
         while (accumulator.canSimulateTick(this.timeManager.getTimeStep())) {
             pollInputEvents(inputProvider);
 
-            this.activeGameMode.tick(state);
+            this.activeGameMode.systemDispatcher().tick(state.world());
             accumulator.nextTick(this.timeManager.getTimeStep());
             this.timeManager.nextTick();
 
@@ -152,10 +150,10 @@ public abstract class GameRunner implements MainThread {
                     activeState = changeState.gameState();
                     stateHasChanged = true;
                 } else if (stateEvent instanceof StateEvent.ChangeMode changeMode) {
-                    if (this.activeGameMode instanceof Closeable closeable) {
+                    if (this.activeGameMode != null) {
                         try {
-                            closeable.close();
-                        } catch (final IOException e) {
+                            this.activeGameMode.close();
+                        } catch (final Exception e) {
                             LOG.error("Error while cleaning up old game mode: " + e.getMessage());
                         }
                     }
@@ -230,7 +228,7 @@ public abstract class GameRunner implements MainThread {
             public void setConnectionError(final String error) {
             }
         });
-        return this.activeGameMode.createState(world);
+        return this.activeGameMode.stateFactory().apply(world);
     }
 
     private void pollInputEvents(final InputProvider inputProvider) {

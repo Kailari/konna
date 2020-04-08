@@ -3,6 +3,7 @@ package fi.jakojaannos.roguelite.engine.data.resources;
 import org.joml.Vector2d;
 
 import java.util.Optional;
+import javax.annotation.Nullable;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
@@ -18,7 +19,7 @@ public class CameraProperties implements Resource {
 
     public Entity cameraEntity;
 
-    public CameraProperties(final Entity cameraEntity) {
+    public CameraProperties(@Nullable final Entity cameraEntity) {
         this.cameraEntity = cameraEntity;
     }
 

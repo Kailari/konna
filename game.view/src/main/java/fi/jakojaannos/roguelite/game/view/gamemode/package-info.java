@@ -1,7 +1,7 @@
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 @FieldsAreNonnullByDefault
-package fi.jakojaannos.roguelite.game.state;
+package fi.jakojaannos.roguelite.game.view.gamemode;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 

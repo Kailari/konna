@@ -1,7 +1,10 @@
-package fi.jakojaannos.roguelite.game;
+package fi.jakojaannos.roguelite.game.systems;
 
-import fi.jakojaannos.roguelite.engine.GameState;
+import java.util.stream.Stream;
+
 import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
+import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
+import fi.jakojaannos.roguelite.engine.ecs.Requirements;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.input.ButtonInput;
 import fi.jakojaannos.roguelite.engine.input.InputAxis;
@@ -9,14 +12,26 @@ import fi.jakojaannos.roguelite.engine.input.InputButton;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
 
 /**
- * @deprecated Leftover legacy input handling
+ * @deprecated Leftover legacy input handling. Used to be in <code>RogueliteGame.java</code>
  */
 @Deprecated
-public class RogueliteGame {
-    public static void tickInputs(final GameState state) {
-        final var inputs = state.world().fetchResource(Inputs.class);
-        final var mouse = state.world().fetchResource(Mouse.class);
-        final var events = state.world().fetchResource(Events.class);
+public class LegacyInputHandler implements EcsSystem<LegacyInputHandler.Resources, EcsSystem.NoEntities, EcsSystem.NoEvents> {
+    @Override
+    public Requirements<Resources, NoEntities, NoEvents> declareRequirements(
+            final Requirements<Resources, NoEntities, NoEvents> require
+    ) {
+        return require.resources(Resources.class);
+    }
+
+    @Override
+    public void tick(
+            final Resources resources,
+            final Stream<EntityDataHandle<NoEntities>> entities,
+            final NoEvents noEvents
+    ) {
+        final var inputs = resources.inputs;
+        final var mouse = resources.mouse;
+        final var events = resources.events;
         final var inputEvents = events.input();
 
         // FIXME: Input handling should happen in some engine-level system and provide actual inputs
@@ -77,5 +92,12 @@ public class RogueliteGame {
                 }
             });
         }
+    }
+
+    public static record Resources(
+            Inputs inputs,
+            Mouse mouse,
+            Events events
+    ) {
     }
 }
