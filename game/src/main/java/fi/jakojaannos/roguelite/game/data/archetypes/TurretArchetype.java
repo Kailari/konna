@@ -46,7 +46,7 @@ public class TurretArchetype {
                                         .projectileLifetimeInTicks(-1)
                                         .projectilePushForce(0.0)
                                         .build();
-        wepInv.equip(0, new InventoryWeapon<>(new SimpleWeapon(), wepStats));
+        wepInv.equip(0, new InventoryWeapon<>(SimpleWeapon.createBasicWeapon(), wepStats));
 
         return turret;
     }

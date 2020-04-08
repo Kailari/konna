@@ -54,7 +54,7 @@ public class StalkerArchetype {
                                         .projectileLifetimeInTicks(10)
                                         .projectilePushForce(0.0)
                                         .build();
-        wepInv.equip(0, new InventoryWeapon<>(new SimpleWeapon(), wepStats));
+        wepInv.equip(0, new InventoryWeapon<>(SimpleWeapon.createBasicWeapon(), wepStats));
 
         return entity;
     }
