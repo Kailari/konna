@@ -63,7 +63,7 @@ public class PlayerArchetype {
                                             .build();
         final var grenadeStats = WeaponStats.builder()
                                             .timeBetweenShots(timeManager.convertToTicks(3.0))
-                                            .projectileSpeed(1.0)
+                                            .projectileSpeed(12.0)
                                             .spread(0.0)
                                             .projectileSpeedNoise(0.0)
                                             .projectileLifetimeInTicks(-1)
