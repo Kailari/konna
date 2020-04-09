@@ -41,7 +41,6 @@ public class SingleShotTrigger implements Weapon.TriggerMechanism<SingleShotTrig
             final SingleShotTriggerState state
     ) {
         if (state.triggerDown && !state.shotFired) {
-            // TODO: is this a problem? TriggerMechanism assumes that weapon fires a shot
             state.shotFired = true;
             return true;
         }

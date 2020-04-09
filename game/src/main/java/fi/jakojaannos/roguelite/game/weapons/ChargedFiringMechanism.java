@@ -1,6 +1,7 @@
 package fi.jakojaannos.roguelite.game.weapons;
 
 import org.joml.Vector2d;
+import org.joml.Vector2i;
 
 import java.util.Random;
 
@@ -9,7 +10,7 @@ import fi.jakojaannos.roguelite.engine.ecs.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.EntityManager;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.utilities.math.CoordinateHelper;
-import fi.jakojaannos.roguelite.game.data.archetypes.ProjectileArchetype;
+import fi.jakojaannos.roguelite.game.data.archetypes.BombArchetype;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponStats;
 
@@ -76,35 +77,60 @@ public class ChargedFiringMechanism implements Weapon.FiringMechanism<ChargedFir
         final var speedNoise = (this.random.nextDouble() * 2.0 - 1.0) * stats.projectileSpeedNoise;
         final var actualSpeed = stats.projectileSpeed + speedNoise;
 
-        final var timestamp = timeManager.getCurrentGameTime();
-        ProjectileArchetype.createWeaponProjectile(entityManager,
-                                                   projectilePos,
-                                                   direction.normalize(actualSpeed)
-                                            .add(spreadOffset),
-                                                   attackAbility.damageSource,
-                                                   attackAbility.projectileLayer,
-                                                   timestamp,
-                                                   getProjectileLifetime(state, stats),
-                                                   stats.projectilePushForce);
+        final var minChargeTime = 0;
+        final var minChargeValue = 2;
+        final var maxChargeTime = 120;
+        final var maxChargeValue = 55;
+        final var airTime = getAirTime(
+                this.tempMin.set(minChargeTime, minChargeValue),
+                this.tempMax.set(maxChargeTime, maxChargeValue),
+                this.charge);
 
-        //state.lastAttackTimestamp = timestamp;
+        // TODO: move these to weaponStats or something
+        final var fuseTime = 120;
+        final var boomDamage = 2.5;
+        final var boomPushForce = 30;
+        final var shrapnelDamage = 1.5;
+
+        final var timestamp = timeManager.getCurrentGameTime();
+        BombArchetype.createGrenade(entityManager,
+                                    projectilePos,
+                                    direction.normalize(actualSpeed)
+                                             .add(spreadOffset),
+                                    attackAbility.damageSource,
+                                    attackAbility.projectileLayer,
+                                    timestamp,
+                                    fuseTime,
+                                    airTime,
+                                    boomPushForce,
+                                    boomDamage,
+                                    shrapnelDamage);
+
         state.setLastAttackTimestamp(timestamp);
-        //state.hasFired = true;
         state.setHasFired(true);
     }
 
-    // TODO: this is more of an proof of concept version of a system that takes in some variable
-    //  (such as time charged the shot) and changes firing behaviour based on that
-    private final Vector2d tempMinVal = new Vector2d(0, 10);
-    private final Vector2d tempMaxVal = new Vector2d(120, 500);
-    private final Vector2d temp = new Vector2d();
+    private final Vector2i tempMin = new Vector2i();
+    private final Vector2i tempMax = new Vector2i();
 
-    private long getProjectileLifetime(
-            final ChargedFiringState state,
-            final WeaponStats stats
+    private static long getAirTime(
+            final Vector2i minVal,
+            final Vector2i maxVal,
+            final ChargedFiringState state
     ) {
-        //final var timeCharged = state.chargeEndTimestamp - state.chargeStartTimestamp;
-        this.tempMinVal.lerp(this.tempMaxVal, state.getChargeTime() / this.tempMaxVal.x, this.temp);
-        return (long) this.temp.y;
+        // if time charged is less than minVal.x, return minVal.y
+        // if time charged is more than maxVal.x, return maxVal.y
+        // else return LERP between the two
+        if (state.getChargeTime() <= minVal.x) return minVal.y;
+        if (state.getChargeTime() >= maxVal.x) return maxVal.y;
+
+        final var diff = maxVal.x - minVal.x;
+        if (diff == 0) return minVal.y;
+
+        // y = y0 + (x - x0) * (y1 - y0) / (x1 - x0)
+        return (long) (minVal.y
+                + (state.getChargeTime() - minVal.x)
+                * (maxVal.y - minVal.y)
+                / ((double) maxVal.x - minVal.x));
     }
 }
