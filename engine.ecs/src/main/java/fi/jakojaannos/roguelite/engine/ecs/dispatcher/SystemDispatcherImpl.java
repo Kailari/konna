@@ -106,16 +106,19 @@ public class SystemDispatcherImpl implements SystemDispatcher {
         this.tick++;
         final var ticked = new ArrayList<SystemGroup>(queue.size());
 
-        // FIXME: isGroupReadyToTick is evaluated twice. Split this to two steps to avoid iterating twice every time
-        //          (this impl is O(n^2) overall, collecting could drop it close to O(n) in best case and would likely
-        //           not have adverse effect on performance anyway.)
-        while (queue.stream().anyMatch(group -> isGroupReadyToTick(group, systemState, queue))) {
-            queue.stream() // TODO: locks on entity/component storage and make this parallel?
-                 .filter(group -> isGroupReadyToTick(group, systemState, queue))
-                 .forEach(group -> {
-                     ticked.add(group);
-                     tick(group, world, systemState, events);
-                 });
+        while (!queue.isEmpty()) {
+            // TODO: locks on entity/component storage and make this parallel?
+            for (final var group : queue) {
+                if (isGroupReadyToTick(group, systemState, queue)) {
+                    ticked.add(group);
+                    tick(group, world, systemState, events);
+                }
+            }
+
+            // Break out if none of the systems in queue could be ticked
+            if (ticked.size() == 0) {
+                break;
+            }
 
             ticked.forEach(queue::remove);
             ticked.clear();
@@ -267,6 +270,14 @@ public class SystemDispatcherImpl implements SystemDispatcher {
                         .collect(Collectors.toMap(Object::getClass, event -> event));
     }
 
+    /**
+     * A group is ready to tick if all of the following are satisfied.
+     * <ol>
+     *     <li>The group itself is enabled</li>
+     *     <li>All its dependencies have been ticked (none of them are queued for tick anymore)</li>
+     *     <li>Any of its systems is enabled</li>
+     * </ol>
+     */
     private static boolean isGroupReadyToTick(
             final SystemGroup group,
             final SystemState systemState,
