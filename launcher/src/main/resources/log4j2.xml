@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration xmlns="http://logging.apache.org/log4j/2.0/config">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <!--
+            Legend:
+                %d              -   date
+                %t              -   thread
+                %msg            -   message
+                %-5level        -   Log level, right-padded to be 5 characters long
+                %-24logger{1}   -   Logger name, with precision of 1 (only class name), right-padded
+                                    to be 24 chars long.
+
+            More info: https://logging.apache.org/log4j/2.x/manual/layouts.html
+            -->
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] [%-5level] %-24logger{1} - %msg%n"/>
+
+            <!-- Filters, use these to configure what gets logged by default -->
+            <Filters>
+                <MarkerFilter marker="HEALTH" onMatch="DENY" onMismatch="NEUTRAL" />
+                <MarkerFilter marker="ENTITY_LIFECYCLE" onMatch="DENY" onMismatch="NEUTRAL" />
+            </Filters>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Root level="trace">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>

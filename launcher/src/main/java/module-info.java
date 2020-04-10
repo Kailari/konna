@@ -1,5 +1,6 @@
 module roguelite.launcher {
     requires org.slf4j;
+    requires org.apache.logging.log4j;
     requires roguelite.game.app;
 
     // Make sure jlink packages the natives

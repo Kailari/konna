@@ -3,56 +3,20 @@ package fi.jakojaannos.roguelite.game;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
-import java.util.Iterator;
+import fi.jakojaannos.roguelite.engine.utilities.logging.EnumMarker;
 
-public enum LogCategories implements Marker {
+public enum LogCategories implements EnumMarker {
     HEALTH,
-    DEATH,
     NET_CONNECTION;
 
     private final Marker wrapped;
 
+    @Override
+    public Marker getWrapped() {
+        return this.wrapped;
+    }
+
     LogCategories() {
         this.wrapped = MarkerFactory.getMarker(name());
-    }
-
-    @Override
-    public String getName() {
-        return this.wrapped.getName();
-    }
-
-    @Override
-    public void add(final Marker reference) {
-        this.wrapped.add(reference);
-    }
-
-    @Override
-    public boolean remove(final Marker reference) {
-        return this.wrapped.remove(reference);
-    }
-
-    @Override
-    public boolean hasChildren() {
-        return false;
-    }
-
-    @Override
-    public boolean hasReferences() {
-        return this.wrapped.hasReferences();
-    }
-
-    @Override
-    public Iterator<Marker> iterator() {
-        return this.wrapped.iterator();
-    }
-
-    @Override
-    public boolean contains(final Marker other) {
-        return this.wrapped.contains(other);
-    }
-
-    @Override
-    public boolean contains(final String name) {
-        return this.wrapped.contains(name);
     }
 }

@@ -38,14 +38,16 @@ public class HealthUpdateSystem implements ECSSystem {
             final var damageInstances = health.damageInstances;
             for (final var instance : damageInstances) {
                 health.currentHealth -= instance.damage();
-                LOG.debug(LogCategories.HEALTH, "Entity {} took {} damage. Has {} health remaining",
+                LOG.debug(LogCategories.HEALTH,
+                          "Entity {} took {} damage. Has {} health remaining",
                           entity.getId(),
                           instance.damage(),
                           health.currentHealth);
             }
 
             if (health.currentHealth <= 0.0f) {
-                LOG.debug(LogCategories.HEALTH, "Entity {} health less than or equal to zero. Marking as dead.",
+                LOG.trace(LogCategories.HEALTH,
+                          "Entity {} health less than or equal to zero. Marking as dead.",
                           entity.getId());
                 entityManager.addComponentIfAbsent(entity, DeadTag.class, DeadTag::new);
 
