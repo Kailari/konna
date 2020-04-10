@@ -8,9 +8,8 @@ import javax.annotation.Nullable;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Resource;
 
-public class CameraProperties implements Resource {
+public class CameraProperties {
     public double viewportWidthInWorldUnits;
     public double viewportHeightInWorldUnits;
 

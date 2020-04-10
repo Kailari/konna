@@ -3,13 +3,12 @@ package fi.jakojaannos.roguelite.game.data.resources.collision;
 import java.util.*;
 
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Resource;
 import fi.jakojaannos.roguelite.game.systems.collision.CollisionEvent;
 
 /**
  * Manages {@link CollisionEvent CollisionEvents} for entities.
  */
-public class Collisions implements Resource {
+public class Collisions {
     private final Map<Entity, List<CollisionEvent>> collisionEvents = new HashMap<>();
 
     /**

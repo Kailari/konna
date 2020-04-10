@@ -41,6 +41,7 @@ public record ParsedRequirements<TResources, TEntityData, TEvents>(
         for (int i = 0; i < params.length; ++i) {
             params[i] = eventLookup.get(eventTypes[i]);
 
+            // Allow non-required events to be null
             final var isRequiredEvent = !this.events.enableOn()[i] && !this.events.disableOn()[i];
             if (params[i] == null && isRequiredEvent) {
                 return null;

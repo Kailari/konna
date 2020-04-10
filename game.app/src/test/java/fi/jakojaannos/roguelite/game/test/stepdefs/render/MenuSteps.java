@@ -82,9 +82,10 @@ public class MenuSteps {
         assertNotEquals(MainMenuGameMode.GAME_MODE_ID, mode.id());
     }
 
-    @Then("the game is now in the main menu")
-    public void theGameIsNowInTheMainMenu() {
+    @Then("the game now proceeds to the main menu after next tick")
+    public void theGameNowProceedsToTheMainMenu() {
         simulateTick();
+        simulateTick(); // NOTE: It takes two ticks before the events are processed
         assertEquals(MainMenuGameMode.GAME_MODE_ID, mode.id());
     }
 }

@@ -14,6 +14,6 @@ Feature: The player has died. They wish to return to the main menu.
 
   Scenario: The player has died. They press escape and are returned to menu.
     Given the player has 0 health
-    When player presses key "ESCAPE"
-    And the game runs for a single tick
-    Then the game is now in the main menu
+    When the game runs for a single tick
+    And player presses key "ESCAPE"
+    Then the game now proceeds to the main menu after next tick

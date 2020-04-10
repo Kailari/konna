@@ -47,6 +47,12 @@ public class SystemDispatcherImpl implements SystemDispatcher {
     private final ForkJoinPool threadPool;
     private final List<SystemGroup> systemGroups;
     private final List<Object> allSystems;
+    private boolean parallel;
+
+    @Override
+    public void setParallel(final boolean state) {
+        this.parallel = state;
+    }
 
     // TODO: Move to SystemContext which contains the requirements and enabled status
     //       - possibly move the system there, too, and make groups rely on SystemIds
@@ -56,6 +62,8 @@ public class SystemDispatcherImpl implements SystemDispatcher {
     private int tick;
 
     public SystemDispatcherImpl(final List<SystemGroup> systemGroups) {
+        this.parallel = true;
+
         this.systemGroups = systemGroups;
         this.allSystems = this.systemGroups.stream()
                                            .flatMap(systemGroup -> systemGroup.getSystems().stream())
@@ -228,7 +236,7 @@ public class SystemDispatcherImpl implements SystemDispatcher {
         try {
             threadPool.submit(
                     () -> system.tick(systemResources,
-                                      StreamSupport.stream(entitySpliterator, true),
+                                      StreamSupport.stream(entitySpliterator, this.parallel),
                                       systemEvents)
             ).get();
         } catch (final InterruptedException e) {
