@@ -15,4 +15,9 @@ public class LegacyEntityHandleImpl extends EntityHandleImpl implements Entity {
     ) {
         super(id, world);
     }
+
+    @Override
+    public String toString() {
+        return "LegacyEntityHandle[" + this.getId() + "]";
+    }
 }

@@ -53,7 +53,7 @@ public interface EcsSystem<TResources, TEntityData, TEvents> {
         <TComponent> boolean addComponent(TComponent component);
 
         /**
-         * @see EntityHandle#addOrGet(Supplier)
+         * @see EntityHandle#addOrGet(Class, Supplier)
          */
         <TComponent> TComponent addOrGet(Class<TComponent> componentClass, Supplier<TComponent> component);
 

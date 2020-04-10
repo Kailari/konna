@@ -160,19 +160,14 @@ public class SystemDispatcherImpl implements SystemDispatcher {
                 var shouldEnable = false;
                 var shouldDisable = false;
                 for (final Class<?> eventClass : events.keySet()) {
-                    LOG.debug("Checking event {} for system {}",
-                              eventClass.getSimpleName(),
-                              systemObj.getClass().getSimpleName());
                     final var hasEnableOn = Arrays.stream(requirements.events().enableOn())
                                                   .anyMatch(clazz -> clazz.isAssignableFrom(eventClass));
                     final var hasDisableOn = Arrays.stream(requirements.events().disableOn())
                                                    .anyMatch(clazz -> clazz.isAssignableFrom(eventClass));
 
-                    LOG.debug("Has @EnableOn: {}", hasEnableOn);
-                    LOG.debug("Has @DisableOn: {}", hasDisableOn);
                     // Special case: @EnableOn + @DisableOn = "@TickOnce"
+                    // TODO: Events live only for one tick, @TickOnce is implied from no annotations!
                     if (hasEnableOn && hasDisableOn) {
-                        LOG.debug("...is effectively @TickOnce! Enabling!");
                         shouldEnable = true;
                     } else if (hasDisableOn) {
                         // @DisableOn takes precedence. If any event is @DisableOn, the system will

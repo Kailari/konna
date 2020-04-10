@@ -66,14 +66,15 @@ public class EntityHandleImpl implements EntityHandle {
 
     @Override
     public void destroy() {
+        if (this.destroyed) {
+            throw new IllegalStateException("Already destroyed!");
+        }
+
         if (this.pendingRemoval) {
             LOG.warn("Already marked for removal!");
             return;
         }
 
-        if (this.destroyed) {
-            throw new IllegalStateException("Already destroyed!");
-        }
         this.world.destroyEntity(this);
     }
 

@@ -30,7 +30,7 @@ public class ReaperSystem implements ECSSystem {
         final var entityManager = world.getEntityManager();
         entities.forEach(entity -> {
             entityManager.destroyEntity(entity);
-            LOG.debug(LogCategories.DEATH, "Destroyed a dead entity {}", entity.getId());
+            LOG.trace(LogCategories.HEALTH, "Destroyed a dead entity {}", entity.getId());
         });
     }
 }

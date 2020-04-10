@@ -1,15 +1,21 @@
 package fi.jakojaannos.roguelite.engine.ecs.world;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
+import fi.jakojaannos.roguelite.engine.ecs.LogCategories;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.world.storage.ComponentStorage;
 import fi.jakojaannos.roguelite.engine.ecs.world.storage.ResourceStorage;
 
 public class WorldImpl implements World {
+    private static final Logger LOG = LoggerFactory.getLogger(World.class);
+
     @Deprecated
     private final LegacyCompat compat;
 
@@ -70,6 +76,7 @@ public class WorldImpl implements World {
         final var id = this.idCounter;
         this.idCounter++;
 
+        LOG.debug(LogCategories.ENTITY_LIFECYCLE, "Creating entity with id {}", id);
         if (id == this.entities.length) {
             resize(this.capacity + 256);
         }
@@ -96,6 +103,7 @@ public class WorldImpl implements World {
 
     @Override
     public void destroyEntity(final EntityHandle handle) {
+        LOG.trace(LogCategories.ENTITY_LIFECYCLE, "Marking entity {} for removal", handle);
         final var actualHandle = (EntityHandleImpl) handle;
         actualHandle.markPendingRemoval();
 
@@ -105,6 +113,7 @@ public class WorldImpl implements World {
             actualHandle.markDestroyed();
 
             final var removedSlot = actualHandle.getId();
+            LOG.debug(LogCategories.ENTITY_LIFECYCLE, "Destroyed entity {}", removedSlot);
 
             // Swap components from the last entity to the removed slot
             this.componentStorage.moveAndClear(this.idCounter, removedSlot);
@@ -123,6 +132,7 @@ public class WorldImpl implements World {
 
     @Override
     public void clearAllEntities() {
+        LOG.warn(LogCategories.ENTITY_LIFECYCLE, "Clearing all ({}) entities!", this.nEntities);
         this.entityRemoveTasks.clear();
         this.componentStorage.clear();
         for (int i = 0; i < this.entities.length; i++) {
