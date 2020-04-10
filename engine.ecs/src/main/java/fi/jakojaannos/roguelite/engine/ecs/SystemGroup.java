@@ -6,8 +6,6 @@ import java.util.Collection;
  * Logical group of systems with internal ordering. Systems inside a group are executed sequentially.
  */
 public interface SystemGroup {
-    boolean isEnabled();
-
     Collection<SystemGroup> getDependencies();
 
     // TODO: Change to EcsSystem

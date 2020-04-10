@@ -23,6 +23,7 @@ public class UpdateSessionTimerSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
+        // TODO: @DisableOn GameLostEvent
         final var noPlayersAlive = entities.count() == 0;
         if (noPlayersAlive) {
             return;

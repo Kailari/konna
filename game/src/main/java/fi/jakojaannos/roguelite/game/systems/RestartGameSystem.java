@@ -2,49 +2,52 @@ package fi.jakojaannos.roguelite.game.systems;
 
 import java.util.stream.Stream;
 
+import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
+import fi.jakojaannos.roguelite.engine.ecs.Requirements;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
+import fi.jakojaannos.roguelite.engine.ecs.annotation.DisabledByDefault;
+import fi.jakojaannos.roguelite.engine.ecs.annotation.EnableOn;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.state.StateEvent;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
+import fi.jakojaannos.roguelite.game.data.events.GameLostEvent;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
 import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
 import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;
 import fi.jakojaannos.roguelite.game.gamemode.MainMenuGameMode;
 
-// TODO: Use "Player dead event" to enable this system
-public class RestartGameSystem implements ECSSystem {
+@DisabledByDefault
+public class RestartGameSystem implements EcsSystem<RestartGameSystem.Resources, EcsSystem.NoEntities, RestartGameSystem.EventData> {
     @Override
-    public void declareRequirements(final RequirementsBuilder requirements) {
-        requirements.addToGroup(SystemGroups.CLEANUP)
-                    .requireResource(Inputs.class)
-                    .requireResource(SessionStats.class)
-                    .requireProvidedResource(TimeManager.class)
-                    .withComponent(PlayerTag.class);
+    public Requirements<Resources, NoEntities, EventData> declareRequirements(
+            final Requirements<Resources, NoEntities, EventData> require
+    ) {
+        return require.resources(Resources.class)
+                      .events(EventData.class);
     }
 
     @Override
     public void tick(
-            final Stream<Entity> entities,
-            final World world
+            final Resources resources,
+            final Stream<EntityDataHandle<NoEntities>> entities,
+            final EventData eventData
     ) {
-        final var anyPlayerAlive = entities.count() > 0;
-        if (anyPlayerAlive) {
-            return;
-        }
-
-        final var inputs = world.fetchResource(Inputs.class);
+        final var inputs = resources.inputs;
         if (inputs.inputRestart) {
-            world.fetchResource(Events.class)
-                 .state()
-                 .fire(new StateEvent.ChangeMode(GameplayGameMode.create(System.nanoTime())));
+            resources.events()
+                     .state()
+                     .fire(new StateEvent.ChangeMode(GameplayGameMode.create(System.nanoTime())));
         } else if (inputs.inputMenu) {
-            world.fetchResource(Events.class)
-                 .state()
-                 .fire(new StateEvent.ChangeMode(MainMenuGameMode.create()));
+            resources.events()
+                     .state()
+                     .fire(new StateEvent.ChangeMode(MainMenuGameMode.create()));
         }
     }
+
+    public static record Resources(Inputs inputs, Events events) {}
+
+    public static record EventData(@EnableOn GameLostEvent gameLost) {}
 }

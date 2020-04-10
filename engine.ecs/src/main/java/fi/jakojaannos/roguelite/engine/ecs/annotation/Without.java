@@ -1,6 +1,8 @@
-package fi.jakojaannos.roguelite.engine.ecs;
+package fi.jakojaannos.roguelite.engine.ecs.annotation;
 
 import java.lang.annotation.*;
+
+import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 
 /**
  * Inverts a input entity data requirement of a system. Mark record component with this annotation to make the system

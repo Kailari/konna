@@ -5,5 +5,6 @@ module roguelite.engine.ecs {
     requires roguelite.engine.utilities;
 
     exports fi.jakojaannos.roguelite.engine.ecs;
+    exports fi.jakojaannos.roguelite.engine.ecs.annotation;
     exports fi.jakojaannos.roguelite.engine.ecs.legacy;
 }

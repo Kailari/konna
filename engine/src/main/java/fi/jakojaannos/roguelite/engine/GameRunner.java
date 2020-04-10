@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.Queue;
 
@@ -25,6 +26,7 @@ public abstract class GameRunner implements MainThread {
     private final GameRunnerTimeManager timeManager;
     private final EventBus<StateEvent> stateBus;
     private final EventBus<InputEvent> inputBus;
+    private final EventBus<Object> systemBus;
     private final Events events;
 
     private final Object taskQueueLock = new Object();
@@ -49,10 +51,6 @@ public abstract class GameRunner implements MainThread {
         return this.events;
     }
 
-    public GameMode getActiveGameMode() {
-        return this.activeGameMode;
-    }
-
     public TimeManager getTimeManager() {
         return this.timeManager;
     }
@@ -64,7 +62,8 @@ public abstract class GameRunner implements MainThread {
     protected GameRunner(final GameRunnerTimeManager timeManager) {
         this.stateBus = new EventBus<>();
         this.inputBus = new EventBus<>();
-        this.events = new Events(new EventBus<>(), this.inputBus, this.stateBus);
+        this.systemBus = new EventBus<>();
+        this.events = new Events(new EventBus<>(), this.inputBus, this.stateBus, this.systemBus);
         this.timeManager = timeManager;
     }
 
@@ -159,7 +158,11 @@ public abstract class GameRunner implements MainThread {
         while (accumulator.canSimulateTick(this.timeManager.getTimeStep())) {
             pollInputEvents(inputProvider);
 
-            this.activeGameMode.systemDispatcher().tick(state.world());
+            final var systemEvents = new ArrayList<>();
+            while (this.systemBus.hasEvents()) {
+                systemEvents.add(this.systemBus.pollEvent());
+            }
+            this.activeGameMode.systemDispatcher().tick(state.world(), state.systems(), systemEvents);
             accumulator.nextTick(this.timeManager.getTimeStep());
             this.timeManager.nextTick();
 
@@ -243,7 +246,8 @@ public abstract class GameRunner implements MainThread {
             public void setConnectionError(final String error) {
             }
         });
-        return gameMode.stateFactory().apply(world);
+        gameMode.stateFactory().accept(world);
+        return new GameState(world, gameMode.systemStateFactory().get());
     }
 
     private void pollInputEvents(final InputProvider inputProvider) {

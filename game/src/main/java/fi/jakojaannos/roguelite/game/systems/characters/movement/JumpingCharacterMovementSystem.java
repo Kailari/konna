@@ -6,7 +6,7 @@ import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Requirements;
-import fi.jakojaannos.roguelite.engine.ecs.Without;
+import fi.jakojaannos.roguelite.engine.ecs.annotation.Without;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.InAir;
 import fi.jakojaannos.roguelite.game.data.components.Physics;

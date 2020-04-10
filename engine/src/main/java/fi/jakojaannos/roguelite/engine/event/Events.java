@@ -1,6 +1,5 @@
 package fi.jakojaannos.roguelite.engine.event;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.ProvidedResource;
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.state.StateEvent;
 import fi.jakojaannos.roguelite.engine.ui.UIEvent;
@@ -15,6 +14,15 @@ import fi.jakojaannos.roguelite.engine.ui.UIEvent;
 public record Events(
         EventReceiver<UIEvent>ui,
         EventReceiver<InputEvent>input,
-        EventSender<StateEvent>state
-) implements ProvidedResource {
+        EventSender<StateEvent>state,
+        EventSender<Object>system
+) {
+    @Deprecated
+    public Events(
+            final EventReceiver<UIEvent> ui,
+            final EventReceiver<InputEvent> input,
+            final EventSender<StateEvent> state
+    ) {
+        this(ui, input, state, new EventBus<>());
+    }
 }

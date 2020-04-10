@@ -4,11 +4,12 @@ import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Requirements;
+import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.game.data.components.character.DeadTag;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
+import fi.jakojaannos.roguelite.game.data.events.PlayerDeadEvent;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 
-// TODO: EntityDestroyedEvent
 public class CleanUpDeadPlayersSystem implements EcsSystem<CleanUpDeadPlayersSystem.Resources, CleanUpDeadPlayersSystem.EntityData, EcsSystem.NoEvents> {
     @Override
     public Requirements<Resources, EntityData, NoEvents> declareRequirements(
@@ -24,10 +25,13 @@ public class CleanUpDeadPlayersSystem implements EcsSystem<CleanUpDeadPlayersSys
             final Stream<EntityDataHandle<EntityData>> entities,
             final NoEvents noEvents
     ) {
-        entities.forEach(entity -> resources.players.removePlayer(entity.getHandle()));
+        entities.forEach(entity -> {
+            resources.events.system().fire(new PlayerDeadEvent());
+            resources.players.removePlayer(entity.getHandle());
+        });
     }
 
-    public static record Resources(Players players) {}
+    public static record Resources(Players players, Events events) {}
 
     public static record EntityData(
             DeadTag deadTag,
