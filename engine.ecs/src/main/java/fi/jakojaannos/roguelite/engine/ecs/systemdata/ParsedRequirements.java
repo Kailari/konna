@@ -2,6 +2,7 @@ package fi.jakojaannos.roguelite.engine.ecs.systemdata;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 import fi.jakojaannos.roguelite.engine.ecs.world.storage.ResourceStorage;
 
@@ -33,11 +34,17 @@ public record ParsedRequirements<TResources, TEntityData, TEvents>(
         }
     }
 
+    @Nullable
     public TEvents constructEvents(final Map<Class<?>, Object> eventLookup) {
         final var eventTypes = this.events.componentTypes();
         final var params = new Object[eventTypes.length];
         for (int i = 0; i < params.length; ++i) {
             params[i] = eventLookup.get(eventTypes[i]);
+
+            final var isRequiredEvent = !this.events.enableOn()[i] && !this.events.disableOn()[i];
+            if (params[i] == null && isRequiredEvent) {
+                return null;
+            }
         }
 
         try {

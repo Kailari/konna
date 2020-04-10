@@ -17,7 +17,6 @@ import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.systemdata.ParsedRequirements;
 import fi.jakojaannos.roguelite.engine.ecs.systemdata.RequirementsBuilder;
 
-@SuppressWarnings("deprecation")
 public class SystemDispatcherImpl implements SystemDispatcher {
     private static final Logger LOG = LoggerFactory.getLogger(SystemDispatcherImpl.class);
     private static final boolean LOG_SYSTEM_TICK = false;
@@ -102,7 +101,7 @@ public class SystemDispatcherImpl implements SystemDispatcher {
         final var queue = new HashSet<>(this.systemGroups);
 
         if (LOG_TICK) {
-            LOG.debug("Tick #{} (Dispatcher {})", this.tick, this);
+            LOG.debug(LogCategories.DISPATCHER, "Tick #{} (Dispatcher {})", this.tick, this);
         }
         this.tick++;
         final var ticked = new ArrayList<SystemGroup>(queue.size());
@@ -121,32 +120,6 @@ public class SystemDispatcherImpl implements SystemDispatcher {
             ticked.forEach(queue::remove);
             ticked.clear();
         }
-
-        disableTickOnceListeners(systemState, events);
-    }
-
-    private void disableTickOnceListeners(
-            final SystemState systemState,
-            final Map<Class<?>, Object> events
-    ) {
-        for (final var systemObj : this.allSystems) {
-            if (systemObj instanceof EcsSystem<?, ?, ?> system) {
-                final var requirements = requirementsFor(system);
-
-                for (final Class<?> eventClass : events.keySet()) {
-                    final var hasEnableOn = Arrays.asList(requirements.events().enableOn())
-                                                  .contains(eventClass);
-                    final var hasDisableOn = Arrays.asList(requirements.events().disableOn())
-                                                   .contains(eventClass);
-
-                    // @EnableOn + @DisableOn = "@TickOnce"
-                    if (hasEnableOn && hasDisableOn) {
-                        systemState.setState(system, false);
-                        break;
-                    }
-                }
-            }
-        }
     }
 
     private void enableEventListeners(
@@ -159,28 +132,25 @@ public class SystemDispatcherImpl implements SystemDispatcher {
 
                 var shouldEnable = false;
                 var shouldDisable = false;
-                for (final Class<?> eventClass : events.keySet()) {
-                    final var hasEnableOn = Arrays.stream(requirements.events().enableOn())
-                                                  .anyMatch(clazz -> clazz.isAssignableFrom(eventClass));
-                    final var hasDisableOn = Arrays.stream(requirements.events().disableOn())
-                                                   .anyMatch(clazz -> clazz.isAssignableFrom(eventClass));
+                final var requiredTypes = requirements.events().componentTypes();
 
-                    // Special case: @EnableOn + @DisableOn = "@TickOnce"
-                    // TODO: Events live only for one tick, @TickOnce is implied from no annotations!
-                    if (hasEnableOn && hasDisableOn) {
-                        shouldEnable = true;
-                    } else if (hasDisableOn) {
-                        // @DisableOn takes precedence. If any event is @DisableOn, the system will
-                        // be disabled, ignoring all other events.
+                for (int i = 0; i < requiredTypes.length; i++) {
+                    // Skip all event types that are not present in the lookup
+                    if (!events.containsKey(requiredTypes[i])) {
+                        continue;
+                    }
+
+                    // Event is present, figure out if we need to enable/disable it
+                    final var hasEnableOn = requirements.events().enableOn()[i];
+                    final var hasDisableOn = requirements.events().disableOn()[i];
+                    if (hasDisableOn) {
                         shouldDisable = true;
-                        break;
                     } else if (hasEnableOn) {
-                        // Do not break here as some other event could have @DisableOn, which could
-                        // override shouldEnable
                         shouldEnable = true;
                     }
                 }
 
+                // Disable takes precedence
                 if (shouldDisable) {
                     systemState.setState(system, false);
                 } else if (shouldEnable) {
@@ -197,33 +167,33 @@ public class SystemDispatcherImpl implements SystemDispatcher {
             final Map<Class<?>, Object> events
     ) {
         if (LOG_GROUP_TICK) {
-            LOG.debug("Ticking group \"{}\"", group.getName());
+            LOG.trace(LogCategories.DISPATCHER, "Ticking group \"{}\"", group.getName());
         }
 
-        // XXX: This has to be sequential by the spec. "The system execution order must match the registration order"
-        group.getSystems()
-             .forEach(systemObj -> {
-                 if (LOG_SYSTEM_TICK) {
-                     LOG.debug("Ticking system \"{}\"", systemObj.getClass().getSimpleName());
-                 }
-                 if (systemObj instanceof ECSSystem legacySystem) {
-                     final var requirements = new ComponentOnlyRequirementsBuilder();
-                     legacySystem.declareRequirements(requirements);
-                     final var entities = world.getEntityManager()
-                                               .getEntitiesWith(requirements.required(),
-                                                                requirements.excluded());
-                     legacySystem.tick(entities, world);
-                 } else if (systemObj instanceof EcsSystem<?, ?, ?> system) {
-                     // XXX: This cannot be filter as that would possibly prevent tick in situations where previous
-                     //      system enables the next system
-                     if (systemState.isEnabled(system)) {
-                         dispatch(world, system, this.threadPool, events);
-                     }
-                 } else {
-                     throw new IllegalStateException("Invalid system type: " + systemObj.getClass().getSimpleName());
-                 }
-                 world.commitEntityModifications();
-             });
+        // XXX: This has to be sequential by the spec: (do not use parallel streams etc.)
+        //      "The system execution order within the group must match the registration order"
+        for (final var systemObj : group.getSystems()) {
+            if (LOG_SYSTEM_TICK) {
+                LOG.trace(LogCategories.DISPATCHER, "Ticking system \"{}\"", systemObj.getClass().getSimpleName());
+            }
+            if (systemObj instanceof ECSSystem legacySystem) {
+                final var requirements = new ComponentOnlyRequirementsBuilder();
+                legacySystem.declareRequirements(requirements);
+                final var entities = world.getEntityManager()
+                                          .getEntitiesWith(requirements.required(),
+                                                           requirements.excluded());
+                legacySystem.tick(entities, world);
+            } else if (systemObj instanceof EcsSystem<?, ?, ?> system) {
+                // XXX: This cannot be filter as that would possibly prevent tick in situations where previous
+                //      system enables the next system
+                if (systemState.isEnabled(system)) {
+                    dispatch(world, system, this.threadPool, events);
+                }
+            } else {
+                throw new IllegalStateException("Invalid system type: " + systemObj.getClass().getSimpleName());
+            }
+            world.commitEntityModifications();
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -246,6 +216,11 @@ public class SystemDispatcherImpl implements SystemDispatcher {
                                                               requirements.entityData().excluded(),
                                                               world,
                                                               requirements::constructEntityData);
+
+        // Return if event constraints were not met
+        if (systemEvents == null) {
+            return;
+        }
 
         try {
             threadPool.submit(

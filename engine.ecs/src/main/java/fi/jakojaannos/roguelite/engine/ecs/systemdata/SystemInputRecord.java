@@ -146,8 +146,7 @@ interface SystemInputRecord<T> {
             final boolean[] excluded = new boolean[recordComponents.length];
             for (var i = 0; i < recordComponents.length; ++i) {
                 excluded[i] = recordComponents[i].isAnnotationPresent(Without.class);
-                LOG.debug(LogCategories.SYSTEM_DATA_DUMP,
-                          "-> {} {} (excluded: {})",
+                LOG.debug(LogCategories.SYSTEM_DATA_DUMP, "-> {} {} (excluded: {})",
                           recordComponents[i].getType().getSimpleName(),
                           recordComponents[i].getName(),
                           excluded[i]);
@@ -160,8 +159,8 @@ interface SystemInputRecord<T> {
     record Events<T>(
             Constructor<T>constructor,
             Class<?>[]componentTypes,
-            Class<?>[]enableOn,
-            Class<?>[]disableOn
+            boolean[]enableOn,
+            boolean[]disableOn
     ) implements SystemInputRecord<T> {
         public static <T> Events<T> createFor(final Class<T> clazz) {
             LOG.debug(LogCategories.SYSTEM_DATA_DUMP,
@@ -175,17 +174,16 @@ interface SystemInputRecord<T> {
                                              .map(RecordComponent::getType)
                                              .toArray(Class<?>[]::new);
 
-            final var enableOn = Arrays.stream(recordComponents)
-                                       .filter(eventClass -> eventClass.isAnnotationPresent(EnableOn.class))
-                                       .map(RecordComponent::getType)
-                                       .toArray(Class<?>[]::new);
-            final var disableOn = Arrays.stream(recordComponents)
-                                        .filter(eventClass -> eventClass.isAnnotationPresent(DisableOn.class))
-                                        .map(RecordComponent::getType)
-                                        .toArray(Class<?>[]::new);
-
-            LOG.debug(LogCategories.SYSTEM_DATA_DUMP, "-> @EnableOn events: {}", Arrays.toString(enableOn));
-            LOG.debug(LogCategories.SYSTEM_DATA_DUMP, "-> @DisableOn events: {}", Arrays.toString(disableOn));
+            final boolean[] enableOn = new boolean[recordComponents.length];
+            final boolean[] disableOn = new boolean[recordComponents.length];
+            for (var i = 0; i < recordComponents.length; ++i) {
+                enableOn[i] = recordComponents[i].isAnnotationPresent(EnableOn.class);
+                disableOn[i] = recordComponents[i].isAnnotationPresent(DisableOn.class);
+                LOG.debug(LogCategories.SYSTEM_DATA_DUMP, "-> {} {} (@EnableOn: {}, @DisableOn: {})",
+                          recordComponents[i].getType().getSimpleName(),
+                          recordComponents[i].getName(),
+                          enableOn[i], disableOn[i]);
+            }
 
             return new Events<>(constructor, componentTypes, enableOn, disableOn);
         }
