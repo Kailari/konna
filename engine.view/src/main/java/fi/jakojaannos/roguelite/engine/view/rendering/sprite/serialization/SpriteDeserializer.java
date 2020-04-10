@@ -111,7 +111,7 @@ public class SpriteDeserializer<TTexture extends Texture> implements JsonDeseria
             final Map<String, Animation> animations
     ) {
         if (animationsJson == null) {
-            LOG.trace(LogCategories.SPRITE_SERIALIZATION,
+            LOG.trace(LogCategories.ASSET_LOADING,
                       "=> No animations found. Defaulting to infinite individual frames of all available frames.");
             animations.put("default", Animation.forFrameRange(0, frameCount - 1, Double.POSITIVE_INFINITY));
             return;

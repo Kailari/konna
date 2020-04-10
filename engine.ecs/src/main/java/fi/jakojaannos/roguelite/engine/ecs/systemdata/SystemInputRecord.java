@@ -7,6 +7,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.RecordComponent;
 import java.util.Arrays;
 
+import fi.jakojaannos.roguelite.engine.ecs.LogCategories;
 import fi.jakojaannos.roguelite.engine.ecs.annotation.DisableOn;
 import fi.jakojaannos.roguelite.engine.ecs.annotation.EnableOn;
 import fi.jakojaannos.roguelite.engine.ecs.annotation.Without;
@@ -105,14 +106,14 @@ interface SystemInputRecord<T> {
             Class<?>[]componentTypes
     ) implements SystemInputRecord<T> {
         static <T> Resources<T> createFor(final Class<T> clazz) {
-            LOG.debug("Parsing Resources {}", clazz.getName());
+            LOG.debug(LogCategories.SYSTEM_DATA_DUMP, "Parsing Resources {}", clazz.getName());
             validateIsRecord(clazz);
 
             final var recordComponents = resolveComponents(clazz);
             final var constructor = resolveConstructor(clazz, recordComponents);
 
             for (final RecordComponent recordComponent : recordComponents) {
-                LOG.debug("-> {} {}",
+                LOG.debug(LogCategories.SYSTEM_DATA_DUMP, "-> {} {}",
                           recordComponent.getType().getSimpleName(),
                           recordComponent.getName());
             }
@@ -131,7 +132,8 @@ interface SystemInputRecord<T> {
             boolean[]excluded
     ) implements SystemInputRecord<T> {
         public static <T> EntityData<T> createFor(final Class<T> clazz) {
-            LOG.debug("Parsing EntityData {}", clazz.getName());
+            LOG.debug(LogCategories.SYSTEM_DATA_DUMP,
+                      "Parsing EntityData {}", clazz.getName());
             validateIsRecord(clazz);
 
             final var recordComponents = resolveComponents(clazz);
@@ -144,7 +146,8 @@ interface SystemInputRecord<T> {
             final boolean[] excluded = new boolean[recordComponents.length];
             for (var i = 0; i < recordComponents.length; ++i) {
                 excluded[i] = recordComponents[i].isAnnotationPresent(Without.class);
-                LOG.debug("-> {} {} (excluded: {})",
+                LOG.debug(LogCategories.SYSTEM_DATA_DUMP,
+                          "-> {} {} (excluded: {})",
                           recordComponents[i].getType().getSimpleName(),
                           recordComponents[i].getName(),
                           excluded[i]);
@@ -161,7 +164,8 @@ interface SystemInputRecord<T> {
             Class<?>[]disableOn
     ) implements SystemInputRecord<T> {
         public static <T> Events<T> createFor(final Class<T> clazz) {
-            LOG.debug("Parsing EventData {}", clazz.getName());
+            LOG.debug(LogCategories.SYSTEM_DATA_DUMP,
+                      "Parsing EventData {}", clazz.getName());
             validateIsRecord(clazz);
 
             final var recordComponents = resolveComponents(clazz);
@@ -180,8 +184,8 @@ interface SystemInputRecord<T> {
                                         .map(RecordComponent::getType)
                                         .toArray(Class<?>[]::new);
 
-            LOG.debug("-> @EnableOn events: {}", Arrays.toString(enableOn));
-            LOG.debug("-> @DisableOn events: {}", Arrays.toString(disableOn));
+            LOG.debug(LogCategories.SYSTEM_DATA_DUMP, "-> @EnableOn events: {}", Arrays.toString(enableOn));
+            LOG.debug(LogCategories.SYSTEM_DATA_DUMP, "-> @DisableOn events: {}", Arrays.toString(disableOn));
 
             return new Events<>(constructor, componentTypes, enableOn, disableOn);
         }

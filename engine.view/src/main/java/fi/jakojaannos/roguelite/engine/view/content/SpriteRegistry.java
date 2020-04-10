@@ -53,7 +53,7 @@ public class SpriteRegistry extends AbstractAssetRegistry<Sprite> {
                 .create();
         final var path = this.assetRoot.resolve(handle.name() + ".json");
         try (final var reader = new InputStreamReader(Files.newInputStream(path, StandardOpenOption.READ))) {
-            LOG.trace(LogCategories.SPRITE_SERIALIZATION,
+            LOG.trace(LogCategories.ASSET_LOADING,
                       "Loading sprite {}", path.toString());
             return Optional.ofNullable(gson.fromJson(reader, Sprite.class));
         } catch (final IOException e) {

@@ -6,9 +6,7 @@ import org.slf4j.MarkerFactory;
 import fi.jakojaannos.roguelite.engine.utilities.logging.EnumMarker;
 
 public enum LogCategories implements EnumMarker {
-    ANIMATION,
-    SPRITE_SERIALIZATION,
-    UI_BUILDER;
+    ASSET_LOADING;
 
     private final Marker wrapped;
 
