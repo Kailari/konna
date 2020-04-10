@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 
+import fi.jakojaannos.roguelite.engine.view.LogCategories;
 import fi.jakojaannos.roguelite.engine.view.rendering.Texture;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -53,7 +54,7 @@ public class LWJGLTexture implements Texture {
 
         this.width = width;
         this.height = height;
-        LOG.debug("Done loading texture! {}×{}", width, height);
+        LOG.debug(LogCategories.ASSET_LOADING, "Done loading texture! {}×{}", width, height);
     }
 
     @Override

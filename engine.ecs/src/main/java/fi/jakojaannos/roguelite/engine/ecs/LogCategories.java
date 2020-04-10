@@ -6,7 +6,8 @@ import org.slf4j.MarkerFactory;
 import fi.jakojaannos.roguelite.engine.utilities.logging.EnumMarker;
 
 public enum LogCategories implements EnumMarker {
-    ENTITY_LIFECYCLE;
+    ENTITY_LIFECYCLE,
+    SYSTEM_DATA_DUMP;
 
     private final Marker wrapped;
 

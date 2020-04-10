@@ -7,7 +7,7 @@ import fi.jakojaannos.roguelite.engine.utilities.logging.EnumMarker;
 
 public enum LogCategories implements EnumMarker {
     HEALTH,
-    NET_CONNECTION;
+    NET_CONNECTION, COLLISION_LAYER;
 
     private final Marker wrapped;
 

@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fi.jakojaannos.roguelite.engine.utilities.BitMaskUtils;
+import fi.jakojaannos.roguelite.game.LogCategories;
 
 public enum CollisionLayer {
     NONE,
@@ -19,7 +20,7 @@ public enum CollisionLayer {
     private static final int MASK_SIZE = 1;
 
     static {
-        LOG.debug("Registering collision layers...");
+        LOG.debug(LogCategories.COLLISION_LAYER, "Registering collision layers...");
 
         COLLIDE_ALL.setCollidesWith(values());
         OVERLAP_ALL.setCollidesWith(values());
@@ -47,17 +48,17 @@ public enum CollisionLayer {
     }
 
     private void setCollidesWith(final CollisionLayer... layers) {
-        LOG.trace("Setting collisions for {}", this.name());
+        LOG.trace(LogCategories.COLLISION_LAYER, "Collisions for {}", this.name());
         for (final var other : layers) {
-            LOG.trace("\t-> {}", other.name());
+            LOG.trace(LogCategories.COLLISION_LAYER, "\t-> {}", other.name());
             BitMaskUtils.setNthBit(this.collisionMask, other.getIndex());
         }
     }
 
     private void setOverlapsWith(final CollisionLayer... layers) {
-        LOG.trace("Setting overlaps for {}", this.name());
+        LOG.trace(LogCategories.COLLISION_LAYER, "Overlaps for {}", this.name());
         for (final var other : layers) {
-            LOG.trace("\t-> {}", other.name());
+            LOG.trace(LogCategories.COLLISION_LAYER, "\t-> {}", other.name());
             BitMaskUtils.setNthBit(this.overlapMask, other.getIndex());
         }
     }
