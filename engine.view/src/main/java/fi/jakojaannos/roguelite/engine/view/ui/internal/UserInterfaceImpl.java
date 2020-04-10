@@ -89,6 +89,7 @@ public class UserInterfaceImpl implements UserInterface {
                .buildGroup();
 
         this.uiDispatcher = builder.build();
+        this.uiDispatcher.setParallel(false);
 
         this.uiWorld.registerResource(UIRoot.class, new UIRoot(viewport));
     }

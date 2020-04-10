@@ -4,7 +4,8 @@ Feature: When the game initially starts, player is greeted with a Title Screen.
 
   Scenario: The user looks at the main menu. There are buttons for playing the game, shutting down the game and a title.
     Given the main menu has just loaded
-    When the game is rendered
+    When the game runs for a single tick
+    And the game is rendered
     Then there is a title with text "Konna"
     And there is a button with text "Quit"
     And there is a button with text "Play"

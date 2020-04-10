@@ -9,6 +9,8 @@ public interface SystemDispatcher extends AutoCloseable {
         return new SystemDispatcherBuilderImpl();
     }
 
+    void setParallel(boolean state);
+
     SystemState createDefaultState();
 
     void tick(World world, SystemState systemState, Collection<Object> systemEvents);

@@ -19,8 +19,11 @@ public class GlobalGameState {
     }
 
     public static void updatePlayerPositionBeforeRun() {
-        playerPositionBeforeRun = getLocalPlayer().flatMap(player -> player.getComponent(Transform.class))
-                                                  .map(transform -> new Vector2d(transform.position))
-                                                  .orElse(new Vector2d(0.0));
+        try {
+            playerPositionBeforeRun = getLocalPlayer().flatMap(player -> player.getComponent(Transform.class))
+                                                      .map(transform -> new Vector2d(transform.position))
+                                                      .orElse(new Vector2d(0.0));
+        } catch (Exception ignored) {
+        }
     }
 }
