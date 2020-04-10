@@ -34,26 +34,6 @@ public interface RequirementsBuilder {
     RequirementsBuilder tickBefore(Class<? extends ECSSystem> other);
 
     /**
-     * Adds a dependency for this system to be ticked after given system group.
-     *
-     * @param group the systems to ensure to be ticked before ticking this system
-     *
-     * @return the builder for chaining
-     */
-    @Deprecated
-    RequirementsBuilder tickAfter(SystemGroup group);
-
-    /**
-     * Adds a dependency for this system to be ticked before given system group.
-     *
-     * @param group the system group that must not tick before this system
-     *
-     * @return the builder for chaining
-     */
-    @Deprecated
-    RequirementsBuilder tickBefore(SystemGroup group);
-
-    /**
      * Adds this system to a system group. System groups are used for easier dependency definition.
      *
      * @param group group to add this system to

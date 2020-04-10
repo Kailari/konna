@@ -22,11 +22,6 @@ public class SystemGroupImpl implements SystemGroup {
     private final int id;
 
     @Override
-    public boolean isEnabled() {
-        return true;
-    }
-
-    @Override
     public Collection<SystemGroup> getDependencies() {
         return this.dependencies;
     }

@@ -1,10 +1,9 @@
 package fi.jakojaannos.roguelite.engine.view.data.resources.ui;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.ProvidedResource;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.data.components.ui.ElementBoundaries;
 
-public class UIRoot implements ProvidedResource {
+public class UIRoot {
     private final Viewport viewport;
     private final ElementBoundaries boundaries = new ElementBoundaries();
 

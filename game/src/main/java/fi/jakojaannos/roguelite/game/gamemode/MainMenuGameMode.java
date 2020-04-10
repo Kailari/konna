@@ -3,7 +3,6 @@ package fi.jakojaannos.roguelite.game.gamemode;
 import javax.annotation.Nullable;
 
 import fi.jakojaannos.roguelite.engine.GameMode;
-import fi.jakojaannos.roguelite.engine.GameState;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
@@ -45,12 +44,9 @@ public final class MainMenuGameMode {
         return dispatcher;
     }
 
-    private static GameState createState(final World world) {
-        final var state = new GameState(world);
+    private static void createState(final World world) {
         world.registerResource(new CameraProperties(null));
         world.registerResource(new Mouse());
         world.registerResource(new Inputs());
-
-        return state;
     }
 }

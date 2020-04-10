@@ -1,7 +1,6 @@
 package fi.jakojaannos.roguelite.game.gamemode;
 
 import fi.jakojaannos.roguelite.engine.GameMode;
-import fi.jakojaannos.roguelite.engine.GameState;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
@@ -48,7 +47,7 @@ public final class GameplayGameMode {
         return new GameMode(GAME_MODE_ID, createDispatcher(), world -> createState(world, seed));
     }
 
-    private static GameState createState(final World world, final long seed) {
+    private static void createState(final World world, final long seed) {
         final var timeManager = world.fetchResource(TimeManager.class);
 
         world.registerResource(new Colliders());
@@ -90,8 +89,6 @@ public final class GameplayGameMode {
         TurretArchetype.create(entityManager, timeManager, new Transform(2.0, 0.0));
 
         entityManager.applyModifications();
-
-        return new GameState(world);
     }
 
     private static SystemDispatcher createDispatcher() {
@@ -149,6 +146,7 @@ public final class GameplayGameMode {
                .withSystem(new CleanUpDeadEnemyKillsSystem())
                .withSystem(new CleanUpEntitiesWithLifetime())
                .withSystem(new ReaperSystem())
+               .withSystem(new LoseGameOnPlayerDeathSystem())
                .dependsOn(input, earlyTick, characterTick, physicsTick, collisionHandler, lateTick)
                .buildGroup();
 

@@ -3,17 +3,15 @@ package fi.jakojaannos.roguelite.engine.utilities.assertions.world.builder;
 import java.util.function.Consumer;
 
 import fi.jakojaannos.roguelite.engine.GameMode;
-import fi.jakojaannos.roguelite.engine.GameState;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.ecs.SystemGroup;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.utilities.assertions.world.SimulationBuilder;
 import fi.jakojaannos.roguelite.engine.utilities.assertions.world.SimulationInspector;
-import fi.jakojaannos.roguelite.engine.utilities.assertions.world.SimulationRunner;
 import fi.jakojaannos.roguelite.engine.utilities.assertions.world.runner.SimulationRunnerImpl;
 import fi.jakojaannos.roguelite.engine.utilities.assertions.world.runner.TestGameRunner;
 
-public class SimulationBuilderImpl implements SimulationBuilder, SimulationRunner<SimulationInspector> {
+public class SimulationBuilderImpl implements SimulationBuilder {
     private final SystemDispatcher.Builder dispatcherBuilder = SystemDispatcher.builder();
     private Consumer<World> initialStateFactory = world -> {};
 
@@ -52,10 +50,7 @@ public class SimulationBuilderImpl implements SimulationBuilder, SimulationRunne
     private SimulationInspector build() {
         final var gameMode = new GameMode(0,
                                           this.dispatcherBuilder.build(),
-                                          world -> {
-                                              this.initialStateFactory.accept(world);
-                                              return new GameState(world);
-                                          });
+                                          this.initialStateFactory);
         return new SimulationRunnerImpl(new TestGameRunner(gameMode));
     }
 }

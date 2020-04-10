@@ -22,7 +22,7 @@ public class RogueliteServer {
     ) {
         try (final var runner = new ServerGameRunner(port)) {
             final Queue<InputEvent> dummyInputQueue = new ArrayDeque<>();
-            runner.run(new GameMode(-1, SystemDispatcher.builder().build(), GameState::new),
+            runner.run(new GameMode(-1, SystemDispatcher.builder().build(), world -> {}),
                        () -> dummyInputQueue);
         }
     }

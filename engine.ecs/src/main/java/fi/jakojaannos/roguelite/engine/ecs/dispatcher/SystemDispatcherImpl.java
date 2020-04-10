@@ -8,16 +8,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinWorkerThread;
-import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
-import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
-import fi.jakojaannos.roguelite.engine.ecs.SystemGroup;
-import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.ecs.*;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Resource;
 import fi.jakojaannos.roguelite.engine.ecs.systemdata.ParsedRequirements;
 import fi.jakojaannos.roguelite.engine.ecs.systemdata.RequirementsBuilder;
 
@@ -28,9 +24,30 @@ public class SystemDispatcherImpl implements SystemDispatcher {
     private static final boolean LOG_GROUP_TICK = false;
     private static final boolean LOG_TICK = false;
 
+    private static final SystemState ALL_SYSTEMS_ENABLED = new SystemState() {
+        @Override
+        public boolean isEnabled(final Object system) {
+            return true;
+        }
+
+        @Override
+        public boolean isEnabled(final SystemGroup systemGroup) {
+            return true;
+        }
+
+        @Override
+        public void setState(final Object system, final boolean state) {
+        }
+
+        @Override
+        public void setState(final SystemGroup systemGroup, final boolean state) {
+        }
+    };
+
 
     private final ForkJoinPool threadPool;
     private final List<SystemGroup> systemGroups;
+    private final List<Object> allSystems;
 
     // TODO: Move to SystemContext which contains the requirements and enabled status
     //       - possibly move the system there, too, and make groups rely on SystemIds
@@ -41,16 +58,20 @@ public class SystemDispatcherImpl implements SystemDispatcher {
 
     public SystemDispatcherImpl(final List<SystemGroup> systemGroups) {
         this.systemGroups = systemGroups;
-        this.systemGroups.stream()
-                         .flatMap(group -> group.getSystems().stream())
-                         .filter(system -> EcsSystem.class.isAssignableFrom(system.getClass()))
-                         .map(EcsSystem.class::cast)
-                         .forEach(this::resolveRequirements);
+        this.allSystems = this.systemGroups.stream()
+                                           .flatMap(systemGroup -> systemGroup.getSystems().stream())
+                                           .collect(Collectors.toUnmodifiableList());
 
         this.threadPool = new ForkJoinPool(4,
                                            SystemDispatcherImpl::workerThreadFactory,
                                            null,
                                            false);
+
+        this.systemGroups.stream()
+                         .flatMap(group -> group.getSystems().stream())
+                         .filter(system -> EcsSystem.class.isAssignableFrom(system.getClass()))
+                         .map(EcsSystem.class::cast)
+                         .forEach(this::resolveRequirements);
     }
 
     private <TResources, TEntityData, TEvents> void resolveRequirements(final EcsSystem<TResources, TEntityData, TEvents> system) {
@@ -60,33 +81,126 @@ public class SystemDispatcherImpl implements SystemDispatcher {
     }
 
     @Override
-    public void tick(final World world) {
-        final var queue = new HashSet<>(this.systemGroups);
+    public SystemState createDefaultState() {
+        return new SystemStateImpl(this.allSystems, this.systemGroups);
+    }
 
-        final Predicate<SystemGroup> isReadyToTick = (group) -> group.isEnabled()
-                                                                && group.getDependencies()
-                                                                        .stream()
-                                                                        .noneMatch(queue::contains);
+    @Override
+    public void tick(final World world) {
+        tick(world, ALL_SYSTEMS_ENABLED, List.of());
+    }
+
+    @Override
+    public void tick(
+            final World world,
+            final SystemState systemState,
+            final Collection<Object> systemEvents
+    ) {
+        final var events = constructEventLookup(systemEvents);
+        enableEventListeners(systemState, events);
+
+        final var queue = new HashSet<>(this.systemGroups);
 
         if (LOG_TICK) {
             LOG.debug("Tick #{} (Dispatcher {})", this.tick, this);
         }
         this.tick++;
-        final var ticked = new ArrayList<fi.jakojaannos.roguelite.engine.ecs.SystemGroup>(queue.size());
-        while (queue.stream().anyMatch(isReadyToTick)) {
+        final var ticked = new ArrayList<SystemGroup>(queue.size());
+
+        // FIXME: isGroupReadyToTick is evaluated twice. Split this to two steps to avoid iterating twice every time
+        //          (this impl is O(n^2) overall, collecting could drop it close to O(n) in best case and would likely
+        //           not have adverse effect on performance anyway.)
+        while (queue.stream().anyMatch(group -> isGroupReadyToTick(group, systemState, queue))) {
             queue.stream() // TODO: locks on entity/component storage and make this parallel?
-                 .filter(isReadyToTick)
+                 .filter(group -> isGroupReadyToTick(group, systemState, queue))
                  .forEach(group -> {
                      ticked.add(group);
-                     tick(group, world);
+                     tick(group, world, systemState, events);
                  });
 
             ticked.forEach(queue::remove);
             ticked.clear();
         }
+
+        disableTickOnceListeners(systemState, events);
     }
 
-    private void tick(final SystemGroup group, final World world) {
+    private void disableTickOnceListeners(
+            final SystemState systemState,
+            final Map<Class<?>, Object> events
+    ) {
+        for (final var systemObj : this.allSystems) {
+            if (systemObj instanceof EcsSystem<?, ?, ?> system) {
+                final var requirements = requirementsFor(system);
+
+                for (final Class<?> eventClass : events.keySet()) {
+                    final var hasEnableOn = Arrays.asList(requirements.events().enableOn())
+                                                  .contains(eventClass);
+                    final var hasDisableOn = Arrays.asList(requirements.events().disableOn())
+                                                   .contains(eventClass);
+
+                    // @EnableOn + @DisableOn = "@TickOnce"
+                    if (hasEnableOn && hasDisableOn) {
+                        systemState.setState(system, false);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    private void enableEventListeners(
+            final SystemState systemState,
+            final Map<Class<?>, Object> events
+    ) {
+        for (final var systemObj : this.allSystems) {
+            if (systemObj instanceof EcsSystem<?, ?, ?> system) {
+                final var requirements = requirementsFor(system);
+
+                var shouldEnable = false;
+                var shouldDisable = false;
+                for (final Class<?> eventClass : events.keySet()) {
+                    LOG.debug("Checking event {} for system {}",
+                              eventClass.getSimpleName(),
+                              systemObj.getClass().getSimpleName());
+                    final var hasEnableOn = Arrays.stream(requirements.events().enableOn())
+                                                  .anyMatch(clazz -> clazz.isAssignableFrom(eventClass));
+                    final var hasDisableOn = Arrays.stream(requirements.events().disableOn())
+                                                   .anyMatch(clazz -> clazz.isAssignableFrom(eventClass));
+
+                    LOG.debug("Has @EnableOn: {}", hasEnableOn);
+                    LOG.debug("Has @DisableOn: {}", hasDisableOn);
+                    // Special case: @EnableOn + @DisableOn = "@TickOnce"
+                    if (hasEnableOn && hasDisableOn) {
+                        LOG.debug("...is effectively @TickOnce! Enabling!");
+                        shouldEnable = true;
+                    } else if (hasDisableOn) {
+                        // @DisableOn takes precedence. If any event is @DisableOn, the system will
+                        // be disabled, ignoring all other events.
+                        shouldDisable = true;
+                        break;
+                    } else if (hasEnableOn) {
+                        // Do not break here as some other event could have @DisableOn, which could
+                        // override shouldEnable
+                        shouldEnable = true;
+                    }
+                }
+
+                if (shouldDisable) {
+                    systemState.setState(system, false);
+                } else if (shouldEnable) {
+                    systemState.setState(system, true);
+                }
+            }
+        }
+    }
+
+    private void tick(
+            final SystemGroup group,
+            final World world,
+            final SystemState systemState,
+            final Map<Class<?>, Object> events
+    ) {
         if (LOG_GROUP_TICK) {
             LOG.debug("Ticking group \"{}\"", group.getName());
         }
@@ -107,18 +221,14 @@ public class SystemDispatcherImpl implements SystemDispatcher {
                  } else if (systemObj instanceof EcsSystem<?, ?, ?> system) {
                      // XXX: This cannot be filter as that would possibly prevent tick in situations where previous
                      //      system enables the next system
-                     if (isEnabled(system)) {
-                         dispatch(world, system, this.threadPool);
+                     if (systemState.isEnabled(system)) {
+                         dispatch(world, system, this.threadPool, events);
                      }
                  } else {
                      throw new IllegalStateException("Invalid system type: " + systemObj.getClass().getSimpleName());
                  }
                  world.commitEntityModifications();
              });
-    }
-
-    private boolean isEnabled(final EcsSystem<?, ?, ?> system) {
-        return true;
     }
 
     @SuppressWarnings("unchecked")
@@ -131,9 +241,11 @@ public class SystemDispatcherImpl implements SystemDispatcher {
     private <TResources, TEntityData, TEvents> void dispatch(
             final World world,
             final EcsSystem<TResources, TEntityData, TEvents> system,
-            final ForkJoinPool threadPool
+            final ForkJoinPool threadPool,
+            final Map<Class<?>, Object> events
     ) {
         final var requirements = requirementsFor(system);
+        final var systemEvents = requirements.constructEvents(events);
         final var systemResources = requirements.constructResources(world.getResources());
         final var entitySpliterator = new EntitySpliterator<>(requirements.entityData().componentTypes(),
                                                               requirements.entityData().excluded(),
@@ -143,8 +255,8 @@ public class SystemDispatcherImpl implements SystemDispatcher {
         try {
             threadPool.submit(
                     () -> system.tick(systemResources,
-                                      StreamSupport.stream(entitySpliterator, false),
-                                      null)
+                                      StreamSupport.stream(entitySpliterator, true),
+                                      systemEvents)
             ).get();
         } catch (final InterruptedException e) {
             LOG.warn("System \"" + system.getClass().getSimpleName() + "\" was interrupted!");
@@ -178,6 +290,25 @@ public class SystemDispatcherImpl implements SystemDispatcher {
             LOG.error("SYSTEM DISPATCHER FAILED TO DISPOSE ONE OR MORE SYSTEM(S)");
             throw new SystemDisposeException(exceptions);
         }
+    }
+
+    private static Map<Class<?>, Object> constructEventLookup(final Collection<Object> eventList) {
+        return eventList.stream()
+                        .collect(Collectors.toMap(Object::getClass, event -> event));
+    }
+
+    private static boolean isGroupReadyToTick(
+            final SystemGroup group,
+            final SystemState systemState,
+            final Set<SystemGroup> queue
+    ) {
+        return systemState.isEnabled(group)
+               && group.getDependencies()
+                       .stream()
+                       .noneMatch(queue::contains)
+               && group.getSystems()
+                       .stream()
+                       .anyMatch(systemState::isEnabled);
     }
 
     private static ForkJoinWorkerThread workerThreadFactory(final ForkJoinPool pool) {
@@ -214,16 +345,6 @@ public class SystemDispatcherImpl implements SystemDispatcher {
 
         @Override
         public fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder tickBefore(final Class<? extends ECSSystem> other) {
-            return this;
-        }
-
-        @Override
-        public fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder tickAfter(final fi.jakojaannos.roguelite.engine.ecs.legacy.SystemGroup group) {
-            return this;
-        }
-
-        @Override
-        public fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder tickBefore(final fi.jakojaannos.roguelite.engine.ecs.legacy.SystemGroup group) {
             return this;
         }
 
