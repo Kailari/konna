@@ -4,14 +4,10 @@ import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.Requirements;
-import fi.jakojaannos.roguelite.engine.ecs.annotation.DisableOn;
-import fi.jakojaannos.roguelite.engine.ecs.annotation.DisabledByDefault;
-import fi.jakojaannos.roguelite.engine.ecs.annotation.EnableOn;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.game.data.events.GameLostEvent;
 import fi.jakojaannos.roguelite.game.data.events.PlayerDeadEvent;
 
-@DisabledByDefault
 public class LoseGameOnPlayerDeathSystem implements EcsSystem<LoseGameOnPlayerDeathSystem.Resources, EcsSystem.NoEntities, LoseGameOnPlayerDeathSystem.EventData> {
     @Override
     public Requirements<Resources, NoEntities, EventData> declareRequirements(
@@ -32,5 +28,5 @@ public class LoseGameOnPlayerDeathSystem implements EcsSystem<LoseGameOnPlayerDe
 
     public static record Resources(Events events) {}
 
-    public static record EventData(@EnableOn @DisableOn PlayerDeadEvent playerDead) {}
+    public static record EventData(PlayerDeadEvent playerDead) {}
 }
