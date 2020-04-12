@@ -3,7 +3,6 @@ package fi.jakojaannos.roguelite.engine.ecs.entities;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.World;
@@ -160,15 +159,15 @@ class EntityManagerTest {
         assertFalse(entityManager.hasComponent(entity, ComponentA.class));
     }
 
-    private static class ComponentA implements Component {
+    private static class ComponentA {
     }
 
-    private static class ComponentB implements Component {
+    private static class ComponentB {
     }
 
-    private static class ComponentC implements Component {
+    private static class ComponentC {
     }
 
-    private static class ComponentD implements Component {
+    private static class ComponentD {
     }
 }

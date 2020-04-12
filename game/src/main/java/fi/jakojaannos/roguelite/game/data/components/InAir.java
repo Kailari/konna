@@ -1,8 +1,6 @@
 package fi.jakojaannos.roguelite.game.data.components;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
-
-public class InAir implements Component {
+public class InAir {
     public long flightStartTimeStamp;
     public long flightDuration;
 

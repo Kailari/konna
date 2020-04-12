@@ -16,9 +16,7 @@ import java.util.Random;
 import fi.jakojaannos.roguelite.engine.GameMode;
 import fi.jakojaannos.roguelite.engine.GameRunner;
 import fi.jakojaannos.roguelite.engine.GameState;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.event.EventBus;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLAssetManager;
@@ -51,7 +49,7 @@ public class GlobalState {
 
     public static Random random;
 
-    public static <T extends Component> Optional<T> getComponentOf(
+    public static <T> Optional<T> getComponentOf(
             Entity player,
             Class<T> componentClass
     ) {

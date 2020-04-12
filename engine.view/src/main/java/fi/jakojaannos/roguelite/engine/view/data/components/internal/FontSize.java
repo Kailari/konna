@@ -1,8 +1,6 @@
 package fi.jakojaannos.roguelite.engine.view.data.components.internal;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
-
-public class FontSize implements Component {
+public class FontSize {
     public int value;
 
     public int getValue() {

@@ -1,9 +1,8 @@
 package fi.jakojaannos.roguelite.game.data.components;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 
-public class Lifetime implements Component {
+public class Lifetime {
     public long timestamp;
     public long duration;
 

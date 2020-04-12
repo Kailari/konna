@@ -1,8 +1,6 @@
 package fi.jakojaannos.roguelite.game.data.components.character;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
-
-public class WeaponInput implements Component {
+public class WeaponInput {
     public boolean attack;
     public boolean previousAttack;
     public boolean reload;

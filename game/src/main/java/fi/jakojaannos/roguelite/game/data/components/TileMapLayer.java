@@ -1,10 +1,9 @@
 package fi.jakojaannos.roguelite.game.data.components;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
 import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
 
-public class TileMapLayer implements Component {
+public class TileMapLayer {
     public TileMap<TileType> tileMap;
     public boolean collisionEnabled;
 

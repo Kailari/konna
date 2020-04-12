@@ -1,8 +1,6 @@
 package fi.jakojaannos.roguelite.game.data.components.character.enemy;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
-
-public class SplitOnDeath implements Component {
+public class SplitOnDeath {
     /** "Size" of the entity */
     public double size;
 

@@ -1,6 +1,4 @@
 package fi.jakojaannos.roguelite.game.data.components;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
-
-public class CrosshairTag implements Component {
+public class CrosshairTag {
 }

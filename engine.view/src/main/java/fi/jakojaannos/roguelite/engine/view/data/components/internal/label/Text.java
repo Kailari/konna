@@ -1,8 +1,6 @@
 package fi.jakojaannos.roguelite.engine.view.data.components.internal.label;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
-
-public class Text implements Component {
+public class Text {
     private String text;
 
     public String getText() {

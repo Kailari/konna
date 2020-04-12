@@ -2,8 +2,6 @@ package fi.jakojaannos.roguelite.engine.view.data.components.ui;
 
 import org.joml.Vector2i;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
-
 /**
  * Cached read-only view of a component's boundaries.
  * <p>
@@ -11,7 +9,7 @@ import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
  * of the UI rendering tick). To actually modify the ui element, use one of the
  * <code>BoundXXX</code> components.
  */
-public class ElementBoundaries implements Component {
+public class ElementBoundaries {
     public static int INVALID_VALUE = Integer.MIN_VALUE;
 
     public int minX;

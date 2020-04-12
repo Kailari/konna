@@ -13,7 +13,6 @@ import java.util.stream.StreamSupport;
 
 import fi.jakojaannos.roguelite.engine.ecs.*;
 import fi.jakojaannos.roguelite.engine.ecs.annotation.DisabledByDefault;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.systemdata.ParsedRequirements;
 import fi.jakojaannos.roguelite.engine.ecs.systemdata.RequirementsBuilder;
@@ -310,9 +309,10 @@ public class SystemDispatcherImpl implements SystemDispatcher {
         return worker;
     }
 
+    @Deprecated
     private static record ComponentOnlyRequirementsBuilder(
-            List<Class<? extends Component>>required,
-            List<Class<? extends Component>>excluded
+            List<Class<?>>required,
+            List<Class<?>>excluded
     ) implements fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder {
 
         public ComponentOnlyRequirementsBuilder() {
@@ -320,39 +320,39 @@ public class SystemDispatcherImpl implements SystemDispatcher {
         }
 
         @Override
-        public fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder withComponent(final Class<? extends Component> componentClass) {
+        public fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder withComponent(final Class<?> componentClass) {
             this.required.add(componentClass);
             return this;
         }
 
         @Override
-        public fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder withoutComponent(final Class<? extends Component> componentClass) {
+        public fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder withoutComponent(final Class<?> componentClass) {
             this.excluded.add(componentClass);
             return this;
         }
 
         @Override
-        public fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder tickAfter(final Class<? extends ECSSystem> other) {
+        public fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder tickAfter(final Class<? extends ECSSystem> ignored) {
             return this;
         }
 
         @Override
-        public fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder tickBefore(final Class<? extends ECSSystem> other) {
+        public fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder tickBefore(final Class<? extends ECSSystem> ignored) {
             return this;
         }
 
         @Override
-        public fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder addToGroup(final fi.jakojaannos.roguelite.engine.ecs.legacy.SystemGroup group) {
+        public fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder addToGroup(final Object ignored) {
             return this;
         }
 
         @Override
-        public fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder requireResource(final Class<?> resource) {
+        public fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder requireResource(final Class<?> ignored) {
             return this;
         }
 
         @Override
-        public fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder requireProvidedResource(final Class<?> resource) {
+        public fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder requireProvidedResource(final Class<?> ignored) {
             return this;
         }
     }

@@ -1,8 +1,6 @@
 package fi.jakojaannos.roguelite.game.data.components.character;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
-
-public class JumpingMovementAbility implements Component {
+public class JumpingMovementAbility {
     public long jumpCoolDownInTicks;
     public long jumpDurationInTicks;
     public double jumpForce;

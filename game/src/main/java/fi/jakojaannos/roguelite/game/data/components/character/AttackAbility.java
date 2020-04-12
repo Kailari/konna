@@ -2,11 +2,10 @@ package fi.jakojaannos.roguelite.game.data.components.character;
 
 import org.joml.Vector2d;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
 import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.DamageSource;
 
-public class AttackAbility implements Component {
+public class AttackAbility {
     public final DamageSource<?> damageSource;
     public final CollisionLayer projectileLayer;
     public final Vector2d weaponOffset = new Vector2d(0.0, 0.0); // TODO: move to weaponStats?
