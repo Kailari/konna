@@ -100,6 +100,13 @@ public interface EntityHandle {
      */
     void destroy();
 
+    /**
+     * Converts this handle into a legacy entity.
+     *
+     * @return a legacy entity for this handle
+     *
+     * @deprecated Due to removal as soon as we get rid of the {@link fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager}
+     */
     @Deprecated
     default Entity asLegacyEntity() {
         return (LegacyEntityHandleImpl) this;

@@ -19,9 +19,8 @@ public record ParsedRequirements<TResources, TEntityData, TEvents>(
         }
     }
 
-    public TResources constructResources(final ResourceStorage resourceStorage) {
+    public TResources constructResources(final Object[] resources) {
         try {
-            final var resources = resourceStorage.fetch(this.resources.componentTypes());
             return this.resources.constructor().newInstance(resources);
         } catch (final InstantiationException e) {
             throw new IllegalStateException("Resources input cannot be instantiated!");

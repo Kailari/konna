@@ -1,7 +1,5 @@
 package fi.jakojaannos.roguelite.engine.ecs;
 
-import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
@@ -12,7 +10,9 @@ import java.util.stream.Stream;
  * this system to be ticked. If no resources are needed use {@link EcsSystem.NoResources}.
  * <p>
  * Specifying entities makes this system require matching entities. There must be at least single entity matching the
- * requirements in order for this system to be ticked. If no entities are needed use {@link EcsSystem.NoEntities}.
+ * requirements in order for this system to be ticked. If no entities are needed use {@link EcsSystem.NoEntities}. If
+ * system for some reason requires iterating through all entities, {@link EcsSystem.AllEntities} can be used. The latter
+ * is not advised and should be avoided, where possible.
  * <p>
  * Specifying events makes this system depend on said events. This causes the system to tick only when matching events
  * are fired. If no events are needed, use {@link EcsSystem.NoEvents}.
@@ -22,61 +22,32 @@ import java.util.stream.Stream;
  * @param <TEvents>     container class for holding instances of required events
  */
 public interface EcsSystem<TResources, TEntityData, TEvents> {
+    /**
+     * Declares the requirements of this system. In practice, this means registering the concrete types used for passing
+     * system inputs data to the system.
+     *
+     * @param require requirements builder to use for declaring the requirements
+     *
+     * @return the requirements builder
+     */
     Requirements<TResources, TEntityData, TEvents> declareRequirements(
             Requirements<TResources, TEntityData, TEvents> require
     );
 
+    /**
+     * Runs a single simulation tick for this system. Performs any data manipulation the system is intended to do.
+     *
+     * @param resources input resources, defined in type parameters and in {@link #declareRequirements(Requirements)}
+     * @param entities  stream of input entities, defined in type parameters and in {@link
+     *                  #declareRequirements(Requirements)}
+     * @param events    input events, defined in type parameters and in {@link #declareRequirements(Requirements)}.
+     *                  Non-required events may be <code>null</code>
+     */
     void tick(
             TResources resources,
             Stream<EntityDataHandle<TEntityData>> entities,
             TEvents events
     );
-
-    interface EntityDataHandle<TEntityData> {
-        TEntityData getData();
-
-        /**
-         * @see EntityHandle#isPendingRemoval()
-         */
-        boolean isPendingRemoval();
-
-        /**
-         * @see EntityHandle#getId()
-         */
-        int getId();
-
-        EntityHandle getHandle();
-
-        /**
-         * @see EntityHandle#addComponent(Object)
-         */
-        <TComponent> boolean addComponent(TComponent component);
-
-        /**
-         * @see EntityHandle#addOrGet(Class, Supplier)
-         */
-        <TComponent> TComponent addOrGet(Class<TComponent> componentClass, Supplier<TComponent> component);
-
-        /**
-         * @see EntityHandle#removeComponent(Class)
-         */
-        <TComponent> boolean removeComponent(Class<TComponent> componentClass);
-
-        /**
-         * @see EntityHandle#hasComponent(Class)
-         */
-        <TComponent> boolean hasComponent(Class<TComponent> componentClass);
-
-        /**
-         * @see EntityHandle#getComponent(Class)
-         */
-        <TComponent> Optional<TComponent> getComponent(Class<TComponent> componentClass);
-
-        /**
-         * @see EntityHandle#destroy()
-         */
-        void destroy();
-    }
 
     /**
      * Utility tag for creating systems without resource requirements. Substitute this for <code>TResources</code> to
@@ -100,7 +71,8 @@ public interface EcsSystem<TResources, TEntityData, TEvents> {
     }
 
     /**
-     * Tag for iterating all entities without any components
+     * Tag for iterating all entities. This does not give any guarantees about which components the entities being read
+     * have.
      */
     record AllEntities() {
     }

@@ -3,6 +3,7 @@ package fi.jakojaannos.roguelite.engine.view.systems.ui;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
+import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
 import fi.jakojaannos.roguelite.engine.ecs.Requirements;
 import fi.jakojaannos.roguelite.engine.ui.TextSizeProvider;
