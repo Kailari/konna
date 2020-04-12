@@ -3,8 +3,8 @@ package fi.jakojaannos.roguelite.engine.ecs.dispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.ParameterizedType;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinWorkerThread;
@@ -15,7 +15,7 @@ import fi.jakojaannos.roguelite.engine.ecs.*;
 import fi.jakojaannos.roguelite.engine.ecs.annotation.DisabledByDefault;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.systemdata.ParsedRequirements;
-import fi.jakojaannos.roguelite.engine.ecs.systemdata.RequirementsBuilder;
+import fi.jakojaannos.roguelite.engine.ecs.systemdata.SystemInputRecord;
 
 public class SystemDispatcherImpl implements SystemDispatcher {
     private static final Logger LOG = LoggerFactory.getLogger(SystemDispatcherImpl.class);
@@ -50,7 +50,7 @@ public class SystemDispatcherImpl implements SystemDispatcher {
     // TODO: Move to SystemContext which contains the requirements and enabled status
     //       - possibly move the system there, too, and make groups rely on SystemIds
     @SuppressWarnings("rawtypes")
-    private final Map<Class<? extends EcsSystem>, ParsedRequirements> systemRequirements = new ConcurrentHashMap<>();
+    private final Map<Class<? extends EcsSystem>, ParsedRequirements> systemRequirements;
     private boolean parallel;
     private int tick;
 
@@ -67,22 +67,18 @@ public class SystemDispatcherImpl implements SystemDispatcher {
                                            null,
                                            false);
 
-        this.systemGroups.stream()
-                         .flatMap(group -> group.getSystems().stream())
-                         .filter(system -> EcsSystem.class.isAssignableFrom(system.getClass()))
-                         .map(EcsSystem.class::cast)
-                         .forEach(this::resolveRequirements);
+        this.systemRequirements = this.systemGroups
+                .stream()
+                .flatMap(group -> group.getSystems().stream())
+                .filter(system -> EcsSystem.class.isAssignableFrom(system.getClass()))
+                // XXX: This map should not be necessary once getSystems() returns EcsSystems
+                .map(system -> (EcsSystem<?, ?, ?>) system)
+                .collect(Collectors.toMap(EcsSystem::getClass, SystemDispatcherImpl::resolveRequirements));
     }
 
     @Override
     public void setParallel(final boolean state) {
         this.parallel = state;
-    }
-
-    private <TResources, TEntityData, TEvents> void resolveRequirements(final EcsSystem<TResources, TEntityData, TEvents> system) {
-        final var requirementsBuilder = new RequirementsBuilder<TResources, TEntityData, TEvents>();
-        system.declareRequirements(requirementsBuilder);
-        this.systemRequirements.put(system.getClass(), requirementsBuilder.build());
     }
 
     @Override
@@ -264,6 +260,36 @@ public class SystemDispatcherImpl implements SystemDispatcher {
             LOG.error("SYSTEM DISPATCHER FAILED TO DISPOSE ONE OR MORE SYSTEM(S)");
             throw new SystemDisposeException(exceptions);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <TResources, TEntityData, TEvents> ParsedRequirements<TResources, TEntityData, TEvents>
+    resolveRequirements(final EcsSystem<TResources, TEntityData, TEvents> system) {
+        final var interfaceType = Arrays.stream(system.getClass().getGenericInterfaces())
+                                        // Filter out any non-parameterized (non-generic) interfaces
+                                        .filter(type -> ParameterizedType.class.isAssignableFrom(type.getClass()))
+                                        // Convert to a stream of parameterized types
+                                        .map(ParameterizedType.class::cast)
+                                        // Find EcsSystem from those interfaces
+                                        // (Find EcsSystem from the implements list of the system)
+                                        .filter(SystemDispatcherImpl::isEcsSystem)
+                                        .findFirst()
+                                        .orElseThrow(() -> new IllegalStateException(
+                                                "Could not find EcsSystem from system implements list!"));
+
+        // Now, we have parameterized type we can pull the type arguments from
+        final var resourceDataType = interfaceType.getActualTypeArguments()[0];
+        final var entityDataType = interfaceType.getActualTypeArguments()[1];
+        final var eventDataType = interfaceType.getActualTypeArguments()[2];
+
+        // ...and then just construct the requirements from them
+        return new ParsedRequirements<>(SystemInputRecord.Resources.createFor((Class<TResources>) resourceDataType),
+                                        SystemInputRecord.EntityData.createFor((Class<TEntityData>) entityDataType),
+                                        SystemInputRecord.Events.createFor((Class<TEvents>) eventDataType));
+    }
+
+    private static boolean isEcsSystem(final ParameterizedType type) {
+        return ((Class<?>) type.getRawType()).isAssignableFrom(EcsSystem.class);
     }
 
     private static Map<Class<?>, Object> constructEventLookup(final Collection<Object> eventList) {

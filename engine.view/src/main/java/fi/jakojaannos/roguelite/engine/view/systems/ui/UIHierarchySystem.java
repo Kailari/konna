@@ -6,7 +6,6 @@ import javax.annotation.Nullable;
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
-import fi.jakojaannos.roguelite.engine.ecs.Requirements;
 import fi.jakojaannos.roguelite.engine.view.data.components.internal.Parent;
 import fi.jakojaannos.roguelite.engine.view.data.resources.ui.UIHierarchy;
 
@@ -19,14 +18,6 @@ public class UIHierarchySystem implements EcsSystem<UIHierarchySystem.Resources,
         return entity.getComponent(Parent.class)
                      .map(parent -> parent.value)
                      .orElse(null);
-    }
-
-    @Override
-    public Requirements<Resources, AllEntities, NoEvents> declareRequirements(
-            final Requirements<Resources, AllEntities, NoEvents> require
-    ) {
-        return require.entityData(AllEntities.class)
-                      .resources(Resources.class);
     }
 
     @Override
@@ -45,8 +36,5 @@ public class UIHierarchySystem implements EcsSystem<UIHierarchySystem.Resources,
     // TODO: record EntityData(Optional<Parent> maybeParent) {}
     //  - Allows getting rid of ugly AllEntities workaround
 
-    public static record Resources(
-            UIHierarchy hierarchy
-    ) {
-    }
+    public static record Resources(UIHierarchy hierarchy) {}
 }

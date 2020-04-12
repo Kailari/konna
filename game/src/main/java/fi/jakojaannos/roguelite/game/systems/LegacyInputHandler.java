@@ -5,7 +5,6 @@ import java.util.stream.Stream;
 import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
-import fi.jakojaannos.roguelite.engine.ecs.Requirements;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.input.ButtonInput;
 import fi.jakojaannos.roguelite.engine.input.InputAxis;
@@ -17,13 +16,6 @@ import fi.jakojaannos.roguelite.game.data.resources.Inputs;
  */
 @Deprecated
 public class LegacyInputHandler implements EcsSystem<LegacyInputHandler.Resources, EcsSystem.NoEntities, EcsSystem.NoEvents> {
-    @Override
-    public Requirements<Resources, NoEntities, NoEvents> declareRequirements(
-            final Requirements<Resources, NoEntities, NoEvents> require
-    ) {
-        return require.resources(Resources.class);
-    }
-
     @Override
     public void tick(
             final Resources resources,
