@@ -88,7 +88,7 @@ public class LegacyCompat implements EntityManager {
             final Collection<Class<? extends Component>> required,
             final Collection<Class<? extends Component>> excluded
     ) {
-        final var componentStorage = LegacyCompat.this.world.getComponents();
+        final var componentStorage = LegacyCompat.this.world.getComponentStorage();
         return IntStream.range(0, LegacyCompat.this.world.getEntityCount())
                         .filter(id -> required.stream()
                                               .allMatch(c -> componentStorage.has(id, c)))

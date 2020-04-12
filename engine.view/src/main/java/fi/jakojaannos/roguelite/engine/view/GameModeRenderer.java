@@ -8,10 +8,6 @@ public final record GameModeRenderer(
         SystemDispatcher renderDispatcher,
         UserInterface userInterface
 ) implements AutoCloseable {
-    public void render(final World world) {
-        this.renderDispatcher.tick(world);
-    }
-
     @Override
     public void close() throws Exception {
         this.renderDispatcher.close();

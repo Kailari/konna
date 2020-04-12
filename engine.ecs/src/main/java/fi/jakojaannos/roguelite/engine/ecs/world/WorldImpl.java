@@ -6,10 +6,15 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Spliterator;
+import java.util.function.Function;
 
+import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
 import fi.jakojaannos.roguelite.engine.ecs.LogCategories;
 import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.ecs.dispatcher.EntitySpliterator;
+import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.world.storage.ComponentStorage;
 import fi.jakojaannos.roguelite.engine.ecs.world.storage.ResourceStorage;
 
@@ -17,7 +22,7 @@ public class WorldImpl implements World {
     private static final Logger LOG = LoggerFactory.getLogger(World.class);
 
     @Deprecated
-    private final LegacyCompat compat;
+    private final LegacyCompat legacyCompatibilityEntityManager;
 
     private final ComponentStorage componentStorage;
     private final ResourceStorage resourceStorage;
@@ -30,8 +35,8 @@ public class WorldImpl implements World {
     private int nEntities;
 
     @Override
-    public LegacyCompat getCompatibilityLayer() {
-        return this.compat;
+    public EntityManager getEntityManager() {
+        return this.legacyCompatibilityEntityManager;
     }
 
     @Override
@@ -39,14 +44,8 @@ public class WorldImpl implements World {
         return this.nEntities;
     }
 
-    @Override
-    public ComponentStorage getComponents() {
+    public ComponentStorage getComponentStorage() {
         return this.componentStorage;
-    }
-
-    @Override
-    public ResourceStorage getResources() {
-        return this.resourceStorage;
     }
 
     public WorldImpl() {
@@ -58,7 +57,7 @@ public class WorldImpl implements World {
         this.resourceStorage = new ResourceStorage();
         this.componentStorage = new ComponentStorage(this.capacity);
 
-        this.compat = new LegacyCompat(this);
+        this.legacyCompatibilityEntityManager = new LegacyCompat(this);
     }
 
     @Override
@@ -158,5 +157,19 @@ public class WorldImpl implements World {
     @Override
     public <TResource> TResource fetchResource(final Class<TResource> resourceClass) {
         return this.resourceStorage.fetch(resourceClass);
+    }
+
+    @Override
+    public Object[] fetchResources(final Class<?>[] resourceClasses) {
+        return this.resourceStorage.fetch(resourceClasses);
+    }
+
+    @Override
+    public <TEntityData> Spliterator<EntityDataHandle<TEntityData>> iterateEntities(
+            final Class<?>[] componentClasses,
+            final boolean[] excluded,
+            final Function<Object[], TEntityData> dataFactory
+    ) {
+        return new EntitySpliterator<>(componentClasses, excluded, this, dataFactory);
     }
 }

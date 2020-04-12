@@ -7,7 +7,8 @@ import fi.jakojaannos.roguelite.engine.utilities.logging.EnumMarker;
 
 public enum LogCategories implements EnumMarker {
     ENTITY_LIFECYCLE,
-    SYSTEM_DATA_DUMP, DISPATCHER;
+    SYSTEM_DATA_DUMP,
+    DISPATCHER;
 
     private final Marker wrapped;
 

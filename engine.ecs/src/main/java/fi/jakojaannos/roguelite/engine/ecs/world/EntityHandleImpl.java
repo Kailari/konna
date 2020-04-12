@@ -38,7 +38,7 @@ public class EntityHandleImpl implements EntityHandle {
 
     @Override
     public <TComponent> boolean addComponent(final TComponent component) {
-        return this.world.getComponents().add(this.id, component);
+        return this.world.getComponentStorage().add(this.id, component);
     }
 
     @Override
@@ -46,22 +46,22 @@ public class EntityHandleImpl implements EntityHandle {
             final Class<TComponent> componentClass,
             final Supplier<TComponent> supplier
     ) {
-        return this.world.getComponents().addOrGet(this.id, componentClass, supplier);
+        return this.world.getComponentStorage().addOrGet(this.id, componentClass, supplier);
     }
 
     @Override
     public <TComponent> boolean removeComponent(final Class<TComponent> componentClass) {
-        return this.world.getComponents().remove(this.id, componentClass);
+        return this.world.getComponentStorage().remove(this.id, componentClass);
     }
 
     @Override
     public <TComponent> boolean hasComponent(final Class<TComponent> componentClass) {
-        return this.world.getComponents().has(this.id, componentClass);
+        return this.world.getComponentStorage().has(this.id, componentClass);
     }
 
     @Override
     public <TComponent> Optional<TComponent> getComponent(final Class<TComponent> componentClass) {
-        return this.world.getComponents().get(this.id, componentClass);
+        return this.world.getComponentStorage().get(this.id, componentClass);
     }
 
     @Override

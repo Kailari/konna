@@ -9,9 +9,9 @@ import java.util.Collection;
 import java.util.Objects;
 import javax.annotation.Nullable;
 
+import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.SystemGroup;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
-import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 
 public class SystemGroupImpl implements SystemGroup {
     private static final Logger LOG = LoggerFactory.getLogger(SystemGroupImpl.class);
@@ -19,6 +19,7 @@ public class SystemGroupImpl implements SystemGroup {
     private final Collection<SystemGroup> dependencies;
     private final Collection<Object> systems;
     private final String name;
+    private final boolean enabledByDefault;
     private final int id;
 
     @Override
@@ -36,15 +37,22 @@ public class SystemGroupImpl implements SystemGroup {
         return this.name;
     }
 
+    @Override
+    public boolean isEnabledByDefault() {
+        return this.enabledByDefault;
+    }
+
     private SystemGroupImpl(
             final Collection<SystemGroup> dependencies,
             final Collection<Object> systems,
             final String name,
+            final boolean enabledByDefault,
             final int id
     ) {
         this.dependencies = dependencies;
         this.systems = systems;
         this.name = name;
+        this.enabledByDefault = enabledByDefault;
         this.id = id;
     }
 
@@ -69,17 +77,24 @@ public class SystemGroupImpl implements SystemGroup {
         private final Collection<Object> systems = new ArrayList<>();
         private final String name;
         private final int id;
+        private boolean enabledByDefault;
         @Nullable private SystemGroupImpl built;
 
         public Builder(final String name, final int id) {
             this.name = name;
             this.id = id;
+
+            this.enabledByDefault = true;
         }
 
         @Override
         public SystemGroup buildGroup() {
             if (this.built == null) {
-                this.built = new SystemGroupImpl(this.dependencies, this.systems, this.name, this.id);
+                this.built = new SystemGroupImpl(this.dependencies,
+                                                 this.systems,
+                                                 this.name,
+                                                 this.enabledByDefault,
+                                                 this.id);
             } else {
                 LOG.warn("buildGroup() called multiple times! Offending group: \"{}\"", this.name);
             }
@@ -95,6 +110,12 @@ public class SystemGroupImpl implements SystemGroup {
         @Override
         public SystemGroup.Builder withSystem(final EcsSystem<?, ?, ?> system) {
             this.systems.add(system);
+            return this;
+        }
+
+        @Override
+        public SystemGroup.Builder disabledByDefault() {
+            this.enabledByDefault = false;
             return this;
         }
 

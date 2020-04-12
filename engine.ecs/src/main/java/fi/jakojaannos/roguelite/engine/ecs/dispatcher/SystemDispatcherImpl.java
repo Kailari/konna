@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import fi.jakojaannos.roguelite.engine.ecs.*;
+import fi.jakojaannos.roguelite.engine.ecs.annotation.DisabledByDefault;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.systemdata.ParsedRequirements;
@@ -23,19 +24,22 @@ public class SystemDispatcherImpl implements SystemDispatcher {
     private static final boolean LOG_GROUP_TICK = false;
     private static final boolean LOG_TICK = false;
 
-    private static final SystemState ALL_SYSTEMS_ENABLED = new SystemState() {
+    /**
+     * Immutable system state with everything which is hinted to be enabled by default is set to enabled.
+     */
+    private static final SystemState EVERYTHING_ENABLED_BY_DEFAULT_ENABLED = new SystemState() {
         @Override
-        public boolean isEnabled(final Object system) {
-            return true;
+        public boolean isEnabled(final Class<?> systemClass) {
+            return !systemClass.isAnnotationPresent(DisabledByDefault.class);
         }
 
         @Override
         public boolean isEnabled(final SystemGroup systemGroup) {
-            return true;
+            return systemGroup.isEnabledByDefault();
         }
 
         @Override
-        public void setState(final Object system, final boolean state) {
+        public void setState(final Class<?> systemClass, final boolean state) {
         }
 
         @Override
@@ -47,18 +51,11 @@ public class SystemDispatcherImpl implements SystemDispatcher {
     private final ForkJoinPool threadPool;
     private final List<SystemGroup> systemGroups;
     private final List<Object> allSystems;
-    private boolean parallel;
-
-    @Override
-    public void setParallel(final boolean state) {
-        this.parallel = state;
-    }
-
     // TODO: Move to SystemContext which contains the requirements and enabled status
     //       - possibly move the system there, too, and make groups rely on SystemIds
     @SuppressWarnings("rawtypes")
     private final Map<Class<? extends EcsSystem>, ParsedRequirements> systemRequirements = new ConcurrentHashMap<>();
-
+    private boolean parallel;
     private int tick;
 
     public SystemDispatcherImpl(final List<SystemGroup> systemGroups) {
@@ -81,6 +78,11 @@ public class SystemDispatcherImpl implements SystemDispatcher {
                          .forEach(this::resolveRequirements);
     }
 
+    @Override
+    public void setParallel(final boolean state) {
+        this.parallel = state;
+    }
+
     private <TResources, TEntityData, TEvents> void resolveRequirements(final EcsSystem<TResources, TEntityData, TEvents> system) {
         final var requirementsBuilder = new RequirementsBuilder<TResources, TEntityData, TEvents>();
         system.declareRequirements(requirementsBuilder);
@@ -94,7 +96,7 @@ public class SystemDispatcherImpl implements SystemDispatcher {
 
     @Override
     public void tick(final World world) {
-        tick(world, ALL_SYSTEMS_ENABLED, List.of());
+        tick(world, EVERYTHING_ENABLED_BY_DEFAULT_ENABLED, List.of());
     }
 
     @Override
@@ -163,9 +165,9 @@ public class SystemDispatcherImpl implements SystemDispatcher {
 
                 // Disable takes precedence
                 if (shouldDisable) {
-                    systemState.setState(system, false);
+                    systemState.setState(system.getClass(), false);
                 } else if (shouldEnable) {
-                    systemState.setState(system, true);
+                    systemState.setState(system.getClass(), true);
                 }
             }
         }
@@ -197,7 +199,7 @@ public class SystemDispatcherImpl implements SystemDispatcher {
             } else if (systemObj instanceof EcsSystem<?, ?, ?> system) {
                 // XXX: This cannot be filter as that would possibly prevent tick in situations where previous
                 //      system enables the next system
-                if (systemState.isEnabled(system)) {
+                if (systemState.isEnabled(system.getClass())) {
                     dispatch(world, system, this.threadPool, events);
                 }
             } else {
@@ -222,11 +224,12 @@ public class SystemDispatcherImpl implements SystemDispatcher {
     ) {
         final var requirements = requirementsFor(system);
         final var systemEvents = requirements.constructEvents(events);
-        final var systemResources = requirements.constructResources(world.getResources());
-        final var entitySpliterator = new EntitySpliterator<>(requirements.entityData().componentTypes(),
-                                                              requirements.entityData().excluded(),
-                                                              world,
-                                                              requirements::constructEntityData);
+
+        final Object[] resources = world.fetchResources(requirements.resources().componentTypes());
+        final var systemResources = requirements.constructResources(resources);
+        final var entitySpliterator = world.iterateEntities(requirements.entityData().componentTypes(),
+                                              requirements.entityData().excluded(),
+                                              requirements::constructEntityData);
 
         // Return if event constraints were not met
         if (systemEvents == null) {
@@ -297,6 +300,7 @@ public class SystemDispatcherImpl implements SystemDispatcher {
                        .noneMatch(queue::contains)
                && group.getSystems()
                        .stream()
+                       .map(Object::getClass)
                        .anyMatch(systemState::isEnabled);
     }
 

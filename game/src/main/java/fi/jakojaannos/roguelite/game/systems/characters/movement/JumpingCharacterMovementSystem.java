@@ -5,6 +5,7 @@ import org.joml.Vector2d;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
+import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.ecs.Requirements;
 import fi.jakojaannos.roguelite.engine.ecs.annotation.Without;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;

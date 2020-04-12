@@ -6,28 +6,28 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
+import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
-import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.ecs.world.WorldImpl;
 
-class EntitySpliterator<TEntityData> implements Spliterator<EcsSystem.EntityDataHandle<TEntityData>> {
+public class EntitySpliterator<TEntityData> implements Spliterator<EntityDataHandle<TEntityData>> {
     private final Object[][] paramStorages;
     private final Object[] parameters;
     private final boolean[] excluded;
-    private final World world;
+    private final WorldImpl world;
 
     private final Function<Object[], TEntityData> factory;
 
     private int startIndex;
     private int endIndex;
 
-    EntitySpliterator(
+    public EntitySpliterator(
             final Class<?>[] componentClasses,
             final boolean[] excluded,
-            final World world,
+            final WorldImpl world,
             final Function<Object[], TEntityData> factory
     ) {
-        this(world.getComponents().fetchStorages(componentClasses),
+        this(world.getComponentStorage().fetchStorages(componentClasses),
              excluded,
              world,
              factory,
@@ -38,7 +38,7 @@ class EntitySpliterator<TEntityData> implements Spliterator<EcsSystem.EntityData
     private EntitySpliterator(
             final Object[][] paramStorages,
             final boolean[] excluded,
-            final World world,
+            final WorldImpl world,
             final Function<Object[], TEntityData> factory,
             final int startIndex,
             final int endIndex
@@ -53,7 +53,7 @@ class EntitySpliterator<TEntityData> implements Spliterator<EcsSystem.EntityData
     }
 
     @Override
-    public boolean tryAdvance(final Consumer<? super EcsSystem.EntityDataHandle<TEntityData>> action) {
+    public boolean tryAdvance(final Consumer<? super EntityDataHandle<TEntityData>> action) {
         // Do nothing if there is nothing more to iterate
         if (this.startIndex >= this.endIndex) {
             return false;
@@ -75,7 +75,7 @@ class EntitySpliterator<TEntityData> implements Spliterator<EcsSystem.EntityData
     }
 
     @Override
-    public Spliterator<EcsSystem.EntityDataHandle<TEntityData>> trySplit() {
+    public Spliterator<EntityDataHandle<TEntityData>> trySplit() {
         final var remaining = this.endIndex - this.startIndex;
         if (remaining >= 2) {
             final var oldEndIndex = this.endIndex;
@@ -122,7 +122,7 @@ class EntitySpliterator<TEntityData> implements Spliterator<EcsSystem.EntityData
         return false;
     }
 
-    private static class EntityDataHandleImpl<TEntityData> implements EcsSystem.EntityDataHandle<TEntityData> {
+    private static class EntityDataHandleImpl<TEntityData> implements EntityDataHandle<TEntityData> {
         private final TEntityData data;
         private final EntityHandle handle;
 
