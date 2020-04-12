@@ -15,13 +15,22 @@
             -->
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] [%-5level] %-24logger{1} - %msg%n"/>
 
-            <!-- Filters, use these to configure what gets logged by default -->
-            <!--  - Adjust these by toggling `onMatch` to ACCEPT or DENY     -->
+            <!-- Filters, use these to configure what gets logged by default            -->
+            <!--  - Adjust these by toggling `onMatch` to ACCEPT or DENY (or NEUTRAL)   -->
             <Filters>
-                <MarkerFilter onMismatch="NEUTRAL" marker="HEALTH" onMatch="DENY"/>
+                <!-- Engine -->
                 <MarkerFilter onMismatch="NEUTRAL" marker="ENTITY_LIFECYCLE" onMatch="DENY"/>
                 <MarkerFilter onMismatch="NEUTRAL" marker="SYSTEM_DATA_DUMP" onMatch="DENY"/>
+                <MarkerFilter onMismatch="NEUTRAL" marker="DISPATCHER" onMatch="DENY"/>
+                <MarkerFilter onMismatch="NEUTRAL" marker="DISPATCHER_TICK" onMatch="DENY"/>
+                <MarkerFilter onMismatch="NEUTRAL" marker="DISPATCHER_GROUP" onMatch="DENY"/>
+                <MarkerFilter onMismatch="NEUTRAL" marker="DISPATCHER_SYSTEM" onMatch="DENY"/>
+
+                <!-- Game -->
                 <MarkerFilter onMismatch="NEUTRAL" marker="COLLISION_LAYER" onMatch="DENY"/>
+                <MarkerFilter onMismatch="NEUTRAL" marker="HEALTH" onMatch="DENY"/>
+
+                <!-- Assets/IO -->
                 <MarkerFilter onMismatch="NEUTRAL" marker="ASSET_LOADING" onMatch="DENY"/>
             </Filters>
         </Console>
