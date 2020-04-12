@@ -22,26 +22,13 @@ import java.util.stream.Stream;
  * @param <TEvents>     container class for holding instances of required events
  */
 public interface EcsSystem<TResources, TEntityData, TEvents> {
-    /**
-     * Declares the requirements of this system. In practice, this means registering the concrete types used for passing
-     * system inputs data to the system.
-     *
-     * @param require requirements builder to use for declaring the requirements
-     *
-     * @return the requirements builder
-     */
-    Requirements<TResources, TEntityData, TEvents> declareRequirements(
-            Requirements<TResources, TEntityData, TEvents> require
-    );
 
     /**
      * Runs a single simulation tick for this system. Performs any data manipulation the system is intended to do.
      *
-     * @param resources input resources, defined in type parameters and in {@link #declareRequirements(Requirements)}
-     * @param entities  stream of input entities, defined in type parameters and in {@link
-     *                  #declareRequirements(Requirements)}
-     * @param events    input events, defined in type parameters and in {@link #declareRequirements(Requirements)}.
-     *                  Non-required events may be <code>null</code>
+     * @param resources input resources
+     * @param entities  stream of input entities
+     * @param events    input events
      */
     void tick(
             TResources resources,

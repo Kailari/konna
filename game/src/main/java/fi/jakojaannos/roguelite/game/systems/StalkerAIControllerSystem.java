@@ -8,7 +8,6 @@ import java.util.stream.Stream;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
-import fi.jakojaannos.roguelite.engine.ecs.Requirements;
 import fi.jakojaannos.roguelite.engine.ecs.annotation.Without;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.InAir;
@@ -22,14 +21,6 @@ public class StalkerAIControllerSystem implements EcsSystem<StalkerAIControllerS
     private final Random random = new Random(8055); // 8055 = 666 + 420 + 6969
     private final Vector2d tempForce = new Vector2d();
     private final Vector2d emptyPos = new Vector2d();
-
-    @Override
-    public Requirements<Resources, EntityData, NoEvents> declareRequirements(
-            final Requirements<Resources, EntityData, NoEvents> require
-    ) {
-        return require.entityData(EntityData.class)
-                      .resources(Resources.class);
-    }
 
     @Override
     public void tick(

@@ -6,7 +6,6 @@ import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
-import fi.jakojaannos.roguelite.engine.ecs.Requirements;
 import fi.jakojaannos.roguelite.engine.ecs.annotation.Without;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.InAir;
@@ -15,14 +14,6 @@ import fi.jakojaannos.roguelite.game.data.components.character.JumpingMovementAb
 import fi.jakojaannos.roguelite.game.data.components.character.MovementInput;
 
 public class JumpingCharacterMovementSystem implements EcsSystem<JumpingCharacterMovementSystem.Resources, JumpingCharacterMovementSystem.EntityData, EcsSystem.NoEvents> {
-    @Override
-    public Requirements<Resources, EntityData, NoEvents> declareRequirements(
-            final Requirements<Resources, EntityData, NoEvents> require
-    ) {
-        return require.resources(Resources.class)
-                      .entityData(EntityData.class);
-    }
-
     @Override
     public void tick(
             final Resources resources,

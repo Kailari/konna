@@ -5,7 +5,6 @@ import java.util.stream.Stream;
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
-import fi.jakojaannos.roguelite.engine.ecs.Requirements;
 import fi.jakojaannos.roguelite.engine.ui.TextSizeProvider;
 import fi.jakojaannos.roguelite.engine.view.data.components.internal.AutomaticSizeTag;
 import fi.jakojaannos.roguelite.engine.view.data.components.internal.BoundHeight;
@@ -22,14 +21,6 @@ public class UILabelAutomaticSizeCalculationSystem implements EcsSystem<UILabelA
     // FIXME: Read font from UI
     public UILabelAutomaticSizeCalculationSystem(final TextSizeProvider font) {
         this.font = font;
-    }
-
-    @Override
-    public Requirements<Resources, EntityData, NoEvents> declareRequirements(
-            final Requirements<Resources, EntityData, NoEvents> require
-    ) {
-        return require.resources(Resources.class)
-                      .entityData(EntityData.class);
     }
 
     @Override

@@ -4,7 +4,6 @@ import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
-import fi.jakojaannos.roguelite.engine.ecs.Requirements;
 import fi.jakojaannos.roguelite.engine.ecs.annotation.DisabledByDefault;
 import fi.jakojaannos.roguelite.engine.ecs.annotation.EnableOn;
 import fi.jakojaannos.roguelite.engine.event.Events;
@@ -16,14 +15,6 @@ import fi.jakojaannos.roguelite.game.gamemode.MainMenuGameMode;
 
 @DisabledByDefault
 public class RestartGameSystem implements EcsSystem<RestartGameSystem.Resources, EcsSystem.NoEntities, RestartGameSystem.EventData> {
-    @Override
-    public Requirements<Resources, NoEntities, EventData> declareRequirements(
-            final Requirements<Resources, NoEntities, EventData> require
-    ) {
-        return require.resources(Resources.class)
-                      .events(EventData.class);
-    }
-
     @Override
     public void tick(
             final Resources resources,

@@ -13,7 +13,6 @@ import javax.annotation.Nullable;
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
-import fi.jakojaannos.roguelite.engine.ecs.Requirements;
 import fi.jakojaannos.roguelite.engine.utilities.OptionalUtil;
 import fi.jakojaannos.roguelite.engine.view.data.components.internal.*;
 import fi.jakojaannos.roguelite.engine.view.data.components.ui.ElementBoundaries;
@@ -33,14 +32,6 @@ import fi.jakojaannos.roguelite.engine.view.ui.ProportionValue;
  * defined, there is a high risk of contradiction.
  */
 public class UIElementBoundaryCalculationSystem implements EcsSystem<UIElementBoundaryCalculationSystem.Resources, UIElementBoundaryCalculationSystem.EntityData, EcsSystem.NoEvents> {
-    @Override
-    public Requirements<Resources, EntityData, NoEvents> declareRequirements(
-            final Requirements<Resources, EntityData, NoEvents> require
-    ) {
-        return require.entityData(EntityData.class)
-                      .resources(Resources.class);
-    }
-
     @Override
     public void tick(
             final Resources resources,

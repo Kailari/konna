@@ -7,8 +7,8 @@ import javax.annotation.Nullable;
 import fi.jakojaannos.roguelite.engine.ecs.world.storage.ResourceStorage;
 
 public record ParsedRequirements<TResources, TEntityData, TEvents>(
-        SystemInputRecord.EntityData<TEntityData>entityData,
         SystemInputRecord.Resources<TResources>resources,
+        SystemInputRecord.EntityData<TEntityData>entityData,
         SystemInputRecord.Events<TEvents>events
 ) {
     public TEntityData constructEntityData(final Object[] params) {

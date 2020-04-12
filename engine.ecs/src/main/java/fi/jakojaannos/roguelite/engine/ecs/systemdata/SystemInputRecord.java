@@ -12,7 +12,7 @@ import fi.jakojaannos.roguelite.engine.ecs.annotation.DisableOn;
 import fi.jakojaannos.roguelite.engine.ecs.annotation.EnableOn;
 import fi.jakojaannos.roguelite.engine.ecs.annotation.Without;
 
-interface SystemInputRecord<T> {
+public interface SystemInputRecord<T> {
     Logger LOG = LoggerFactory.getLogger(SystemInputRecord.class);
 
     Constructor<T> constructor();
@@ -105,7 +105,7 @@ interface SystemInputRecord<T> {
             Constructor<T>constructor,
             Class<?>[]componentTypes
     ) implements SystemInputRecord<T> {
-        static <T> Resources<T> createFor(final Class<T> clazz) {
+        public static <T> Resources<T> createFor(final Class<T> clazz) {
             LOG.debug(LogCategories.SYSTEM_DATA_DUMP, "Parsing Resources {}", clazz.getName());
             validateIsRecord(clazz);
 
