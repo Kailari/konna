@@ -2,9 +2,7 @@ package fi.jakojaannos.roguelite.game.data.components;
 
 import org.joml.Vector2d;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
-
-public class Velocity extends Vector2d implements Component {
+public class Velocity extends Vector2d {
     public Velocity() {
         super(0.0, 0.0);
     }

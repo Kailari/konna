@@ -1,8 +1,6 @@
 package fi.jakojaannos.roguelite.game.data.components.character;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
-
-public class WalkingMovementAbility implements Component {
+public class WalkingMovementAbility {
     public double maxSpeed;
     public double acceleration;
 

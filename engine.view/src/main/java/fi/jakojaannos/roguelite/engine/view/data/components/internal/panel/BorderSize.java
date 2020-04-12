@@ -1,8 +1,6 @@
 package fi.jakojaannos.roguelite.engine.view.data.components.internal.panel;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
-
-public class BorderSize implements Component {
+public class BorderSize {
     private int value;
 
     public int getValue() {

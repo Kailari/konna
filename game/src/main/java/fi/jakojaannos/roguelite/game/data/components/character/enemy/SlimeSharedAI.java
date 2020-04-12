@@ -5,10 +5,9 @@ import org.joml.Vector2d;
 import java.util.ArrayList;
 import java.util.List;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 
-public class SlimeSharedAI implements Component {
+public class SlimeSharedAI {
 
     public List<Entity> slimes = new ArrayList<>();
 

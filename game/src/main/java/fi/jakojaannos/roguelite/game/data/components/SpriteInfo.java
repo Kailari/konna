@@ -2,9 +2,7 @@ package fi.jakojaannos.roguelite.game.data.components;
 
 import java.util.List;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
-
-public class SpriteInfo implements Component {
+public class SpriteInfo {
     public String spriteName;
     public String animationName = "default";
     public int zLayer;

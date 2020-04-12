@@ -4,9 +4,7 @@ import org.joml.Vector2d;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
-
-public class Physics implements Component {
+public class Physics {
     private static final Logger LOG = LoggerFactory.getLogger(Physics.class);
     public final Vector2d acceleration = new Vector2d(0.0, 0.0);
     public double mass;

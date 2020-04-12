@@ -41,7 +41,7 @@ public interface RequirementsBuilder {
      * @return the builder for chaining
      */
     @Deprecated
-    RequirementsBuilder addToGroup(SystemGroup group);
+    RequirementsBuilder addToGroup(Object group);
 
     /**
      * Marks requirement for all entities this system handles to have a component of given type.
@@ -51,7 +51,7 @@ public interface RequirementsBuilder {
      * @return the builder for chaining
      */
     @Deprecated
-    RequirementsBuilder withComponent(Class<? extends Component> componentClass);
+    RequirementsBuilder withComponent(Class<?> componentClass);
 
     /**
      * Marks requirement for all entities this system handles to not have a component of given type. This means that any
@@ -63,7 +63,7 @@ public interface RequirementsBuilder {
      * @return the builder for chaining
      */
     @Deprecated
-    RequirementsBuilder withoutComponent(Class<? extends Component> componentClass);
+    RequirementsBuilder withoutComponent(Class<?> componentClass);
 
     /**
      * Marks requirement for a resource to be available for this system to be able to tick.

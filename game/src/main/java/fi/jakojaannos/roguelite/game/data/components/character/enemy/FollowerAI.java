@@ -1,8 +1,6 @@
 package fi.jakojaannos.roguelite.game.data.components.character.enemy;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
-
-public class FollowerAI implements Component {
+public class FollowerAI {
     public double aggroRadius;
     public double targetDistance;
 

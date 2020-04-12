@@ -1,8 +1,6 @@
 package fi.jakojaannos.roguelite.game.data.components.character.enemy;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
-
-public class StalkerAI implements Component {
+public class StalkerAI {
     public long lastJumpTimeStamp = -1000; // TODO: Move to LeapAbility
     public double aggroRadiusSquared;
     public double leapRadiusSquared;

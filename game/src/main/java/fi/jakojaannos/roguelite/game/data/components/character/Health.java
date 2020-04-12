@@ -3,10 +3,9 @@ package fi.jakojaannos.roguelite.game.data.components.character;
 import java.util.ArrayList;
 import java.util.List;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
 import fi.jakojaannos.roguelite.game.data.DamageInstance;
 
-public class Health implements Component {
+public class Health {
     public List<DamageInstance> damageInstances = new ArrayList<>();
     public long lastDamageInstanceTimeStamp = -10000L;
 

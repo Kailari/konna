@@ -5,11 +5,10 @@ import org.joml.Vector2d;
 import java.util.Random;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
 
-public class SpawnerComponent implements Component {
+public class SpawnerComponent {
     public final Random random;
     public final EntityFactory entityFactory;
     private final Vector2d temp = new Vector2d();

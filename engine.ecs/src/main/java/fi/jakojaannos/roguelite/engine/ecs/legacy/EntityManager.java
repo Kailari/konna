@@ -39,7 +39,7 @@ public interface EntityManager {
      * @return The added component
      */
     @Deprecated
-    <TComponent extends Component> TComponent addComponentTo(Entity entity, TComponent component);
+    <TComponent> TComponent addComponentTo(Entity entity, TComponent component);
 
     /**
      * Removes a component of given type from the entity.
@@ -48,7 +48,7 @@ public interface EntityManager {
      * @param component Component to remove
      */
     @Deprecated
-    default <TComponent extends Component> void removeComponentFrom(
+    default <TComponent> void removeComponentFrom(
             final Entity entity,
             final TComponent component
     ) {
@@ -62,7 +62,7 @@ public interface EntityManager {
      * @param componentClass Type of the component to remove
      */
     @Deprecated
-    void removeComponentFrom(Entity entity, Class<? extends Component> componentClass);
+    void removeComponentFrom(Entity entity, Class<?> componentClass);
 
     /**
      * Gets the component of given type from the entity.
@@ -74,7 +74,7 @@ public interface EntityManager {
      * @return If component exists, component optional of the component. Otherwise, an empty optional
      */
     @Deprecated
-    <TComponent extends Component> Optional<TComponent> getComponentOf(
+    <TComponent> Optional<TComponent> getComponentOf(
             Entity entity,
             Class<TComponent> componentClass
     );
@@ -88,7 +88,7 @@ public interface EntityManager {
      * @return <code>true</code> if the entity has the component, <code>false</code> otherwise
      */
     @Deprecated
-    boolean hasComponent(Entity entity, Class<? extends Component> componentClass);
+    boolean hasComponent(Entity entity, Class<?> componentClass);
 
     /**
      * Gets all entities with given component.
@@ -99,8 +99,8 @@ public interface EntityManager {
      * @return <code>EntityComponentPair</code>s of all the entities and their respective components
      */
     @Deprecated
-    <TComponent extends Component> Stream<EntityComponentPair<TComponent>> getEntitiesWith(
-            Class<? extends TComponent> componentType
+    <TComponent> Stream<EntityComponentPair<TComponent>> getEntitiesWith(
+            Class<TComponent> componentType
     );
 
     /**
@@ -114,8 +114,8 @@ public interface EntityManager {
      */
     @Deprecated
     Stream<Entity> getEntitiesWith(
-            Collection<Class<? extends Component>> required,
-            Collection<Class<? extends Component>> excluded
+            Collection<Class<?>> required,
+            Collection<Class<?>> excluded
     );
 
     /**
@@ -130,7 +130,7 @@ public interface EntityManager {
      *         yet
      */
     @Deprecated
-    default <TComponent extends Component> TComponent addComponentIfAbsent(
+    default <TComponent> TComponent addComponentIfAbsent(
             final Entity entity,
             final Class<TComponent> componentClass,
             final Supplier<TComponent> componentSupplier
@@ -151,7 +151,7 @@ public interface EntityManager {
     @Deprecated
     default boolean removeComponentIfPresent(
             final Entity entity,
-            final Class<? extends Component> componentClass
+            final Class<?> componentClass
     ) {
         if (!hasComponent(entity, componentClass)) {
             return false;
@@ -169,7 +169,6 @@ public interface EntityManager {
         getAllEntities().forEach(this::destroyEntity);
     }
 
-    @Deprecated
-            record EntityComponentPair<TComponent extends Component>(Entity entity, TComponent component) {
+    @Deprecated record EntityComponentPair<TComponent>(Entity entity, TComponent component) {
     }
 }

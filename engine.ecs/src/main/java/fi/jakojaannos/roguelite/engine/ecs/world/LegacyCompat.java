@@ -9,7 +9,6 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
 
@@ -44,7 +43,7 @@ public class LegacyCompat implements EntityManager {
     }
 
     @Override
-    public <TComponent extends Component> TComponent addComponentTo(
+    public <TComponent> TComponent addComponentTo(
             final Entity entity,
             final TComponent component
     ) {
@@ -55,13 +54,13 @@ public class LegacyCompat implements EntityManager {
     @Override
     public void removeComponentFrom(
             final Entity entity,
-            final Class<? extends Component> componentClass
+            final Class<?> componentClass
     ) {
         ((LegacyEntityHandleImpl) entity).removeComponent(componentClass);
     }
 
     @Override
-    public <TComponent extends Component> Optional<TComponent> getComponentOf(
+    public <TComponent> Optional<TComponent> getComponentOf(
             final Entity entity,
             final Class<TComponent> componentClass
     ) {
@@ -71,13 +70,15 @@ public class LegacyCompat implements EntityManager {
     @Override
     public boolean hasComponent(
             final Entity entity,
-            final Class<? extends Component> componentClass
+            final Class<?> componentClass
     ) {
         return ((LegacyEntityHandleImpl) entity).hasComponent(componentClass);
     }
 
     @Override
-    public <TComponent extends Component> Stream<EntityComponentPair<TComponent>> getEntitiesWith(final Class<? extends TComponent> componentType) {
+    public <TComponent> Stream<EntityComponentPair<TComponent>> getEntitiesWith(
+            final Class<TComponent> componentType
+    ) {
         return getEntitiesWith(List.of(componentType), List.of())
                 .map(entity -> new EntityComponentPair<>(entity,
                                                          getComponentOf(entity, componentType).orElseThrow()));
@@ -85,8 +86,8 @@ public class LegacyCompat implements EntityManager {
 
     @Override
     public Stream<Entity> getEntitiesWith(
-            final Collection<Class<? extends Component>> required,
-            final Collection<Class<? extends Component>> excluded
+            final Collection<Class<?>> required,
+            final Collection<Class<?>> excluded
     ) {
         final var componentStorage = LegacyCompat.this.world.getComponentStorage();
         return IntStream.range(0, LegacyCompat.this.world.getEntityCount())

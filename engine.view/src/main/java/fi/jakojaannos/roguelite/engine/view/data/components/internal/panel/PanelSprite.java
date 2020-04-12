@@ -1,8 +1,6 @@
 package fi.jakojaannos.roguelite.engine.view.data.components.internal.panel;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
-
-public class PanelSprite implements Component {
+public class PanelSprite {
     private String sprite;
 
     public String getSprite() {

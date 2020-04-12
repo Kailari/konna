@@ -3,12 +3,11 @@ package fi.jakojaannos.roguelite.game.data.components.character.enemy;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Component;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
 
-public class AttackAI implements Component {
-    public final Class<? extends Component> targetTagClass;
+public class AttackAI {
+    public final Class<?> targetTagClass;
     public double attackRange;
     @Nullable private Entity attackTarget;
 
@@ -16,7 +15,7 @@ public class AttackAI implements Component {
         this(PlayerTag.class, attackRange);
     }
 
-    public AttackAI(final Class<? extends Component> targetTagClass, final double attackRange) {
+    public AttackAI(final Class<?> targetTagClass, final double attackRange) {
         this.targetTagClass = targetTagClass;
         this.attackRange = attackRange;
     }
