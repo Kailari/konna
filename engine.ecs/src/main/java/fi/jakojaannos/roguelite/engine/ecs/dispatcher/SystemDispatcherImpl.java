@@ -19,9 +19,6 @@ import fi.jakojaannos.roguelite.engine.ecs.systemdata.RequirementsBuilder;
 
 public class SystemDispatcherImpl implements SystemDispatcher {
     private static final Logger LOG = LoggerFactory.getLogger(SystemDispatcherImpl.class);
-    private static final boolean LOG_SYSTEM_TICK = false;
-    private static final boolean LOG_GROUP_TICK = false;
-    private static final boolean LOG_TICK = false;
 
     /**
      * Immutable system state with everything which is hinted to be enabled by default is set to enabled.
@@ -109,9 +106,7 @@ public class SystemDispatcherImpl implements SystemDispatcher {
 
         final var queue = new HashSet<>(this.systemGroups);
 
-        if (LOG_TICK) {
-            LOG.debug(LogCategories.DISPATCHER, "Tick #{} (Dispatcher {})", this.tick, this);
-        }
+        LOG.debug(LogCategories.DISPATCHER_TICK, "Tick #{} (Dispatcher {})", this.tick, this);
         this.tick++;
         final var ticked = new ArrayList<SystemGroup>(queue.size());
 
@@ -178,16 +173,12 @@ public class SystemDispatcherImpl implements SystemDispatcher {
             final SystemState systemState,
             final Map<Class<?>, Object> events
     ) {
-        if (LOG_GROUP_TICK) {
-            LOG.trace(LogCategories.DISPATCHER, "Ticking group \"{}\"", group.getName());
-        }
+        LOG.trace(LogCategories.DISPATCHER_GROUP, "Ticking group \"{}\"", group.getName());
 
         // XXX: This has to be sequential by the spec: (do not use parallel streams etc.)
         //      "The system execution order within the group must match the registration order"
         for (final var systemObj : group.getSystems()) {
-            if (LOG_SYSTEM_TICK) {
-                LOG.trace(LogCategories.DISPATCHER, "Ticking system \"{}\"", systemObj.getClass().getSimpleName());
-            }
+            LOG.trace(LogCategories.DISPATCHER_SYSTEM, "Ticking system \"{}\"", systemObj.getClass().getSimpleName());
             if (systemObj instanceof ECSSystem legacySystem) {
                 final var requirements = new ComponentOnlyRequirementsBuilder();
                 legacySystem.declareRequirements(requirements);
@@ -227,8 +218,8 @@ public class SystemDispatcherImpl implements SystemDispatcher {
         final Object[] resources = world.fetchResources(requirements.resources().componentTypes());
         final var systemResources = requirements.constructResources(resources);
         final var entitySpliterator = world.iterateEntities(requirements.entityData().componentTypes(),
-                                              requirements.entityData().excluded(),
-                                              requirements::constructEntityData);
+                                                            requirements.entityData().excluded(),
+                                                            requirements::constructEntityData);
 
         // Return if event constraints were not met
         if (systemEvents == null) {
