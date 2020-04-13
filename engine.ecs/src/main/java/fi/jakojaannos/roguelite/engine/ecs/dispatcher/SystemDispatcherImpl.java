@@ -265,6 +265,7 @@ public class SystemDispatcherImpl implements SystemDispatcher {
     @SuppressWarnings("unchecked")
     private static <TResources, TEntityData, TEvents> ParsedRequirements<TResources, TEntityData, TEvents>
     resolveRequirements(final EcsSystem<TResources, TEntityData, TEvents> system) {
+        // TODO: Handle IllegalAccessException and log info on possible fix using `opens .. to ..`
         final var interfaceType = Arrays.stream(system.getClass().getGenericInterfaces())
                                         // Filter out any non-parameterized (non-generic) interfaces
                                         .filter(type -> ParameterizedType.class.isAssignableFrom(type.getClass()))
@@ -283,7 +284,8 @@ public class SystemDispatcherImpl implements SystemDispatcher {
         final var eventDataType = interfaceType.getActualTypeArguments()[2];
 
         // ...and then just construct the requirements from them
-        return new ParsedRequirements<>(SystemInputRecord.Resources.createFor((Class<TResources>) resourceDataType),
+        return new ParsedRequirements<>(system.getClass().getSimpleName(),
+                                        SystemInputRecord.Resources.createFor((Class<TResources>) resourceDataType),
                                         SystemInputRecord.EntityData.createFor((Class<TEntityData>) entityDataType),
                                         SystemInputRecord.Events.createFor((Class<TEvents>) eventDataType));
     }
