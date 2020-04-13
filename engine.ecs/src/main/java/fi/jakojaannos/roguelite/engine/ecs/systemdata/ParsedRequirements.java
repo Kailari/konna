@@ -1,36 +1,35 @@
 package fi.jakojaannos.roguelite.engine.ecs.systemdata;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import javax.annotation.Nullable;
 
-import fi.jakojaannos.roguelite.engine.ecs.world.storage.ResourceStorage;
+import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 
 public record ParsedRequirements<TResources, TEntityData, TEvents>(
+        String systemName,
         SystemInputRecord.Resources<TResources>resources,
         SystemInputRecord.EntityData<TEntityData>entityData,
         SystemInputRecord.Events<TEvents>events
 ) {
-    public TEntityData constructEntityData(final Object[] params) {
-        try {
-            return this.entityData.constructor().newInstance(params);
-        } catch (final InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            throw new IllegalStateException("Could not instantiate entity data!");
-        }
+    private static final Logger LOG = LoggerFactory.getLogger(EcsSystem.class);
+
+    public TEntityData constructEntityData(final Object[] entityData) {
+        return safeNewInputRecordInstance(this.systemName,
+                                          "entity data",
+                                          this.entityData.constructor(),
+                                          entityData);
     }
 
     public TResources constructResources(final Object[] resources) {
-        try {
-            return this.resources.constructor().newInstance(resources);
-        } catch (final InstantiationException e) {
-            throw new IllegalStateException("Resources input cannot be instantiated!");
-        } catch (final IllegalAccessException e) {
-            throw new IllegalStateException("Cannot access resource input constructor! ("
-                                            + this.resources.constructor().getDeclaringClass().getName()
-                                            + ")");
-        } catch (final InvocationTargetException e) {
-            throw new IllegalStateException("Resource input constructor failed: " + e.getMessage());
-        }
+        return safeNewInputRecordInstance(this.systemName,
+                                          "resources",
+                                          this.resources.constructor(),
+                                          resources);
     }
 
     @Nullable
@@ -47,16 +46,46 @@ public record ParsedRequirements<TResources, TEntityData, TEvents>(
             }
         }
 
+        return safeNewInputRecordInstance(this.systemName,
+                                          "events",
+                                          this.events.constructor(),
+                                          params);
+    }
+
+    private static <T> T safeNewInputRecordInstance(
+            final String systemName,
+            final String type,
+            final Constructor<T> constructor,
+            final Object... params
+    ) {
         try {
-            return this.events.constructor().newInstance(params);
+            return constructor.newInstance(params);
         } catch (final InstantiationException e) {
-            throw new IllegalStateException("Resources input cannot be instantiated!");
+            throw new IllegalStateException(type + " input record cannot be instantiated! ("
+                                            + systemName + ")");
         } catch (final IllegalAccessException e) {
-            throw new IllegalStateException("Cannot access resource input constructor! ("
-                                            + this.resources.constructor().getDeclaringClass().getName()
-                                            + ")");
+            LOG.error("""
+                                            
+                      ========================================================================================
+                      Ticking system {} failed due to {} input record being inaccessible to reflective access!
+                       
+                      Usually this is caused by module misconfiguration and can be fixed by adding a line with
+                         opens <system.package.here> to roguelite.engine.ecs
+
+                      to the "module-info.java" for the module with the system implementation. This allows the
+                      ECS requirements handler to reflectively gain access the systems' input types without
+                      system implementation needing to provide the constructors manually. Note that the "opens"
+                      line in the module info is required on per-package basis.
+
+                      ========================================================================================
+                      """,
+                      systemName,
+                      type);
+            throw new IllegalStateException("Cannot access " + type + " input record constructor! ("
+                                            + systemName + ") See log above for additional details.");
         } catch (final InvocationTargetException e) {
-            throw new IllegalStateException("Resource input constructor failed: " + e.getMessage());
+            throw new IllegalStateException(type + " input constructor for system " + systemName
+                                            + " failed with an exception: " + e.getMessage());
         }
     }
 }

@@ -35,7 +35,7 @@ public interface SystemInputRecord<T> {
         validateHasConstructor(clazz, constructors);
         if (constructors.length > 1) {
             throw new IllegalRequirementsException(String.format(
-                    "Entity data should not have manually defined constructors! [data=%s]",
+                    "System input records should not have manually defined constructors! [data=%s]",
                     clazz.getSimpleName()));
         }
 
