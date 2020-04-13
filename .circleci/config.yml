@@ -1,6 +1,4 @@
 version: 2.1
-orbs:
-  win: circleci/windows@2.2.0
 
 jobs:
   build:
@@ -27,17 +25,17 @@ jobs:
       - run:
           name: Compile
           command: |
-            gradle compileJava
-            gradle assemble
+            ./gradlew compileJava
+            ./gradlew assemble
       - run:
           name: Run tests
           command: |
-            gradle compileTestJava 
-            gradle check
+            ./gradlew compileTestJava
+            ./gradlew check
       - run:
           name: Upload test results to CodeCov
           command: |
-            gradle jacocoTestReport jacocoRootReport
+            ./gradlew jacocoTestReport jacocoRootReport
             bash <(curl -s https://codecov.io/bash)
       - run:
           name: Save test results to Circle
@@ -51,28 +49,39 @@ jobs:
           path: ~/test-results/junit
 
   deploy:
-    executor: win/default
+    docker:
+      - image: circleci/openjdk:14-jdk-buster
+    working_directory: ~/repo
 
     environment:
       JVM_OPTS: -Xmx3200m
+      TERM: dumb
 
     steps:
       - checkout
       - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "build.gradle" }}
-            - v1-dependencies-
+            - v1-jdk
+
+      - run: gradle dependencies
+      - run:
+          name: Download windows JDK
+          command: |
+            mkdir jdk
+            cd jdk
+            wget https://download.java.net/java/GA/jdk14/076bab302c7b4508975440c56f6cc26a/36/GPL/openjdk-14_windows-x64_bin.zip
+            unzip ./openjdk-14_windows-x64_bin.zip -d jdk14
+            cd ..
       - run:
           name: Build
-          command: ./gradlew.bat compileJava assemble
-          shell: bash.exe
+          command: ./gradlew compileJava assemble
       - run:
           name: Package
-          command: ./gradlew.bat jlinkZip
-          shell: bash.exe
+          command: TARGET_PLATFORM=windows ./gradlew jlinkZip
 
       - store_artifacts:
-          path: ./launcher/build/image.zip
+          path: ./launcher/build/image-windows.zip
           destination: 'konna-unstable.zip'
 
 workflows:
