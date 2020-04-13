@@ -16,6 +16,11 @@ dependencies {
     implementation "org.joml:joml:${jomlVersion}"
 
     testImplementation project(':engine.assert')
+
+    // Cucumber for fancy tests
+    testImplementation "io.cucumber:cucumber-java:${cucumberVersion}"
+    testImplementation "io.cucumber:cucumber-junit:${cucumberVersion}"
+    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${jUnitVersion}"
 }
 
 test {
