@@ -41,5 +41,4 @@ public class Collisions {
     public void clear() {
         this.collisionEvents.clear();
     }
-
 }
