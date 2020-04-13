@@ -83,7 +83,10 @@ public class WorldImpl implements World {
         // TODO: Change to EntityHandleImpl
         this.entities[id] = new LegacyEntityHandleImpl(id, this);
         for (final var component : components) {
-            this.entities[id].addComponent(component);
+            if (!this.entities[id].addComponent(component)) {
+                throw new IllegalStateException("Tried adding component " + component.getClass().getSimpleName()
+                                                + " to an entity, but the component already exists!");
+            }
         }
 
         return this.entities[id];

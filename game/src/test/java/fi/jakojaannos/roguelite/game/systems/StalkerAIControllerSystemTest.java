@@ -43,11 +43,9 @@ public class StalkerAIControllerSystemTest {
                                      stalkerTransform,
                                      movementStats,
                                      new MovementInput(),
-                                     new WalkingMovementAbility(1.0, 250.0),
                                      Physics.builder()
                                             .friction(200)
                                             .build());
-        world.commitEntityModifications();
     }
 
     @ParameterizedTest

@@ -31,8 +31,6 @@ public class HandleEntitiesInAirSystemTest {
 
     @Test
     void inAirComponentIsRemovedAfterExpiring() {
-        beforeEach();
-
         Entity entity = entityManager.createEntity();
         entityManager.addComponentTo(entity, new InAir(time.getCurrentGameTime(), 10));
         entityManager.applyModifications();
