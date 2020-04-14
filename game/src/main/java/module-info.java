@@ -1,7 +1,6 @@
 module roguelite.game {
     requires transitive org.joml;
     requires org.slf4j;
-    requires org.lwjgl.opengl;
     requires jsr305;
 
     requires transitive roguelite.engine;

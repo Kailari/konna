@@ -12,32 +12,15 @@ if (buildPlatform == null) {
     buildPlatform = OperatingSystem.current()
 }
 
-switch (buildPlatform) {
-    case OperatingSystem.LINUX:
-        project.ext.lwjglNatives = "natives-linux"
-        break
-    case OperatingSystem.MAC_OS:
-        project.ext.lwjglNatives = "natives-macos"
-        break
-    case OperatingSystem.WINDOWS:
-        project.ext.lwjglNatives = "natives-windows"
-        break
-}
-
-
 dependencies {
     implementation project(':game.app')
 
     // LWJGL and its components
     implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
 
-    implementation "org.lwjgl:lwjgl"
-    implementation "org.lwjgl:lwjgl-assimp"
-    implementation "org.lwjgl:lwjgl-glfw"
-    implementation "org.lwjgl:lwjgl-openal"
-    implementation "org.lwjgl:lwjgl-stb"
-    implementation "org.lwjgl:lwjgl-opengl"
+    final def lwjglNatives = selectNatives(buildPlatform)
     for (final lwjglModule in ["", "-assimp", "-glfw", "-openal", "-opengl", "-stb", "-opengl"]) {
+        implementation "org.lwjgl:lwjgl${lwjglModule}"
         implementation "org.lwjgl:lwjgl${lwjglModule}::${lwjglNatives}"
     }
     implementation "org.joml:joml:${jomlVersion}"
@@ -50,7 +33,7 @@ application {
 
 jlink {
     // XXX: Stripping debug symbols makes classloader fail on some records
-    addOptions /*'--strip-debug', */'--compress', '2', '--no-header-files', '--no-man-pages'
+    addOptions /*'--strip-debug', */ '--compress', '2', '--no-header-files', '--no-man-pages'
     forceMerge 'log4j-api'
     launcher {
         name = 'konna'
@@ -58,48 +41,31 @@ jlink {
     }
 }
 
+def targetAssetsPath = "${buildDir}/image"
+
 if (buildPlatformName != null) {
     jlink {
-        switch (buildPlatform) {
-            case OperatingSystem.LINUX:
-                targetPlatform(buildPlatformName, System.getenv("JAVA_HOME_LINUX"))
-                break
-            case OperatingSystem.MAC_OS:
-                targetPlatform(buildPlatformName, System.getenv("JAVA_HOME_MACOS"))
-                break
-            case OperatingSystem.WINDOWS:
-                targetPlatform(buildPlatformName, "${System.getenv("HOME")}/repo/jdk/jdk14/jdk-14/")
-                break
+        final def CI = System.getenv("CI")
+        final def path = (CI != null && CI == "true")
+                ? "${System.getenv("HOME")}/repo/jdk/jdk-${buildPlatformName}/jdk-14/"
+                : getPlatformHomeWithFallBack(buildPlatformName)
+        if (path == null) {
+            throw new IllegalStateException("Could not determine JDK location for platform \"${buildPlatformName}\"")
         }
+        targetPlatform(buildPlatformName, path)
     }
 
-    tasks.jlink.doLast {
-        copy {
-            from('../assets')
-            into("${buildDir}/image/konna-${buildPlatformName}/bin/assets")
-            exclude("**/*.aseprite")
-        }
-    }
-} else {
-    tasks.jlink.doLast {
-        copy {
-            from('../assets')
-            into("$buildDir/image/bin/assets")
-            exclude("**/*.aseprite")
-        }
+    targetAssetsPath += "-${buildPlatformName}"
+}
+tasks.jlink.doLast {
+    copy {
+        from('../assets')
+        into("${targetAssetsPath}/bin/assets")
+        exclude("**/*.aseprite")
     }
 }
 
 run {
-    moduleOptions {
-        addModules = [
-                "org.lwjgl.natives",
-                "org.lwjgl.opengl.natives",
-                "org.lwjgl.glfw.natives",
-        ]
-        addReads = ["roguelite.launcher": "org.lwjgl.natives,org.lwjgl.opengl.natives,org.lwjgl.glfw.natives"]
-    }
-
     //jvmArgs = ['-XX:+PrintGCDetails']
     setArgsString("--debug --assetRoot ../assets/")
 }
@@ -124,10 +90,27 @@ jar {
     }
 }
 
-
 test {
     moduleOptions {
         runOnClasspath = true
     }
 }
 
+
+static String selectNatives(final OperatingSystem platform) {
+    switch (platform) {
+        case OperatingSystem.LINUX:
+            return "natives-linux"
+        case OperatingSystem.MAC_OS:
+            return "natives-macos"
+        case OperatingSystem.WINDOWS:
+            return "natives-windows"
+        default:
+            throw new UnsupportedOperationException("Unknown build platform: \"${platform}\"");
+    }
+}
+
+static String getPlatformHomeWithFallBack(final String platformName) {
+    final def path = System.getenv("JAVA_HOME_${platformName.toUpperCase()}")
+    return path != null ? path : System.getenv("JAVA_HOME")
+}

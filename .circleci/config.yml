@@ -71,7 +71,7 @@ jobs:
             mkdir jdk
             cd jdk
             wget https://download.java.net/java/GA/jdk14/076bab302c7b4508975440c56f6cc26a/36/GPL/openjdk-14_windows-x64_bin.zip
-            unzip ./openjdk-14_windows-x64_bin.zip -d jdk14
+            unzip ./openjdk-14_windows-x64_bin.zip -d jdk-windows
             cd ..
       - run:
           name: Build
@@ -82,7 +82,7 @@ jobs:
 
       - store_artifacts:
           path: ./launcher/build/image-windows.zip
-          destination: 'konna-unstable.zip'
+          destination: 'konna-unstable-win.zip'
 
 workflows:
   version: 2.1
