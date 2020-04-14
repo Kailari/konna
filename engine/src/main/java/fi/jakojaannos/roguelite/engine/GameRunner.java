@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Optional;
 import java.util.Queue;
 
 import fi.jakojaannos.roguelite.engine.data.resources.Network;
@@ -14,6 +13,7 @@ import fi.jakojaannos.roguelite.engine.event.EventBus;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.input.InputProvider;
+import fi.jakojaannos.roguelite.engine.network.NetworkImpl;
 import fi.jakojaannos.roguelite.engine.network.NetworkManager;
 import fi.jakojaannos.roguelite.engine.state.StateEvent;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
@@ -31,6 +31,7 @@ public abstract class GameRunner implements MainThread {
 
     private final Object taskQueueLock = new Object();
     private final Queue<MainThreadTask> mainThreadTaskQueue = new ArrayDeque<>();
+    private final Network network;
 
     private GameMode activeGameMode;
     private boolean running;
@@ -65,6 +66,7 @@ public abstract class GameRunner implements MainThread {
         this.systemBus = new EventBus<>();
         this.events = new Events(new EventBus<>(), this.inputBus, this.stateBus, this.systemBus);
         this.timeManager = timeManager;
+        this.network = new NetworkImpl();
     }
 
     @Override
@@ -96,6 +98,7 @@ public abstract class GameRunner implements MainThread {
         LOG.info("Entering main loop");
         var state = setActiveGameMode(defaultGameMode);
         onModeChange(this.activeGameMode);
+        onStateChange(state);
         try {
             this.running = true;
             while (this.running && shouldContinueLoop()) {
@@ -110,6 +113,9 @@ public abstract class GameRunner implements MainThread {
                 limitFramerate();
             }
         } finally {
+            this.network.getNetworkManager()
+                        .ifPresent(NetworkManager::close);
+
             if (this.activeGameMode != null) {
                 try {
                     this.activeGameMode.close();
@@ -229,23 +235,8 @@ public abstract class GameRunner implements MainThread {
         world.registerResource(Events.class, this.events);
         world.registerResource(TimeManager.class, this.timeManager);
         world.registerResource(MainThread.class, this);
+        world.registerResource(Network.class, this.network);
 
-        // FIXME: Figure out something smarter
-        world.registerResource(Network.class, new Network() {
-            @Override
-            public Optional<NetworkManager<?>> getNetworkManager() {
-                return Optional.empty();
-            }
-
-            @Override
-            public Optional<String> getConnectionError() {
-                return Optional.empty();
-            }
-
-            @Override
-            public void setConnectionError(final String error) {
-            }
-        });
         gameMode.stateFactory().accept(world);
         return new GameState(world, gameMode.systemStateFactory().get());
     }
@@ -273,4 +264,5 @@ public abstract class GameRunner implements MainThread {
             return this.value;
         }
     }
+
 }

@@ -37,6 +37,7 @@ public class ClientCommandChannelRunnable extends CommandChannelRunnable {
         return super.isConnected() && this.channel != null && this.channel.isConnected();
     }
 
+    @SuppressWarnings("StatementWithEmptyBody")
     public ClientCommandChannelRunnable(
             final String host,
             final int port,
@@ -58,9 +59,9 @@ public class ClientCommandChannelRunnable extends CommandChannelRunnable {
         this.channel.socket().setKeepAlive(true);
         this.channel.connect(new InetSocketAddress(host, port));
 
-        this.channel.finishConnect();
-
+        while (!this.channel.finishConnect());
         LOG.info("Connection successful.");
+
         this.channel.register(this.selector, SelectionKey.OP_READ);
     }
 
