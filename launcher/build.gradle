@@ -55,7 +55,7 @@ if (buildPlatformName != null) {
         targetPlatform(buildPlatformName, path)
     }
 
-    targetAssetsPath += "-${buildPlatformName}"
+    targetAssetsPath += "/konna-${buildPlatformName}"
 }
 tasks.jlink.doLast {
     copy {

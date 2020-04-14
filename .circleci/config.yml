@@ -66,6 +66,11 @@ jobs:
 
       - run: gradle dependencies
       - run:
+          name: Install lFTP
+          command: |
+            sudo apt-get update
+            sudo apt-get install lftp
+      - run:
           name: Download windows JDK
           command: |
             mkdir jdk
@@ -79,6 +84,9 @@ jobs:
       - run:
           name: Package
           command: TARGET_PLATFORM=windows ./gradlew jlinkZip
+      - run:
+          name: Upload to file server
+          command: lftp ftp://${username}:${password}@${hostname} -e "rm konna-unstable-win.zip; put -c ./launcher/build/image-windows.zip -o konna-unstable-win.zip; quit"
 
       - store_artifacts:
           path: ./launcher/build/image-windows.zip
