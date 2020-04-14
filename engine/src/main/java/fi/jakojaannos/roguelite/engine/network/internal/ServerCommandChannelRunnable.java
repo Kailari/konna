@@ -17,6 +17,7 @@ import java.util.Queue;
 import java.util.concurrent.Semaphore;
 import java.util.function.Consumer;
 
+import fi.jakojaannos.roguelite.engine.LogCategories;
 import fi.jakojaannos.roguelite.engine.MainThread;
 import fi.jakojaannos.roguelite.engine.network.NetworkConnection;
 import fi.jakojaannos.roguelite.engine.network.message.MessageHandlingContext;
@@ -72,6 +73,10 @@ public class ServerCommandChannelRunnable extends CommandChannelRunnable {
     }
 
     public void send(final NetworkConnection target, final NetworkMessage message) {
+        LOG.trace(LogCategories.NETWORK_MESSAGE, "Sending message {} to {}",
+                  message.getClass().getSimpleName(),
+                  target);
+
         final ClientInfo clientInfo;
         synchronized (this.clients) {
             clientInfo = this.clients.get(target);
@@ -189,12 +194,13 @@ public class ServerCommandChannelRunnable extends CommandChannelRunnable {
         this.clientIdCounter++;
     }
 
-    private static record ClientInfo(Queue<TypedNetworkMessage<?>>receiveQueue,
-                                     ByteBuffer writeBuffer,
-                                     ByteBuffer readBuffer,
-                                     Semaphore removalSemaphore,
-                                     SocketChannel channel,
-                                     MessageHandlingContext context
+    private static record ClientInfo(
+            Queue<TypedNetworkMessage<?>>receiveQueue,
+            ByteBuffer writeBuffer,
+            ByteBuffer readBuffer,
+            Semaphore removalSemaphore,
+            SocketChannel channel,
+            MessageHandlingContext context
     ) {
         ClientInfo(
                 final SocketChannel channel,

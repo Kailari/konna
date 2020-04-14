@@ -24,7 +24,7 @@ public class ClientNetworkManager extends NetworkManager<ClientCommandChannelRun
                                                new MessageDecoder(NetworkMessage.TYPES),
                                                mainThread));
         // FIXME: Remove this and implement proper tests
-        send(new HelloMessage("Hello Netty!"));
+        send(new HelloMessage("Hello from client!"));
     }
 
     public void send(final NetworkMessage message) {
