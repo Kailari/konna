@@ -11,6 +11,8 @@ public class AutomaticTriggerModule implements WeaponModule<AutomaticTriggerModu
         hooks.registerWeaponFire(this, this::checkIfCanFire, Phase.CHECK);
         hooks.registerTriggerPull(this, this::onTriggerPull, Phase.TRIGGER);
         hooks.registerTriggerRelease(this, this::onTriggerRelease, Phase.TRIGGER);
+        hooks.registerWeaponEquip(this, this::equip, Phase.POST);
+        hooks.registerWeaponUnequip(this, this::unequip, Phase.POST);
     }
 
     public void onTriggerPull(
@@ -43,7 +45,26 @@ public class AutomaticTriggerModule implements WeaponModule<AutomaticTriggerModu
         }
     }
 
+    public void equip(
+            final State state,
+            final NoAttributes attributes,
+            final WeaponEquipEvent event,
+            final ActionInfo info
+    ) {
+        state.triggerDown = false;
+    }
+
+    public void unequip(
+            final State state,
+            final NoAttributes attributes,
+            final WeaponUnequipEvent event,
+            final ActionInfo info
+    ) {
+        state.triggerDown = false;
+    }
+
     public static class State {
         public boolean triggerDown;
+
     }
 }
