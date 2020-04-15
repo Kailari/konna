@@ -17,6 +17,7 @@ import fi.jakojaannos.roguelite.engine.ui.TextSizeProvider;
 import fi.jakojaannos.roguelite.engine.ui.UIEvent;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
+import fi.jakojaannos.roguelite.engine.view.data.components.internal.Parent;
 import fi.jakojaannos.roguelite.engine.view.data.resources.ui.UIHierarchy;
 import fi.jakojaannos.roguelite.engine.view.data.resources.ui.UIRoot;
 import fi.jakojaannos.roguelite.engine.view.systems.ui.*;
@@ -134,6 +135,8 @@ public class UserInterfaceImpl implements UserInterface {
                                                    .filter(Predicate.not(EntityHandle::isPendingRemoval))
                                                    .collect(Collectors.toCollection(ArrayList::new));
         this.elementEntities.forEach(entity -> this.hierarchy.update(entity,
-                                                                     UIHierarchySystem.getParent(entity)));
+                                                                     entity.getComponent(Parent.class)
+                                                                           .map(p -> p.value)
+                                                                           .orElse(null)));
     }
 }
