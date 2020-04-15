@@ -304,7 +304,7 @@ public class ApplyVelocitySystem implements ECSSystem {
             return 0.0;
         }
 
-        // Return immediately if we can move the full distance
+        // Return immediately if we can move the full depth
         if ((collision = collisionsAfterMoving(distance, direction, transform, translatedTransform,
                                                translatedCollider, collisionTargets)).isEmpty()) {
             moveDistanceTriggeringCollisions(transform,
@@ -321,7 +321,7 @@ public class ApplyVelocitySystem implements ECSSystem {
         final var maxSteps = (int) (distance / STEP_SIZE);
         int stepsToTake = -1;
         for (int b = maxSteps; b >= 1; b /= 2) {
-            // borderline case of full distance leading to collision and maxSteps not colliding
+            // borderline case of full depth leading to collision and maxSteps not colliding
             while (stepsToTake <= maxSteps
                    && (collision = collisionsAfterMoving((stepsToTake + b) * STEP_SIZE,
                                                          direction,
@@ -475,14 +475,17 @@ public class ApplyVelocitySystem implements ECSSystem {
         }
 
         public boolean overlaps(final Transform transform, final Shape shape) {
-            final var initialDirection = transform.position.sub(this.transform.position, new Vector2d());
-            return GJK2D.intersects(transform,
-                                    shape,
-                                    this.transform,
-                                    this.entity != null
-                                            ? this.entity.collider()
-                                            : TILE_SHAPE,
-                                    initialDirection);
+            final var collision = GJK2D.getCollision(transform,
+                                                     shape,
+                                                     this.transform,
+                                                     this.entity != null
+                                                             ? this.entity.collider()
+                                                             : TILE_SHAPE);
+            if (collision.collides()) {
+                LOG.debug("Collision depth: {}", collision.depth());
+                LOG.debug("Collision normal: {}", collision.normal());
+            }
+            return collision.collides();
         }
     }
 

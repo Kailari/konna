@@ -4,66 +4,24 @@ import org.joml.Vector2d;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nullable;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.game.data.components.Shape;
 
 public class GJK2D {
-    private static final Transform DEFAULT_TRANSFORM = new Transform();
-    private static final Vector2d tmpSupportA = new Vector2d();
-    private static final Vector2d tmpSupportB = new Vector2d();
-    private static final Vector2d tmpDirection = new Vector2d();
-
     private static final int MAX_ITERATIONS = 100;
+    private static final double TOLERANCE = 0.1;
+    private static final double EPA_TOLERANCE = 0.00001;
 
-    public static boolean intersects(
-            final Transform transformA,
-            final Shape shapeA,
-            final Shape shapeB,
-            final Vector2d initialDirection
-    ) {
-        return intersects(transformA, shapeA, DEFAULT_TRANSFORM, shapeB, initialDirection);
-    }
-
-    public static Vector2d minkowskiSupport(
-            final Vector2d direction,
-            final Transform transformA,
-            final Shape shapeA,
-            final Shape shapeB,
-            final Vector2d result
-    ) {
-        return minkowskiSupport(direction, transformA, shapeA, DEFAULT_TRANSFORM, shapeB, result);
-    }
-
-    public static Vector2d minkowskiSupport(
-            final Vector2d direction,
+    public static boolean checkCollision(
             final Transform transformA,
             final Shape shapeA,
             final Transform transformB,
             final Shape shapeB,
-            final Vector2d result
+            final Vector2d direction,
+            final List<Vector2d> simplex
     ) {
-        // minkowskiSupport = a.support(direction) - b.support(-1 × direction)
-        final var negatedDirection = direction.negate(new Vector2d());
-        final var supportA = shapeA.supportPoint(transformA, direction, new Vector2d());
-        final var supportB = shapeB.supportPoint(transformB, negatedDirection, new Vector2d());
-
-        return supportA.sub(supportB, result);
-    }
-
-    public static boolean intersects(
-            final Transform transformA,
-            final Shape shapeA,
-            final Transform transformB,
-            final Shape shapeB,
-            final Vector2d initialDirection
-    ) {
-        List<Vector2d> simplex = new ArrayList<>(3);
-
-        final var direction = tmpDirection.set(initialDirection);
-        if (direction.lengthSquared() == 0.0) {
-            direction.set(1.0, 0.0);
-        }
 
         // Select first support point
         simplex.add(minkowskiSupport(direction, transformA, shapeA, transformB, shapeB, new Vector2d()));
@@ -99,6 +57,174 @@ public class GJK2D {
         return true;
     }
 
+    public static Result getCollision(
+            final Transform transformA,
+            final Shape shapeA,
+            final Transform transformB,
+            final Shape shapeB
+    ) {
+        final var direction = new Vector2d(1, 0);
+        final var collisionSimplex = new ArrayList<Vector2d>(3);
+        final var isColliding = checkCollision(transformA,
+                                               shapeA,
+                                               transformB,
+                                               shapeB,
+                                               direction,
+                                               collisionSimplex);
+
+        if (isColliding) {
+            assert collisionSimplex.size() == 3;
+
+            // Determine simplex winding
+            final var a = collisionSimplex.get(2);
+            final var b = collisionSimplex.get(1);
+            final var c = collisionSimplex.get(0);
+            final var cross = (b.x - a.x) * (c.y - b.y) - (b.y - a.y) * (c.x - b.x);
+            final var clockwise = cross <= 0.0;
+
+            while (true) {
+                final var edge = findClosestEdge(collisionSimplex, clockwise);
+
+                final var p = minkowskiSupport(edge.normal, transformA, shapeA, transformB, shapeB, new Vector2d());
+
+                final var depth = p.dot(edge.normal);
+                if (depth - edge.distance < EPA_TOLERANCE) {
+                    return Result.collision(depth, edge.normal);
+                } else {
+                    // Insert the `p` in between the points of the closest edge
+                    collisionSimplex.add(edge.index, p);
+                }
+            }
+        }
+
+        return Result.noCollision();
+    }
+
+    public static double getDistance(
+            final Transform transformA,
+            final Shape shapeA,
+            final Transform transformB,
+            final Shape shapeB,
+            final Vector2d direction
+    ) {
+        final var simplex = new ArrayList<Vector2d>(2);
+        simplex.add(minkowskiSupport(direction, transformA, shapeA, transformB, shapeB, new Vector2d()));
+        simplex.add(minkowskiSupport(direction.negate(), transformA, shapeA, transformB, shapeB, new Vector2d()));
+
+        // direction = closest a b
+        closestPointToOrigin(simplex.get(1), simplex.get(0), direction);
+
+        var iterations = MAX_ITERATIONS;
+        while (iterations > 0) {
+            assert simplex.size() == 2;
+
+            // direction points towards the origin, flip it
+            direction.negate();
+
+            // If direction is a zero vector, shapes are touching
+            if (direction.lengthSquared() == 0) {
+                return 0.0;
+            }
+
+            final var c = minkowskiSupport(direction, transformA, shapeA, transformB, shapeB, new Vector2d());
+
+            final var dc = c.dot(direction);
+            final var da = simplex.get(1).dot(direction);
+
+            // Stop if we are not making progress
+            if (dc - da < TOLERANCE) {
+                return direction.length();
+            }
+
+            final var p1 = closestPointToOrigin(simplex.get(1), c, new Vector2d());
+            final var p2 = closestPointToOrigin(c, simplex.get(0), new Vector2d());
+
+            if (p1.length() < p2.length()) {
+                simplex.get(0).set(c);
+                direction.set(p1);
+            } else {
+                simplex.get(1).set(c);
+                direction.set(p2);
+            }
+
+            --iterations;
+        }
+
+        return Double.NaN;
+    }
+
+    private static Edge findClosestEdge(final List<Vector2d> simplex, final boolean clockwise) {
+        final var closest = new Edge();
+        closest.distance = Double.MAX_VALUE;
+
+        for (var i = 0; i < simplex.size(); ++i) {
+            final var nextIndex = i + 1 == simplex.size() ? 0 : i + 1;
+            final var a = simplex.get(i);
+            final var b = simplex.get(nextIndex);
+
+            final var edge = b.sub(a, new Vector2d());
+
+            // Use vector per-product to find edge normal
+            //noinspection SuspiciousNameCombination
+            final Vector2d normal = clockwise
+                    ? new Vector2d(edge.y, -edge.x)
+                    : new Vector2d(-edge.y, edge.x);
+
+            normal.normalize();
+            final var distance = normal.dot(a);
+            if (distance < closest.distance) {
+                closest.distance = distance;
+                closest.normal = normal;
+                closest.index = nextIndex;
+            }
+        }
+
+        return closest;
+    }
+
+    private static Vector2d minkowskiSupport(
+            final Vector2d direction,
+            final Transform transformA,
+            final Shape shapeA,
+            final Transform transformB,
+            final Shape shapeB,
+            final Vector2d result
+    ) {
+        // minkowskiSupport = a.support(direction) - b.support(-1 × direction)
+        final var negatedDirection = direction.negate(new Vector2d());
+        final var supportA = shapeA.supportPoint(transformA, direction, new Vector2d());
+        final var supportB = shapeB.supportPoint(transformB, negatedDirection, new Vector2d());
+
+        return supportA.sub(supportB, result);
+    }
+
+    private static Vector2d closestPointToOrigin(final Vector2d a, final Vector2d b, final Vector2d result) {
+        final var abx = b.x - a.x;
+        final var aby = b.y - a.y;
+
+        // We can only calculate the perpendicular depth if the projected point from pos to
+        // AB is actually on the segment. Thus, need to check here that it is not past either
+        // endpoint before calculating the depth.
+        // "bp dot ab" >= 0
+        if (abx * -b.x + aby * -b.y >= 0.0) {
+            // pos is past the segment towards B, thus the closest point is B
+            return b;
+        }
+
+        // "ap dot ab" <= 0
+        if (abx * -a.x + aby * -a.y <= 0.0) {
+            // pos is past the segment towards A, thus the closest point is A
+            return a;
+        }
+
+        // Project the pos to the direction vector AB
+        final var length = Math.sqrt(abx * abx + aby * aby);
+        final var dx = abx / length;
+        final var dy = aby / length;
+        final var t = (-a.x * dx) + (-a.y * dy);
+        return a.add(dx * t, dy * t, result);
+    }
+
     private static boolean checkIfSimplexContainsTheOriginAndUpdateDirection(
             final List<Vector2d> simplex,
             final Vector2d direction
@@ -116,10 +242,6 @@ public class GJK2D {
             final var ac = c.sub(a, new Vector2d());
 
             // Edge normals
-//            final var acPerpendicular = new Vector2d();
-//            final var abacDot = ab.x * ac.y - ac.x * ab.y;
-//            acPerpendicular.set(-ac.y * abacDot,
-//                                ac.x * abacDot);
             final var acPerpendicular = tripleProduct(ab, ac, ac);
 
             // The origin lies on the right side of A<->C
@@ -127,9 +249,6 @@ public class GJK2D {
                 simplex.remove(1);
                 direction.set(acPerpendicular);
             } else {
-//                final var abPerpendicular = new Vector2d();
-//                abPerpendicular.set(ab.y * abacDot,
-//                                    -ab.x * abacDot);
                 final var abPerpendicular = tripleProduct(ac, ab, ab);
 
                 // The origin is in the central region.
@@ -164,5 +283,21 @@ public class GJK2D {
         final var bc = b.x * c.x + b.y * c.y;
         return new Vector2d(b.x * ac - a.x * bc,
                             b.y * ac - a.y * bc);
+    }
+
+    public static record Result(boolean collides, double depth, @Nullable Vector2d normal) {
+        private static Result noCollision() {
+            return new Result(false, Double.NaN, null);
+        }
+
+        private static Result collision(final double depth, final Vector2d normal) {
+            return new Result(true, depth, normal);
+        }
+    }
+
+    private static class Edge {
+        public double distance;
+        public Vector2d normal;
+        public int index;
     }
 }
