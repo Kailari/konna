@@ -103,12 +103,12 @@ public interface World {
     /**
      * Creates a spliterator for iterating over the entities with specified components pre-fetched.
      *
-     * @param <TEntityData>    entity data container type. Structure for containing the pre-fetched components
      * @param componentClasses required component classes
      * @param excluded         inversion table for component classes. Must have exact same length as
      *                         <code>componentClasses</code>
-     * @param optional
+     * @param optional         lookup table for checking if components are optional
      * @param dataFactory      factory for producing entity data instances
+     * @param <TEntityData>    entity data container type. Structure for containing the pre-fetched components
      *
      * @return spliterator for iterating entities matching the specified requirements
      */
