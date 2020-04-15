@@ -1,25 +1,16 @@
 package fi.jakojaannos.roguelite.game.weapons;
 
-public class WeaponState<MS, TS, FS> {
-    private final MS magazine;
-    private final TS trigger;
-    private final FS firing;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Supplier;
 
-    public WeaponState(final MS mag, final TS trig, final FS fir) {
-        this.magazine = mag;
-        this.trigger = trig;
-        this.firing = fir;
-    }
+public class WeaponState {
+    private final Map<Class<? extends WeaponModule>, Object> stateMap = new HashMap<>();
 
-    public MS getMagazine() {
-        return this.magazine;
-    }
-
-    public TS getTrigger() {
-        return this.trigger;
-    }
-
-    public FS getFiring() {
-        return this.firing;
+    public <TState> TState getOrCreateState(
+            final Class<? extends WeaponModule<TState, ?>> moduleClass,
+            final Supplier<TState> stateConstructor
+    ) {
+        return (TState) this.stateMap.computeIfAbsent(moduleClass, ignored -> stateConstructor.get());
     }
 }
