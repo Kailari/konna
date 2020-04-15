@@ -4,8 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.RecordComponent;
 import java.util.Arrays;
+import java.util.Optional;
 
 import fi.jakojaannos.roguelite.engine.ecs.LogCategories;
 import fi.jakojaannos.roguelite.engine.ecs.annotation.DisableOn;
@@ -129,7 +131,8 @@ public interface SystemInputRecord<T> {
     record EntityData<T>(
             Constructor<T>constructor,
             Class<?>[]componentTypes,
-            boolean[]excluded
+            boolean[]excluded,
+            boolean[]optional
     ) implements SystemInputRecord<T> {
         public static <T> EntityData<T> createFor(final Class<T> clazz) {
             LOG.debug(LogCategories.SYSTEM_DATA_DUMP,
@@ -139,20 +142,62 @@ public interface SystemInputRecord<T> {
             final var recordComponents = resolveComponents(clazz);
             final var constructor = resolveConstructor(clazz, recordComponents);
 
-            final var componentTypes = Arrays.stream(recordComponents)
-                                             .map(RecordComponent::getType)
-                                             .toArray(Class<?>[]::new);
-
-            final boolean[] excluded = new boolean[recordComponents.length];
+            final var componentTypes = new Class<?>[recordComponents.length];
+            final var excluded = new boolean[recordComponents.length];
+            final var optional = new boolean[recordComponents.length];
             for (var i = 0; i < recordComponents.length; ++i) {
-                excluded[i] = recordComponents[i].isAnnotationPresent(Without.class);
-                LOG.debug(LogCategories.SYSTEM_DATA_DUMP, "-> {} {} (excluded: {})",
-                          recordComponents[i].getType().getSimpleName(),
+                resolveActualType(recordComponents[i], componentTypes, optional, excluded, i);
+
+                LOG.debug(LogCategories.SYSTEM_DATA_DUMP, "-> {} {} (excluded: {}, optional: {})",
+                          componentTypes[i].getSimpleName(),
                           recordComponents[i].getName(),
-                          excluded[i]);
+                          excluded[i],
+                          optional[i]);
+
+                if (excluded[i] && optional[i]) {
+                    throw new IllegalRequirementsException("Illegal EntityData definition: Optional component \""
+                                                           + recordComponents[i].getName()
+                                                           + "\" marked as excluded! This does not make sense. Remove "
+                                                           + "either the `Optional` or the `@Without`");
+                }
             }
 
-            return new EntityData<>(constructor, componentTypes, excluded);
+            return new EntityData<>(constructor, componentTypes, excluded, optional);
+        }
+
+        public static void resolveActualType(
+                final RecordComponent recordComponent,
+                final Class<?>[] componentTypes,
+                final boolean[] optional,
+                final boolean[] excluded,
+                final int index
+        ) {
+            // Exclude if marked as excluded
+            excluded[index] = recordComponent.isAnnotationPresent(Without.class);
+
+            final var componentClass = recordComponent.getType();
+            if (Optional.class.isAssignableFrom(componentClass)) {
+                final var genericType = recordComponent.getGenericType();
+                if (genericType instanceof ParameterizedType paramType) {
+                    // It is optional and parameterized, we may safely assume it also has a single type parameter
+                    final var typeParam = paramType.getActualTypeArguments()[0];
+
+                    // The returned type parameter is actually always instance of `Class`, even though the signature
+                    // claims it may be any `Type`. Do checked cast, just to be safe. This is executed only once, so
+                    // we are not in a hurry here.
+                    if (typeParam instanceof Class<?> paramClass) {
+                        // All checks passed, it actually is an `Optional<T>`
+                        // Use the unwrapped `T` for component type and mark as optional
+                        componentTypes[index] = paramClass;
+                        optional[index] = true;
+                        return;
+                    }
+                }
+            }
+
+            // Not optional or some other check failed. Use the type directly and mark as non-optional.
+            componentTypes[index] = componentClass;
+            optional[index] = false;
         }
     }
 

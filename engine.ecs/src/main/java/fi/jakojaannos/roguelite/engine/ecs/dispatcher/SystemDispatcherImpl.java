@@ -215,6 +215,7 @@ public class SystemDispatcherImpl implements SystemDispatcher {
         final var systemResources = requirements.constructResources(resources);
         final var entitySpliterator = world.iterateEntities(requirements.entityData().componentTypes(),
                                                             requirements.entityData().excluded(),
+                                                            requirements.entityData().optional(),
                                                             requirements::constructEntityData);
 
         // Return if event constraints were not met

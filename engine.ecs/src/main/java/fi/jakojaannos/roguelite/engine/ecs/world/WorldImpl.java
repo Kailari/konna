@@ -171,8 +171,9 @@ public class WorldImpl implements World {
     public <TEntityData> Spliterator<EntityDataHandle<TEntityData>> iterateEntities(
             final Class<?>[] componentClasses,
             final boolean[] excluded,
+            final boolean[] optional,
             final Function<Object[], TEntityData> dataFactory
     ) {
-        return new EntitySpliterator<>(componentClasses, excluded, this, dataFactory);
+        return new EntitySpliterator<>(componentClasses, excluded, optional, this, dataFactory);
     }
 }

@@ -1,12 +1,5 @@
 package fi.jakojaannos.roguelite.engine.ecs.world.storage;
 
-// TODO: add/remove must happen *after* iteration (of a single system) has finished. Otherwise
-//       execution order might affect which entities are iterated
-//          -   handle with a bitmask? Save changes to storage on-the-go but flip bits only *after* the execution has
-//              finished?
-//          -   is this a non-issue? Should modifying components that affect iteration of the system itself be
-//              prohibited?
-
 import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.Supplier;
