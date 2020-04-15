@@ -2,7 +2,6 @@ package fi.jakojaannos.roguelite.game.weapons;
 
 public class WeaponUnequipEvent {
     private boolean cancelled;
-    private boolean shouldFire;
 
     public void cancel() {
         this.cancelled = true;
@@ -10,13 +9,5 @@ public class WeaponUnequipEvent {
 
     public boolean isCancelled() {
         return this.cancelled;
-    }
-
-    public void tryShoot() {
-        this.shouldFire = true;
-    }
-
-    public boolean shouldFire() {
-        return this.shouldFire;
     }
 }

@@ -37,12 +37,12 @@ public class InventoryWeapon {
         this.weapon.fire(this, info);
     }
 
-    public void equip(final ActionInfo actionInfo) {
-
+    public void equip(final ActionInfo info) {
+        this.weapon.equip(this, info);
     }
 
-    public void unequip(final ActionInfo actionInfo) {
-
+    public void unequip(final ActionInfo info) {
+        this.weapon.unequip(this, info);
     }
 
     public WeaponAttributes getAttributes() {
