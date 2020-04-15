@@ -101,6 +101,34 @@ public class ModularWeapon {
         }
     }
 
+    public void equip(
+            final InventoryWeapon weapon,
+            final ActionInfo info
+    ) {
+        final var equipEvent = new WeaponEquipEvent();
+        for (final var handler : this.equipListeners) {
+            handler.handle(weapon, equipEvent, info);
+
+            if (equipEvent.isCancelled() && handler.getPhase() == Phase.CHECK) {
+                break;
+            }
+        }
+    }
+
+    public void unequip(
+            final InventoryWeapon weapon,
+            final ActionInfo info
+    ) {
+        final var unequipEvent = new WeaponUnequipEvent();
+        for (final var handler : this.unequipListeners) {
+            handler.handle(weapon, unequipEvent, info);
+
+            if (unequipEvent.isCancelled() && handler.getPhase() == Phase.CHECK) {
+                break;
+            }
+        }
+    }
+
     public static record Module<TState, TAttributes>(
             WeaponModule<TState, TAttributes>module,
             TAttributes attributes
