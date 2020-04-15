@@ -1,5 +1,6 @@
 package fi.jakojaannos.roguelite.game.systems;
 
+import org.joml.Vector2d;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -28,7 +29,7 @@ class CharacterAttackSystemTest {
     private Entity entity;
     private WeaponInput weaponInput;
     private AttackAbility attackAbility;
-    private ProjectileFiringAttributes projectileStats;
+    private ProjectileFiringModule.Attributes projectileStats;
     private SimpleTimeManager time;
 
     @BeforeEach
@@ -54,9 +55,16 @@ class CharacterAttackSystemTest {
         entityManager.addComponentTo(entity, this.attackAbility);
         final var wepInv = new WeaponInventory(1);
         final var weaponAttributes = new WeaponAttributes();
-        projectileStats = new ProjectileFiringAttributes();
-        weaponAttributes.createAttributes(ProjectileFiringModule.class, projectileStats);
-        wepInv.equip(0, new InventoryWeapon(Weapons.BASIC_WEAPON, weaponAttributes));
+        projectileStats = new ProjectileFiringModule.Attributes(new Vector2d(0.0),
+                                                                20,
+                                                                10,
+                                                                2.0,
+                                                                0.0,
+                                                                15,
+                                                                0.0,
+                                                                1.0);
+        weaponAttributes.put(ProjectileFiringModule.class, projectileStats);
+        wepInv.equip(0, new InventoryWeapon(Weapons.PLAYER_AR));
         entityManager.addComponentTo(entity, wepInv);
 
         entityManager.applyModifications();
@@ -71,7 +79,6 @@ class CharacterAttackSystemTest {
     @Test
     void characterDoesNotShootWhenInputIsFalse() {
         attackAbility.targetPosition.set(10.0, 10.0);
-        projectileStats.timeBetweenShots = 20;
 
         weaponInput.attack = false;
         this.system.tick(Stream.of(entity), this.world);
@@ -83,7 +90,6 @@ class CharacterAttackSystemTest {
     @Test
     void characterShootsWhenInputIsTrue() {
         attackAbility.targetPosition.set(10.0, 10.0);
-        projectileStats.timeBetweenShots = 20;
 
         weaponInput.attack = true;
         this.system.tick(Stream.of(entity), this.world);
@@ -95,7 +101,6 @@ class CharacterAttackSystemTest {
     @Test
     void attackRateLimitsWhenCharacterCanShoot() {
         attackAbility.targetPosition.set(10.0, 10.0);
-        projectileStats.timeBetweenShots = 20;
 
         weaponInput.attack = true;
         for (int i = 0; i < 65; ++i) {
@@ -104,13 +109,12 @@ class CharacterAttackSystemTest {
             time.refresh();
         }
 
-        assertEquals(4, this.world.getEntityManager().getEntitiesWith(ProjectileStats.class).count());
+        assertEquals(6, this.world.getEntityManager().getEntitiesWith(ProjectileStats.class).count());
     }
 
     @Test
     void characterStopsAttackingWhenInputIsSetToFalse() {
         attackAbility.targetPosition.set(10.0, 10.0);
-        projectileStats.timeBetweenShots = 20;
 
         weaponInput.attack = true;
         this.system.tick(Stream.of(entity), this.world);

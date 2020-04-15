@@ -20,8 +20,8 @@ public class InternalHandler<TState, TAttributes, TEvent> {
             final TEvent event,
             final ActionInfo info
     ) {
-        final var state = this.weaponModule.getState(weapon);
-        final var attributes = this.weaponModule.getAttributes(weapon);
+        final var state = this.weaponModule.getState(weapon.getState());
+        final var attributes = this.weaponModule.getAttributes(weapon.getAttributes());
         this.handler.handle(state, attributes, event, info);
     }
 

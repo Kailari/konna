@@ -103,17 +103,7 @@ public class SlimeArchetype {
                                                                0.0));
         final var wepInv = new WeaponInventory(10);
         entityManager.addComponentTo(entity, wepInv);
-        final var wepStats = new ProjectileFiringAttributes();
-        wepStats.timeBetweenShots = 20;
-        wepStats.projectileSpeed = 10;
-        wepStats.spread = 2.0;
-        wepStats.projectileSpeedNoise = 0.0;
-        wepStats.projectileLifetimeInTicks = 15;
-        wepStats.projectilePushForce = 0.0;
-
-        final var attr = new WeaponAttributes();
-        attr.createAttributes(ProjectileFiringModule.class, wepStats);
-        wepInv.equip(0, new InventoryWeapon(Weapons.BASIC_WEAPON, attr));
+        wepInv.equip(0, new InventoryWeapon(Weapons.SLIME_MELEE));
 
         return entity;
     }

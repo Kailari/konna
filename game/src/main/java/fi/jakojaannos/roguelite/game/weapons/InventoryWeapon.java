@@ -2,16 +2,14 @@ package fi.jakojaannos.roguelite.game.weapons;
 
 public class InventoryWeapon {
     private final ModularWeapon weapon;
-    private final WeaponAttributes attributes;
     private final WeaponState state;
 
-    public InventoryWeapon(final ModularWeapon weapon, final WeaponAttributes attributes) {
-        this(weapon, attributes, new WeaponState());
+    public InventoryWeapon(final ModularWeapon weapon) {
+        this(weapon, new WeaponState());
     }
 
-    public InventoryWeapon(final ModularWeapon weapon, final WeaponAttributes attributes, final WeaponState state) {
+    public InventoryWeapon(final ModularWeapon weapon, final WeaponState state) {
         this.weapon = weapon;
-        this.attributes = attributes;
         this.state = state;
     }
 
@@ -40,7 +38,7 @@ public class InventoryWeapon {
     }
 
     public WeaponAttributes getAttributes() {
-        return this.attributes;
+        return this.weapon.getAttributes();
     }
 
     public WeaponState getState() {

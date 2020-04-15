@@ -1,25 +1,20 @@
 package fi.jakojaannos.roguelite.game.weapons;
 
-public class AutomaticTriggerModule implements WeaponModule<AutomaticTriggerState, NoAttributes> {
+public class AutomaticTriggerModule implements WeaponModule<AutomaticTriggerModule.State, NoAttributes> {
     @Override
-    public AutomaticTriggerState getState(final InventoryWeapon weapon) {
-        return weapon.getState().getOrCreateState(AutomaticTriggerModule.class, AutomaticTriggerState::new);
-    }
-
-    @Override
-    public NoAttributes getAttributes(final InventoryWeapon weapon) {
-        return NoAttributes.INSTANCE;
+    public State getDefaultState() {
+        return new State();
     }
 
     @Override
     public void register(final WeaponHooks hooks) {
-        hooks.onWeaponFire(this, this::checkIfCanFire, Phase.CHECK);
-        hooks.onTriggerPull(this, this::onTriggerPull, Phase.TRIGGER);
-        hooks.onTriggerRelease(this, this::onTriggerRelease, Phase.TRIGGER);
+        hooks.registerWeaponFire(this, this::checkIfCanFire, Phase.CHECK);
+        hooks.registerTriggerPull(this, this::onTriggerPull, Phase.TRIGGER);
+        hooks.registerTriggerRelease(this, this::onTriggerRelease, Phase.TRIGGER);
     }
 
     public void onTriggerPull(
-            final AutomaticTriggerState state,
+            final State state,
             final NoAttributes attributes,
             final TriggerPullEvent event,
             final ActionInfo info
@@ -29,7 +24,7 @@ public class AutomaticTriggerModule implements WeaponModule<AutomaticTriggerStat
     }
 
     public void onTriggerRelease(
-            final AutomaticTriggerState state,
+            final State state,
             final NoAttributes attributes,
             final TriggerReleaseEvent event,
             final ActionInfo info
@@ -38,7 +33,7 @@ public class AutomaticTriggerModule implements WeaponModule<AutomaticTriggerStat
     }
 
     public void checkIfCanFire(
-            final AutomaticTriggerState state,
+            final State state,
             final NoAttributes attributes,
             final WeaponFireEvent event,
             final ActionInfo info
@@ -48,4 +43,7 @@ public class AutomaticTriggerModule implements WeaponModule<AutomaticTriggerStat
         }
     }
 
+    public static class State {
+        public boolean triggerDown;
+    }
 }
