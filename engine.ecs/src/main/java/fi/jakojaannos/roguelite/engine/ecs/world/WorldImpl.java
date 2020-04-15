@@ -13,6 +13,7 @@ import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
 import fi.jakojaannos.roguelite.engine.ecs.LogCategories;
 import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.ecs.data.resources.Entities;
 import fi.jakojaannos.roguelite.engine.ecs.dispatcher.EntitySpliterator;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.world.storage.ComponentStorage;
@@ -56,6 +57,8 @@ public class WorldImpl implements World {
         this.entities = new EntityHandleImpl[this.capacity];
         this.resourceStorage = new ResourceStorage();
         this.componentStorage = new ComponentStorage(this.capacity);
+
+        this.registerResource(Entities.class, this::createEntity);
 
         this.legacyCompatibilityEntityManager = new LegacyCompat(this);
     }
