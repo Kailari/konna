@@ -53,7 +53,8 @@ class CharacterAttackSystemTest {
         entityManager.addComponentTo(entity, new Velocity());
         entityManager.addComponentTo(entity, this.weaponInput);
         entityManager.addComponentTo(entity, this.attackAbility);
-        final var wepInv = new WeaponInventory(1);
+
+        final var wepInv = new WeaponInventory(3);
         final var weaponAttributes = new WeaponAttributes();
         projectileStats = new ProjectileFiringModule.Attributes(new Vector2d(0.0),
                                                                 20,
@@ -128,5 +129,25 @@ class CharacterAttackSystemTest {
         }
 
         assertEquals(1, this.world.getEntityManager().getEntitiesWith(ProjectileStats.class).count());
+    }
+
+    @Test
+    void switchingWeaponEquipsNewWeapon() {
+        // switch weapon slot
+
+        // tick system
+
+        // assert that new weapon had its .equip(...) called
+
+    }
+
+    @Test
+    void switchingWeaponUnequipsPreviousWeapon() {
+        // switch
+
+        // tick system
+
+        // assert that old weapon has its .unequip(...) called
+
     }
 }

@@ -37,6 +37,14 @@ public class InventoryWeapon {
         this.weapon.fire(this, info);
     }
 
+    public void equip(final ActionInfo actionInfo) {
+
+    }
+
+    public void unequip(final ActionInfo actionInfo) {
+
+    }
+
     public WeaponAttributes getAttributes() {
         return this.weapon.getAttributes();
     }

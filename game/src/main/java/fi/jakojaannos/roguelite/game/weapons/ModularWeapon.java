@@ -9,6 +9,8 @@ public class ModularWeapon {
     private final List<InternalHandler<?, ?, TriggerPullEvent>> triggerPullListeners;
     private final List<InternalHandler<?, ?, TriggerReleaseEvent>> triggerReleaseListeners;
     private final List<InternalHandler<?, ?, WeaponFireEvent>> weaponFireListeners;
+    private final List<InternalHandler<?, ?, WeaponEquipEvent>> equipListeners;
+    private final List<InternalHandler<?, ?, WeaponUnequipEvent>> unequipListeners;
 
     private final WeaponAttributes attributes;
 
@@ -22,6 +24,9 @@ public class ModularWeapon {
         this.triggerPullListeners = new ArrayList<>();
         this.triggerReleaseListeners = new ArrayList<>();
         this.weaponFireListeners = new ArrayList<>();
+        this.equipListeners = new ArrayList<>();
+        this.unequipListeners = new ArrayList<>();
+
         this.attributes = new WeaponAttributes();
 
         final var hooks = new Hooks();
@@ -30,12 +35,14 @@ public class ModularWeapon {
             // XXX: We *could* further pass this thing down to get rid of uncheckedness, but entry
             //      signature ensures that the types must pass, so rawtype is OK workaround here.
             this.attributes.put((Class) entry.module.getClass(), entry.attributes);
-        }
 
-        this.reloadListeners.sort(Comparator.comparing(InternalHandler::getPhase));
-        this.triggerPullListeners.sort(Comparator.comparing(InternalHandler::getPhase));
-        this.triggerReleaseListeners.sort(Comparator.comparing(InternalHandler::getPhase));
-        this.weaponFireListeners.sort(Comparator.comparing(InternalHandler::getPhase));
+            this.reloadListeners.sort(Comparator.comparing(InternalHandler::getPhase));
+            this.triggerPullListeners.sort(Comparator.comparing(InternalHandler::getPhase));
+            this.triggerReleaseListeners.sort(Comparator.comparing(InternalHandler::getPhase));
+            this.weaponFireListeners.sort(Comparator.comparing(InternalHandler::getPhase));
+            this.unequipListeners.sort(Comparator.comparing(InternalHandler::getPhase));
+            this.equipListeners.sort(Comparator.comparing(InternalHandler::getPhase));
+        }
     }
 
     public void reload(
@@ -134,6 +141,24 @@ public class ModularWeapon {
                 final Phase phase
         ) {
             ModularWeapon.this.weaponFireListeners.add(new InternalHandler<>(module, phase, onWeaponFire));
+        }
+
+        @Override
+        public <TState, TAttributes> void registerWeaponEquip(
+                final WeaponModule<TState, TAttributes> module,
+                final WeaponEventHandler<TState, TAttributes, WeaponEquipEvent> onEquip,
+                final Phase phase
+        ) {
+            ModularWeapon.this.equipListeners.add(new InternalHandler<>(module, phase, onEquip));
+        }
+
+        @Override
+        public <TState, TAttributes> void registerWeaponUnequip(
+                final WeaponModule<TState, TAttributes> module,
+                final WeaponEventHandler<TState, TAttributes, WeaponUnequipEvent> onUnequip,
+                final Phase phase
+        ) {
+            ModularWeapon.this.unequipListeners.add(new InternalHandler<>(module, phase, onUnequip));
         }
     }
 }

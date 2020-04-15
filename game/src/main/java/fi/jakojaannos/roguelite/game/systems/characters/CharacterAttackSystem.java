@@ -46,6 +46,11 @@ public class CharacterAttackSystem implements ECSSystem {
             final InventoryWeapon equippedWeapon = inventory.getWeaponAtSlot(equippedSlot);
             final var actionInfo = new ActionInfo(timeManager, entityManager, shooterPos, attackAbility);
 
+            if(attackAbility.equippedSlot != attackAbility.previousEquippedSlot){
+                equippedWeapon.equip(actionInfo);
+                inventory.getWeaponAtSlot(attackAbility.previousEquippedSlot).unequip(actionInfo);
+            }
+
             if (input.reload) {
                 equippedWeapon.reload(actionInfo);
             }
@@ -59,6 +64,7 @@ public class CharacterAttackSystem implements ECSSystem {
             equippedWeapon.fireIfReady(actionInfo);
 
             input.previousAttack = input.attack;
+            attackAbility.previousEquippedSlot = attackAbility.equippedSlot;
         });
     }
 }

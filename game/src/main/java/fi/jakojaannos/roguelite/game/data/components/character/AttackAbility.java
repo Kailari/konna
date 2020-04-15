@@ -8,12 +8,11 @@ import fi.jakojaannos.roguelite.game.data.DamageSource;
 public class AttackAbility {
     public final DamageSource<?> damageSource;
     public final CollisionLayer projectileLayer;
-    public final Vector2d weaponOffset = new Vector2d(0.0, 0.0); // TODO: move to weaponStats?
+    public final Vector2d weaponOffset = new Vector2d(0.0, 0.0);
+    public Vector2d targetPosition = new Vector2d();
 
     public int equippedSlot;
-
-    public Vector2d targetPosition = new Vector2d();
-    //public long lastAttackTimestamp = -10000;
+    public int previousEquippedSlot;
 
     @Deprecated
     public AttackAbility(final DamageSource<?> damageSource) {
