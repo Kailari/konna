@@ -17,11 +17,8 @@ import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.WeaponInput;
 import fi.jakojaannos.roguelite.game.data.components.weapon.ProjectileStats;
-import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponStats;
 import fi.jakojaannos.roguelite.game.systems.characters.CharacterAttackSystem;
-import fi.jakojaannos.roguelite.game.weapons.InventoryWeapon;
-import fi.jakojaannos.roguelite.game.weapons.SimpleWeapon;
-import fi.jakojaannos.roguelite.game.weapons.WeaponInventory;
+import fi.jakojaannos.roguelite.game.weapons.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -31,7 +28,7 @@ class CharacterAttackSystemTest {
     private Entity entity;
     private WeaponInput weaponInput;
     private AttackAbility attackAbility;
-    private WeaponStats weaponStats;
+    private ProjectileFiringAttributes projectileStats;
     private SimpleTimeManager time;
 
     @BeforeEach
@@ -50,13 +47,16 @@ class CharacterAttackSystemTest {
                 CollisionLayer.PLAYER,
                 0.0,
                 0.0);
-        this.weaponStats = WeaponStats.builder().build();
+        //this.weaponStats = WeaponStats.builder().build();
         entityManager.addComponentTo(entity, new Transform(0.0, 0.0));
         entityManager.addComponentTo(entity, new Velocity());
         entityManager.addComponentTo(entity, this.weaponInput);
         entityManager.addComponentTo(entity, this.attackAbility);
         final var wepInv = new WeaponInventory(1);
-        wepInv.equip(0, new InventoryWeapon<>(SimpleWeapon.createBasicWeapon(), weaponStats));
+        final var weaponAttributes = new WeaponAttributes();
+        projectileStats = new ProjectileFiringAttributes();
+        weaponAttributes.createAttributes(ProjectileFiringModule.class, projectileStats);
+        wepInv.equip(0, new InventoryWeapon(Weapons.BASIC_WEAPON, weaponAttributes));
         entityManager.addComponentTo(entity, wepInv);
 
         entityManager.applyModifications();
@@ -71,7 +71,7 @@ class CharacterAttackSystemTest {
     @Test
     void characterDoesNotShootWhenInputIsFalse() {
         attackAbility.targetPosition.set(10.0, 10.0);
-        weaponStats.timeBetweenShots = 20;
+        projectileStats.timeBetweenShots = 20;
 
         weaponInput.attack = false;
         this.system.tick(Stream.of(entity), this.world);
@@ -83,7 +83,7 @@ class CharacterAttackSystemTest {
     @Test
     void characterShootsWhenInputIsTrue() {
         attackAbility.targetPosition.set(10.0, 10.0);
-        weaponStats.timeBetweenShots = 20;
+        projectileStats.timeBetweenShots = 20;
 
         weaponInput.attack = true;
         this.system.tick(Stream.of(entity), this.world);
@@ -95,7 +95,7 @@ class CharacterAttackSystemTest {
     @Test
     void attackRateLimitsWhenCharacterCanShoot() {
         attackAbility.targetPosition.set(10.0, 10.0);
-        weaponStats.timeBetweenShots = 20;
+        projectileStats.timeBetweenShots = 20;
 
         weaponInput.attack = true;
         for (int i = 0; i < 65; ++i) {
@@ -110,7 +110,7 @@ class CharacterAttackSystemTest {
     @Test
     void characterStopsAttackingWhenInputIsSetToFalse() {
         attackAbility.targetPosition.set(10.0, 10.0);
-        weaponStats.timeBetweenShots = 20;
+        projectileStats.timeBetweenShots = 20;
 
         weaponInput.attack = true;
         this.system.tick(Stream.of(entity), this.world);

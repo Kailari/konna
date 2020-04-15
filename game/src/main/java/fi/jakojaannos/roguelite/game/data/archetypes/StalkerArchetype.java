@@ -10,10 +10,7 @@ import fi.jakojaannos.roguelite.game.data.components.character.*;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.AttackAI;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.EnemyTag;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.StalkerAI;
-import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponStats;
-import fi.jakojaannos.roguelite.game.weapons.InventoryWeapon;
-import fi.jakojaannos.roguelite.game.weapons.SimpleWeapon;
-import fi.jakojaannos.roguelite.game.weapons.WeaponInventory;
+import fi.jakojaannos.roguelite.game.weapons.*;
 
 public class StalkerArchetype {
     public static Entity spawnStalker(
@@ -46,15 +43,17 @@ public class StalkerArchetype {
         entityManager.addComponentTo(entity, new WeaponInput());
         final var wepInv = new WeaponInventory(10);
         entityManager.addComponentTo(entity, wepInv);
-        final var wepStats = WeaponStats.builder()
-                                        .timeBetweenShots(20)
-                                        .projectileSpeed(10.0)
-                                        .spread(2.0)
-                                        .projectileSpeedNoise(0.0)
-                                        .projectileLifetimeInTicks(10)
-                                        .projectilePushForce(0.0)
-                                        .build();
-        wepInv.equip(0, new InventoryWeapon<>(SimpleWeapon.createBasicWeapon(), wepStats));
+        final var wepStats = new ProjectileFiringAttributes();
+        wepStats.timeBetweenShots = 20;
+        wepStats.projectileSpeed = 10;
+        wepStats.spread = 2.0;
+        wepStats.projectileSpeedNoise = 0.0;
+        wepStats.projectileLifetimeInTicks = 10;
+        wepStats.projectilePushForce = 0.0;
+
+        final var attr = new WeaponAttributes();
+        attr.createAttributes(ProjectileFiringModule.class, wepStats);
+        wepInv.equip(0, new InventoryWeapon(Weapons.BASIC_WEAPON, attr));
 
         return entity;
     }

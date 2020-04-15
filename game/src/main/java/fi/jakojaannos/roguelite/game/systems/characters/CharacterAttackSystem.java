@@ -11,6 +11,7 @@ import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.WeaponInput;
 import fi.jakojaannos.roguelite.game.systems.SystemGroups;
+import fi.jakojaannos.roguelite.game.weapons.ActionInfo;
 import fi.jakojaannos.roguelite.game.weapons.InventoryWeapon;
 import fi.jakojaannos.roguelite.game.weapons.WeaponInventory;
 
@@ -39,20 +40,23 @@ public class CharacterAttackSystem implements ECSSystem {
                                                    .orElseThrow();
             final var inventory = entityManager.getComponentOf(entity, WeaponInventory.class)
                                                .orElseThrow();
+            final var shooterPos = entityManager.getComponentOf(entity, Transform.class)
+                                                .orElseThrow();
             final var equippedSlot = attackAbility.equippedSlot;
-            final InventoryWeapon<?, ?, ?> equippedWeapon = inventory.getWeaponAtSlot(equippedSlot);
+            final InventoryWeapon equippedWeapon = inventory.getWeaponAtSlot(equippedSlot);
+            final var actionInfo = new ActionInfo(timeManager, entityManager, shooterPos, attackAbility);
 
             if (input.reload) {
-                equippedWeapon.reload(timeManager);
+                equippedWeapon.reload(actionInfo);
             }
 
             if (input.attack && !input.previousAttack) {
-                equippedWeapon.pullTrigger(entityManager, entity, timeManager);
+                equippedWeapon.pullTrigger(actionInfo);
             } else if (!input.attack && input.previousAttack) {
-                equippedWeapon.releaseTrigger(entityManager, entity, timeManager);
+                equippedWeapon.releaseTrigger(actionInfo);
             }
 
-            equippedWeapon.fireIfReady(entityManager, entity, timeManager, attackAbility);
+            equippedWeapon.fireIfReady(actionInfo);
 
             input.previousAttack = input.attack;
         });

@@ -1,0 +1,31 @@
+package fi.jakojaannos.roguelite.game.weapons;
+
+public class InternalHandler<TState, TAttributes, TEvent> {
+    private final WeaponModule<TState, TAttributes> weaponModule;
+    private final Phase phase;
+    private final WeaponEventHandler<TState, TAttributes, TEvent> handler;
+
+    public InternalHandler(
+            final WeaponModule<TState, TAttributes> weaponModule,
+            final Phase phase,
+            final WeaponEventHandler<TState, TAttributes, TEvent> handler
+    ) {
+        this.weaponModule = weaponModule;
+        this.phase = phase;
+        this.handler = handler;
+    }
+
+    public void handle(
+            final InventoryWeapon weapon,
+            final TEvent event,
+            final ActionInfo info
+    ) {
+        final var state = this.weaponModule.getState(weapon);
+        final var attributes = this.weaponModule.getAttributes(weapon);
+        this.handler.handle(state, attributes, event, info);
+    }
+
+    public Phase getPhase() {
+        return this.phase;
+    }
+}

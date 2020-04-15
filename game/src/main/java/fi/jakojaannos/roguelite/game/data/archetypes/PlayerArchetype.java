@@ -11,11 +11,7 @@ import fi.jakojaannos.roguelite.game.data.components.Physics;
 import fi.jakojaannos.roguelite.game.data.components.SpriteInfo;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.game.data.components.character.*;
-import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponStats;
-import fi.jakojaannos.roguelite.game.weapons.GrenadeWeapon;
-import fi.jakojaannos.roguelite.game.weapons.InventoryWeapon;
-import fi.jakojaannos.roguelite.game.weapons.SimpleWeapon;
-import fi.jakojaannos.roguelite.game.weapons.WeaponInventory;
+import fi.jakojaannos.roguelite.game.weapons.*;
 
 public class PlayerArchetype {
     public static EntityHandle create(
@@ -40,7 +36,7 @@ public class PlayerArchetype {
 
         final var weaponInventory = new WeaponInventory(10);
         player.addComponent(weaponInventory);
-        final var assaultRifleStats = WeaponStats.builder()
+        /*final var assaultRifleStats = WeaponStats.builder()
                                                  .timeBetweenShots(timeManager.convertToTicks(1.0 / 2.5))
                                                  .projectileSpeed(80.0)
                                                  .spread(2.5)
@@ -71,10 +67,20 @@ public class PlayerArchetype {
                                             .projectilePushForce(0.0)
                                             .magazineCapacity(100)
                                             .reloadTimeInTicks(timeManager.convertToTicks(0.8))
-                                            .build();
-        weaponInventory.equip(0, new InventoryWeapon<>(SimpleWeapon.createBasicWeapon(), assaultRifleStats));
-        weaponInventory.equip(1, new InventoryWeapon<>(SimpleWeapon.createShotgunWeapon(), shotgunStats));
-        weaponInventory.equip(2, new InventoryWeapon<>(new GrenadeWeapon(), grenadeStats));
+                                            .build();*/
+
+        final var wepStats = new ProjectileFiringAttributes();
+        wepStats.timeBetweenShots = 24;
+        wepStats.projectileSpeed = 80;
+        wepStats.spread = 2.5;
+        wepStats.projectileSpeedNoise = 4.0;
+        wepStats.projectileLifetimeInTicks = -1;
+        wepStats.projectilePushForce = 20.0;
+
+        final var attr = new WeaponAttributes();
+        attr.createAttributes(ProjectileFiringModule.class, wepStats);
+        weaponInventory.equip(0, new InventoryWeapon(Weapons.BASIC_WEAPON, attr));
+
         player.addComponent(new SpriteInfo("sprites/player"));
         player.addComponent(new Health(10));
         return player;

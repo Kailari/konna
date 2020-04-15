@@ -1,58 +1,49 @@
 package fi.jakojaannos.roguelite.game.weapons;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
-import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
-import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponStats;
+public class InventoryWeapon {
+    private final ModularWeapon weapon;
+    private final WeaponAttributes attributes;
+    private final WeaponState state;
 
-public class InventoryWeapon<MS, TS, FS> {
-    private final Weapon<MS, TS, FS> weapon;
-    private final WeaponStats stats;
-    private final WeaponState<MS, TS, FS> state;
-
-    public Weapon<MS, TS, FS> getWeapon() {
-        return this.weapon;
+    public InventoryWeapon(final ModularWeapon weapon, final WeaponAttributes attributes) {
+        this(weapon, attributes, new WeaponState());
     }
 
-    public WeaponState<MS, TS, FS> getState() {
-        return this.state;
-    }
-
-    public InventoryWeapon(final Weapon<MS, TS, FS> weapon, final WeaponStats stats) {
+    public InventoryWeapon(final ModularWeapon weapon, final WeaponAttributes attributes, final WeaponState state) {
         this.weapon = weapon;
-        this.stats = stats;
-        this.state = new WeaponState<>(weapon.getMagazineHandler().createState(stats),
-                                       weapon.getTrigger().createState(stats),
-                                       weapon.getFiringMechanism().createState(stats));
+        this.attributes = attributes;
+        this.state = state;
+    }
+
+    public void reload(
+            final ActionInfo info
+    ) {
+        this.weapon.reload(this, info);
     }
 
     public void pullTrigger(
-            final EntityManager entityManager,
-            final Entity entity,
-            final TimeManager timeManager
+            final ActionInfo info
     ) {
-        this.weapon.getTrigger().pull(entityManager, entity, timeManager, this.state.getTrigger(), this.stats);
+        this.weapon.pullTrigger(this, info);
     }
 
     public void releaseTrigger(
-            final EntityManager entityManager,
-            final Entity entity,
-            final TimeManager timeManager
+            final ActionInfo info
     ) {
-        this.weapon.getTrigger().release(entityManager, entity, timeManager, this.state.getTrigger());
+        this.weapon.releaseTrigger(this, info);
     }
 
     public void fireIfReady(
-            final EntityManager entityManager,
-            final Entity entity,
-            final TimeManager timeManager,
-            final AttackAbility attackAbility
+            final ActionInfo info
     ) {
-        this.weapon.fireIfReady(entityManager, entity, timeManager, this.state, this.stats, attackAbility);
+        this.weapon.fire(this, info);
     }
 
-    public void reload(final TimeManager timeManager) {
-        this.weapon.getMagazineHandler().reload(this.state.getMagazine(), this.stats, timeManager);
+    public WeaponAttributes getAttributes() {
+        return this.attributes;
+    }
+
+    public WeaponState getState() {
+        return this.state;
     }
 }

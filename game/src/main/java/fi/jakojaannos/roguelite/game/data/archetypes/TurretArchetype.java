@@ -13,10 +13,7 @@ import fi.jakojaannos.roguelite.game.data.components.character.LookAtTargetTag;
 import fi.jakojaannos.roguelite.game.data.components.character.WeaponInput;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.AttackAI;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.EnemyTag;
-import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponStats;
-import fi.jakojaannos.roguelite.game.weapons.InventoryWeapon;
-import fi.jakojaannos.roguelite.game.weapons.SimpleWeapon;
-import fi.jakojaannos.roguelite.game.weapons.WeaponInventory;
+import fi.jakojaannos.roguelite.game.weapons.*;
 
 public class TurretArchetype {
     public static Entity create(
@@ -38,15 +35,17 @@ public class TurretArchetype {
                                                                -1.0));
         final var wepInv = new WeaponInventory(10);
         entityManager.addComponentTo(turret, wepInv);
-        final var wepStats = WeaponStats.builder()
-                                        .timeBetweenShots(timeManager.convertToTicks(1.0 / 5.0))
-                                        .projectileSpeed(50.0)
-                                        .spread(5.0)
-                                        .projectileSpeedNoise(5.0)
-                                        .projectileLifetimeInTicks(-1)
-                                        .projectilePushForce(0.0)
-                                        .build();
-        wepInv.equip(0, new InventoryWeapon<>(SimpleWeapon.createBasicWeapon(), wepStats));
+        final var wepStats = new ProjectileFiringAttributes();
+        wepStats.timeBetweenShots = 4;
+        wepStats.projectileSpeed = 50;
+        wepStats.spread = 5.0;
+        wepStats.projectileSpeedNoise = 5.0;
+        wepStats.projectileLifetimeInTicks = -1;
+        wepStats.projectilePushForce = 0.0;
+
+        final var attr = new WeaponAttributes();
+        attr.createAttributes(ProjectileFiringModule.class, wepStats);
+        wepInv.equip(0, new InventoryWeapon(Weapons.BASIC_WEAPON, attr));
 
         return turret;
     }
