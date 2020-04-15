@@ -14,6 +14,7 @@ public class EntitySpliterator<TEntityData> implements Spliterator<EntityDataHan
     private final Object[][] paramStorages;
     private final Object[] parameters;
     private final boolean[] excluded;
+    private final boolean[] optional;
     private final WorldImpl world;
 
     private final Function<Object[], TEntityData> factory;
@@ -24,11 +25,13 @@ public class EntitySpliterator<TEntityData> implements Spliterator<EntityDataHan
     public EntitySpliterator(
             final Class<?>[] componentClasses,
             final boolean[] excluded,
+            final boolean[] optional,
             final WorldImpl world,
             final Function<Object[], TEntityData> factory
     ) {
         this(world.getComponentStorage().fetchStorages(componentClasses),
              excluded,
+             optional,
              world,
              factory,
              0,
@@ -38,6 +41,7 @@ public class EntitySpliterator<TEntityData> implements Spliterator<EntityDataHan
     private EntitySpliterator(
             final Object[][] paramStorages,
             final boolean[] excluded,
+            final boolean[] optional,
             final WorldImpl world,
             final Function<Object[], TEntityData> factory,
             final int startIndex,
@@ -46,6 +50,7 @@ public class EntitySpliterator<TEntityData> implements Spliterator<EntityDataHan
         this.parameters = new Object[paramStorages.length];
         this.paramStorages = paramStorages;
         this.excluded = excluded;
+        this.optional = optional;
         this.world = world;
         this.factory = factory;
         this.startIndex = startIndex;
@@ -83,6 +88,7 @@ public class EntitySpliterator<TEntityData> implements Spliterator<EntityDataHan
 
             return new EntitySpliterator<>(this.paramStorages,
                                            this.excluded,
+                                           this.optional,
                                            this.world,
                                            this.factory,
                                            this.endIndex,
@@ -114,8 +120,17 @@ public class EntitySpliterator<TEntityData> implements Spliterator<EntityDataHan
             this.parameters[paramIndex] = this.paramStorages[paramIndex][entityId];
 
             final var isNull = this.parameters[paramIndex] == null;
-            if (isNull != this.excluded[paramIndex]) {
-                return true;
+
+            final var isOptional = this.optional[paramIndex];
+            if (isOptional) {
+                // Wrap if optional
+                this.parameters[paramIndex] = Optional.ofNullable(this.parameters[paramIndex]);
+            } else {
+                // Mark parameters incomplete if exclusion and nullness do not match
+                final var isExcluded = this.excluded[paramIndex];
+                if (isNull != isExcluded) {
+                    return true;
+                }
             }
         }
 
