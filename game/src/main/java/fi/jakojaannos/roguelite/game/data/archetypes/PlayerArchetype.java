@@ -69,17 +69,7 @@ public class PlayerArchetype {
                                             .reloadTimeInTicks(timeManager.convertToTicks(0.8))
                                             .build();*/
 
-        final var wepStats = new ProjectileFiringAttributes();
-        wepStats.timeBetweenShots = 24;
-        wepStats.projectileSpeed = 80;
-        wepStats.spread = 2.5;
-        wepStats.projectileSpeedNoise = 4.0;
-        wepStats.projectileLifetimeInTicks = -1;
-        wepStats.projectilePushForce = 20.0;
-
-        final var attr = new WeaponAttributes();
-        attr.createAttributes(ProjectileFiringModule.class, wepStats);
-        weaponInventory.equip(0, new InventoryWeapon(Weapons.BASIC_WEAPON, attr));
+        weaponInventory.equip(0, new InventoryWeapon(Weapons.PLAYER_AR));
 
         player.addComponent(new SpriteInfo("sprites/player"));
         player.addComponent(new Health(10));

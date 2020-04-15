@@ -7,7 +7,7 @@ import java.util.Random;
 import fi.jakojaannos.roguelite.engine.utilities.math.CoordinateHelper;
 import fi.jakojaannos.roguelite.game.data.archetypes.ProjectileArchetype;
 
-public class ProjectileFiringModule implements WeaponModule<ProjectileFiringState, ProjectileFiringAttributes> {
+public class ProjectileFiringModule implements WeaponModule<ProjectileFiringModule.State, ProjectileFiringModule.Attributes> {
     private final Vector2d tmpSpreadOffset = new Vector2d();
     private final Vector2d tmpProjectilePos = new Vector2d();
     private final Vector2d tmpDirection = new Vector2d();
@@ -15,26 +15,20 @@ public class ProjectileFiringModule implements WeaponModule<ProjectileFiringStat
     private final Random random = new Random(1337);
 
     @Override
-    public ProjectileFiringState getState(final InventoryWeapon weapon) {
-        return weapon.getState().getOrCreateState(ProjectileFiringModule.class, ProjectileFiringState::new);
-    }
-
-    @Override
-    public ProjectileFiringAttributes getAttributes(final InventoryWeapon weapon) {
-        return weapon.getAttributes()
-                     .getOrCreateAttributes(ProjectileFiringModule.class, ProjectileFiringAttributes::new);
+    public State getDefaultState() {
+        return new State();
     }
 
     @Override
     public void register(final WeaponHooks hooks) {
-        hooks.onWeaponFire(this, this::checkIfReadyToFire, Phase.CHECK);
-        hooks.onWeaponFire(this, this::fire, Phase.TRIGGER);
-        hooks.onWeaponFire(this, this::afterFire, Phase.POST);
+        hooks.registerWeaponFire(this, this::checkIfReadyToFire, Phase.CHECK);
+        hooks.registerWeaponFire(this, this::fire, Phase.TRIGGER);
+        hooks.registerWeaponFire(this, this::afterFire, Phase.POST);
     }
 
     public void checkIfReadyToFire(
-            final ProjectileFiringState state,
-            final ProjectileFiringAttributes attributes,
+            final State state,
+            final Attributes attributes,
             final WeaponFireEvent event,
             final ActionInfo info
     ) {
@@ -45,8 +39,8 @@ public class ProjectileFiringModule implements WeaponModule<ProjectileFiringStat
     }
 
     public void afterFire(
-            final ProjectileFiringState state,
-            final ProjectileFiringAttributes attributes,
+            final State state,
+            final Attributes attributes,
             final WeaponFireEvent event,
             final ActionInfo info
     ) {
@@ -54,8 +48,8 @@ public class ProjectileFiringModule implements WeaponModule<ProjectileFiringStat
     }
 
     public void fire(
-            final ProjectileFiringState state,
-            final ProjectileFiringAttributes attributes,
+            final State state,
+            final Attributes attributes,
             final WeaponFireEvent event,
             final ActionInfo info
     ) {
@@ -99,5 +93,20 @@ public class ProjectileFiringModule implements WeaponModule<ProjectileFiringStat
                                                    attributes.projectileLifetimeInTicks,
                                                    attributes.projectilePushForce,
                                                    attributes.damage);
+    }
+
+    public static record Attributes(
+            Vector2d weaponOffset,
+            long timeBetweenShots,
+            double projectileSpeed,
+            double spread,
+            double projectileSpeedNoise,
+            long projectileLifetimeInTicks,
+            double projectilePushForce,
+            double damage
+    ) {}
+
+    public static class State {
+        public long lastAttackTimestamp = -1000;
     }
 }

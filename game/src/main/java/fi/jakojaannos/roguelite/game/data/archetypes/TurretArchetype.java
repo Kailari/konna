@@ -35,17 +35,8 @@ public class TurretArchetype {
                                                                -1.0));
         final var wepInv = new WeaponInventory(10);
         entityManager.addComponentTo(turret, wepInv);
-        final var wepStats = new ProjectileFiringAttributes();
-        wepStats.timeBetweenShots = 4;
-        wepStats.projectileSpeed = 50;
-        wepStats.spread = 5.0;
-        wepStats.projectileSpeedNoise = 5.0;
-        wepStats.projectileLifetimeInTicks = -1;
-        wepStats.projectilePushForce = 0.0;
 
-        final var attr = new WeaponAttributes();
-        attr.createAttributes(ProjectileFiringModule.class, wepStats);
-        wepInv.equip(0, new InventoryWeapon(Weapons.BASIC_WEAPON, attr));
+        wepInv.equip(0, new InventoryWeapon(Weapons.TURRET_GATLING));
 
         return turret;
     }

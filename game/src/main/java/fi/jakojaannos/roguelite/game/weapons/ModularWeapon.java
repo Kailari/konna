@@ -4,20 +4,32 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class ModularWeapon implements WeaponHooks {
+public class ModularWeapon {
     private final List<InternalHandler<?, ?, ReloadEvent>> reloadListeners;
     private final List<InternalHandler<?, ?, TriggerPullEvent>> triggerPullListeners;
     private final List<InternalHandler<?, ?, TriggerReleaseEvent>> triggerReleaseListeners;
     private final List<InternalHandler<?, ?, WeaponFireEvent>> weaponFireListeners;
 
-    public ModularWeapon(final WeaponModule... modules) {
+    private final WeaponAttributes attributes;
+
+    public WeaponAttributes getAttributes() {
+        return this.attributes;
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public ModularWeapon(final Module... modules) {
         this.reloadListeners = new ArrayList<>();
         this.triggerPullListeners = new ArrayList<>();
         this.triggerReleaseListeners = new ArrayList<>();
         this.weaponFireListeners = new ArrayList<>();
+        this.attributes = new WeaponAttributes();
 
-        for (final var module : modules) {
-            module.register(this);
+        final var hooks = new Hooks();
+        for (final var entry : modules) {
+            entry.module.register(hooks);
+            // XXX: We *could* further pass this thing down to get rid of uncheckedness, but entry
+            //      signature ensures that the types must pass, so rawtype is OK workaround here.
+            this.attributes.put((Class) entry.module.getClass(), entry.attributes);
         }
 
         this.reloadListeners.sort(Comparator.comparing(InternalHandler::getPhase));
@@ -82,39 +94,46 @@ public class ModularWeapon implements WeaponHooks {
         }
     }
 
-    @Override
-    public <TState, TAttributes> void onReload(
-            final WeaponModule<TState, TAttributes> module,
-            final WeaponEventHandler<TState, TAttributes, ReloadEvent> onReload,
-            final Phase phase
-    ) {
-        this.reloadListeners.add(new InternalHandler<>(module, phase, onReload));
-    }
+    public static record Module<TState, TAttributes>(
+            WeaponModule<TState, TAttributes>module,
+            TAttributes attributes
+    ) {}
 
-    @Override
-    public <TState, TAttributes> void onTriggerPull(
-            final WeaponModule<TState, TAttributes> module,
-            final WeaponEventHandler<TState, TAttributes, TriggerPullEvent> onTriggerPull,
-            final Phase phase
-    ) {
-        this.triggerPullListeners.add(new InternalHandler<>(module, phase, onTriggerPull));
-    }
+    private final class Hooks implements WeaponHooks {
+        @Override
+        public <TState, TAttributes> void registerReload(
+                final WeaponModule<TState, TAttributes> module,
+                final WeaponEventHandler<TState, TAttributes, ReloadEvent> onReload,
+                final Phase phase
+        ) {
+            ModularWeapon.this.reloadListeners.add(new InternalHandler<>(module, phase, onReload));
+        }
 
-    @Override
-    public <TState, TAttributes> void onTriggerRelease(
-            final WeaponModule<TState, TAttributes> module,
-            final WeaponEventHandler<TState, TAttributes, TriggerReleaseEvent> onTriggerRelease,
-            final Phase phase
-    ) {
-        this.triggerReleaseListeners.add(new InternalHandler<>(module, phase, onTriggerRelease));
-    }
+        @Override
+        public <TState, TAttributes> void registerTriggerPull(
+                final WeaponModule<TState, TAttributes> module,
+                final WeaponEventHandler<TState, TAttributes, TriggerPullEvent> onTriggerPull,
+                final Phase phase
+        ) {
+            ModularWeapon.this.triggerPullListeners.add(new InternalHandler<>(module, phase, onTriggerPull));
+        }
 
-    @Override
-    public <TState, TAttributes> void onWeaponFire(
-            final WeaponModule<TState, TAttributes> module,
-            final WeaponEventHandler<TState, TAttributes, WeaponFireEvent> onWeaponFire,
-            final Phase phase
-    ) {
-        this.weaponFireListeners.add(new InternalHandler<>(module, phase, onWeaponFire));
+        @Override
+        public <TState, TAttributes> void registerTriggerRelease(
+                final WeaponModule<TState, TAttributes> module,
+                final WeaponEventHandler<TState, TAttributes, TriggerReleaseEvent> onTriggerRelease,
+                final Phase phase
+        ) {
+            ModularWeapon.this.triggerReleaseListeners.add(new InternalHandler<>(module, phase, onTriggerRelease));
+        }
+
+        @Override
+        public <TState, TAttributes> void registerWeaponFire(
+                final WeaponModule<TState, TAttributes> module,
+                final WeaponEventHandler<TState, TAttributes, WeaponFireEvent> onWeaponFire,
+                final Phase phase
+        ) {
+            ModularWeapon.this.weaponFireListeners.add(new InternalHandler<>(module, phase, onWeaponFire));
+        }
     }
 }

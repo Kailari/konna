@@ -1,7 +1,7 @@
 package fi.jakojaannos.roguelite.game.weapons;
 
 public class WeaponInventory {
-    private static final InventoryWeapon UNARMED = new InventoryWeapon(Weapons.NO_WEAPON, new WeaponAttributes());
+    private static final InventoryWeapon UNARMED = new InventoryWeapon(Weapons.NO_WEAPON);
 
     private final InventoryWeapon[] slots;
 

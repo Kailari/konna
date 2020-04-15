@@ -2,22 +2,26 @@ package fi.jakojaannos.roguelite.game.weapons;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Supplier;
 
+@SuppressWarnings("rawtypes")
 public class WeaponAttributes {
-    private final Map<Class<? extends WeaponModule>, Object> attrMap = new HashMap<>();
+    private final Map<Class<? extends WeaponModule>, Object> attributes = new HashMap<>();
 
-    public <TState> TState getOrCreateAttributes(
-            final Class<? extends WeaponModule<?, TState>> moduleClass,
-            final Supplier<TState> attributeConstructor
-    ) {
-        return (TState) this.attrMap.computeIfAbsent(moduleClass, ignored -> attributeConstructor.get());
+    @SuppressWarnings("unchecked")
+    public <TState> TState get(final Class<? extends WeaponModule<?, TState>> moduleClass) {
+        if (!this.attributes.containsKey(moduleClass)) {
+            throw new IllegalStateException("Tried to get attributes for weapon module, but could not find any "
+                                            + "registered. Module: " + moduleClass.getSimpleName());
+        }
+
+        // SAFETY: This is safe as long as `put` guarantees matching signatures
+        return (TState) this.attributes.get(moduleClass);
     }
 
-    public <TState> void createAttributes(
+    public <TState> void put(
             final Class<? extends WeaponModule<?, TState>> moduleClass,
             final TState attributes
     ) {
-        this.attrMap.put(moduleClass, attributes);
+        this.attributes.put(moduleClass, attributes);
     }
 }
