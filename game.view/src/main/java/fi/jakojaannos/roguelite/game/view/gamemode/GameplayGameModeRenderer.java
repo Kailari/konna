@@ -14,6 +14,7 @@ import fi.jakojaannos.roguelite.engine.view.rendering.text.Font;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.GenericUIElementBuilder;
+import fi.jakojaannos.roguelite.engine.view.ui.builder.UIElementBuilder;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.UILabelBuilder;
 import fi.jakojaannos.roguelite.game.DebugConfig;
 import fi.jakojaannos.roguelite.game.view.systems.*;
@@ -112,6 +113,9 @@ public final class GameplayGameModeRenderer {
                             .element("game-over-container",
                                      UIElementType.NONE,
                                      GameplayGameModeRenderer::buildGameOverSplash)
+                            .element("weapon-ammo",
+                                     UIElementType.LABEL,
+                                     GameplayGameModeRenderer::buildAmmoCounter)
                             .build();
     }
 
@@ -135,6 +139,14 @@ public final class GameplayGameModeRenderer {
                                     .left(percentOf().ownWidth(-0.5))
                                     .text(GAME_OVER_HELP_TEXT)
                                     .fontSize(24));
+    }
+
+    private static void buildAmmoCounter(final UILabelBuilder builder) {
+        builder.anchorX(absolute(0))
+               .right(absolute(10))
+               .bottom(absolute(5))
+               .fontSize(24)
+               .text("Ammo: ??");
     }
 
     private static void buildKillsCounter(final UILabelBuilder builder) {

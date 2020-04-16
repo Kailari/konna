@@ -1,7 +1,7 @@
 package fi.jakojaannos.roguelite.game.weapons;
 
 public interface WeaponModule<TState, TAttributes> {
-    TState getDefaultState();
+    TState getDefaultState(TAttributes attributes);
 
     void register(WeaponHooks hooks);
 
@@ -14,8 +14,8 @@ public interface WeaponModule<TState, TAttributes> {
      * @return the attributes for this weapon module
      */
     @SuppressWarnings("unchecked")
-    default TState getState(final WeaponState state) {
-        return state.getOrCreateState((Class<WeaponModule<TState, TAttributes>>) getClass(), this::getDefaultState);
+    default TState getState(final WeaponState state, final TAttributes attributes) {
+        return state.getOrCreateState((Class<WeaponModule<TState, TAttributes>>) getClass(), () -> this.getDefaultState(attributes));
     }
 
     /**

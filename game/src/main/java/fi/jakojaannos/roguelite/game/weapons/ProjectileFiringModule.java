@@ -15,7 +15,7 @@ public class ProjectileFiringModule implements WeaponModule<ProjectileFiringModu
     private final Random random = new Random(1337);
 
     @Override
-    public State getDefaultState() {
+    public State getDefaultState(final Attributes attributes) {
         return new State();
     }
 

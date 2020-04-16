@@ -16,7 +16,9 @@ public class Weapons {
                                                                              4.0,
                                                                              -1,
                                                                              20.0,
-                                                                             0.75)));
+                                                                             0.75)),
+            new ModularWeapon.Module<>(new ClipMagazineModule(),
+                                       new ClipMagazineModule.Attributes()));
     public static ModularWeapon TURRET_GATLING = new ModularWeapon(
             new ModularWeapon.Module<>(new AutomaticTriggerModule(),
                                        new NoAttributes()),

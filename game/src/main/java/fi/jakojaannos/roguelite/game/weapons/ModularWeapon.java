@@ -11,6 +11,7 @@ public class ModularWeapon {
     private final List<InternalHandler<?, ?, WeaponFireEvent>> weaponFireListeners;
     private final List<InternalHandler<?, ?, WeaponEquipEvent>> equipListeners;
     private final List<InternalHandler<?, ?, WeaponUnequipEvent>> unequipListeners;
+    private final List<InternalHandler<?, ?, WeaponStateQuery>> queryListeners;
 
     private final WeaponAttributes attributes;
 
@@ -26,6 +27,7 @@ public class ModularWeapon {
         this.weaponFireListeners = new ArrayList<>();
         this.equipListeners = new ArrayList<>();
         this.unequipListeners = new ArrayList<>();
+        this.queryListeners = new ArrayList<>();
 
         this.attributes = new WeaponAttributes();
 
@@ -43,6 +45,7 @@ public class ModularWeapon {
         this.weaponFireListeners.sort(Comparator.comparing(InternalHandler::getPhase));
         this.unequipListeners.sort(Comparator.comparing(InternalHandler::getPhase));
         this.equipListeners.sort(Comparator.comparing(InternalHandler::getPhase));
+        this.queryListeners.sort(Comparator.comparing(InternalHandler::getPhase));
     }
 
     public void reload(
@@ -129,6 +132,17 @@ public class ModularWeapon {
         }
     }
 
+    public WeaponStateQuery weaponStateQuery(
+            final InventoryWeapon weapon,
+            final ActionInfo info
+    ) {
+        final var query = new WeaponStateQuery();
+        for (final var handler : this.queryListeners) {
+            handler.handle(weapon, query, info);
+        }
+        return query;
+    }
+
     public static record Module<TState, TAttributes>(
             WeaponModule<TState, TAttributes>module,
             TAttributes attributes
@@ -187,6 +201,15 @@ public class ModularWeapon {
                 final Phase phase
         ) {
             ModularWeapon.this.unequipListeners.add(new InternalHandler<>(module, phase, onUnequip));
+        }
+
+        @Override
+        public <TState, TAttributes> void registerWeaponStateQuery(
+                final WeaponModule<TState, TAttributes> module,
+                final WeaponEventHandler<TState, TAttributes, WeaponStateQuery> query,
+                final Phase phase
+        ) {
+            ModularWeapon.this.queryListeners.add(new InternalHandler<>(module, phase, query));
         }
     }
 }
