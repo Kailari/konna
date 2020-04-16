@@ -2,11 +2,10 @@ package fi.jakojaannos.roguelite.game.systems.physics;
 
 import org.joml.Math;
 import org.joml.Vector2d;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -39,7 +38,6 @@ import fi.jakojaannos.roguelite.game.systems.collision.CollisionEvent;
  * @see Collision
  */
 public class ApplyVelocitySystem implements EcsSystem<ApplyVelocitySystem.Resources, ApplyVelocitySystem.EntityData, EcsSystem.NoEvents> {
-    private static final Logger LOG = LoggerFactory.getLogger(ApplyVelocitySystem.class);
     /**
      * If velocity length is smaller than this value, applying velocity will be skipped.
      */
@@ -47,17 +45,17 @@ public class ApplyVelocitySystem implements EcsSystem<ApplyVelocitySystem.Resour
     /**
      * Maximum tries per tick per entity we may attempt to move.
      */
-    private static final int MAX_ITERATIONS = 25;
+    private static final int MAX_ITERATIONS = 2;
     /**
      * Should an entity move less than this value during an movement iteration, we may consider it being still and can
      * stop trying to move.
      */
     private static final double MOVE_EPSILON = 0.00001;
     /**
-     * The size of a single movement step. When near collision, this is the resolution at which entities are allowed to
-     * move.
+     * The minimum size of a "try move" step. Fast-moving entities may occasionally pass through walls that are thinner
+     * than this.
      */
-    private static final double STEP_SIZE = 0.01;
+    private static final double STEP_SIZE = 0.25;
 
     @Override
     public void tick(
@@ -65,7 +63,6 @@ public class ApplyVelocitySystem implements EcsSystem<ApplyVelocitySystem.Resour
             final Stream<EntityDataHandle<EntityData>> entities,
             final NoEvents noEvents
     ) {
-        final var collisionEvents = resources.collisions;
         final var delta = resources.timeManager.getTimeStepInSeconds();
 
         final var tileMapLayers = resources.colliders.tileMapLayersWithCollision;
@@ -92,20 +89,18 @@ public class ApplyVelocitySystem implements EcsSystem<ApplyVelocitySystem.Resour
                 final var translatedTransform = new Transform(transform);
                 translatedTransform.position.add(velocity.mul(delta, new Vector2d()));
                 translatedCollider.refreshTranslatedVertices(translatedTransform);
-                final var bounds = translatedCollider.getBounds(translatedTransform);
 
                 collectRelevantTiles(tileMapLayers,
                                      translatedTransform,
                                      translatedCollider,
-                                     collisionTargets::add
-                );
+                                     collisionTargets::add);
                 collectRelevantEntities(resources.colliders,
                                         entity,
                                         collider.layer,
                                         collisionTargets::add,
                                         overlapTargets::add);
 
-                moveWithCollision(collisionEvents,
+                moveWithCollision(resources.collisions,
                                   entity,
                                   transform,
                                   velocity,
@@ -165,26 +160,18 @@ public class ApplyVelocitySystem implements EcsSystem<ApplyVelocitySystem.Resour
                                         .length();
         final var direction = velocity.normalize(new Vector2d());
 
-        var iterations = 0;
+        var iterations = MAX_ITERATIONS;
         final var collisions = new ArrayList<CollisionEventCandidate>();
-        final var collisionsX = new ArrayList<CollisionEventCandidate>();
-        final var collisionsY = new ArrayList<CollisionEventCandidate>();
         final var tmpTransform = new Transform(transform);
-        final var tmpTransformX = new Transform(transform);
-        final var tmpTransformY = new Transform(transform);
 
-        while (distanceRemaining > 0 && (iterations++) < MAX_ITERATIONS) {
+        while (distanceRemaining > 0 && iterations > 0) {
             collisions.clear();
-            collisionsX.clear();
-            collisionsY.clear();
             tmpTransform.set(transform);
-            tmpTransformX.set(transform);
-            tmpTransformY.set(transform);
 
             // Refresh non-translated vertices of the collider
             translatedCollider.refresh();
 
-            var distanceMoved = moveUntilCollision(
+            final var distanceMoved = moveUntilCollision(
                     tmpTransform,
                     translatedTransform,
                     translatedCollider,
@@ -192,52 +179,10 @@ public class ApplyVelocitySystem implements EcsSystem<ApplyVelocitySystem.Resour
                     distanceRemaining,
                     collisionTargets,
                     overlapTargets,
-                    (candidate, mode) ->
-                            collisions.add(new CollisionEventCandidate(mode, candidate))
+                    (candidate, mode) -> collisions.add(new CollisionEventCandidate(mode, candidate))
             );
 
-            var actualCollisions = collisions;
-            if (distanceMoved < MOVE_EPSILON) {
-                var distanceMovedX = 0.0;
-                if (Math.abs(direction.x) > VELOCITY_EPSILON) {
-                    distanceMovedX = moveUntilCollision(
-                            tmpTransformX,
-                            translatedTransform,
-                            translatedCollider,
-                            new Vector2d(direction.x, 0.0).normalize(),
-                            Math.abs(distanceRemaining * direction.x),
-                            collisionTargets,
-                            overlapTargets,
-                            (candidate, mode) ->
-                                    collisionsX.add(new CollisionEventCandidate(mode, candidate)));
-                }
-
-                var distanceMovedY = 0.0;
-                if (Math.abs(direction.y) > VELOCITY_EPSILON) {
-                    distanceMovedY = moveUntilCollision(
-                            tmpTransformY,
-                            translatedTransform,
-                            translatedCollider,
-                            new Vector2d(0.0, direction.y).normalize(),
-                            Math.abs(distanceRemaining * direction.y),
-                            collisionTargets,
-                            overlapTargets,
-                            (candidate, mode) ->
-                                    collisionsY.add(new CollisionEventCandidate(mode, candidate)));
-                }
-
-                if (distanceMovedX > MOVE_EPSILON) {
-                    distanceMoved = distanceMovedX;
-                    tmpTransform.set(tmpTransformX);
-                    actualCollisions = collisionsY;
-                } else if (distanceMovedY > MOVE_EPSILON) {
-                    distanceMoved = distanceMovedY;
-                    tmpTransform.set(tmpTransformY);
-                    actualCollisions = collisionsX;
-                }
-            }
-
-            for (final var collision : actualCollisions) {
+            for (final var collision : collisions) {
                 fireCollisionEvent(collisionEvents,
                                    entity,
                                    collision.candidate,
@@ -250,9 +195,47 @@ public class ApplyVelocitySystem implements EcsSystem<ApplyVelocitySystem.Resour
 
             transform.set(tmpTransform);
             distanceRemaining -= distanceMoved;
+            --iterations;
         }
     }
 
+    /**
+     * Checking for collisions of fast-moving objects? Easy. Calculating push-out/penetration vectors for them? Easy.
+     * Calculating the said vectors, preventing <i>"Bullet Through Paper"-problem</i> in the process? Hard.
+     * <p>
+     * The moving part itself is quite simple. "Stretch" the collider for the object being moved so that the collider is
+     * the size of the whole translation. Now, if that stretched collider overlaps with anything solid, we know for sure
+     * that moving will cause a collision. This is fast and cheap to check.
+     * <p>
+     * However, if we were to naively calculate a push-put vector for that stretched collider, chances are, the larger
+     * half of the collider for fast-moving objects is on the other side of the wall we collided with. This causes EPA
+     * to resolve shortest penetration vector out of the wrong side of the wall, effectively causing us to push the
+     * entity through the wall. This is the <i>"Bullet Through Paper"-problem</i>.
+     * <p>
+     * That is easy to fix, too. Just split the moving operation to series of smaller steps with relatively small step
+     * size, and as long as walls are thicker than the step size, bullets cannot phase through. The large issue here is
+     * that when number of entities grows, the small increment in iterations might multiplicatively add up to huge
+     * performance impact. However, by carefully choosing the step size and adjusting it dynamically, we may limit the
+     * performance impact to situations where there are lot of simultaneous collisions *(which is arguably rare in
+     * common use case)*
+     * <p>
+     * Then the next issue: Separate colliders near each other. If we calculate shortest push-out vector from an entity,
+     * but it points towards another, we end up pushing the entity inside the latter entity! This allows things to move
+     * inside walls, and as invalid collision responses are rapidly followed by new invalid responses, things start
+     * phasing through walls again.
+     * <p>
+     * One way which I thought would fix all the issues listed here was to calculate the penetration vector against the
+     * inverse direction of movement, which should then give vector out of the collider, towards the direction of entry.
+     * Wrong. This blows up e.g. in cases where entity collides against the side of an obstacle, while still moving
+     * faster vertically than horizontally. This then causes the collision normal direction to point to a vertical
+     * direction, usually ending up pushing the entity inside a wall or otherwise snapping it jarringly around.
+     * <p>
+     * Now, what I actually ended up doing <i>(and what seems to be working surprisingly well)</i>, was to move using
+     * dynamically adjusted step size and <strong>calculate an average of push-out vectors from all collisions</strong>.
+     * Surprisingly, this seems to work as colliding <strong>exactly at the midpoint</strong> of two perfectly adjacent
+     * colliders is quite improbable <i>(it does happen once in a while, resulting in bullets flying through walls, but
+     * it's rare enough so fix is going to be on the backlog for a while)</i>.
+     */
     private double moveUntilCollision(
             final Transform transform,
             final Transform translatedTransform,
@@ -263,32 +246,48 @@ public class ApplyVelocitySystem implements EcsSystem<ApplyVelocitySystem.Resour
             final Collection<CollisionCandidate> overlapTargets,
             final BiConsumer<CollisionCandidate, Collision.Mode> collisionConsumer
     ) {
-        final var maybeCollision = collisionsAfterMoving(distance,
-                                                         direction,
-                                                         transform,
-                                                         translatedTransform,
-                                                         translatedCollider,
-                                                         collisionTargets);
-        final double actualDistance;
-        final Vector2d actualDirection;
-        if (maybeCollision.isPresent()) {
-            final var collision = maybeCollision.get();
-            final var translation = new Vector2d(direction).mul(distance)
-                                                           .sub(collision.collision()
-                                                                         .normal()
-                                                                         .mul(collision.collision()
-                                                                                       .depth(),
-                                                                              new Vector2d()));
-            actualDistance = translation.length();
-            actualDirection = translation.normalize();
+        var actualDistance = distance * 2.0;
+        boolean wouldCollide;
+        do {
+            actualDistance /= 2.0;
+            wouldCollide = collidesAfterMoving(actualDistance,
+                                               direction,
+                                               transform,
+                                               translatedTransform,
+                                               translatedCollider,
+                                               collisionTargets);
+        } while (wouldCollide && actualDistance > STEP_SIZE);
+
+        final var collisions = collisionsAfterMoving(actualDistance,
+                                                     direction,
+                                                     transform,
+                                                     translatedTransform,
+                                                     translatedCollider,
+                                                     collisionTargets);
+        final double correctedDistance;
+        final Vector2d correctedDirection;
+        if (collisions.isEmpty()) {
+            correctedDistance = actualDistance;
+            correctedDirection = direction;
         } else {
-            actualDistance = distance;
-            actualDirection = direction;
+            final var sum = new Vector2d(0.0);
+            for (final ActualCollision collision : collisions) {
+                final var result = collision.collision();
+                final var translation = new Vector2d(direction).mul(actualDistance)
+                                                               .sub(result.normal()
+                                                                          .mul(result.depth(), new Vector2d()));
+                sum.add(translation);
+                collisionConsumer.accept(collision.candidate, Collision.Mode.COLLISION);
+            }
+            final var translation = sum.mul(1.0 / collisions.size());
+            correctedDistance = translation.length();
+            correctedDirection = translation.normalize();
+
         }
 
         moveDistanceTriggeringCollisions(transform,
-                                         actualDirection,
-                                         actualDistance,
+                                         correctedDirection,
+                                         correctedDistance,
                                          translatedTransform,
                                          translatedCollider,
                                          overlapTargets,
@@ -311,7 +310,7 @@ public class ApplyVelocitySystem implements EcsSystem<ApplyVelocitySystem.Resour
 
         translatedCollider.refreshTranslatedVertices(translatedTransform);
         for (final var candidate : overlapTargets) {
-            if (candidate.overlaps(translatedTransform, translatedCollider).collides()) {
+            if (candidate.overlaps(translatedTransform, translatedCollider)) {
                 collisionConsumer.accept(candidate, Collision.Mode.OVERLAP);
             }
         }
@@ -320,7 +319,30 @@ public class ApplyVelocitySystem implements EcsSystem<ApplyVelocitySystem.Resour
         transform.position.add(translation);
     }
 
-    private Optional<ActualCollision> collisionsAfterMoving(
+    private List<ActualCollision> collisionsAfterMoving(
+            final double distance,
+            final Vector2d direction,
+            final Transform transform,
+            final Transform translatedTransform,
+            final StretchedCollider translatedCollider,
+            final Collection<CollisionCandidate> collisionTargets
+    ) {
+        translatedTransform.position.set(transform.position)
+                                    .add(direction.mul(distance, new Vector2d()));
+
+        translatedCollider.refreshTranslatedVertices(translatedTransform);
+        final var collisions = new ArrayList<ActualCollision>();
+        for (final var target : collisionTargets) {
+            final var collision = target.getCollision(translatedTransform, translatedCollider);
+            if (collision.collides()) {
+                collisions.add(new ActualCollision(target, collision));
+            }
+        }
+
+        return collisions;
+    }
+
+    private boolean collidesAfterMoving(
             final double distance,
             final Vector2d direction,
             final Transform transform,
@@ -333,13 +355,12 @@ public class ApplyVelocitySystem implements EcsSystem<ApplyVelocitySystem.Resour
 
         translatedCollider.refreshTranslatedVertices(translatedTransform);
         for (final var target : collisionTargets) {
-            final var collision = target.overlaps(translatedTransform, translatedCollider);
-            if (collision.collides()) {
-                return Optional.of(new ActualCollision(target, collision));
+            if (target.overlaps(translatedTransform, translatedCollider)) {
+                return true;
             }
         }
 
-        return Optional.empty();
+        return false;
     }
 
     private void fireCollisionEvent(
@@ -442,13 +463,22 @@ public class ApplyVelocitySystem implements EcsSystem<ApplyVelocitySystem.Resour
             this.transform = entity.transform();
         }
 
-        public GJK2D.Result overlaps(final Transform transform, final Shape shape) {
+        public GJK2D.Result getCollision(final Transform transform, final Shape shape) {
             return GJK2D.getCollision(transform,
                                       shape,
                                       this.transform,
                                       this.entity != null
                                               ? this.entity.collider()
                                               : TILE_SHAPE);
+        }
+
+        public boolean overlaps(final Transform transform, final Shape shape) {
+            return GJK2D.checkCollision(transform,
+                                        shape,
+                                        this.transform,
+                                        this.entity != null
+                                                ? this.entity.collider()
+                                                : TILE_SHAPE);
         }
     }
 

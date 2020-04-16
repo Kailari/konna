@@ -1,17 +1,18 @@
 package fi.jakojaannos.roguelite.game.data.resources.collision;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.game.systems.collision.CollisionEvent;
 
 /**
  * Manages {@link CollisionEvent CollisionEvents} for entities.
  */
 public class Collisions {
-    private final Map<EntityHandle, List<CollisionEvent>> collisionEvents = new ConcurrentHashMap<>();
+    private final Map<EntityHandle, Queue<CollisionEvent>> collisionEvents = new ConcurrentHashMap<>();
 
     /**
      * Gets all collision events currently recorded for given entity. This usually means only events fired earlier
@@ -21,8 +22,8 @@ public class Collisions {
      *
      * @return collection containing all the collision events
      */
-    public Collection<CollisionEvent> getEventsFor(final EntityHandle entity) {
-        return this.collisionEvents.getOrDefault(entity, List.of());
+    public Queue<CollisionEvent> getEventsFor(final EntityHandle entity) {
+        return this.collisionEvents.getOrDefault(entity, new ConcurrentLinkedQueue<>());
     }
 
     /**
@@ -33,7 +34,7 @@ public class Collisions {
      * @param event  event to fire
      */
     public void fireCollisionEvent(final EntityHandle entity, final CollisionEvent event) {
-        this.collisionEvents.computeIfAbsent(entity, key -> new ArrayList<>())
+        this.collisionEvents.computeIfAbsent(entity, key -> new ConcurrentLinkedQueue<>())
                             .add(event);
     }
 
