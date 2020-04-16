@@ -34,7 +34,7 @@ public class ColliderDataCollectorSystem implements ECSSystem {
         entities.forEach(entity -> {
             final var collider = world.getEntityManager().getComponentOf(entity, Collider.class).orElseThrow();
             final var transform = world.getEntityManager().getComponentOf(entity, Transform.class).orElseThrow();
-            final var colliderEntity = new Colliders.ColliderEntity(entity, transform, collider);
+            final var colliderEntity = new Colliders.ColliderEntity(entity.asHandle(), transform, collider);
             for (final var layer : CollisionLayer.values()) {
                 if (collider.layer.isSolidTo(layer)) {
                     colliders.solidForLayer.computeIfAbsent(layer, key -> new ArrayList<>())

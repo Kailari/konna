@@ -2,10 +2,11 @@ package fi.jakojaannos.roguelite.engine.tilemap.storage;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ChunkMap<TTile> {
     private final TTile defaultTile;
-    private final Map<Long, Chunk<TTile>> chunks = new HashMap<>();
+    private final Map<Long, Chunk<TTile>> chunks = new ConcurrentHashMap<>();
 
     public ChunkMap(final TTile defaultTile) {
         this.defaultTile = defaultTile;

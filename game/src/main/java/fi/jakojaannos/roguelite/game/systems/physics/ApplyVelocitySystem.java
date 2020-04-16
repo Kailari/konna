@@ -7,28 +7,26 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
+import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
+import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.GJK2D;
-import fi.jakojaannos.roguelite.game.data.components.*;
+import fi.jakojaannos.roguelite.game.data.CollisionLayer;
+import fi.jakojaannos.roguelite.game.data.components.Collider;
+import fi.jakojaannos.roguelite.game.data.components.RecentCollisionTag;
+import fi.jakojaannos.roguelite.game.data.components.Shape;
+import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.game.data.resources.collision.Colliders;
 import fi.jakojaannos.roguelite.game.data.resources.collision.Collisions;
-import fi.jakojaannos.roguelite.game.systems.SystemGroups;
 import fi.jakojaannos.roguelite.game.systems.collision.Collision;
 import fi.jakojaannos.roguelite.game.systems.collision.CollisionEvent;
 
@@ -40,69 +38,55 @@ import fi.jakojaannos.roguelite.game.systems.collision.CollisionEvent;
  * @see CollisionEvent
  * @see Collision
  */
-public class ApplyVelocitySystem implements ECSSystem {
+public class ApplyVelocitySystem implements EcsSystem<ApplyVelocitySystem.Resources, ApplyVelocitySystem.EntityData, EcsSystem.NoEvents> {
     private static final Logger LOG = LoggerFactory.getLogger(ApplyVelocitySystem.class);
-
     /**
      * If velocity length is smaller than this value, applying velocity will be skipped.
      */
     private static final double VELOCITY_EPSILON = 0.0000001;
-
     /**
      * Maximum tries per tick per entity we may attempt to move.
      */
     private static final int MAX_ITERATIONS = 25;
-
     /**
      * Should an entity move less than this value during an movement iteration, we may consider it being still and can
      * stop trying to move.
      */
     private static final double MOVE_EPSILON = 0.00001;
-
     /**
      * The size of a single movement step. When near collision, this is the resolution at which entities are allowed to
      * move.
      */
     private static final double STEP_SIZE = 0.01;
-    private final Vector2d tmpVelocity = new Vector2d();
-
-    @Override
-    public void declareRequirements(final RequirementsBuilder requirements) {
-        requirements.addToGroup(SystemGroups.PHYSICS_TICK)
-                    .withComponent(Transform.class)
-                    .withComponent(Velocity.class)
-                    .requireResource(Collisions.class)
-                    .requireResource(Colliders.class);
-    }
 
     @Override
     public void tick(
-            final Stream<Entity> entities,
-            final World world
+            final Resources resources,
+            final Stream<EntityDataHandle<EntityData>> entities,
+            final NoEvents noEvents
     ) {
-        final var entityManager = world.getEntityManager();
-        final var entitiesWithCollider = world.fetchResource(Colliders.class);
-        final var collisionEvents = world.fetchResource(Collisions.class);
-        final var delta = world.fetchResource(TimeManager.class).getTimeStepInSeconds();
+        final var collisionEvents = resources.collisions;
+        final var delta = resources.timeManager.getTimeStepInSeconds();
 
-        final var tileMapLayers = getTileMapLayersWithCollision(world);
+        final var tileMapLayers = resources.colliders.tileMapLayersWithCollision;
 
-        final var collisionTargets = new ArrayList<CollisionCandidate>();
-        final var overlapTargets = new ArrayList<CollisionCandidate>();
+        // XXX: I'm fairly confident that this breaks determinism. Parallel execution may impose
+        //      race conditions where certain fast-moving entities which collide with each other
+        //      are handled at the same time. In these cases, the collision response might depend
+        //      on which one of the entities is handled first.
         entities.forEach(entity -> {
-            collisionTargets.clear();
-            overlapTargets.clear();
-            final var transform = entityManager.getComponentOf(entity, Transform.class)
-                                               .orElseThrow();
-            final var velocity = entityManager.getComponentOf(entity, Velocity.class).orElseThrow();
+            final var collisionTargets = new ArrayList<CollisionCandidate>();
+            final var overlapTargets = new ArrayList<CollisionCandidate>();
+            final var transform = entity.getData().transform;
+            final var velocity = entity.getData().velocity;
+            final var maybeCollider = entity.getData().collider;
 
             if (velocity.length() < VELOCITY_EPSILON) {
                 return;
             }
 
-            if (entityManager.hasComponent(entity, Collider.class)) {
-                final var collider = entityManager.getComponentOf(entity, Collider.class)
-                                                  .orElseThrow();
+            if (maybeCollider.isPresent()) {
+                final var collider = maybeCollider.get();
 
                 final var translatedCollider = new StretchedCollider(collider, transform);
                 final var translatedTransform = new Transform(transform);
@@ -113,16 +97,15 @@ public class ApplyVelocitySystem implements ECSSystem {
                 collectRelevantTiles(tileMapLayers,
                                      translatedTransform,
                                      translatedCollider,
-                                     collisionTargets::add,
-                                     overlapTargets::add);
-                entitiesWithCollider.collectRelevantEntities(entity,
-                                                             collider.layer,
-                                                             bounds,
-                                                             collisionTargets::add,
-                                                             overlapTargets::add);
+                                     collisionTargets::add
+                );
+                collectRelevantEntities(resources.colliders,
+                                        entity,
+                                        collider.layer,
+                                        collisionTargets::add,
+                                        overlapTargets::add);
 
                 moveWithCollision(collisionEvents,
-                                  world,
                                   entity,
                                   transform,
                                   velocity,
@@ -141,8 +124,7 @@ public class ApplyVelocitySystem implements ECSSystem {
             final Collection<TileMap<TileType>> tileMapLayers,
             final Transform translatedTransform,
             final Shape translatedCollider,
-            final Consumer<CollisionCandidate> colliderConsumer,
-            final Consumer<CollisionCandidate> overlapConsumer
+            final Consumer<CollisionCandidate> colliderConsumer
     ) {
         final var bounds = translatedCollider.getBounds(translatedTransform);
         final var startX = (int) Math.floor(bounds.minX - STEP_SIZE);
@@ -170,8 +152,7 @@ public class ApplyVelocitySystem implements ECSSystem {
 
     private void moveWithCollision(
             final Collisions collisionEvents,
-            final World world,
-            final Entity entity,
+            final EntityDataHandle<EntityData> entity,
             final Transform transform,
             final Velocity velocity,
             final StretchedCollider translatedCollider,
@@ -258,7 +239,6 @@ public class ApplyVelocitySystem implements ECSSystem {
 
             for (final var collision : actualCollisions) {
                 fireCollisionEvent(collisionEvents,
-                                   world,
                                    entity,
                                    collision.candidate,
                                    collision.mode);
@@ -283,79 +263,38 @@ public class ApplyVelocitySystem implements ECSSystem {
             final Collection<CollisionCandidate> overlapTargets,
             final BiConsumer<CollisionCandidate, Collision.Mode> collisionConsumer
     ) {
-        // Fail fast if we cannot move at all
-        Optional<CollisionCandidate> collision;
-        if ((collision = collisionsAfterMoving(STEP_SIZE,
-                                               direction,
-                                               transform,
-                                               translatedTransform,
-                                               translatedCollider,
-                                               collisionTargets)).isPresent()
-        ) {
-            collision.ifPresent(candidate -> collisionConsumer.accept(candidate,
-                                                                      Collision.Mode.COLLISION));
-            moveDistanceTriggeringCollisions(transform,
-                                             direction,
-                                             0.0,
-                                             translatedTransform,
-                                             translatedCollider,
-                                             overlapTargets,
-                                             collisionConsumer);
-            return 0.0;
-        }
-
-        // Return immediately if we can move the full depth
-        if ((collision = collisionsAfterMoving(distance, direction, transform, translatedTransform,
-                                               translatedCollider, collisionTargets)).isEmpty()) {
-            moveDistanceTriggeringCollisions(transform,
-                                             direction,
-                                             distance,
-                                             translatedTransform,
-                                             translatedCollider,
-                                             overlapTargets,
-                                             collisionConsumer);
-            return distance;
-        }
-
-        // Binary search for maximum steps we are allowed to take
-        final var maxSteps = (int) (distance / STEP_SIZE);
-        int stepsToTake = -1;
-        for (int b = maxSteps; b >= 1; b /= 2) {
-            // borderline case of full depth leading to collision and maxSteps not colliding
-            while (stepsToTake <= maxSteps
-                   && (collision = collisionsAfterMoving((stepsToTake + b) * STEP_SIZE,
+        final var maybeCollision = collisionsAfterMoving(distance,
                                                          direction,
                                                          transform,
                                                          translatedTransform,
                                                          translatedCollider,
-                                                         collisionTargets)).isEmpty()
-            ) {
-                stepsToTake += b;
-            }
+                                                         collisionTargets);
+        final double actualDistance;
+        final Vector2d actualDirection;
+        if (maybeCollision.isPresent()) {
+            final var collision = maybeCollision.get();
+            final var translation = new Vector2d(direction).mul(distance)
+                                                           .sub(collision.collision()
+                                                                         .normal()
+                                                                         .mul(collision.collision()
+                                                                                       .depth(),
+                                                                              new Vector2d()));
+            actualDistance = translation.length();
+            actualDirection = translation.normalize();
+        } else {
+            actualDistance = distance;
+            actualDirection = direction;
         }
 
-        // Just in case, needed for borderline cases
-        if (stepsToTake > maxSteps) {
-            stepsToTake = maxSteps;
-        }
-
-        if (stepsToTake == -1) {
-            LOG.warn("Could not move. This should have been covered by early checks!");
-            return 0.0;
-        }
-
-        final var distanceToMove = stepsToTake * STEP_SIZE;
-        collision.ifPresent(candidate -> collisionConsumer.accept(candidate,
-                                                                  Collision.Mode.COLLISION));
         moveDistanceTriggeringCollisions(transform,
-                                         direction,
-                                         distanceToMove,
+                                         actualDirection,
+                                         actualDistance,
                                          translatedTransform,
                                          translatedCollider,
                                          overlapTargets,
                                          collisionConsumer);
 
-        return distanceToMove;
+        return actualDistance;
     }
 
     private void moveDistanceTriggeringCollisions(
@@ -372,7 +311,7 @@ public class ApplyVelocitySystem implements ECSSystem {
 
         translatedCollider.refreshTranslatedVertices(translatedTransform);
         for (final var candidate : overlapTargets) {
-            if (candidate.overlaps(translatedTransform, translatedCollider)) {
+            if (candidate.overlaps(translatedTransform, translatedCollider).collides()) {
                 collisionConsumer.accept(candidate, Collision.Mode.OVERLAP);
             }
         }
@@ -381,7 +320,7 @@ public class ApplyVelocitySystem implements ECSSystem {
         transform.position.add(translation);
     }
 
-    private Optional<CollisionCandidate> collisionsAfterMoving(
+    private Optional<ActualCollision> collisionsAfterMoving(
             final double distance,
             final Vector2d direction,
             final Transform transform,
@@ -394,8 +333,9 @@ public class ApplyVelocitySystem implements ECSSystem {
 
         translatedCollider.refreshTranslatedVertices(translatedTransform);
         for (final var target : collisionTargets) {
-            if (target.overlaps(translatedTransform, translatedCollider)) {
-                return Optional.of(target);
+            final var collision = target.overlaps(translatedTransform, translatedCollider);
+            if (collision.collides()) {
+                return Optional.of(new ActualCollision(target, collision));
             }
         }
 
@@ -404,8 +344,7 @@ public class ApplyVelocitySystem implements ECSSystem {
 
     private void fireCollisionEvent(
             final Collisions collisions,
-            final World world,
-            final Entity entity,
+            final EntityDataHandle<EntityData> entity,
             final CollisionCandidate candidate,
             final Collision.Mode mode
     ) {
@@ -413,21 +352,17 @@ public class ApplyVelocitySystem implements ECSSystem {
             final var event = new CollisionEvent(Collision.tile(mode,
                                                                 candidate.transform.position.x,
                                                                 candidate.transform.position.y));
-            collisions.fireCollisionEvent(entity, event);
+            collisions.fireCollisionEvent(entity.getHandle(), event);
         } else {
             final var event = new CollisionEvent(Collision.entity(mode, candidate.entity.entity()));
-            final var otherEvent = new CollisionEvent(Collision.entity(mode, entity));
-            collisions.fireCollisionEvent(entity, event);
+            final var otherEvent = new CollisionEvent(Collision.entity(mode, entity.getHandle()));
+            collisions.fireCollisionEvent(entity.getHandle(), event);
             collisions.fireCollisionEvent(candidate.entity.entity(), otherEvent);
 
-            world.getEntityManager()
-                 .addComponentIfAbsent(candidate.entity.entity(),
-                                       RecentCollisionTag.class,
-                                       RecentCollisionTag::new);
+            candidate.entity.entity().addOrGet(RecentCollisionTag.class, RecentCollisionTag::new);
         }
 
-        world.getEntityManager()
-             .addComponentIfAbsent(entity, RecentCollisionTag.class, RecentCollisionTag::new);
+        entity.addOrGet(RecentCollisionTag.class, RecentCollisionTag::new);
     }
 
     private void moveWithoutCollision(
@@ -435,17 +370,50 @@ public class ApplyVelocitySystem implements ECSSystem {
             final Velocity velocity,
             final double delta
     ) {
-        transform.position.add(velocity.mul(delta, this.tmpVelocity));
+        transform.position.add(velocity.mul(delta, new Vector2d()));
     }
 
-    private List<TileMap<TileType>> getTileMapLayersWithCollision(final World world) {
-        return world.getEntityManager()
-                    .getEntitiesWith(TileMapLayer.class)
-                    .map(EntityManager.EntityComponentPair::component)
-                    .filter(TileMapLayer::isCollisionEnabled)
-                    .map(TileMapLayer::getTileMap)
-                    .collect(Collectors.toList());
+    private static void collectRelevantEntities(
+            final Colliders colliders,
+            final EntityDataHandle<EntityData> entity,
+            final CollisionLayer layer,
+            final Consumer<CollisionCandidate> colliderConsumer,
+            final Consumer<CollisionCandidate> overlapConsumer
+    ) {
+        final var potentialCollisions = colliders.solidForLayer.get(layer);
+        if (potentialCollisions != null) {
+            for (final var other : potentialCollisions) {
+                if (other.entity().getId() == entity.getId()) {
+                    continue;
+                }
+                colliderConsumer.accept(new CollisionCandidate(other));
+            }
+        }
+
+        final var potentialOverlaps = colliders.overlapsWithLayer.get(layer);
+        if (potentialOverlaps != null) {
+            for (final var other : potentialOverlaps) {
+                if (other.entity().getId() == entity.getId()) {
+                    continue;
+                }
+                overlapConsumer.accept(new CollisionCandidate(other));
+            }
+        }
     }
+
+    public static record Resources(
+            Collisions collisions,
+            Colliders colliders,
+            TimeManager timeManager
+    ) {}
+
+    public static record EntityData(
+            Transform transform,
+            Velocity velocity,
+            Optional<Collider>collider
+    ) {}
+
+    private static record ActualCollision(CollisionCandidate candidate, GJK2D.Result collision) {}
 
     public static final class CollisionCandidate {
         private static final Vector2d[] TILE_VERTICES = new Vector2d[]{
@@ -474,18 +442,13 @@ public class ApplyVelocitySystem implements ECSSystem {
             this.transform = entity.transform();
         }
 
-        public boolean overlaps(final Transform transform, final Shape shape) {
-            final var collision = GJK2D.getCollision(transform,
-                                                     shape,
-                                                     this.transform,
-                                                     this.entity != null
-                                                             ? this.entity.collider()
-                                                             : TILE_SHAPE);
-            if (collision.collides()) {
-                LOG.debug("Collision depth: {}", collision.depth());
-                LOG.debug("Collision normal: {}", collision.normal());
-            }
-            return collision.collides();
+        public GJK2D.Result overlaps(final Transform transform, final Shape shape) {
+            return GJK2D.getCollision(transform,
+                                      shape,
+                                      this.transform,
+                                      this.entity != null
+                                              ? this.entity.collider()
+                                              : TILE_SHAPE);
         }
     }
 

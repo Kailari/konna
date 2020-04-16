@@ -14,7 +14,7 @@ public class ApplyForceSystem implements ECSSystem {
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.PHYSICS_TICK)
-                    .tickBefore(ApplyVelocitySystem.class)
+                    //.tickBefore(ApplyVelocitySystem.class)
                     .withComponent(Physics.class)
                     .withComponent(Velocity.class);
     }

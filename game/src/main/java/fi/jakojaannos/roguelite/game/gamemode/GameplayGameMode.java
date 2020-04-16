@@ -27,10 +27,7 @@ import fi.jakojaannos.roguelite.game.systems.cleanup.CleanUpDeadEnemyKillsSystem
 import fi.jakojaannos.roguelite.game.systems.cleanup.CleanUpDeadPlayersSystem;
 import fi.jakojaannos.roguelite.game.systems.cleanup.CleanUpEntitiesWithLifetime;
 import fi.jakojaannos.roguelite.game.systems.cleanup.ReaperSystem;
-import fi.jakojaannos.roguelite.game.systems.collision.ColliderDataCollectorSystem;
-import fi.jakojaannos.roguelite.game.systems.collision.CollisionEventCleanupSystem;
-import fi.jakojaannos.roguelite.game.systems.collision.DestroyProjectilesOnCollisionSystem;
-import fi.jakojaannos.roguelite.game.systems.collision.ProjectileToCharacterCollisionHandlerSystem;
+import fi.jakojaannos.roguelite.game.systems.collision.*;
 import fi.jakojaannos.roguelite.game.systems.physics.ApplyForceSystem;
 import fi.jakojaannos.roguelite.game.systems.physics.ApplyFrictionSystem;
 import fi.jakojaannos.roguelite.game.systems.physics.ApplyVelocitySystem;
@@ -104,6 +101,7 @@ public final class GameplayGameMode {
 
         final var earlyTick = builder.group("early-tick")
                                      .withSystem(new SpawnerSystem())
+                                     .withSystem(new TileColliderCollectorSystem())
                                      .withSystem(new ColliderDataCollectorSystem())
                                      .withSystem(new ApplyFrictionSystem())
                                      .dependsOn(input)
