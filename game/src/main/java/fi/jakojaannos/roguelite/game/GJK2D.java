@@ -13,7 +13,6 @@ import fi.jakojaannos.roguelite.game.data.components.Shape;
 
 public class GJK2D {
     private static final Logger LOG = LoggerFactory.getLogger(GJK2D.class);
-
     private static final int MAX_ITERATIONS = 100;
     private static final double TOLERANCE = 0.1;
     private static final double EPA_TOLERANCE = 0.00001;
@@ -22,43 +21,11 @@ public class GJK2D {
             final Transform transformA,
             final Shape shapeA,
             final Transform transformB,
-            final Shape shapeB,
-            final Vector2d direction,
-            final List<Vector2d> simplex
+            final Shape shapeB
     ) {
-
-        // Select first support point
-        simplex.add(minkowskiSupport(direction, transformA, shapeA, transformB, shapeB, new Vector2d()));
-
-        // Fail fast if the support point is not past the origin
-        if (simplex.get(0).dot(direction) <= 0.0) {
-            return false;
-        }
-
-        // Negate the direction to get a point on the opposite side
-        direction.negate();
-        var iterations = MAX_ITERATIONS;
-        while (iterations-- > 0) {
-            final var support = minkowskiSupport(direction, transformA, shapeA, transformB, shapeB, new Vector2d());
-            simplex.add(support);
-
-            // Due to the way points are selected, if the selected point did not move past origin
-            // in the current direction, we know for sure that the Minkowski Sum does not contain
-            // the origin. We can cheaply check moving past some point by taking the dot product.
-            if (support.dot(direction) <= 0) {
-                return false;
-            }
-            // If we did not conclude that the origin is outside of the Minkowski Sum, iterate
-            // our simplex. If next iteration step is able to contain the origin inside the simplex,
-            // return true, otherwise continue iterating.
-            else {
-                if (checkIfSimplexContainsTheOriginAndUpdateDirection(simplex, direction)) {
-                    return true;
-                }
-            }
-        }
-
-        return true;
+        final var direction = new Vector2d(1, 0);
+        final var collisionSimplex = new ArrayList<Vector2d>(3);
+        return checkCollision(transformA, shapeA, transformB, shapeB, direction, collisionSimplex);
     }
 
     public static Result getCollision(
@@ -77,7 +44,9 @@ public class GJK2D {
                                                collisionSimplex);
 
         if (isColliding) {
-            assert collisionSimplex.size() == 3;
+            if (collisionSimplex.size() != 3) {
+                return Result.collision(0.0, new Vector2d(0.0));
+            }
 
             // Determine simplex winding
             final var a = collisionSimplex.get(2);
@@ -160,6 +129,48 @@ public class GJK2D {
         }
 
         return Double.NaN;
+    }
+
+    private static boolean checkCollision(
+            final Transform transformA,
+            final Shape shapeA,
+            final Transform transformB,
+            final Shape shapeB,
+            final Vector2d direction,
+            final List<Vector2d> simplex
+    ) {
+        // Select first support point
+        simplex.add(minkowskiSupport(direction, transformA, shapeA, transformB, shapeB, new Vector2d()));
+
+        // Fail fast if the support point is not past the origin
+        if (simplex.get(0).dot(direction) <= 0.0) {
+            return false;
+        }
+
+        // Negate the direction to get a point on the opposite side
+        direction.negate();
+        var iterations = MAX_ITERATIONS;
+        while (iterations-- > 0) {
+            final var support = minkowskiSupport(direction, transformA, shapeA, transformB, shapeB, new Vector2d());
+            simplex.add(support);
+
+            // Due to the way points are selected, if the selected point did not move past origin
+            // in the current direction, we know for sure that the Minkowski Sum does not contain
+            // the origin. We can cheaply check moving past some point by taking the dot product.
+            if (support.dot(direction) <= 0) {
+                return false;
+            }
+            // If we did not conclude that the origin is outside of the Minkowski Sum, iterate
+            // our simplex. If next iteration step is able to contain the origin inside the simplex,
+            // return true, otherwise continue iterating.
+            else {
+                if (checkIfSimplexContainsTheOriginAndUpdateDirection(simplex, direction)) {
+                    return true;
+                }
+            }
+        }
+
+        return true;
     }
 
     private static Edge findClosestEdge(final List<Vector2d> simplex, final boolean clockwise) {
