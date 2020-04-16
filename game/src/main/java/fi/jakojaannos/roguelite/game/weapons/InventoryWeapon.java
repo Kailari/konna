@@ -4,6 +4,14 @@ public class InventoryWeapon {
     private final ModularWeapon weapon;
     private final WeaponState state;
 
+    public WeaponAttributes getAttributes() {
+        return this.weapon.getAttributes();
+    }
+
+    public WeaponState getState() {
+        return this.state;
+    }
+
     public InventoryWeapon(final ModularWeapon weapon) {
         this(weapon, new WeaponState());
     }
@@ -45,11 +53,7 @@ public class InventoryWeapon {
         this.weapon.unequip(this, info);
     }
 
-    public WeaponAttributes getAttributes() {
-        return this.weapon.getAttributes();
-    }
-
-    public WeaponState getState() {
-        return this.state;
+    public WeaponStateQuery doStateQuery(final ActionInfo info) {
+        return this.weapon.weaponStateQuery(this, info);
     }
 }

@@ -2,10 +2,10 @@ package fi.jakojaannos.roguelite.game.view.systems;
 
 import java.util.stream.Stream;
 
-import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
+import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
+import fi.jakojaannos.roguelite.engine.ecs.data.resources.Entities;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
@@ -13,46 +13,54 @@ import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
+import fi.jakojaannos.roguelite.game.weapons.ActionInfo;
+import fi.jakojaannos.roguelite.game.weapons.WeaponInventory;
 
-public class UpdateHUDSystem implements ECSSystem {
+public class UpdateHUDSystem implements EcsSystem<UpdateHUDSystem.Resources, EcsSystem.NoEntities, EcsSystem.NoEvents> {
     private final UIElement timePlayedTimer;
     private final UIElement killsCounter;
+    private final UIElement ammoCounter;
 
     public UpdateHUDSystem(final UserInterface userInterface) {
-        this.timePlayedTimer = userInterface.findElementsWithMatchingProperty(UIProperty.NAME,
-                                                                              name -> name.equals("time-played-timer"))
+        this.timePlayedTimer = userInterface.findElements(that -> that.hasName().equalTo("time-played-timer"))
                                             .findFirst()
                                             .orElseThrow();
-        this.killsCounter = userInterface.findElementsWithMatchingProperty(UIProperty.NAME,
-                                                                           name -> name.equals("score-kills"))
+        this.killsCounter = userInterface.findElements(that -> that.hasName().equalTo("score-kills"))
                                          .findFirst()
                                          .orElseThrow();
-    }
-
-    @Override
-    public void declareRequirements(final RequirementsBuilder requirements) {
-        requirements.addToGroup(RenderSystemGroups.UI)
-                    .tickBefore(UserInterfaceRenderingSystem.class)
-                    .requireResource(Players.class)
-                    .requireProvidedResource(TimeManager.class);
+        this.ammoCounter = userInterface.findElements(that -> that.hasName().equalTo("weapon-ammo"))
+                                        .findFirst()
+                                        .orElseThrow();
     }
 
     @Override
     public void tick(
-            final Stream<Entity> entities,
-            final World world
+            final Resources resources,
+            final Stream<EntityDataHandle<NoEntities>> entities,
+            final NoEvents noEvents
     ) {
-        final var timeManager = world.fetchResource(TimeManager.class);
-        final var sessionStats = world.fetchResource(SessionStats.class);
-        world.fetchResource(Players.class)
-             .getLocalPlayer()
-             .ifPresent(localPlayer -> {
-                 final var localPlayerAbilities = localPlayer.getComponent(AttackAbility.class)
-                                                             .orElseThrow();
-                 final var localPlayerKills = sessionStats.getKillsOf(localPlayerAbilities.damageSource);
-                 this.killsCounter.setProperty(UIProperty.TEXT, String.format("Kills: %02d",
-                                                                              localPlayerKills));
-             });
+        final var timeManager = resources.timeManager;
+        final var sessionStats = resources.sessionStats;
+        resources.players
+                .getLocalPlayer()
+                .ifPresent(localPlayer -> {
+                    final var localPlayerAbilities = localPlayer.getComponent(AttackAbility.class)
+                                                                .orElseThrow();
+                    final var inventory = localPlayer.getComponent(WeaponInventory.class)
+                                                     .orElseThrow();
+                    final var playerPos = localPlayer.getComponent(Transform.class).orElseThrow();
+
+                    final var localPlayerKills = sessionStats.getKillsOf(localPlayerAbilities.damageSource);
+                    this.killsCounter.setProperty(UIProperty.TEXT, String.format("Kills: %02d",
+                                                                                 localPlayerKills));
+
+                    final var info = new ActionInfo(timeManager, resources.entities, playerPos, localPlayerAbilities);
+                    final var query = inventory.getWeaponAtSlot(localPlayerAbilities.equippedSlot)
+                                               .doStateQuery(info);
+                    final int ammo = query.currentAmmo;
+                    final int maxAmmo = query.maxAmmo;
+                    this.ammoCounter.setProperty(UIProperty.TEXT, String.format("Ammo: %03d/%03d", ammo, maxAmmo));
+                });
 
         final var ticks = sessionStats.endTimeStamp - sessionStats.beginTimeStamp;
         final var secondsRaw = ticks / (1000 / timeManager.getTimeStep());
@@ -63,4 +71,11 @@ public class UpdateHUDSystem implements ECSSystem {
         this.timePlayedTimer.setProperty(UIProperty.TEXT, String.format("%02d:%02d:%02d",
                                                                         hours, minutes, seconds));
     }
+
+    public static record Resources(
+            TimeManager timeManager,
+            Players players,
+            SessionStats sessionStats,
+            Entities entities
+    ) {}
 }

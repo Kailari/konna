@@ -2,7 +2,7 @@ package fi.jakojaannos.roguelite.game.weapons;
 
 public class AutomaticTriggerModule implements WeaponModule<AutomaticTriggerModule.State, NoAttributes> {
     @Override
-    public State getDefaultState() {
+    public State getDefaultState(final NoAttributes attributes) {
         return new State();
     }
 

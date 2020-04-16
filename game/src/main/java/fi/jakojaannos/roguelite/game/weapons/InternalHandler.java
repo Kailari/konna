@@ -5,6 +5,10 @@ public class InternalHandler<TState, TAttributes, TEvent> {
     private final Phase phase;
     private final WeaponEventHandler<TState, TAttributes, TEvent> handler;
 
+    public Phase getPhase() {
+        return this.phase;
+    }
+
     public InternalHandler(
             final WeaponModule<TState, TAttributes> weaponModule,
             final Phase phase,
@@ -20,12 +24,8 @@ public class InternalHandler<TState, TAttributes, TEvent> {
             final TEvent event,
             final ActionInfo info
     ) {
-        final var state = this.weaponModule.getState(weapon.getState());
         final var attributes = this.weaponModule.getAttributes(weapon.getAttributes());
+        final var state = this.weaponModule.getState(weapon.getState(), attributes);
         this.handler.handle(state, attributes, event, info);
-    }
-
-    public Phase getPhase() {
-        return this.phase;
     }
 }

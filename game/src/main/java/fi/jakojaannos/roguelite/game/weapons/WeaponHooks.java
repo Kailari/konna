@@ -36,4 +36,10 @@ public interface WeaponHooks {
             WeaponEventHandler<TState, TAttributes, WeaponUnequipEvent> onUnequip,
             Phase phase
     );
+
+    <TState, TAttributes> void registerWeaponStateQuery(
+            WeaponModule<TState, TAttributes> module,
+            WeaponEventHandler<TState, TAttributes, WeaponStateQuery> query,
+            Phase phase
+    );
 }
