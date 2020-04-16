@@ -44,20 +44,20 @@ public class ProjectileToCharacterCollisionHandlerSystem implements ECSSystem {
                                            .orElseThrow();
             final var velocity = entityManager.getComponentOf(entity, Velocity.class).orElseThrow();
 
-            final var entityCollisions = collisions.getEventsFor(entity)
+            final var entityCollisions = collisions.getEventsFor(entity.asHandle())
                                                    .stream()
                                                    .map(CollisionEvent::collision)
                                                    .filter(Collision::isEntity)
                                                    .map(Collision::getAsEntityCollision);
 
             for (final var collision : (Iterable<Collision.EntityCollision>) entityCollisions::iterator) {
-                final boolean hasHealth = entityManager.hasComponent(collision.getOther(), Health.class);
-                final boolean hasPhysics = entityManager.hasComponent(collision.getOther(), Physics.class);
+                final boolean hasHealth = entityManager.hasComponent(collision.getOther().asLegacyEntity(), Health.class);
+                final boolean hasPhysics = entityManager.hasComponent(collision.getOther().asLegacyEntity(), Physics.class);
                 if (hasHealth || hasPhysics) {
-                    entityManager.getComponentOf(collision.getOther(), Physics.class)
+                    entityManager.getComponentOf(collision.getOther().asLegacyEntity(), Physics.class)
                                  .ifPresent(physics -> applyKnockback(stats, velocity, physics));
 
-                    entityManager.getComponentOf(collision.getOther(), Health.class)
+                    entityManager.getComponentOf(collision.getOther().asLegacyEntity(), Health.class)
                                  .ifPresent(health -> dealDamage(timeManager, stats, health));
 
                     entityManager.destroyEntity(entity);

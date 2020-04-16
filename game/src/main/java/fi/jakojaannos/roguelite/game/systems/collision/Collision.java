@@ -1,5 +1,6 @@
 package fi.jakojaannos.roguelite.game.systems.collision;
 
+import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 
 public abstract class Collision {
@@ -54,7 +55,7 @@ public abstract class Collision {
         return new TileCollision(mode, tileX, tileY);
     }
 
-    public static Collision entity(final Mode mode, final Entity other) {
+    public static Collision entity(final Mode mode, final EntityHandle other) {
         return new EntityCollision(mode, other);
     }
 
@@ -69,13 +70,13 @@ public abstract class Collision {
     }
 
     public static class EntityCollision extends Collision {
-        private final Entity other;
+        private final EntityHandle other;
 
-        public Entity getOther() {
+        public EntityHandle getOther() {
             return this.other;
         }
 
-        private EntityCollision(final Mode mode, final Entity other) {
+        private EntityCollision(final Mode mode, final EntityHandle other) {
             super(Type.ENTITY, mode);
             this.other = other;
         }

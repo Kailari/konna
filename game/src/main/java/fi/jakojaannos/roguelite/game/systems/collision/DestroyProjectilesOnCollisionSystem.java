@@ -29,7 +29,7 @@ public class DestroyProjectilesOnCollisionSystem implements ECSSystem {
         final var collisions = world.fetchResource(Collisions.class);
 
         entities.forEach(entity -> {
-            if (collisions.getEventsFor(entity)
+            if (collisions.getEventsFor(entity.asHandle())
                           .stream()
                           .map(CollisionEvent::collision)
                           .anyMatch(c -> c.getMode() == Collision.Mode.COLLISION)) {

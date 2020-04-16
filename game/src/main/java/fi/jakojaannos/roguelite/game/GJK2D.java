@@ -1,6 +1,8 @@
 package fi.jakojaannos.roguelite.game;
 
 import org.joml.Vector2d;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +12,8 @@ import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.game.data.components.Shape;
 
 public class GJK2D {
+    private static final Logger LOG = LoggerFactory.getLogger(GJK2D.class);
+
     private static final int MAX_ITERATIONS = 100;
     private static final double TOLERANCE = 0.1;
     private static final double EPA_TOLERANCE = 0.00001;
@@ -82,7 +86,8 @@ public class GJK2D {
             final var cross = (b.x - a.x) * (c.y - b.y) - (b.y - a.y) * (c.x - b.x);
             final var clockwise = cross <= 0.0;
 
-            while (true) {
+            var iterations = MAX_ITERATIONS;
+            while (iterations > 0) {
                 final var edge = findClosestEdge(collisionSimplex, clockwise);
 
                 final var p = minkowskiSupport(edge.normal, transformA, shapeA, transformB, shapeB, new Vector2d());
@@ -94,7 +99,11 @@ public class GJK2D {
                     // Insert the `p` in between the points of the closest edge
                     collisionSimplex.add(edge.index, p);
                 }
+                --iterations;
             }
+
+            LOG.warn("EPA breaking out due to iterating for too long!");
+            return Result.collision(0.0, new Vector2d());
         }
 
         return Result.noCollision();
