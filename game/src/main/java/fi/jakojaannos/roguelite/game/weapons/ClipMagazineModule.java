@@ -19,14 +19,15 @@ public class ClipMagazineModule implements WeaponModule<ClipMagazineModule.State
         hooks.registerWeaponUnequip(this, this::unequip, Phase.TRIGGER);
     }
 
-
     public void checkIfCanReload(
             final State state,
             final Attributes attributes,
             final ReloadEvent event,
             final ActionInfo info
     ) {
-        if (state.ammo == attributes.magazineCapacity) {
+        updateAmmoState(state, attributes, info.timeManager());
+        if (state.isReloading
+            || state.ammo == attributes.magazineCapacity) {
             event.cancel();
         }
     }
@@ -37,7 +38,8 @@ public class ClipMagazineModule implements WeaponModule<ClipMagazineModule.State
             final ReloadEvent event,
             final ActionInfo info
     ) {
-        state.ammo = attributes.magazineCapacity;
+        state.isReloading = true;
+        state.reloadStartTimestamp = info.timeManager().getCurrentGameTime();
     }
 
     public void checkIfCanFire(
@@ -46,7 +48,9 @@ public class ClipMagazineModule implements WeaponModule<ClipMagazineModule.State
             final WeaponFireEvent event,
             final ActionInfo info
     ) {
-        if (state.ammo <= 0) {
+        updateAmmoState(state, attributes, info.timeManager());
+        if (state.isReloading
+            || state.ammo <= 0) {
             event.cancel();
         }
     }
@@ -68,8 +72,11 @@ public class ClipMagazineModule implements WeaponModule<ClipMagazineModule.State
             final WeaponUnequipEvent event,
             final ActionInfo info
     ) {
+        updateAmmoState(state, attributes, info.timeManager());
+        if (state.isReloading) {
+            state.isReloading = false;
+        }
     }
-
 
     public void stateQuery(
             final State state,
@@ -77,12 +84,36 @@ public class ClipMagazineModule implements WeaponModule<ClipMagazineModule.State
             final WeaponStateQuery event,
             final ActionInfo info
     ) {
-        event.currentAmmo = state.ammo;
-        event.maxAmmo = attributes.magazineCapacity;
+        updateAmmoState(state, attributes, info.timeManager());
+        if (state.isReloading) {
+            event.currentAmmo = state.ammo;
+            event.maxAmmo = 666;
+        } else {
+            event.currentAmmo = state.ammo;
+            event.maxAmmo = attributes.magazineCapacity;
+        }
+    }
+
+    private void updateAmmoState(
+            final State state,
+            final Attributes attributes,
+            final TimeManager timeManager
+    ) {
+        if (!state.isReloading) {
+            return;
+        }
+        if (timeManager.getCurrentGameTime() - state.reloadStartTimestamp <= attributes.reloadTime) {
+            return;
+        }
+
+        state.ammo = attributes.magazineCapacity;
+        state.isReloading = false;
     }
 
     public static class State {
         public int ammo;
+        public boolean isReloading;
+        public long reloadStartTimestamp;
 
         public State(final int currentAmmo) {
             this.ammo = currentAmmo;
@@ -91,5 +122,11 @@ public class ClipMagazineModule implements WeaponModule<ClipMagazineModule.State
 
     public static class Attributes {
         public int magazineCapacity = 30;
+        public long reloadTime = 60;
+
+        public Attributes(final int magazineCapacity, final long reloadTimeInTicks) {
+            this.magazineCapacity = magazineCapacity;
+            this.reloadTime = reloadTimeInTicks;
+        }
     }
 }
