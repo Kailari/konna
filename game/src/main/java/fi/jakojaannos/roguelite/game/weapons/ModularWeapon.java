@@ -35,14 +35,14 @@ public class ModularWeapon {
             // XXX: We *could* further pass this thing down to get rid of uncheckedness, but entry
             //      signature ensures that the types must pass, so rawtype is OK workaround here.
             this.attributes.put((Class) entry.module.getClass(), entry.attributes);
-
-            this.reloadListeners.sort(Comparator.comparing(InternalHandler::getPhase));
-            this.triggerPullListeners.sort(Comparator.comparing(InternalHandler::getPhase));
-            this.triggerReleaseListeners.sort(Comparator.comparing(InternalHandler::getPhase));
-            this.weaponFireListeners.sort(Comparator.comparing(InternalHandler::getPhase));
-            this.unequipListeners.sort(Comparator.comparing(InternalHandler::getPhase));
-            this.equipListeners.sort(Comparator.comparing(InternalHandler::getPhase));
         }
+
+        this.reloadListeners.sort(Comparator.comparing(InternalHandler::getPhase));
+        this.triggerPullListeners.sort(Comparator.comparing(InternalHandler::getPhase));
+        this.triggerReleaseListeners.sort(Comparator.comparing(InternalHandler::getPhase));
+        this.weaponFireListeners.sort(Comparator.comparing(InternalHandler::getPhase));
+        this.unequipListeners.sort(Comparator.comparing(InternalHandler::getPhase));
+        this.equipListeners.sort(Comparator.comparing(InternalHandler::getPhase));
     }
 
     public void reload(

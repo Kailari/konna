@@ -43,19 +43,20 @@ public class ProjectileKnockbackSteps {
         state.world().createEntity(targetTransform = new Transform(25.0, 25.0),
                                    new Velocity(),
                                    Physics.builder()
-                                             .mass(1.0)
-                                             .friction(50.0)
-                                             .build(),
+                                          .mass(1.0)
+                                          .friction(50.0)
+                                          .build(),
                                    new Collider(CollisionLayer.ENEMY));
 
-        ProjectileArchetype.createWeaponProjectile(entityManager,
+        ProjectileArchetype.createWeaponProjectile(state.world()::createEntity,
                                                    new Vector2d(22.0, 22.0),
                                                    new Vector2d(6.0, 6.0),
                                                    DamageSource.Generic.UNDEFINED,
                                                    CollisionLayer.PLAYER_PROJECTILE,
                                                    0,
                                                    -1,
-                                                   25);
+                                                   25,
+                                                   1.0);
 
         entityManager.applyModifications();
     }
@@ -81,14 +82,15 @@ public class ProjectileKnockbackSteps {
         entityManager.addComponentTo(target, new Collider(CollisionLayer.ENEMY));
         entityManager.addComponentTo(target, new InAir(0, 69420666));
 
-        ProjectileArchetype.createWeaponProjectile(entityManager,
+        ProjectileArchetype.createWeaponProjectile(state.world()::createEntity,
                                                    new Vector2d(30.0, -12),
                                                    new Vector2d(0.0, 6.0),
                                                    DamageSource.Generic.UNDEFINED,
                                                    CollisionLayer.PLAYER_PROJECTILE,
                                                    0,
                                                    -1,
-                                                   25);
+                                                   25,
+                                                   1.0);
 
         entityManager.applyModifications();
     }

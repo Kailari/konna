@@ -53,7 +53,7 @@ public class ProjectileFiringModule implements WeaponModule<ProjectileFiringModu
             final WeaponFireEvent event,
             final ActionInfo info
     ) {
-        final var entityManager = info.entityManager();
+        final var entities = info.entities();
         final var timeManager = info.timeManager();
         final var attackAbility = info.attackAbility();
         final var shooterTransform = info.shooterTransform();
@@ -83,7 +83,7 @@ public class ProjectileFiringModule implements WeaponModule<ProjectileFiringModu
         final var actualSpeed = attributes.projectileSpeed + speedNoise;
 
         final var timestamp = timeManager.getCurrentGameTime();
-        ProjectileArchetype.createWeaponProjectile(entityManager,
+        ProjectileArchetype.createWeaponProjectile(entities,
                                                    projectilePos,
                                                    direction.normalize(actualSpeed)
                                                             .add(spreadOffset),

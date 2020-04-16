@@ -75,7 +75,7 @@ public class SlimeArchetype {
             final double slimeSize
     ) {
         final var entity = entityManager.createEntity();
-        //entityManager.addComponentTo(entity, new InAir(-1000000, 0));
+        //entities.addComponentTo(entity, new InAir(-1000000, 0));
 
         entityManager.addComponentTo(entity, new Health(maxHp));
         entityManager.addComponentTo(entity, new SplitOnDeath(slimeSize));
