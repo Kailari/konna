@@ -8,4 +8,5 @@ module roguelite.launcher {
     requires org.lwjgl.stb.natives;
     requires org.lwjgl.glfw.natives;
     requires org.lwjgl.opengl.natives;
+    requires org.lwjgl.openal.natives;
 }

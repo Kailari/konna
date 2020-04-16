@@ -6,6 +6,7 @@ import java.util.Random;
 
 import fi.jakojaannos.roguelite.engine.utilities.math.CoordinateHelper;
 import fi.jakojaannos.roguelite.game.data.archetypes.ProjectileArchetype;
+import fi.jakojaannos.roguelite.game.data.events.render.GunshotEvent;
 
 public class ProjectileFiringModule implements WeaponModule<ProjectileFiringModule.State, ProjectileFiringModule.Attributes> {
     private final Vector2d tmpSpreadOffset = new Vector2d();
@@ -93,6 +94,7 @@ public class ProjectileFiringModule implements WeaponModule<ProjectileFiringModu
                                                    attributes.projectileLifetimeInTicks,
                                                    attributes.projectilePushForce,
                                                    attributes.damage);
+        info.events().render().fire(new GunshotEvent(attributes.gunshotVariant));
     }
 
     public static record Attributes(
@@ -103,7 +105,8 @@ public class ProjectileFiringModule implements WeaponModule<ProjectileFiringModu
             double projectileSpeedNoise,
             long projectileLifetimeInTicks,
             double projectilePushForce,
-            double damage
+            double damage,
+            GunshotEvent.Variant gunshotVariant
     ) {}
 
     public static class State {

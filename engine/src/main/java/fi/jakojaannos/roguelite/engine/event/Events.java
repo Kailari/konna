@@ -15,14 +15,7 @@ public record Events(
         EventReceiver<UIEvent>ui,
         EventReceiver<InputEvent>input,
         EventSender<StateEvent>state,
-        EventSender<Object>system
+        EventSender<Object>system,
+        EventSender<Object>render
 ) {
-    @Deprecated
-    public Events(
-            final EventReceiver<UIEvent> ui,
-            final EventReceiver<InputEvent> input,
-            final EventSender<StateEvent> state
-    ) {
-        this(ui, input, state, new EventBus<>());
-    }
 }

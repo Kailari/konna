@@ -8,7 +8,9 @@ public class EventBus<TEvent> implements EventReceiver<TEvent>, EventSender<TEve
 
     @Override
     public void fire(final TEvent event) {
-        this.events.offer(event);
+        synchronized (this.events) {
+            this.events.offer(event);
+        }
     }
 
     @Override
