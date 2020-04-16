@@ -50,8 +50,9 @@ public interface SystemDispatcher extends AutoCloseable {
      * processed.
      *
      * @param world world to manipulate
+     * @param systemEvents
      */
-    void tick(World world);
+    void tick(World world, final Collection<Object> systemEvents);
 
     /**
      * System dispatcher builder, for registering systems and groups for the dispatcher.

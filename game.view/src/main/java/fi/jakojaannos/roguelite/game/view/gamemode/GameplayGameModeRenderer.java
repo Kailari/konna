@@ -18,6 +18,7 @@ import fi.jakojaannos.roguelite.engine.view.ui.builder.UIElementBuilder;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.UILabelBuilder;
 import fi.jakojaannos.roguelite.game.DebugConfig;
 import fi.jakojaannos.roguelite.game.view.systems.*;
+import fi.jakojaannos.roguelite.game.view.systems.audio.PlayGunshotSoundsSystem;
 import fi.jakojaannos.roguelite.game.view.systems.debug.EntityCollisionBoundsRenderingSystem;
 import fi.jakojaannos.roguelite.game.view.systems.debug.EntityTransformRenderingSystem;
 
@@ -82,6 +83,10 @@ public final class GameplayGameModeRenderer {
                                                                            backend))
                               .dependsOn(entities, level)
                               .buildGroup();
+        final var sound = builder.group("sound")
+                                 .withSystem(new PlayGunshotSoundsSystem(assetRoot))
+                                 .dependsOn(ui)
+                                 .buildGroup();
 
         if (DebugConfig.debugModeEnabled) {
             builder.group("debug")

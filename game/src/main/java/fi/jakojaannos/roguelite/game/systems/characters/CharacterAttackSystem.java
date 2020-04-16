@@ -6,6 +6,7 @@ import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.ecs.data.resources.Entities;
+import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.WeaponInput;
@@ -28,7 +29,11 @@ public class CharacterAttackSystem implements EcsSystem<CharacterAttackSystem.Re
             final var equippedSlot = attackAbility.equippedSlot;
 
             final InventoryWeapon equippedWeapon = inventory.getWeaponAtSlot(equippedSlot);
-            final var actionInfo = new ActionInfo(resources.timeManager, resources.entities, shooterPos, attackAbility);
+            final var actionInfo = new ActionInfo(resources.timeManager,
+                                                  resources.entities,
+                                                  shooterPos,
+                                                  attackAbility,
+                                                  resources.events);
 
             if (attackAbility.equippedSlot != attackAbility.previousEquippedSlot) {
                 inventory.getWeaponAtSlot(attackAbility.previousEquippedSlot).unequip(actionInfo);
@@ -60,5 +65,5 @@ public class CharacterAttackSystem implements EcsSystem<CharacterAttackSystem.Re
             WeaponInventory inventory
     ) {}
 
-    public static record Resources(TimeManager timeManager, Entities entities) {}
+    public static record Resources(TimeManager timeManager, Entities entities, Events events) {}
 }

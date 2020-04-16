@@ -64,7 +64,7 @@ public abstract class GameRunner implements MainThread {
         this.stateBus = new EventBus<>();
         this.inputBus = new EventBus<>();
         this.systemBus = new EventBus<>();
-        this.events = new Events(new EventBus<>(), this.inputBus, this.stateBus, this.systemBus);
+        this.events = new Events(new EventBus<>(), this.inputBus, this.stateBus, this.systemBus, new EventBus<>());
         this.timeManager = timeManager;
         this.network = new NetworkImpl();
     }

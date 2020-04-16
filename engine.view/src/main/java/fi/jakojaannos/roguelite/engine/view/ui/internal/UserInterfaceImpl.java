@@ -124,7 +124,7 @@ public class UserInterfaceImpl implements UserInterface {
         uiMouse.clicked = mouse.clicked;
         uiMouse.position.set(mouse.position);
 
-        this.uiDispatcher.tick(this.uiWorld);
+        this.uiDispatcher.tick(this.uiWorld, List.of());
         this.uiWorld.commitEntityModifications();
     }
 

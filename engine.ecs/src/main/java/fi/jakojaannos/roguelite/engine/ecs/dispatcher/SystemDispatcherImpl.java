@@ -87,8 +87,8 @@ public class SystemDispatcherImpl implements SystemDispatcher {
     }
 
     @Override
-    public void tick(final World world) {
-        tick(world, EVERYTHING_ENABLED_BY_DEFAULT_ENABLED, List.of());
+    public void tick(final World world, final Collection<Object> systemEvents) {
+        tick(world, EVERYTHING_ENABLED_BY_DEFAULT_ENABLED, systemEvents);
     }
 
     @Override
@@ -296,8 +296,9 @@ public class SystemDispatcherImpl implements SystemDispatcher {
     }
 
     private static Map<Class<?>, Object> constructEventLookup(final Collection<Object> eventList) {
-        return eventList.stream()
-                        .collect(Collectors.toMap(Object::getClass, event -> event));
+        final var lookup = new HashMap<Class<?>, Object>();
+        eventList.forEach(event -> lookup.put(event.getClass(), event));
+        return lookup;
     }
 
     /**

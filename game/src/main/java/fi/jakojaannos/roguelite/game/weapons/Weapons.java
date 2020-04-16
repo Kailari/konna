@@ -2,6 +2,8 @@ package fi.jakojaannos.roguelite.game.weapons;
 
 import org.joml.Vector2d;
 
+import fi.jakojaannos.roguelite.game.data.events.render.GunshotEvent;
+
 public class Weapons {
     public static ModularWeapon NO_WEAPON = new ModularWeapon();
 
@@ -16,7 +18,8 @@ public class Weapons {
                                                                              4.0,
                                                                              -1,
                                                                              20.0,
-                                                                             0.75)),
+                                                                             0.75,
+                                                                             GunshotEvent.Variant.SHOTGUN)),
             new ModularWeapon.Module<>(new ClipMagazineModule(),
                                        new ClipMagazineModule.Attributes(30, 60)));
     public static ModularWeapon PLAYER_SHOTGUN = new ModularWeapon(
@@ -45,7 +48,8 @@ public class Weapons {
                                                                              5.0,
                                                                              -1,
                                                                              5.0,
-                                                                             0.75)));
+                                                                             0.75,
+                                                                             GunshotEvent.Variant.GATLING)));
     public static ModularWeapon SLIME_MELEE = new ModularWeapon(
             new ModularWeapon.Module<>(new AutomaticTriggerModule(),
                                        new NoAttributes()),
@@ -57,7 +61,8 @@ public class Weapons {
                                                                              0.0,
                                                                              15,
                                                                              0.0,
-                                                                             1.0)));
+                                                                             1.0,
+                                                                             GunshotEvent.Variant.MELEE)));
     public static ModularWeapon FOLLOWER_MELEE = new ModularWeapon(
             new ModularWeapon.Module<>(new AutomaticTriggerModule(),
                                        new NoAttributes()),
@@ -69,6 +74,7 @@ public class Weapons {
                                                                              0.0,
                                                                              10,
                                                                              0.0,
-                                                                             1.0)));
+                                                                             1.0,
+                                                                             GunshotEvent.Variant.MELEE)));
 
 }
