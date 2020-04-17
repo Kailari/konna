@@ -6,6 +6,7 @@ import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.ecs.data.resources.Entities;
+import fi.jakojaannos.roguelite.engine.event.RenderEvents;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
@@ -54,7 +55,11 @@ public class UpdateHUDSystem implements EcsSystem<UpdateHUDSystem.Resources, Ecs
                     this.killsCounter.setProperty(UIProperty.TEXT, String.format("Kills: %02d",
                                                                                  localPlayerKills));
 
-                    final var info = new ActionInfo(timeManager, resources.entities, playerPos, localPlayerAbilities);
+                    final var info = new ActionInfo(timeManager,
+                                                    resources.entities,
+                                                    playerPos,
+                                                    localPlayerAbilities,
+                                                    resources.events);
                     final var query = inventory.getWeaponAtSlot(localPlayerAbilities.equippedSlot)
                                                .doStateQuery(info);
                     final int ammo = query.currentAmmo;
@@ -76,6 +81,7 @@ public class UpdateHUDSystem implements EcsSystem<UpdateHUDSystem.Resources, Ecs
             TimeManager timeManager,
             Players players,
             SessionStats sessionStats,
-            Entities entities
+            Entities entities,
+            RenderEvents events
     ) {}
 }

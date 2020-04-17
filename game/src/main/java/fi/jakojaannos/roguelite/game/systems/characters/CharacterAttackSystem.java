@@ -7,6 +7,7 @@ import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.ecs.data.resources.Entities;
 import fi.jakojaannos.roguelite.engine.event.Events;
+import fi.jakojaannos.roguelite.engine.event.RenderEvents;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.WeaponInput;
@@ -65,5 +66,5 @@ public class CharacterAttackSystem implements EcsSystem<CharacterAttackSystem.Re
             WeaponInventory inventory
     ) {}
 
-    public static record Resources(TimeManager timeManager, Entities entities, Events events) {}
+    public static record Resources(TimeManager timeManager, Entities entities, RenderEvents events) {}
 }

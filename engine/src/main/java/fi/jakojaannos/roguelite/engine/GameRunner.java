@@ -6,11 +6,13 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import fi.jakojaannos.roguelite.engine.data.resources.Network;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.event.EventBus;
 import fi.jakojaannos.roguelite.engine.event.Events;
+import fi.jakojaannos.roguelite.engine.event.RenderEvents;
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.input.InputProvider;
 import fi.jakojaannos.roguelite.engine.network.NetworkImpl;
@@ -23,12 +25,12 @@ import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
  */
 public abstract class GameRunner implements MainThread {
     private static final Logger LOG = LoggerFactory.getLogger(GameRunner.class);
+    protected final RenderEvents renderEvents;
     private final GameRunnerTimeManager timeManager;
     private final EventBus<StateEvent> stateBus;
     private final EventBus<InputEvent> inputBus;
     private final EventBus<Object> systemBus;
     private final Events events;
-
     private final Object taskQueueLock = new Object();
     private final Queue<MainThreadTask> mainThreadTaskQueue = new ArrayDeque<>();
     private final Network network;
@@ -64,7 +66,8 @@ public abstract class GameRunner implements MainThread {
         this.stateBus = new EventBus<>();
         this.inputBus = new EventBus<>();
         this.systemBus = new EventBus<>();
-        this.events = new Events(new EventBus<>(), this.inputBus, this.stateBus, this.systemBus, new EventBus<>());
+        this.events = new Events(new EventBus<>(), this.inputBus, this.stateBus, this.systemBus);
+        this.renderEvents = new RenderEvents(new ConcurrentLinkedQueue<>());
         this.timeManager = timeManager;
         this.network = new NetworkImpl();
     }
@@ -161,6 +164,7 @@ public abstract class GameRunner implements MainThread {
         var stateHasChanged = false;
         var modeHasChanged = false;
         var activeState = state;
+        this.renderEvents.events().clear();
         while (accumulator.canSimulateTick(this.timeManager.getTimeStep())) {
             pollInputEvents(inputProvider);
 
@@ -233,6 +237,7 @@ public abstract class GameRunner implements MainThread {
     public GameState createStateFor(final GameMode gameMode) {
         final var world = World.createNew();
         world.registerResource(Events.class, this.events);
+        world.registerResource(RenderEvents.class, this.renderEvents);
         world.registerResource(TimeManager.class, this.timeManager);
         world.registerResource(MainThread.class, this);
         world.registerResource(Network.class, this.network);

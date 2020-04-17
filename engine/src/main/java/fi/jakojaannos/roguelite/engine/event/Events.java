@@ -15,7 +15,6 @@ public record Events(
         EventReceiver<UIEvent>ui,
         EventReceiver<InputEvent>input,
         EventSender<StateEvent>state,
-        EventSender<Object>system,
-        EventSender<Object>render
+        EventSender<Object>system
 ) {
 }

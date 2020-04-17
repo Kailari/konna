@@ -9,12 +9,16 @@ import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.libc.LibCStdlib.free;
 
 public class SoundEffect implements AutoCloseable {
-    private final int[] sourcePointers;
     private final int bufferPointer;
+    private final AudioContext context;
 
-    private int pointer;
+    public SoundEffect(
+            final Path assetRoot,
+            final String filename,
+            final AudioContext context
+    ) {
+        this.context = context;
 
-    public SoundEffect(final Path assetRoot, final String filename, final int sourceCount) {
         // Load the sound effect
         final int channels;
         final int sampleRate;
@@ -45,26 +49,21 @@ public class SoundEffect implements AutoCloseable {
         this.bufferPointer = alGenBuffers();
         alBufferData(this.bufferPointer, format, rawAudioBuffer, sampleRate);
         free(rawAudioBuffer);
-
-        // Get the audio source(s)
-        this.sourcePointers = new int[sourceCount];
-        alGenSources(this.sourcePointers);
-        for (final int source : this.sourcePointers) {
-            alSourcei(source, AL_BUFFER, this.bufferPointer);
-        }
     }
 
-    public void play() {
-        alSourcePlay(this.sourcePointers[this.pointer]);
-        this.pointer++;
-        if (this.pointer >= this.sourcePointers.length) {
-            this.pointer = 0;
-        }
+    public void play(final int priority, final float gain, final float pitch) {
+        this.context.nextSource(priority)
+                    .ifPresent(source -> {
+                        alSourcef(source, AL_GAIN, gain);
+                        alSourcef(source, AL_PITCH, pitch);
+
+                        alSourcei(source, AL_BUFFER, this.bufferPointer);
+                        alSourcePlay(source);
+                    });
     }
 
     @Override
     public void close() {
-        alDeleteSources(this.sourcePointers);
         alDeleteBuffers(this.bufferPointer);
     }
 }

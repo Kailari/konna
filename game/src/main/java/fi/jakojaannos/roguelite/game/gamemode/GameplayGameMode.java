@@ -31,7 +31,7 @@ import fi.jakojaannos.roguelite.game.systems.collision.*;
 import fi.jakojaannos.roguelite.game.systems.physics.ApplyForceSystem;
 import fi.jakojaannos.roguelite.game.systems.physics.ApplyFrictionSystem;
 import fi.jakojaannos.roguelite.game.systems.physics.ApplyVelocitySystem;
-import fi.jakojaannos.roguelite.game.weapons.Weapons;
+import fi.jakojaannos.roguelite.game.data.resources.Weapons;
 import fi.jakojaannos.roguelite.game.world.WorldGenerator;
 
 public final class GameplayGameMode {
