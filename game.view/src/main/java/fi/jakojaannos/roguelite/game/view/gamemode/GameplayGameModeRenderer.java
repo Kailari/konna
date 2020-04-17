@@ -157,8 +157,9 @@ public final class GameplayGameModeRenderer {
         builder.anchorX(absolute(0))
                .right(absolute(10))
                .bottom(absolute(5))
-               .fontSize(24)
-               .text("Ammo: ??");
+               .fontSize(36)
+               .text("4/20")
+               .color(1.0, 1.0, 1.0);
     }
 
     private static void buildKillsCounter(final UILabelBuilder builder) {

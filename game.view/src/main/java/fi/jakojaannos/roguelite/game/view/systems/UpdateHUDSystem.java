@@ -8,6 +8,7 @@ import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.ecs.data.resources.Entities;
 import fi.jakojaannos.roguelite.engine.event.RenderEvents;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.roguelite.engine.view.data.components.ui.Color;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
@@ -18,6 +19,9 @@ import fi.jakojaannos.roguelite.game.weapons.ActionInfo;
 import fi.jakojaannos.roguelite.game.weapons.WeaponInventory;
 
 public class UpdateHUDSystem implements EcsSystem<UpdateHUDSystem.Resources, EcsSystem.NoEntities, EcsSystem.NoEvents> {
+    private static final Color COLOR_BAD = new Color(0.75, 0.15, 0.15);
+    private static final Color COLOR_GOOD = new Color(0.95, 0.95, 0.95);
+
     private final UIElement timePlayedTimer;
     private final UIElement killsCounter;
     private final UIElement ammoCounter;
@@ -65,7 +69,8 @@ public class UpdateHUDSystem implements EcsSystem<UpdateHUDSystem.Resources, Ecs
                     final int ammo = query.currentAmmo;
                     final int maxAmmo = query.maxAmmo;
                     final var maxAmmoString = maxAmmo == 666 ? "REL" : String.format("%03d", maxAmmo);
-                    this.ammoCounter.setProperty(UIProperty.TEXT, String.format("Ammo: %03d/%s", ammo, maxAmmoString));
+                    this.ammoCounter.setProperty(UIProperty.TEXT, String.format("%03d/%s", ammo, maxAmmoString));
+                    this.ammoCounter.setProperty(UIProperty.COLOR, ammo == 0 ? COLOR_BAD : COLOR_GOOD);
                 });
 
         final var ticks = sessionStats.endTimeStamp - sessionStats.beginTimeStamp;

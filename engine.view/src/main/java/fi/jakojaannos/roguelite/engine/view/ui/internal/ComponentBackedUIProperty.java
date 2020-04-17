@@ -19,7 +19,7 @@ public class ComponentBackedUIProperty<T, C> extends EntityBackedUIProperty<T> {
     }
 
     private static <T, C> Function<EntityHandle, Optional<T>> createGetter(
-            final Class<? extends C> componentClass,
+            final Class<C> componentClass,
             final Function<C, T> componentToValueMapper
     ) {
         return (entityHandle) -> entityHandle.getComponent(componentClass)

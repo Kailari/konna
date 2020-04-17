@@ -25,7 +25,7 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
 
     @BeforeEach
     void beforeEach() {
-        final var events = new Events(new EventBus<>(), new EventBus<>(), new EventBus<>(), new EventBus<>(), new EventBus<>());
+        final var events = new Events(new EventBus<>(), new EventBus<>(), new EventBus<>(), new EventBus<>());
         final var timeManager = new SimpleTimeManager(20);
         uiBuilder = UserInterface.builder(events,
                                           timeManager,
