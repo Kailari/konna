@@ -95,8 +95,8 @@ public class WorldGenerator<TTile> {
 
             final var spawnerXH = hallwayStartX + hallwaySize / 2;
             final var spawnerYH = hallwayLength - 2;
-            final var stalkerFreq = 20.0;
-            final var followerFreq = 17.5;
+            final var stalkerFreq = 15.0;
+            final var followerFreq = 12.5;
             final var slimeFrequency = 30;
 
             final var followerFactory =

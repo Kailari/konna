@@ -64,7 +64,8 @@ public class UpdateHUDSystem implements EcsSystem<UpdateHUDSystem.Resources, Ecs
                                                .doStateQuery(info);
                     final int ammo = query.currentAmmo;
                     final int maxAmmo = query.maxAmmo;
-                    this.ammoCounter.setProperty(UIProperty.TEXT, String.format("Ammo: %03d/%03d", ammo, maxAmmo));
+                    final var maxAmmoString = maxAmmo == 666 ? "REL" : String.format("%03d", maxAmmo);
+                    this.ammoCounter.setProperty(UIProperty.TEXT, String.format("Ammo: %03d/%s", ammo, maxAmmoString));
                 });
 
         final var ticks = sessionStats.endTimeStamp - sessionStats.beginTimeStamp;
