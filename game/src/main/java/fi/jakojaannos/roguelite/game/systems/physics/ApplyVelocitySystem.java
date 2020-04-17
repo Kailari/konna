@@ -78,7 +78,7 @@ public class ApplyVelocitySystem implements EcsSystem<ApplyVelocitySystem.Resour
             final var velocity = entity.getData().velocity;
             final var maybeCollider = entity.getData().collider;
 
-            if (velocity.length() < VELOCITY_EPSILON) {
+            if (velocity.lengthSquared() < VELOCITY_EPSILON) {
                 return;
             }
 
