@@ -15,6 +15,7 @@ module roguelite.engine.view {
     opens fi.jakojaannos.roguelite.engine.view.systems.ui to roguelite.engine.ecs;
 
     exports fi.jakojaannos.roguelite.engine.view;
+    exports fi.jakojaannos.roguelite.engine.view.audio;
     exports fi.jakojaannos.roguelite.engine.view.data.components.ui;
     exports fi.jakojaannos.roguelite.engine.view.content;
     exports fi.jakojaannos.roguelite.engine.view.ui;

@@ -2,6 +2,7 @@ package fi.jakojaannos.roguelite.engine.lwjgl;
 
 import java.nio.file.Path;
 
+import fi.jakojaannos.roguelite.engine.lwjgl.audio.LWJGLAudioContext;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLCamera;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.LWJGLViewport;
 import fi.jakojaannos.roguelite.engine.lwjgl.view.rendering.LWJGLSpriteBatch;
@@ -13,6 +14,7 @@ import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.Window;
+import fi.jakojaannos.roguelite.engine.view.audio.AudioContext;
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.Mesh;
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexFormat;
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexFormatBuilder;
@@ -60,6 +62,11 @@ public class LWJGLRenderingBackend implements RenderingBackend, AutoCloseable {
     @Override
     public ShaderBuilder createShaderProgram() {
         return new LWJGLShaderBuilder();
+    }
+
+    @Override
+    public AudioContext createAudioContext() {
+        return new LWJGLAudioContext(16);
     }
 
     @Override

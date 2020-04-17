@@ -16,10 +16,10 @@ import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.view.*;
+import fi.jakojaannos.roguelite.engine.view.audio.AudioContext;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;
 import fi.jakojaannos.roguelite.game.gamemode.MainMenuGameMode;
-import fi.jakojaannos.roguelite.game.view.data.AudioContext;
 import fi.jakojaannos.roguelite.game.view.gamemode.GameplayGameModeRenderer;
 import fi.jakojaannos.roguelite.game.view.gamemode.MainMenuGameModeRenderer;
 
@@ -52,7 +52,7 @@ public class RogueliteGameRenderer implements GameRenderer {
             final AssetManager assetManager
     ) {
         LOG.trace("Constructing GameRenderer...");
-        this.audioContext = new AudioContext(16);
+        this.audioContext = backend.createAudioContext();
 
         final var viewport = backend.getViewport(window);
         this.camera = backend.createCamera(viewport);

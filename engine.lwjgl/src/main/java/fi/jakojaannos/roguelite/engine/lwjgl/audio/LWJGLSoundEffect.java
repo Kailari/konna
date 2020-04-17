@@ -1,18 +1,21 @@
-package fi.jakojaannos.roguelite.game.view.data;
+package fi.jakojaannos.roguelite.engine.lwjgl.audio;
 
 import java.nio.ShortBuffer;
 import java.nio.file.Path;
+
+import fi.jakojaannos.roguelite.engine.view.audio.AudioContext;
+import fi.jakojaannos.roguelite.engine.view.audio.SoundEffect;
 
 import static org.lwjgl.openal.AL10.*;
 import static org.lwjgl.stb.STBVorbis.stb_vorbis_decode_filename;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.libc.LibCStdlib.free;
 
-public class SoundEffect implements AutoCloseable {
+public class LWJGLSoundEffect implements SoundEffect {
     private final int bufferPointer;
     private final AudioContext context;
 
-    public SoundEffect(
+    public LWJGLSoundEffect(
             final Path assetRoot,
             final String filename,
             final AudioContext context
@@ -51,6 +54,7 @@ public class SoundEffect implements AutoCloseable {
         free(rawAudioBuffer);
     }
 
+    @Override
     public void play(final int priority, final float gain, final float pitch) {
         this.context.nextSource(priority)
                     .ifPresent(source -> {
