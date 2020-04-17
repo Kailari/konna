@@ -6,9 +6,9 @@ import java.util.stream.Stream;
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.event.RenderEvents;
+import fi.jakojaannos.roguelite.engine.view.audio.AudioContext;
+import fi.jakojaannos.roguelite.engine.view.audio.SoundEffect;
 import fi.jakojaannos.roguelite.game.data.events.render.GunshotEvent;
-import fi.jakojaannos.roguelite.game.view.data.AudioContext;
-import fi.jakojaannos.roguelite.game.view.data.SoundEffect;
 
 public class HandleRenderEventsSystem implements EcsSystem<HandleRenderEventsSystem.Resources, EcsSystem.NoEntities, EcsSystem.NoEvents>, AutoCloseable {
     private final SoundEffect shotgun;
@@ -22,12 +22,12 @@ public class HandleRenderEventsSystem implements EcsSystem<HandleRenderEventsSys
             final Path assetRoot,
             final AudioContext context
     ) {
-        this.shotgun = new SoundEffect(assetRoot, "shotgun/Blast1.ogg", context);
-        this.rifle = new SoundEffect(assetRoot, "shotgun/Blast3.ogg", context);
-        this.melee = new SoundEffect(assetRoot, "shotgun/Pump3.ogg", context);
-        this.gatling = new SoundEffect(assetRoot, "shotgun/Blast2.ogg", context);
+        this.shotgun = context.createEffect(assetRoot, "shotgun/Blast1.ogg", context);
+        this.rifle = context.createEffect(assetRoot, "shotgun/Blast3.ogg", context);
+        this.melee = context.createEffect(assetRoot, "shotgun/Pump3.ogg", context);
+        this.gatling = context.createEffect(assetRoot, "shotgun/Blast2.ogg", context);
 
-        this.click = new SoundEffect(assetRoot, "shotgun/Load1.ogg", context);
+        this.click = context.createEffect(assetRoot, "shotgun/Load1.ogg", context);
     }
 
     @Override
@@ -50,11 +50,12 @@ public class HandleRenderEventsSystem implements EcsSystem<HandleRenderEventsSys
     }
 
     @Override
-    public void close() {
+    public void close() throws Exception {
         this.rifle.close();
         this.shotgun.close();
         this.melee.close();
         this.gatling.close();
+        this.click.close();
     }
 
     public static record Resources(RenderEvents events) {}

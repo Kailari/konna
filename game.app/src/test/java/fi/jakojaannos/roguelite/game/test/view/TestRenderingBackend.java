@@ -1,11 +1,14 @@
 package fi.jakojaannos.roguelite.game.test.view;
 
 import java.nio.file.Path;
+import java.util.Optional;
 
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.Window;
+import fi.jakojaannos.roguelite.engine.view.audio.AudioContext;
+import fi.jakojaannos.roguelite.engine.view.audio.SoundEffect;
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.Mesh;
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexFormat;
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexFormatBuilder;
@@ -17,6 +20,12 @@ import static org.mockito.Mockito.mock;
 
 public class TestRenderingBackend implements RenderingBackend {
     @Override
+    public TextRenderer getTextRenderer(
+    ) {
+        return mock(TextRenderer.class);
+    }
+
+    @Override
     public Viewport getViewport(final Window window) {
         return new Viewport(window.getWidth(), window.getHeight());
     }
@@ -24,12 +33,6 @@ public class TestRenderingBackend implements RenderingBackend {
     @Override
     public Camera createCamera(final Viewport viewport) {
         return new TestCamera(viewport);
-    }
-
-    @Override
-    public TextRenderer getTextRenderer(
-    ) {
-        return mock(TextRenderer.class);
     }
 
     @Override
@@ -53,6 +56,29 @@ public class TestRenderingBackend implements RenderingBackend {
     @Override
     public ShaderBuilder createShaderProgram() {
         return new TestShaderBuilder();
+    }
+
+    @Override
+    public AudioContext createAudioContext() {
+        return new AudioContext() {
+            @Override
+            public Optional<Integer> nextSource(final int priority) {
+                return Optional.empty();
+            }
+
+            @Override
+            public SoundEffect createEffect(
+                    final Path assetRoot,
+                    final String filename,
+                    final AudioContext context
+            ) {
+                return mock(SoundEffect.class);
+            }
+
+            @Override
+            public void close() {
+            }
+        };
     }
 
     @Override

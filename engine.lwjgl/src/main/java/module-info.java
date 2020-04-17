@@ -4,6 +4,7 @@ module roguelite.engine.lwjgl {
     requires org.lwjgl.stb;
     requires org.lwjgl.glfw;
     requires org.lwjgl.opengl;
+    requires org.lwjgl.openal;
     requires org.slf4j;
     requires jsr305;
 

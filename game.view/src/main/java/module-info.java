@@ -1,7 +1,6 @@
 module roguelite.game.view {
     requires org.slf4j;
     requires org.lwjgl;
-    requires org.lwjgl.openal;
     requires org.lwjgl.stb;
     requires org.joml;
     requires jsr305;

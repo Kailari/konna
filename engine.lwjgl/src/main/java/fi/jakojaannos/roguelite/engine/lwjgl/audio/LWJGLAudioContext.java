@@ -1,23 +1,27 @@
-package fi.jakojaannos.roguelite.game.view.data;
+package fi.jakojaannos.roguelite.engine.lwjgl.audio;
 
 import org.lwjgl.openal.AL;
 import org.lwjgl.openal.ALC;
 
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Optional;
+
+import fi.jakojaannos.roguelite.engine.view.audio.AudioContext;
+import fi.jakojaannos.roguelite.engine.view.audio.SoundEffect;
 
 import static org.lwjgl.openal.AL10.*;
 import static org.lwjgl.openal.ALC10.*;
 import static org.lwjgl.system.MemoryStack.stackPush;
 
-public class AudioContext implements AutoCloseable {
+public class LWJGLAudioContext implements AudioContext {
     private final long context;
     private final long device;
 
     private final int[] sources;
     private final int[] priorities;
 
-    public AudioContext(final int nSources) {
+    public LWJGLAudioContext(final int nSources) {
         // Create device/context
         final var defaultDeviceName = alcGetString(0, ALC_DEFAULT_DEVICE_SPECIFIER);
         this.device = alcOpenDevice(defaultDeviceName);
@@ -37,6 +41,16 @@ public class AudioContext implements AutoCloseable {
         Arrays.fill(this.priorities, -1);
     }
 
+    @Override
+    public SoundEffect createEffect(
+            final Path assetRoot,
+            final String filename,
+            final AudioContext context
+    ) {
+        return new LWJGLSoundEffect(assetRoot, filename, context);
+    }
+
+    @Override
     public Optional<Integer> nextSource(final int priority) {
         // Try to find free sources. If no free sources are available, pick the one with lowest priority.
         int lowestPriority = priority;
@@ -67,7 +81,7 @@ public class AudioContext implements AutoCloseable {
         return Optional.empty();
     }
 
-    public int getSourceState(final int source) {
+    private int getSourceState(final int source) {
         final int state;
         try (final var stack = stackPush()) {
             final var pState = stack.mallocInt(1);
