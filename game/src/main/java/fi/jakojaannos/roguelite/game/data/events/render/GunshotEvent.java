@@ -6,5 +6,6 @@ public record GunshotEvent(Variant variant) {
         MELEE,
         GATLING,
         SHOTGUN,
+        CLICK,
     }
 }

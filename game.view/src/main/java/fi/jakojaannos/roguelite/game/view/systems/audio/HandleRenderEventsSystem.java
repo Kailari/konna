@@ -16,6 +16,8 @@ public class HandleRenderEventsSystem implements EcsSystem<HandleRenderEventsSys
     private final SoundEffect gatling;
     private final SoundEffect rifle;
 
+    private final SoundEffect click;
+
     public HandleRenderEventsSystem(
             final Path assetRoot,
             final AudioContext context
@@ -24,6 +26,8 @@ public class HandleRenderEventsSystem implements EcsSystem<HandleRenderEventsSys
         this.rifle = new SoundEffect(assetRoot, "shotgun/Blast3.ogg", context);
         this.melee = new SoundEffect(assetRoot, "shotgun/Pump3.ogg", context);
         this.gatling = new SoundEffect(assetRoot, "shotgun/Blast2.ogg", context);
+
+        this.click = new SoundEffect(assetRoot, "shotgun/Load1.ogg", context);
     }
 
     @Override
@@ -37,6 +41,7 @@ public class HandleRenderEventsSystem implements EcsSystem<HandleRenderEventsSys
                 switch (gunshot.variant()) {
                     case SHOTGUN -> this.rifle.play(2, 0.75f, 1.0f);
                     case RIFLE -> this.rifle.play(2, 0.75f, 1.5f);
+                    case CLICK -> this.click.play(2, 1.5f, 2.0f);
                     case MELEE -> this.melee.play(1, 1.0f, 0.5f);
                     case GATLING -> this.gatling.play(0, 0.3f, 2.0f);
                 }

@@ -37,7 +37,7 @@ public class Weapons {
                                                                           1.0,
                                                                           10,
                                                                           7.5,
-                                                                          0.55,
+                                                                          1.25,
                                                                           12)),
             new ModularWeapon.Module<>(new ShotgunMagazineModule(),
                                        new ShotgunMagazineModule.Attributes(6, 30)));
