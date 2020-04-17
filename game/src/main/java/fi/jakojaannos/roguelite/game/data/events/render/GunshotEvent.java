@@ -7,5 +7,7 @@ public record GunshotEvent(Variant variant) {
         GATLING,
         SHOTGUN,
         CLICK,
+        PUMP,
+        SHOTGUN_RELOAD,
     }
 }

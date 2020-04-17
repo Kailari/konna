@@ -28,6 +28,10 @@ public class ShotgunFiringModule implements WeaponModule<ShotgunFiringModule.Sta
             final ActionInfo info
     ) {
         final var timeSinceLastAttack = info.timeManager().getCurrentGameTime() - state.lastAttackTimestamp;
+        if (timeSinceLastAttack == attributes.timeBetweenShots) {
+            info.events().fire(new GunshotEvent(GunshotEvent.Variant.PUMP));
+        }
+
         if (timeSinceLastAttack < attributes.timeBetweenShots) {
             event.cancel();
         }

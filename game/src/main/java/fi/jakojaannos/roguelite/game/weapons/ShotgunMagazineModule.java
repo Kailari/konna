@@ -101,7 +101,12 @@ public class ShotgunMagazineModule implements WeaponModule<ShotgunMagazineModule
             final WeaponStateQuery event,
             final ActionInfo info
     ) {
+        final var oldAmmo = state.ammo;
         updateReloadState(state, attributes, info.timeManager());
+        if (oldAmmo != state.ammo) {
+            info.events().fire(new GunshotEvent(GunshotEvent.Variant.SHOTGUN_RELOAD));
+        }
+
         if (state.isReloading) {
             event.currentAmmo = state.ammo;
             event.maxAmmo = 666;

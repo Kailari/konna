@@ -83,7 +83,7 @@ public final class GameplayGameMode {
         final var layer = new TileMapLayer(generator.getTileMap(), true);
         entityManager.addComponentTo(levelEntity, layer);
 
-        TurretArchetype.create(entityManager, timeManager, new Transform(2.0, 0.0));
+        //TurretArchetype.create(entityManager, timeManager, new Transform(2.0, 0.0));
 
         entityManager.applyModifications();
     }

@@ -27,8 +27,6 @@ public class Weapons {
             new ModularWeapon.Module<>(new ClipMagazineModule(),
                                        new ClipMagazineModule.Attributes(30, 60)));
     public static ModularWeapon PLAYER_SHOTGUN = new ModularWeapon(
-            new ModularWeapon.Module<>(new SingleShotTriggerModule(),
-                                       new NoAttributes()),
             new ModularWeapon.Module<>(new ShotgunFiringModule(),
                                        new ShotgunFiringModule.Attributes(new Vector2d(0.0),
                                                                           40,
@@ -39,6 +37,8 @@ public class Weapons {
                                                                           7.5,
                                                                           1.25,
                                                                           12)),
+            new ModularWeapon.Module<>(new SingleShotTriggerModule(),
+                                       new NoAttributes()),
             new ModularWeapon.Module<>(new ShotgunMagazineModule(),
                                        new ShotgunMagazineModule.Attributes(6, 30)));
     public static ModularWeapon TURRET_GATLING = new ModularWeapon(
