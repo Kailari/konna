@@ -39,7 +39,7 @@ public class ClipMagazineModule implements WeaponModule<ClipMagazineModule.State
             final ReloadEvent event,
             final ActionInfo info
     ) {
-        updateAmmoState(state, attributes, info.timeManager());
+        updateReloadState(state, attributes, info.timeManager());
         if (state.isReloading || state.ammo == attributes.magazineCapacity) {
             event.cancel();
         }
@@ -61,7 +61,7 @@ public class ClipMagazineModule implements WeaponModule<ClipMagazineModule.State
             final WeaponFireEvent event,
             final ActionInfo info
     ) {
-        updateAmmoState(state, attributes, info.timeManager());
+        updateReloadState(state, attributes, info.timeManager());
         if (state.isReloading || state.ammo <= 0) {
             event.cancel();
         }
@@ -84,7 +84,7 @@ public class ClipMagazineModule implements WeaponModule<ClipMagazineModule.State
             final WeaponUnequipEvent event,
             final ActionInfo info
     ) {
-        updateAmmoState(state, attributes, info.timeManager());
+        updateReloadState(state, attributes, info.timeManager());
         if (state.isReloading) {
             state.isReloading = false;
         }
@@ -96,7 +96,7 @@ public class ClipMagazineModule implements WeaponModule<ClipMagazineModule.State
             final WeaponStateQuery event,
             final ActionInfo info
     ) {
-        updateAmmoState(state, attributes, info.timeManager());
+        updateReloadState(state, attributes, info.timeManager());
         if (state.isReloading) {
             event.currentAmmo = state.ammo;
             event.maxAmmo = 666;
@@ -106,7 +106,7 @@ public class ClipMagazineModule implements WeaponModule<ClipMagazineModule.State
         }
     }
 
-    private void updateAmmoState(
+    private void updateReloadState(
             final State state,
             final Attributes attributes,
             final TimeManager timeManager
@@ -114,7 +114,7 @@ public class ClipMagazineModule implements WeaponModule<ClipMagazineModule.State
         if (!state.isReloading) {
             return;
         }
-        if (timeManager.getCurrentGameTime() - state.reloadStartTimestamp <= attributes.reloadTime) {
+        if (timeManager.getCurrentGameTime() - state.reloadStartTimestamp < attributes.reloadTime) {
             return;
         }
 
@@ -132,13 +132,8 @@ public class ClipMagazineModule implements WeaponModule<ClipMagazineModule.State
         }
     }
 
-    public static class Attributes {
-        public int magazineCapacity = 30;
-        public long reloadTime = 60;
-
-        public Attributes(final int magazineCapacity, final long reloadTimeInTicks) {
-            this.magazineCapacity = magazineCapacity;
-            this.reloadTime = reloadTimeInTicks;
-        }
-    }
+    public static record Attributes(
+            int magazineCapacity,
+            long reloadTime
+    ) {}
 }

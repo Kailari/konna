@@ -9,12 +9,6 @@ import fi.jakojaannos.roguelite.game.data.archetypes.ProjectileArchetype;
 import fi.jakojaannos.roguelite.game.data.events.render.GunshotEvent;
 
 public class ProjectileFiringModule implements WeaponModule<ProjectileFiringModule.State, ProjectileFiringModule.Attributes> {
-    private final Vector2d tmpSpreadOffset = new Vector2d();
-    private final Vector2d tmpProjectilePos = new Vector2d();
-    private final Vector2d tmpDirection = new Vector2d();
-
-    private final Random random = new Random(1337);
-
     @Override
     public State getDefaultState(final Attributes attributes) {
         return new State();
@@ -66,21 +60,21 @@ public class ProjectileFiringModule implements WeaponModule<ProjectileFiringModu
                                                                       attributes.weaponOffset.y,
                                                                       new Vector2d());
 
-        final var projectilePos = this.tmpProjectilePos.set(shooterTransform.position)
-                                                       .add(weaponOffset);
-        final var direction = attackAbility.targetPosition.sub(projectilePos, this.tmpDirection);
+        final var projectilePos = state.tmpProjectilePos.set(shooterTransform.position)
+                                                        .add(weaponOffset);
+        final var direction = attackAbility.targetPosition.sub(projectilePos, state.tmpDirection);
         if (direction.lengthSquared() == 0) {
             direction.set(1.0, 0.0);
         } else {
             direction.normalize();
         }
 
-        final var spreadAmount = (this.random.nextDouble() * 2.0 - 1.0) * attributes.spread;
-        final var spreadOffset = this.tmpSpreadOffset.set(direction)
-                                                     .perpendicular()
-                                                     .mul(spreadAmount);
+        final var spreadAmount = (state.random.nextDouble() * 2.0 - 1.0) * attributes.spread;
+        final var spreadOffset = state.tmpSpreadOffset.set(direction)
+                                                      .perpendicular()
+                                                      .mul(spreadAmount);
 
-        final var speedNoise = (this.random.nextDouble() * 2.0 - 1.0) * attributes.projectileSpeedNoise;
+        final var speedNoise = (state.random.nextDouble() * 2.0 - 1.0) * attributes.projectileSpeedNoise;
         final var actualSpeed = attributes.projectileSpeed + speedNoise;
 
         final var timestamp = timeManager.getCurrentGameTime();
@@ -110,6 +104,10 @@ public class ProjectileFiringModule implements WeaponModule<ProjectileFiringModu
     ) {}
 
     public static class State {
+        private final Vector2d tmpSpreadOffset = new Vector2d();
+        private final Vector2d tmpProjectilePos = new Vector2d();
+        private final Vector2d tmpDirection = new Vector2d();
+        private final Random random = new Random(1337);
         public long lastAttackTimestamp = -1000;
     }
 }
