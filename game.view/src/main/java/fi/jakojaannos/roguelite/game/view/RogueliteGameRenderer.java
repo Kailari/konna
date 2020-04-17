@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
@@ -13,13 +13,13 @@ import fi.jakojaannos.roguelite.engine.GameState;
 import fi.jakojaannos.roguelite.engine.content.AssetManager;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
-import fi.jakojaannos.roguelite.engine.event.EventBus;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.view.*;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;
 import fi.jakojaannos.roguelite.game.gamemode.MainMenuGameMode;
+import fi.jakojaannos.roguelite.game.view.data.AudioContext;
 import fi.jakojaannos.roguelite.game.view.gamemode.GameplayGameModeRenderer;
 import fi.jakojaannos.roguelite.game.view.gamemode.MainMenuGameModeRenderer;
 
@@ -28,6 +28,7 @@ public class RogueliteGameRenderer implements GameRenderer {
 
     private final Camera camera;
     private final GameModeRendererFactory stateRenderers = new GameModeRendererFactory();
+    private final AudioContext audioContext;
 
     @Nullable
     private GameModeRenderer stateRenderer;
@@ -51,6 +52,7 @@ public class RogueliteGameRenderer implements GameRenderer {
             final AssetManager assetManager
     ) {
         LOG.trace("Constructing GameRenderer...");
+        this.audioContext = new AudioContext(16);
 
         final var viewport = backend.getViewport(window);
         this.camera = backend.createCamera(viewport);
@@ -65,7 +67,8 @@ public class RogueliteGameRenderer implements GameRenderer {
                                                                                assetRoot,
                                                                                this.camera,
                                                                                assetManager,
-                                                                               backend));
+                                                                               backend,
+                                                                               this.audioContext));
         this.stateRenderers.register(MainMenuGameMode.GAME_MODE_ID,
                                      (mode) -> MainMenuGameModeRenderer.create(events,
                                                                                timeManager,
@@ -90,14 +93,9 @@ public class RogueliteGameRenderer implements GameRenderer {
                 .ifPresent(cameraTransform -> this.camera.setPosition(cameraTransform.position.x,
                                                                       cameraTransform.position.y));
 
-        final var eventBus = (EventBus<Object>) world.fetchResource(Events.class).render();
-        final var events = new ArrayList<>();
-        while (eventBus.hasEvents()) {
-            events.add(eventBus.pollEvent());
-        }
         Optional.ofNullable(this.stateRenderer)
                 .ifPresent(renderer -> renderer.renderDispatcher()
-                                               .tick(state.world(), events));
+                                               .tick(state.world(), List.of()));
     }
 
     @Override
@@ -110,6 +108,7 @@ public class RogueliteGameRenderer implements GameRenderer {
         if (this.stateRenderer != null) {
             this.stateRenderer.close();
         }
+        this.audioContext.close();
         this.camera.close();
     }
 }

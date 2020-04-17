@@ -20,7 +20,7 @@ import fi.jakojaannos.roguelite.game.data.components.character.MovementInput;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
 import fi.jakojaannos.roguelite.game.data.components.character.WeaponInput;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
-import fi.jakojaannos.roguelite.game.weapons.Weapons;
+import fi.jakojaannos.roguelite.game.data.resources.Weapons;
 
 import static org.junit.jupiter.api.Assertions.*;
 

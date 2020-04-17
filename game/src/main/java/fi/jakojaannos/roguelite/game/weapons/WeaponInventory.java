@@ -1,5 +1,7 @@
 package fi.jakojaannos.roguelite.game.weapons;
 
+import fi.jakojaannos.roguelite.game.data.resources.Weapons;
+
 public class WeaponInventory {
     private static final InventoryWeapon UNARMED = new InventoryWeapon(Weapons.NO_WEAPON);
 

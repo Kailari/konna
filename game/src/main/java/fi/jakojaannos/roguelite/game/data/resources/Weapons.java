@@ -1,9 +1,13 @@
-package fi.jakojaannos.roguelite.game.weapons;
+package fi.jakojaannos.roguelite.game.data.resources;
 
 import org.joml.Vector2d;
 
 import fi.jakojaannos.roguelite.game.data.events.render.GunshotEvent;
+import fi.jakojaannos.roguelite.game.weapons.*;
 
+/**
+ * Resource for managing weapon instances.
+ */
 public class Weapons {
     public static ModularWeapon NO_WEAPON = new ModularWeapon();
 
@@ -12,12 +16,12 @@ public class Weapons {
                                        new NoAttributes()),
             new ModularWeapon.Module<>(new ProjectileFiringModule(),
                                        new ProjectileFiringModule.Attributes(new Vector2d(0.0),
-                                                                             12,
+                                                                             8,
                                                                              80,
                                                                              2.5,
                                                                              4.0,
                                                                              -1,
-                                                                             20.0,
+                                                                             10.0,
                                                                              0.75,
                                                                              GunshotEvent.Variant.SHOTGUN)),
             new ModularWeapon.Module<>(new ClipMagazineModule(),

@@ -14,11 +14,11 @@ import fi.jakojaannos.roguelite.engine.view.rendering.text.Font;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.GenericUIElementBuilder;
-import fi.jakojaannos.roguelite.engine.view.ui.builder.UIElementBuilder;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.UILabelBuilder;
 import fi.jakojaannos.roguelite.game.DebugConfig;
+import fi.jakojaannos.roguelite.game.view.data.AudioContext;
 import fi.jakojaannos.roguelite.game.view.systems.*;
-import fi.jakojaannos.roguelite.game.view.systems.audio.PlayGunshotSoundsSystem;
+import fi.jakojaannos.roguelite.game.view.systems.audio.HandleRenderEventsSystem;
 import fi.jakojaannos.roguelite.game.view.systems.debug.EntityCollisionBoundsRenderingSystem;
 import fi.jakojaannos.roguelite.game.view.systems.debug.EntityTransformRenderingSystem;
 
@@ -40,10 +40,16 @@ public final class GameplayGameModeRenderer {
             final Path assetRoot,
             final Camera camera,
             final AssetManager assetManager,
-            final RenderingBackend backend
+            final RenderingBackend backend,
+            final AudioContext audioContext
     ) {
         final var userInterface = createUserInterface(events, timeManager, camera, assetManager);
-        final var dispatcher = createRenderDispatcher(userInterface, assetRoot, camera, assetManager, backend);
+        final var dispatcher = createRenderDispatcher(userInterface,
+                                                      assetRoot,
+                                                      camera,
+                                                      assetManager,
+                                                      backend,
+                                                      audioContext);
         return new GameModeRenderer(dispatcher, userInterface);
     }
 
@@ -52,7 +58,8 @@ public final class GameplayGameModeRenderer {
             final Path assetRoot,
             final Camera camera,
             final AssetManager assetManager,
-            final RenderingBackend backend
+            final RenderingBackend backend,
+            final AudioContext audioContext
     ) {
         final var fontRegistry = assetManager.getAssetRegistry(Font.class);
         final var spriteRegistry = assetManager.getAssetRegistry(Sprite.class);
@@ -84,7 +91,7 @@ public final class GameplayGameModeRenderer {
                               .dependsOn(entities, level)
                               .buildGroup();
         final var sound = builder.group("sound")
-                                 .withSystem(new PlayGunshotSoundsSystem(assetRoot))
+                                 .withSystem(new HandleRenderEventsSystem(assetRoot, audioContext))
                                  .dependsOn(ui)
                                  .buildGroup();
 
@@ -92,7 +99,7 @@ public final class GameplayGameModeRenderer {
             builder.group("debug")
                    .withSystem(new EntityCollisionBoundsRenderingSystem(assetRoot, camera, backend))
                    .withSystem(new EntityTransformRenderingSystem(assetRoot, camera, backend))
-                   .dependsOn(ui, entities, level)
+                   .dependsOn(ui, entities, level, sound)
                    .buildGroup();
         }
 

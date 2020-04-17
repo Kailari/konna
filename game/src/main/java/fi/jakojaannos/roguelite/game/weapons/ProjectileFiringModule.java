@@ -94,7 +94,7 @@ public class ProjectileFiringModule implements WeaponModule<ProjectileFiringModu
                                                    attributes.projectileLifetimeInTicks,
                                                    attributes.projectilePushForce,
                                                    attributes.damage);
-        info.events().render().fire(new GunshotEvent(attributes.gunshotVariant));
+        info.events().fire(new GunshotEvent(attributes.gunshotVariant));
     }
 
     public static record Attributes(
