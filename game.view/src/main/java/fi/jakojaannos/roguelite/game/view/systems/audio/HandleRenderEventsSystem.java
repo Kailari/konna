@@ -17,6 +17,8 @@ public class HandleRenderEventsSystem implements EcsSystem<HandleRenderEventsSys
     private final SoundEffect rifle;
 
     private final SoundEffect click;
+    private final SoundEffect pump;
+    private final SoundEffect shotgunReload;
 
     public HandleRenderEventsSystem(
             final Path assetRoot,
@@ -28,6 +30,8 @@ public class HandleRenderEventsSystem implements EcsSystem<HandleRenderEventsSys
         this.gatling = context.createEffect(assetRoot, "shotgun/Blast2.ogg", context);
 
         this.click = context.createEffect(assetRoot, "shotgun/Load1.ogg", context);
+        this.pump = context.createEffect(assetRoot, "shotgun/Pump1.ogg", context);
+        this.shotgunReload = context.createEffect(assetRoot, "shotgun/Load2.ogg", context);
     }
 
     @Override
@@ -42,6 +46,8 @@ public class HandleRenderEventsSystem implements EcsSystem<HandleRenderEventsSys
                     case SHOTGUN -> this.rifle.play(2, 0.75f, 1.0f);
                     case RIFLE -> this.rifle.play(2, 0.75f, 1.5f);
                     case CLICK -> this.click.play(2, 1.5f, 2.0f);
+                    case SHOTGUN_RELOAD -> this.shotgunReload.play(2, 1.0f, 1.0f);
+                    case PUMP -> this.pump.play(2, 1.0f, 1.0f);
                     case MELEE -> this.melee.play(1, 1.0f, 0.5f);
                     case GATLING -> this.gatling.play(0, 0.3f, 2.0f);
                 }
@@ -56,6 +62,7 @@ public class HandleRenderEventsSystem implements EcsSystem<HandleRenderEventsSys
         this.melee.close();
         this.gatling.close();
         this.click.close();
+        this.pump.close();
     }
 
     public static record Resources(RenderEvents events) {}
