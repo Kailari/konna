@@ -6,6 +6,7 @@ import java.util.Random;
 
 import fi.jakojaannos.roguelite.engine.utilities.math.CoordinateHelper;
 import fi.jakojaannos.roguelite.game.data.archetypes.ProjectileArchetype;
+import fi.jakojaannos.roguelite.game.data.events.render.GunshotEvent;
 
 public class ShotgunFiringModule implements WeaponModule<ShotgunFiringModule.State, ShotgunFiringModule.Attributes> {
     @Override
@@ -89,6 +90,7 @@ public class ShotgunFiringModule implements WeaponModule<ShotgunFiringModule.Sta
                                                         attributes.projectilePushForce,
                                                         attributes.damage);
         }
+        info.events().fire(new GunshotEvent(GunshotEvent.Variant.SHOTGUN));
     }
 
     public static record Attributes(
