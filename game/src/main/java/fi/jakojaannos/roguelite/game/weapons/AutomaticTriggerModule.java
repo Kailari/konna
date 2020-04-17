@@ -22,7 +22,6 @@ public class AutomaticTriggerModule implements WeaponModule<AutomaticTriggerModu
             final ActionInfo info
     ) {
         state.triggerDown = true;
-        event.tryShoot();
     }
 
     public void onTriggerRelease(
@@ -65,6 +64,5 @@ public class AutomaticTriggerModule implements WeaponModule<AutomaticTriggerModu
 
     public static class State {
         public boolean triggerDown;
-
     }
 }
