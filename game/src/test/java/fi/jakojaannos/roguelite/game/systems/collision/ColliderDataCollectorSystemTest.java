@@ -1,60 +1,50 @@
 package fi.jakojaannos.roguelite.game.systems.collision;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.stream.Stream;
-
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
 import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.resources.collision.Colliders;
 
+import static fi.jakojaannos.roguelite.engine.utilities.assertions.world.GameExpect.whenGame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ColliderDataCollectorSystemTest {
-    private World world;
-    private Entity entityA;
-    private Entity entityB;
-    private ColliderDataCollectorSystem system;
+    private EntityHandle enemyEntity;
+    private EntityHandle obstacleEntity;
+    private Colliders colliders;
 
-    @BeforeEach
-    void beforeEach() {
-        world = World.createNew();
-        world.registerResource(new Colliders());
-        final EntityManager entityManager = world.getEntityManager();
+    void beforeEach(final World world) {
+        colliders = new Colliders();
+        world.registerResource(colliders);
 
-        entityA = entityManager.createEntity();
-        entityManager.addComponentTo(entityA, new Transform());
-        entityManager.addComponentTo(entityA, new Collider(CollisionLayer.ENEMY));
+        enemyEntity = world.createEntity(new Transform(),
+                                         new Collider(CollisionLayer.ENEMY));
 
-        entityB = entityManager.createEntity();
-        entityManager.addComponentTo(entityB, new Transform());
-        entityManager.addComponentTo(entityB, new Collider(CollisionLayer.OBSTACLE));
+        obstacleEntity = world.createEntity(new Transform(),
+                                            new Collider(CollisionLayer.OBSTACLE));
 
-        system = new ColliderDataCollectorSystem();
         for (CollisionLayer layer : CollisionLayer.values()) {
-            Entity other = entityManager.createEntity();
-            entityManager.addComponentTo(other, new Transform());
-            entityManager.addComponentTo(other, new Collider(layer));
+            world.createEntity(new Transform(),
+                               new Collider(layer));
         }
-
-        entityManager.applyModifications();
     }
 
     @Test
     void entityWithColliderIsAddedToRelevantLists() {
-        system.tick(Stream.of(entityA, entityB), world);
-
-        Colliders colliders = world.fetchResource(Colliders.class);
-        assertTrue(colliders.overlapsWithLayer.get(CollisionLayer.PLAYER_PROJECTILE)
-                                              .stream()
-                                              .anyMatch(e -> e.entity().getId() == entityA.getId()));
-        assertTrue(colliders.solidForLayer.get(CollisionLayer.PLAYER)
-                                          .stream()
-                                          .anyMatch(e -> e.entity().getId() == entityB.getId()));
+        whenGame().withSystems(new ColliderDataCollectorSystem())
+                  .withState(this::beforeEach)
+                  .runsSingleTick()
+                  .expect(state -> {
+                      assertTrue(colliders.overlapsWithLayer.get(CollisionLayer.PLAYER_PROJECTILE)
+                                                            .stream()
+                                                            .anyMatch(e -> e.entity().getId() == enemyEntity.getId()));
+                      assertTrue(colliders.solidForLayer.get(CollisionLayer.PLAYER)
+                                                        .stream()
+                                                        .anyMatch(e -> e.entity().getId() == obstacleEntity.getId()));
+                  });
     }
 }

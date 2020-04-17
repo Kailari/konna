@@ -1,19 +1,12 @@
 package fi.jakojaannos.roguelite.game.systems;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.joml.Vector2d;
 import org.junit.jupiter.api.Test;
-
-import java.time.Duration;
-import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
 import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
-import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.TileMapLayer;
@@ -21,273 +14,205 @@ import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.game.data.resources.collision.Colliders;
 import fi.jakojaannos.roguelite.game.data.resources.collision.Collisions;
 import fi.jakojaannos.roguelite.game.systems.collision.ColliderDataCollectorSystem;
+import fi.jakojaannos.roguelite.game.systems.collision.TileColliderCollectorSystem;
 import fi.jakojaannos.roguelite.game.systems.physics.ApplyVelocitySystem;
 
+import static fi.jakojaannos.roguelite.engine.utilities.assertions.junitextension.Assertions.assertEqualsExt;
+import static fi.jakojaannos.roguelite.engine.utilities.assertions.world.GameExpect.whenGame;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ApplyVelocitySystemTest {
-    private ColliderDataCollectorSystem dataCollectorSystem;
-    private ApplyVelocitySystem system;
-    private World world;
-    private EntityManager entityManager;
-    private Entity entity;
     private Velocity velocity;
     private Transform transform;
 
-    @BeforeEach
-    void beforeEach() {
-        world = World.createNew();
-        entityManager = world.getEntityManager();
-
+    void stateWithCollider(final World world) {
         world.registerResource(new Collisions());
         world.registerResource(new Colliders());
-        world.registerResource(TimeManager.class, new SimpleTimeManager(20));
 
-        entity = entityManager.createEntity();
-        entityManager.addComponentTo(entity, velocity = new Velocity());
-        entityManager.addComponentTo(entity, transform = new Transform(0.0, 0.0));
-        Collider collider;
-        entityManager.addComponentTo(entity, collider = new Collider(CollisionLayer.COLLIDE_ALL));
-        collider.height = collider.width = 1;
+        velocity = new Velocity();
+        transform = new Transform(0.0, 0.0);
+        world.createEntity(velocity,
+                           transform,
+                           new Collider(CollisionLayer.COLLIDE_ALL, 1.0));
+    }
 
-        system = new ApplyVelocitySystem();
-        dataCollectorSystem = new ColliderDataCollectorSystem();
+    void stateWithoutCollider(final World world) {
+        world.registerResource(new Collisions());
+        world.registerResource(new Colliders());
+
+        velocity = new Velocity();
+        transform = new Transform(0.0, 0.0);
+        world.createEntity(velocity,
+                           transform);
     }
 
     @Test
     void entityWithColliderDoesNotMoveWhenVelocityIsZero() {
-        velocity.set(0.0);
-
-        world.getEntityManager().applyModifications();
-        dataCollectorSystem.tick(Stream.of(entity), world);
-        system.tick(Stream.of(entity), world);
-
-        assertEquals(0.0, transform.position.x);
-        assertEquals(0.0, transform.position.y);
+        whenGame().withSystems(new ColliderDataCollectorSystem(),
+                               new TileColliderCollectorSystem(),
+                               new ApplyVelocitySystem())
+                  .withState(this::stateWithCollider)
+                  .withState(world -> velocity.set(0.0))
+                  .runsSingleTick()
+                  .expect(state -> assertEqualsExt(new Vector2d(0.0, 0.0), transform.position, 0.0));
     }
 
     @Test
     void entityWithColliderMovesWhenVelocityIsNonZero() {
-        velocity.set(10.0);
-
-        world.getEntityManager().applyModifications();
-        for (int i = 0; i < 50; ++i) {
-            dataCollectorSystem.tick(Stream.of(entity), world);
-            system.tick(Stream.of(entity), world);
-        }
-
-        assertEquals(10.0, transform.position.x, 0.02);
-        assertEquals(10.0, transform.position.y, 0.02);
+        whenGame().withSystems(new ColliderDataCollectorSystem(),
+                               new TileColliderCollectorSystem(),
+                               new ApplyVelocitySystem())
+                  .withState(this::stateWithCollider)
+                  .withState(world -> velocity.set(10.0))
+                  .runsForTicks(50)
+                  .expect(state -> assertEqualsExt(new Vector2d(10.0, 10.0), transform.position, 0.02));
     }
 
     @Test
     void entityWithoutColliderDoesNotMoveWhenVelocityIsZero() {
-        World world = World.createNew();
-        world.registerResource(new Collisions());
-        world.registerResource(new Colliders());
-        EntityManager entityManager = world.getEntityManager();
-
-        world.registerResource(TimeManager.class, new SimpleTimeManager(20));
-
-        Entity entity = entityManager.createEntity();
-        entityManager.addComponentTo(entity, velocity = new Velocity());
-        entityManager.addComponentTo(entity, transform = new Transform(0.0, 0.0));
-        velocity.set(0.0);
-
-        world.getEntityManager().applyModifications();
-        system.tick(Stream.of(entity), world);
-
-        assertEquals(0.0, transform.position.x);
-        assertEquals(0.0, transform.position.y);
+        whenGame().withSystems(new ColliderDataCollectorSystem(),
+                               new TileColliderCollectorSystem(),
+                               new ApplyVelocitySystem())
+                  .withState(this::stateWithoutCollider)
+                  .withState(world -> velocity.set(0.0))
+                  .runsSingleTick()
+                  .expect(state -> assertEqualsExt(new Vector2d(0.0, 0.0), transform.position, 0.0));
     }
 
     @Test
     void entityWithoutColliderMovesWhenVelocityIsNonZero() {
-        final var world = World.createNew();
-        world.registerResource(new Collisions());
-        world.registerResource(new Colliders());
-        EntityManager entityManager = world.getEntityManager();
-
-        world.registerResource(TimeManager.class, new SimpleTimeManager(20));
-
-        Entity entity = entityManager.createEntity();
-        entityManager.addComponentTo(entity, velocity = new Velocity());
-        entityManager.addComponentTo(entity, transform = new Transform(0.0, 0.0));
-        velocity.set(10.0);
-
-        for (int i = 0; i < 50; ++i) {
-            world.getEntityManager().applyModifications();
-            system.tick(Stream.of(entity), world);
-        }
-
-        assertEquals(10.0, transform.position.x, 0.01);
-        assertEquals(10.0, transform.position.y, 0.01);
+        whenGame().withSystems(new ColliderDataCollectorSystem(),
+                               new TileColliderCollectorSystem(),
+                               new ApplyVelocitySystem())
+                  .withState(this::stateWithoutCollider)
+                  .withState(world -> velocity.set(10.0))
+                  .runsForTicks(50)
+                  .expect(state -> assertEqualsExt(new Vector2d(10.0, 10.0), transform.position, 0.02));
     }
 
     @Test
     void entityWithNonSolidColliderDoesNotBlockMovement() {
-        Entity other = entityManager.createEntity();
-        Transform otherTransform = new Transform(1.0, 0.0);
-        Collider otherCollider = new Collider(CollisionLayer.NONE);
-        entityManager.addComponentTo(other, otherCollider);
-        entityManager.addComponentTo(other, otherTransform);
-
-        velocity.set(10.0, 0.75);
-
-        world.getEntityManager().applyModifications();
-        for (int i = 0; i < 50; ++i) {
-            dataCollectorSystem.tick(Stream.of(entity, other), world);
-            system.tick(Stream.of(entity), world);
-        }
-
-        assertEquals(10.0, transform.position.x, 0.01);
-        assertEquals(0.75, transform.position.y, 0.01);
+        whenGame().withSystems(new ColliderDataCollectorSystem(),
+                               new TileColliderCollectorSystem(),
+                               new ApplyVelocitySystem())
+                  .withState(this::stateWithCollider)
+                  .withState(world -> {
+                      world.createEntity(new Transform(1.0, 0.0),
+                                         new Collider(CollisionLayer.NONE));
+                      velocity.set(10.0, 0.75);
+                  })
+                  .runsForTicks(50)
+                  .expect(state -> assertEqualsExt(new Vector2d(10.0, 0.75), transform.position, 0.05));
     }
 
     @Test
     void entityWithSolidColliderBlocksMovement() {
-        Entity other = entityManager.createEntity();
-        Transform otherTransform = new Transform(1.0, 0.0);
-        Collider otherCollider = new Collider(CollisionLayer.COLLIDE_ALL);
-        entityManager.addComponentTo(other, otherCollider);
-        entityManager.addComponentTo(other, otherTransform);
-
-        velocity.set(1.0, 0.1);
-
-        world.getEntityManager().applyModifications();
-        for (int i = 0; i < 50; ++i) {
-            dataCollectorSystem.tick(Stream.of(entity, other), world);
-            system.tick(Stream.of(entity), world);
-        }
-
-        assertEquals(0.0, transform.position.x);
+        whenGame().withSystems(new ColliderDataCollectorSystem(),
+                               new TileColliderCollectorSystem(),
+                               new ApplyVelocitySystem())
+                  .withState(this::stateWithCollider)
+                  .withState(world -> {
+                      world.createEntity(new Transform(1.0, 0.0),
+                                         new Collider(CollisionLayer.COLLIDE_ALL));
+                      velocity.set(1.0, 0.0);
+                  })
+                  .runsForTicks(50)
+                  .expect(state -> assertEquals(0.0, transform.position.x, 0.05));
     }
 
     @Test
     void entitySlidesHorizontallyWhenCollidingAgainstSolidEntityFromBelow() {
-        Entity other = entityManager.createEntity();
-        Transform otherTransform = new Transform(0.0, 1.0);
-        Collider otherCollider = new Collider(CollisionLayer.COLLIDE_ALL);
-        entityManager.addComponentTo(other, otherCollider);
-        entityManager.addComponentTo(other, otherTransform);
-
-        velocity.set(0.1, 1.0);
-
-        world.getEntityManager().applyModifications();
-        for (int i = 0; i < 50; ++i) {
-            dataCollectorSystem.tick(Stream.of(entity, other), world);
-            system.tick(Stream.of(entity), world);
-        }
-
-        assertNotEquals(0.0, transform.position.x);
-        assertEquals(0.0, transform.position.y);
+        whenGame().withSystems(new ColliderDataCollectorSystem(),
+                               new TileColliderCollectorSystem(),
+                               new ApplyVelocitySystem())
+                  .withState(this::stateWithCollider)
+                  .withState(world -> {
+                      world.createEntity(new Transform(0.0, 1.0),
+                                         new Collider(CollisionLayer.COLLIDE_ALL));
+                      velocity.set(0.25, 1.0);
+                  })
+                  .runsForTicks(50)
+                  .expect(state -> assertAll(() -> assertNotEquals(0.0, transform.position.x, 0.05),
+                                             () -> assertEquals(0.0, transform.position.y, 0.05)));
     }
 
     @Test
     void entitySlidesVerticallyWhenCollidingAgainstSolidEntityFromSide() {
-        Entity other = entityManager.createEntity();
-        Transform otherTransform = new Transform(1.0, 0.0);
-        Collider otherCollider = new Collider(CollisionLayer.COLLIDE_ALL);
-        entityManager.addComponentTo(other, otherCollider);
-        entityManager.addComponentTo(other, otherTransform);
-
-        velocity.set(1.0, 0.25);
-        transform.position.x = -0.05;
-
-        world.getEntityManager().applyModifications();
-        for (int i = 0; i < 50; ++i) {
-            dataCollectorSystem.tick(Stream.of(entity, other), world);
-            system.tick(Stream.of(entity), world);
-        }
-
-        assertEquals(0.0, transform.position.x, 0.01);
-        assertNotEquals(0.0, transform.position.y, 0.01);
+        whenGame().withSystems(new ColliderDataCollectorSystem(),
+                               new TileColliderCollectorSystem(),
+                               new ApplyVelocitySystem())
+                  .withState(this::stateWithCollider)
+                  .withState(world -> {
+                      world.createEntity(new Transform(1.0, 0.0),
+                                         new Collider(CollisionLayer.COLLIDE_ALL));
+                      velocity.set(1.0, 0.25);
+                  })
+                  .runsForTicks(50)
+                  .expect(state -> assertAll(() -> assertEquals(0.0, transform.position.x, 0.05),
+                                             () -> assertNotEquals(0.0, transform.position.y, 0.05)));
     }
 
     @Test
     void tileLayerDoesNotBlockMovementIfCollisionIsDisabledForLayer() {
-        Entity other = entityManager.createEntity();
-        TileType empty = new TileType(0, false);
-        TileType block = new TileType(1, true);
-        TileMap<TileType> tileMap = new TileMap<>(empty);
-        tileMap.setTile(1, 0, block);
-        TileMapLayer layer = new TileMapLayer(tileMap, false);
-        entityManager.addComponentTo(other, layer);
+        whenGame().withSystems(new ColliderDataCollectorSystem(),
+                               new TileColliderCollectorSystem(),
+                               new ApplyVelocitySystem())
+                  .withState(this::stateWithCollider)
+                  .withState(world -> {
+                      final var empty = new TileType(0, false);
+                      final var block = new TileType(1, true);
+                      final var tileMap = new TileMap<>(empty);
+                      tileMap.setTile(1, 0, block);
 
-        velocity.set(1.0, 0.1);
-        transform.position.x = 0;
+                      world.createEntity(new TileMapLayer(tileMap, false));
 
-        world.getEntityManager().applyModifications();
-        for (int i = 0; i < 50; ++i) {
-            dataCollectorSystem.tick(Stream.of(entity), world);
-            system.tick(Stream.of(entity), world);
-        }
-
-        assertEquals(1.0, transform.position.x, 0.01);
-        assertEquals(0.1, transform.position.y, 0.01);
+                      velocity.set(1.0, 0.1);
+                      transform.position.x = 0;
+                  })
+                  .runsForTicks(50)
+                  .expect(state -> assertEqualsExt(new Vector2d(1.0, 0.1), transform.position, 0.05));
     }
 
     @Test
     void entitySlidesVerticallyWhenCollidingAgainstTileFromSide() {
-        Entity other = entityManager.createEntity();
-        TileType empty = new TileType(0, false);
-        TileType block = new TileType(1, true);
-        TileMap<TileType> tileMap = new TileMap<>(empty);
-        tileMap.setTile(1, 0, block);
-        entityManager.addComponentTo(other, new TileMapLayer(tileMap, true));
+        whenGame().withSystems(new ColliderDataCollectorSystem(),
+                               new TileColliderCollectorSystem(),
+                               new ApplyVelocitySystem())
+                  .withState(this::stateWithCollider)
+                  .withState(world -> {
+                      final var empty = new TileType(0, false);
+                      final var block = new TileType(1, true);
+                      final var tileMap = new TileMap<>(empty);
+                      tileMap.setTile(1, 0, block);
 
-        velocity.set(1.0, 0.1);
+                      world.createEntity(new TileMapLayer(tileMap, true));
 
-        world.getEntityManager().applyModifications();
-        for (int i = 0; i < 50; ++i) {
-            dataCollectorSystem.tick(Stream.of(entity), world);
-            system.tick(Stream.of(entity), world);
-        }
-
-        assertEquals(0.0, transform.position.x);
-        assertNotEquals(0.0, transform.position.y);
+                      velocity.set(1.0, 0.1);
+                      transform.position.x = 0;
+                  })
+                  .runsForTicks(50)
+                  .expect(state -> assertAll(() -> assertEquals(0.0, transform.position.x, 0.05),
+                                             () -> assertNotEquals(0.0, transform.position.y, 0.05)));
     }
 
     @Test
     void nonSolidTilesDoNotBlockMovement() {
-        Entity other = entityManager.createEntity();
-        TileType empty = new TileType(0, false);
-        TileType nonSolid = new TileType(1, false);
-        TileMap<TileType> tileMap = new TileMap<>(empty);
-        tileMap.setTile(1, 0, nonSolid);
-        entityManager.addComponentTo(other, new TileMapLayer(tileMap, false));
+        whenGame().withSystems(new ColliderDataCollectorSystem(),
+                               new TileColliderCollectorSystem(),
+                               new ApplyVelocitySystem())
+                  .withState(this::stateWithCollider)
+                  .withState(world -> {
+                      final var empty = new TileType(0, false);
+                      final var nonSolid = new TileType(1, false);
+                      final var tileMap = new TileMap<>(empty);
+                      tileMap.setTile(1, 0, nonSolid);
 
-        velocity.set(1.0, 0.1);
+                      world.createEntity(new TileMapLayer(tileMap, true));
 
-        world.getEntityManager().applyModifications();
-        for (int i = 0; i < 50; ++i) {
-            dataCollectorSystem.tick(Stream.of(entity), world);
-            system.tick(Stream.of(entity), world);
-        }
-
-        assertEquals(1.0, transform.position.x, 0.01);
-        assertEquals(0.1, transform.position.y, 0.01);
-    }
-
-    @Test
-    void collidingWithDiagonalSurfaceDoesNotBlowUp() {
-        Entity other = entityManager.createEntity();
-        Transform otherTransform = new Transform(1.0, 0.5);
-        otherTransform.rotation = 45.0;
-        Collider otherCollider = new Collider(CollisionLayer.COLLIDE_ALL);
-        entityManager.addComponentTo(other, otherCollider);
-        entityManager.addComponentTo(other, otherTransform);
-
-        velocity.set(1.0, 0);
-        transform.position.x = -1.5;
-        transform.position.y = -1;
-
-        world.getEntityManager().applyModifications();
-        assertTimeout(Duration.ofMillis(500), () -> {
-            for (int i = 0; i < 150; ++i) {
-                dataCollectorSystem.tick(Stream.of(entity, other), world);
-                system.tick(Stream.of(entity), world);
-            }
-        });
+                      velocity.set(1.0, 0.1);
+                      transform.position.x = 0;
+                  })
+                  .runsForTicks(50)
+                  .expect(state -> assertEqualsExt(new Vector2d(1.0, 0.1), transform.position, 0.05));
     }
 }

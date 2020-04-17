@@ -2,14 +2,11 @@ package fi.jakojaannos.roguelite.game.systems.collision;
 
 import java.util.stream.Stream;
 
-import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
+import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
+import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.RecentCollisionTag;
 import fi.jakojaannos.roguelite.game.data.resources.collision.Collisions;
-import fi.jakojaannos.roguelite.game.systems.SystemGroups;
 import fi.jakojaannos.roguelite.game.systems.physics.ApplyVelocitySystem;
 
 /**
@@ -18,20 +15,18 @@ import fi.jakojaannos.roguelite.game.systems.physics.ApplyVelocitySystem;
  *
  * @see ApplyVelocitySystem
  */
-public class CollisionEventCleanupSystem implements ECSSystem {
-    @Override
-    public void declareRequirements(final RequirementsBuilder requirements) {
-        requirements.addToGroup(SystemGroups.CLEANUP)
-                    .requireResource(Collisions.class)
-                    .withComponent(RecentCollisionTag.class);
-    }
-
+public class CollisionEventCleanupSystem implements EcsSystem<CollisionEventCleanupSystem.Resources, CollisionEventCleanupSystem.EntityData, EcsSystem.NoEvents> {
     @Override
     public void tick(
-            final Stream<Entity> entities,
-            final World world
+            final Resources resources,
+            final Stream<EntityDataHandle<EntityData>> entities,
+            final NoEvents noEvents
     ) {
-        world.fetchResource(Collisions.class).clear();
-        entities.forEach(entity -> world.getEntityManager().removeComponentFrom(entity, RecentCollisionTag.class));
+        resources.collisions.clear();
+        entities.forEach(entity -> entity.removeComponent(RecentCollisionTag.class));
     }
+
+    public static record Resources(Collisions collisions) {}
+
+    public static record EntityData(RecentCollisionTag tag) {}
 }

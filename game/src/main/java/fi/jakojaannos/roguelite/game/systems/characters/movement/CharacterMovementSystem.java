@@ -3,9 +3,9 @@ package fi.jakojaannos.roguelite.game.systems.characters.movement;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
+import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
+import fi.jakojaannos.roguelite.engine.ecs.annotation.Without;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.InAir;
@@ -13,42 +13,44 @@ import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.game.data.components.character.MovementInput;
 import fi.jakojaannos.roguelite.game.data.components.character.WalkingMovementAbility;
 
-public class CharacterMovementSystem implements ECSSystem {
+public class CharacterMovementSystem implements EcsSystem<CharacterMovementSystem.Resources, CharacterMovementSystem.EntityData, EcsSystem.NoEvents> {
     private static final float INPUT_EPSILON = 0.001f;
 
     @Override
-    public void declareRequirements(final RequirementsBuilder requirements) {
-        requirements.withComponent(Transform.class)
-                    .withComponent(Velocity.class)
-                    .withComponent(MovementInput.class)
-                    .withComponent(WalkingMovementAbility.class)
-                    .withoutComponent(InAir.class);
-    }
-
-    @Override
     public void tick(
-            final Stream<Entity> entities,
-            final World world
+            final Resources resources,
+            final Stream<EntityDataHandle<EntityData>> entities,
+            final NoEvents noEvents
     ) {
-        final var entityManager = world.getEntityManager();
-        final var delta = world.fetchResource(TimeManager.class).getTimeStepInSeconds();
+        final var delta = resources.timeManager.getTimeStepInSeconds();
 
         entities.forEach(entity -> {
-            final var input = entityManager.getComponentOf(entity, MovementInput.class).orElseThrow();
-            final var stats = entityManager.getComponentOf(entity, WalkingMovementAbility.class).orElseThrow();
-            final var velocity = entityManager.getComponentOf(entity, Velocity.class).orElseThrow();
+            final var input = entity.getData().input;
+            final var ability = entity.getData().ability;
+            final var velocity = entity.getData().velocity;
 
             if (input.move.lengthSquared() > INPUT_EPSILON * INPUT_EPSILON) {
-                final var maxSpeed = (velocity.lengthSquared() >= stats.maxSpeed * stats.maxSpeed)
+                final var movingFasterThanMaxSpeed = velocity.lengthSquared() >= ability.maxSpeed * ability.maxSpeed;
+                final var actualMaxSpeed = movingFasterThanMaxSpeed
                         ? velocity.length()
-                        : stats.maxSpeed;
+                        : ability.maxSpeed;
 
-                velocity.add(input.move.normalize(stats.acceleration * delta));
+                velocity.add(input.move.normalize(ability.acceleration * delta));
                 if (velocity.lengthSquared() != 0) {
-                    final var newSpeed = Math.min(velocity.length(), maxSpeed);
+                    final var newSpeed = Math.min(velocity.length(), actualMaxSpeed);
                     velocity.normalize(newSpeed);
                 }
             }
         });
     }
+
+    public static record Resources(TimeManager timeManager) {}
+
+    public static record EntityData(
+            Transform transform,
+            Velocity velocity,
+            MovementInput input,
+            WalkingMovementAbility ability,
+            @Without InAir noInAir
+    ) {}
 }

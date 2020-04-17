@@ -1,64 +1,54 @@
 package fi.jakojaannos.roguelite.game.systems.collision;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
-import java.util.stream.Stream;
-
+import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
 import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.RecentCollisionTag;
 import fi.jakojaannos.roguelite.game.data.resources.collision.Collisions;
 
+import static fi.jakojaannos.roguelite.engine.utilities.assertions.world.GameExpect.expectEntity;
+import static fi.jakojaannos.roguelite.engine.utilities.assertions.world.GameExpect.whenGame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
 
 class CollisionEventCleanupSystemTest {
-    private CollisionEventCleanupSystem system;
     private Collisions collisions;
-    private World world;
-    private EntityManager entityManager;
-    private Entity entity;
+    private EntityHandle entity;
 
-    @BeforeEach
-    void beforeEach() {
-        system = new CollisionEventCleanupSystem();
-        world = mock(World.class);
-        entity = mock(Entity.class);
-
-        Collider collider = new Collider(CollisionLayer.COLLIDE_ALL);
+    void beforeEach(final World world) {
         collisions = new Collisions();
+        world.registerResource(collisions);
 
-        entityManager = mock(EntityManager.class);
-        when(world.getEntityManager()).thenReturn(entityManager);
-        when(world.fetchResource(eq(Collisions.class))).thenReturn(collisions);
-        when(entityManager.getComponentOf(eq(entity), eq(Collider.class))).thenReturn(Optional.of(collider));
+        entity = world.createEntity(new Collider(CollisionLayer.COLLIDE_ALL),
+                                    new RecentCollisionTag());
+
+        final var other = world.createEntity();
+        collisions.fireCollisionEvent(entity,
+                                      new CollisionEvent(Collision.entity(Collision.Mode.COLLISION,
+                                                                          other)));
+        collisions.fireCollisionEvent(entity,
+                                      new CollisionEvent(Collision.entity(Collision.Mode.COLLISION,
+                                                                          other)));
+        collisions.fireCollisionEvent(entity,
+                                      new CollisionEvent(Collision.entity(Collision.Mode.COLLISION,
+                                                                          other)));
     }
 
     @Test
     void collisionEventsAreCleanedUp() {
-        Entity other = mock(Entity.class);
-        collisions.fireCollisionEvent(entity, new CollisionEvent(Collision.entity(Collision.Mode.COLLISION, other)));
-        collisions.fireCollisionEvent(entity, new CollisionEvent(Collision.entity(Collision.Mode.COLLISION, other)));
-        collisions.fireCollisionEvent(entity, new CollisionEvent(Collision.entity(Collision.Mode.COLLISION, other)));
-
-        system.tick(Stream.of(entity), world);
-        assertTrue(collisions.getEventsFor(entity).isEmpty());
+        whenGame().withSystems(new CollisionEventCleanupSystem())
+                  .withState(this::beforeEach)
+                  .runsSingleTick()
+                  .expect(state -> assertTrue(collisions.getEventsFor(entity).isEmpty()));
     }
 
     @Test
     void recentCollisionTagIsRemoved() {
-        Entity other = mock(Entity.class);
-        collisions.fireCollisionEvent(entity, new CollisionEvent(Collision.entity(Collision.Mode.COLLISION, other)));
-        collisions.fireCollisionEvent(entity, new CollisionEvent(Collision.entity(Collision.Mode.COLLISION, other)));
-        collisions.fireCollisionEvent(entity, new CollisionEvent(Collision.entity(Collision.Mode.COLLISION, other)));
-
-        system.tick(Stream.of(entity), world);
-        verify(entityManager).removeComponentFrom(eq(entity), eq(RecentCollisionTag.class));
+        whenGame().withSystems(new CollisionEventCleanupSystem())
+                  .withState(this::beforeEach)
+                  .runsSingleTick()
+                  .expect(state -> expectEntity(entity).toNotHaveComponent(RecentCollisionTag.class));
     }
 }
