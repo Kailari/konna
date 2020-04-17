@@ -1,49 +1,43 @@
 package fi.jakojaannos.roguelite.game.systems.collision;
 
-import java.util.ArrayList;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
+import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
+import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.resources.collision.Colliders;
-import fi.jakojaannos.roguelite.game.systems.SystemGroups;
 
-public class ColliderDataCollectorSystem implements ECSSystem {
-    @Override
-    public void declareRequirements(final RequirementsBuilder requirements) {
-        requirements.addToGroup(SystemGroups.EARLY_TICK)
-                    .withComponent(Collider.class)
-                    .withComponent(Transform.class)
-                    .requireResource(Colliders.class);
-    }
-
+public class ColliderDataCollectorSystem implements EcsSystem<ColliderDataCollectorSystem.Resources, ColliderDataCollectorSystem.EntityData, EcsSystem.NoEvents> {
     @Override
     public void tick(
-            final Stream<Entity> entities,
-            final World world
+            final Resources resources,
+            final Stream<EntityDataHandle<EntityData>> entities,
+            final NoEvents noEvents
     ) {
-        final var colliders = world.fetchResource(Colliders.class);
+        final var colliders = resources.colliders;
 
         colliders.solidForLayer.clear();
         colliders.overlapsWithLayer.clear();
         entities.forEach(entity -> {
-            final var collider = world.getEntityManager().getComponentOf(entity, Collider.class).orElseThrow();
-            final var transform = world.getEntityManager().getComponentOf(entity, Transform.class).orElseThrow();
-            final var colliderEntity = new Colliders.ColliderEntity(entity.asHandle(), transform, collider);
+            final var collider = entity.getData().collider;
+            final var transform = entity.getData().transform;
+            final var colliderEntity = new Colliders.ColliderEntity(entity.getHandle(), transform, collider);
             for (final var layer : CollisionLayer.values()) {
                 if (collider.layer.isSolidTo(layer)) {
-                    colliders.solidForLayer.computeIfAbsent(layer, key -> new ArrayList<>())
+                    colliders.solidForLayer.computeIfAbsent(layer, key -> new ConcurrentLinkedQueue<>())
                                            .add(colliderEntity);
                 } else if (collider.layer.canOverlapWith(layer)) {
-                    colliders.overlapsWithLayer.computeIfAbsent(layer, key -> new ArrayList<>())
+                    colliders.overlapsWithLayer.computeIfAbsent(layer, key -> new ConcurrentLinkedQueue<>())
                                                .add(colliderEntity);
                 }
             }
         });
     }
+
+    public static record EntityData(Collider collider, Transform transform) {}
+
+    public static record Resources(Colliders colliders) {}
 }
