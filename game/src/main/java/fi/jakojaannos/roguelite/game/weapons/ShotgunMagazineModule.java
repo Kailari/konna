@@ -1,6 +1,7 @@
 package fi.jakojaannos.roguelite.game.weapons;
 
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.roguelite.game.data.events.render.GunshotEvent;
 
 public class ShotgunMagazineModule implements WeaponModule<ShotgunMagazineModule.State, ShotgunMagazineModule.Attributes> {
 
@@ -17,6 +18,19 @@ public class ShotgunMagazineModule implements WeaponModule<ShotgunMagazineModule
         hooks.registerWeaponFire(this, this::checkIfCanFire, Phase.CHECK);
         hooks.registerWeaponFire(this, this::afterFiring, Phase.POST);
         hooks.registerWeaponUnequip(this, this::unequip, Phase.TRIGGER);
+
+        hooks.registerTriggerPull(this, this::afterTriggerPull, Phase.POST);
+    }
+
+    private void afterTriggerPull(
+            final State state,
+            final Attributes attributes,
+            final TriggerPullEvent triggerPullEvent,
+            final ActionInfo info
+    ) {
+        if (state.ammo <= 0) {
+            info.events().fire(new GunshotEvent(GunshotEvent.Variant.CLICK));
+        }
     }
 
     public void checkIfCanFire(
