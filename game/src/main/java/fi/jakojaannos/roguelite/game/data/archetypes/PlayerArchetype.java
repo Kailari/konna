@@ -11,7 +11,9 @@ import fi.jakojaannos.roguelite.game.data.components.Physics;
 import fi.jakojaannos.roguelite.game.data.components.SpriteInfo;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.game.data.components.character.*;
-import fi.jakojaannos.roguelite.game.weapons.*;
+import fi.jakojaannos.roguelite.game.weapons.InventoryWeapon;
+import fi.jakojaannos.roguelite.game.weapons.WeaponInventory;
+import fi.jakojaannos.roguelite.game.weapons.Weapons;
 
 public class PlayerArchetype {
     public static EntityHandle create(
@@ -36,40 +38,9 @@ public class PlayerArchetype {
 
         final var weaponInventory = new WeaponInventory(10);
         player.addComponent(weaponInventory);
-        /*final var assaultRifleStats = WeaponStats.builder()
-                                                 .timeBetweenShots(timeManager.convertToTicks(1.0 / 2.5))
-                                                 .projectileSpeed(80.0)
-                                                 .spread(2.5)
-                                                 .projectileSpeedNoise(4.0)
-                                                 .projectileLifetimeInTicks(-1)
-                                                 .projectilePushForce(20.0)
-                                                 .magazineCapacity(10)
-                                                 .reloadTimeInTicks(timeManager.convertToTicks(2.0))
-                                                 .build();
-        final var shotgunStats = WeaponStats.builder()
-                                            .timeBetweenShots(timeManager.convertToTicks(1.0 / 1.5))
-                                            .projectileSpeed(50.0)
-                                            .spread(10.0)
-                                            .projectileSpeedNoise(1.0)
-                                            .projectileLifetimeInTicks(10)
-                                            .projectilePushForce(7.5)
-                                            .magazineCapacity(6)
-                                            .reloadTimeInTicks(timeManager.convertToTicks(0.8))
-                                            .pelletCount(12)
-                                            .damage(0.35)
-                                            .build();
-        final var grenadeStats = WeaponStats.builder()
-                                            .timeBetweenShots(timeManager.convertToTicks(3.0))
-                                            .projectileSpeed(12.0)
-                                            .spread(0.0)
-                                            .projectileSpeedNoise(0.0)
-                                            .projectileLifetimeInTicks(-1)
-                                            .projectilePushForce(0.0)
-                                            .magazineCapacity(100)
-                                            .reloadTimeInTicks(timeManager.convertToTicks(0.8))
-                                            .build();*/
 
         weaponInventory.equip(0, new InventoryWeapon(Weapons.PLAYER_AR));
+        weaponInventory.equip(1, new InventoryWeapon(Weapons.PLAYER_SHOTGUN));
 
         player.addComponent(new SpriteInfo("sprites/player"));
         player.addComponent(new Health(10));
