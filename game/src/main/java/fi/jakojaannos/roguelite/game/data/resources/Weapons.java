@@ -23,7 +23,7 @@ public class Weapons {
                                                                              -1,
                                                                              10.0,
                                                                              0.75,
-                                                                             GunshotEvent.Variant.SHOTGUN)),
+                                                                             GunshotEvent.Variant.RIFLE)),
             new ModularWeapon.Module<>(new ClipMagazineModule(),
                                        new ClipMagazineModule.Attributes(30, 60)));
     public static ModularWeapon PLAYER_SHOTGUN = new ModularWeapon(
