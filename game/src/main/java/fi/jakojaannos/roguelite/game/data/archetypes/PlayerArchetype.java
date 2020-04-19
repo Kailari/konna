@@ -27,10 +27,13 @@ public class PlayerArchetype {
         player.addComponent(Physics.builder().friction(42.0 * 2).build());
         player.addComponent(new MovementInput());
         player.addComponent(new WeaponInput());
-        player.addComponent(new AttackAbility(new DamageSource.Entity(player),
-                                              CollisionLayer.PLAYER_PROJECTILE,
-                                              0.25,
-                                              -0.5));
+        final var attackAbility = new AttackAbility(new DamageSource.Entity(player),
+                                                    CollisionLayer.PLAYER_PROJECTILE,
+                                                    0.25,
+                                                    -0.5);
+        attackAbility.equippedSlot = 1;
+        attackAbility.previousEquippedSlot = 1;
+        player.addComponent(attackAbility);
         player.addComponent(new Collider(CollisionLayer.PLAYER, 1.0, 1.0, 0.5, 0.5));
         player.addComponent(new PlayerTag());
         player.addComponent(new LookAtTargetTag());
@@ -39,8 +42,11 @@ public class PlayerArchetype {
         final var weaponInventory = new WeaponInventory(10);
         player.addComponent(weaponInventory);
 
-        weaponInventory.equip(0, new InventoryWeapon(Weapons.PLAYER_AR));
-        weaponInventory.equip(1, new InventoryWeapon(Weapons.PLAYER_SHOTGUN));
+        weaponInventory.equip(1, new InventoryWeapon(Weapons.PLAYER_AR));
+        weaponInventory.equip(2, new InventoryWeapon(Weapons.PLAYER_SHOTGUN));
+        weaponInventory.equip(3, new InventoryWeapon(Weapons.PLAYER_MINIGUN_OVERHEAT_1));
+        weaponInventory.equip(4, new InventoryWeapon(Weapons.PLAYER_MINIGUN_OVERHEAT_2));
+        weaponInventory.equip(5, new InventoryWeapon(Weapons.PLAYER_MINIGUN_OVERHEAT_3));
 
         player.addComponent(new SpriteInfo("sprites/player"));
         player.addComponent(new Health(10));

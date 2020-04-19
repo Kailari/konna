@@ -128,6 +128,9 @@ public final class GameplayGameModeRenderer {
                             .element("weapon-ammo",
                                      UIElementType.LABEL,
                                      GameplayGameModeRenderer::buildAmmoCounter)
+                            .element("weapon-heat",
+                                     UIElementType.LABEL,
+                                     GameplayGameModeRenderer::buildHeatCounter)
                             .build();
     }
 
@@ -151,6 +154,15 @@ public final class GameplayGameModeRenderer {
                                     .left(percentOf().ownWidth(-0.5))
                                     .text(GAME_OVER_HELP_TEXT)
                                     .fontSize(24));
+    }
+
+    private static void buildHeatCounter(final UILabelBuilder builder) {
+        builder.anchorX(absolute(0))
+               .right(absolute(10))
+               .bottom(absolute(45))
+               .fontSize(36)
+               .text("Heat")
+               .color(1.0, 1.0, 1.0);
     }
 
     private static void buildAmmoCounter(final UILabelBuilder builder) {

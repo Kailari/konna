@@ -25,6 +25,7 @@ public class UpdateHUDSystem implements EcsSystem<UpdateHUDSystem.Resources, Ecs
     private final UIElement timePlayedTimer;
     private final UIElement killsCounter;
     private final UIElement ammoCounter;
+    private final UIElement heatCounter;
 
     public UpdateHUDSystem(final UserInterface userInterface) {
         this.timePlayedTimer = userInterface.findElements(that -> that.hasName().equalTo("time-played-timer"))
@@ -34,6 +35,9 @@ public class UpdateHUDSystem implements EcsSystem<UpdateHUDSystem.Resources, Ecs
                                          .findFirst()
                                          .orElseThrow();
         this.ammoCounter = userInterface.findElements(that -> that.hasName().equalTo("weapon-ammo"))
+                                        .findFirst()
+                                        .orElseThrow();
+        this.heatCounter = userInterface.findElements(that -> that.hasName().equalTo("weapon-heat"))
                                         .findFirst()
                                         .orElseThrow();
     }
@@ -71,6 +75,14 @@ public class UpdateHUDSystem implements EcsSystem<UpdateHUDSystem.Resources, Ecs
                     final var maxAmmoString = maxAmmo == 666 ? "REL" : String.format("%03d", maxAmmo);
                     this.ammoCounter.setProperty(UIProperty.TEXT, String.format("%03d/%s", ammo, maxAmmoString));
                     this.ammoCounter.setProperty(UIProperty.COLOR, ammo == 0 ? COLOR_BAD : COLOR_GOOD);
+
+                    final double heat = query.heat;
+                    if (heat == -1) {
+                        this.heatCounter.setProperty(UIProperty.TEXT, "No heat");
+                    } else {
+                        final var heatString = query.jammed ? "JAMMED!" : String.format("%.2f", heat);
+                        this.heatCounter.setProperty(UIProperty.TEXT, heatString);
+                    }
                 });
 
         final var ticks = sessionStats.endTimeStamp - sessionStats.beginTimeStamp;
