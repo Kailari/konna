@@ -2,6 +2,10 @@ package fi.jakojaannos.roguelite.game.weapons;
 
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 
+/**
+ * Overheat module that increases weapon's overheat from every shot fired, and starts cooling down weapon once user
+ * releases trigger. Once overheat reaches its maximum value, the weapon jams for a while.
+ */
 public class OverheatModule implements WeaponModule<OverheatModule.State, OverheatModule.Attributes> {
     @Override
     public State getDefaultState(final Attributes attributes) {
@@ -15,8 +19,26 @@ public class OverheatModule implements WeaponModule<OverheatModule.State, Overhe
         hooks.registerWeaponFire(this, this::afterFire, Phase.POST);
         hooks.registerTriggerRelease(this, this::triggerRelease, Phase.TRIGGER);
         hooks.registerTriggerPull(this, this::triggerPull, Phase.TRIGGER);
-        //hooks.registerReload(this, this::checkIfCanReload, Phase.CHECK);
-        //hooks.registerReload(this, this::afterReload, Phase.POST);
+        hooks.registerWeaponEquip(this, this::equip, Phase.CHECK);
+        hooks.registerWeaponUnequip(this, this::unequip, Phase.CHECK);
+    }
+
+    public void equip(
+            final State state,
+            final Attributes attributes,
+            final WeaponEquipEvent event,
+            final ActionInfo info
+    ) {
+        state.isTriggerDown = false;
+    }
+
+    public void unequip(
+            final State state,
+            final Attributes attributes,
+            final WeaponUnequipEvent event,
+            final ActionInfo info
+    ) {
+        state.isTriggerDown = false;
     }
 
     public void checkIfCanFire(
@@ -26,7 +48,7 @@ public class OverheatModule implements WeaponModule<OverheatModule.State, Overhe
             final ActionInfo info
     ) {
         updateHeatState(state, attributes, info.timeManager());
-        if (state.isJammed) {
+        if (state.isJammed || !state.isTriggerDown) {
             event.cancel();
         }
     }
@@ -76,9 +98,12 @@ public class OverheatModule implements WeaponModule<OverheatModule.State, Overhe
             if (state.isTriggerDown) {
                 // in case trigger is held down: afterFire() handles increasing heat, we just check for overheat
                 if (state.heat >= attributes.maxHeat) {
-                    state.heat = attributes.maxHeat;
                     state.isJammed = true;
+                    state.heat = attributes.maxHeat;
                     state.jamStartTimestamp = timeManager.getCurrentGameTime();
+                    // by having this line the weapon doesn't start shooting once jam has cleared (if user holds the trigger down)
+                    // remove the line to change the behaviour
+                    state.isTriggerDown = false;
                 }
             } else {
                 // cooling down

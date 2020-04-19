@@ -2,6 +2,10 @@ package fi.jakojaannos.roguelite.game.weapons;
 
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 
+/**
+ * Overheat module that increases weapon's overheat from every shot fired, and cools it down every tick. Once overheat
+ * reaches its maximum value, the weapon jams for a while.
+ */
 public class OverheatFromShotsModule implements WeaponModule<OverheatFromShotsModule.State, OverheatFromShotsModule.Attributes> {
     @Override
     public State getDefaultState(final Attributes attributes) {
@@ -50,6 +54,7 @@ public class OverheatFromShotsModule implements WeaponModule<OverheatFromShotsMo
             if (timeJammed >= attributes.jamDurationInTicks) {
                 state.isJammed = false;
                 state.heat = 0;
+                state.heatAtLastShot = 0;
             }
         } else {
             final var timeSinceLastShot = timeManager.getCurrentGameTime() - state.lastShotTimestamp;
