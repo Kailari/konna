@@ -47,6 +47,7 @@ public class PlayerArchetype {
         weaponInventory.equip(3, new InventoryWeapon(Weapons.PLAYER_MINIGUN_OVERHEAT_1));
         weaponInventory.equip(4, new InventoryWeapon(Weapons.PLAYER_MINIGUN_OVERHEAT_2));
         weaponInventory.equip(5, new InventoryWeapon(Weapons.PLAYER_MINIGUN_OVERHEAT_3));
+        weaponInventory.equip(6, new InventoryWeapon(Weapons.PLAYER_MINIGUN_SPREAD));
 
         player.addComponent(new SpriteInfo("sprites/player"));
         player.addComponent(new Health(10));
