@@ -57,7 +57,7 @@ public class Weapons {
             new ModularWeapon.Module<>(new ClipMagazineModule(),
                                        new ClipMagazineModule.Attributes(450, 180)),
             new ModularWeapon.Module<>(new OverheatModule(),
-                                       new OverheatModule.Attributes(4.5, 100, 1.0, 200)));
+                                       new OverheatModule.Attributes(1.5, 100, 1.0, 200)));
     public static ModularWeapon PLAYER_MINIGUN_OVERHEAT_2 = new ModularWeapon(
             new ModularWeapon.Module<>(new AutomaticTriggerModule(),
                                        new NoAttributes()),
@@ -74,7 +74,7 @@ public class Weapons {
             new ModularWeapon.Module<>(new ClipMagazineModule(),
                                        new ClipMagazineModule.Attributes(450, 180)),
             new ModularWeapon.Module<>(new OverheatFromShotsModule(),
-                                       new OverheatFromShotsModule.Attributes(4.5, 100, 1.0, 200)));
+                                       new OverheatFromShotsModule.Attributes(1.5, 100, 0.25, 200)));
     public static ModularWeapon PLAYER_MINIGUN_OVERHEAT_3 = new ModularWeapon(
             new ModularWeapon.Module<>(new AutomaticTriggerModule(),
                                        new NoAttributes()),
@@ -91,7 +91,7 @@ public class Weapons {
             new ModularWeapon.Module<>(new ClipMagazineModule(),
                                        new ClipMagazineModule.Attributes(450, 180)),
             new ModularWeapon.Module<>(new OverheatFromTriggerDownModule(),
-                                       new OverheatFromTriggerDownModule.Attributes(4.5, 100, 1.0, 200)));
+                                       new OverheatFromTriggerDownModule.Attributes(1.1, 100, 1.0, 200)));
     public static ModularWeapon TURRET_GATLING = new ModularWeapon(
             new ModularWeapon.Module<>(new AutomaticTriggerModule(),
                                        new NoAttributes()),

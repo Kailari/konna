@@ -2,6 +2,10 @@ package fi.jakojaannos.roguelite.game.weapons;
 
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 
+/**
+ * Overheat module that increases weapon's overheat while trigger is held down, and starts cooling down weapon once user
+ * releases trigger. Once overheat reaches its maximum value, the weapon jams for a while.
+ */
 public class OverheatFromTriggerDownModule implements WeaponModule<OverheatFromTriggerDownModule.State, OverheatFromTriggerDownModule.Attributes> {
     @Override
     public State getDefaultState(final Attributes attributes) {
@@ -14,6 +18,31 @@ public class OverheatFromTriggerDownModule implements WeaponModule<OverheatFromT
         hooks.registerWeaponStateQuery(this, this::stateQuery, Phase.TRIGGER);
         hooks.registerTriggerPull(this, this::triggerPull, Phase.TRIGGER);
         hooks.registerTriggerRelease(this, this::triggerRelease, Phase.TRIGGER);
+        hooks.registerWeaponEquip(this, this::equip, Phase.CHECK);
+        hooks.registerWeaponUnequip(this, this::unequip, Phase.CHECK);
+    }
+
+    public void equip(
+            final State state,
+            final Attributes attributes,
+            final WeaponEquipEvent event,
+            final ActionInfo info
+    ) {
+        updateHeatState(state, attributes, info.timeManager());
+        state.isTriggerDown = false;
+        state.heatAtTriggerRelease = state.heat;
+        state.triggerReleaseTimestamp = info.timeManager().getCurrentGameTime();
+    }
+
+    public void unequip(
+            final State state,
+            final Attributes attributes,
+            final WeaponUnequipEvent event,
+            final ActionInfo info
+    ) {
+        state.isTriggerDown = false;
+        state.heatAtTriggerRelease = state.heat;
+        state.triggerReleaseTimestamp = info.timeManager().getCurrentGameTime();
     }
 
     public void checkIfCanFire(
@@ -23,7 +52,7 @@ public class OverheatFromTriggerDownModule implements WeaponModule<OverheatFromT
             final ActionInfo info
     ) {
         updateHeatState(state, attributes, info.timeManager());
-        if (state.isJammed) {
+        if (state.isJammed || !state.isTriggerDown) {
             event.cancel();
         }
     }
@@ -35,9 +64,9 @@ public class OverheatFromTriggerDownModule implements WeaponModule<OverheatFromT
             final ActionInfo info
     ) {
         updateHeatState(state, attributes, info.timeManager());
-        state.triggerPullTimestamp = info.timeManager().getCurrentGameTime();
-        state.heatAtTriggerPull = state.heat;
         state.isTriggerDown = true;
+        state.heatAtTriggerPull = state.heat;
+        state.triggerPullTimestamp = info.timeManager().getCurrentGameTime();
     }
 
     public void triggerRelease(
@@ -47,9 +76,9 @@ public class OverheatFromTriggerDownModule implements WeaponModule<OverheatFromT
             final ActionInfo info
     ) {
         updateHeatState(state, attributes, info.timeManager());
-        state.triggerReleaseTimestamp = info.timeManager().getCurrentGameTime();
-        state.heatAtTriggerRelease = state.heat;
         state.isTriggerDown = false;
+        state.heatAtTriggerRelease = state.heat;
+        state.triggerReleaseTimestamp = info.timeManager().getCurrentGameTime();
     }
 
     private void updateHeatState(
@@ -71,9 +100,11 @@ public class OverheatFromTriggerDownModule implements WeaponModule<OverheatFromT
                 state.heat = state.heatAtTriggerPull + heatGathered;
 
                 if (state.heat >= attributes.maxHeat) {
-                    state.heat = attributes.maxHeat;
                     state.isJammed = true;
+                    state.heat = attributes.maxHeat;
                     state.jamStartTimestamp = timeManager.getCurrentGameTime();
+                    // by having this line the weapon doesn't start shooting once jam has cleared (if user holds the trigger down)
+                    state.isTriggerDown = false;
                 }
             } else {
                 // cooling down
