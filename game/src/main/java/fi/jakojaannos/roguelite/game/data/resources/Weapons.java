@@ -3,7 +3,8 @@ package fi.jakojaannos.roguelite.game.data.resources;
 import org.joml.Vector2d;
 
 import fi.jakojaannos.roguelite.game.data.events.render.GunshotEvent;
-import fi.jakojaannos.roguelite.game.weapons.*;
+import fi.jakojaannos.roguelite.game.weapons.ModularWeapon;
+import fi.jakojaannos.roguelite.game.weapons.NoAttributes;
 import fi.jakojaannos.roguelite.game.weapons.modules.*;
 
 /**
@@ -27,6 +28,24 @@ public class Weapons {
                                                                              GunshotEvent.Variant.RIFLE)),
             new ModularWeapon.Module<>(new ClipMagazineModule(),
                                        new ClipMagazineModule.Attributes(30, 60)));
+    public static ModularWeapon PLAYER_TEST_AR = new ModularWeapon(
+            new ModularWeapon.Module<>(new AutomaticTriggerModule(),
+                                       new NoAttributes()),
+            new ModularWeapon.Module<>(new ProjectileFiringModule(),
+                                       new ProjectileFiringModule.Attributes(new Vector2d(0.0),
+                                                                             7,
+                                                                             80,
+                                                                             2.5,
+                                                                             4.0,
+                                                                             -1,
+                                                                             10.0,
+                                                                             0.85,
+                                                                             GunshotEvent.Variant.RIFLE)),
+            new ModularWeapon.Module<>(new ClipMagazineModule(),
+                                       new ClipMagazineModule.Attributes(60, 60)),
+            new ModularWeapon.Module<>(new FirerateRampOnShotModule(),
+                                       new FirerateRampOnShotModule.Attributes(0.25,
+                                                                               6)));
     public static ModularWeapon PLAYER_SHOTGUN = new ModularWeapon(
             new ModularWeapon.Module<>(new ShotgunFiringModule(),
                                        new ShotgunFiringModule.Attributes(new Vector2d(0.0),

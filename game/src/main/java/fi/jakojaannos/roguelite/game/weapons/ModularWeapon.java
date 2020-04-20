@@ -138,7 +138,20 @@ public class ModularWeapon {
             TAttributes attributes
     ) {}
 
-    private final record Hooks(
+    private static record InternalHandler<TEvent>(
+            Phase phase,
+            WeaponEventHandler<TEvent>handler
+    ) {
+        public Phase getPhase() {
+            return this.phase;
+        }
+
+        public void handle(final Weapon weapon, final TEvent event, final ActionInfo info) {
+            this.handler.handle(weapon, event, info);
+        }
+    }
+
+    private static final record Hooks(
             List<InternalHandler<ReloadEvent>>reloadListeners,
             List<InternalHandler<TriggerPullEvent>>triggerPullListeners,
             List<InternalHandler<TriggerReleaseEvent>>triggerReleaseListeners,
@@ -164,10 +177,7 @@ public class ModularWeapon {
         }
 
         @Override
-        public void triggerRelease(
-                final WeaponEventHandler<TriggerReleaseEvent> onTriggerRelease,
-                final Phase phase
-        ) {
+        public void triggerRelease(final WeaponEventHandler<TriggerReleaseEvent> onTriggerRelease, final Phase phase) {
             this.triggerReleaseListeners.add(new InternalHandler<>(phase, onTriggerRelease));
         }
 
@@ -200,7 +210,7 @@ public class ModularWeapon {
             this.stateFactories.put(stateClass, factory);
         }
 
-        public void sort() {
+        void sort() {
             this.reloadListeners.sort(Comparator.comparing(InternalHandler::getPhase));
             this.triggerPullListeners.sort(Comparator.comparing(InternalHandler::getPhase));
             this.triggerReleaseListeners.sort(Comparator.comparing(InternalHandler::getPhase));
