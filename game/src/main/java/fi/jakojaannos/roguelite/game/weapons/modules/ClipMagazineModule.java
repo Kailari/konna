@@ -8,42 +8,41 @@ import fi.jakojaannos.roguelite.game.weapons.events.TriggerPullEvent;
 import fi.jakojaannos.roguelite.game.weapons.events.WeaponFireEvent;
 import fi.jakojaannos.roguelite.game.weapons.events.WeaponUnequipEvent;
 
-public class ClipMagazineModule implements WeaponModule<ClipMagazineModule.State, ClipMagazineModule.Attributes> {
-
+public class ClipMagazineModule implements WeaponModule<ClipMagazineModule.Attributes> {
     @Override
-    public State getDefaultState(final Attributes attributes) {
-        return new State(attributes.magazineCapacity);
-    }
+    public void register(final WeaponHooks hooks, final Attributes attributes) {
+        hooks.registerWeaponStateQuery(this::stateQuery, Phase.TRIGGER);
+        hooks.registerReload(this::checkIfCanReload, Phase.CHECK);
+        hooks.registerReload(this::reload, Phase.TRIGGER);
+        hooks.registerWeaponFire(this::checkIfCanFire, Phase.CHECK);
+        hooks.registerWeaponFire(this::afterFiring, Phase.POST);
+        hooks.registerWeaponUnequip(this::unequip, Phase.TRIGGER);
 
-    @Override
-    public void register(final WeaponHooks hooks) {
-        hooks.registerWeaponStateQuery(this, this::stateQuery, Phase.TRIGGER);
-        hooks.registerReload(this, this::checkIfCanReload, Phase.CHECK);
-        hooks.registerReload(this, this::reload, Phase.TRIGGER);
-        hooks.registerWeaponFire(this, this::checkIfCanFire, Phase.CHECK);
-        hooks.registerWeaponFire(this, this::afterFiring, Phase.POST);
-        hooks.registerWeaponUnequip(this, this::unequip, Phase.TRIGGER);
+        hooks.registerTriggerPull(this::afterTriggerPull, Phase.POST);
 
-        hooks.registerTriggerPull(this, this::afterTriggerPull, Phase.POST);
+        hooks.registerStateFactory(State.class, () -> new State(attributes.magazineCapacity));
     }
 
     private void afterTriggerPull(
-            final State state,
-            final Attributes attributes,
+            final Weapon weapon,
             final TriggerPullEvent triggerPullEvent,
             final ActionInfo info
     ) {
+        final var state = weapon.getState(State.class);
+
         if (state.ammo <= 0) {
             info.events().fire(new GunshotEvent(GunshotEvent.Variant.CLICK));
         }
     }
 
     public void checkIfCanReload(
-            final State state,
-            final Attributes attributes,
+            final Weapon weapon,
             final ReloadEvent event,
             final ActionInfo info
     ) {
+        final var state = weapon.getState(State.class);
+        final var attributes = weapon.getAttributes(Attributes.class);
+
         updateReloadState(state, attributes, info.timeManager());
         if (state.isReloading || state.ammo == attributes.magazineCapacity) {
             event.cancel();
@@ -51,21 +50,24 @@ public class ClipMagazineModule implements WeaponModule<ClipMagazineModule.State
     }
 
     public void reload(
-            final State state,
-            final Attributes attributes,
+            final Weapon weapon,
             final ReloadEvent event,
             final ActionInfo info
     ) {
+        final var state = weapon.getState(State.class);
+
         state.isReloading = true;
         state.reloadStartTimestamp = info.timeManager().getCurrentGameTime();
     }
 
     public void checkIfCanFire(
-            final State state,
-            final Attributes attributes,
+            final Weapon weapon,
             final WeaponFireEvent event,
             final ActionInfo info
     ) {
+        final var state = weapon.getState(State.class);
+        final var attributes = weapon.getAttributes(Attributes.class);
+
         updateReloadState(state, attributes, info.timeManager());
         if (state.isReloading || state.ammo <= 0) {
             event.cancel();
@@ -73,22 +75,25 @@ public class ClipMagazineModule implements WeaponModule<ClipMagazineModule.State
     }
 
     public void afterFiring(
-            final State state,
-            final Attributes attributes,
+            final Weapon weapon,
             final WeaponFireEvent event,
             final ActionInfo info
     ) {
+        final var state = weapon.getState(State.class);
+
         if (state.ammo > 0) {
             state.ammo--;
         }
     }
 
     public void unequip(
-            final State state,
-            final Attributes attributes,
+            final Weapon weapon,
             final WeaponUnequipEvent event,
             final ActionInfo info
     ) {
+        final var state = weapon.getState(State.class);
+        final var attributes = weapon.getAttributes(Attributes.class);
+
         updateReloadState(state, attributes, info.timeManager());
         if (state.isReloading) {
             state.isReloading = false;
@@ -96,11 +101,13 @@ public class ClipMagazineModule implements WeaponModule<ClipMagazineModule.State
     }
 
     public void stateQuery(
-            final State state,
-            final Attributes attributes,
+            final Weapon weapon,
             final WeaponStateQuery event,
             final ActionInfo info
     ) {
+        final var state = weapon.getState(State.class);
+        final var attributes = weapon.getAttributes(Attributes.class);
+
         updateReloadState(state, attributes, info.timeManager());
         if (state.isReloading) {
             event.currentAmmo = state.ammo;

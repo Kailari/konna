@@ -21,6 +21,8 @@ module roguelite.game {
 
     exports fi.jakojaannos.roguelite.game;
     exports fi.jakojaannos.roguelite.game.weapons;
+    exports fi.jakojaannos.roguelite.game.weapons.events;
+    exports fi.jakojaannos.roguelite.game.weapons.modules;
     exports fi.jakojaannos.roguelite.game.gamemode;
     exports fi.jakojaannos.roguelite.game.data;
     exports fi.jakojaannos.roguelite.game.data.events.render;
