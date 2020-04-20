@@ -5,6 +5,7 @@ import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
 import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.DamageSource;
+import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponInventory;
 import fi.jakojaannos.roguelite.game.data.resources.Weapons;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import fi.jakojaannos.roguelite.game.data.components.character.*;
@@ -48,7 +49,7 @@ public class FollowerArchetype {
         final var wepInv = new WeaponInventory(1);
         entityManager.addComponentTo(entity, wepInv);
 
-        wepInv.equip(0, new InventoryWeapon(Weapons.FOLLOWER_MELEE));
+        wepInv.slots[0] = new InventoryWeapon(Weapons.FOLLOWER_MELEE);
 
         return entity;
     }

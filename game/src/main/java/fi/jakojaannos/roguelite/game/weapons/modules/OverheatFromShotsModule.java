@@ -1,6 +1,8 @@
-package fi.jakojaannos.roguelite.game.weapons;
+package fi.jakojaannos.roguelite.game.weapons.modules;
 
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.roguelite.game.weapons.*;
+import fi.jakojaannos.roguelite.game.weapons.events.WeaponFireEvent;
 
 /**
  * Overheat module that increases weapon's overheat from every shot fired, and cools it down every tick. Once overheat

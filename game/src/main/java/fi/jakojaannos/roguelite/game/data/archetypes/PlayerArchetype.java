@@ -13,7 +13,7 @@ import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.game.data.components.character.*;
 import fi.jakojaannos.roguelite.game.data.resources.Weapons;
 import fi.jakojaannos.roguelite.game.weapons.InventoryWeapon;
-import fi.jakojaannos.roguelite.game.weapons.WeaponInventory;
+import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponInventory;
 
 public class PlayerArchetype {
     public static EntityHandle create(
@@ -42,12 +42,12 @@ public class PlayerArchetype {
         final var weaponInventory = new WeaponInventory(10);
         player.addComponent(weaponInventory);
 
-        weaponInventory.equip(1, new InventoryWeapon(Weapons.PLAYER_AR));
-        weaponInventory.equip(2, new InventoryWeapon(Weapons.PLAYER_SHOTGUN));
-        weaponInventory.equip(3, new InventoryWeapon(Weapons.PLAYER_MINIGUN_OVERHEAT_1));
-        weaponInventory.equip(4, new InventoryWeapon(Weapons.PLAYER_MINIGUN_OVERHEAT_2));
-        weaponInventory.equip(5, new InventoryWeapon(Weapons.PLAYER_MINIGUN_OVERHEAT_3));
-        weaponInventory.equip(6, new InventoryWeapon(Weapons.PLAYER_MINIGUN_SPREAD));
+        weaponInventory.slots[1] = new InventoryWeapon(Weapons.PLAYER_AR);
+        weaponInventory.slots[2] = new InventoryWeapon(Weapons.PLAYER_SHOTGUN);
+        weaponInventory.slots[3] = new InventoryWeapon(Weapons.PLAYER_MINIGUN_OVERHEAT_1);
+        weaponInventory.slots[4] = new InventoryWeapon(Weapons.PLAYER_MINIGUN_OVERHEAT_2);
+        weaponInventory.slots[5] = new InventoryWeapon(Weapons.PLAYER_MINIGUN_OVERHEAT_3);
+        weaponInventory.slots[6] = new InventoryWeapon(Weapons.PLAYER_MINIGUN_SPREAD);
 
         player.addComponent(new SpriteInfo("sprites/player"));
         player.addComponent(new Health(10));

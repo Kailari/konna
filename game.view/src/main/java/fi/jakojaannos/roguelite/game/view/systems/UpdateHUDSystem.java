@@ -16,7 +16,7 @@ import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
 import fi.jakojaannos.roguelite.game.weapons.ActionInfo;
-import fi.jakojaannos.roguelite.game.weapons.WeaponInventory;
+import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponInventory;
 
 public class UpdateHUDSystem implements EcsSystem<UpdateHUDSystem.Resources, EcsSystem.NoEntities, EcsSystem.NoEvents> {
     private static final Color COLOR_BAD = new Color(0.75, 0.15, 0.15);
@@ -68,7 +68,7 @@ public class UpdateHUDSystem implements EcsSystem<UpdateHUDSystem.Resources, Ecs
                                                     playerPos,
                                                     localPlayerAbilities,
                                                     resources.events);
-                    final var query = inventory.getWeaponAtSlot(localPlayerAbilities.equippedSlot)
+                    final var query = inventory.slots[localPlayerAbilities.equippedSlot]
                                                .doStateQuery(info);
                     final int ammo = query.currentAmmo;
                     final int maxAmmo = query.maxAmmo;

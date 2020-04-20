@@ -1,6 +1,6 @@
-package fi.jakojaannos.roguelite.game.weapons;
+package fi.jakojaannos.roguelite.game.weapons.events;
 
-public class ReloadEvent {
+public class WeaponEquipEvent {
     private boolean cancelled;
 
     public boolean isCancelled() {

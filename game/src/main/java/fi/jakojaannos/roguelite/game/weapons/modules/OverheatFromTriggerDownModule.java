@@ -1,6 +1,8 @@
-package fi.jakojaannos.roguelite.game.weapons;
+package fi.jakojaannos.roguelite.game.weapons.modules;
 
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.roguelite.game.weapons.*;
+import fi.jakojaannos.roguelite.game.weapons.events.*;
 
 /**
  * Overheat module that increases weapon's overheat while trigger is held down, and starts cooling down weapon once user
