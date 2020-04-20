@@ -13,9 +13,9 @@ import fi.jakojaannos.roguelite.game.weapons.events.WeaponFireEvent;
 public class ProjectileFiringModule implements WeaponModule<ProjectileFiringModule.Attributes> {
     @Override
     public void register(final WeaponHooks hooks, final Attributes attributes) {
-        hooks.registerWeaponFire(this::checkIfReadyToFire, Phase.CHECK);
-        hooks.registerWeaponFire(this::fire, Phase.TRIGGER);
-        hooks.registerWeaponFire(this::afterFire, Phase.POST);
+        hooks.weaponFire(this::checkIfReadyToFire, Phase.CHECK);
+        hooks.weaponFire(this::fire, Phase.TRIGGER);
+        hooks.weaponFire(this::afterFire, Phase.POST);
 
         hooks.registerStateFactory(State.class, State::new);
     }

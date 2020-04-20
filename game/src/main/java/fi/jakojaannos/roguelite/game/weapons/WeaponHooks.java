@@ -9,19 +9,19 @@ import fi.jakojaannos.roguelite.game.weapons.events.*;
  * during them. Allows registering module states.
  */
 public interface WeaponHooks {
-    void registerReload(WeaponEventHandler<ReloadEvent> onReload, Phase phase);
+    void reload(WeaponEventHandler<ReloadEvent> onReload, Phase phase);
 
-    void registerTriggerPull(WeaponEventHandler<TriggerPullEvent> onTriggerPull, Phase phase);
+    void triggerPull(WeaponEventHandler<TriggerPullEvent> onTriggerPull, Phase phase);
 
-    void registerTriggerRelease(WeaponEventHandler<TriggerReleaseEvent> onTriggerRelease, Phase phase);
+    void triggerRelease(WeaponEventHandler<TriggerReleaseEvent> onTriggerRelease, Phase phase);
 
-    void registerWeaponFire(WeaponEventHandler<WeaponFireEvent> onWeaponFire, Phase phase);
+    void weaponFire(WeaponEventHandler<WeaponFireEvent> onWeaponFire, Phase phase);
 
-    void registerWeaponEquip(WeaponEventHandler<WeaponEquipEvent> onEquip, Phase phase);
+    void weaponEquip(WeaponEventHandler<WeaponEquipEvent> onEquip, Phase phase);
 
-    void registerWeaponUnequip(WeaponEventHandler<WeaponUnequipEvent> onUnequip, Phase phase);
+    void weaponUnequip(WeaponEventHandler<WeaponUnequipEvent> onUnequip, Phase phase);
 
-    void registerWeaponStateQuery(WeaponEventHandler<WeaponStateQuery> query, Phase phase);
+    void weaponStateQuery(WeaponEventHandler<WeaponStateQuery> query, Phase phase);
 
     <TState> void registerStateFactory(Class<TState> stateClass, Supplier<TState> factory);
 }

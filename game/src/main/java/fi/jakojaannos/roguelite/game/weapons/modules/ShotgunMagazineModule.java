@@ -11,14 +11,14 @@ import fi.jakojaannos.roguelite.game.weapons.events.WeaponUnequipEvent;
 public class ShotgunMagazineModule implements WeaponModule<ShotgunMagazineModule.Attributes> {
     @Override
     public void register(final WeaponHooks hooks, final Attributes attributes) {
-        hooks.registerWeaponStateQuery(this::stateQuery, Phase.TRIGGER);
-        hooks.registerReload(this::checkIfCanReload, Phase.CHECK);
-        hooks.registerReload(this::reload, Phase.TRIGGER);
-        hooks.registerWeaponFire(this::checkIfCanFire, Phase.CHECK);
-        hooks.registerWeaponFire(this::afterFiring, Phase.POST);
-        hooks.registerWeaponUnequip(this::unequip, Phase.TRIGGER);
+        hooks.weaponStateQuery(this::stateQuery, Phase.TRIGGER);
+        hooks.reload(this::checkIfCanReload, Phase.CHECK);
+        hooks.reload(this::reload, Phase.TRIGGER);
+        hooks.weaponFire(this::checkIfCanFire, Phase.CHECK);
+        hooks.weaponFire(this::afterFiring, Phase.POST);
+        hooks.weaponUnequip(this::unequip, Phase.TRIGGER);
 
-        hooks.registerTriggerPull(this::afterTriggerPull, Phase.POST);
+        hooks.triggerPull(this::afterTriggerPull, Phase.POST);
 
         hooks.registerStateFactory(State.class, () -> new State(attributes.magazineCapacity));
     }
