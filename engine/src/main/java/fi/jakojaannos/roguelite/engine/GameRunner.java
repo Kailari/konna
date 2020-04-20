@@ -172,7 +172,7 @@ public abstract class GameRunner implements MainThread {
             while (this.systemBus.hasEvents()) {
                 systemEvents.add(this.systemBus.pollEvent());
             }
-            this.activeGameMode.systemDispatcher().tick(state.world(), state.systems(), systemEvents);
+            this.activeGameMode.systemDispatcher().tick(activeState.world(), activeState.systems(), systemEvents);
             accumulator.nextTick(this.timeManager.getTimeStep());
             this.timeManager.nextTick();
 
