@@ -1,6 +1,7 @@
 package fi.jakojaannos.roguelite.engine.lwjgl.audio;
 
 import java.nio.ShortBuffer;
+import javax.annotation.Nullable;
 
 import static org.lwjgl.openal.AL10.*;
 import static org.lwjgl.openal.AL11.AL_SAMPLE_OFFSET;
@@ -39,29 +40,40 @@ public class AudioRenderer implements AutoCloseable {
         alcSetThreadContext(NULL);
     }
 
-    public boolean update(final LWJGLMusicTrack track, final boolean loop) {
+    public UpdateResult update(
+            final LWJGLMusicTrack track,
+            @Nullable final LWJGLMusicTrack nextTrack,
+            final boolean loopOrSeamless
+    ) {
         // Get number of processed buffers
         final var processed = alGetSourcei(this.source, AL_BUFFERS_PROCESSED);
 
+        var result = UpdateResult.OK;
+        var activeTrack = track;
         for (var i = 0; i < processed; ++i) {
-            this.bufferOffset += BUFFER_SIZE / track.getChannelCount();
+            this.bufferOffset += BUFFER_SIZE / activeTrack.getChannelCount();
             final var buffer = alSourceUnqueueBuffers(this.source);
 
-            if (stream(track, buffer) == 0) {
+            if (stream(activeTrack, buffer) == 0) {
                 var shouldExit = true;
 
-                if (loop) {
-                    // TODO: Swap track here
-                    track.rewind();
+                if (loopOrSeamless) {
+                    // Swap the tracks
+                    if (nextTrack != null) {
+                        activeTrack = nextTrack;
+                        result = UpdateResult.SWAP;
+                    }
+
+                    activeTrack.rewind();
                     this.lastOffset = 0;
                     this.offset = 0;
                     this.bufferOffset = 0;
 
-                    shouldExit = stream(track, buffer) == 0;
+                    shouldExit = stream(activeTrack, buffer) == 0;
                 }
 
                 if (shouldExit) {
-                    return false;
+                    return UpdateResult.ERROR;
                 }
             }
             alSourceQueueBuffers(this.source, buffer);
@@ -71,7 +83,7 @@ public class AudioRenderer implements AutoCloseable {
             alSourcePlay(this.source);
         }
 
-        return true;
+        return result;
     }
 
     /**
@@ -137,5 +149,11 @@ public class AudioRenderer implements AutoCloseable {
                 return AudioRenderer.this.play(track);
             }
         };
+    }
+
+    enum UpdateResult {
+        OK,
+        ERROR,
+        SWAP
     }
 }

@@ -8,6 +8,8 @@ import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.Window;
 import fi.jakojaannos.roguelite.engine.view.audio.AudioContext;
+import fi.jakojaannos.roguelite.engine.view.audio.MusicPlayer;
+import fi.jakojaannos.roguelite.engine.view.audio.MusicTrack;
 import fi.jakojaannos.roguelite.engine.view.audio.SoundEffect;
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.Mesh;
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexFormat;
@@ -72,6 +74,16 @@ public class TestRenderingBackend implements RenderingBackend {
                     final String filename
             ) {
                 return mock(SoundEffect.class);
+            }
+
+            @Override
+            public MusicPlayer createMusicPlayer() {
+                return mock(MusicPlayer.class);
+            }
+
+            @Override
+            public MusicTrack createTrack(final Path path) {
+                return mock(MusicTrack.class);
             }
 
             @Override
