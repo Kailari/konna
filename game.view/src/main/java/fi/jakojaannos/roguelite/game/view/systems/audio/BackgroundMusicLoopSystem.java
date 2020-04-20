@@ -11,10 +11,12 @@ import fi.jakojaannos.roguelite.engine.view.audio.MusicTrack;
 
 public class BackgroundMusicLoopSystem implements EcsSystem<EcsSystem.NoResources, EcsSystem.NoEntities, EcsSystem.NoEvents>, AutoCloseable {
     private final MusicTrack background;
+    private final MusicTrack backgroundIntense;
     private final MusicPlayer musicPlayer;
 
     public BackgroundMusicLoopSystem(final Path assetRoot, final AudioContext audioContext) {
         this.background = audioContext.createTrack(assetRoot.resolve("music/Desolation1_noperc.ogg"));
+        this.backgroundIntense = audioContext.createTrack(assetRoot.resolve("music/Desolation1.ogg"));
         this.musicPlayer = audioContext.createMusicPlayer();
 
         this.musicPlayer.playNow(this.background);
@@ -26,13 +28,14 @@ public class BackgroundMusicLoopSystem implements EcsSystem<EcsSystem.NoResource
             final Stream<EntityDataHandle<NoEntities>> noEntities,
             final NoEvents noEvents
     ) {
-        this.musicPlayer.nextTrack(this.background);
+        this.musicPlayer.nextTrack(this.backgroundIntense);
         this.musicPlayer.update();
     }
 
     @Override
     public void close() throws Exception {
         this.background.close();
+        this.backgroundIntense.close();
         this.musicPlayer.close();
     }
 }

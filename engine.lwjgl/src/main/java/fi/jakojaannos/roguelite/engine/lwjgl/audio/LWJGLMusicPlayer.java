@@ -16,10 +16,13 @@ public class LWJGLMusicPlayer implements MusicPlayer {
     private final AtomicBoolean paused = new AtomicBoolean(true);
     private final Thread audioThread;
 
-    @Nullable
-    private LWJGLMusicTrack playingTrack;
     private boolean audioThreadRunning;
     private AudioStateUpdater stateUpdater;
+
+    @Nullable
+    private LWJGLMusicTrack nextTrack;
+    @Nullable
+    private LWJGLMusicTrack playingTrack;
 
     public LWJGLMusicPlayer(final LWJGLAudioContext context) {
         LOG.debug("Creating music player!");
@@ -33,9 +36,13 @@ public class LWJGLMusicPlayer implements MusicPlayer {
                 audioLatch.countDown();
                 while (this.audioThreadRunning) {
                     if (!this.paused.get()) {
-                        if (!audioRenderer.update(this.playingTrack, true)) {
+                        final var updateResult = audioRenderer.update(this.playingTrack, this.nextTrack, true);
+                        if (updateResult == AudioRenderer.UpdateResult.ERROR) {
                             LOG.error("Audio playback failed");
                             this.paused.set(true);
+                        } else if (updateResult == AudioRenderer.UpdateResult.SWAP) {
+                            this.playingTrack = this.nextTrack;
+                            this.nextTrack = null;
                         }
                     }
 
@@ -70,7 +77,7 @@ public class LWJGLMusicPlayer implements MusicPlayer {
 
     @Override
     public void nextTrack(final MusicTrack track) {
-
+        this.nextTrack = (LWJGLMusicTrack) track;
     }
 
     @Override
