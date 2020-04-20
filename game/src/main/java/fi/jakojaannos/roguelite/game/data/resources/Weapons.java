@@ -4,6 +4,7 @@ import org.joml.Vector2d;
 
 import fi.jakojaannos.roguelite.game.data.events.render.GunshotEvent;
 import fi.jakojaannos.roguelite.game.weapons.*;
+import fi.jakojaannos.roguelite.game.weapons.modules.*;
 
 /**
  * Resource for managing weapon instances.

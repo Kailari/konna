@@ -6,14 +6,13 @@ import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.ecs.data.resources.Entities;
-import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.event.RenderEvents;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.WeaponInput;
 import fi.jakojaannos.roguelite.game.weapons.ActionInfo;
 import fi.jakojaannos.roguelite.game.weapons.InventoryWeapon;
-import fi.jakojaannos.roguelite.game.weapons.WeaponInventory;
+import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponInventory;
 
 public class CharacterAttackSystem implements EcsSystem<CharacterAttackSystem.Resources, CharacterAttackSystem.EntityData, EcsSystem.NoEvents> {
     @Override
@@ -29,7 +28,7 @@ public class CharacterAttackSystem implements EcsSystem<CharacterAttackSystem.Re
             final var shooterPos = entity.getData().transform;
             final var equippedSlot = attackAbility.equippedSlot;
 
-            final InventoryWeapon equippedWeapon = inventory.getWeaponAtSlot(equippedSlot);
+            final InventoryWeapon equippedWeapon = inventory.slots[equippedSlot];
             final var actionInfo = new ActionInfo(resources.timeManager,
                                                   resources.entities,
                                                   shooterPos,
@@ -37,7 +36,7 @@ public class CharacterAttackSystem implements EcsSystem<CharacterAttackSystem.Re
                                                   resources.events);
 
             if (attackAbility.equippedSlot != attackAbility.previousEquippedSlot) {
-                inventory.getWeaponAtSlot(attackAbility.previousEquippedSlot).unequip(actionInfo);
+                inventory.slots[attackAbility.previousEquippedSlot].unequip(actionInfo);
                 equippedWeapon.equip(actionInfo);
 
                 attackAbility.previousEquippedSlot = attackAbility.equippedSlot;

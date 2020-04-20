@@ -1,4 +1,7 @@
-package fi.jakojaannos.roguelite.game.weapons;
+package fi.jakojaannos.roguelite.game.weapons.modules;
+
+import fi.jakojaannos.roguelite.game.weapons.*;
+import fi.jakojaannos.roguelite.game.weapons.events.*;
 
 public class AutomaticTriggerModule implements WeaponModule<AutomaticTriggerModule.State, NoAttributes> {
     @Override

@@ -1,5 +1,7 @@
 package fi.jakojaannos.roguelite.game.weapons;
 
+import fi.jakojaannos.roguelite.game.weapons.events.*;
+
 public interface WeaponHooks {
     <TState, TAttributes> void registerReload(
             WeaponModule<TState, TAttributes> module,

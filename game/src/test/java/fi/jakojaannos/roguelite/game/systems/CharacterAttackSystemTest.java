@@ -12,7 +12,7 @@ import fi.jakojaannos.roguelite.game.data.components.character.WeaponInput;
 import fi.jakojaannos.roguelite.game.systems.characters.CharacterAttackSystem;
 import fi.jakojaannos.roguelite.game.weapons.ActionInfo;
 import fi.jakojaannos.roguelite.game.weapons.InventoryWeapon;
-import fi.jakojaannos.roguelite.game.weapons.WeaponInventory;
+import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponInventory;
 
 import static fi.jakojaannos.roguelite.engine.utilities.assertions.world.GameExpect.whenGame;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -45,9 +45,9 @@ class CharacterAttackSystemTest {
         slot1 = mock(InventoryWeapon.class);
         slot2 = mock(InventoryWeapon.class);
 
-        wepInv.equip(0, slot0);
-        wepInv.equip(1, slot1);
-        wepInv.equip(2, slot2);
+        wepInv.slots[0] = slot0;
+        wepInv.slots[1] = slot1;
+        wepInv.slots[2] = slot2;
     }
 
     @Test

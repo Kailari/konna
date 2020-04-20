@@ -13,12 +13,8 @@ public class InventoryWeapon {
     }
 
     public InventoryWeapon(final ModularWeapon weapon) {
-        this(weapon, new WeaponState());
-    }
-
-    public InventoryWeapon(final ModularWeapon weapon, final WeaponState state) {
         this.weapon = weapon;
-        this.state = state;
+        this.state = new WeaponState();
     }
 
     public void reload(

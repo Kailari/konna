@@ -3,6 +3,8 @@ package fi.jakojaannos.roguelite.game.weapons;
 import java.util.HashMap;
 import java.util.Map;
 
+import fi.jakojaannos.roguelite.game.weapons.WeaponModule;
+
 @SuppressWarnings("rawtypes")
 public class WeaponAttributes {
     private final Map<Class<? extends WeaponModule>, Object> attributes = new HashMap<>();

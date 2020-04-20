@@ -1,9 +1,14 @@
-package fi.jakojaannos.roguelite.game.weapons;
+package fi.jakojaannos.roguelite.game.weapons.modules;
 
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.events.render.GunshotEvent;
+import fi.jakojaannos.roguelite.game.weapons.*;
+import fi.jakojaannos.roguelite.game.weapons.events.ReloadEvent;
+import fi.jakojaannos.roguelite.game.weapons.events.TriggerPullEvent;
+import fi.jakojaannos.roguelite.game.weapons.events.WeaponFireEvent;
+import fi.jakojaannos.roguelite.game.weapons.events.WeaponUnequipEvent;
 
-public class ClipMagazineModule implements WeaponModule<ClipMagazineModule.State, ClipMagazineModule.Attributes> {
+public class ShotgunMagazineModule implements WeaponModule<ShotgunMagazineModule.State, ShotgunMagazineModule.Attributes> {
 
     @Override
     public State getDefaultState(final Attributes attributes) {
@@ -33,28 +38,6 @@ public class ClipMagazineModule implements WeaponModule<ClipMagazineModule.State
         }
     }
 
-    public void checkIfCanReload(
-            final State state,
-            final Attributes attributes,
-            final ReloadEvent event,
-            final ActionInfo info
-    ) {
-        updateReloadState(state, attributes, info.timeManager());
-        if (state.isReloading || state.ammo == attributes.magazineCapacity) {
-            event.cancel();
-        }
-    }
-
-    public void reload(
-            final State state,
-            final Attributes attributes,
-            final ReloadEvent event,
-            final ActionInfo info
-    ) {
-        state.isReloading = true;
-        state.reloadStartTimestamp = info.timeManager().getCurrentGameTime();
-    }
-
     public void checkIfCanFire(
             final State state,
             final Attributes attributes,
@@ -62,7 +45,7 @@ public class ClipMagazineModule implements WeaponModule<ClipMagazineModule.State
             final ActionInfo info
     ) {
         updateReloadState(state, attributes, info.timeManager());
-        if (state.isReloading || state.ammo <= 0) {
+        if (state.ammo <= 0) {
             event.cancel();
         }
     }
@@ -76,6 +59,33 @@ public class ClipMagazineModule implements WeaponModule<ClipMagazineModule.State
         if (state.ammo > 0) {
             state.ammo--;
         }
+        if (state.isReloading) {
+            state.isReloading = false;
+        }
+    }
+
+    public void checkIfCanReload(
+            final State state,
+            final Attributes attributes,
+            final ReloadEvent event,
+            final ActionInfo info
+    ) {
+        updateReloadState(state, attributes, info.timeManager());
+        if (state.isReloading
+            || state.ammo == attributes.magazineCapacity) {
+            event.cancel();
+        }
+    }
+
+    public void reload(
+            final State state,
+            final Attributes attributes,
+            final ReloadEvent event,
+            final ActionInfo info
+    ) {
+        state.isReloading = true;
+        state.reloadStartTimestamp = info.timeManager().getCurrentGameTime();
+        state.ammoOnReloadStart = state.ammo;
     }
 
     public void unequip(
@@ -96,7 +106,12 @@ public class ClipMagazineModule implements WeaponModule<ClipMagazineModule.State
             final WeaponStateQuery event,
             final ActionInfo info
     ) {
+        final var oldAmmo = state.ammo;
         updateReloadState(state, attributes, info.timeManager());
+        if (oldAmmo != state.ammo) {
+            info.events().fire(new GunshotEvent(GunshotEvent.Variant.SHOTGUN_RELOAD));
+        }
+
         if (state.isReloading) {
             event.currentAmmo = state.ammo;
             event.maxAmmo = 666;
@@ -114,18 +129,28 @@ public class ClipMagazineModule implements WeaponModule<ClipMagazineModule.State
         if (!state.isReloading) {
             return;
         }
-        if (timeManager.getCurrentGameTime() - state.reloadStartTimestamp < attributes.reloadTime) {
+        if (attributes.reloadTime == 0) {
+            // reloadTime = 0 -> congratulations, you have successfully turned shotgun magazine into AR magazine
+            state.isReloading = false;
+            state.ammo = attributes.magazineCapacity;
             return;
         }
 
-        state.ammo = attributes.magazineCapacity;
-        state.isReloading = false;
+        final long timeUsedReloading = timeManager.getCurrentGameTime() - state.reloadStartTimestamp;
+        final int shellsReloaded = (int) (timeUsedReloading / attributes.reloadTime);
+
+        state.ammo = state.ammoOnReloadStart + shellsReloaded;
+        if (state.ammo >= attributes.magazineCapacity) {
+            state.ammo = attributes.magazineCapacity;
+            state.isReloading = false;
+        }
     }
 
     public static class State {
-        public int ammo;
-        public boolean isReloading;
-        public long reloadStartTimestamp;
+        private int ammo;
+        private boolean isReloading;
+        private long reloadStartTimestamp;
+        private int ammoOnReloadStart;
 
         public State(final int currentAmmo) {
             this.ammo = currentAmmo;

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import fi.jakojaannos.roguelite.game.weapons.events.*;
+
 public class ModularWeapon {
     private final List<InternalHandler<?, ?, ReloadEvent>> reloadListeners;
     private final List<InternalHandler<?, ?, TriggerPullEvent>> triggerPullListeners;

@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.game.weapons;
+package fi.jakojaannos.roguelite.game.weapons.modules;
 
 import org.joml.Vector2d;
 
@@ -7,6 +7,11 @@ import java.util.Random;
 import fi.jakojaannos.roguelite.engine.utilities.math.CoordinateHelper;
 import fi.jakojaannos.roguelite.game.data.archetypes.ProjectileArchetype;
 import fi.jakojaannos.roguelite.game.data.events.render.GunshotEvent;
+import fi.jakojaannos.roguelite.game.weapons.*;
+import fi.jakojaannos.roguelite.game.weapons.events.ReloadEvent;
+import fi.jakojaannos.roguelite.game.weapons.events.TriggerPullEvent;
+import fi.jakojaannos.roguelite.game.weapons.events.TriggerReleaseEvent;
+import fi.jakojaannos.roguelite.game.weapons.events.WeaponFireEvent;
 
 public class MinigunFiringModule implements WeaponModule<MinigunFiringModule.State, MinigunFiringModule.Attributes> {
     @Override
