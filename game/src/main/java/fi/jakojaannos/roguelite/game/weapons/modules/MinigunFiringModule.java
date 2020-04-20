@@ -13,58 +13,60 @@ import fi.jakojaannos.roguelite.game.weapons.events.TriggerPullEvent;
 import fi.jakojaannos.roguelite.game.weapons.events.TriggerReleaseEvent;
 import fi.jakojaannos.roguelite.game.weapons.events.WeaponFireEvent;
 
-public class MinigunFiringModule implements WeaponModule<MinigunFiringModule.State, MinigunFiringModule.Attributes> {
+public class MinigunFiringModule implements WeaponModule<MinigunFiringModule.Attributes> {
     @Override
-    public State getDefaultState(final Attributes attributes) {
-        return new State();
-    }
+    public void register(final WeaponHooks hooks, final Attributes attributes) {
+        hooks.registerWeaponFire(this::checkIfReadyToFire, Phase.CHECK);
+        hooks.registerWeaponFire(this::fire, Phase.TRIGGER);
+        hooks.registerWeaponFire(this::afterFire, Phase.POST);
+        hooks.registerTriggerPull(this::triggerPull, Phase.POST);
+        hooks.registerTriggerRelease(this::triggerRelease, Phase.POST);
+        hooks.registerReload(this::afterReload, Phase.POST);
 
-    @Override
-    public void register(final WeaponHooks hooks) {
-        hooks.registerWeaponFire(this, this::checkIfReadyToFire, Phase.CHECK);
-        hooks.registerWeaponFire(this, this::fire, Phase.TRIGGER);
-        hooks.registerWeaponFire(this, this::afterFire, Phase.POST);
-        hooks.registerTriggerPull(this, this::triggerPull, Phase.POST);
-        hooks.registerTriggerRelease(this, this::triggerRelease, Phase.POST);
-        hooks.registerReload(this, this::afterReload, Phase.POST);
+        hooks.registerStateFactory(State.class, State::new);
     }
 
     private void afterReload(
-            final State state,
-            final Attributes attributes,
+            final Weapon weapon,
             final ReloadEvent reloadEvent,
             final ActionInfo info
     ) {
+        final var state = weapon.getState(State.class);
+
         state.fireRateIncrease = 0;
         state.spreadDecrease = 0;
     }
 
     public void triggerPull(
-            final State state,
-            final Attributes attributes,
+            final Weapon weapon,
             final TriggerPullEvent event,
             final ActionInfo info
     ) {
+        final var state = weapon.getState(State.class);
+
         state.fireRateIncrease = 0;
         state.spreadDecrease = 0;
     }
 
     public void triggerRelease(
-            final State state,
-            final Attributes attributes,
+            final Weapon weapon,
             final TriggerReleaseEvent event,
             final ActionInfo info
     ) {
+        final var state = weapon.getState(State.class);
+
         state.fireRateIncrease = 0;
         state.spreadDecrease = 0;
     }
 
     public void checkIfReadyToFire(
-            final State state,
-            final Attributes attributes,
+            final Weapon weapon,
             final WeaponFireEvent event,
             final ActionInfo info
     ) {
+        final var state = weapon.getState(State.class);
+        final var attributes = weapon.getAttributes(Attributes.class);
+
         final var timeSinceLastAttack = info.timeManager().getCurrentGameTime() - state.lastAttackTimestamp;
         if (timeSinceLastAttack < getTimeBetweenShots(state, attributes)) {
             event.cancel();
@@ -72,22 +74,26 @@ public class MinigunFiringModule implements WeaponModule<MinigunFiringModule.Sta
     }
 
     public void afterFire(
-            final State state,
-            final Attributes attributes,
+            final Weapon weapon,
             final WeaponFireEvent event,
             final ActionInfo info
     ) {
+        final var state = weapon.getState(State.class);
+        final var attributes = weapon.getAttributes(Attributes.class);
+
         state.lastAttackTimestamp = info.timeManager().getCurrentGameTime();
         state.spreadDecrease += attributes.spreadDecreasePerShot;
         state.fireRateIncrease += attributes.fireRateIncreasePerShot;
     }
 
     public void fire(
-            final State state,
-            final Attributes attributes,
+            final Weapon weapon,
             final WeaponFireEvent event,
             final ActionInfo info
     ) {
+        final var state = weapon.getState(State.class);
+        final var attributes = weapon.getAttributes(Attributes.class);
+
         final var entities = info.entities();
         final var timeManager = info.timeManager();
         final var attackAbility = info.attackAbility();

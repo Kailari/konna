@@ -8,28 +8,27 @@ import fi.jakojaannos.roguelite.game.weapons.events.*;
  * Overheat module that increases weapon's overheat while trigger is held down, and starts cooling down weapon once user
  * releases trigger. Once overheat reaches its maximum value, the weapon jams for a while.
  */
-public class OverheatFromTriggerDownModule implements WeaponModule<OverheatFromTriggerDownModule.State, OverheatFromTriggerDownModule.Attributes> {
+public class OverheatFromTriggerDownModule implements WeaponModule<OverheatFromTriggerDownModule.Attributes> {
     @Override
-    public State getDefaultState(final Attributes attributes) {
-        return new State();
-    }
+    public void register(final WeaponHooks hooks, final Attributes attributes) {
+        hooks.registerWeaponFire(this::checkIfCanFire, Phase.CHECK);
+        hooks.registerWeaponStateQuery(this::stateQuery, Phase.TRIGGER);
+        hooks.registerTriggerPull(this::triggerPull, Phase.TRIGGER);
+        hooks.registerTriggerRelease(this::triggerRelease, Phase.TRIGGER);
+        hooks.registerWeaponEquip(this::equip, Phase.CHECK);
+        hooks.registerWeaponUnequip(this::unequip, Phase.CHECK);
 
-    @Override
-    public void register(final WeaponHooks hooks) {
-        hooks.registerWeaponFire(this, this::checkIfCanFire, Phase.CHECK);
-        hooks.registerWeaponStateQuery(this, this::stateQuery, Phase.TRIGGER);
-        hooks.registerTriggerPull(this, this::triggerPull, Phase.TRIGGER);
-        hooks.registerTriggerRelease(this, this::triggerRelease, Phase.TRIGGER);
-        hooks.registerWeaponEquip(this, this::equip, Phase.CHECK);
-        hooks.registerWeaponUnequip(this, this::unequip, Phase.CHECK);
+        hooks.registerStateFactory(State.class, State::new);
     }
 
     public void equip(
-            final State state,
-            final Attributes attributes,
+            final Weapon weapon,
             final WeaponEquipEvent event,
             final ActionInfo info
     ) {
+        final var state = weapon.getState(State.class);
+        final var attributes = weapon.getAttributes(Attributes.class);
+
         updateHeatState(state, attributes, info.timeManager());
         state.isTriggerDown = false;
         state.heatAtTriggerRelease = state.heat;
@@ -37,22 +36,26 @@ public class OverheatFromTriggerDownModule implements WeaponModule<OverheatFromT
     }
 
     public void unequip(
-            final State state,
-            final Attributes attributes,
+            final Weapon weapon,
             final WeaponUnequipEvent event,
             final ActionInfo info
     ) {
+        final var state = weapon.getState(State.class);
+        final var attributes = weapon.getAttributes(Attributes.class);
+
         state.isTriggerDown = false;
         state.heatAtTriggerRelease = state.heat;
         state.triggerReleaseTimestamp = info.timeManager().getCurrentGameTime();
     }
 
     public void checkIfCanFire(
-            final State state,
-            final Attributes attributes,
+            final Weapon weapon,
             final WeaponFireEvent event,
             final ActionInfo info
     ) {
+        final var state = weapon.getState(State.class);
+        final var attributes = weapon.getAttributes(Attributes.class);
+
         updateHeatState(state, attributes, info.timeManager());
         if (state.isJammed || !state.isTriggerDown) {
             event.cancel();
@@ -60,11 +63,13 @@ public class OverheatFromTriggerDownModule implements WeaponModule<OverheatFromT
     }
 
     public void triggerPull(
-            final State state,
-            final Attributes attributes,
+            final Weapon weapon,
             final TriggerPullEvent event,
             final ActionInfo info
     ) {
+        final var state = weapon.getState(State.class);
+        final var attributes = weapon.getAttributes(Attributes.class);
+
         updateHeatState(state, attributes, info.timeManager());
         state.isTriggerDown = true;
         state.heatAtTriggerPull = state.heat;
@@ -72,11 +77,13 @@ public class OverheatFromTriggerDownModule implements WeaponModule<OverheatFromT
     }
 
     public void triggerRelease(
-            final State state,
-            final Attributes attributes,
+            final Weapon weapon,
             final TriggerReleaseEvent event,
             final ActionInfo info
     ) {
+        final var state = weapon.getState(State.class);
+        final var attributes = weapon.getAttributes(Attributes.class);
+
         updateHeatState(state, attributes, info.timeManager());
         state.isTriggerDown = false;
         state.heatAtTriggerRelease = state.heat;
@@ -122,11 +129,13 @@ public class OverheatFromTriggerDownModule implements WeaponModule<OverheatFromT
     }
 
     public void stateQuery(
-            final State state,
-            final Attributes attributes,
+            final Weapon weapon,
             final WeaponStateQuery event,
             final ActionInfo info
     ) {
+        final var state = weapon.getState(State.class);
+        final var attributes = weapon.getAttributes(Attributes.class);
+
         updateHeatState(state, attributes, info.timeManager());
         event.heat = state.heat;
         event.jammed = state.isJammed;

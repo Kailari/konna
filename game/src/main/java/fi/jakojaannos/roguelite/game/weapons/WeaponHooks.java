@@ -1,47 +1,27 @@
 package fi.jakojaannos.roguelite.game.weapons;
 
+import java.util.function.Supplier;
+
 import fi.jakojaannos.roguelite.game.weapons.events.*;
 
+/**
+ * Event hooks for weapon modules. Allows weapon modules to hook into different weapon events and execute behavior
+ * during them. Allows registering module states.
+ */
 public interface WeaponHooks {
-    <TState, TAttributes> void registerReload(
-            WeaponModule<TState, TAttributes> module,
-            WeaponEventHandler<TState, TAttributes, ReloadEvent> onReload,
-            Phase phase
-    );
+    void registerReload(WeaponEventHandler<ReloadEvent> onReload, Phase phase);
 
-    <TState, TAttributes> void registerTriggerPull(
-            WeaponModule<TState, TAttributes> module,
-            WeaponEventHandler<TState, TAttributes, TriggerPullEvent> onTriggerPull,
-            Phase phase
-    );
+    void registerTriggerPull(WeaponEventHandler<TriggerPullEvent> onTriggerPull, Phase phase);
 
-    <TState, TAttributes> void registerTriggerRelease(
-            WeaponModule<TState, TAttributes> module,
-            WeaponEventHandler<TState, TAttributes, TriggerReleaseEvent> onTriggerRelease,
-            Phase phase
-    );
+    void registerTriggerRelease(WeaponEventHandler<TriggerReleaseEvent> onTriggerRelease, Phase phase);
 
-    <TState, TAttributes> void registerWeaponFire(
-            WeaponModule<TState, TAttributes> module,
-            WeaponEventHandler<TState, TAttributes, WeaponFireEvent> onWeaponFire,
-            Phase phase
-    );
+    void registerWeaponFire(WeaponEventHandler<WeaponFireEvent> onWeaponFire, Phase phase);
 
-    <TState, TAttributes> void registerWeaponEquip(
-            WeaponModule<TState, TAttributes> module,
-            WeaponEventHandler<TState, TAttributes, WeaponEquipEvent> onEquip,
-            Phase phase
-    );
+    void registerWeaponEquip(WeaponEventHandler<WeaponEquipEvent> onEquip, Phase phase);
 
-    <TState, TAttributes> void registerWeaponUnequip(
-            WeaponModule<TState, TAttributes> module,
-            WeaponEventHandler<TState, TAttributes, WeaponUnequipEvent> onUnequip,
-            Phase phase
-    );
+    void registerWeaponUnequip(WeaponEventHandler<WeaponUnequipEvent> onUnequip, Phase phase);
 
-    <TState, TAttributes> void registerWeaponStateQuery(
-            WeaponModule<TState, TAttributes> module,
-            WeaponEventHandler<TState, TAttributes, WeaponStateQuery> query,
-            Phase phase
-    );
+    void registerWeaponStateQuery(WeaponEventHandler<WeaponStateQuery> query, Phase phase);
+
+    <TState> void registerStateFactory(Class<TState> stateClass, Supplier<TState> factory);
 }

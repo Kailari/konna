@@ -1,10 +1,5 @@
 package fi.jakojaannos.roguelite.game.weapons;
 
-public interface WeaponEventHandler<TState, TAttributes, TEvent> {
-    void handle(
-            TState state,
-            TAttributes attributes,
-            TEvent event,
-            ActionInfo actionInfo
-    );
+public interface WeaponEventHandler<TEvent> {
+    void handle(Weapon weapon, TEvent event, ActionInfo actionInfo);
 }

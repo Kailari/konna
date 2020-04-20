@@ -10,25 +10,24 @@ import fi.jakojaannos.roguelite.game.data.events.render.GunshotEvent;
 import fi.jakojaannos.roguelite.game.weapons.*;
 import fi.jakojaannos.roguelite.game.weapons.events.WeaponFireEvent;
 
-public class ProjectileFiringModule implements WeaponModule<ProjectileFiringModule.State, ProjectileFiringModule.Attributes> {
+public class ProjectileFiringModule implements WeaponModule<ProjectileFiringModule.Attributes> {
     @Override
-    public State getDefaultState(final Attributes attributes) {
-        return new State();
-    }
+    public void register(final WeaponHooks hooks, final Attributes attributes) {
+        hooks.registerWeaponFire(this::checkIfReadyToFire, Phase.CHECK);
+        hooks.registerWeaponFire(this::fire, Phase.TRIGGER);
+        hooks.registerWeaponFire(this::afterFire, Phase.POST);
 
-    @Override
-    public void register(final WeaponHooks hooks) {
-        hooks.registerWeaponFire(this, this::checkIfReadyToFire, Phase.CHECK);
-        hooks.registerWeaponFire(this, this::fire, Phase.TRIGGER);
-        hooks.registerWeaponFire(this, this::afterFire, Phase.POST);
+        hooks.registerStateFactory(State.class, State::new);
     }
 
     public void checkIfReadyToFire(
-            final State state,
-            final Attributes attributes,
+            final Weapon weapon,
             final WeaponFireEvent event,
             final ActionInfo info
     ) {
+        final var state = weapon.getState(State.class);
+        final var attributes = weapon.getAttributes(Attributes.class);
+
         final var timeSinceLastAttack = info.timeManager().getCurrentGameTime() - state.lastAttackTimestamp;
         if (timeSinceLastAttack < attributes.timeBetweenShots) {
             event.cancel();
@@ -36,20 +35,23 @@ public class ProjectileFiringModule implements WeaponModule<ProjectileFiringModu
     }
 
     public void afterFire(
-            final State state,
-            final Attributes attributes,
+            final Weapon weapon,
             final WeaponFireEvent event,
             final ActionInfo info
     ) {
+        final var state = weapon.getState(State.class);
+
         state.lastAttackTimestamp = info.timeManager().getCurrentGameTime();
     }
 
     public void fire(
-            final State state,
-            final Attributes attributes,
+            final Weapon weapon,
             final WeaponFireEvent event,
             final ActionInfo info
     ) {
+        final var state = weapon.getState(State.class);
+        final var attributes = weapon.getAttributes(Attributes.class);
+
         final var entities = info.entities();
         final var timeManager = info.timeManager();
         final var attackAbility = info.attackAbility();

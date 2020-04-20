@@ -3,65 +3,62 @@ package fi.jakojaannos.roguelite.game.weapons.modules;
 import fi.jakojaannos.roguelite.game.weapons.*;
 import fi.jakojaannos.roguelite.game.weapons.events.*;
 
-public class AutomaticTriggerModule implements WeaponModule<AutomaticTriggerModule.State, NoAttributes> {
+public class AutomaticTriggerModule implements WeaponModule<NoAttributes> {
     @Override
-    public State getDefaultState(final NoAttributes attributes) {
-        return new State();
-    }
+    public void register(final WeaponHooks hooks, final NoAttributes ignored) {
+        hooks.registerWeaponFire(this::checkIfCanFire, Phase.CHECK);
+        hooks.registerTriggerPull(this::onTriggerPull, Phase.TRIGGER);
+        hooks.registerTriggerRelease(this::onTriggerRelease, Phase.TRIGGER);
+        hooks.registerWeaponEquip(this::equip, Phase.POST);
+        hooks.registerWeaponUnequip(this::unequip, Phase.POST);
 
-    @Override
-    public void register(final WeaponHooks hooks) {
-        hooks.registerWeaponFire(this, this::checkIfCanFire, Phase.CHECK);
-        hooks.registerTriggerPull(this, this::onTriggerPull, Phase.TRIGGER);
-        hooks.registerTriggerRelease(this, this::onTriggerRelease, Phase.TRIGGER);
-        hooks.registerWeaponEquip(this, this::equip, Phase.POST);
-        hooks.registerWeaponUnequip(this, this::unequip, Phase.POST);
+        hooks.registerStateFactory(State.class, State::new);
     }
 
     public void onTriggerPull(
-            final State state,
-            final NoAttributes attributes,
+            final Weapon weapon,
             final TriggerPullEvent event,
             final ActionInfo info
     ) {
+        final var state = weapon.getState(State.class);
         state.triggerDown = true;
     }
 
     public void onTriggerRelease(
-            final State state,
-            final NoAttributes attributes,
+            final Weapon weapon,
             final TriggerReleaseEvent event,
             final ActionInfo info
     ) {
+        final var state = weapon.getState(State.class);
         state.triggerDown = false;
     }
 
     public void checkIfCanFire(
-            final State state,
-            final NoAttributes attributes,
+            final Weapon weapon,
             final WeaponFireEvent event,
             final ActionInfo info
     ) {
+        final var state = weapon.getState(State.class);
         if (!state.triggerDown) {
             event.cancel();
         }
     }
 
     public void equip(
-            final State state,
-            final NoAttributes attributes,
+            final Weapon weapon,
             final WeaponEquipEvent event,
             final ActionInfo info
     ) {
+        final var state = weapon.getState(State.class);
         state.triggerDown = false;
     }
 
     public void unequip(
-            final State state,
-            final NoAttributes attributes,
+            final Weapon weapon,
             final WeaponUnequipEvent event,
             final ActionInfo info
     ) {
+        final var state = weapon.getState(State.class);
         state.triggerDown = false;
     }
 
