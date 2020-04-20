@@ -10,7 +10,7 @@ import fi.jakojaannos.roguelite.engine.view.audio.AudioContext;
 import fi.jakojaannos.roguelite.engine.view.audio.SoundEffect;
 import fi.jakojaannos.roguelite.game.data.events.render.GunshotEvent;
 
-public class HandleRenderEventsSystem implements EcsSystem<HandleRenderEventsSystem.Resources, EcsSystem.NoEntities, EcsSystem.NoEvents>, AutoCloseable {
+public class HandleAudioEventsSystem implements EcsSystem<HandleAudioEventsSystem.Resources, EcsSystem.NoEntities, EcsSystem.NoEvents>, AutoCloseable {
     private final SoundEffect shotgun;
     private final SoundEffect melee;
     private final SoundEffect gatling;
@@ -20,18 +20,18 @@ public class HandleRenderEventsSystem implements EcsSystem<HandleRenderEventsSys
     private final SoundEffect pump;
     private final SoundEffect shotgunReload;
 
-    public HandleRenderEventsSystem(
+    public HandleAudioEventsSystem(
             final Path assetRoot,
             final AudioContext context
     ) {
-        this.shotgun = context.createEffect(assetRoot, "shotgun/Blast1.ogg", context);
-        this.rifle = context.createEffect(assetRoot, "shotgun/Blast3.ogg", context);
-        this.melee = context.createEffect(assetRoot, "shotgun/Pump3.ogg", context);
-        this.gatling = context.createEffect(assetRoot, "shotgun/Blast2.ogg", context);
+        this.shotgun = context.createEffect(assetRoot, "shotgun/Blast1.ogg");
+        this.rifle = context.createEffect(assetRoot, "shotgun/Blast3.ogg");
+        this.melee = context.createEffect(assetRoot, "shotgun/Pump3.ogg");
+        this.gatling = context.createEffect(assetRoot, "shotgun/Blast2.ogg");
 
-        this.click = context.createEffect(assetRoot, "shotgun/Load1.ogg", context);
-        this.pump = context.createEffect(assetRoot, "shotgun/Pump1.ogg", context);
-        this.shotgunReload = context.createEffect(assetRoot, "shotgun/Load2.ogg", context);
+        this.click = context.createEffect(assetRoot, "shotgun/Load1.ogg");
+        this.pump = context.createEffect(assetRoot, "shotgun/Pump1.ogg");
+        this.shotgunReload = context.createEffect(assetRoot, "shotgun/Load2.ogg");
     }
 
     @Override

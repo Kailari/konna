@@ -69,8 +69,7 @@ public class TestRenderingBackend implements RenderingBackend {
             @Override
             public SoundEffect createEffect(
                     final Path assetRoot,
-                    final String filename,
-                    final AudioContext context
+                    final String filename
             ) {
                 return mock(SoundEffect.class);
             }

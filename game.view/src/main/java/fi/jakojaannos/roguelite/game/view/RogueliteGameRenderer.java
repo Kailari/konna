@@ -100,12 +100,21 @@ public class RogueliteGameRenderer implements GameRenderer {
 
     @Override
     public void changeGameMode(final GameMode gameMode) {
+        if (this.stateRenderer != null) {
+            try {
+                this.stateRenderer.close();
+            } catch (final Exception e) {
+                LOG.error("Destroying the old renderer failed: " + e.getMessage());
+            }
+        }
         this.stateRenderer = this.stateRenderers.get(gameMode);
     }
 
     @Override
     public void close() throws Exception {
+        LOG.debug("Destroying the renderer...");
         if (this.stateRenderer != null) {
+            LOG.debug("\t-> Destroying the state renderer...");
             this.stateRenderer.close();
         }
         this.audioContext.close();

@@ -8,6 +8,8 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import fi.jakojaannos.roguelite.engine.view.audio.AudioContext;
+import fi.jakojaannos.roguelite.engine.view.audio.MusicPlayer;
+import fi.jakojaannos.roguelite.engine.view.audio.MusicTrack;
 import fi.jakojaannos.roguelite.engine.view.audio.SoundEffect;
 
 import static org.lwjgl.openal.AL10.*;
@@ -20,6 +22,11 @@ public class LWJGLAudioContext implements AudioContext {
 
     private final int[] sources;
     private final int[] priorities;
+    private final int musicSource;
+
+    public long getALContext() {
+        return this.context;
+    }
 
     public LWJGLAudioContext(final int nSources) {
         // Create device/context
@@ -34,6 +41,7 @@ public class LWJGLAudioContext implements AudioContext {
         AL.createCapabilities(alcCapabilities);
 
         // Get the audio source(s)
+        this.musicSource = alGenSources();
         this.sources = new int[nSources];
         alGenSources(this.sources);
 
@@ -44,10 +52,9 @@ public class LWJGLAudioContext implements AudioContext {
     @Override
     public SoundEffect createEffect(
             final Path assetRoot,
-            final String filename,
-            final AudioContext context
+            final String filename
     ) {
-        return new LWJGLSoundEffect(assetRoot, filename, context);
+        return new LWJGLSoundEffect(assetRoot, filename, this);
     }
 
     @Override
@@ -91,8 +98,14 @@ public class LWJGLAudioContext implements AudioContext {
         return state;
     }
 
-    private boolean hasStopped(final int i) {
-        return false;
+    @Override
+    public MusicPlayer createMusicPlayer() {
+        return new LWJGLMusicPlayer(this);
+    }
+
+    @Override
+    public MusicTrack createTrack(final Path path) {
+        return new LWJGLMusicTrack(path);
     }
 
     @Override
@@ -102,5 +115,7 @@ public class LWJGLAudioContext implements AudioContext {
         alcCloseDevice(this.device);
     }
 
-    public static record Source(int pointer, int priority) {}
+    public int getMusicSource() {
+        return this.musicSource;
+    }
 }

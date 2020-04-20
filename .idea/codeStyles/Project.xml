@@ -263,6 +263,13 @@
           <section>
             <rule>
               <match>
+                <SETTER />
+              </match>
+            </rule>
+          </section>
+          <section>
+            <rule>
+              <match>
                 <CONSTRUCTOR>true</CONSTRUCTOR>
               </match>
             </rule>
