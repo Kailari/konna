@@ -15,8 +15,7 @@ import static org.lwjgl.openal.AL10.AL_FORMAT_MONO16;
 import static org.lwjgl.openal.AL10.AL_FORMAT_STEREO16;
 import static org.lwjgl.stb.STBVorbis.*;
 import static org.lwjgl.system.MemoryStack.stackPush;
-import static org.lwjgl.system.MemoryUtil.NULL;
-import static org.lwjgl.system.MemoryUtil.memAlloc;
+import static org.lwjgl.system.MemoryUtil.*;
 
 public class LWJGLMusicTrack implements MusicTrack {
     @SuppressWarnings("FieldCanBeLocal")
@@ -78,6 +77,7 @@ public class LWJGLMusicTrack implements MusicTrack {
     @Override
     public void close() {
         stb_vorbis_close(this.handle);
+        memFree(this.encodedAudio);
     }
 
     @Override
