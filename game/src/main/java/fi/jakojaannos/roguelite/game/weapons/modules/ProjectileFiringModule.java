@@ -29,7 +29,7 @@ public class ProjectileFiringModule implements WeaponModule<ProjectileFiringModu
         final var attributes = weapon.getAttributes(Attributes.class);
 
         final var timeSinceLastAttack = info.timeManager().getCurrentGameTime() - state.lastAttackTimestamp;
-        if (timeSinceLastAttack < attributes.timeBetweenShots) {
+        if (timeSinceLastAttack < Math.max(1, attributes.timeBetweenShots - state.firerateModifier)) {
             event.cancel();
         }
     }
@@ -113,5 +113,7 @@ public class ProjectileFiringModule implements WeaponModule<ProjectileFiringModu
         private final Vector2d tmpDirection = new Vector2d();
         private final Random random = new Random(1337);
         public long lastAttackTimestamp = -1000;
+
+        public double firerateModifier;
     }
 }

@@ -9,27 +9,19 @@ public class InventoryWeapon {
         this.instance = new WeaponInstanceImpl(weapon.constructStates(), weapon.getAttributes());
     }
 
-    public void reload(
-            final ActionInfo info
-    ) {
+    public void reload(final ActionInfo info) {
         this.weapon.reload(this.instance, info);
     }
 
-    public void pullTrigger(
-            final ActionInfo info
-    ) {
+    public void pullTrigger(final ActionInfo info) {
         this.weapon.pullTrigger(this.instance, info);
     }
 
-    public void releaseTrigger(
-            final ActionInfo info
-    ) {
+    public void releaseTrigger(final ActionInfo info) {
         this.weapon.releaseTrigger(this.instance, info);
     }
 
-    public void fireIfReady(
-            final ActionInfo info
-    ) {
+    public void fireIfReady(final ActionInfo info) {
         this.weapon.fire(this.instance, info);
     }
 

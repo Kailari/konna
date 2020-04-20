@@ -48,6 +48,7 @@ public class PlayerArchetype {
         weaponInventory.slots[4] = new InventoryWeapon(Weapons.PLAYER_MINIGUN_OVERHEAT_2);
         weaponInventory.slots[5] = new InventoryWeapon(Weapons.PLAYER_MINIGUN_OVERHEAT_3);
         weaponInventory.slots[6] = new InventoryWeapon(Weapons.PLAYER_MINIGUN_SPREAD);
+        weaponInventory.slots[0] = new InventoryWeapon(Weapons.PLAYER_TEST_AR);
 
         player.addComponent(new SpriteInfo("sprites/player"));
         player.addComponent(new Health(10));

@@ -15,49 +15,29 @@ public class AutomaticTriggerModule implements WeaponModule<NoAttributes> {
         hooks.registerStateFactory(State.class, State::new);
     }
 
-    public void onTriggerPull(
-            final Weapon weapon,
-            final TriggerPullEvent event,
-            final ActionInfo info
-    ) {
+    public void onTriggerPull(final Weapon weapon, final TriggerPullEvent event, final ActionInfo info) {
         final var state = weapon.getState(State.class);
         state.triggerDown = true;
     }
 
-    public void onTriggerRelease(
-            final Weapon weapon,
-            final TriggerReleaseEvent event,
-            final ActionInfo info
-    ) {
+    public void onTriggerRelease(final Weapon weapon, final TriggerReleaseEvent event, final ActionInfo info) {
         final var state = weapon.getState(State.class);
         state.triggerDown = false;
     }
 
-    public void checkIfCanFire(
-            final Weapon weapon,
-            final WeaponFireEvent event,
-            final ActionInfo info
-    ) {
+    public void checkIfCanFire(final Weapon weapon, final WeaponFireEvent event, final ActionInfo info) {
         final var state = weapon.getState(State.class);
         if (!state.triggerDown) {
             event.cancel();
         }
     }
 
-    public void equip(
-            final Weapon weapon,
-            final WeaponEquipEvent event,
-            final ActionInfo info
-    ) {
+    public void equip(final Weapon weapon, final WeaponEquipEvent event, final ActionInfo info) {
         final var state = weapon.getState(State.class);
         state.triggerDown = false;
     }
 
-    public void unequip(
-            final Weapon weapon,
-            final WeaponUnequipEvent event,
-            final ActionInfo info
-    ) {
+    public void unequip(final Weapon weapon, final WeaponUnequipEvent event, final ActionInfo info) {
         final var state = weapon.getState(State.class);
         state.triggerDown = false;
     }
