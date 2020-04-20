@@ -6,11 +6,11 @@ import fi.jakojaannos.roguelite.game.weapons.events.*;
 public class SingleShotTriggerModule implements WeaponModule<NoAttributes> {
     @Override
     public void register(final WeaponHooks hooks, final NoAttributes ignored) {
-        hooks.registerWeaponFire(this::checkIfCanFire, Phase.CHECK);
-        hooks.registerTriggerPull(this::onTriggerPull, Phase.TRIGGER);
-        hooks.registerTriggerRelease(this::onTriggerRelease, Phase.TRIGGER);
-        hooks.registerWeaponEquip(this::equip, Phase.POST);
-        hooks.registerWeaponUnequip(this::unequip, Phase.POST);
+        hooks.weaponFire(this::checkIfCanFire, Phase.CHECK);
+        hooks.triggerPull(this::onTriggerPull, Phase.TRIGGER);
+        hooks.triggerRelease(this::onTriggerRelease, Phase.TRIGGER);
+        hooks.weaponEquip(this::equip, Phase.POST);
+        hooks.weaponUnequip(this::unequip, Phase.POST);
 
         hooks.registerStateFactory(State.class, State::new);
     }

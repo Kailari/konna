@@ -11,13 +11,13 @@ import fi.jakojaannos.roguelite.game.weapons.events.*;
 public class OverheatModule implements WeaponModule<OverheatModule.Attributes> {
     @Override
     public void register(final WeaponHooks hooks, final Attributes attributes) {
-        hooks.registerWeaponStateQuery(this::stateQuery, Phase.TRIGGER);
-        hooks.registerWeaponFire(this::checkIfCanFire, Phase.CHECK);
-        hooks.registerWeaponFire(this::afterFire, Phase.POST);
-        hooks.registerTriggerRelease(this::triggerRelease, Phase.TRIGGER);
-        hooks.registerTriggerPull(this::triggerPull, Phase.TRIGGER);
-        hooks.registerWeaponEquip(this::equip, Phase.CHECK);
-        hooks.registerWeaponUnequip(this::unequip, Phase.CHECK);
+        hooks.weaponStateQuery(this::stateQuery, Phase.TRIGGER);
+        hooks.weaponFire(this::checkIfCanFire, Phase.CHECK);
+        hooks.weaponFire(this::afterFire, Phase.POST);
+        hooks.triggerRelease(this::triggerRelease, Phase.TRIGGER);
+        hooks.triggerPull(this::triggerPull, Phase.TRIGGER);
+        hooks.weaponEquip(this::equip, Phase.CHECK);
+        hooks.weaponUnequip(this::unequip, Phase.CHECK);
 
         hooks.registerStateFactory(State.class, State::new);
     }

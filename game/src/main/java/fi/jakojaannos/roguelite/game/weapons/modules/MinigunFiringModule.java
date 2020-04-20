@@ -16,12 +16,12 @@ import fi.jakojaannos.roguelite.game.weapons.events.WeaponFireEvent;
 public class MinigunFiringModule implements WeaponModule<MinigunFiringModule.Attributes> {
     @Override
     public void register(final WeaponHooks hooks, final Attributes attributes) {
-        hooks.registerWeaponFire(this::checkIfReadyToFire, Phase.CHECK);
-        hooks.registerWeaponFire(this::fire, Phase.TRIGGER);
-        hooks.registerWeaponFire(this::afterFire, Phase.POST);
-        hooks.registerTriggerPull(this::triggerPull, Phase.POST);
-        hooks.registerTriggerRelease(this::triggerRelease, Phase.POST);
-        hooks.registerReload(this::afterReload, Phase.POST);
+        hooks.weaponFire(this::checkIfReadyToFire, Phase.CHECK);
+        hooks.weaponFire(this::fire, Phase.TRIGGER);
+        hooks.weaponFire(this::afterFire, Phase.POST);
+        hooks.triggerPull(this::triggerPull, Phase.POST);
+        hooks.triggerRelease(this::triggerRelease, Phase.POST);
+        hooks.reload(this::afterReload, Phase.POST);
 
         hooks.registerStateFactory(State.class, State::new);
     }
