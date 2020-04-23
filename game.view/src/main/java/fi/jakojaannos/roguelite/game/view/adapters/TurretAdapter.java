@@ -1,4 +1,7 @@
-package fi.jakojaannos.roguelite.game.view.systems;
+package fi.jakojaannos.roguelite.game.view.adapters;
+
+import org.joml.Matrix4f;
+import org.joml.Vector2d;
 
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
@@ -28,7 +31,9 @@ import static fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexAttribut
 import static fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexAttribute.Type.FLOAT;
 import static org.lwjgl.system.MemoryStack.stackPush;
 
-public final class TurretBaseAdapter implements EcsRenderAdapter<TurretBaseAdapter.Resources, TurretBaseAdapter.EntityData> {
+public final class TurretAdapter implements EcsRenderAdapter<TurretAdapter.Resources, TurretAdapter.EntityData> {
+    private static final Matrix4f MODEL = new Matrix4f();
+
     private final ShaderProgram shader;
     private final Camera camera;
     private final Sprite sprite;
@@ -45,7 +50,7 @@ public final class TurretBaseAdapter implements EcsRenderAdapter<TurretBaseAdapt
         return this.mesh;
     }
 
-    public TurretBaseAdapter(
+    public TurretAdapter(
             final Path assetRoot,
             final RenderingBackend backend,
             final AssetRegistry<Sprite> spriteRegistry,
@@ -56,8 +61,11 @@ public final class TurretBaseAdapter implements EcsRenderAdapter<TurretBaseAdapt
                              .vertexShader(assetRoot.resolve("shaders/entities/turret.vert"))
                              .attributeLocation(0, "in_pos")
                              .attributeLocation(1, "in_uv")
-                             .attributeLocation(2, "in_translation")
-                             .attributeLocation(3, "in_frame")
+                             .attributeLocation(2, "in_model0")
+                             .attributeLocation(3, "in_model1")
+                             .attributeLocation(4, "in_model2")
+                             .attributeLocation(5, "in_model3")
+                             .attributeLocation(6, "in_frame")
                              .fragmentDataLocation(0, "out_frag_color")
                              .fragmentShader(assetRoot.resolve("shaders/entities/turret.frag"))
                              .build();
@@ -66,13 +74,16 @@ public final class TurretBaseAdapter implements EcsRenderAdapter<TurretBaseAdapt
 
         this.sprite = spriteRegistry.getByAssetName("sprites/turret");
 
-        this.vertexFormat = backend.createVertexFormat(256)
+        this.vertexFormat = backend.createVertexFormat()
                                    // Vertex position
                                    .withAttribute(FLOAT, 2, false)
                                    // UV coordinates
                                    .withAttribute(FLOAT, 2, false)
-                                   // World position
-                                   .withInstanceAttribute(FLOAT, 2, false)
+                                   // World transformations (4x4 matrix)
+                                   .withInstanceAttribute(FLOAT, 4, false)
+                                   .withInstanceAttribute(FLOAT, 4, false)
+                                   .withInstanceAttribute(FLOAT, 4, false)
+                                   .withInstanceAttribute(FLOAT, 4, false)
                                    // Frame
                                    .withInstanceAttribute(BYTE, 1, false)
                                    .build();
@@ -125,28 +136,42 @@ public final class TurretBaseAdapter implements EcsRenderAdapter<TurretBaseAdapt
                    .use();
 
         this.shader.setUniform2f("frame_size",
-                                 1.0f / this.sprite.getRows(),
-                                 1.0f / this.sprite.getColumns());
+                                 1.0f / this.sprite.getColumns(),
+                                 1.0f / this.sprite.getRows());
+        this.shader.setUniform1i("rows", this.sprite.getRows());
+        this.shader.setUniform1i("columns", this.sprite.getColumns());
 
         this.camera.useWorldCoordinates();
 
-        return entities.map(entity -> {
+        return entities.flatMap(entity -> {
             final var transform = entity.getData().transform;
             final var hasTarget = entity.getData().attackAi.getAttackTarget()
                                                            .isPresent();
-            // TODO: Handle using animations
+            // TODO: Handle using animations?
             final int frame;
+            final float rotation;
             if (hasTarget) {
+                final var target = entity.getData().attackAi.getAttackTarget().get().asHandle();
+                final var targetPosition = target.getComponent(Transform.class).orElseThrow();
+                rotation = (float) targetPosition.position.sub(transform.position, new Vector2d())
+                                                          .angle(new Vector2d(0, -1));
+
                 frame = 1 + (int) ((timeManager.getCurrentGameTime() / 5) % 2);
             } else {
                 frame = 0;
+                rotation = 0.0f;
             }
 
-            return (buffer, offset) -> write(buffer,
-                                             offset,
-                                             (float) transform.position.x,
-                                             (float) transform.position.y,
-                                             (byte) frame);
+            return Stream.of((buffer, offset) -> write(buffer, offset,
+                                                       (float) transform.position.x,
+                                                       (float) transform.position.y,
+                                                       0.0f,
+                                                       (byte) frame),
+                             ((buffer, offset) -> write(buffer, offset,
+                                                        (float) transform.position.x,
+                                                        (float) transform.position.y,
+                                                        -rotation,
+                                                        (byte) (frame + 3))));
         });
     }
 
@@ -155,11 +180,14 @@ public final class TurretBaseAdapter implements EcsRenderAdapter<TurretBaseAdapt
             final int offset,
             final float x,
             final float y,
+            final float rotation,
             final byte frame
     ) {
-        buffer.putFloat(offset, x);
-        buffer.putFloat(offset + 4, y);
-        buffer.put(offset + 8, frame);
+        MODEL.identity()
+             .setTranslation(x, y, 1)
+             .rotateZ(rotation);
+        MODEL.get(offset, buffer);
+        buffer.put(offset + 64, frame);
     }
 
     public static record EntityData(

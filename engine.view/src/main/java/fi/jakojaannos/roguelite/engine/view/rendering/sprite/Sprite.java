@@ -11,11 +11,11 @@ public final class Sprite {
     private final List<TextureRegion> frames;
     private final Map<String, Animation> animations;
 
-    public float getRows() {
+    public int getRows() {
         return this.rows;
     }
 
-    public float getColumns() {
+    public int getColumns() {
         return this.columns;
     }
 

@@ -18,6 +18,7 @@ import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.GenericUIElementBuilder;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.UILabelBuilder;
 import fi.jakojaannos.roguelite.game.DebugConfig;
+import fi.jakojaannos.roguelite.game.view.adapters.TurretAdapter;
 import fi.jakojaannos.roguelite.game.view.systems.*;
 import fi.jakojaannos.roguelite.game.view.systems.audio.BackgroundMusicLoopSystem;
 import fi.jakojaannos.roguelite.game.view.systems.audio.HandleAudioEventsSystem;
@@ -68,10 +69,10 @@ public final class GameplayGameModeRenderer {
             final Camera camera
     ) {
         return RenderDispatcher.builder()
-                               .withAdapter(new TurretBaseAdapter(assetRoot,
-                                                                  backend,
-                                                                  assetManager.getAssetRegistry(Sprite.class),
-                                                                  camera))
+                               .withAdapter(new TurretAdapter(assetRoot,
+                                                              backend,
+                                                              assetManager.getAssetRegistry(Sprite.class),
+                                                              camera))
                                .build();
     }
 

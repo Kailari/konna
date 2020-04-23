@@ -1,8 +1,8 @@
 {
   "frames": {
     "texture": "textures/turret.png",
-    "rows": 3,
-    "columns": 2
+    "rows": 2,
+    "columns": 3
   },
   "animations": {
     "default": [ 0 ],

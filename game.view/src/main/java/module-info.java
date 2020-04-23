@@ -14,9 +14,9 @@ module roguelite.game.view {
 
     requires roguelite.game;
 
+    opens fi.jakojaannos.roguelite.game.view.adapters to roguelite.engine.ecs;
+    opens fi.jakojaannos.roguelite.game.view.systems to roguelite.engine.ecs;
     opens fi.jakojaannos.roguelite.game.view.systems.audio to roguelite.engine.ecs;
 
     exports fi.jakojaannos.roguelite.game.view;
-
-    opens fi.jakojaannos.roguelite.game.view.systems to roguelite.engine.ecs;
 }
