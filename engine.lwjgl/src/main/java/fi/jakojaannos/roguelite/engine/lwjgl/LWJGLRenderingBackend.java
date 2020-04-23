@@ -55,11 +55,6 @@ public class LWJGLRenderingBackend implements RenderingBackend {
     }
 
     @Override
-    public VertexFormatBuilder createVertexFormat(final int instanceCount) {
-        return new LWJGLVertexFormatBuilder();
-    }
-
-    @Override
     public Mesh createMesh(final VertexFormat vertexFormat) {
         return new LWJGLMesh(vertexFormat);
     }

@@ -9,10 +9,6 @@ import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexFormat;
 public interface EcsRenderAdapter<TResources, TEntityData> {
     VertexFormat getVertexFormat();
 
-    default int getVertexSizeInBytes() {
-        return this.getVertexFormat().getSizeInBytes();
-    }
-
     Mesh getMesh();
 
     Stream<EntityWriter> tick(

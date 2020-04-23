@@ -23,8 +23,6 @@ public interface RenderingBackend extends AutoCloseable {
 
     VertexFormatBuilder createVertexFormat();
 
-    VertexFormatBuilder createVertexFormat(int instanceCount);
-
     ShaderBuilder createShaderProgram();
 
     AudioContext createAudioContext();

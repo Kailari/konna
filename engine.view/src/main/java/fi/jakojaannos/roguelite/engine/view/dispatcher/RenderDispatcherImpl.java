@@ -66,7 +66,7 @@ public class RenderDispatcherImpl implements RenderDispatcher {
         final var nQueued = new QueueCounter();
         adapter.tick(resources, entityStream, accumulator)
                .forEach(writer -> {
-                   if (nQueued.value == MAX_PER_BATCH) {
+                   if (nQueued.value + 1 == MAX_PER_BATCH) {
                        flush(buffer, mesh, nQueued.value);
                        nQueued.value = 0;
                    }
@@ -95,7 +95,7 @@ public class RenderDispatcherImpl implements RenderDispatcher {
 
     private ByteBuffer getBufferFor(final EcsRenderAdapter<?, ?> adapter) {
         return this.adapterBuffers.computeIfAbsent(adapter.getClass(),
-                                                   ignored -> memAlloc(MAX_PER_BATCH * adapter.getVertexSizeInBytes()));
+                                                   ignored -> memAlloc(MAX_PER_BATCH * adapter.getVertexFormat().getInstanceSizeInBytes()));
     }
 
     @SuppressWarnings("unchecked")
