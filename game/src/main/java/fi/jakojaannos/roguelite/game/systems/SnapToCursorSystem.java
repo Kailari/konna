@@ -34,7 +34,7 @@ public class SnapToCursorSystem implements ECSSystem {
         final var camProps = world.fetchResource(CameraProperties.class);
 
         final var entityManager = world.getEntityManager();
-        mouse.calculateCursorPositionRelativeToCamera(entityManager, camProps, this.tmpCursorPosition);
+        mouse.calculateCursorPositionRelativeToCamera(camProps, this.tmpCursorPosition);
 
         entities.map(entity -> entityManager.getComponentOf(entity, Transform.class).orElseThrow().position)
                 .forEach(entityPosition -> entityPosition.set(this.tmpCursorPosition));

@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import fi.jakojaannos.roguelite.engine.GameMode;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
+import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
@@ -45,7 +46,7 @@ public final class MainMenuGameMode {
     }
 
     private static void createState(final World world) {
-        world.registerResource(new CameraProperties(null));
+        world.registerResource(new CameraProperties((EntityHandle) null));
         world.registerResource(new Mouse());
         world.registerResource(new Inputs());
     }

@@ -78,7 +78,6 @@ public class HealthBarUpdateSystem implements ECSSystem {
             final var offsetX = -width / 2.0f;
             final var offsetY = (float) this.camera.getPixelsPerUnitY() * 0.85f;
             cameraProperties.calculateRelativePositionAndReMapToSize(transform.position,
-                                                                     entityManager,
                                                                      this.camera.getViewport()
                                                                                 .getWidthInPixels(),
                                                                      this.camera.getViewport()

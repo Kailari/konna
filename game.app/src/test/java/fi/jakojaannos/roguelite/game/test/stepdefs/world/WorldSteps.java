@@ -41,7 +41,7 @@ public class WorldSteps {
         final var camera = state.world().getEntityManager().createEntity();
         state.world().getEntityManager().addComponentTo(camera, new Transform());
         state.world().getEntityManager().addComponentTo(camera, new NoDrawTag());
-        state.world().fetchResource(CameraProperties.class).cameraEntity = camera;
+        state.world().fetchResource(CameraProperties.class).cameraEntity = camera.asHandle();
 
         final var areaWidth = 20;
         final var areaHeight = 20;

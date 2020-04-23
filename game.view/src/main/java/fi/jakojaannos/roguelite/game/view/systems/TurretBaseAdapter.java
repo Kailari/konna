@@ -114,7 +114,8 @@ public final class TurretBaseAdapter implements EcsRenderAdapter<TurretBaseAdapt
     @Override
     public Stream<EntityWriter> tick(
             final Resources resources,
-            final Stream<EntityDataHandle<EntityData>> entities
+            final Stream<EntityDataHandle<EntityData>> entities,
+            final long accumulator
     ) {
         final var timeManager = resources.timeManager;
 

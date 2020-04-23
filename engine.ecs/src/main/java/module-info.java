@@ -8,4 +8,6 @@ module roguelite.engine.ecs {
     exports fi.jakojaannos.roguelite.engine.ecs.data.resources;
     exports fi.jakojaannos.roguelite.engine.ecs.annotation;
     exports fi.jakojaannos.roguelite.engine.ecs.legacy;
+
+    exports fi.jakojaannos.roguelite.engine.ecs.systemdata to roguelite.engine.view;
 }

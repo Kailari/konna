@@ -2,15 +2,12 @@ package fi.jakojaannos.roguelite.engine.data.resources;
 
 import org.joml.Vector2d;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
-
 public class Mouse {
     public final Vector2d position = new Vector2d(-999.0, -999.0);
     private final Vector2d tmpPosition = new Vector2d();
     public boolean clicked;
 
     public final Vector2d calculateCursorPositionRelativeToCamera(
-            final EntityManager entityManager,
             final CameraProperties cameraProperties,
             final Vector2d outResult
     ) {
@@ -18,7 +15,6 @@ public class Mouse {
                                                                   .mul(cameraProperties.viewportWidthInWorldUnits,
                                                                        cameraProperties.viewportHeightInWorldUnits)
                                                                   .negate(),
-                                                       entityManager,
                                                        outResult);
     }
 }

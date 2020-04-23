@@ -1,7 +1,6 @@
 package fi.jakojaannos.roguelite.game.view.gamemode;
 
 import java.nio.file.Path;
-import java.util.List;
 
 import fi.jakojaannos.roguelite.engine.content.AssetManager;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
@@ -9,6 +8,7 @@ import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.GameModeRenderer;
+import fi.jakojaannos.roguelite.engine.view.RenderDispatcher;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.audio.AudioContext;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.Sprite;
@@ -46,21 +46,36 @@ public final class GameplayGameModeRenderer {
             final AudioContext audioContext
     ) {
         final var userInterface = createUserInterface(events, timeManager, camera, assetManager);
-        final var dispatcher = createRenderDispatcher(userInterface,
-                                                      assetRoot,
-                                                      camera,
-                                                      assetManager,
-                                                      backend,
-                                                      audioContext);
-        return new GameModeRenderer(dispatcher,
-                                    List.of(new TurretBaseAdapter(assetRoot,
-                                                                  backend,
-                                                                  assetManager.getAssetRegistry(Sprite.class),
-                                                                  camera)),
+        final var legacyDispatcher = createLegacyDispatcher(userInterface,
+                                                            assetRoot,
+                                                            camera,
+                                                            assetManager,
+                                                            backend,
+                                                            audioContext);
+        final var renderDispatcher = createRenderDispatcher(assetRoot,
+                                                            assetManager,
+                                                            backend,
+                                                            camera);
+        return new GameModeRenderer(legacyDispatcher,
+                                    renderDispatcher,
                                     userInterface);
     }
 
-    private static SystemDispatcher createRenderDispatcher(
+    private static RenderDispatcher createRenderDispatcher(
+            final Path assetRoot,
+            final AssetManager assetManager,
+            final RenderingBackend backend,
+            final Camera camera
+    ) {
+        return RenderDispatcher.builder()
+                               .withAdapter(new TurretBaseAdapter(assetRoot,
+                                                                  backend,
+                                                                  assetManager.getAssetRegistry(Sprite.class),
+                                                                  camera))
+                               .build();
+    }
+
+    private static SystemDispatcher createLegacyDispatcher(
             final UserInterface userInterface,
             final Path assetRoot,
             final Camera camera,
