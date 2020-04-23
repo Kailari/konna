@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
+import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
@@ -73,7 +74,7 @@ class PlayerInputSystemTest {
             boolean up,
             boolean down
     ) {
-        world.registerResource(new CameraProperties(null));
+        world.registerResource(new CameraProperties((EntityHandle) null));
         Inputs inputs = this.world.fetchResource(Inputs.class);
         inputs.inputLeft = left;
         inputs.inputRight = right;
@@ -118,7 +119,7 @@ class PlayerInputSystemTest {
 
     @Test
     void havingInputAttackSetUpdatesAttack() {
-        world.registerResource(new CameraProperties(null));
+        world.registerResource(new CameraProperties((EntityHandle) null));
         Inputs inputs = this.world.fetchResource(Inputs.class);
         inputs.inputAttack = false;
 
