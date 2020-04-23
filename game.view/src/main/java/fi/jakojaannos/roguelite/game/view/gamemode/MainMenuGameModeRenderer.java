@@ -1,7 +1,6 @@
 package fi.jakojaannos.roguelite.game.view.gamemode;
 
 import java.nio.file.Path;
-import java.util.Collections;
 
 import fi.jakojaannos.roguelite.engine.content.AssetManager;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
@@ -9,6 +8,7 @@ import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.GameModeRenderer;
+import fi.jakojaannos.roguelite.engine.view.RenderDispatcher;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.Sprite;
 import fi.jakojaannos.roguelite.engine.view.rendering.text.Font;
@@ -36,11 +36,12 @@ public final class MainMenuGameModeRenderer {
             final RenderingBackend backend
     ) {
         final var userInterface = createUserInterface(events, timeManager, camera, assetManager);
-        final var dispatcher = createRenderDispatcher(userInterface, assetRoot, camera, assetManager, backend);
-        return new GameModeRenderer(dispatcher, Collections.emptyList(), userInterface);
+        final var legacyDispatcher = createLegacyDispatcher(userInterface, assetRoot, camera, assetManager, backend);
+        final var renderDispatcher = RenderDispatcher.builder().build();
+        return new GameModeRenderer(legacyDispatcher, renderDispatcher, userInterface);
     }
 
-    private static SystemDispatcher createRenderDispatcher(
+    private static SystemDispatcher createLegacyDispatcher(
             final UserInterface userInterface,
             final Path assetRoot,
             final Camera camera,

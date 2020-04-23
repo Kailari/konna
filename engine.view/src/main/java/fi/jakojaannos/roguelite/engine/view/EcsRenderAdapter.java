@@ -17,6 +17,7 @@ public interface EcsRenderAdapter<TResources, TEntityData> {
 
     Stream<EntityWriter> tick(
             TResources resources,
-            Stream<EntityDataHandle<TEntityData>> entities
+            Stream<EntityDataHandle<TEntityData>> entities,
+            final long accumulator
     );
 }

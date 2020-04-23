@@ -43,7 +43,7 @@ public class LevelRenderingSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
-        final var cameraEntity = world.fetchResource(CameraProperties.class).cameraEntity;
+        final var cameraEntity = world.fetchResource(CameraProperties.class).cameraEntity.asLegacyEntity();
         final var cameraTransform = world.getEntityManager()
                                          .getComponentOf(cameraEntity, Transform.class)
                                          .orElseThrow();
