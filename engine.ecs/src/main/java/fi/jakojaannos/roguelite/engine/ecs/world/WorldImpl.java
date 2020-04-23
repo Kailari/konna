@@ -75,7 +75,7 @@ public class WorldImpl implements World {
     }
 
     @Override
-    public EntityHandle createEntity(final Object... components) {
+    public synchronized EntityHandle createEntity(final Object... components) {
         final var id = this.idCounter.getAndAdd(1);
 
         LOG.debug(LogCategories.ENTITY_LIFECYCLE, "Creating entity with id {}", id);
@@ -95,7 +95,7 @@ public class WorldImpl implements World {
         return this.entities[id];
     }
 
-    private void resize(final int newCapacity) {
+    private synchronized void resize(final int newCapacity) {
         this.capacity = newCapacity;
         this.entities = Arrays.copyOf(this.entities, newCapacity);
         this.componentStorage.resize(newCapacity);
