@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Spliterator;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
@@ -29,11 +30,11 @@ public class WorldImpl implements World {
     private final ResourceStorage resourceStorage;
     private final List<Runnable> entityRemoveTasks = new ArrayList<>();
 
+    private final AtomicInteger idCounter = new AtomicInteger(0);
+    private final AtomicInteger nEntities = new AtomicInteger(0);
+
     private EntityHandleImpl[] entities;
     private int capacity;
-
-    private int idCounter;
-    private int nEntities;
 
     @Override
     public EntityManager getEntityManager() {
@@ -42,7 +43,7 @@ public class WorldImpl implements World {
 
     @Override
     public int getEntityCount() {
-        return this.nEntities;
+        return this.nEntities.get();
     }
 
     public ComponentStorage getComponentStorage() {
@@ -51,8 +52,8 @@ public class WorldImpl implements World {
 
     public WorldImpl() {
         this.capacity = 256;
-        this.idCounter = 0;
-        this.nEntities = 0;
+        this.idCounter.set(0);
+        this.nEntities.set(0);
 
         this.entities = new EntityHandleImpl[this.capacity];
         this.resourceStorage = new ResourceStorage();
@@ -75,8 +76,7 @@ public class WorldImpl implements World {
 
     @Override
     public EntityHandle createEntity(final Object... components) {
-        final var id = this.idCounter;
-        this.idCounter++;
+        final var id = this.idCounter.getAndAdd(1);
 
         LOG.debug(LogCategories.ENTITY_LIFECYCLE, "Creating entity with id {}", id);
         if (id == this.entities.length) {
@@ -112,31 +112,33 @@ public class WorldImpl implements World {
         final var actualHandle = (EntityHandleImpl) handle;
         actualHandle.markPendingRemoval();
 
-        this.entityRemoveTasks.add(() -> {
-            this.idCounter--;
-            this.nEntities--;
-            actualHandle.markDestroyed();
+        this.entityRemoveTasks.add(() -> cleanUpEntity(actualHandle));
+    }
 
-            final var removedSlot = actualHandle.getId();
-            LOG.debug(LogCategories.ENTITY_LIFECYCLE, "Destroyed entity {}", removedSlot);
+    private synchronized void cleanUpEntity(final EntityHandleImpl actualHandle) {
+        this.idCounter.decrementAndGet();
+        this.nEntities.decrementAndGet();
+        actualHandle.markDestroyed();
 
-            // Swap components from the last entity to the removed slot
-            this.componentStorage.moveAndClear(this.idCounter, removedSlot);
-            if (removedSlot != this.idCounter) {
+        final var removedSlot = actualHandle.getId();
+        LOG.debug(LogCategories.ENTITY_LIFECYCLE, "Destroyed entity {}", removedSlot);
 
-                // Swap handle IDs
-                this.entities[this.idCounter].moveTo(removedSlot);
-                this.entities[removedSlot].moveTo(-1);
+        // Swap components from the last entity to the removed slot
+        this.componentStorage.moveAndClear(this.idCounter.get(), removedSlot);
+        if (removedSlot != this.idCounter.get()) {
 
-                // Swap handle to correct position in lookup
-                this.entities[removedSlot] = this.entities[this.idCounter];
-            }
-            this.entities[this.idCounter] = null;
-        });
+            // Swap handle IDs
+            this.entities[this.idCounter.get()].moveTo(removedSlot);
+            this.entities[removedSlot].moveTo(-1);
+
+            // Swap handle to correct position in lookup
+            this.entities[removedSlot] = this.entities[this.idCounter.get()];
+        }
+        this.entities[this.idCounter.get()] = null;
     }
 
     @Override
-    public void clearAllEntities() {
+    public synchronized void clearAllEntities() {
         LOG.warn(LogCategories.ENTITY_LIFECYCLE, "Clearing all ({}) entities!", this.nEntities);
         this.entityRemoveTasks.clear();
         this.componentStorage.clear();
@@ -149,13 +151,13 @@ public class WorldImpl implements World {
 
             this.entities[i] = null;
         }
-        this.idCounter = 0;
-        this.nEntities = 0;
+        this.idCounter.set(0);
+        this.nEntities.set(0);
     }
 
     @Override
-    public void commitEntityModifications() {
-        this.nEntities = this.idCounter;
+    public synchronized void commitEntityModifications() {
+        this.nEntities.set(this.idCounter.get());
         this.entityRemoveTasks.forEach(Runnable::run);
         this.entityRemoveTasks.clear();
     }
