@@ -1,6 +1,7 @@
 package fi.jakojaannos.roguelite.game.view.gamemode;
 
 import java.nio.file.Path;
+import java.util.Collections;
 
 import fi.jakojaannos.roguelite.engine.content.AssetManager;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
@@ -36,7 +37,7 @@ public final class MainMenuGameModeRenderer {
     ) {
         final var userInterface = createUserInterface(events, timeManager, camera, assetManager);
         final var dispatcher = createRenderDispatcher(userInterface, assetRoot, camera, assetManager, backend);
-        return new GameModeRenderer(dispatcher, userInterface);
+        return new GameModeRenderer(dispatcher, Collections.emptyList(), userInterface);
     }
 
     private static SystemDispatcher createRenderDispatcher(

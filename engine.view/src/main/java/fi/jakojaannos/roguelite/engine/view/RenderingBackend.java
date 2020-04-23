@@ -11,17 +11,19 @@ import fi.jakojaannos.roguelite.engine.view.rendering.sprite.SpriteBatch;
 import fi.jakojaannos.roguelite.engine.view.rendering.text.TextRenderer;
 
 public interface RenderingBackend extends AutoCloseable {
+    TextRenderer getTextRenderer();
+
     Viewport getViewport(Window window);
 
     Camera createCamera(Viewport viewport);
-
-    TextRenderer getTextRenderer();
 
     SpriteBatch createSpriteBatch(Path assetRoot, String shader);
 
     Mesh createMesh(VertexFormat vertexFormat);
 
     VertexFormatBuilder createVertexFormat();
+
+    VertexFormatBuilder createVertexFormat(int instanceCount);
 
     ShaderBuilder createShaderProgram();
 

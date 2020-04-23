@@ -16,7 +16,17 @@ public class LWJGLVertexFormatBuilder implements VertexFormatBuilder {
             final int count,
             final boolean normalized
     ) {
-        this.attributes.add(new LWJGLVertexAttribute(type, count, normalized));
+        this.attributes.add(new LWJGLVertexAttribute(false, type, count, normalized));
+        return this;
+    }
+
+    @Override
+    public VertexFormatBuilder withInstanceAttribute(
+            final VertexAttribute.Type type,
+            final int count,
+            final boolean normalized
+    ) {
+        this.attributes.add(new LWJGLVertexAttribute(true, type, count, normalized));
         return this;
     }
 

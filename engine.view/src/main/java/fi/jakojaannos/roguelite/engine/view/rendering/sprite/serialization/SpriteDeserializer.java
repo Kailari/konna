@@ -23,6 +23,8 @@ public class SpriteDeserializer<TTexture extends Texture> implements JsonDeseria
     private static final Logger LOG = LoggerFactory.getLogger(SpriteDeserializer.class);
 
     private final AssetRegistry<TTexture> textures;
+    private int rows;
+    private int columns;
 
     public SpriteDeserializer(final AssetRegistry<TTexture> textures) {
         this.textures = textures;
@@ -43,7 +45,7 @@ public class SpriteDeserializer<TTexture extends Texture> implements JsonDeseria
         final Map<String, Animation> animations = new HashMap<>();
         deserializeAnimations(animationsJson, frames.size(), animations);
 
-        return new Sprite(List.copyOf(frames), Map.copyOf(animations));
+        return new Sprite(this.rows, this.columns, List.copyOf(frames), Map.copyOf(animations));
     }
 
     private void deserializeFrames(
@@ -59,8 +61,8 @@ public class SpriteDeserializer<TTexture extends Texture> implements JsonDeseria
             final var framesJsonObject = framesElement.getAsJsonObject();
             final var textureHandle = framesJsonObject.get("texture").getAsString();
             final var texture = this.textures.getByAssetName(textureHandle);
-            final var rows = framesJsonObject.get("rows").getAsInt();
-            final var columns = framesJsonObject.get("columns").getAsInt();
+            this.rows = framesJsonObject.get("rows").getAsInt();
+            this.columns = framesJsonObject.get("columns").getAsInt();
 
             final var frameU = 1.0 / rows;
             final var frameV = 1.0 / columns;
@@ -152,7 +154,7 @@ public class SpriteDeserializer<TTexture extends Texture> implements JsonDeseria
         else if (animationElement.isJsonObject()) {
             final var animationJsonObject = animationElement.getAsJsonObject();
             if (JsonUtils.hasAll(animationJsonObject, "first", "last")
-                    && JsonUtils.hasAnyOf(animationJsonObject, "totalDuration", "durations")) {
+                && JsonUtils.hasAnyOf(animationJsonObject, "totalDuration", "durations")) {
 
                 final var first = animationJsonObject.get("first").getAsInt();
                 final var last = animationJsonObject.get("last").getAsInt();

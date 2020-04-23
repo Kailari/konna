@@ -1,11 +1,7 @@
 {
-  "frames": [
-    {
-      "texture": "textures/shotgun_pellet.png",
-      "x": 0,
-      "y": 0,
-      "w": 4,
-      "h": 4
-    }
-  ]
+  "frames": {
+    "texture": "textures/shotgun_pellet.png",
+    "rows": 1,
+    "columns": 1
+  }
 }

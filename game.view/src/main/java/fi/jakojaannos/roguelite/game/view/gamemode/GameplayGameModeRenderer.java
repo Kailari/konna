@@ -1,6 +1,7 @@
 package fi.jakojaannos.roguelite.game.view.gamemode;
 
 import java.nio.file.Path;
+import java.util.List;
 
 import fi.jakojaannos.roguelite.engine.content.AssetManager;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
@@ -51,7 +52,12 @@ public final class GameplayGameModeRenderer {
                                                       assetManager,
                                                       backend,
                                                       audioContext);
-        return new GameModeRenderer(dispatcher, userInterface);
+        return new GameModeRenderer(dispatcher,
+                                    List.of(new TurretBaseAdapter(assetRoot,
+                                                                  backend,
+                                                                  assetManager.getAssetRegistry(Sprite.class),
+                                                                  camera)),
+                                    userInterface);
     }
 
     private static SystemDispatcher createRenderDispatcher(
@@ -73,7 +79,6 @@ public final class GameplayGameModeRenderer {
 
         final var entities = builder.group("entities")
                                     .withSystem(new SpriteRenderingSystem(assetRoot, camera, spriteRegistry, backend))
-                                    .withSystem(new TurretRenderingSystem(assetRoot, backend, spriteRegistry, camera))
                                     .dependsOn(level)
                                     .buildGroup();
 

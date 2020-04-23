@@ -1,5 +1,7 @@
 package fi.jakojaannos.roguelite.game.gamemode;
 
+import java.util.Random;
+
 import fi.jakojaannos.roguelite.engine.GameMode;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
@@ -83,7 +85,11 @@ public final class GameplayGameMode {
         final var layer = new TileMapLayer(generator.getTileMap(), true);
         entityManager.addComponentTo(levelEntity, layer);
 
-        //TurretArchetype.create(entityManager, timeManager, new Transform(2.0, 0.0));
+        final var random = new Random(seed + 1337);
+        for (int i = 0; i < 1; i++) {
+            TurretArchetype.create(entityManager, timeManager, new Transform((random.nextDouble() * 2.0 - 1.0) * 10.0,
+                                                                             (random.nextDouble() * 2.0 - 1.0) * 10.0));
+        }
 
         entityManager.applyModifications();
     }
