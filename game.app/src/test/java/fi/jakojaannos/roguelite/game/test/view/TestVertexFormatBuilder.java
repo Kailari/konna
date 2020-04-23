@@ -16,7 +16,17 @@ public class TestVertexFormatBuilder implements VertexFormatBuilder {
             final int count,
             final boolean normalized
     ) {
-        this.attributes.add(new TestVertexAttribute(type, count));
+        this.attributes.add(new TestVertexAttribute(false, type, count));
+        return this;
+    }
+
+    @Override
+    public VertexFormatBuilder withInstanceAttribute(
+            final VertexAttribute.Type type,
+            final int count,
+            final boolean normalized
+    ) {
+        this.attributes.add(new TestVertexAttribute(true, type, count));
         return this;
     }
 
@@ -28,33 +38,31 @@ public class TestVertexFormatBuilder implements VertexFormatBuilder {
     private static class TestVertexAttribute implements VertexAttribute {
         private final Type type;
         private final int count;
-
-        public TestVertexAttribute(
-                final Type type,
-                final int count
-        ) {
-            this.type = type;
-            this.count = count;
-        }
+        private final boolean instanced;
 
         @Override
         public int getSizeInBytes() {
-            switch (this.type) {
-                case BYTE:
-                case UNSIGNED_BYTE:
-                    return this.count;
-                case SHORT:
-                case UNSIGNED_SHORT:
-                    return 2 * this.count;
-                case INT:
-                case UNSIGNED_INT:
-                case FLOAT:
-                    return 4 * this.count;
-                case DOUBLE:
-                    return 8 * this.count;
-                default:
-                    throw new IllegalArgumentException("Unknown type: " + this.type);
-            }
+            return switch (this.type) {
+                case BYTE, UNSIGNED_BYTE -> this.count;
+                case SHORT, UNSIGNED_SHORT -> 2 * this.count;
+                case INT, UNSIGNED_INT, FLOAT -> 4 * this.count;
+                case DOUBLE -> 8 * this.count;
+            };
+        }
+
+        @Override
+        public boolean isInstanced() {
+            return this.instanced;
+        }
+
+        public TestVertexAttribute(
+                final boolean instanced,
+                final Type type,
+                final int count
+        ) {
+            this.instanced = instanced;
+            this.type = type;
+            this.count = count;
         }
 
         @Override

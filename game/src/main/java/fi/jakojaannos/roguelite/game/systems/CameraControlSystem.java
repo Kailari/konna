@@ -23,13 +23,13 @@ public class CameraControlSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
-        final var cameraEntity = world.fetchResource(CameraProperties.class).cameraEntity.asLegacyEntity();
+        final var cameraEntity = world.fetchResource(CameraProperties.class).cameraEntity;
         if (cameraEntity == null) {
             return;
         }
 
         final var entityManager = world.getEntityManager();
-        entityManager.getComponentOf(cameraEntity, Transform.class)
+        entityManager.getComponentOf(cameraEntity.asLegacyEntity(), Transform.class)
                      .ifPresent(cameraTransform -> {
                          entities.findFirst()
                                  .flatMap(entity -> entityManager.getComponentOf(entity, Transform.class))
