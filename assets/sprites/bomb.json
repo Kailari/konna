@@ -1,11 +1,7 @@
 {
-  "frames": [
-    {
-      "texture": "textures/bomb.png",
-      "x": 0,
-      "y": 0,
-      "w": 32,
-      "h": 32
-    }
-  ]
+  "frames": {
+    "texture": "textures/bomb.png",
+    "rows": 1,
+    "columns": 1
+  }
 }

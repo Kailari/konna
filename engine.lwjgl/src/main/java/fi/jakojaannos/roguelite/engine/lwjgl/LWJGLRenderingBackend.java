@@ -22,8 +22,13 @@ import fi.jakojaannos.roguelite.engine.view.rendering.shader.ShaderBuilder;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.SpriteBatch;
 import fi.jakojaannos.roguelite.engine.view.rendering.text.TextRenderer;
 
-public class LWJGLRenderingBackend implements RenderingBackend, AutoCloseable {
+public class LWJGLRenderingBackend implements RenderingBackend {
     private final LWJGLTextRenderer textRenderer;
+
+    @Override
+    public TextRenderer getTextRenderer() {
+        return this.textRenderer;
+    }
 
     public LWJGLRenderingBackend(final Path assetRoot) {
         this.textRenderer = new LWJGLTextRenderer(assetRoot, this);
@@ -32,11 +37,6 @@ public class LWJGLRenderingBackend implements RenderingBackend, AutoCloseable {
     @Override
     public Viewport getViewport(final Window window) {
         return new LWJGLViewport(window.getWidth(), window.getHeight());
-    }
-
-    @Override
-    public TextRenderer getTextRenderer() {
-        return this.textRenderer;
     }
 
     @Override
@@ -51,6 +51,11 @@ public class LWJGLRenderingBackend implements RenderingBackend, AutoCloseable {
 
     @Override
     public VertexFormatBuilder createVertexFormat() {
+        return new LWJGLVertexFormatBuilder();
+    }
+
+    @Override
+    public VertexFormatBuilder createVertexFormat(final int instanceCount) {
         return new LWJGLVertexFormatBuilder();
     }
 

@@ -1,13 +1,9 @@
 {
-  "frames": [
-    {
-      "texture": "textures/player.png",
-      "x": 0,
-      "y": 0,
-      "w": 32,
-      "h": 32
-    }
-  ],
+  "frames": {
+    "texture": "textures/player.png",
+    "rows": 1,
+    "columns": 1
+  },
   "animations": {
     "default": {
       "index": 0,

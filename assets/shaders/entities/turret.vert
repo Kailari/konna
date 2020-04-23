@@ -1,23 +1,23 @@
 #version 330
 
-in vec2 in_pos;
-in float in_alert_status;
-in float in_shooting_status;
-in float in_base_rotation;
-in vec2 in_target_pos;
+layout (std140) uniform CameraInfo
+{
+    mat4 view;
+    mat4 projection;
+} camera_info;
 
-out Vertex {
-    float alert_status;
-    float shooting_status;
-    float base_rotation;
-    vec2 target_pos;
-} vertex;
+uniform vec2 frame_size;
+
+layout(location = 0) in vec2 in_pos;
+layout(location = 1) in vec2 in_uv;
+layout(location = 2) in vec2 in_translation;
+layout(location = 3) in float in_frame;
+
+out vec2 frag_uv;
 
 void main(void) {
-    gl_Position = vec4(in_pos.xy, 0.0, 1.0);
+    mat4 mvp = camera_info.projection * camera_info.view;
+    gl_Position = mvp * vec4(in_pos.xy + in_translation.xy, 0.0, 1.0);
 
-    vertex.alert_status = in_alert_status;
-    vertex.shooting_status = in_shooting_status;
-    vertex.base_rotation = in_base_rotation;
-    vertex.target_pos = in_target_pos;
+    frag_uv = in_uv * frame_size + vec2(frame_size.x * in_frame, 0);
 }

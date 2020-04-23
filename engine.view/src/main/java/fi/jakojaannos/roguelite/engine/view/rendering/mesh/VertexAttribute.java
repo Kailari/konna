@@ -5,6 +5,8 @@ public interface VertexAttribute {
 
     void apply(int i, int offset, int stride);
 
+    boolean isInstanced();
+
     enum Type {
         FLOAT,
         DOUBLE,

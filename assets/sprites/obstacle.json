@@ -1,11 +1,7 @@
 {
-  "frames": [
-    {
-      "texture": "textures/obstacle.png",
-      "x": 0,
-      "y": 0,
-      "w": 8,
-      "h": 8
-    }
-  ]
+  "frames": {
+    "texture": "textures/obstacle.png",
+    "rows": 1,
+    "columns": 1
+  }
 }

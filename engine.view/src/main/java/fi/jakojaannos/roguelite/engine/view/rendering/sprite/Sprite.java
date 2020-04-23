@@ -6,16 +6,35 @@ import java.util.Map;
 import fi.jakojaannos.roguelite.engine.view.rendering.TextureRegion;
 
 public final class Sprite {
+    private final int rows;
+    private final int columns;
     private final List<TextureRegion> frames;
     private final Map<String, Animation> animations;
 
-    public Sprite(final List<TextureRegion> frames, final Map<String, Animation> animations) {
+    public float getRows() {
+        return this.rows;
+    }
+
+    public float getColumns() {
+        return this.columns;
+    }
+
+    public Sprite(
+            final int rows,
+            final int columns,
+            final List<TextureRegion> frames,
+            final Map<String, Animation> animations
+    ) {
+        this.rows = rows;
+        this.columns = columns;
         this.frames = frames;
         this.animations = animations;
     }
 
     public static Sprite ofSingleFrame(final TextureRegion region) {
-        return new Sprite(List.of(region),
+        return new Sprite(1,
+                          1,
+                          List.of(region),
                           Map.of("default", Animation.forSingleFrame(0, Double.POSITIVE_INFINITY)));
     }
 

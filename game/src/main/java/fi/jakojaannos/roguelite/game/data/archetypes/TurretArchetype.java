@@ -6,6 +6,7 @@ import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.DamageSource;
+import fi.jakojaannos.roguelite.game.data.components.TurretTag;
 import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponInventory;
 import fi.jakojaannos.roguelite.game.data.resources.Weapons;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
@@ -28,6 +29,7 @@ public class TurretArchetype {
         entityManager.addComponentTo(turret, new SpriteInfo("sprites/turret"));
         entityManager.addComponentTo(turret, new Collider(CollisionLayer.NONE, 1.0, 1.0, 0.5, 0.5));
         entityManager.addComponentTo(turret, new LookAtTargetTag());
+        entityManager.addComponentTo(turret, new TurretTag());
 
         entityManager.addComponentTo(turret, new AttackAI(EnemyTag.class, 15.0));
         entityManager.addComponentTo(turret, new WeaponInput());
