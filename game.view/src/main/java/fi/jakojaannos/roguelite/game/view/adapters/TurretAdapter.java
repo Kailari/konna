@@ -59,13 +59,6 @@ public final class TurretAdapter implements EcsRenderAdapter<TurretAdapter.Resou
         this.camera = camera;
         this.shader = backend.createShaderProgram()
                              .vertexShader(assetRoot.resolve("shaders/entities/turret.vert"))
-                             .attributeLocation(0, "in_pos")
-                             .attributeLocation(1, "in_uv")
-                             .attributeLocation(2, "in_model0")
-                             .attributeLocation(3, "in_model1")
-                             .attributeLocation(4, "in_model2")
-                             .attributeLocation(5, "in_model3")
-                             .attributeLocation(6, "in_frame")
                              .fragmentDataLocation(0, "out_frag_color")
                              .fragmentShader(assetRoot.resolve("shaders/entities/turret.frag"))
                              .build();
@@ -89,8 +82,7 @@ public final class TurretAdapter implements EcsRenderAdapter<TurretAdapter.Resou
                                    .build();
 
         this.mesh = backend.createMesh(this.vertexFormat);
-        this.mesh.setElements(0, 1, 2,
-                              0, 2, 3);
+        this.mesh.setElements(0, 1, 2, 0, 2, 3);
 
 
         try (final var stack = stackPush()) {
