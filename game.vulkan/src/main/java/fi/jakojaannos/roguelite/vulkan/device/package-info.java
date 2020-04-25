@@ -1,7 +1,7 @@
 @FieldsAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-package fi.jakojaannos.roguelite.device;
+package fi.jakojaannos.roguelite.vulkan.device;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 

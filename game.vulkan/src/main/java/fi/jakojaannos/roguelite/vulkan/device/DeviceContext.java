@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.device;
+package fi.jakojaannos.roguelite.vulkan.device;
 
 import org.lwjgl.vulkan.*;
 

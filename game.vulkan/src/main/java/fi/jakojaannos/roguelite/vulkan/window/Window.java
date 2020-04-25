@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite;
+package fi.jakojaannos.roguelite.vulkan.window;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFWVulkan.glfwVulkanSupported;
@@ -34,6 +34,10 @@ public class Window implements AutoCloseable {
                 glfwSetWindowShouldClose(win, true);
             }
         });
+    }
+
+    public void handleOSEvents() {
+        glfwPollEvents();
     }
 
     public void show() {

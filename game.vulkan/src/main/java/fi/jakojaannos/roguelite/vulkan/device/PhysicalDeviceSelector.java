@@ -1,22 +1,21 @@
-package fi.jakojaannos.roguelite.device;
+package fi.jakojaannos.roguelite.vulkan.device;
 
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.vulkan.VkInstance;
 import org.lwjgl.vulkan.VkPhysicalDevice;
-import org.lwjgl.vulkan.VkQueueFamilyProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.IntBuffer;
 import java.util.Arrays;
 import java.util.Comparator;
 
 import fi.jakojaannos.roguelite.VulkanInstance;
+import fi.jakojaannos.roguelite.vulkan.window.WindowSurface;
 
 import static fi.jakojaannos.roguelite.util.VkUtil.translateVulkanResult;
 import static org.lwjgl.system.MemoryStack.stackPush;
-import static org.lwjgl.vulkan.KHRSurface.vkGetPhysicalDeviceSurfaceSupportKHR;
-import static org.lwjgl.vulkan.VK10.*;
+import static org.lwjgl.vulkan.VK10.VK_SUCCESS;
+import static org.lwjgl.vulkan.VK10.vkEnumeratePhysicalDevices;
 
 public class PhysicalDeviceSelector {
     private static final Logger LOG = LoggerFactory.getLogger(PhysicalDeviceSelector.class);
@@ -27,7 +26,7 @@ public class PhysicalDeviceSelector {
     public static DeviceCandidate pickPhysicalDevice(
             final VulkanInstance instance,
             final PointerBuffer pRequiredExtensions,
-            final long surface
+            final WindowSurface surface
     ) {
         final var devices = getPhysicalDevices(instance.getHandle());
         return pickBest(instance.getHandle(), devices, pRequiredExtensions, surface);
@@ -61,16 +60,15 @@ public class PhysicalDeviceSelector {
             final VkInstance instance,
             final long[] devices,
             final PointerBuffer pRequiredExtensions,
-            final long surface
+            final WindowSurface surface
     ) {
         final var candidates = new InternalDeviceCandidate[devices.length];
         for (int i = 0; i < devices.length; i++) {
             final var device = new VkPhysicalDevice(devices[i], instance);
-            final var builder = QueueFamilies.builder();
-            findDeviceQueueFamilies(device, builder, surface);
+            final var queueFamilies = QueueFamilySelector.findDeviceQueueFamilies(device, surface);
 
-            final int suitability = rateDeviceSuitability(device, builder, pRequiredExtensions);
-            candidates[i] = new InternalDeviceCandidate(device, builder.build(), suitability);
+            final int suitability = rateDeviceSuitability(device, queueFamilies, pRequiredExtensions);
+            candidates[i] = new InternalDeviceCandidate(device, queueFamilies, suitability);
             LOG.debug("Device #{}: graphics={}, transfer={}, present={}",
                       i,
                       candidates[i].queueFamilies.graphics(),
@@ -86,83 +84,9 @@ public class PhysicalDeviceSelector {
                                    candidates[0].queueFamilies);
     }
 
-    private static void findDeviceQueueFamilies(
-            final VkPhysicalDevice device,
-            final QueueFamilies.Builder builder,
-            final long surface
-    ) {
-        try (final var stack = stackPush()) {
-            final var pCount = stack.mallocInt(1);
-            vkGetPhysicalDeviceQueueFamilyProperties(device, pCount, null);
-
-            final var familyCount = pCount.get(0);
-            final var pQueueFamilies = VkQueueFamilyProperties.callocStack(familyCount);
-            vkGetPhysicalDeviceQueueFamilyProperties(device, pCount, pQueueFamilies);
-
-            // Note: allocate temporary pointer here to avoid native memory allocations in loop
-            final var pSupported = stack.mallocInt(1);
-
-            // Iterate the queue families and try to find all desired queues
-            int selectedGraphics = -1;
-            int selectedTransfer = -1;
-            int selectedPresent = -1;
-            for (int i = 0; i < familyCount; i++) {
-                final var props = pQueueFamilies.get(i);
-                final var hasGraphicsBit = (props.queueFlags() & VK_QUEUE_GRAPHICS_BIT) != 0;
-                if (selectedTransfer == -1 && hasGraphicsBit) {
-                    selectedGraphics = i;
-                }
-
-                final var hasTransferBit = (props.queueFlags() & VK_QUEUE_TRANSFER_BIT) != 0;
-                if (selectedTransfer == -1 && hasTransferBit && selectedGraphics != i) {
-                    selectedTransfer = i;
-                }
-
-                checkPresentSupport(device, i, surface, pSupported);
-                if (pSupported.get(0) == VK_TRUE && selectedGraphics != i) {
-                    selectedPresent = i;
-                }
-
-                final var allFound = (selectedGraphics != -1 && selectedTransfer != -1 && selectedPresent != -1);
-                if (allFound) {
-                    break;
-                }
-            }
-
-            // Fallback transfer queue to graphics queue if separate queue is not found
-            if (selectedTransfer == -1 && selectedGraphics != -1) {
-                final var graphicsProps = pQueueFamilies.get(selectedGraphics);
-                if ((graphicsProps.queueFlags() & VK_QUEUE_TRANSFER_BIT) != 0) {
-                    selectedTransfer = selectedGraphics;
-                }
-            }
-
-            // Fallback present queue to graphics queue if separate queue is not found
-            if (selectedPresent == -1 && selectedGraphics != -1) {
-                checkPresentSupport(device, selectedGraphics, surface, pSupported);
-                if (pSupported.get(0) == VK_TRUE) {
-                    selectedPresent = selectedGraphics;
-                }
-            }
-
-            builder.graphics(selectedGraphics);
-            builder.transfer(selectedTransfer);
-            builder.present(selectedPresent);
-        }
-    }
-
-    private static void checkPresentSupport(
-            final VkPhysicalDevice device,
-            final int familyIndex,
-            final long surface,
-            final IntBuffer pSupported
-    ) {
-        vkGetPhysicalDeviceSurfaceSupportKHR(device, familyIndex, surface, pSupported);
-    }
-
     private static int rateDeviceSuitability(
             final VkPhysicalDevice device,
-            final QueueFamilies.Builder builder,
+            final QueueFamilies builder,
             final PointerBuffer pRequiredExtensions
     ) {
         int suitability = 0;
@@ -173,19 +97,19 @@ public class PhysicalDeviceSelector {
         return suitability;
     }
 
-    private static int queueSuitability(final QueueFamilies.Builder builder) {
+    private static int queueSuitability(final QueueFamilies queueFamilies) {
         int suitability = 0;
-        if (builder.hasSeparateGraphicsQueue()) {
+        if (queueFamilies.hasSeparateGraphicsQueue()) {
             suitability += 100;
         }
-        if (builder.hasSeparatePresentQueue()) {
+        if (queueFamilies.hasSeparatePresentQueue()) {
             suitability += 200;
         }
-        if (builder.hasSeparateTransferQueue()) {
+        if (queueFamilies.hasSeparateTransferQueue()) {
             suitability += 50;
         }
 
-        if (builder.isIncomplete()) {
+        if (queueFamilies.isIncomplete()) {
             suitability -= 100_000;
         }
         return suitability;

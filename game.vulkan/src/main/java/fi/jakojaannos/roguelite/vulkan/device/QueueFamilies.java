@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.device;
+package fi.jakojaannos.roguelite.vulkan.device;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -13,6 +13,25 @@ public record QueueFamilies(
         return new HashSet<>(List.of(this.graphics, this.transfer, this.present));
     }
 
+    public boolean isIncomplete() {
+        return this.graphics == -1 || this.transfer == -1 || this.present == -1;
+    }
+
+    public boolean hasSeparateGraphicsQueue() {
+        return this.graphics != this.present
+               && this.graphics != this.transfer;
+    }
+
+    public boolean hasSeparateTransferQueue() {
+        return this.transfer != this.graphics
+               && this.transfer != this.present;
+    }
+
+    public boolean hasSeparatePresentQueue() {
+        return this.present != this.graphics
+               && this.present != this.transfer;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -21,25 +40,6 @@ public record QueueFamilies(
         private int graphics = -1;
         private int transfer = -1;
         private int present = -1;
-
-        public boolean isIncomplete() {
-            return this.graphics == -1 || this.transfer == -1 || this.present == -1;
-        }
-
-        public boolean hasSeparateGraphicsQueue() {
-            return this.graphics != this.present
-                   && this.graphics != this.transfer;
-        }
-
-        public boolean hasSeparateTransferQueue() {
-            return this.transfer != this.graphics
-                   && this.transfer != this.present;
-        }
-
-        public boolean hasSeparatePresentQueue() {
-            return this.present != this.graphics
-                   && this.present != this.transfer;
-        }
 
         public QueueFamilies build() {
             return new QueueFamilies(this.graphics, this.transfer, this.present);
