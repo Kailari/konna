@@ -1,25 +1,23 @@
 package fi.jakojaannos.roguelite.vulkan.device;
 
 import org.lwjgl.PointerBuffer;
+import org.lwjgl.vulkan.VkExtensionProperties;
 import org.lwjgl.vulkan.VkInstance;
 import org.lwjgl.vulkan.VkPhysicalDevice;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Comparator;
 
 import fi.jakojaannos.roguelite.VulkanInstance;
+import fi.jakojaannos.roguelite.util.BufferUtil;
 import fi.jakojaannos.roguelite.vulkan.window.WindowSurface;
 
 import static fi.jakojaannos.roguelite.util.VkUtil.translateVulkanResult;
 import static org.lwjgl.system.MemoryStack.stackPush;
-import static org.lwjgl.vulkan.VK10.VK_SUCCESS;
-import static org.lwjgl.vulkan.VK10.vkEnumeratePhysicalDevices;
+import static org.lwjgl.vulkan.VK10.*;
 
 public class PhysicalDeviceSelector {
-    private static final Logger LOG = LoggerFactory.getLogger(PhysicalDeviceSelector.class);
-
     private PhysicalDeviceSelector() {
     }
 
@@ -62,38 +60,47 @@ public class PhysicalDeviceSelector {
             final PointerBuffer pRequiredExtensions,
             final WindowSurface surface
     ) {
-        final var candidates = new InternalDeviceCandidate[devices.length];
-        for (int i = 0; i < devices.length; i++) {
-            final var device = new VkPhysicalDevice(devices[i], instance);
-            final var queueFamilies = QueueFamilySelector.findDeviceQueueFamilies(device, surface);
+        try (final var ignored = stackPush()) {
+            final var candidates = new InternalDeviceCandidate[devices.length];
+            for (int i = 0; i < devices.length; i++) {
+                final var device = new VkPhysicalDevice(devices[i], instance);
+                final var queueFamilies = QueueFamilySelector.findDeviceQueueFamilies(device, surface);
+                final var swapchainSupport = SwapchainSupportDetails.query(device, surface);
 
-            final int suitability = rateDeviceSuitability(device, queueFamilies, pRequiredExtensions);
-            candidates[i] = new InternalDeviceCandidate(device, queueFamilies, suitability);
-            LOG.debug("Device #{}: graphics={}, transfer={}, present={}",
-                      i,
-                      candidates[i].queueFamilies.graphics(),
-                      candidates[i].queueFamilies.transfer(),
-                      candidates[i].queueFamilies.present());
+                final int suitability = rateDeviceSuitability(device, queueFamilies, pRequiredExtensions, swapchainSupport);
+                candidates[i] = new InternalDeviceCandidate(device, queueFamilies, suitability);
+            }
+
+            Arrays.sort(candidates,
+                        Comparator.comparingInt(InternalDeviceCandidate::suitability)
+                                  .reversed());
+
+            return new DeviceCandidate(candidates[0].physicalDevice,
+                                       candidates[0].queueFamilies);
         }
-
-        Arrays.sort(candidates,
-                    Comparator.comparingInt(InternalDeviceCandidate::suitability)
-                              .reversed());
-
-        return new DeviceCandidate(candidates[0].physicalDevice,
-                                   candidates[0].queueFamilies);
     }
 
     private static int rateDeviceSuitability(
             final VkPhysicalDevice device,
             final QueueFamilies builder,
-            final PointerBuffer pRequiredExtensions
+            final PointerBuffer pRequiredExtensions,
+            final SwapchainSupportDetails details
     ) {
         int suitability = 0;
         suitability += queueSuitability(builder);
         suitability += extensionSuitability(device, pRequiredExtensions);
+        suitability += swapchainSuitability(details);
         suitability += devicePropertySuitability(device);
         suitability += deviceFeatureSuitability(device);
+        return suitability;
+    }
+
+    private static int swapchainSuitability(final SwapchainSupportDetails swapchainSupport) {
+        int suitability = 0;
+        if (swapchainSupport.formats().length == 0 || swapchainSupport.presentModes().length == 0) {
+            suitability -= 100_000;
+        }
+
         return suitability;
     }
 
@@ -116,7 +123,27 @@ public class PhysicalDeviceSelector {
     }
 
     private static int extensionSuitability(final VkPhysicalDevice device, final PointerBuffer pRequiredExtensions) {
-        return 0;
+        int suitability = 0;
+        try (final var stack = stackPush()) {
+            final var pCount = stack.mallocInt(1);
+            vkEnumerateDeviceExtensionProperties(device, (ByteBuffer) null, pCount, null);
+
+            final var pAvailable = VkExtensionProperties.callocStack(pCount.get(0));
+            vkEnumerateDeviceExtensionProperties(device, (ByteBuffer) null, pCount, pAvailable);
+
+            final var allSupported = BufferUtil.filteredForEachAsStringUTF8(
+                    pRequiredExtensions,
+                    name -> pAvailable.stream()
+                                      .map(VkExtensionProperties::extensionNameString)
+                                      .noneMatch(name::equals),
+                    notFound -> {});
+
+            if (!allSupported) {
+                suitability -= 100_000;
+            }
+        }
+
+        return suitability;
     }
 
     private static int devicePropertySuitability(final VkPhysicalDevice device) {

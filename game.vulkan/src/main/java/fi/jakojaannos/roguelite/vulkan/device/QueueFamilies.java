@@ -36,6 +36,10 @@ public record QueueFamilies(
         return new Builder();
     }
 
+    public boolean graphicsAndPresentAreSame() {
+        return this.present == this.graphics;
+    }
+
     public static class Builder {
         private int graphics = -1;
         private int transfer = -1;

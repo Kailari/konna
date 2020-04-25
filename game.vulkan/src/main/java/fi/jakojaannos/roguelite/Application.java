@@ -2,33 +2,39 @@ package fi.jakojaannos.roguelite;
 
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
 import fi.jakojaannos.roguelite.vulkan.device.PhysicalDeviceSelector;
+import fi.jakojaannos.roguelite.vulkan.swapchain.Swapchain;
 import fi.jakojaannos.roguelite.vulkan.window.Window;
 import fi.jakojaannos.roguelite.vulkan.window.WindowSurface;
 
 import static org.lwjgl.glfw.GLFWVulkan.glfwGetRequiredInstanceExtensions;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.EXTDebugUtils.VK_EXT_DEBUG_UTILS_EXTENSION_NAME;
+import static org.lwjgl.vulkan.KHRSwapchain.VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 
 
 public record Application(
         Window window,
         VulkanInstance vulkanInstance,
         WindowSurface surface,
-        DeviceContext deviceContext
+        DeviceContext deviceContext,
+        Swapchain swapchain
 ) implements AutoCloseable {
-    public static Application initialize() {
-        final var window = new Window(800, 600);
+    public static Application initialize(final int windowWidth, final int windowHeight) {
+        final var window = new Window(windowWidth, windowHeight);
         final var instance = createInstance();
         final var surface = new WindowSurface(instance, window);
 
         final var deviceContext = createDeviceContext(instance, surface);
+        final var swapchain = new Swapchain(deviceContext, surface, windowWidth, windowHeight);
 
-        return new Application(window, instance, surface, deviceContext);
+        return new Application(window, instance, surface, deviceContext, swapchain);
     }
 
     @Override
     public void close() {
+        this.swapchain.close();
         this.deviceContext.close();
+        this.surface.close();
         this.window.close();
         this.vulkanInstance.close();
     }
@@ -56,10 +62,15 @@ public record Application(
     private static DeviceContext createDeviceContext(final VulkanInstance instance, final WindowSurface surface) {
         final PhysicalDeviceSelector.DeviceCandidate deviceCandidate;
         try (final var stack = stackPush()) {
-            final var pExtensions = stack.mallocPointer(0);
+            final var pExtensions = stack.pointers(
+                    stack.UTF8(VK_KHR_SWAPCHAIN_EXTENSION_NAME)
+            );
 
             deviceCandidate = PhysicalDeviceSelector.pickPhysicalDevice(instance, pExtensions, surface);
+
+            return new DeviceContext(deviceCandidate.physicalDevice(),
+                                     deviceCandidate.queueFamilies(),
+                                     pExtensions);
         }
-        return new DeviceContext(deviceCandidate.physicalDevice(), deviceCandidate.queueFamilies());
     }
 }
