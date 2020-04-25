@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <!--
+            Legend:
+                %d              -   date
+                %t              -   thread
+                %msg            -   message
+                %-5level        -   Log level, right-padded to be 5 characters long
+                %-24logger{1}   -   Logger name, with precision of 1 (only class name), right-padded
+                                    to be 24 chars long.
+
+            More info: https://logging.apache.org/log4j/2.x/manual/layouts.html
+            -->
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] [%-5level] %-24logger{1} - %msg%n"/>
+
+            <!-- Filters, use these to configure what gets logged by default            -->
+            <!--  - Adjust these by toggling `onMatch` to ACCEPT or DENY (or NEUTRAL)   -->
+            <Filters>
+                <!-- Engine -->
+                <MarkerFilter onMismatch="NEUTRAL" marker="ENTITY_LIFECYCLE" onMatch="DENY"/>
+                <MarkerFilter onMismatch="NEUTRAL" marker="SYSTEM_DATA_DUMP" onMatch="DENY"/>
+                <MarkerFilter onMismatch="NEUTRAL" marker="DISPATCHER" onMatch="DENY"/>
+                <MarkerFilter onMismatch="NEUTRAL" marker="DISPATCHER_TICK" onMatch="DENY"/>
+                <MarkerFilter onMismatch="NEUTRAL" marker="DISPATCHER_GROUP" onMatch="DENY"/>
+                <MarkerFilter onMismatch="NEUTRAL" marker="DISPATCHER_SYSTEM" onMatch="DENY"/>
+
+                <!-- Game -->
+                <MarkerFilter onMismatch="NEUTRAL" marker="COLLISION_LAYER" onMatch="DENY"/>
+                <MarkerFilter onMismatch="NEUTRAL" marker="HEALTH" onMatch="DENY"/>
+
+                <!-- Assets/IO -->
+                <MarkerFilter onMismatch="NEUTRAL" marker="ASSET_LOADING" onMatch="DENY"/>
+            </Filters>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Root level="trace">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>

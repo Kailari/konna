@@ -1,0 +1,41 @@
+import org.gradle.internal.os.OperatingSystem
+
+plugins {
+    id "application"
+    id "java"
+}
+
+repositories {
+    mavenCentral()
+}
+
+application.mainClassName = "fi.jakojaannos.roguelite.Main"
+
+def final implementationModules = ['', '-glfw', '-vulkan']
+def final runtimeModules = ['', '-glfw']
+
+dependencies {
+    implementation project(":engine.utilities")
+
+    implementation "org.joml:joml:${jomlVersion}"
+
+    // LWJGL 3 (Minimal Vulkan)
+    implementation platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")
+    final def lwjglNatives = selectNatives(OperatingSystem.current())
+    for (final modulePostfix in implementationModules) { implementation "org.lwjgl:lwjgl${modulePostfix}" }
+    for (final modulePostfix in runtimeModules) { runtimeOnly "org.lwjgl:lwjgl${modulePostfix}::${lwjglNatives}" }
+    if (lwjglNatives == "natives-macos") runtimeOnly "org.lwjgl:lwjgl-vulkan::${lwjglNatives}"
+}
+
+static String selectNatives(final OperatingSystem platform) {
+    switch (platform) {
+        case OperatingSystem.LINUX:
+            return "natives-linux"
+        case OperatingSystem.MAC_OS:
+            return "natives-macos"
+        case OperatingSystem.WINDOWS:
+            return "natives-windows"
+        default:
+            throw new UnsupportedOperationException("Unknown build platform: \"${platform}\"")
+    }
+}
