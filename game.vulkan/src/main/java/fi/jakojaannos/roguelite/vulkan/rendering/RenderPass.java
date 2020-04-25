@@ -2,6 +2,7 @@ package fi.jakojaannos.roguelite.vulkan.rendering;
 
 import org.lwjgl.vulkan.*;
 
+import fi.jakojaannos.roguelite.vulkan.CommandBuffer;
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
 
 import static fi.jakojaannos.roguelite.util.VkUtil.translateVulkanResult;
@@ -63,5 +64,49 @@ public class RenderPass implements AutoCloseable {
     @Override
     public void close() {
         vkDestroyRenderPass(this.device, this.handle, null);
+    }
+
+    public Scope begin(final Framebuffer framebuffer, final CommandBuffer commandBuffer) {
+        return new Scope(this, framebuffer, commandBuffer);
+    }
+
+    public static final class Scope implements AutoCloseable {
+        private final CommandBuffer commandBuffer;
+
+        public Scope(
+                final RenderPass renderPass,
+                final Framebuffer framebuffer,
+                final CommandBuffer commandBuffer
+        ) {
+            this.commandBuffer = commandBuffer;
+            try (final var ignored = stackPush()) {
+                final var beginInfo = VkRenderPassBeginInfo
+                        .callocStack()
+                        .sType(VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO)
+                        .renderPass(renderPass.getHandle())
+                        .framebuffer(framebuffer.getHandle());
+
+                beginInfo.renderArea()
+                         .offset(VkOffset2D.callocStack().set(0, 0))
+                         .extent(framebuffer.getExtent());
+
+                final var clearValues = VkClearValue.callocStack(1);
+                clearValues.get(0).color().float32(0, 0.0f);
+                clearValues.get(0).color().float32(1, 0.0f);
+                clearValues.get(0).color().float32(2, 0.0f);
+                clearValues.get(0).color().float32(3, 1.0f);
+
+                beginInfo.pClearValues(clearValues);
+
+                vkCmdBeginRenderPass(this.commandBuffer.getHandle(),
+                                     beginInfo,
+                                     VK_SUBPASS_CONTENTS_INLINE);
+            }
+        }
+
+        @Override
+        public void close() {
+            vkCmdEndRenderPass(this.commandBuffer.getHandle());
+        }
     }
 }

@@ -25,6 +25,10 @@ public class GraphicsPipeline implements AutoCloseable {
     private final long pipelineLayout;
     private final long handle;
 
+    public long getHandle() {
+        return this.handle;
+    }
+
     public GraphicsPipeline(
             final Path assetRoot,
             final DeviceContext deviceContext,

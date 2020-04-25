@@ -106,6 +106,10 @@ public class Swapchain implements AutoCloseable {
         vkDestroySwapchainKHR(this.device, this.handle, null);
     }
 
+    public int getImageCount() {
+        return this.imageViews.length;
+    }
+
     private static long[] getSwapchainImages(final VkDevice device, final long handle) {
         try (final var stack = stackPush()) {
             final var pCount = stack.mallocInt(1);

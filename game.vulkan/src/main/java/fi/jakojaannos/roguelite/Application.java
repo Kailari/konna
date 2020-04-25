@@ -2,6 +2,7 @@ package fi.jakojaannos.roguelite;
 
 import java.nio.file.Path;
 
+import fi.jakojaannos.roguelite.vulkan.CommandPool;
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
 import fi.jakojaannos.roguelite.vulkan.device.PhysicalDeviceSelector;
 import fi.jakojaannos.roguelite.vulkan.rendering.Framebuffers;
@@ -25,7 +26,8 @@ public record Application(
         Swapchain swapchain,
         RenderPass renderPass,
         GraphicsPipeline graphicsPipeline,
-        Framebuffers framebuffers
+        Framebuffers framebuffers,
+        CommandPool graphicsCommandPool
 ) implements AutoCloseable {
     public static Application initialize(final int windowWidth, final int windowHeight, final Path assetRoot) {
         final var window = new Window(windowWidth, windowHeight);
@@ -45,6 +47,9 @@ public record Application(
                                                           swapchain.getExtent(),
                                                           renderPass);
 
+        final var graphicsCommandPool = new CommandPool(deviceContext,
+                                                        deviceContext.getQueueFamilies().graphics());
+
         return new Application(window,
                                instance,
                                surface,
@@ -52,7 +57,8 @@ public record Application(
                                swapchain,
                                renderPass,
                                graphicsPipeline,
-                               framebuffers);
+                               framebuffers,
+                               graphicsCommandPool);
     }
 
     @Override
