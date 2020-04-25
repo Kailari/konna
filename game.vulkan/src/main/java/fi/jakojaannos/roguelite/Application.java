@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
 import fi.jakojaannos.roguelite.vulkan.device.PhysicalDeviceSelector;
 import fi.jakojaannos.roguelite.vulkan.rendering.GraphicsPipeline;
+import fi.jakojaannos.roguelite.vulkan.rendering.RenderPass;
 import fi.jakojaannos.roguelite.vulkan.rendering.Swapchain;
 import fi.jakojaannos.roguelite.vulkan.window.Window;
 import fi.jakojaannos.roguelite.vulkan.window.WindowSurface;
@@ -21,22 +22,37 @@ public record Application(
         WindowSurface surface,
         DeviceContext deviceContext,
         Swapchain swapchain,
+        RenderPass renderPass,
         GraphicsPipeline graphicsPipeline
 ) implements AutoCloseable {
-    public static Application initialize(final int windowWidth, final int windowHeight) {
+    public static Application initialize(final int windowWidth, final int windowHeight, final Path assetRoot) {
         final var window = new Window(windowWidth, windowHeight);
         final var instance = createInstance();
         final var surface = new WindowSurface(instance, window);
 
         final var deviceContext = createDeviceContext(instance, surface);
         final var swapchain = new Swapchain(deviceContext, surface, windowWidth, windowHeight);
-        final var graphicsPipeline = new GraphicsPipeline(Path.of("../assets"));
 
-        return new Application(window, instance, surface, deviceContext, swapchain, graphicsPipeline);
+        final var renderPass = new RenderPass(deviceContext, swapchain.getImageFormat());
+        final var graphicsPipeline = new GraphicsPipeline(assetRoot,
+                                                          deviceContext,
+                                                          swapchain.getExtent(),
+                                                          renderPass);
+
+        return new Application(window,
+                               instance,
+                               surface,
+                               deviceContext,
+                               swapchain,
+                               renderPass,
+                               graphicsPipeline);
     }
 
     @Override
     public void close() {
+        this.renderPass.close();
+        this.graphicsPipeline.close();
+
         this.swapchain.close();
         this.deviceContext.close();
         this.surface.close();

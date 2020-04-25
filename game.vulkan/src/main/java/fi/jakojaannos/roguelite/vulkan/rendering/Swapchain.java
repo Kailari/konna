@@ -16,9 +16,19 @@ public class Swapchain implements AutoCloseable {
     private final VkDevice device;
     private final long handle;
 
+    private final VkExtent2D extent;
+
     private final long[] images;
     private final ImageView[] imageViews;
     private final int imageFormat;
+
+    public int getImageFormat() {
+        return this.imageFormat;
+    }
+
+    public VkExtent2D getExtent() {
+        return this.extent;
+    }
 
     public Swapchain(
             final DeviceContext deviceContext,
@@ -72,6 +82,7 @@ public class Swapchain implements AutoCloseable {
                                                 + translateVulkanResult(result));
             }
             this.handle = pSwapchain.get(0);
+            this.extent = VkExtent2D.calloc().set(swapChainSupport.capabilities().currentExtent());
             this.imageFormat = surfaceFormat.format();
 
             this.images = getSwapchainImages(this.device, this.handle);
@@ -87,7 +98,7 @@ public class Swapchain implements AutoCloseable {
         for (final var imageView : this.imageViews) {
             imageView.close();
         }
-
+        this.extent.free();
         vkDestroySwapchainKHR(this.device, this.handle, null);
     }
 
