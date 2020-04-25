@@ -4,6 +4,7 @@ import java.nio.file.Path;
 
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
 import fi.jakojaannos.roguelite.vulkan.device.PhysicalDeviceSelector;
+import fi.jakojaannos.roguelite.vulkan.rendering.Framebuffers;
 import fi.jakojaannos.roguelite.vulkan.rendering.GraphicsPipeline;
 import fi.jakojaannos.roguelite.vulkan.rendering.RenderPass;
 import fi.jakojaannos.roguelite.vulkan.rendering.Swapchain;
@@ -23,7 +24,8 @@ public record Application(
         DeviceContext deviceContext,
         Swapchain swapchain,
         RenderPass renderPass,
-        GraphicsPipeline graphicsPipeline
+        GraphicsPipeline graphicsPipeline,
+        Framebuffers framebuffers
 ) implements AutoCloseable {
     public static Application initialize(final int windowWidth, final int windowHeight, final Path assetRoot) {
         final var window = new Window(windowWidth, windowHeight);
@@ -34,6 +36,10 @@ public record Application(
         final var swapchain = new Swapchain(deviceContext, surface, windowWidth, windowHeight);
 
         final var renderPass = new RenderPass(deviceContext, swapchain.getImageFormat());
+        final var framebuffers = new Framebuffers(deviceContext,
+                                                  swapchain.getExtent(),
+                                                  swapchain.getImageViews(),
+                                                  renderPass);
         final var graphicsPipeline = new GraphicsPipeline(assetRoot,
                                                           deviceContext,
                                                           swapchain.getExtent(),
@@ -45,11 +51,13 @@ public record Application(
                                deviceContext,
                                swapchain,
                                renderPass,
-                               graphicsPipeline);
+                               graphicsPipeline,
+                               framebuffers);
     }
 
     @Override
     public void close() {
+        this.framebuffers.close();
         this.renderPass.close();
         this.graphicsPipeline.close();
 

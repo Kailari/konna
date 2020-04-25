@@ -12,6 +12,10 @@ public class ImageView implements AutoCloseable {
     private final VkDevice device;
     private final long handle;
 
+    public long getHandle() {
+        return this.handle;
+    }
+
     public ImageView(final DeviceContext deviceContext, final long image, final int imageFormat) {
         this.device = deviceContext.getDevice();
 

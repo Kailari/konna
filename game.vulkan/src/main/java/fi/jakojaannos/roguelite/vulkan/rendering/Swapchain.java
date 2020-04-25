@@ -30,6 +30,10 @@ public class Swapchain implements AutoCloseable {
         return this.extent;
     }
 
+    public ImageView[] getImageViews() {
+        return this.imageViews;
+    }
+
     public Swapchain(
             final DeviceContext deviceContext,
             final WindowSurface surface,
