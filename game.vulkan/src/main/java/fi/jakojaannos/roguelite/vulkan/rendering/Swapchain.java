@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.vulkan.swapchain;
+package fi.jakojaannos.roguelite.vulkan.rendering;
 
 import org.lwjgl.vulkan.*;
 

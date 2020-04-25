@@ -1,7 +1,7 @@
 @FieldsAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-package fi.jakojaannos.roguelite.vulkan.swapchain;
+package fi.jakojaannos.roguelite.vulkan.rendering;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 

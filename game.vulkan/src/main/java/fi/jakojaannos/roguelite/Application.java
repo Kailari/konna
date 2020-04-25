@@ -1,8 +1,11 @@
 package fi.jakojaannos.roguelite;
 
+import java.nio.file.Path;
+
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
 import fi.jakojaannos.roguelite.vulkan.device.PhysicalDeviceSelector;
-import fi.jakojaannos.roguelite.vulkan.swapchain.Swapchain;
+import fi.jakojaannos.roguelite.vulkan.rendering.GraphicsPipeline;
+import fi.jakojaannos.roguelite.vulkan.rendering.Swapchain;
 import fi.jakojaannos.roguelite.vulkan.window.Window;
 import fi.jakojaannos.roguelite.vulkan.window.WindowSurface;
 
@@ -17,7 +20,8 @@ public record Application(
         VulkanInstance vulkanInstance,
         WindowSurface surface,
         DeviceContext deviceContext,
-        Swapchain swapchain
+        Swapchain swapchain,
+        GraphicsPipeline graphicsPipeline
 ) implements AutoCloseable {
     public static Application initialize(final int windowWidth, final int windowHeight) {
         final var window = new Window(windowWidth, windowHeight);
@@ -26,8 +30,9 @@ public record Application(
 
         final var deviceContext = createDeviceContext(instance, surface);
         final var swapchain = new Swapchain(deviceContext, surface, windowWidth, windowHeight);
+        final var graphicsPipeline = new GraphicsPipeline(Path.of("../assets"));
 
-        return new Application(window, instance, surface, deviceContext, swapchain);
+        return new Application(window, instance, surface, deviceContext, swapchain, graphicsPipeline);
     }
 
     @Override
