@@ -47,9 +47,12 @@ public class UIElementClickEventProvider implements ECSSystem {
             //      -> archetype swap does its thing to wrong direction?
             //      -> spliterator does something wacky once elements get removed?
             //      -> Archetype::matchesRequirements returns false-positives?
+            //      -> Components are not null'd and count is not decremented?
             final var isActive = entity.asHandle()
                                        .hasComponent(ActiveTag.class);
-            System.out.println(name + " is active: " + isActive);
+            if (!isActive) {
+                throw new IllegalStateException("Component missing!");
+            }
 
             if (mouse.clicked) {
                 final var clicked = entityManager.addComponentIfAbsent(entity,

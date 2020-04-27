@@ -27,7 +27,7 @@ public class RogueliteClient {
         LOG.trace("Running application");
         LOG.debug("asset root: {}", assetRoot);
 
-        try (final var runner = new LWJGLGameRunner(DebugConfig.debugModeEnabled,
+         try (final var runner = new LWJGLGameRunner(DebugConfig.debugModeEnabled,
                                                     DebugConfig.openGLDebugEnabled,
                                                     windowWidth,
                                                     windowHeight);
