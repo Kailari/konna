@@ -91,7 +91,7 @@ public class EntityHandleImpl implements EntityHandle {
             return Optional.empty();
         }
 
-        return Optional.of(this.chunk.getComponent(this.storageIndex, componentClass));
+        return Optional.ofNullable(this.chunk.getComponent(this.storageIndex, componentClass));
     }
 
     @Override

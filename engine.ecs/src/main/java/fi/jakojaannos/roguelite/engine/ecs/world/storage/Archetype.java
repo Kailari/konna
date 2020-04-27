@@ -3,6 +3,7 @@ package fi.jakojaannos.roguelite.engine.ecs.world.storage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -22,7 +23,6 @@ public class Archetype {
     private final Collection<Removed> removed = new ArrayList<>();
 
     private final EntityChunk root;
-    private EntityChunk head;
 
     public Class<?>[] getComponentClasses() {
         return this.componentClasses;
@@ -34,9 +34,7 @@ public class Archetype {
 
     public Archetype(final Class<?>[] componentClasses) {
         this.componentClasses = componentClasses;
-        this.root = new EntityChunk(this);
-
-        this.head = this.root;
+        this.root = new EntityChunk(this, null);
     }
 
     public boolean hasAll(final Class<?>[] componentClasses) {
@@ -49,24 +47,13 @@ public class Archetype {
             final boolean[] excluded,
             final boolean[] optional
     ) {
+        final var ownComponents = List.of(this.componentClasses);
+
         for (int i = 0; i < componentClasses.length; i++) {
-            var noneMatches = true;
-            for (final var componentClass : this.componentClasses) {
+            final var other = componentClasses[i];
 
-
-                final var other = componentClasses[i];
-                if (componentClass.equals(other)) {
-                    // Return false if any excluded component class is found
-                    if (excluded[i]) {
-                        return false;
-                    }
-
-                    noneMatches = false;
-                }
-            }
-
-            // Return false if any of the non-optional, non-excluded component classes are not found
-            if (noneMatches && !optional[i] && !excluded[i]) {
+            final var hasComponent = ownComponents.contains(other);
+            if (!hasComponent && !optional[i] && !excluded[i]) {
                 return false;
             }
         }
@@ -98,12 +85,7 @@ public class Archetype {
             final Class<?>[] componentClasses,
             final Object[] components
     ) {
-        this.head.addEntity(entityHandle, componentClasses, components);
-
-        // Move chain head if new chunk was added
-        if (this.head.hasNext()) {
-            this.head = this.head.getNext();
-        }
+        this.root.addEntity(entityHandle, componentClasses, components);
     }
 
     public void commitModifications() {
@@ -113,14 +95,20 @@ public class Archetype {
             chunk = chunk.getNext();
         } while (chunk != null);
 
-        //for (final var removeTask : this.removed) {
-        //    final var entity = removeTask.chunk.getEntity(removeTask.storageIndex);
-        //    this.head.moveLastInto(removeTask.chunk, removeTask.storageIndex);
-//
-        //    if (removeTask.destroyed) {
-        //        entity.markDestroyed();
-        //    }
-        //}
+        for (final var removeTask : this.removed) {
+            final var entity = removeTask.chunk.getEntity(removeTask.storageIndex);
+            removeTask.chunk.swapLastInto(removeTask.storageIndex);
+
+            if (removeTask.chunk.isEmpty()) {
+                if (removeTask.chunk.hasPrevious()) {
+                    removeTask.chunk.removeFromChain();
+                }
+            }
+
+            if (removeTask.destroyed) {
+                entity.markDestroyed();
+            }
+        }
         this.removed.clear();
     }
 

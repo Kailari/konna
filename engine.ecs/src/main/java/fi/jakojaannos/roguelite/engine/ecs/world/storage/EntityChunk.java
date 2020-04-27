@@ -27,12 +27,15 @@ public class EntityChunk {
     @Nullable
     private EntityChunk next;
 
+    @Nullable
+    private EntityChunk previous;
+
     public int getEntityCount() {
         return this.nEntities;
     }
 
     public int getLastEntityIndex() {
-        return this.indexCounter.get();
+        return this.nEntities;
     }
 
     /**
@@ -45,12 +48,22 @@ public class EntityChunk {
         return this.next;
     }
 
+    @Nullable
+    public EntityChunk getPrevious() {
+        return this.previous;
+    }
+
     public Archetype getArchetype() {
         return this.archetype;
     }
 
-    public EntityChunk(final Archetype archetype) {
+    public boolean isEmpty() {
+        return this.indexCounter.get() == 0;
+    }
+
+    public EntityChunk(final Archetype archetype, @Nullable final EntityChunk previous) {
         this.archetype = archetype;
+        this.previous = previous;
 
         this.entities = new EntityHandleImpl[ENTITY_COUNT_PER_CHUNK];
         this.components = Arrays.stream(archetype.getComponentClasses())
@@ -79,6 +92,10 @@ public class EntityChunk {
         return this.next != null;
     }
 
+    public boolean hasPrevious() {
+        return this.previous != null;
+    }
+
     /**
      * Stores the given entity to this chunk. If this chunk is full, the entity is stored to the next chunk. If there is
      * no next chunk, one is created and linked as the {@link #getNext() next} for this chunk.
@@ -96,7 +113,7 @@ public class EntityChunk {
         final var isFull = this.indexCounter.get() == ENTITY_COUNT_PER_CHUNK - 1;
         if (isFull) {
             if (this.next == null) {
-                this.next = new EntityChunk(this.archetype);
+                this.next = new EntityChunk(this.archetype, this);
             }
             this.next.addEntity(entityHandle, componentClasses, components);
             return;
@@ -165,7 +182,7 @@ public class EntityChunk {
     }
 
     /**
-     * Moves the last entity in this chunk into the given other chunk.
+     * Moves the last entity in this chunk into the given position in another chunk.
      *
      * @param chunk        the target chunk
      * @param storageIndex the storage index in the target chunk
@@ -178,7 +195,12 @@ public class EntityChunk {
             return;
         }
 
+
         final var lastIndex = this.indexCounter.decrementAndGet();
+        if (storageIndex == lastIndex && chunk == this) {
+            return;
+        }
+
         for (final Class<?> componentClass : this.getArchetype().getComponentClasses()) {
             moveComponent(this, chunk, lastIndex, storageIndex, componentClass);
         }
@@ -187,6 +209,22 @@ public class EntityChunk {
         this.entities[lastIndex] = null;
 
         handle.moveToChunk(chunk, storageIndex);
+    }
+
+    public void swapLastInto(final int storageIndex) {
+        if (this.indexCounter.get() == 0) {
+            return;
+        }
+
+        final var lastIndex = this.indexCounter.decrementAndGet();
+        for (final Class<?> componentClass : this.getArchetype().getComponentClasses()) {
+            moveComponent(this, this, lastIndex, storageIndex, componentClass);
+        }
+        final var handle = this.entities[lastIndex];
+        this.entities[storageIndex] = handle;
+        this.entities[lastIndex] = null;
+
+        handle.moveToChunk(this, storageIndex);
     }
 
     public <TComponent> TComponent getComponent(
@@ -201,6 +239,15 @@ public class EntityChunk {
         }
 
         return storage[storageIndex];
+    }
+
+    public void removeFromChain() {
+        if (this.previous != null) {
+            this.previous.next = this.next;
+        }
+        if (this.next != null) {
+            this.next.previous = this.previous;
+        }
     }
 
     private static <TComponent> void moveComponent(
@@ -219,6 +266,7 @@ public class EntityChunk {
         }
 
         toStorage[toIndex] = fromStorage[fromIndex];
+        fromStorage[fromIndex] = null;
     }
 
     @SuppressWarnings("unchecked")

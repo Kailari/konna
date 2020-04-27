@@ -84,13 +84,13 @@ public class EntityStorage {
 
         // Find or create the new archetype
         final var oldComponents = archetype.getComponentClasses();
-        final var componentClasses = new Class<?>[oldComponents.length + 1];
+        final var componentClasses = new Class[oldComponents.length + 1];
         System.arraycopy(oldComponents, 0, componentClasses, 0, oldComponents.length);
         componentClasses[componentClasses.length - 1] = component.getClass();
 
         final var newArchetype = findOrCreateArchetype(componentClasses);
 
-        // Move to the new archetype
+        // Copy to the new archetype
         final var storages = chunk.fetchStorages(oldComponents, new boolean[oldComponents.length]);
         final var components = new Object[componentClasses.length];
         for (int i = 0; i < oldComponents.length; i++) {
@@ -121,7 +121,7 @@ public class EntityStorage {
 
         // Find or create the new archetype
         final var oldComponents = archetype.getComponentClasses();
-        final var componentClasses = new Class<?>[oldComponents.length - 1];
+        final var componentClasses = new Class[oldComponents.length - 1];
         for (int i = 0, iOld = 0; i < componentClasses.length; ++i, ++iOld) {
             if (oldComponents[i].equals(componentClass)) {
                 ++iOld;
