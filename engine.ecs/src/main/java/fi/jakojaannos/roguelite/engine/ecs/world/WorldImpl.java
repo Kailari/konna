@@ -15,9 +15,9 @@ import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
 import fi.jakojaannos.roguelite.engine.ecs.LogCategories;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.data.resources.Entities;
-import fi.jakojaannos.roguelite.engine.ecs.dispatcher.EntitySpliterator;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.world.storage.ComponentStorage;
+import fi.jakojaannos.roguelite.engine.ecs.world.storage.EntityStorage;
 import fi.jakojaannos.roguelite.engine.ecs.world.storage.ResourceStorage;
 
 public class WorldImpl implements World {
@@ -33,6 +33,7 @@ public class WorldImpl implements World {
     private final AtomicInteger idCounter = new AtomicInteger(0);
     private final AtomicInteger nEntities = new AtomicInteger(0);
 
+    private EntityStorage entityStorage;
     private EntityHandleImpl[] entities;
     private int capacity;
 
@@ -179,6 +180,6 @@ public class WorldImpl implements World {
             final boolean[] optional,
             final Function<Object[], TEntityData> dataFactory
     ) {
-        return new EntitySpliterator<>(componentClasses, excluded, optional, this, dataFactory);
+        return this.entityStorage.stream(componentClasses, excluded, optional, dataFactory);
     }
 }

@@ -1,7 +1,7 @@
 package fi.jakojaannos.roguelite.engine.ecs;
 
-import java.util.Spliterator;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.world.WorldImpl;
@@ -112,7 +112,7 @@ public interface World {
      *
      * @return spliterator for iterating entities matching the specified requirements
      */
-    <TEntityData> Spliterator<EntityDataHandle<TEntityData>> iterateEntities(
+    <TEntityData> Stream<EntityDataHandle<TEntityData>> iterateEntities(
             Class<?>[] componentClasses,
             boolean[] excluded,
             boolean[] optional,
