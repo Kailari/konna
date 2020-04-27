@@ -9,7 +9,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import fi.jakojaannos.roguelite.engine.ecs.*;
 import fi.jakojaannos.roguelite.engine.ecs.annotation.DisabledByDefault;
@@ -213,31 +212,34 @@ public class SystemDispatcherImpl implements SystemDispatcher {
 
         final Object[] resources = world.fetchResources(requirements.resources().componentTypes());
         final var systemResources = requirements.constructResources(resources);
-        final var entitySpliterator = world.iterateEntities(requirements.entityData().componentTypes(),
-                                                            requirements.entityData().excluded(),
-                                                            requirements.entityData().optional(),
-                                                            requirements::constructEntityData);
+        final var entityStream = world.iterateEntities(requirements.entityData().componentTypes(),
+                                                       requirements.entityData().excluded(),
+                                                       requirements.entityData().optional(),
+                                                       requirements::constructEntityData,
+                                                       this.parallel);
 
         // Return if event constraints were not met
         if (systemEvents == null) {
             return;
         }
 
-        try {
-            threadPool.submit(
-                    () -> system.tick(systemResources,
-                                      StreamSupport.stream(entitySpliterator, this.parallel),
-                                      systemEvents)
-            ).get();
-        } catch (final InterruptedException e) {
-            LOG.warn("System \"" + system.getClass().getSimpleName() + "\" was interrupted!");
-        } catch (final ExecutionException ee) {
-            LOG.error("System \"" + system.getClass().getSimpleName() + "\" failure!", ee);
-            if (ee.getCause() instanceof RuntimeException e) {
-                throw e;
-            } else {
-                throw new RuntimeException("Assuming unrecoverable error, dispatcher is going crashing down!", ee);
+        if (this.parallel) {
+            try {
+                threadPool.submit(
+                        () -> system.tick(systemResources, entityStream, systemEvents)
+                ).get();
+            } catch (final InterruptedException e) {
+                LOG.warn("System \"" + system.getClass().getSimpleName() + "\" was interrupted!");
+            } catch (final ExecutionException ee) {
+                LOG.error("System \"" + system.getClass().getSimpleName() + "\" failure!", ee);
+                if (ee.getCause() instanceof RuntimeException e) {
+                    throw e;
+                } else {
+                    throw new RuntimeException("Assuming unrecoverable error, dispatcher is going crashing down!", ee);
+                }
             }
+        } else {
+            system.tick(systemResources, entityStream, systemEvents);
         }
     }
 

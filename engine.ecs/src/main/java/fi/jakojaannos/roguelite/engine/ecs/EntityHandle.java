@@ -44,18 +44,6 @@ public interface EntityHandle {
     <TComponent> boolean addComponent(TComponent component);
 
     /**
-     * Tries to add a component to the entity. If entity already has a component of the specified type, the method
-     * fetches the existing component. The component to be added is constructed only if entity does not already have a
-     * component of the given type.
-     *
-     * @param supplier     component factory for constructing the component
-     * @param <TComponent> type of the component to add
-     *
-     * @return the component which was added or the existing entity if one is present
-     */
-    <TComponent> TComponent addOrGet(Class<TComponent> componentClass, Supplier<TComponent> supplier);
-
-    /**
      * Tries to remove a component of the given type from the entity. If the entity does not have a component with
      * specified type, the method does nothing.
      *
@@ -99,6 +87,28 @@ public interface EntityHandle {
      * hard to catch bugs and odd behavior in edge-cases.
      */
     void destroy();
+
+    /**
+     * Tries to add a component to the entity. If the entity already has a component of the specified type, the method
+     * fetches the existing component. The component to be added is constructed only if entity does not already have a
+     * component of the given type.
+     *
+     * @param supplier     component factory for constructing the component
+     * @param <TComponent> type of the component to add
+     *
+     * @return the component which was added or the existing entity if one is present
+     */
+    default <TComponent> TComponent addOrGet(
+            final Class<TComponent> componentClass,
+            final Supplier<TComponent> supplier
+    ) {
+        return getComponent(componentClass).orElseGet(() -> {
+            final var component = supplier.get();
+            addComponent(component);
+
+            return component;
+        });
+    }
 
     /**
      * Converts this handle into a legacy entity.

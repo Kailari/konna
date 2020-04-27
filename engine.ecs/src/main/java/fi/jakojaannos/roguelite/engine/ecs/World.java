@@ -26,13 +26,6 @@ public interface World {
     EntityManager getEntityManager();
 
     /**
-     * Gets the number of entities currently in the world.
-     *
-     * @return the number of entities
-     */
-    int getEntityCount();
-
-    /**
      * Creates a new world instance.
      *
      * @return a new world
@@ -116,34 +109,14 @@ public interface World {
             Class<?>[] componentClasses,
             boolean[] excluded,
             boolean[] optional,
-            Function<Object[], TEntityData> dataFactory
+            Function<Object[], TEntityData> dataFactory,
+            boolean parallel
     );
-
-    /**
-     * Marks and queues the given entity for destruction. The same as calling {@link EntityHandle#destroy()}. After this
-     * call, {@link EntityHandle#isPendingRemoval()} is guaranteed to immediately start returning <code>true</code>.
-     * This should not generally be relied upon, though, to avoid race-conditions.
-     * <p>
-     * The entity will not be destroyed until the {@link #commitEntityModifications()} is called the next time.
-     *
-     * @param handle the entity to destroy.
-     */
-    void destroyEntity(EntityHandle handle);
 
     /**
      * Flushes all pending add/destroy entity operations.
      */
     void commitEntityModifications();
-
-    /**
-     * Gets the entity with the given entity ID. Not very useful for general use as entity IDs are unstable and may
-     * frequently change as entities are created/destroyed.
-     *
-     * @param entityId id of the entity to get
-     *
-     * @return handle to the entity
-     */
-    EntityHandle getEntity(int entityId);
 
     /**
      * Clears all entities from this world.

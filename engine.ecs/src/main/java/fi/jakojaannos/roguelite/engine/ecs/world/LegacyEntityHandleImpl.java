@@ -1,6 +1,7 @@
 package fi.jakojaannos.roguelite.engine.ecs.world;
 
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
+import fi.jakojaannos.roguelite.engine.ecs.world.storage.EntityStorage;
 
 @Deprecated
 public class LegacyEntityHandleImpl extends EntityHandleImpl implements Entity {
@@ -11,9 +12,9 @@ public class LegacyEntityHandleImpl extends EntityHandleImpl implements Entity {
 
     public LegacyEntityHandleImpl(
             final int id,
-            final WorldImpl world
+            final EntityStorage storage
     ) {
-        super(id, world);
+        super(id, storage);
     }
 
     @Override
