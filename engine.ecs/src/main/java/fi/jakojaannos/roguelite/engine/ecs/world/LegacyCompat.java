@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.IntStream;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
@@ -19,8 +19,12 @@ public class LegacyCompat implements EntityManager {
 
     @Override
     public Stream<Entity> getAllEntities() {
-        return IntStream.range(0, LegacyCompat.this.world.getEntityCount())
-                        .mapToObj(i -> (LegacyEntityHandleImpl) LegacyCompat.this.world.getEntity(i));
+        return this.world.iterateEntities(new Class[0],
+                                          new boolean[0],
+                                          new boolean[0],
+                                          objects -> new Object(),
+                                          false)
+                         .map(dataHandle -> dataHandle.getHandle().asLegacyEntity());
     }
 
     public LegacyCompat(final WorldImpl world) {
@@ -29,7 +33,7 @@ public class LegacyCompat implements EntityManager {
 
     @Override
     public Entity createEntity() {
-        return (LegacyEntityHandleImpl) LegacyCompat.this.world.createEntity();
+        return (LegacyEntityHandleImpl) this.world.createEntity();
     }
 
     @Override
@@ -39,7 +43,7 @@ public class LegacyCompat implements EntityManager {
 
     @Override
     public void applyModifications() {
-        LegacyCompat.this.world.commitEntityModifications();
+        this.world.commitEntityModifications();
     }
 
     @Override
@@ -86,15 +90,24 @@ public class LegacyCompat implements EntityManager {
 
     @Override
     public Stream<Entity> getEntitiesWith(
-            final Collection<Class<?>> required,
-            final Collection<Class<?>> excluded
+            final Collection<Class<?>> requiredComponents,
+            final Collection<Class<?>> excludedComponents
     ) {
-        final var componentStorage = LegacyCompat.this.world.getComponentStorage();
-        return IntStream.range(0, LegacyCompat.this.world.getEntityCount())
-                        .filter(id -> required.stream()
-                                              .allMatch(c -> componentStorage.has(id, c)))
-                        .filter(id -> excluded.stream()
-                                              .noneMatch(c -> componentStorage.has(id, c)))
-                        .mapToObj(id -> (LegacyEntityHandleImpl) LegacyCompat.this.world.getEntity(id));
+        final var components = Stream.concat(requiredComponents.stream(), excludedComponents.stream())
+                                     .distinct()
+                                     .collect(Collectors.toUnmodifiableList());
+        final var excluded = new boolean[components.size()];
+        var i = 0;
+        for (final var excludedComponent : excludedComponents) {
+            excluded[i] = components.contains(excludedComponent);
+            ++i;
+        }
+
+        return this.world.iterateEntities(components.toArray(Class[]::new),
+                                          excluded,
+                                          new boolean[components.size()],
+                                          objects -> new Object(),
+                                          false)
+                         .map(dataHandle -> dataHandle.getHandle().asLegacyEntity());
     }
 }
