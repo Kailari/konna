@@ -36,7 +36,7 @@ public class EntityStorage {
         //  - custom list collection with support for spliterator might be the easisest solution
         final Stream<Archetype> baseStream;
         final var immutableArchetypes = List.copyOf(this.archetypes);
-        if (parallel && false) {
+        if (parallel) {
             baseStream = immutableArchetypes.parallelStream();
         } else {
             baseStream = immutableArchetypes.stream();
@@ -48,8 +48,7 @@ public class EntityStorage {
                                                                 optional,
                                                                 excluded,
                                                                 dataFactory,
-                                                                false //parallel
-                         ));
+                                                                parallel));
     }
 
     /**
@@ -66,7 +65,8 @@ public class EntityStorage {
      *
      * @return <code>true</code> if the component was added
      */
-    public <TComponent> boolean addComponent(
+    // FIXME: Try to get rid of synchronized on these
+    public synchronized <TComponent> boolean addComponent(
             final EntityHandleImpl entity,
             final Class<TComponent> componentClass,
             final TComponent component
@@ -105,7 +105,7 @@ public class EntityStorage {
         return true;
     }
 
-    public <TComponent> boolean removeComponent(
+    public synchronized  <TComponent> boolean removeComponent(
             final EntityHandleImpl entity,
             final Class<TComponent> componentClass
     ) {

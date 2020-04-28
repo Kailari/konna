@@ -54,6 +54,7 @@ public final class GameplayGameModeRenderer {
                                                             assetManager,
                                                             backend,
                                                             camera);
+        legacyDispatcher.setParallel(false);
         return new GameModeRenderer(legacyDispatcher,
                                     renderDispatcher,
                                     userInterface);

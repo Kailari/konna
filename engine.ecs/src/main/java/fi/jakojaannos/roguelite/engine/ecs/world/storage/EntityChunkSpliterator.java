@@ -143,7 +143,6 @@ public class EntityChunkSpliterator<TEntityData> implements Spliterator<EntityDa
 
     @Override
     public Spliterator<EntityDataHandle<TEntityData>> trySplit() {
-        if (true) return null;
         // Un-chain this chunk if we are still part of a chain
         if (this.chunk.hasNext()) {
             final var next = this.chunk.getNext();

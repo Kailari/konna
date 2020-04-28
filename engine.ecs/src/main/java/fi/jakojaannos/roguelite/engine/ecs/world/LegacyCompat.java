@@ -3,11 +3,9 @@ package fi.jakojaannos.roguelite.engine.ecs.world;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
@@ -24,7 +22,7 @@ public class LegacyCompat implements EntityManager {
                                           new boolean[0],
                                           new boolean[0],
                                           objects -> new Object(),
-                                          false)
+                                          true)
                          .map(dataHandle -> dataHandle.getHandle().asLegacyEntity());
     }
 
@@ -84,7 +82,7 @@ public class LegacyCompat implements EntityManager {
     public <TComponent> Stream<EntityComponentPair<TComponent>> getEntitiesWith(
             final Class<TComponent> componentType
     ) {
-        return getEntitiesWith(List.of(componentType), List.of())
+        return getEntitiesWith(List.of(componentType), List.of(), false)
                 .map(entity -> new EntityComponentPair<>(entity,
                                                          getComponentOf(entity, componentType).orElseThrow()));
     }
@@ -92,7 +90,8 @@ public class LegacyCompat implements EntityManager {
     @Override
     public Stream<Entity> getEntitiesWith(
             final Collection<Class<?>> requiredComponents,
-            final Collection<Class<?>> excludedComponents
+            final Collection<Class<?>> excludedComponents,
+            final boolean parallel
     ) {
         final var components = new Class[requiredComponents.size() + excludedComponents.size()];
         final var excluded = new boolean[components.length];
@@ -111,7 +110,7 @@ public class LegacyCompat implements EntityManager {
                                           excluded,
                                           new boolean[components.length],
                                           objects -> new Object(),
-                                          false)
+                                          parallel)
                          .map(dataHandle -> dataHandle.getHandle().asLegacyEntity());
     }
 }

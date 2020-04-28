@@ -86,7 +86,7 @@ public final class GameplayGameMode {
         entityManager.addComponentTo(levelEntity, layer);
 
         final var random = new Random(seed + 1337);
-        for (int i = 0; i < 1/*00*/; i++) {
+        for (int i = 0; i < 1000; i++) {
             TurretArchetype.create(entityManager, timeManager, new Transform((random.nextDouble() * 2.0 - 1.0) * 10.0,
                                                                              (random.nextDouble() * 2.0 - 1.0) * 10.0));
         }
