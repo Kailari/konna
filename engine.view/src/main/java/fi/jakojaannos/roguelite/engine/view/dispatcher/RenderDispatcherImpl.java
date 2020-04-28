@@ -4,7 +4,6 @@ import java.lang.reflect.ParameterizedType;
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import fi.jakojaannos.roguelite.engine.GameState;
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
@@ -60,11 +59,11 @@ public class RenderDispatcherImpl implements RenderDispatcher {
         final var entities = state.world().iterateEntities(requirements.entityData().componentTypes(),
                                                            requirements.entityData().excluded(),
                                                            requirements.entityData().optional(),
-                                                           requirements::constructEntityData);
-        final var entityStream = StreamSupport.stream(entities, false);
+                                                           requirements::constructEntityData,
+                                                           false);
 
         final var nQueued = new QueueCounter();
-        adapter.tick(resources, entityStream, accumulator)
+        adapter.tick(resources, entities, accumulator)
                .forEach(writer -> {
                    if (nQueued.value + 1 == MAX_PER_BATCH) {
                        flush(buffer, mesh, nQueued.value);
@@ -95,7 +94,8 @@ public class RenderDispatcherImpl implements RenderDispatcher {
 
     private ByteBuffer getBufferFor(final EcsRenderAdapter<?, ?> adapter) {
         return this.adapterBuffers.computeIfAbsent(adapter.getClass(),
-                                                   ignored -> memAlloc(MAX_PER_BATCH * adapter.getVertexFormat().getInstanceSizeInBytes()));
+                                                   ignored -> memAlloc(MAX_PER_BATCH * adapter.getVertexFormat()
+                                                                                              .getInstanceSizeInBytes()));
     }
 
     @SuppressWarnings("unchecked")

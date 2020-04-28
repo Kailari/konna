@@ -110,12 +110,14 @@ public interface EntityManager {
      * @param required required component types
      * @param excluded excluded component types
      *
+     * @param parallel
      * @return Stream of entities matching the given criteria
      */
     @Deprecated
     Stream<Entity> getEntitiesWith(
             Collection<Class<?>> required,
-            Collection<Class<?>> excluded
+            Collection<Class<?>> excluded,
+            final boolean parallel
     );
 
     /**

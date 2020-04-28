@@ -179,7 +179,8 @@ public class SystemDispatcherImpl implements SystemDispatcher {
                 legacySystem.declareRequirements(requirements);
                 final var entities = world.getEntityManager()
                                           .getEntitiesWith(requirements.required(),
-                                                           requirements.excluded());
+                                                           requirements.excluded(),
+                                                           this.parallel);
                 legacySystem.tick(entities, world);
             } else if (systemObj instanceof EcsSystem<?, ?, ?> system) {
                 // XXX: This cannot be filter as that would possibly prevent tick in situations where previous

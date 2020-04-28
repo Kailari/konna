@@ -1,5 +1,8 @@
 package fi.jakojaannos.roguelite.engine.ecs.world.storage;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Map;
@@ -14,6 +17,8 @@ import fi.jakojaannos.roguelite.engine.ecs.world.EntityHandleImpl;
  * linked-list fashion, allowing them to "grow" on-demand.
  */
 public class EntityChunk {
+    private static final Logger LOG = LoggerFactory.getLogger(EntityChunk.class);
+
     private static final int ENTITY_COUNT_PER_CHUNK = 256;
 
     @SuppressWarnings("rawtypes")
@@ -180,7 +185,8 @@ public class EntityChunk {
 
     public void removeEntityAt(final int storageIndex) {
         if (this.indexCounter.get() == 0) {
-            throw new IllegalStateException("Tried removing entity from an empty chunk!");
+            LOG.error("Tried removing entity from an empty chunk!");
+            return;
         }
 
         if (this.indexCounter.get() == 1) {
