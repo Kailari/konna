@@ -3,6 +3,7 @@ package fi.jakojaannos.roguelite.engine.ecs.world;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -93,19 +94,22 @@ public class LegacyCompat implements EntityManager {
             final Collection<Class<?>> requiredComponents,
             final Collection<Class<?>> excludedComponents
     ) {
-        final var components = Stream.concat(requiredComponents.stream(), excludedComponents.stream())
-                                     .distinct()
-                                     .collect(Collectors.toUnmodifiableList());
-        final var excluded = new boolean[components.size()];
+        final var components = new Class[requiredComponents.size() + excludedComponents.size()];
+        final var excluded = new boolean[components.length];
         var i = 0;
-        for (final var excludedComponent : excludedComponents) {
-            excluded[i] = components.contains(excludedComponent);
+        for (final var component : requiredComponents) {
+            components[i] = component;
+            ++i;
+        }
+        for (final var component : excludedComponents) {
+            components[i] = component;
+            excluded[i] = true;
             ++i;
         }
 
-        return this.world.iterateEntities(components.toArray(Class[]::new),
+        return this.world.iterateEntities(components,
                                           excluded,
-                                          new boolean[components.size()],
+                                          new boolean[components.length],
                                           objects -> new Object(),
                                           false)
                          .map(dataHandle -> dataHandle.getHandle().asLegacyEntity());

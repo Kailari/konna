@@ -56,6 +56,10 @@ public class Archetype {
             if (!hasComponent && !optional[i] && !excluded[i]) {
                 return false;
             }
+
+            if (hasComponent && excluded[i]) {
+                return false;
+            }
         }
 
         // Everything required was found, return true

@@ -24,6 +24,7 @@ public class EntityStorageTest {
             storage.createEntity(new ComponentA(),
                                  new ComponentB());
         }
+        storage.commitModifications();
     }
 
     @Test
@@ -62,8 +63,20 @@ public class EntityStorageTest {
     }
 
     @Test
+    void createdEntityDoesNotAppearOnTheStreamWhenChangesHaveNotYetBeenCommitted() {
+        storage.createEntity(new ComponentA(), new ComponentB());
+        final var stream = storage.stream(new Class[]{ComponentA.class},
+                                          new boolean[]{false},
+                                          new boolean[]{false},
+                                          objects -> new Object(),
+                                          false);
+        assertEquals(200, stream.count());
+    }
+
+    @Test
     void createdEntityIsOnTheStreamAfterChangesHaveBeenCommitted() {
         storage.createEntity(new ComponentA(), new ComponentB());
+        storage.commitModifications();
 
         final var stream = createStreamOf(ComponentA.class);
         assertEquals(201, stream.count());
@@ -73,6 +86,8 @@ public class EntityStorageTest {
     void justCreatedEntityWithManuallyAddedComponentIsOnTheStreamAfterCommit() {
         final var handle = storage.createEntity(new ComponentA());
         handle.addComponent(new ComponentB());
+
+        storage.commitModifications();
 
         final var streamA = createStreamOf(ComponentA.class);
         final var streamB = createStreamOf(ComponentB.class);
@@ -84,6 +99,8 @@ public class EntityStorageTest {
     void justCreatedEntityWithManuallyRemovedComponentIsOnTheCorrectStreamsAfterCommit() {
         final var handle = storage.createEntity(new ComponentA(), new ComponentB());
         handle.removeComponent(ComponentB.class);
+
+        storage.commitModifications();
 
         final var streamA = createStreamOf(ComponentA.class);
         final var streamB = createStreamOf(ComponentB.class);
@@ -98,6 +115,8 @@ public class EntityStorageTest {
         handle.addComponent(new ComponentC());
         handle.addComponent(new ComponentD());
         handle.addComponent(new ComponentE());
+
+        storage.commitModifications();
 
         final var streamA = createStreamOf(ComponentA.class);
         final var streamB = createStreamOf(ComponentB.class);
@@ -115,11 +134,14 @@ public class EntityStorageTest {
     void entityWithComponentsAddedOverMultiplePassesIsOnStream() {
         final var handle = storage.createEntity(new ComponentA());
         handle.addComponent(new ComponentB());
+        storage.commitModifications();
 
         handle.addComponent(new ComponentC());
+        storage.commitModifications();
 
         handle.addComponent(new ComponentD());
         handle.addComponent(new ComponentE());
+        storage.commitModifications();
 
         final var streamA = createStreamOf(ComponentA.class);
         final var streamB = createStreamOf(ComponentB.class);
@@ -137,12 +159,15 @@ public class EntityStorageTest {
     void entityWithComponentsAddedAndRemovedOverMultiplePassesIsOnStream() {
         final var handle = storage.createEntity(new ComponentA());
         handle.addComponent(new ComponentB());
+        storage.commitModifications();
 
         handle.addComponent(new ComponentC());
         handle.removeComponent(ComponentA.class);
+        storage.commitModifications();
 
         handle.addComponent(new ComponentD());
         handle.addComponent(new ComponentE());
+        storage.commitModifications();
 
         final var streamA = createStreamOf(ComponentA.class);
         final var streamB = createStreamOf(ComponentB.class);
@@ -166,12 +191,15 @@ public class EntityStorageTest {
 
         final var handle = storage.createEntity();
         handle.addComponent(b);
+        storage.commitModifications();
 
         handle.addComponent(c);
         handle.removeComponent(ComponentA.class);
+        storage.commitModifications();
 
         handle.addComponent(d);
         handle.addComponent(e);
+        storage.commitModifications();
 
         final var streamA = createStreamOf(ComponentA.class);
         final var streamB = createStreamOf(ComponentB.class);
@@ -195,12 +223,15 @@ public class EntityStorageTest {
 
         final var handle = storage.createEntity(a);
         handle.addComponent(b);
+        storage.commitModifications();
 
         handle.addComponent(c);
         handle.removeComponent(ComponentA.class);
+        storage.commitModifications();
 
         handle.addComponent(d);
         handle.addComponent(e);
+        storage.commitModifications();
 
         final var stream = createStreamOf(ComponentB.class, ComponentC.class, ComponentD.class, ComponentE.class);
         assertEquals(1, stream.filter(h -> h.getComponent(ComponentB.class).orElseThrow().equals(b)
@@ -217,8 +248,10 @@ public class EntityStorageTest {
         for (int i = 0; i < 100; i++) {
             storage.createEntity(new ComponentB(), new ComponentA());
             final var handle = storage.createEntity(new ComponentB(), new ComponentA());
+            storage.commitModifications();
             handle.destroy();
 
+            storage.commitModifications();
         }
 
         final var result = createStreamOf(ComponentA.class, ComponentB.class).count();
@@ -236,6 +269,7 @@ public class EntityStorageTest {
             }
             handles[i] = storage.createEntity(component);
         }
+        storage.commitModifications();
 
         for (int i = 0; i < 100; i++) {
             if (i == 50) {
@@ -243,6 +277,7 @@ public class EntityStorageTest {
             }
             handles[i].destroy();
         }
+        storage.commitModifications();
 
         assertEquals(e, handles[50].getComponent(ComponentE.class)
                                    .orElseThrow());
@@ -259,10 +294,12 @@ public class EntityStorageTest {
             }
             handles[i] = storage.createEntity(component);
         }
+        storage.commitModifications();
 
         for (int i = 0; i < 99; i++) {
             handles[i].destroy();
         }
+        storage.commitModifications();
 
         assertEquals(e, handles[99].getComponent(ComponentE.class)
                                    .orElseThrow());
@@ -279,6 +316,7 @@ public class EntityStorageTest {
             }
             handles[i] = storage.createEntity(component);
         }
+        storage.commitModifications();
 
         for (int i = 0; i < 100; i++) {
             if (i == 0) {
@@ -286,6 +324,7 @@ public class EntityStorageTest {
             }
             handles[i].destroy();
         }
+        storage.commitModifications();
 
         assertEquals(e, handles[0].getComponent(ComponentE.class)
                                   .orElseThrow());
@@ -318,6 +357,16 @@ public class EntityStorageTest {
                                           objects -> new Object(),
                                           false);
         assertEquals(0, stream.count());
+    }
+
+    @Test
+    void entitiesWithExcludedComponentsAreNotOnTheStream() {
+        final var stream = storage.stream(new Class[]{ComponentA.class, ComponentB.class},
+                                          new boolean[]{false, true},
+                                          new boolean[]{false, false},
+                                          objects -> new Object(),
+                                          false);
+        assertEquals(100, stream.count());
     }
 
     @SuppressWarnings("rawtypes")
