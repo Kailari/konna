@@ -97,12 +97,10 @@ public class Archetype {
 
         for (final var removeTask : this.removed) {
             final var entity = removeTask.chunk.getEntity(removeTask.storageIndex);
-            removeTask.chunk.swapLastInto(removeTask.storageIndex);
+            removeTask.chunk.removeEntityAt(removeTask.storageIndex);
 
-            if (removeTask.chunk.isEmpty()) {
-                if (removeTask.chunk.hasPrevious()) {
-                    removeTask.chunk.removeFromChain();
-                }
+            if (removeTask.chunk.isEmpty() && removeTask.chunk.hasPrevious()) {
+                removeTask.chunk.removeFromChain();
             }
 
             if (removeTask.destroyed) {

@@ -181,42 +181,29 @@ public class EntityChunk {
         return (TComponent[]) this.components.get(componentClass);
     }
 
-    /**
-     * Moves the last entity in this chunk into the given position in another chunk.
-     *
-     * @param chunk        the target chunk
-     * @param storageIndex the storage index in the target chunk
-     */
-    synchronized void moveLastInto(final EntityChunk chunk, final int storageIndex) {
-        // SAFETY: It is safe to get first and then decrement later as this method is always run in
-        //         the main thread. Worker threads should never call this, or it must be ensured
-        //         that a single call at a time is in progress (method is `synchronized`)
+    public void removeEntityAt(final int storageIndex) {
         if (this.indexCounter.get() == 0) {
             return;
         }
 
+        if (this.indexCounter.get() == 1) {
+            this.nEntities = 0;
+            this.indexCounter.set(0);
 
-        final var lastIndex = this.indexCounter.decrementAndGet();
-        if (storageIndex == lastIndex && chunk == this) {
-            return;
-        }
-
-        for (final Class<?> componentClass : this.getArchetype().getComponentClasses()) {
-            moveComponent(this, chunk, lastIndex, storageIndex, componentClass);
-        }
-        final var handle = this.entities[lastIndex];
-        chunk.entities[storageIndex] = handle;
-        this.entities[lastIndex] = null;
-
-        handle.moveToChunk(chunk, storageIndex);
-    }
-
-    public void swapLastInto(final int storageIndex) {
-        if (this.indexCounter.get() == 0) {
+            this.entities[0] = null;
+            for (final var componentClass : this.getArchetype().getComponentClasses()) {
+                final var storage = getStorage(componentClass);
+                if (storage == null) {
+                    throw new IllegalStateException("Entity chunk missing storage \""
+                                                    + componentClass.getSimpleName() + "\"");
+                }
+                storage[0] = null;
+            }
             return;
         }
 
         final var lastIndex = this.indexCounter.decrementAndGet();
+        this.nEntities = this.indexCounter.get();
         for (final Class<?> componentClass : this.getArchetype().getComponentClasses()) {
             moveComponent(this, this, lastIndex, storageIndex, componentClass);
         }
@@ -224,7 +211,11 @@ public class EntityChunk {
         this.entities[storageIndex] = handle;
         this.entities[lastIndex] = null;
 
-        handle.moveToChunk(this, storageIndex);
+        // Only move if the entity has not already been moved out of this chunk
+        // TODO: Why is this necessary?
+        if (handle.getChunk() == this) {
+            handle.moveToChunk(this, storageIndex);
+        }
     }
 
     public <TComponent> TComponent getComponent(
