@@ -30,11 +30,7 @@ public class EntityChunk {
     @Nullable
     private EntityChunk previous;
 
-    public int getEntityCount() {
-        return this.nEntities;
-    }
-
-    public int getLastEntityIndex() {
+    public int getLastIndex() {
         return this.nEntities;
     }
 
@@ -149,7 +145,8 @@ public class EntityChunk {
      */
     public Object[][] fetchStorages(
             final Class<?>[] componentClasses,
-            final boolean[] optional
+            final boolean[] optional,
+            final boolean[] excluded
     ) {
         final var paramStorages = new Object[componentClasses.length][];
 
@@ -157,7 +154,7 @@ public class EntityChunk {
             final Class<?> componentClass = componentClasses[index];
             final Object[] storage = getStorage(componentClass);
 
-            if (storage == null && !optional[index]) {
+            if (storage == null && !optional[index] && !excluded[index]) {
                 throw new IllegalArgumentException("Tried fetching component type \""
                                                    + componentClass.getSimpleName()
                                                    + "\" not stored in this chunk!");
@@ -183,7 +180,7 @@ public class EntityChunk {
 
     public void removeEntityAt(final int storageIndex) {
         if (this.indexCounter.get() == 0) {
-            return;
+            throw new IllegalStateException("Tried removing entity from an empty chunk!");
         }
 
         if (this.indexCounter.get() == 1) {
