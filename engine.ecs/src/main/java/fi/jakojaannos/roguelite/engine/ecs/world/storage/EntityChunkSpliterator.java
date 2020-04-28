@@ -19,8 +19,9 @@ import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
  */
 public class EntityChunkSpliterator<TEntityData> implements Spliterator<EntityDataHandle<TEntityData>> {
     private final Function<Object[], TEntityData> dataFactory;
-    private final Object[][] relevantStorages;
+    private final Object[][] storages;
     private final Class<?>[] componentClasses;
+    private final boolean[] excluded;
     private final boolean[] optional;
 
     private EntityChunk chunk;
@@ -37,23 +38,26 @@ public class EntityChunkSpliterator<TEntityData> implements Spliterator<EntityDa
             final EntityChunk chunk,
             final Class<?>[] componentClasses,
             final boolean[] optional,
+            final boolean[] excluded,
             final Function<Object[], TEntityData> dataFactory
     ) {
         this(chunk,
              componentClasses,
-             chunk.fetchStorages(componentClasses, optional),
+             chunk.fetchStorages(componentClasses, optional, excluded),
              optional,
+             excluded,
              dataFactory,
              0,
-             chunk.getLastEntityIndex(),
+             chunk.getLastIndex(),
              true);
     }
 
-    public EntityChunkSpliterator(
+    private EntityChunkSpliterator(
             final EntityChunk chunk,
             final Class<?>[] componentClasses,
-            final Object[][] relevantStorages,
+            final Object[][] storages,
             final boolean[] optional,
+            final boolean[] excluded,
             final Function<Object[], TEntityData> dataFactory,
             final int startPointer,
             final int endPointer,
@@ -61,8 +65,9 @@ public class EntityChunkSpliterator<TEntityData> implements Spliterator<EntityDa
     ) {
         this.chunk = chunk;
         this.componentClasses = componentClasses;
-        this.relevantStorages = relevantStorages;
+        this.storages = storages;
         this.optional = optional;
+        this.excluded = excluded;
         this.dataFactory = dataFactory;
 
         this.startPointer = startPointer;
@@ -98,7 +103,7 @@ public class EntityChunkSpliterator<TEntityData> implements Spliterator<EntityDa
 
             this.startPointer = 0;
             this.chained = true;
-            this.endPointer = this.chunk.getLastEntityIndex();
+            this.endPointer = this.chunk.getLastIndex();
 
             // FIXME: Replace recursion with wrapping while-loop
             return tryAdvance(consumer);
@@ -113,20 +118,22 @@ public class EntityChunkSpliterator<TEntityData> implements Spliterator<EntityDa
     }
 
     private Object[] fetchParameters(final int entityIndex) {
-        final var parameters = new Object[this.relevantStorages.length];
+        final var parameters = new Object[this.storages.length];
         for (int paramIndex = 0; paramIndex < parameters.length; ++paramIndex) {
-            final var storage = this.relevantStorages[paramIndex];
+            final var storage = this.storages[paramIndex];
             parameters[paramIndex] = storage != null ? storage[entityIndex] : null;
 
             final var isNull = parameters[paramIndex] == null;
 
             final var isOptional = this.optional[paramIndex];
+            final var isExcluded = this.excluded[paramIndex];
+
             // Wrap if optional
             if (isOptional) {
                 parameters[paramIndex] = Optional.ofNullable(parameters[paramIndex]);
             }
-            // Required component not present; request is invalid!
-            else if (isNull) {
+            // Required component not present? request is invalid!
+            else if (isNull && !isExcluded) {
                 throw new IllegalStateException("Required component not present!");
             }
         }
@@ -136,6 +143,7 @@ public class EntityChunkSpliterator<TEntityData> implements Spliterator<EntityDa
 
     @Override
     public Spliterator<EntityDataHandle<TEntityData>> trySplit() {
+        if (true) return null;
         // Un-chain this chunk if we are still part of a chain
         if (this.chunk.hasNext()) {
             final var next = this.chunk.getNext();
@@ -146,6 +154,7 @@ public class EntityChunkSpliterator<TEntityData> implements Spliterator<EntityDa
             return new EntityChunkSpliterator<>(next,
                                                 this.componentClasses,
                                                 this.optional,
+                                                this.excluded,
                                                 this.dataFactory);
         }
         // Halve the region if possible
@@ -159,8 +168,9 @@ public class EntityChunkSpliterator<TEntityData> implements Spliterator<EntityDa
                 // Create new tail (non-head) spliterator for the first half
                 return new EntityChunkSpliterator<>(this.chunk,
                                                     this.componentClasses,
-                                                    this.relevantStorages,
+                                                    this.storages,
                                                     this.optional,
+                                                    this.excluded,
                                                     this.dataFactory,
                                                     oldStartPointer,
                                                     this.startPointer,
@@ -177,7 +187,7 @@ public class EntityChunkSpliterator<TEntityData> implements Spliterator<EntityDa
         var size = this.endPointer - this.startPointer;
         var current = this.chunk.getNext();
         while (current != null) {
-            size += current.getEntityCount();
+            size += current.getLastIndex();
             current = current.getNext();
         }
 

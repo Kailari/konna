@@ -2,7 +2,7 @@ package fi.jakojaannos.roguelite.engine.ecs.world.storage;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -20,7 +20,7 @@ import fi.jakojaannos.roguelite.engine.ecs.world.EntityHandleImpl;
  */
 public class Archetype {
     private final Class<?>[] componentClasses;
-    private final Collection<Removed> removed = new ArrayList<>();
+    private final List<Removed> removed = new ArrayList<>();
 
     private final EntityChunk root;
 
@@ -65,12 +65,14 @@ public class Archetype {
     public <TEntityData> Stream<EntityDataHandle<TEntityData>> stream(
             final Class<?>[] componentClasses,
             final boolean[] optional,
+            final boolean[] excluded,
             final Function<Object[], TEntityData> dataFactory,
             final boolean parallel
     ) {
         return StreamSupport.stream(new EntityChunkSpliterator<>(this.root,
                                                                  componentClasses,
                                                                  optional,
+                                                                 excluded,
                                                                  dataFactory),
                                     parallel);
     }
@@ -95,6 +97,8 @@ public class Archetype {
             chunk = chunk.getNext();
         } while (chunk != null);
 
+        this.removed.sort(Comparator.<Removed>comparingInt(task -> task.storageIndex)
+                                  .reversed());
         for (final var removeTask : this.removed) {
             final var entity = removeTask.chunk.getEntity(removeTask.storageIndex);
             removeTask.chunk.removeEntityAt(removeTask.storageIndex);

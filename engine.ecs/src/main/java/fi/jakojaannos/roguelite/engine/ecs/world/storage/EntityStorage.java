@@ -3,7 +3,6 @@ package fi.jakojaannos.roguelite.engine.ecs.world.storage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -11,7 +10,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
@@ -33,18 +31,12 @@ public class EntityStorage {
             final Function<Object[], TEntityData> dataFactory,
             final boolean parallel
     ) {
-        // Component classes without excluded components
-        final var requiredClasses = IntStream.range(0, componentClasses.length)
-                                             .filter(i -> !excluded[i])
-                                             .mapToObj(i -> componentClasses[i])
-                                             .toArray(Class[]::new);
-
-        // Filter by exclusion and flatten per-archetype streams to a single stream
+        // Filter by available components and flatten per-archetype streams to a single stream
         // FIXME: Figure out how to avoid having to take immutable copy for iteration
         //  - custom list collection with support for spliterator might be the easisest solution
         final Stream<Archetype> baseStream;
         final var immutableArchetypes = List.copyOf(this.archetypes);
-        if (parallel) {
+        if (parallel && false) {
             baseStream = immutableArchetypes.parallelStream();
         } else {
             baseStream = immutableArchetypes.stream();
@@ -52,10 +44,12 @@ public class EntityStorage {
         return baseStream.filter(archetype -> archetype.matchesRequirements(componentClasses,
                                                                             excluded,
                                                                             optional))
-                         .flatMap(archetype -> archetype.stream(requiredClasses,
+                         .flatMap(archetype -> archetype.stream(componentClasses,
                                                                 optional,
+                                                                excluded,
                                                                 dataFactory,
-                                                                parallel));
+                                                                false //parallel
+                         ));
     }
 
     /**
@@ -65,7 +59,7 @@ public class EntityStorage {
      * newly added component. However, as iterating the storage might still be in progress, the entity slot where the
      * entity previously resided cannot be released until ticking the current system ends.
      *
-     * @param entity   the entity to add the component to
+     * @param entity         the entity to add the component to
      * @param componentClass class of the added component
      * @param component      the component to add
      * @param <TComponent>   type of the added component
@@ -93,30 +87,30 @@ public class EntityStorage {
 
         final var newArchetype = findOrCreateArchetype(componentClasses);
 
-        // Copy to the new archetype
-        final var storages = chunk.fetchStorages(oldComponents, new boolean[oldComponents.length]);
+        // Fetch components
+        final var storages = chunk.fetchStorages(oldComponents,
+                                                 new boolean[oldComponents.length],
+                                                 new boolean[oldComponents.length]);
         final var components = new Object[componentClasses.length];
         for (int i = 0; i < oldComponents.length; i++) {
             components[i] = storages[i][entity.getStorageIndex()];
         }
         components[components.length - 1] = component;
 
-        final var oldStorageIndex = entity.getStorageIndex();
+        // Move to the new archetype
+        archetype.queueRemoved(chunk, entity.getStorageIndex(), false);
         newArchetype.addEntity(entity, componentClasses, components);
-
-        // Queue for removal from the old archetype
-        archetype.queueRemoved(chunk, oldStorageIndex, false);
 
         // The component was added, return true
         return true;
     }
 
     public <TComponent> boolean removeComponent(
-            final EntityHandleImpl entityHandle,
+            final EntityHandleImpl entity,
             final Class<TComponent> componentClass
     ) {
         // Check if we need to do something
-        final var chunk = entityHandle.getChunk();
+        final var chunk = entity.getChunk();
         final var archetype = chunk.getArchetype();
         if (!archetype.hasComponent(componentClass)) {
             // Entity does not have the component, do nothing and return false
@@ -135,17 +129,18 @@ public class EntityStorage {
 
         final var newArchetype = findOrCreateArchetype(componentClasses);
 
-        // Move to the new archetype
-        final var storages = chunk.fetchStorages(componentClasses, new boolean[componentClasses.length]);
+        // Fetch preserved components
+        final var storages = chunk.fetchStorages(componentClasses,
+                                                 new boolean[componentClasses.length],
+                                                 new boolean[componentClasses.length]);
         final var components = new Object[componentClasses.length];
         for (int i = 0; i < components.length; i++) {
-            components[i] = storages[i][entityHandle.getStorageIndex()];
+            components[i] = storages[i][entity.getStorageIndex()];
         }
-        final var oldIndex = entityHandle.getStorageIndex();
-        newArchetype.addEntity(entityHandle, componentClasses, components);
 
-        // Queue for removal from the old archetype
-        archetype.queueRemoved(chunk, oldIndex, false);
+        // Move to the new archetype
+        archetype.queueRemoved(chunk, entity.getStorageIndex(), false);
+        newArchetype.addEntity(entity, componentClasses, components);
 
         // The component was removed, return true
         return true;
