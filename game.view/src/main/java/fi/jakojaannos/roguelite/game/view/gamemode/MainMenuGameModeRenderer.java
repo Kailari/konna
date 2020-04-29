@@ -13,7 +13,6 @@ import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.Sprite;
 import fi.jakojaannos.roguelite.engine.view.rendering.text.Font;
 import fi.jakojaannos.roguelite.engine.view.ui.ProportionValue;
-import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.game.DebugConfig;
 import fi.jakojaannos.roguelite.game.view.systems.NetworkHUDSystem;
@@ -94,7 +93,6 @@ public final class MainMenuGameModeRenderer {
         return UserInterface
                 .builder(events, timeManager, camera.getViewport(), font)
                 .element("play_button",
-                         UIElementType.PANEL,
                          builder -> builder.anchorX(percentOf(parentWidth(0.5)))
                                            .anchorY(percentOf(parentHeight(0.3)))
                                            .left(percentOf(ownWidth(-0.5)))
@@ -104,7 +102,6 @@ public final class MainMenuGameModeRenderer {
                                            .borderSize(borderSize)
                                            .sprite("sprites/ui/ui")
                                            .child("play_button_label",
-                                                  UIElementType.LABEL,
                                                   labelBuilder -> labelBuilder
                                                           .anchorX(percentOf(parentWidth(0.5)))
                                                           .anchorY(percentOf(parentHeight(0.5)))
@@ -113,7 +110,6 @@ public final class MainMenuGameModeRenderer {
                                                           .text("Play")
                                                           .fontSize(24)))
                 .element("quit_button",
-                         UIElementType.PANEL,
                          builder -> builder.anchorX(percentOf(parentWidth(0.5)))
                                            .anchorY(percentOf(parentHeight(0.3)))
                                            .left(percentOf(ownWidth(-0.5)))
@@ -123,7 +119,6 @@ public final class MainMenuGameModeRenderer {
                                            .borderSize(borderSize)
                                            .sprite("sprites/ui/ui")
                                            .child("quit_button_label",
-                                                  UIElementType.LABEL,
                                                   labelBuilder -> labelBuilder
                                                           .anchorX(percentOf(parentWidth(0.5)))
                                                           .anchorY(percentOf(parentHeight(0.5)))
@@ -132,7 +127,6 @@ public final class MainMenuGameModeRenderer {
                                                           .text("Quit")
                                                           .fontSize(24)))
                 .element("connect_button",
-                         UIElementType.PANEL,
                          builder -> builder.anchorX(percentOf(parentWidth(0.5)))
                                            .anchorY(percentOf(parentHeight(0.3)))
                                            .left(percentOf(ownWidth(-0.5)))
@@ -142,7 +136,6 @@ public final class MainMenuGameModeRenderer {
                                            .borderSize(borderSize)
                                            .sprite("sprites/ui/ui")
                                            .child("connect_button_label",
-                                                  UIElementType.LABEL,
                                                   labelBuilder -> labelBuilder
                                                           .anchorX(percentOf(parentWidth(0.5)))
                                                           .anchorY(percentOf(parentHeight(0.5)))
@@ -151,7 +144,6 @@ public final class MainMenuGameModeRenderer {
                                                           .text("Connect")
                                                           .fontSize(24)))
                 .element(TITLE_LABEL_NAME,
-                         UIElementType.LABEL,
                          builder -> builder.anchorX(percentOf(parentWidth(0.5)))
                                            .anchorY(percentOf(parentHeight(0.25)))
                                            .left(percentOf(ownWidth(-0.5)))

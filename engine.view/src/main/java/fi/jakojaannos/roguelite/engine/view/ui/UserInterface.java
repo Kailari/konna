@@ -10,8 +10,7 @@ import fi.jakojaannos.roguelite.engine.ui.TextSizeProvider;
 import fi.jakojaannos.roguelite.engine.ui.UIEvent;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
-import fi.jakojaannos.roguelite.engine.view.ui.builder.UIBuilder;
-import fi.jakojaannos.roguelite.engine.view.ui.builder.UIElementBuilder;
+import fi.jakojaannos.roguelite.engine.view.ui.builder.UIBuilderImpl;
 import fi.jakojaannos.roguelite.engine.view.ui.query.UIElementMatcher;
 
 public interface UserInterface {
@@ -21,13 +20,15 @@ public interface UserInterface {
 
     Stream<UIElement> getRoots();
 
+    UIRoot getRoot();
+
     static UIBuilder builder(
             final Events events,
             final TimeManager timeManager,
             final Viewport viewport,
             final TextSizeProvider fontSizeProvider
     ) {
-        return new UIBuilder(events, timeManager, viewport, fontSizeProvider);
+        return new UIBuilderImpl(events, timeManager, viewport, fontSizeProvider);
     }
 
     void update(Mouse mouse);
@@ -39,13 +40,9 @@ public interface UserInterface {
         return getRoots().flatMap(root -> matchingElements(root, matcher));
     }
 
-    <T extends UIElementType<TBuilder>, TBuilder extends UIElementBuilder<TBuilder>> UIElement addElement(
-            String name,
-            T elementType,
-            Consumer<TBuilder> factory
-    );
+    UIElement addElement(String name, Consumer<UIElementBuilder> factory);
 
-    private Stream<UIElement> matchingElements(
+    private static Stream<UIElement> matchingElements(
             final UIElement element,
             final UIElementMatcher matcher
     ) {
@@ -58,8 +55,6 @@ public interface UserInterface {
 
         return matchingChildren;
     }
-
-    UIRoot getRoot();
 
     interface UIEventBus extends EventSender<UIEvent> {}
 }

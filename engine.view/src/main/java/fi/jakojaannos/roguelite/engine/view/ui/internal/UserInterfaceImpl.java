@@ -13,7 +13,7 @@ import fi.jakojaannos.roguelite.engine.ui.UIEvent;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.ui.*;
-import fi.jakojaannos.roguelite.engine.view.ui.builder.UIElementBuilder;
+import fi.jakojaannos.roguelite.engine.view.ui.builder.UIElementBuilderImpl;
 
 /**
  * The interface used to interact with the game.
@@ -78,17 +78,11 @@ public class UserInterfaceImpl implements UserInterface {
     }
 
     @Override
-    public <T extends UIElementType<TBuilder>, TBuilder extends UIElementBuilder<TBuilder>>
-    UIElement addElement(
-            final String name,
-            final T elementType,
-            final Consumer<TBuilder> factory
-    ) {
+    public UIElement addElement(final String name, final Consumer<UIElementBuilder> factory) {
         final var element = new UIElementImpl(this.idCounter.getAndIncrement(), this);
-        final var builder = elementType.getBuilder(this, element, name);
+        final var builder = new UIElementBuilderImpl(this, element, name);
         factory.accept(builder);
 
-        element.setProperty(UIProperty.TYPE, elementType);
         this.roots.add(element);
         this.allElements.add(element);
         return element;

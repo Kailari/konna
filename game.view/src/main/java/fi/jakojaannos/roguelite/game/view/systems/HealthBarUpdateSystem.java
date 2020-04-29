@@ -112,7 +112,6 @@ public class HealthBarUpdateSystem implements ECSSystem {
 
     private UIElement createHealthBarForEntity(final Integer entityId) {
         return this.userInterface.addElement("healthbar#" + entityId,
-                                             UIElementType.PROGRESS_BAR,
                                              builder -> { });
     }
 }

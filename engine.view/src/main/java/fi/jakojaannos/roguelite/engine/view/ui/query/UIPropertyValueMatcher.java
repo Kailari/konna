@@ -48,6 +48,10 @@ public class UIPropertyValueMatcher<T> implements UIPropertyMatcher<T> {
                                                                           .orElseGet(orElse));
         }
 
+        public UIPropertyValueMatcher<T> isPresent() {
+            return isPresentAndMatches(t -> true);
+        }
+
         public UIPropertyValueMatcher<T> isPresentAndEqual(final T expected) {
             return isPresentAndMatches(actual -> actual.equals(expected));
         }

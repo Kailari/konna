@@ -13,10 +13,8 @@ import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.audio.AudioContext;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.Sprite;
 import fi.jakojaannos.roguelite.engine.view.rendering.text.Font;
-import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
+import fi.jakojaannos.roguelite.engine.view.ui.UIElementBuilder;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
-import fi.jakojaannos.roguelite.engine.view.ui.builder.GenericUIElementBuilder;
-import fi.jakojaannos.roguelite.engine.view.ui.builder.UILabelBuilder;
 import fi.jakojaannos.roguelite.game.DebugConfig;
 import fi.jakojaannos.roguelite.game.view.adapters.TurretAdapter;
 import fi.jakojaannos.roguelite.game.view.systems.*;
@@ -139,38 +137,31 @@ public final class GameplayGameModeRenderer {
         final var font = fontRegistry.getByAssetName("fonts/VCR_OSD_MONO.ttf");
         return UserInterface.builder(events, timeManager, camera.getViewport(), font)
                             .element(TIME_PLAYED_LABEL_NAME,
-                                     UIElementType.LABEL,
                                      GameplayGameModeRenderer::buildTimePlayedTimer)
                             .element("score-kills",
-                                     UIElementType.LABEL,
                                      GameplayGameModeRenderer::buildKillsCounter)
                             .element("game-over-container",
-                                     UIElementType.NONE,
                                      GameplayGameModeRenderer::buildGameOverSplash)
                             .element("weapon-ammo",
-                                     UIElementType.LABEL,
                                      GameplayGameModeRenderer::buildAmmoCounter)
                             .element("weapon-heat",
-                                     UIElementType.LABEL,
                                      GameplayGameModeRenderer::buildHeatCounter)
                             .build();
     }
 
-    private static void buildGameOverSplash(final GenericUIElementBuilder builder) {
+    private static void buildGameOverSplash(final UIElementBuilder builder) {
         builder.anchorY(percentOf(parentHeight(0.5)))
                .height(absolute(70))
                .left(absolute(0))
                .top(absolute(0))
                .width(percentOf(parentWidth(1.0)))
                .child("game-over-label",
-                      UIElementType.LABEL,
                       label -> label.anchorX(percentOf(parentWidth(0.5)))
                                     .top(absolute(0))
                                     .left(percentOf(ownWidth(-0.5)))
                                     .text(GAME_OVER_MESSAGE)
                                     .fontSize(48))
                .child("game-over-help-label",
-                      UIElementType.LABEL,
                       label -> label.anchorX(percentOf(parentWidth(0.5)))
                                     .bottom(absolute(0))
                                     .left(percentOf(ownWidth(-0.5)))
@@ -178,7 +169,7 @@ public final class GameplayGameModeRenderer {
                                     .fontSize(24));
     }
 
-    private static void buildHeatCounter(final UILabelBuilder builder) {
+    private static void buildHeatCounter(final UIElementBuilder builder) {
         builder.anchorX(absolute(0))
                .right(absolute(10))
                .bottom(absolute(45))
@@ -187,7 +178,7 @@ public final class GameplayGameModeRenderer {
                .color(1.0, 1.0, 1.0);
     }
 
-    private static void buildAmmoCounter(final UILabelBuilder builder) {
+    private static void buildAmmoCounter(final UIElementBuilder builder) {
         builder.anchorX(absolute(0))
                .right(absolute(10))
                .bottom(absolute(5))
@@ -196,7 +187,7 @@ public final class GameplayGameModeRenderer {
                .color(1.0, 1.0, 1.0);
     }
 
-    private static void buildKillsCounter(final UILabelBuilder builder) {
+    private static void buildKillsCounter(final UIElementBuilder builder) {
         builder.anchorX(absolute(0))
                .left(absolute(5))
                .bottom(absolute(0))
@@ -204,7 +195,7 @@ public final class GameplayGameModeRenderer {
                .text("Kills: ??");
     }
 
-    private static void buildTimePlayedTimer(final UILabelBuilder builder) {
+    private static void buildTimePlayedTimer(final UIElementBuilder builder) {
         builder.anchorX(percentOf(parentWidth(0.5)))
                .left(percentOf(ownWidth(-0.5)))
                .top(absolute(5))

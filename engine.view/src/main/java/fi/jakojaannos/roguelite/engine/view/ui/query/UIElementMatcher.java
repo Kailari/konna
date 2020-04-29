@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.function.Consumer;
 
 import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
-import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 import fi.jakojaannos.roguelite.engine.view.ui.internal.query.UIElementMatcherImpl;
 
@@ -53,10 +52,10 @@ public interface UIElementMatcher extends UIMatcher {
     }
 
     default UIElementMatcher isProgressBar() {
-        return matching(UIPropertyMatcher.match(UIProperty.TYPE).isPresentAndEqual(UIElementType.PROGRESS_BAR));
+        return matching(UIPropertyMatcher.match(UIProperty.PROGRESS).isPresent());
     }
 
     default UIElementMatcher isLabel() {
-        return matching(UIPropertyMatcher.match(UIProperty.TYPE).isPresentAndEqual(UIElementType.LABEL));
+        return matching(UIPropertyMatcher.match(UIProperty.TEXT).isPresent());
     }
 }

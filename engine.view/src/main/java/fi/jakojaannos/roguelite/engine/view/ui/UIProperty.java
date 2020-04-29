@@ -8,8 +8,6 @@ public final record UIProperty<T>(
         String name,
         @Nullable T defaultValue
 ) {
-    // Generic
-    public static final UIProperty<UIElementType<?>> TYPE = new UIProperty<>("type", UIElementType.NONE);
     public static final UIProperty<String> NAME = new UIProperty<>("name", "undefined");
     public static final UIProperty<Boolean> HIDDEN = new UIProperty<>("hidden", false);
 

@@ -8,9 +8,8 @@ import fi.jakojaannos.roguelite.engine.event.EventBus;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
-import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
-import fi.jakojaannos.roguelite.engine.view.ui.builder.UIBuilder;
+import fi.jakojaannos.roguelite.engine.view.ui.UIBuilder;
 
 import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.absolute;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,9 +33,7 @@ public class UIElementBoundaryResolverTest_AbsoluteProportions {
     @Test
     void buildingUIElementWithoutDefiningBoundsDefaultsToFill() {
         UserInterface userInterface = uiBuilder
-                .element("a",
-                         UIElementType.PANEL,
-                         builder -> {})
+                .element("a", builder -> {})
                 .build();
         userInterface.update(new Mouse());
 
@@ -52,7 +49,6 @@ public class UIElementBoundaryResolverTest_AbsoluteProportions {
     void buildingUIElementWithPartialBoundsSetsOnlyDefinedPropertiesDefaultingOthersToFill() {
         UserInterface userInterface = uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.left(absolute(10))
                                            .bottom(absolute(100)))
                 .build();
@@ -70,7 +66,6 @@ public class UIElementBoundaryResolverTest_AbsoluteProportions {
     void buildingUIElementWithLeftAndRightCalculatesTheWidthAutomatically() {
         UserInterface userInterface = uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.left(absolute(10))
                                            .right(absolute(100)))
                 .build();
@@ -85,7 +80,6 @@ public class UIElementBoundaryResolverTest_AbsoluteProportions {
     void buildingUIElementWithTopAndBottomCalculatesTheHeightAutomatically() {
         UserInterface userInterface = uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.top(absolute(42))
                                            .bottom(absolute(24)))
                 .build();
@@ -100,7 +94,6 @@ public class UIElementBoundaryResolverTest_AbsoluteProportions {
     void buildingUIElementWithLeftBoundAndWidthCalculatesHorizontalCoordinatesCorrectly() {
         UserInterface userInterface = uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.left(absolute(24))
                                            .width(absolute(42)))
                 .build();
@@ -116,7 +109,6 @@ public class UIElementBoundaryResolverTest_AbsoluteProportions {
     void buildingUIElementWithRightBoundAndWidthCalculatesHorizontalCoordinatesCorrectly() {
         UserInterface userInterface = uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.right(absolute(24))
                                            .width(absolute(42)))
                 .build();
@@ -133,7 +125,6 @@ public class UIElementBoundaryResolverTest_AbsoluteProportions {
     void buildingUIElementWithTopBoundAndHeightCalculatesVerticalCoordinatesCorrectly() {
         UserInterface userInterface = uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.top(absolute(24))
                                            .height(absolute(42)))
                 .build();
@@ -149,7 +140,6 @@ public class UIElementBoundaryResolverTest_AbsoluteProportions {
     void buildingUIElementWithBottomBoundAndHeightCalculatesVerticalCoordinatesCorrectly() {
         UserInterface userInterface = uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.bottom(absolute(24))
                                            .height(absolute(42)))
                 .build();
@@ -165,7 +155,6 @@ public class UIElementBoundaryResolverTest_AbsoluteProportions {
     void buildingUIElementWithLeftRightAndWidthIgnoresTheWidth() {
         UserInterface userInterface = uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.left(absolute(100))
                                            .right(absolute(200))
                                            .width(absolute(20_000_000)))
@@ -183,7 +172,6 @@ public class UIElementBoundaryResolverTest_AbsoluteProportions {
     void buildingUIElementWithTopBottomAndHeightIgnoresTheHeight() {
         UserInterface userInterface = uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.top(absolute(100))
                                            .bottom(absolute(200))
                                            .height(absolute(20_000_000)))
@@ -201,7 +189,6 @@ public class UIElementBoundaryResolverTest_AbsoluteProportions {
     void buildingUIElementWithAnchorXOffsetsCorrectAmountHorizontally() {
         UserInterface userInterface = uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.anchorX(absolute(100))
                                            .left(absolute(200)))
                 .build();
@@ -216,7 +203,6 @@ public class UIElementBoundaryResolverTest_AbsoluteProportions {
     void buildingUIElementWithAnchorYOffsetsCorrectAmountVertically() {
         UserInterface userInterface = uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.anchorY(absolute(100))
                                            .top(absolute(200)))
                 .build();
