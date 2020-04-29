@@ -3,10 +3,7 @@ package fi.jakojaannos.roguelite.engine.ecs.world.storage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -105,7 +102,7 @@ public class EntityStorage {
         return true;
     }
 
-    public synchronized  <TComponent> boolean removeComponent(
+    public synchronized <TComponent> boolean removeComponent(
             final EntityHandleImpl entity,
             final Class<TComponent> componentClass
     ) {
