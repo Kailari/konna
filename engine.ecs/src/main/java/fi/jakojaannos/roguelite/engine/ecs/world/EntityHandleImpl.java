@@ -3,6 +3,7 @@ package fi.jakojaannos.roguelite.engine.ecs.world;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
@@ -126,5 +127,19 @@ public class EntityHandleImpl implements EntityHandle {
     public void moveToChunk(final EntityChunk chunk, final int storageIndex) {
         this.chunk = chunk;
         this.storageIndex = storageIndex;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (o instanceof EntityHandleImpl that) {
+            return this.stableId == that.stableId;
+        }
+
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.stableId);
     }
 }

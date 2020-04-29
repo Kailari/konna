@@ -48,7 +48,7 @@ public class EntityChunkSpliterator<TEntityData> implements Spliterator<EntityDa
              excluded,
              dataFactory,
              0,
-             chunk.getLastIndex(),
+             chunk.getEntityCount(),
              true);
     }
 
@@ -103,7 +103,7 @@ public class EntityChunkSpliterator<TEntityData> implements Spliterator<EntityDa
 
             this.startPointer = 0;
             this.chained = true;
-            this.endPointer = this.chunk.getLastIndex();
+            this.endPointer = this.chunk.getEntityCount();
 
             // FIXME: Replace recursion with wrapping while-loop
             return tryAdvance(consumer);
@@ -145,12 +145,11 @@ public class EntityChunkSpliterator<TEntityData> implements Spliterator<EntityDa
     public Spliterator<EntityDataHandle<TEntityData>> trySplit() {
         // Un-chain this chunk if we are still part of a chain
         if (this.chunk.hasNext()) {
-            final var next = this.chunk.getNext();
-            assert next != null;
+            assert this.chunk.getNext() != null;
 
             // No longer head, un-chain this spliterator (the new spliterator is the new head)
             this.chained = false;
-            return new EntityChunkSpliterator<>(next,
+            return new EntityChunkSpliterator<>(this.chunk.getNext(),
                                                 this.componentClasses,
                                                 this.optional,
                                                 this.excluded,
@@ -186,7 +185,7 @@ public class EntityChunkSpliterator<TEntityData> implements Spliterator<EntityDa
         var size = this.endPointer - this.startPointer;
         var current = this.chunk.getNext();
         while (current != null) {
-            size += current.getLastIndex();
+            size += current.getEntityCount();
             current = current.getNext();
         }
 

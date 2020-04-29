@@ -35,7 +35,7 @@ public class EntityChunk {
     @Nullable
     private EntityChunk previous;
 
-    public int getLastIndex() {
+    public int getEntityCount() {
         return this.nEntities;
     }
 
