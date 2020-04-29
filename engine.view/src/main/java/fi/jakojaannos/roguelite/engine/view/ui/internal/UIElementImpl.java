@@ -3,7 +3,7 @@ package fi.jakojaannos.roguelite.engine.view.ui.internal;
 import java.util.*;
 import javax.annotation.Nullable;
 
-import fi.jakojaannos.roguelite.engine.view.data.components.ui.ElementBoundaries;
+import fi.jakojaannos.roguelite.engine.view.ui.ElementBoundaries;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 

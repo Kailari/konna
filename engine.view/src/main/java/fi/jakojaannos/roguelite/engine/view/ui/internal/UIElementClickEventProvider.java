@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.engine.view.systems.ui;
+package fi.jakojaannos.roguelite.engine.view.ui.internal;
 
 import java.util.stream.Stream;
 

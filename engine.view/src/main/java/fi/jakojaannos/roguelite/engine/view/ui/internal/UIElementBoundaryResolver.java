@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.engine.view.systems.ui;
+package fi.jakojaannos.roguelite.engine.view.ui.internal;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,11 +12,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 import fi.jakojaannos.roguelite.engine.utilities.OptionalUtil;
-import fi.jakojaannos.roguelite.engine.view.data.components.ui.ElementBoundaries;
-import fi.jakojaannos.roguelite.engine.view.data.resources.ui.UIRoot;
-import fi.jakojaannos.roguelite.engine.view.ui.ProportionValue;
-import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
-import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
+import fi.jakojaannos.roguelite.engine.view.ui.*;
 
 /**
  * Iterates through entities, finding any with <code>BoundXXX</code>-components and bakes them into {@link
@@ -247,8 +243,8 @@ public class UIElementBoundaryResolver {
             final Lazy<Integer> computedWidth,
             final Lazy<Integer> computedHeight
     ) {
-        if (proportion instanceof ProportionValue.PercentOfSelf) {
-            if (((ProportionValue.PercentOfSelf) proportion).isHorizontal()) {
+        if (proportion instanceof ProportionValueImpl.PercentOfSelf percentOfSelf) {
+            if (percentOfSelf.isHorizontal()) {
                 if (computedWidth.isComputing()) {
                     return false;
                 } else {
@@ -292,9 +288,9 @@ public class UIElementBoundaryResolver {
     ) {
         proportions.filter(Optional::isPresent)
                    .map(Optional::get)
-                   .filter(proportion -> ProportionValue.PercentOfSelf.class.isAssignableFrom(proportion.getClass()))
-                   .map(ProportionValue.PercentOfSelf.class::cast)
-                   .filter(ProportionValue.PercentOfSelf::isHorizontal)
+                   .filter(proportion -> ProportionValueImpl.PercentOfSelf.class.isAssignableFrom(proportion.getClass()))
+                   .map(ProportionValueImpl.PercentOfSelf.class::cast)
+                   .filter(ProportionValueImpl.PercentOfSelf::isHorizontal)
                    .findAny()
                    .ifPresent(invalidProportion -> {
                        throw new IllegalStateException("Width-related properties cannot be proportional to width! "
@@ -309,8 +305,8 @@ public class UIElementBoundaryResolver {
     ) {
         proportions.filter(Optional::isPresent)
                    .map(Optional::get)
-                   .filter(proportion -> ProportionValue.PercentOfSelf.class.isAssignableFrom(proportion.getClass()))
-                   .map(ProportionValue.PercentOfSelf.class::cast)
+                   .filter(proportion -> ProportionValueImpl.PercentOfSelf.class.isAssignableFrom(proportion.getClass()))
+                   .map(ProportionValueImpl.PercentOfSelf.class::cast)
                    .filter(proportion -> !proportion.isHorizontal())
                    .findAny()
                    .ifPresent(invalidProportion -> {
@@ -325,11 +321,9 @@ public class UIElementBoundaryResolver {
             final ProportionValue widthProportion,
             final ProportionValue heightProportion
     ) {
-        final boolean widthIsPercentOfSelf = widthProportion instanceof ProportionValue.PercentOfSelf;
-        final boolean heightIsPercentOfSelf = heightProportion instanceof ProportionValue.PercentOfSelf;
-        if (widthIsPercentOfSelf && heightIsPercentOfSelf) {
-            final var selfProportionalWidth = (ProportionValue.PercentOfSelf) widthProportion;
-            final var selfProportionalHeight = (ProportionValue.PercentOfSelf) heightProportion;
+        if (widthProportion instanceof ProportionValueImpl.PercentOfSelf selfProportionalWidth
+            && heightProportion instanceof ProportionValueImpl.PercentOfSelf selfProportionalHeight
+        ) {
             if (selfProportionalHeight.isHorizontal() && !selfProportionalWidth.isHorizontal()) {
                 throw new IllegalStateException("Width and height cannot cyclically depend on each other!");
             }

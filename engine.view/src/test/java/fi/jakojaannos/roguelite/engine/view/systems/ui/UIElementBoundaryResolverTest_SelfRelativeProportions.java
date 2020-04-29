@@ -12,8 +12,7 @@ import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.UIBuilder;
 
-import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.absolute;
-import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.percentOf;
+import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class UIElementBoundaryResolverTest_SelfRelativeProportions {
@@ -37,7 +36,7 @@ public class UIElementBoundaryResolverTest_SelfRelativeProportions {
         assertThrows(IllegalStateException.class, () -> uiBuilder
                 .element("a",
                          UIElementType.PANEL,
-                         builder -> builder.width(percentOf().ownWidth(0.1)))
+                         builder -> builder.width(percentOf(ownWidth(0.1))))
                 .build()
                 .update(new Mouse()));
     }
@@ -47,7 +46,7 @@ public class UIElementBoundaryResolverTest_SelfRelativeProportions {
         assertThrows(IllegalStateException.class, () -> uiBuilder
                 .element("a",
                          UIElementType.PANEL,
-                         builder -> builder.height(percentOf().ownHeight(0.1)))
+                         builder -> builder.height(percentOf(ownHeight(0.1))))
                 .build()
                 .update(new Mouse()));
     }
@@ -57,8 +56,8 @@ public class UIElementBoundaryResolverTest_SelfRelativeProportions {
         assertThrows(IllegalStateException.class, () -> uiBuilder
                 .element("a",
                          UIElementType.PANEL,
-                         builder -> builder.width(percentOf().ownHeight(0.1))
-                                           .height(percentOf().ownWidth(0.1)))
+                         builder -> builder.width(percentOf(ownHeight(0.1)))
+                                           .height(percentOf(ownWidth(0.1))))
                 .build()
                 .update(new Mouse()));
     }
@@ -68,7 +67,7 @@ public class UIElementBoundaryResolverTest_SelfRelativeProportions {
         UserInterface userInterface = uiBuilder
                 .element("a",
                          UIElementType.PANEL,
-                         builder -> builder.width(percentOf().ownHeight(0.1))
+                         builder -> builder.width(percentOf(ownHeight(0.1)))
                                            .height(absolute(100)))
                 .build();
 
@@ -80,7 +79,7 @@ public class UIElementBoundaryResolverTest_SelfRelativeProportions {
         UserInterface userInterface = uiBuilder
                 .element("a",
                          UIElementType.PANEL,
-                         builder -> builder.width(percentOf().ownHeight(0.1)))
+                         builder -> builder.width(percentOf(ownHeight(0.1))))
                 .build();
 
         assertDoesNotThrow(() -> userInterface.update(new Mouse()));
@@ -91,7 +90,7 @@ public class UIElementBoundaryResolverTest_SelfRelativeProportions {
         UserInterface userInterface = uiBuilder
                 .element("a",
                          UIElementType.PANEL,
-                         builder -> builder.width(percentOf().ownHeight(0.1))
+                         builder -> builder.width(percentOf(ownHeight(0.1)))
                                            .top(absolute(10))
                                            .bottom(absolute(20)))
                 .build();
@@ -105,7 +104,7 @@ public class UIElementBoundaryResolverTest_SelfRelativeProportions {
                 .element("a",
                          UIElementType.PANEL,
                          builder -> builder.width(absolute(100))
-                                           .height(percentOf().ownWidth(0.1)))
+                                           .height(percentOf(ownWidth(0.1))))
                 .build();
 
         assertDoesNotThrow(() -> userInterface.update(new Mouse()));
@@ -116,7 +115,7 @@ public class UIElementBoundaryResolverTest_SelfRelativeProportions {
         UserInterface userInterface = uiBuilder
                 .element("a",
                          UIElementType.PANEL,
-                         builder -> builder.height(percentOf().ownWidth(0.1)))
+                         builder -> builder.height(percentOf(ownWidth(0.1))))
                 .build();
 
         assertDoesNotThrow(() -> userInterface.update(new Mouse()));
@@ -129,7 +128,7 @@ public class UIElementBoundaryResolverTest_SelfRelativeProportions {
                          UIElementType.PANEL,
                          builder -> builder.left(absolute(10))
                                            .right(absolute(20))
-                                           .height(percentOf().ownWidth(0.1)))
+                                           .height(percentOf(ownWidth(0.1))))
                 .build();
 
         assertDoesNotThrow(() -> userInterface.update(new Mouse()));
@@ -140,8 +139,8 @@ public class UIElementBoundaryResolverTest_SelfRelativeProportions {
         assertThrows(IllegalStateException.class, () -> uiBuilder
                 .element("a",
                          UIElementType.PANEL,
-                         builder -> builder.left(percentOf().ownWidth(0.1))
-                                           .right(percentOf().ownWidth(0.05)))
+                         builder -> builder.left(percentOf(ownWidth(0.1)))
+                                           .right(percentOf(ownWidth(0.05))))
                 .build()
                 .update(new Mouse()));
     }
@@ -152,7 +151,7 @@ public class UIElementBoundaryResolverTest_SelfRelativeProportions {
                 .element("a",
                          UIElementType.PANEL,
                          builder -> builder.width(absolute(200))
-                                           .left(percentOf().ownWidth(0.5)))
+                                           .left(percentOf(ownWidth(0.5))))
                 .build();
 
         assertDoesNotThrow(() -> userInterface.update(new Mouse()));
@@ -164,7 +163,7 @@ public class UIElementBoundaryResolverTest_SelfRelativeProportions {
                 .element("a",
                          UIElementType.PANEL,
                          builder -> builder.width(absolute(200))
-                                           .right(percentOf().ownWidth(0.5)))
+                                           .right(percentOf(ownWidth(0.5))))
                 .build();
 
         assertDoesNotThrow(() -> userInterface.update(new Mouse()));
@@ -176,7 +175,7 @@ public class UIElementBoundaryResolverTest_SelfRelativeProportions {
                 .element("a",
                          UIElementType.PANEL,
                          builder -> builder.height(absolute(200))
-                                           .top(percentOf().ownWidth(0.5)))
+                                           .top(percentOf(ownWidth(0.5))))
                 .build();
 
         assertDoesNotThrow(() -> userInterface.update(new Mouse()));
@@ -188,7 +187,7 @@ public class UIElementBoundaryResolverTest_SelfRelativeProportions {
                 .element("a",
                          UIElementType.PANEL,
                          builder -> builder.height(absolute(200))
-                                           .bottom(percentOf().ownWidth(0.5)))
+                                           .bottom(percentOf(ownWidth(0.5))))
                 .build();
 
         assertDoesNotThrow(() -> userInterface.update(new Mouse()));
@@ -199,8 +198,8 @@ public class UIElementBoundaryResolverTest_SelfRelativeProportions {
         UserInterface userInterface = uiBuilder
                 .element("a",
                          UIElementType.PANEL,
-                         builder -> builder.left(percentOf().ownHeight(0.1))
-                                           .right(percentOf().ownHeight(0.05)))
+                         builder -> builder.left(percentOf(ownHeight(0.1)))
+                                           .right(percentOf(ownHeight(0.05))))
                 .build();
 
         assertDoesNotThrow(() -> userInterface.update(new Mouse()));
@@ -212,8 +211,8 @@ public class UIElementBoundaryResolverTest_SelfRelativeProportions {
                 .element("a",
                          UIElementType.PANEL,
                          builder -> builder.height(absolute(200))
-                                           .left(percentOf().ownHeight(0.25))
-                                           .right(percentOf().ownHeight(0.1)))
+                                           .left(percentOf(ownHeight(0.25)))
+                                           .right(percentOf(ownHeight(0.1))))
                 .build();
         userInterface.update(new Mouse());
 

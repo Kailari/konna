@@ -10,7 +10,6 @@ import fi.jakojaannos.roguelite.engine.ui.TextSizeProvider;
 import fi.jakojaannos.roguelite.engine.ui.UIEvent;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
-import fi.jakojaannos.roguelite.engine.view.data.resources.ui.UIRoot;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.UIBuilder;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.UIElementBuilder;
 import fi.jakojaannos.roguelite.engine.view.ui.query.UIElementMatcher;

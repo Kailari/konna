@@ -25,8 +25,7 @@ import fi.jakojaannos.roguelite.game.view.systems.audio.HandleAudioEventsSystem;
 import fi.jakojaannos.roguelite.game.view.systems.debug.EntityCollisionBoundsRenderingSystem;
 import fi.jakojaannos.roguelite.game.view.systems.debug.EntityTransformRenderingSystem;
 
-import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.absolute;
-import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.percentOf;
+import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.*;
 
 public final class GameplayGameModeRenderer {
     public static final String TIME_PLAYED_LABEL_NAME = "time-played-timer";
@@ -158,23 +157,23 @@ public final class GameplayGameModeRenderer {
     }
 
     private static void buildGameOverSplash(final GenericUIElementBuilder builder) {
-        builder.anchorY(percentOf().parentHeight(0.5))
+        builder.anchorY(percentOf(parentHeight(0.5)))
                .height(absolute(70))
                .left(absolute(0))
                .top(absolute(0))
-               .width(percentOf().parentWidth(1.0))
+               .width(percentOf(parentWidth(1.0)))
                .child("game-over-label",
                       UIElementType.LABEL,
-                      label -> label.anchorX(percentOf().parentWidth(0.5))
+                      label -> label.anchorX(percentOf(parentWidth(0.5)))
                                     .top(absolute(0))
-                                    .left(percentOf().ownWidth(-0.5))
+                                    .left(percentOf(ownWidth(-0.5)))
                                     .text(GAME_OVER_MESSAGE)
                                     .fontSize(48))
                .child("game-over-help-label",
                       UIElementType.LABEL,
-                      label -> label.anchorX(percentOf().parentWidth(0.5))
+                      label -> label.anchorX(percentOf(parentWidth(0.5)))
                                     .bottom(absolute(0))
-                                    .left(percentOf().ownWidth(-0.5))
+                                    .left(percentOf(ownWidth(-0.5)))
                                     .text(GAME_OVER_HELP_TEXT)
                                     .fontSize(24));
     }
@@ -206,8 +205,8 @@ public final class GameplayGameModeRenderer {
     }
 
     private static void buildTimePlayedTimer(final UILabelBuilder builder) {
-        builder.anchorX(percentOf().parentWidth(0.5))
-               .left(percentOf().ownWidth(-0.5))
+        builder.anchorX(percentOf(parentWidth(0.5)))
+               .left(percentOf(ownWidth(-0.5)))
                .top(absolute(5))
                .fontSize(48)
                .text("12:34:56");
