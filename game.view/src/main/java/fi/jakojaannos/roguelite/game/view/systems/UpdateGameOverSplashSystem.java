@@ -16,8 +16,7 @@ public class UpdateGameOverSplashSystem implements ECSSystem {
 
     public UpdateGameOverSplashSystem(final UserInterface userInterface) {
         this.gameOverSplashElement =
-                userInterface.findElementsWithMatchingProperty(UIProperty.NAME,
-                                                               name -> name.equals("game-over-container"))
+                userInterface.findElements(that -> that.hasName().equalTo("game-over-container"))
                              .findFirst()
                              .orElseThrow();
     }

@@ -2,6 +2,7 @@ package fi.jakojaannos.roguelite.engine.view.ui.builder;
 
 import java.util.function.Consumer;
 
+import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.ui.TextSizeProvider;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
@@ -32,8 +33,7 @@ public class UIBuilder {
     }
 
     public UserInterface build() {
-        this.userInterface.getWorld().commitEntityModifications();
-        this.userInterface.updateHierarchy();
+        this.userInterface.update(new Mouse());
         return this.userInterface;
     }
 }

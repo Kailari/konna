@@ -27,7 +27,7 @@ public class MenuSteps {
     @When("the player clicks the {string} button")
     public void the_player_clicks_the_button(String string) {
         final var userInterface = gameRenderer.getCurrentUserInterface();
-        final var buttonCenter = userInterface.findElementsWithMatchingProperty(UIProperty.TEXT, text -> text.equals(string))
+        final var buttonCenter = userInterface.findElements(that -> that.hasText().equalTo(string))
                                               .findFirst()
                                               .flatMap(element -> element.getProperty(UIProperty.CENTER))
                                               .orElseThrow();

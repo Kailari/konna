@@ -1,8 +1,5 @@
 package fi.jakojaannos.roguelite.engine.view.ui;
 
-import java.util.function.Consumer;
-
-import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.*;
 
 public final class UIElementType<TBuilder extends UIElementBuilder<TBuilder>> {
@@ -10,6 +7,8 @@ public final class UIElementType<TBuilder extends UIElementBuilder<TBuilder>> {
     public static final UIElementType<UIPanelBuilder> PANEL = new UIElementType<>(UIPanelBuilder::new);
     public static final UIElementType<UILabelBuilder> LABEL = new UIElementType<>(UILabelBuilder::new);
     public static final UIElementType<UIProgressBarBuilder> PROGRESS_BAR = new UIElementType<>(UIProgressBarBuilder::new);
+
+
     private final BuilderFactory<TBuilder> builderFactory;
 
     private UIElementType(final BuilderFactory<TBuilder> builderFactory) {
@@ -18,18 +17,17 @@ public final class UIElementType<TBuilder extends UIElementBuilder<TBuilder>> {
 
     public TBuilder getBuilder(
             final UserInterface userInterface,
-            final EntityHandle entity,
+            final UIElement element,
             final String name
     ) {
-        return this.builderFactory.apply(userInterface, entity, name, entity::addComponent);
+        return this.builderFactory.apply(userInterface, element, name);
     }
 
     public interface BuilderFactory<TBuilder> {
         TBuilder apply(
                 UserInterface userInterface,
-                EntityHandle entity,
-                String name,
-                Consumer<Object> componentConsumer
+                UIElement element,
+                String name
         );
     }
 }

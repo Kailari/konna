@@ -9,7 +9,6 @@ import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
-import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.UIBuilder;
 
@@ -17,7 +16,7 @@ import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.absolute;
 import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.percentOf;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class UIElementBoundaryCalculationSystemTest_SelfRelativeProportions {
+public class UIElementBoundaryResolverTest_SelfRelativeProportions {
     private static final int VIEWPORT_WIDTH = 800;
     private static final int VIEWPORT_HEIGHT = 600;
 
@@ -220,8 +219,8 @@ public class UIElementBoundaryCalculationSystemTest_SelfRelativeProportions {
 
         final var element = userInterface.findElements(that -> that.hasName().equalTo("a"))
                                          .findFirst().orElseThrow();
-        assertEquals(50, element.getProperty(UIProperty.MIN_X).orElseThrow());
-        assertEquals(VIEWPORT_WIDTH - 20, element.getProperty(UIProperty.MAX_X).orElseThrow());
-        assertEquals(VIEWPORT_WIDTH - (50 + 20), element.getProperty(UIProperty.WIDTH).orElseThrow());
+        assertEquals(50, element.getBounds().getMinX());
+        assertEquals(VIEWPORT_WIDTH - 20, element.getBounds().getMaxX());
+        assertEquals(VIEWPORT_WIDTH - (50 + 20), element.getBounds().getWidth());
     }
 }

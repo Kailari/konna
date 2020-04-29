@@ -9,15 +9,13 @@ import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
-import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.UIBuilder;
 
 import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.absolute;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
 
-public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
+public class UIElementBoundaryResolverTest_AbsoluteProportions {
     private static final int VIEWPORT_WIDTH = 800;
     private static final int VIEWPORT_HEIGHT = 600;
 
@@ -44,10 +42,10 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
 
         final var element = userInterface.findElements(that -> that.hasName().equalTo("a"))
                                          .findFirst().orElseThrow();
-        assertEquals(0, element.getProperty(UIProperty.MIN_X).orElseThrow());
-        assertEquals(VIEWPORT_WIDTH, element.getProperty(UIProperty.MAX_X).orElseThrow());
-        assertEquals(0, element.getProperty(UIProperty.MIN_Y).orElseThrow());
-        assertEquals(VIEWPORT_HEIGHT, element.getProperty(UIProperty.MAX_Y).orElseThrow());
+        assertEquals(0, element.getBounds().getMinX());
+        assertEquals(VIEWPORT_WIDTH, element.getBounds().getMaxX());
+        assertEquals(0, element.getBounds().getMinY());
+        assertEquals(VIEWPORT_HEIGHT, element.getBounds().getMaxY());
     }
 
     @Test
@@ -62,10 +60,10 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
 
         final var element = userInterface.findElements(that -> that.hasName().equalTo("a"))
                                          .findFirst().orElseThrow();
-        assertEquals(10, element.getProperty(UIProperty.MIN_X).orElseThrow());
-        assertEquals(VIEWPORT_WIDTH, element.getProperty(UIProperty.MAX_X).orElseThrow());
-        assertEquals(0, element.getProperty(UIProperty.MIN_Y).orElseThrow());
-        assertEquals(VIEWPORT_HEIGHT - 100, element.getProperty(UIProperty.MAX_Y).orElseThrow());
+        assertEquals(10, element.getBounds().getMinX());
+        assertEquals(VIEWPORT_WIDTH, element.getBounds().getMaxX());
+        assertEquals(0, element.getBounds().getMinY());
+        assertEquals(VIEWPORT_HEIGHT - 100, element.getBounds().getMaxY());
     }
 
     @Test
@@ -80,8 +78,7 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
 
         final var element = userInterface.findElements(that -> that.hasName().equalTo("a"))
                                          .findFirst().orElseThrow();
-        assertEquals(VIEWPORT_WIDTH - (10 + 100), element.getProperty(UIProperty.WIDTH)
-                                                         .orElseThrow());
+        assertEquals(VIEWPORT_WIDTH - (10 + 100), element.getBounds().getWidth());
     }
 
     @Test
@@ -96,8 +93,7 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
 
         final var element = userInterface.findElements(that -> that.hasName().equalTo("a"))
                                          .findFirst().orElseThrow();
-        assertEquals(VIEWPORT_HEIGHT - (42 + 24), element.getProperty(UIProperty.HEIGHT)
-                                                         .orElseThrow());
+        assertEquals(VIEWPORT_HEIGHT - (42 + 24), element.getBounds().getHeight());
     }
 
     @Test
@@ -112,8 +108,8 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
 
         final var element = userInterface.findElements(that -> that.hasName().equalTo("a"))
                                          .findFirst().orElseThrow();
-        assertEquals(24, element.getProperty(UIProperty.MIN_X).orElseThrow());
-        assertEquals(66, element.getProperty(UIProperty.MAX_X).orElseThrow());
+        assertEquals(24, element.getBounds().getMinX());
+        assertEquals(66, element.getBounds().getMaxX());
     }
 
     @Test
@@ -129,8 +125,8 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
 
         final var element = userInterface.findElements(that -> that.hasName().equalTo("a"))
                                          .findFirst().orElseThrow();
-        assertEquals(VIEWPORT_WIDTH - 66, element.getProperty(UIProperty.MIN_X).orElseThrow());
-        assertEquals(VIEWPORT_WIDTH - 24, element.getProperty(UIProperty.MAX_X).orElseThrow());
+        assertEquals(VIEWPORT_WIDTH - 66, element.getBounds().getMinX());
+        assertEquals(VIEWPORT_WIDTH - 24, element.getBounds().getMaxX());
     }
 
     @Test
@@ -145,8 +141,8 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
 
         final var element = userInterface.findElements(that -> that.hasName().equalTo("a"))
                                          .findFirst().orElseThrow();
-        assertEquals(24, element.getProperty(UIProperty.MIN_Y).orElseThrow());
-        assertEquals(66, element.getProperty(UIProperty.MAX_Y).orElseThrow());
+        assertEquals(24, element.getBounds().getMinY());
+        assertEquals(66, element.getBounds().getMaxY());
     }
 
     @Test
@@ -161,8 +157,8 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
 
         final var element = userInterface.findElements(that -> that.hasName().equalTo("a"))
                                          .findFirst().orElseThrow();
-        assertEquals(VIEWPORT_HEIGHT - 66, element.getProperty(UIProperty.MIN_Y).orElseThrow());
-        assertEquals(VIEWPORT_HEIGHT - 24, element.getProperty(UIProperty.MAX_Y).orElseThrow());
+        assertEquals(VIEWPORT_HEIGHT - 66, element.getBounds().getMinY());
+        assertEquals(VIEWPORT_HEIGHT - 24, element.getBounds().getMaxY());
     }
 
     @Test
@@ -178,9 +174,9 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
 
         final var element = userInterface.findElements(that -> that.hasName().equalTo("a"))
                                          .findFirst().orElseThrow();
-        assertEquals(100, element.getProperty(UIProperty.MIN_X).orElseThrow());
-        assertEquals(VIEWPORT_WIDTH - 200, element.getProperty(UIProperty.MAX_X).orElseThrow());
-        assertEquals(VIEWPORT_WIDTH - (100 + 200), element.getProperty(UIProperty.WIDTH).orElseThrow());
+        assertEquals(100, element.getBounds().getMinX());
+        assertEquals(VIEWPORT_WIDTH - 200, element.getBounds().getMaxX());
+        assertEquals(VIEWPORT_WIDTH - (100 + 200), element.getBounds().getWidth());
     }
 
     @Test
@@ -196,9 +192,9 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
 
         final var element = userInterface.findElements(that -> that.hasName().equalTo("a"))
                                          .findFirst().orElseThrow();
-        assertEquals(100, element.getProperty(UIProperty.MIN_Y).orElseThrow());
-        assertEquals(VIEWPORT_HEIGHT - 200, element.getProperty(UIProperty.MAX_Y).orElseThrow());
-        assertEquals(VIEWPORT_HEIGHT - (100 + 200), element.getProperty(UIProperty.HEIGHT).orElseThrow());
+        assertEquals(100, element.getBounds().getMinY());
+        assertEquals(VIEWPORT_HEIGHT - 200, element.getBounds().getMaxY());
+        assertEquals(VIEWPORT_HEIGHT - (100 + 200), element.getBounds().getHeight());
     }
 
     @Test
@@ -213,7 +209,7 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
 
         final var element = userInterface.findElements(that -> that.hasName().equalTo("a"))
                                          .findFirst().orElseThrow();
-        assertEquals(300, element.getProperty(UIProperty.MIN_X).orElseThrow());
+        assertEquals(300, element.getBounds().getMinX());
     }
 
     @Test
@@ -228,6 +224,6 @@ public class UIElementBoundaryCalculationSystemTest_AbsoluteProportions {
 
         final var element = userInterface.findElements(that -> that.hasName().equalTo("a"))
                                          .findFirst().orElseThrow();
-        assertEquals(300, element.getProperty(UIProperty.MIN_Y).orElseThrow());
+        assertEquals(300, element.getBounds().getMinY());
     }
 }

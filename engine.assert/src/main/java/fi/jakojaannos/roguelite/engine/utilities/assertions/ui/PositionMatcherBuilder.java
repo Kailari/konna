@@ -1,65 +1,66 @@
 package fi.jakojaannos.roguelite.engine.utilities.assertions.ui;
 
-import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
+import java.util.function.Function;
+
+import fi.jakojaannos.roguelite.engine.view.data.components.ui.ElementBoundaries;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.engine.view.ui.query.UIPropertyMatcher;
 
 public class PositionMatcherBuilder {
     private final int uiSize;
-    private final UIProperty<Integer> minProperty;
-    private final UIProperty<Integer> sizeProperty;
+    private final Function<ElementBoundaries, Integer> minGetter;
+    private final Function<ElementBoundaries, Integer> sizeGetter;
 
     PositionMatcherBuilder(
             final int uiSize,
-            final UIProperty<Integer> minProperty,
-            final UIProperty<Integer> sizeProperty
+            final Function<ElementBoundaries, Integer> minGetter,
+            final Function<ElementBoundaries, Integer> sizeGetter
     ) {
         this.uiSize = uiSize;
-        this.minProperty = minProperty;
-        this.sizeProperty = sizeProperty;
+        this.minGetter = minGetter;
+        this.sizeGetter = sizeGetter;
     }
 
     public static PositionMatcherBuilder isHorizontallyIn(final UserInterface ui) {
-        return new PositionMatcherBuilder(ui.getWidth(), UIProperty.MIN_X, UIProperty.WIDTH);
+        return new PositionMatcherBuilder(ui.getWidth(), ElementBoundaries::getMinX, ElementBoundaries::getWidth);
     }
 
     public static PositionMatcherBuilder isVerticallyIn(final UserInterface ui) {
-        return new PositionMatcherBuilder(ui.getHeight(), UIProperty.MIN_Y, UIProperty.HEIGHT);
+        return new PositionMatcherBuilder(ui.getHeight(), ElementBoundaries::getMinY, ElementBoundaries::getHeight);
     }
 
     public UIPropertyMatcher<Integer> min() {
         return uiElement -> {
-            final var minY = uiElement.getProperty(this.minProperty).orElseThrow();
-            final var height = uiElement.getProperty(this.sizeProperty).orElseThrow();
+            final var min = this.minGetter.apply(uiElement.getBounds());
+            final var size = this.sizeGetter.apply(uiElement.getBounds());
 
-            final var sectionMinY = 0;
-            final var sectionMaxY = this.uiSize * (1.0 / 3.0);
-            final var elementMiddleY = minY + height / 2.0;
-            return elementMiddleY >= sectionMinY && elementMiddleY <= sectionMaxY;
+            final var sectionMin = 0;
+            final var sectionMax = this.uiSize * (1.0 / 3.0);
+            final var elementMiddle = min + size / 2.0;
+            return elementMiddle >= sectionMin && elementMiddle <= sectionMax;
         };
     }
 
     public UIPropertyMatcher<Integer> middle() {
         return uiElement -> {
-            final var minY = uiElement.getProperty(this.minProperty).orElseThrow();
-            final var height = uiElement.getProperty(this.sizeProperty).orElseThrow();
+            final var min = this.minGetter.apply(uiElement.getBounds());
+            final var size = this.sizeGetter.apply(uiElement.getBounds());
 
-            final var sectionMinY = this.uiSize * (1.0 / 3.0);
-            final var sectionMaxY = this.uiSize * (2.0 / 3.0);
-            final var elementMiddleY = minY + height / 2.0;
-            return elementMiddleY >= sectionMinY && elementMiddleY <= sectionMaxY;
+            final var sectionMin = this.uiSize * (1.0 / 3.0);
+            final var sectionMax = this.uiSize * (2.0 / 3.0);
+            final var elementMiddle = min + size / 2.0;
+            return elementMiddle >= sectionMin && elementMiddle <= sectionMax;
         };
     }
 
     public UIPropertyMatcher<Integer> max() {
         return uiElement -> {
-            final var minY = uiElement.getProperty(this.minProperty).orElseThrow();
-            final var height = uiElement.getProperty(this.sizeProperty).orElseThrow();
+            final var min = this.minGetter.apply(uiElement.getBounds());
+            final var size = this.sizeGetter.apply(uiElement.getBounds());
 
-            final var sectionMinY = this.uiSize * (2.0 / 3.0);
-            final var sectionMaxY = this.uiSize;
-            final var elementMiddleY = minY + height / 2.0;
-            return elementMiddleY >= sectionMinY && elementMiddleY <= sectionMaxY;
+            final var sectionMin = this.uiSize * (2.0 / 3.0);
+            final var elementMiddle = min + size / 2.0;
+            return elementMiddle >= sectionMin && elementMiddle <= this.uiSize;
         };
     }
 }

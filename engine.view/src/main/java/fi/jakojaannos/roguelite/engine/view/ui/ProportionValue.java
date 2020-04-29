@@ -16,6 +16,10 @@ public abstract class ProportionValue {
         return new Absolute(value);
     }
 
+    public static ProportionValue notSet() {
+        return null;
+    }
+
     public abstract int getValue(Context context);
 
     // TODO: "em"-style proportional-to-font-size proportion value

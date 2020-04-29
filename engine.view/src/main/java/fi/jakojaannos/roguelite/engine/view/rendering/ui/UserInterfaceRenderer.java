@@ -4,10 +4,14 @@ import java.nio.file.Path;
 
 import fi.jakojaannos.roguelite.engine.content.AssetRegistry;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
+import fi.jakojaannos.roguelite.engine.view.data.components.ui.ElementBoundaries;
+import fi.jakojaannos.roguelite.engine.view.data.resources.ui.UIRoot;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.Sprite;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.SpriteBatch;
 import fi.jakojaannos.roguelite.engine.view.rendering.text.Font;
 import fi.jakojaannos.roguelite.engine.view.rendering.text.TextRenderer;
+import fi.jakojaannos.roguelite.engine.view.systems.ui.UIElementBoundaryResolver;
+import fi.jakojaannos.roguelite.engine.view.systems.ui.UIElementLabelSizeResolver;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
@@ -17,34 +21,35 @@ import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 
 public class UserInterfaceRenderer implements AutoCloseable {
     private static final int DEFAULT_BORDER_SIZE = 5;
-    private static final int ROOT_FONT_SIZE = 12;
 
+    private final UIRoot uiRoot;
     private final SpriteBatch spriteBatch;
     private final AssetRegistry<Sprite> spriteRegistry;
     private final TextRenderer textRenderer;
     private final ProgressBarRenderer progressBarRenderer;
     private final Font font;
 
+    private final UIElementBoundaryResolver boundsResolver;
+    private final UIElementLabelSizeResolver labelSizeResolver;
+
     public UserInterfaceRenderer(
             final Path assetRoot,
             final AssetRegistry<Sprite> spriteRegistry,
             final TextRenderer textRenderer,
             final AssetRegistry<Font> fontRegistry,
-            final RenderingBackend backend
+            final RenderingBackend backend,
+            final UIRoot uiRoot
     ) {
+        this.uiRoot = uiRoot;
         this.spriteBatch = backend.createSpriteBatch(assetRoot, "sprite");
         this.spriteRegistry = spriteRegistry;
         this.textRenderer = textRenderer;
         this.font = fontRegistry.getByAssetName("fonts/VCR_OSD_MONO.ttf");
 
-        this.progressBarRenderer = new ProgressBarRenderer(assetRoot, backend);
-    }
+        this.boundsResolver = new UIElementBoundaryResolver(uiRoot);
+        this.labelSizeResolver = new UIElementLabelSizeResolver(this.font, uiRoot);
 
-    private static int getFontSizeFor(final UIElement uiElement) {
-        return uiElement.getProperty(UIProperty.FONT_SIZE)
-                        .orElseGet(() -> uiElement.getParent()
-                                                  .map(UserInterfaceRenderer::getFontSizeFor)
-                                                  .orElse(ROOT_FONT_SIZE));
+        this.progressBarRenderer = new ProgressBarRenderer(assetRoot, backend);
     }
 
     public void render(final UserInterface userInterface) {
@@ -56,22 +61,28 @@ public class UserInterfaceRenderer implements AutoCloseable {
         if (uiElement.getProperty(UIProperty.HIDDEN).orElse(false)) {
             return;
         }
+        final var bounds = uiElement.getBounds();
+
         uiElement.getProperty(UIProperty.SPRITE)
-                 .ifPresent(spriteId -> renderPanelBackground(uiElement, spriteId));
+                 .ifPresent(spriteId -> renderPanelBackground(uiElement, bounds, spriteId));
         uiElement.getProperty(UIProperty.TEXT)
-                 .ifPresent(text -> renderTextContent(uiElement, text));
+                 .ifPresent(text -> renderTextContent(uiElement, bounds, text));
         uiElement.getProperty(UIProperty.PROGRESS)
-                 .ifPresent(percent -> renderProgressBar(uiElement, percent));
+                 .ifPresent(percent -> renderProgressBar(uiElement, bounds, percent));
 
         uiElement.getChildren()
                  .forEach(this::renderElement);
     }
 
-    private void renderProgressBar(final UIElement uiElement, final double percent) {
-        final var x = uiElement.getProperty(UIProperty.MIN_X).orElseThrow();
-        final var y = uiElement.getProperty(UIProperty.MIN_Y).orElseThrow();
-        final var width = uiElement.getProperty(UIProperty.WIDTH).orElseThrow();
-        final var height = uiElement.getProperty(UIProperty.HEIGHT).orElseThrow();
+    private void renderProgressBar(
+            final UIElement uiElement,
+            final ElementBoundaries bounds,
+            final double percent
+    ) {
+        final var x = bounds.minX;
+        final var y = bounds.minY;
+        final var width = bounds.width;
+        final var height = bounds.height;
 
         final var max = uiElement.getProperty(UIProperty.MAX_PROGRESS)
                                  .orElse(1.0);
@@ -79,26 +90,34 @@ public class UserInterfaceRenderer implements AutoCloseable {
         this.progressBarRenderer.render(x, y, width, height, percent, max);
     }
 
-    private void renderTextContent(final UIElement uiElement, final String text) {
+    private void renderTextContent(
+            final UIElement uiElement,
+            final ElementBoundaries bounds,
+            final String text
+    ) {
         final var fontSize = getFontSizeFor(uiElement);
-        final var x = uiElement.getProperty(UIProperty.MIN_X).orElseThrow();
-        final var y = uiElement.getProperty(UIProperty.MIN_Y).orElseThrow();
+        final var x = bounds.minX;
+        final var y = bounds.minY;
         uiElement.getProperty(UIProperty.COLOR)
                  .ifPresentOrElse(color -> this.textRenderer.draw(x, y, fontSize, this.font, text,
                                                                   color.r, color.g, color.b),
                                   () -> this.textRenderer.draw(x, y, fontSize, this.font, text));
     }
 
-    private void renderPanelBackground(final UIElement uiElement, final String spriteId) {
+    private void renderPanelBackground(
+            final UIElement uiElement,
+            final ElementBoundaries bounds,
+            final String spriteId
+    ) {
         this.spriteBatch.begin();
         final var sprite = this.spriteRegistry.getByAssetName(spriteId);
         final int borderSize = uiElement.getProperty(UIProperty.BORDER_SIZE)
                                         .orElse(DEFAULT_BORDER_SIZE);
 
-        final var x = uiElement.getProperty(UIProperty.MIN_X).orElseThrow();
-        final var y = uiElement.getProperty(UIProperty.MIN_Y).orElseThrow();
-        final var width = uiElement.getProperty(UIProperty.WIDTH).orElseThrow();
-        final var height = uiElement.getProperty(UIProperty.HEIGHT).orElseThrow();
+        final var x = bounds.minX;
+        final var y = bounds.minY;
+        final var width = bounds.width;
+        final var height = bounds.height;
 
         drawPanelRow(sprite, 0, x, y, width, borderSize, borderSize);
         drawPanelRow(sprite, 1, x, y + borderSize, width, height - 2 * borderSize, borderSize);
@@ -123,5 +142,12 @@ public class UserInterfaceRenderer implements AutoCloseable {
     @Override
     public void close() throws Exception {
         this.progressBarRenderer.close();
+    }
+
+    private int getFontSizeFor(final UIElement uiElement) {
+        return uiElement.getProperty(UIProperty.FONT_SIZE)
+                        .orElseGet(() -> uiElement.getParent()
+                                                  .map(this::getFontSizeFor)
+                                                  .orElse(this.uiRoot.getFontSize()));
     }
 }

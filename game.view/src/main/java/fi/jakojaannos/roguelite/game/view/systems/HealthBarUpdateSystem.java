@@ -14,10 +14,7 @@ import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.view.Camera;
-import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
-import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
-import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
-import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
+import fi.jakojaannos.roguelite.engine.view.ui.*;
 import fi.jakojaannos.roguelite.game.data.components.character.Health;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
 
@@ -82,11 +79,11 @@ public class HealthBarUpdateSystem implements ECSSystem {
                                                                                 .getWidthInPixels(),
                                                                      this.camera.getViewport()
                                                                                 .getHeightInPixels(),
-                                                                     tmpPosition);
-            tmpPosition.add(offsetX, offsetY);
+                                                                     this.tmpPosition);
+            this.tmpPosition.add(offsetX, offsetY);
             updateHealthBarFor(entity,
-                               tmpPosition.x(),
-                               tmpPosition.y(),
+                               this.tmpPosition.x(),
+                               this.tmpPosition.y(),
                                width,
                                height,
                                health.currentHealth,
@@ -105,10 +102,10 @@ public class HealthBarUpdateSystem implements ECSSystem {
     ) {
         final var uiElement = this.healthBars.computeIfAbsent(entity.getId(), this::createHealthBarForEntity);
         uiElement.setProperty(UIProperty.HIDDEN, false);
-        uiElement.setProperty(UIProperty.MIN_X, (int) x);
-        uiElement.setProperty(UIProperty.MIN_Y, (int) y);
-        uiElement.setProperty(UIProperty.WIDTH, (int) width);
-        uiElement.setProperty(UIProperty.HEIGHT, (int) height);
+        uiElement.setProperty(UIProperty.LEFT, ProportionValue.absolute((int) x));
+        uiElement.setProperty(UIProperty.TOP, ProportionValue.absolute((int) y));
+        uiElement.setProperty(UIProperty.WIDTH, ProportionValue.absolute((int) width));
+        uiElement.setProperty(UIProperty.HEIGHT, ProportionValue.absolute((int) height));
         uiElement.setProperty(UIProperty.PROGRESS, currentHealth);
         uiElement.setProperty(UIProperty.MAX_PROGRESS, maxHealth);
     }
