@@ -4,17 +4,11 @@ import java.nio.file.Path;
 
 import fi.jakojaannos.roguelite.engine.content.AssetRegistry;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
-import fi.jakojaannos.roguelite.engine.view.ui.ElementBoundaries;
-import fi.jakojaannos.roguelite.engine.view.ui.UIRoot;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.Sprite;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.SpriteBatch;
 import fi.jakojaannos.roguelite.engine.view.rendering.text.Font;
 import fi.jakojaannos.roguelite.engine.view.rendering.text.TextRenderer;
-import fi.jakojaannos.roguelite.engine.view.ui.internal.UIElementBoundaryResolver;
-import fi.jakojaannos.roguelite.engine.view.ui.internal.UIElementLabelSizeResolver;
-import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
-import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
-import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
+import fi.jakojaannos.roguelite.engine.view.ui.*;
 
 // TODO: Render UI elements to cached render targets so that they can be cached (only updated/dirty
 //  parts should be re-rendered)
@@ -29,9 +23,6 @@ public class UserInterfaceRenderer implements AutoCloseable {
     private final ProgressBarRenderer progressBarRenderer;
     private final Font font;
 
-    private final UIElementBoundaryResolver boundsResolver;
-    private final UIElementLabelSizeResolver labelSizeResolver;
-
     public UserInterfaceRenderer(
             final Path assetRoot,
             final AssetRegistry<Sprite> spriteRegistry,
@@ -45,9 +36,6 @@ public class UserInterfaceRenderer implements AutoCloseable {
         this.spriteRegistry = spriteRegistry;
         this.textRenderer = textRenderer;
         this.font = fontRegistry.getByAssetName("fonts/VCR_OSD_MONO.ttf");
-
-        this.boundsResolver = new UIElementBoundaryResolver(uiRoot);
-        this.labelSizeResolver = new UIElementLabelSizeResolver(this.font, uiRoot);
 
         this.progressBarRenderer = new ProgressBarRenderer(assetRoot, backend);
     }
