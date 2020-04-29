@@ -16,7 +16,6 @@ module roguelite.engine.view {
     exports fi.jakojaannos.roguelite.engine.view.content;
     exports fi.jakojaannos.roguelite.engine.view.ui;
     exports fi.jakojaannos.roguelite.engine.view.ui.query;
-    exports fi.jakojaannos.roguelite.engine.view.ui.builder;
     exports fi.jakojaannos.roguelite.engine.view.rendering;
     exports fi.jakojaannos.roguelite.engine.view.rendering.text;
     exports fi.jakojaannos.roguelite.engine.view.rendering.mesh;

@@ -8,9 +8,8 @@ import fi.jakojaannos.roguelite.engine.event.EventBus;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
-import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
+import fi.jakojaannos.roguelite.engine.view.ui.UIBuilder;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
-import fi.jakojaannos.roguelite.engine.view.ui.builder.UIBuilder;
 
 import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,7 +34,6 @@ public class UIElementBoundaryResolverTest_SelfRelativeProportions {
     void buildingUIElementWithWidthRelativeToSelfThrows() {
         assertThrows(IllegalStateException.class, () -> uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.width(percentOf(ownWidth(0.1))))
                 .build()
                 .update(new Mouse()));
@@ -45,7 +43,6 @@ public class UIElementBoundaryResolverTest_SelfRelativeProportions {
     void buildingUIElementWithHeightRelativeToSelfThrows() {
         assertThrows(IllegalStateException.class, () -> uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.height(percentOf(ownHeight(0.1))))
                 .build()
                 .update(new Mouse()));
@@ -55,7 +52,6 @@ public class UIElementBoundaryResolverTest_SelfRelativeProportions {
     void buildingUIElementWithWidthAndHeightRelativeToEachOtherThrows() {
         assertThrows(IllegalStateException.class, () -> uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.width(percentOf(ownHeight(0.1)))
                                            .height(percentOf(ownWidth(0.1))))
                 .build()
@@ -66,7 +62,6 @@ public class UIElementBoundaryResolverTest_SelfRelativeProportions {
     void buildingUIElementWithWidthRelativeToHeightDoesNotThrow() {
         UserInterface userInterface = uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.width(percentOf(ownHeight(0.1)))
                                            .height(absolute(100)))
                 .build();
@@ -78,7 +73,6 @@ public class UIElementBoundaryResolverTest_SelfRelativeProportions {
     void buildingUIElementWithWidthRelativeToDefaultHeightDoesNotThrow() {
         UserInterface userInterface = uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.width(percentOf(ownHeight(0.1))))
                 .build();
 
@@ -89,7 +83,6 @@ public class UIElementBoundaryResolverTest_SelfRelativeProportions {
     void buildingUIElementWithWidthRelativeToCalculatedHeightDoesNotThrow() {
         UserInterface userInterface = uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.width(percentOf(ownHeight(0.1)))
                                            .top(absolute(10))
                                            .bottom(absolute(20)))
@@ -102,7 +95,6 @@ public class UIElementBoundaryResolverTest_SelfRelativeProportions {
     void buildingUIElementWithHeightRelativeToWidthDoesNotThrow() {
         UserInterface userInterface = uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.width(absolute(100))
                                            .height(percentOf(ownWidth(0.1))))
                 .build();
@@ -114,7 +106,6 @@ public class UIElementBoundaryResolverTest_SelfRelativeProportions {
     void buildingUIElementWithHeightRelativeToDefaultWidthDoesNotThrow() {
         UserInterface userInterface = uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.height(percentOf(ownWidth(0.1))))
                 .build();
 
@@ -125,7 +116,6 @@ public class UIElementBoundaryResolverTest_SelfRelativeProportions {
     void buildingUIElementWithHeightRelativeToCalculatedWidthDoesNotThrow() {
         UserInterface userInterface = uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.left(absolute(10))
                                            .right(absolute(20))
                                            .height(percentOf(ownWidth(0.1))))
@@ -138,7 +128,6 @@ public class UIElementBoundaryResolverTest_SelfRelativeProportions {
     void buildingUIElementWithLeftAndRightRelativeToOwnWidthThrows() {
         assertThrows(IllegalStateException.class, () -> uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.left(percentOf(ownWidth(0.1)))
                                            .right(percentOf(ownWidth(0.05))))
                 .build()
@@ -149,7 +138,6 @@ public class UIElementBoundaryResolverTest_SelfRelativeProportions {
     void buildingUIElementWithLeftRelativeToOwnWidthDoesNotThrow() {
         UserInterface userInterface = uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.width(absolute(200))
                                            .left(percentOf(ownWidth(0.5))))
                 .build();
@@ -161,7 +149,6 @@ public class UIElementBoundaryResolverTest_SelfRelativeProportions {
     void buildingUIElementWithRightRelativeToOwnWidthDoesNotThrow() {
         UserInterface userInterface = uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.width(absolute(200))
                                            .right(percentOf(ownWidth(0.5))))
                 .build();
@@ -173,7 +160,6 @@ public class UIElementBoundaryResolverTest_SelfRelativeProportions {
     void buildingUIElementWithTopRelativeToOwnHeightDoesNotThrow() {
         UserInterface userInterface = uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.height(absolute(200))
                                            .top(percentOf(ownWidth(0.5))))
                 .build();
@@ -185,7 +171,6 @@ public class UIElementBoundaryResolverTest_SelfRelativeProportions {
     void buildingUIElementWithBottomRelativeToOwnHeightDoesNotThrow() {
         UserInterface userInterface = uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.height(absolute(200))
                                            .bottom(percentOf(ownWidth(0.5))))
                 .build();
@@ -197,7 +182,6 @@ public class UIElementBoundaryResolverTest_SelfRelativeProportions {
     void buildingUIElementWithLeftAndRightRelativeToOwnHeightWithoutSettingHeightDoesNotThrow() {
         UserInterface userInterface = uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.left(percentOf(ownHeight(0.1)))
                                            .right(percentOf(ownHeight(0.05))))
                 .build();
@@ -209,7 +193,6 @@ public class UIElementBoundaryResolverTest_SelfRelativeProportions {
     void buildingUIElementWithLeftAndRightRelativeToOwnHeightCalculatesTheBoundsCorrectly() {
         UserInterface userInterface = uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.height(absolute(200))
                                            .left(percentOf(ownHeight(0.25)))
                                            .right(percentOf(ownHeight(0.1))))

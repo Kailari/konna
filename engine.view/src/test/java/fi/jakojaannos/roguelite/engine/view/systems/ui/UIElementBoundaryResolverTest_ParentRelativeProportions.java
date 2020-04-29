@@ -8,9 +8,8 @@ import fi.jakojaannos.roguelite.engine.event.EventBus;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
-import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
+import fi.jakojaannos.roguelite.engine.view.ui.UIBuilder;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
-import fi.jakojaannos.roguelite.engine.view.ui.builder.UIBuilder;
 
 import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,7 +34,6 @@ public class UIElementBoundaryResolverTest_ParentRelativeProportions {
     void buildingUIElementWithLeftAndRightRelativeToParentWidthCalculatesTheBoundsCorrectly() {
         UserInterface userInterface = uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.left(percentOf(parentWidth(0.25)))
                                            .right(percentOf(parentWidth(0.1))))
                 .build();
@@ -52,7 +50,6 @@ public class UIElementBoundaryResolverTest_ParentRelativeProportions {
     void buildingUIElementWithLeftAndRightRelativeToParentHeightCalculatesTheBoundsCorrectly() {
         UserInterface userInterface = uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.left(percentOf(parentHeight(0.25)))
                                            .right(percentOf(parentHeight(0.1))))
                 .build();
@@ -69,7 +66,6 @@ public class UIElementBoundaryResolverTest_ParentRelativeProportions {
     void buildingUIElementWithTopAndBottomRelativeToParentWidthCalculatesTheBoundsCorrectly() {
         UserInterface userInterface = uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.top(percentOf(parentWidth(0.25)))
                                            .bottom(percentOf(parentWidth(0.1))))
                 .build();
@@ -86,7 +82,6 @@ public class UIElementBoundaryResolverTest_ParentRelativeProportions {
     void buildingUIElementWithTopAndBottomRelativeToParentHeightCalculatesTheBoundsCorrectly() {
         UserInterface userInterface = uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.top(percentOf(parentHeight(0.25)))
                                            .bottom(percentOf(parentHeight(0.1))))
                 .build();
@@ -103,7 +98,6 @@ public class UIElementBoundaryResolverTest_ParentRelativeProportions {
     void buildingUIElementWithWidthRelativeToParentWidthCalculatesBoundsCorrectly() {
         UserInterface userInterface = uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.left(absolute(10))
                                            .width(percentOf(parentWidth(0.1))))
                 .build();
@@ -120,7 +114,6 @@ public class UIElementBoundaryResolverTest_ParentRelativeProportions {
     void buildingUIElementWithWidthRelativeToParentHeightCalculatesBoundsCorrectly() {
         UserInterface userInterface = uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.left(absolute(10))
                                            .width(percentOf(parentHeight(0.1))))
                 .build();
@@ -137,7 +130,6 @@ public class UIElementBoundaryResolverTest_ParentRelativeProportions {
     void buildingUIElementWithHeightRelativeToParentWidthCalculatesBoundsCorrectly() {
         UserInterface userInterface = uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.top(absolute(10))
                                            .height(percentOf(parentWidth(0.1))))
                 .build();
@@ -154,7 +146,6 @@ public class UIElementBoundaryResolverTest_ParentRelativeProportions {
     void buildingUIElementWithHeightRelativeToParentHeightCalculatesBoundsCorrectly() {
         UserInterface userInterface = uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.top(absolute(10))
                                            .height(percentOf(parentHeight(0.1))))
                 .build();
@@ -171,7 +162,6 @@ public class UIElementBoundaryResolverTest_ParentRelativeProportions {
     void buildingUIElementWithLeftAndRightRelativeToParentWidthAndAnchorXSetProportionalToParentWidthCalculatesCorrectBounds() {
         UserInterface userInterface = uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.anchorX(percentOf(parentWidth(0.25)))
                                            .left(percentOf(parentWidth(0.1)))
                                            .right(percentOf(parentWidth(0.75))))
@@ -189,7 +179,6 @@ public class UIElementBoundaryResolverTest_ParentRelativeProportions {
     void buildingUIElementWithTopAndBottomRelativeToParentWidthAndAnchorYSetProportionalToParentWidthCalculatesCorrectBounds() {
         UserInterface userInterface = uiBuilder
                 .element("a",
-                         UIElementType.PANEL,
                          builder -> builder.anchorY(percentOf(parentWidth(0.25)))
                                            .top(percentOf(parentWidth(0.1)))
                                            .bottom(percentOf(parentWidth(0.05))))
