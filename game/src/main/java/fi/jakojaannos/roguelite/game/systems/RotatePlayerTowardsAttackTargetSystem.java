@@ -16,8 +16,6 @@ import fi.jakojaannos.roguelite.game.data.components.character.LookAtTargetTag;
 public class RotatePlayerTowardsAttackTargetSystem implements ECSSystem {
     private static final Vector2dc ROTATION_ZERO_DIRECTION = new Vector2d(0.0, -1.0);
 
-    private final Vector2d tmpPosition = new Vector2d();
-
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.INPUT)
@@ -39,14 +37,14 @@ public class RotatePlayerTowardsAttackTargetSystem implements ECSSystem {
             final var attackAbility = entityManager.getComponentOf(entity, AttackAbility.class)
                                                    .orElseThrow();
 
-            final Vector2d position = transform.position.add(attackAbility.weaponOffset, this.tmpPosition);
+            final Vector2d position = transform.position.add(attackAbility.weaponOffset, new Vector2d());
             final var targetPosition = attackAbility.targetPosition;
 
             final Vector2d direction;
             if (position.lengthSquared() == 0 && targetPosition.lengthSquared() == 0) {
                 direction = new Vector2d(0.0, -1.0);
             } else {
-                direction = targetPosition.sub(position, this.tmpPosition)
+                direction = targetPosition.sub(position, new Vector2d())
                                           .normalize();
             }
 

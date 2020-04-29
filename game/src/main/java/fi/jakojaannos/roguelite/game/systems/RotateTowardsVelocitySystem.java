@@ -16,8 +16,6 @@ import fi.jakojaannos.roguelite.game.data.components.Velocity;
 public class RotateTowardsVelocitySystem implements ECSSystem {
     private static final Vector2dc ROTATION_ZERO_DIRECTION = new Vector2d(0.0, -1.0);
 
-    private final Vector2d tmpDirection = new Vector2d();
-
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.LATE_TICK)
@@ -42,7 +40,7 @@ public class RotateTowardsVelocitySystem implements ECSSystem {
             if (velocity.lengthSquared() == 0) {
                 direction = new Vector2d(0.0, -1.0);
             } else {
-                direction = velocity.normalize(this.tmpDirection);
+                direction = velocity.normalize(new Vector2d());
             }
 
             transform.rotation = -direction.angle(ROTATION_ZERO_DIRECTION);
