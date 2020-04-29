@@ -7,7 +7,6 @@ import java.util.Queue;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import fi.jakojaannos.roguelite.engine.view.data.components.ui.ElementBoundaries;
 import fi.jakojaannos.roguelite.engine.view.ui.query.UIElementMatcher;
 
 public interface UIElement {

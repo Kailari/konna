@@ -4,8 +4,6 @@ import org.joml.Vector2i;
 
 import javax.annotation.Nullable;
 
-import fi.jakojaannos.roguelite.engine.view.data.components.ui.Color;
-
 public final record UIProperty<T>(
         String name,
         @Nullable T defaultValue

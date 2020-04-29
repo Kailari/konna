@@ -1,7 +1,7 @@
-package fi.jakojaannos.roguelite.engine.view.systems.ui;
+package fi.jakojaannos.roguelite.engine.view.ui.internal;
 
 import fi.jakojaannos.roguelite.engine.ui.TextSizeProvider;
-import fi.jakojaannos.roguelite.engine.view.data.resources.ui.UIRoot;
+import fi.jakojaannos.roguelite.engine.view.ui.UIRoot;
 import fi.jakojaannos.roguelite.engine.view.ui.ProportionValue;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;

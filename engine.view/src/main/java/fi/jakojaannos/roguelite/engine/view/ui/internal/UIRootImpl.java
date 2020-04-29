@@ -1,12 +1,14 @@
-package fi.jakojaannos.roguelite.engine.view.data.resources.ui;
+package fi.jakojaannos.roguelite.engine.view.ui.internal;
 
 import fi.jakojaannos.roguelite.engine.view.Viewport;
-import fi.jakojaannos.roguelite.engine.view.data.components.ui.ElementBoundaries;
+import fi.jakojaannos.roguelite.engine.view.ui.ElementBoundaries;
+import fi.jakojaannos.roguelite.engine.view.ui.UIRoot;
 
-public class UIRoot {
+public class UIRootImpl implements UIRoot {
     private final Viewport viewport;
     private final ElementBoundaries boundaries = new ElementBoundaries();
 
+    @Override
     public ElementBoundaries getBoundaries() {
         this.boundaries.minX = 0;
         this.boundaries.minY = 0;
@@ -15,11 +17,12 @@ public class UIRoot {
         return this.boundaries;
     }
 
+    @Override
     public int getFontSize() {
         return 12;
     }
 
-    public UIRoot(final Viewport viewport) {
+    public UIRootImpl(final Viewport viewport) {
         this.viewport = viewport;
     }
 }

@@ -12,15 +12,7 @@ import fi.jakojaannos.roguelite.engine.ui.TextSizeProvider;
 import fi.jakojaannos.roguelite.engine.ui.UIEvent;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
-import fi.jakojaannos.roguelite.engine.view.data.resources.ui.UIRoot;
-import fi.jakojaannos.roguelite.engine.view.systems.ui.UIElementBoundaryResolver;
-import fi.jakojaannos.roguelite.engine.view.systems.ui.UIElementClickEventProvider;
-import fi.jakojaannos.roguelite.engine.view.systems.ui.UIElementHoverEventProvider;
-import fi.jakojaannos.roguelite.engine.view.systems.ui.UIElementLabelSizeResolver;
-import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
-import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
-import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
-import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
+import fi.jakojaannos.roguelite.engine.view.ui.*;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.UIElementBuilder;
 
 /**
@@ -73,7 +65,7 @@ public class UserInterfaceImpl implements UserInterface {
     ) {
         this.timeManager = timeManager;
         this.viewport = viewport;
-        this.uiRoot = new UIRoot(viewport);
+        this.uiRoot = new UIRootImpl(viewport);
 
         // HACK: We *know* that the `events.ui()` is actually an event bus. Its fire method is
         //       compatible with UIEventBus signature so use cast + method reference to convert.

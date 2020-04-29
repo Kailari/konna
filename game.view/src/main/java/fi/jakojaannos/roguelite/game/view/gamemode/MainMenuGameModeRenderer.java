@@ -21,6 +21,8 @@ import fi.jakojaannos.roguelite.game.view.systems.UserInterfaceRenderingSystem;
 import fi.jakojaannos.roguelite.game.view.systems.debug.EntityCollisionBoundsRenderingSystem;
 import fi.jakojaannos.roguelite.game.view.systems.debug.EntityTransformRenderingSystem;
 
+import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.*;
+
 public final class MainMenuGameModeRenderer {
     public static final String TITLE_LABEL_NAME = "title_label";
 
@@ -93,48 +95,48 @@ public final class MainMenuGameModeRenderer {
                 .builder(events, timeManager, camera.getViewport(), font)
                 .element("play_button",
                          UIElementType.PANEL,
-                         builder -> builder.anchorX(ProportionValue.percentOf().parentWidth(0.5))
-                                           .anchorY(ProportionValue.percentOf().parentHeight(0.3))
-                                           .left(ProportionValue.percentOf().ownWidth(-0.5))
-                                           .top(ProportionValue.absolute(0))
-                                           .width(ProportionValue.absolute(width))
-                                           .height(ProportionValue.absolute(height))
+                         builder -> builder.anchorX(percentOf(parentWidth(0.5)))
+                                           .anchorY(percentOf(parentHeight(0.3)))
+                                           .left(percentOf(ownWidth(-0.5)))
+                                           .top(absolute(0))
+                                           .width(absolute(width))
+                                           .height(absolute(height))
                                            .borderSize(borderSize)
                                            .sprite("sprites/ui/ui")
                                            .child("play_button_label",
                                                   UIElementType.LABEL,
                                                   labelBuilder -> labelBuilder
-                                                          .anchorX(ProportionValue.percentOf().parentWidth(0.5))
-                                                          .anchorY(ProportionValue.percentOf().parentHeight(0.5))
-                                                          .left(ProportionValue.percentOf().ownWidth(-0.5))
-                                                          .top(ProportionValue.percentOf().ownHeight(-0.5))
+                                                          .anchorX(percentOf(parentWidth(0.5)))
+                                                          .anchorY(percentOf(parentHeight(0.5)))
+                                                          .left(percentOf(ownWidth(-0.5)))
+                                                          .top(percentOf(ownHeight(-0.5)))
                                                           .text("Play")
                                                           .fontSize(24)))
                 .element("quit_button",
                          UIElementType.PANEL,
-                         builder -> builder.anchorX(ProportionValue.percentOf().parentWidth(0.5))
-                                           .anchorY(ProportionValue.percentOf().parentHeight(0.3))
-                                           .left(ProportionValue.percentOf().ownWidth(-0.5))
-                                           .top(ProportionValue.percentOf().ownHeight(2.2))
-                                           .width(ProportionValue.absolute(width))
-                                           .height(ProportionValue.absolute(height))
+                         builder -> builder.anchorX(percentOf(parentWidth(0.5)))
+                                           .anchorY(percentOf(parentHeight(0.3)))
+                                           .left(percentOf(ownWidth(-0.5)))
+                                           .top(percentOf(ownHeight(2.2)))
+                                           .width(absolute(width))
+                                           .height(absolute(height))
                                            .borderSize(borderSize)
                                            .sprite("sprites/ui/ui")
                                            .child("quit_button_label",
                                                   UIElementType.LABEL,
                                                   labelBuilder -> labelBuilder
-                                                          .anchorX(ProportionValue.percentOf().parentWidth(0.5))
-                                                          .anchorY(ProportionValue.percentOf().parentHeight(0.5))
-                                                          .left(ProportionValue.percentOf().ownWidth(-0.5))
-                                                          .top(ProportionValue.percentOf().ownHeight(-0.5))
+                                                          .anchorX(percentOf(parentWidth(0.5)))
+                                                          .anchorY(percentOf(parentHeight(0.5)))
+                                                          .left(percentOf(ownWidth(-0.5)))
+                                                          .top(percentOf(ownHeight(-0.5)))
                                                           .text("Quit")
                                                           .fontSize(24)))
                 .element("connect_button",
                          UIElementType.PANEL,
-                         builder -> builder.anchorX(ProportionValue.percentOf().parentWidth(0.5))
-                                           .anchorY(ProportionValue.percentOf().parentHeight(0.3))
-                                           .left(ProportionValue.percentOf().ownWidth(-0.5))
-                                           .top(ProportionValue.percentOf().ownHeight(1.1))
+                         builder -> builder.anchorX(percentOf(parentWidth(0.5)))
+                                           .anchorY(percentOf(parentHeight(0.3)))
+                                           .left(percentOf(ownWidth(-0.5)))
+                                           .top(percentOf(ownHeight(1.1)))
                                            .width(ProportionValue.absolute(width))
                                            .height(ProportionValue.absolute(height))
                                            .borderSize(borderSize)
@@ -142,18 +144,18 @@ public final class MainMenuGameModeRenderer {
                                            .child("connect_button_label",
                                                   UIElementType.LABEL,
                                                   labelBuilder -> labelBuilder
-                                                          .anchorX(ProportionValue.percentOf().parentWidth(0.5))
-                                                          .anchorY(ProportionValue.percentOf().parentHeight(0.5))
-                                                          .left(ProportionValue.percentOf().ownWidth(-0.5))
-                                                          .top(ProportionValue.percentOf().ownHeight(-0.5))
+                                                          .anchorX(percentOf(parentWidth(0.5)))
+                                                          .anchorY(percentOf(parentHeight(0.5)))
+                                                          .left(percentOf(ownWidth(-0.5)))
+                                                          .top(percentOf(ownHeight(-0.5)))
                                                           .text("Connect")
                                                           .fontSize(24)))
                 .element(TITLE_LABEL_NAME,
                          UIElementType.LABEL,
-                         builder -> builder.anchorX(ProportionValue.percentOf().parentWidth(0.5))
-                                           .anchorY(ProportionValue.percentOf().parentHeight(0.25))
-                                           .left(ProportionValue.percentOf().ownWidth(-0.5))
-                                           .top(ProportionValue.percentOf().ownHeight(-1.0))
+                         builder -> builder.anchorX(percentOf(parentWidth(0.5)))
+                                           .anchorY(percentOf(parentHeight(0.25)))
+                                           .left(percentOf(ownWidth(-0.5)))
+                                           .top(percentOf(ownHeight(-1.0)))
                                            .text("Konna")
                                            .fontSize(48))
                 .build();

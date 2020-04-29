@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.engine.view.data.components.ui;
+package fi.jakojaannos.roguelite.engine.view.ui;
 
 public class Color {
     public double r;

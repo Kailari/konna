@@ -1,7 +1,5 @@
 package fi.jakojaannos.roguelite.engine.view.ui.builder;
 
-import fi.jakojaannos.roguelite.engine.view.data.components.internal.FontSize;
-import fi.jakojaannos.roguelite.engine.view.data.components.internal.label.Text;
 import fi.jakojaannos.roguelite.engine.view.ui.ProportionValue;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;

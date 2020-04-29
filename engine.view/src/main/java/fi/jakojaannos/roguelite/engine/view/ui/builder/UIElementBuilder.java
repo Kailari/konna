@@ -2,7 +2,7 @@ package fi.jakojaannos.roguelite.engine.view.ui.builder;
 
 import java.util.function.Consumer;
 
-import fi.jakojaannos.roguelite.engine.view.data.components.ui.Color;
+import fi.jakojaannos.roguelite.engine.view.ui.Color;
 import fi.jakojaannos.roguelite.engine.view.ui.*;
 
 @SuppressWarnings("unchecked")

@@ -2,7 +2,7 @@ package fi.jakojaannos.roguelite.engine.utilities.assertions.ui;
 
 import java.util.function.Function;
 
-import fi.jakojaannos.roguelite.engine.view.data.components.ui.ElementBoundaries;
+import fi.jakojaannos.roguelite.engine.view.ui.ElementBoundaries;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.engine.view.ui.query.UIPropertyMatcher;
 

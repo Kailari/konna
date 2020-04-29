@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.engine.view.data.components.ui;
+package fi.jakojaannos.roguelite.engine.view.ui;
 
 import org.joml.Vector2i;
 

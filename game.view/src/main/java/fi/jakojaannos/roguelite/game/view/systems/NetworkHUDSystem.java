@@ -14,8 +14,7 @@ import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.GenericUIElementBuilder;
 
-import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.absolute;
-import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.percentOf;
+import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.*;
 
 /**
  * Keeps network information visible on the GUI
@@ -81,7 +80,7 @@ public class NetworkHUDSystem implements ECSSystem {
                                                      UIElementType.LABEL,
                                                      errorBuilder -> errorBuilder.fontSize(12)
                                                                                  .left(absolute(0))
-                                                                                 .top(percentOf().parentHeight(1.1))
+                                                                                 .top(percentOf(parentHeight(1.1)))
                                                                                  .color(0.545, 0.0, 0.0)
                                                                                  .text("")));
     }

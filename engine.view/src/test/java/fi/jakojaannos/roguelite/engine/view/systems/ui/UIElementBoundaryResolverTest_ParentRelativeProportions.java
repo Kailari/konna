@@ -12,8 +12,7 @@ import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.UIBuilder;
 
-import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.absolute;
-import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.percentOf;
+import static fi.jakojaannos.roguelite.engine.view.ui.ProportionValue.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class UIElementBoundaryResolverTest_ParentRelativeProportions {
@@ -37,8 +36,8 @@ public class UIElementBoundaryResolverTest_ParentRelativeProportions {
         UserInterface userInterface = uiBuilder
                 .element("a",
                          UIElementType.PANEL,
-                         builder -> builder.left(percentOf().parentWidth(0.25))
-                                           .right(percentOf().parentWidth(0.1)))
+                         builder -> builder.left(percentOf(parentWidth(0.25)))
+                                           .right(percentOf(parentWidth(0.1))))
                 .build();
         userInterface.update(new Mouse());
 
@@ -54,8 +53,8 @@ public class UIElementBoundaryResolverTest_ParentRelativeProportions {
         UserInterface userInterface = uiBuilder
                 .element("a",
                          UIElementType.PANEL,
-                         builder -> builder.left(percentOf().parentHeight(0.25))
-                                           .right(percentOf().parentHeight(0.1)))
+                         builder -> builder.left(percentOf(parentHeight(0.25)))
+                                           .right(percentOf(parentHeight(0.1))))
                 .build();
         userInterface.update(new Mouse());
 
@@ -71,8 +70,8 @@ public class UIElementBoundaryResolverTest_ParentRelativeProportions {
         UserInterface userInterface = uiBuilder
                 .element("a",
                          UIElementType.PANEL,
-                         builder -> builder.top(percentOf().parentWidth(0.25))
-                                           .bottom(percentOf().parentWidth(0.1)))
+                         builder -> builder.top(percentOf(parentWidth(0.25)))
+                                           .bottom(percentOf(parentWidth(0.1))))
                 .build();
         userInterface.update(new Mouse());
 
@@ -88,8 +87,8 @@ public class UIElementBoundaryResolverTest_ParentRelativeProportions {
         UserInterface userInterface = uiBuilder
                 .element("a",
                          UIElementType.PANEL,
-                         builder -> builder.top(percentOf().parentHeight(0.25))
-                                           .bottom(percentOf().parentHeight(0.1)))
+                         builder -> builder.top(percentOf(parentHeight(0.25)))
+                                           .bottom(percentOf(parentHeight(0.1))))
                 .build();
         userInterface.update(new Mouse());
 
@@ -106,7 +105,7 @@ public class UIElementBoundaryResolverTest_ParentRelativeProportions {
                 .element("a",
                          UIElementType.PANEL,
                          builder -> builder.left(absolute(10))
-                                           .width(percentOf().parentWidth(0.1)))
+                                           .width(percentOf(parentWidth(0.1))))
                 .build();
         userInterface.update(new Mouse());
 
@@ -123,7 +122,7 @@ public class UIElementBoundaryResolverTest_ParentRelativeProportions {
                 .element("a",
                          UIElementType.PANEL,
                          builder -> builder.left(absolute(10))
-                                           .width(percentOf().parentHeight(0.1)))
+                                           .width(percentOf(parentHeight(0.1))))
                 .build();
         userInterface.update(new Mouse());
 
@@ -140,7 +139,7 @@ public class UIElementBoundaryResolverTest_ParentRelativeProportions {
                 .element("a",
                          UIElementType.PANEL,
                          builder -> builder.top(absolute(10))
-                                           .height(percentOf().parentWidth(0.1)))
+                                           .height(percentOf(parentWidth(0.1))))
                 .build();
         userInterface.update(new Mouse());
 
@@ -157,7 +156,7 @@ public class UIElementBoundaryResolverTest_ParentRelativeProportions {
                 .element("a",
                          UIElementType.PANEL,
                          builder -> builder.top(absolute(10))
-                                           .height(percentOf().parentHeight(0.1)))
+                                           .height(percentOf(parentHeight(0.1))))
                 .build();
         userInterface.update(new Mouse());
 
@@ -173,9 +172,9 @@ public class UIElementBoundaryResolverTest_ParentRelativeProportions {
         UserInterface userInterface = uiBuilder
                 .element("a",
                          UIElementType.PANEL,
-                         builder -> builder.anchorX(percentOf().parentWidth(0.25))
-                                           .left(percentOf().parentWidth(0.1))
-                                           .right(percentOf().parentWidth(0.75)))
+                         builder -> builder.anchorX(percentOf(parentWidth(0.25)))
+                                           .left(percentOf(parentWidth(0.1)))
+                                           .right(percentOf(parentWidth(0.75))))
                 .build();
         userInterface.update(new Mouse());
 
@@ -191,9 +190,9 @@ public class UIElementBoundaryResolverTest_ParentRelativeProportions {
         UserInterface userInterface = uiBuilder
                 .element("a",
                          UIElementType.PANEL,
-                         builder -> builder.anchorY(percentOf().parentWidth(0.25))
-                                           .top(percentOf().parentWidth(0.1))
-                                           .bottom(percentOf().parentWidth(0.05)))
+                         builder -> builder.anchorY(percentOf(parentWidth(0.25)))
+                                           .top(percentOf(parentWidth(0.1)))
+                                           .bottom(percentOf(parentWidth(0.05))))
                 .build();
         userInterface.update(new Mouse());
 

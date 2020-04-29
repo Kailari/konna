@@ -4,14 +4,14 @@ import java.nio.file.Path;
 
 import fi.jakojaannos.roguelite.engine.content.AssetRegistry;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
-import fi.jakojaannos.roguelite.engine.view.data.components.ui.ElementBoundaries;
-import fi.jakojaannos.roguelite.engine.view.data.resources.ui.UIRoot;
+import fi.jakojaannos.roguelite.engine.view.ui.ElementBoundaries;
+import fi.jakojaannos.roguelite.engine.view.ui.UIRoot;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.Sprite;
 import fi.jakojaannos.roguelite.engine.view.rendering.sprite.SpriteBatch;
 import fi.jakojaannos.roguelite.engine.view.rendering.text.Font;
 import fi.jakojaannos.roguelite.engine.view.rendering.text.TextRenderer;
-import fi.jakojaannos.roguelite.engine.view.systems.ui.UIElementBoundaryResolver;
-import fi.jakojaannos.roguelite.engine.view.systems.ui.UIElementLabelSizeResolver;
+import fi.jakojaannos.roguelite.engine.view.ui.internal.UIElementBoundaryResolver;
+import fi.jakojaannos.roguelite.engine.view.ui.internal.UIElementLabelSizeResolver;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
