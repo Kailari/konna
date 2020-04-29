@@ -7,6 +7,7 @@ import java.util.Queue;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import fi.jakojaannos.roguelite.engine.view.data.components.ui.ElementBoundaries;
 import fi.jakojaannos.roguelite.engine.view.ui.query.UIElementMatcher;
 
 public interface UIElement {
@@ -16,6 +17,10 @@ public interface UIElement {
      * @return the parent element. <code>Optional.empty()</code> if this element is at the root level
      */
     Optional<UIElement> getParent();
+
+    ElementBoundaries getBounds();
+
+    void setParent(UIElement element);
 
     /**
      * Gets all children of this element. The collection is unmodifiable.
@@ -31,9 +36,7 @@ public interface UIElement {
      * @param value    the new value
      * @param <T>      the type of the property value
      */
-    default <T> void setProperty(final UIProperty<T> property, final T value) {
-        property.set(this, value);
-    }
+    <T> void setProperty(final UIProperty<T> property, final T value);
 
     /**
      * Gets the value of a property
@@ -43,9 +46,7 @@ public interface UIElement {
      *
      * @return current value or <code>Optional.empty()</code> if the property is not present
      */
-    default <T> Optional<T> getProperty(final UIProperty<T> property) {
-        return property.getFor(this);
-    }
+    <T> Optional<T> getProperty(final UIProperty<T> property);
 
     /**
      * Queries the direct children of this element for matching components
@@ -58,12 +59,8 @@ public interface UIElement {
         final var matcher = UIElementMatcher.create();
         builder.accept(matcher);
 
-        final Stream.Builder<UIElement> matchingStreamBuilder = Stream.builder();
-        getChildren().stream()
-                     .filter(matcher::evaluate)
-                     .forEach(matchingStreamBuilder);
-
-        return matchingStreamBuilder.build();
+        return getChildren().stream()
+                            .filter(matcher::evaluate);
     }
 
     /**

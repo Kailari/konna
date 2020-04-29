@@ -17,6 +17,7 @@ module roguelite.engine.view {
     exports fi.jakojaannos.roguelite.engine.view;
     exports fi.jakojaannos.roguelite.engine.view.audio;
     exports fi.jakojaannos.roguelite.engine.view.data.components.ui;
+    exports fi.jakojaannos.roguelite.engine.view.data.resources.ui;
     exports fi.jakojaannos.roguelite.engine.view.content;
     exports fi.jakojaannos.roguelite.engine.view.ui;
     exports fi.jakojaannos.roguelite.engine.view.ui.query;

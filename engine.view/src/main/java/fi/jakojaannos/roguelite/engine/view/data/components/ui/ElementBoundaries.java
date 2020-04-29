@@ -67,6 +67,11 @@ public class ElementBoundaries {
         this.height = height;
     }
 
+    public Vector2i getCenter() {
+        return new Vector2i((int) ((this.minX + this.maxX) * 0.5),
+                            (int) ((this.minY + this.maxY) * 0.5));
+    }
+
     public void invalidate() {
         this.minX = ElementBoundaries.INVALID_VALUE;
         this.maxX = ElementBoundaries.INVALID_VALUE;
@@ -74,10 +79,5 @@ public class ElementBoundaries {
         this.maxY = ElementBoundaries.INVALID_VALUE;
         this.width = ElementBoundaries.INVALID_VALUE;
         this.height = ElementBoundaries.INVALID_VALUE;
-    }
-
-    public Vector2i getCenter() {
-        return new Vector2i((int) ((this.minX + this.maxX) * 0.5),
-                            (int) ((this.minY + this.maxY) * 0.5));
     }
 }

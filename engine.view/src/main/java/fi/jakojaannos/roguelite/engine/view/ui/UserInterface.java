@@ -1,7 +1,6 @@
 package fi.jakojaannos.roguelite.engine.view.ui;
 
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
@@ -11,12 +10,18 @@ import fi.jakojaannos.roguelite.engine.ui.TextSizeProvider;
 import fi.jakojaannos.roguelite.engine.ui.UIEvent;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
+import fi.jakojaannos.roguelite.engine.view.data.resources.ui.UIRoot;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.UIBuilder;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.UIElementBuilder;
 import fi.jakojaannos.roguelite.engine.view.ui.query.UIElementMatcher;
-import fi.jakojaannos.roguelite.engine.view.ui.query.UIPropertyMatcher;
 
 public interface UserInterface {
+    int getHeight();
+
+    int getWidth();
+
+    Stream<UIElement> getRoots();
+
     static UIBuilder builder(
             final Events events,
             final TimeManager timeManager,
@@ -26,38 +31,13 @@ public interface UserInterface {
         return new UIBuilder(events, timeManager, viewport, fontSizeProvider);
     }
 
-    int getHeight();
-
-    int getWidth();
-
     void update(Mouse mouse);
-
-    Stream<UIElement> getRoots();
-
-    /**
-     * @deprecated Use {@link #findElements(Consumer)} with {@link UIPropertyMatcher} static methods instead
-     */
-    @Deprecated
-    default <T> Stream<UIElement> findElementsWithMatchingProperty(
-            final UIProperty<T> property,
-            final Predicate<T> matcher
-    ) {
-        final Stream.Builder<UIElement> streamBuilder = Stream.builder();
-        final var elementMatcher = UIElementMatcher.create();
-        elementMatcher.matching(UIPropertyMatcher.match(property)
-                                                 .isPresentAndMatches(matcher));
-
-        this.getRoots().forEach(root -> addIfMatching(elementMatcher, streamBuilder, root));
-        return streamBuilder.build();
-    }
 
     default Stream<UIElement> findElements(final Consumer<UIElementMatcher> builder) {
         final var matcher = UIElementMatcher.create();
         builder.accept(matcher);
 
-        final var streamBuilder = Stream.<UIElement>builder();
-        getRoots().forEach(root -> addIfMatching(matcher, streamBuilder, root));
-        return streamBuilder.build();
+        return getRoots().flatMap(root -> matchingElements(root, matcher));
     }
 
     <T extends UIElementType<TBuilder>, TBuilder extends UIElementBuilder<TBuilder>> UIElement addElement(
@@ -66,17 +46,21 @@ public interface UserInterface {
             Consumer<TBuilder> factory
     );
 
-    private void addIfMatching(
-            final UIElementMatcher matcher,
-            final Stream.Builder<UIElement> streamBuilder,
-            final UIElement element
+    private Stream<UIElement> matchingElements(
+            final UIElement element,
+            final UIElementMatcher matcher
     ) {
+        final var matchingChildren = element.getChildren()
+                                            .stream()
+                                            .flatMap(child -> matchingElements(child, matcher));
         if (matcher.evaluate(element)) {
-            streamBuilder.add(element);
+            return Stream.concat(Stream.of(element), matchingChildren);
         }
 
-        element.getChildren().forEach(child -> addIfMatching(matcher, streamBuilder, child));
+        return matchingChildren;
     }
+
+    UIRoot getRoot();
 
     interface UIEventBus extends EventSender<UIEvent> {}
 }

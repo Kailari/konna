@@ -37,7 +37,8 @@ public class UserInterfaceRenderingSystem implements ECSSystem, AutoCloseable {
                                                                spriteRegistry,
                                                                textRenderer,
                                                                fontRegistry,
-                                                               backend);
+                                                               backend,
+                                                               userInterface.getRoot());
     }
 
     @Override

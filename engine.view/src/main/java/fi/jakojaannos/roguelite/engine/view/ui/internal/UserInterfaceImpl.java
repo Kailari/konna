@@ -1,26 +1,22 @@
 package fi.jakojaannos.roguelite.engine.view.ui.internal;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
-import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
-import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
-import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.event.EventBus;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.ui.TextSizeProvider;
 import fi.jakojaannos.roguelite.engine.ui.UIEvent;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
-import fi.jakojaannos.roguelite.engine.view.data.components.internal.Parent;
-import fi.jakojaannos.roguelite.engine.view.data.resources.ui.UIHierarchy;
 import fi.jakojaannos.roguelite.engine.view.data.resources.ui.UIRoot;
-import fi.jakojaannos.roguelite.engine.view.systems.ui.*;
+import fi.jakojaannos.roguelite.engine.view.systems.ui.UIElementBoundaryResolver;
+import fi.jakojaannos.roguelite.engine.view.systems.ui.UIElementClickEventProvider;
+import fi.jakojaannos.roguelite.engine.view.systems.ui.UIElementHoverEventProvider;
+import fi.jakojaannos.roguelite.engine.view.systems.ui.UIElementLabelSizeResolver;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElementType;
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
@@ -31,12 +27,23 @@ import fi.jakojaannos.roguelite.engine.view.ui.builder.UIElementBuilder;
  * The interface used to interact with the game.
  */
 public class UserInterfaceImpl implements UserInterface {
-    private final World uiWorld;
-    private final SystemDispatcher uiDispatcher;
+    private final TimeManager timeManager;
     private final Viewport viewport;
-    private final UIHierarchy hierarchy;
+    private final UIRoot uiRoot;
 
-    private List<EntityHandle> elementEntities = new ArrayList<>();
+    private final Set<UIElement> roots = new HashSet<>();
+    private final List<UIElement> allElements = new ArrayList<>();
+    private final UIEventBus eventBus;
+
+    private final UIElementLabelSizeResolver labelSizeResolver;
+    private final UIElementBoundaryResolver boundaryResolver;
+    private final UIElementHoverEventProvider hoverEventProvider;
+    private final UIElementClickEventProvider clickEventProvider;
+
+    private final AtomicInteger idCounter = new AtomicInteger(0);
+
+    @SuppressWarnings("rawtypes")
+    private final Map<UIProperty, UIPropertyContainer> propertyContainers = new HashMap<>();
 
     @Override
     public int getWidth() {
@@ -48,14 +55,14 @@ public class UserInterfaceImpl implements UserInterface {
         return this.viewport.getWidthInPixels();
     }
 
-    public World getWorld() {
-        return this.uiWorld;
+    @Override
+    public Stream<UIElement> getRoots() {
+        return this.roots.stream();
     }
 
     @Override
-    public Stream<UIElement> getRoots() {
-        return this.uiWorld.fetchResource(UIHierarchy.class)
-                           .getRoots();
+    public UIRoot getRoot() {
+        return this.uiRoot;
     }
 
     public UserInterfaceImpl(
@@ -64,35 +71,18 @@ public class UserInterfaceImpl implements UserInterface {
             final Viewport viewport,
             final TextSizeProvider textSizeProvider
     ) {
+        this.timeManager = timeManager;
         this.viewport = viewport;
-        this.uiWorld = World.createNew();
-        this.hierarchy = new UIHierarchy();
-        this.uiWorld.registerResource(UIHierarchy.class, this.hierarchy);
-        this.uiWorld.registerResource(Mouse.class, new Mouse());
-        this.uiWorld.registerResource(UIEventBus.class, ((EventBus<UIEvent>) events.ui())::fire);
-        this.uiWorld.registerResource(TimeManager.class, timeManager);
+        this.uiRoot = new UIRoot(viewport);
 
-        final var builder = SystemDispatcher.builder();
-        final var preparations = builder.group("preparations")
-                                        .withSystem(new UIHierarchySystem())
-                                        .withSystem(new UILabelAutomaticSizeCalculationSystem(textSizeProvider))
-                                        .withSystem(new UIElementBoundaryCalculationSystem())
-                                        .buildGroup();
+        // HACK: We *know* that the `events.ui()` is actually an event bus. Its fire method is
+        //       compatible with UIEventBus signature so use cast + method reference to convert.
+        this.eventBus = ((EventBus<UIEvent>) events.ui())::fire;
 
-        final var uiEvents = builder.group("ui-events")
-                                    .withSystem(new UIElementHoverEventProvider())
-                                    .withSystem(new UIElementClickEventProvider())
-                                    .dependsOn(preparations)
-                                    .buildGroup();
-
-        builder.group("cleanup")
-               .dependsOn(preparations, uiEvents)
-               .buildGroup();
-
-        this.uiDispatcher = builder.build();
-        this.uiDispatcher.setParallel(false);
-
-        this.uiWorld.registerResource(UIRoot.class, new UIRoot(viewport));
+        this.labelSizeResolver = new UIElementLabelSizeResolver(textSizeProvider, this.uiRoot);
+        this.boundaryResolver = new UIElementBoundaryResolver(this.uiRoot);
+        this.clickEventProvider = new UIElementClickEventProvider();
+        this.hoverEventProvider = new UIElementHoverEventProvider();
     }
 
     @Override
@@ -102,41 +92,45 @@ public class UserInterfaceImpl implements UserInterface {
             final T elementType,
             final Consumer<TBuilder> factory
     ) {
-        final var elementEntity = this.uiWorld.createEntity();
-        this.elementEntities.add(elementEntity);
-        factory.accept(elementType.getBuilder(this, elementEntity, name));
-        final var element = this.hierarchy.getOrCreateElementFor(elementEntity);
+        final var element = new UIElementImpl(this.idCounter.getAndIncrement(), this);
+        final var builder = elementType.getBuilder(this, element, name);
+        factory.accept(builder);
+
         element.setProperty(UIProperty.TYPE, elementType);
-        this.uiWorld.commitEntityModifications();
-        this.updateHierarchy();
+        this.roots.add(element);
+        this.allElements.add(element);
         return element;
     }
 
     @Override
     public void update(final Mouse mouse) {
-        this.uiWorld.commitEntityModifications();
-        this.elementEntities = this.elementEntities.stream()
-                                                   .filter(Predicate.not(EntityHandle::isDestroyed))
-                                                   .filter(Predicate.not(EntityHandle::isPendingRemoval))
-                                                   .collect(Collectors.toCollection(ArrayList::new));
+        this.allElements.forEach(this.labelSizeResolver::resolve);
+        this.roots.forEach(this::updateBounds);
 
-        final var uiMouse = this.uiWorld.fetchResource(Mouse.class);
-        uiMouse.clicked = mouse.clicked;
-        uiMouse.position.set(mouse.position);
-
-        this.uiDispatcher.tick(this.uiWorld, List.of());
-        this.uiWorld.commitEntityModifications();
+        this.hoverEventProvider.tick(getRoots(), this.eventBus, mouse);
+        this.clickEventProvider.tick(getRoots(), this.eventBus, mouse, this.timeManager);
     }
 
-    // TODO: Figure out where and why this is necessary and get rid of the root cause
-    public void updateHierarchy() {
-        this.elementEntities = this.elementEntities.stream()
-                                                   .filter(Predicate.not(EntityHandle::isDestroyed))
-                                                   .filter(Predicate.not(EntityHandle::isPendingRemoval))
-                                                   .collect(Collectors.toCollection(ArrayList::new));
-        this.elementEntities.forEach(entity -> this.hierarchy.update(entity,
-                                                                     entity.getComponent(Parent.class)
-                                                                           .map(p -> p.value)
-                                                                           .orElse(null)));
+    private void updateBounds(final UIElement element) {
+        this.boundaryResolver.resolve(element);
+        element.setProperty(UIProperty.CENTER, element.getBounds().getCenter());
+
+        element.getChildren()
+               .forEach(this::updateBounds);
+    }
+
+    public void addToRoots(final UIElementImpl uiElement) {
+        this.roots.add(uiElement);
+    }
+
+    public void removeFromRoots(final UIElementImpl uiElement) {
+        this.roots.remove(uiElement);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> UIPropertyContainer<T> getPropertyContainer(final UIProperty<T> property) {
+        return this.propertyContainers.computeIfAbsent(property,
+                                                       key -> new UIPropertyContainer<>(property.name(),
+                                                                                        property.defaultValue()));
     }
 }
