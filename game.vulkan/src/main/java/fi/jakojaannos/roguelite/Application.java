@@ -63,6 +63,7 @@ public record Application(
 
     @Override
     public void close() {
+        this.graphicsCommandPool.close();
         this.framebuffers.close();
         this.renderPass.close();
         this.graphicsPipeline.close();

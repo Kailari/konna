@@ -46,11 +46,21 @@ public class RenderPass implements AutoCloseable {
                     .colorAttachmentCount(1)
                     .pColorAttachments(colorAttachmentRef);
 
+            final var dependencies = VkSubpassDependency
+                    .callocStack(1)
+                    .srcSubpass(VK_SUBPASS_EXTERNAL)
+                    .dstSubpass(0)
+                    .srcStageMask(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT)
+                    .srcAccessMask(0)
+                    .dstStageMask(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT)
+                    .dstAccessMask(VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
+
             final var createInfo = VkRenderPassCreateInfo
                     .callocStack()
                     .sType(VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO)
                     .pAttachments(attachments)
-                    .pSubpasses(subpasses);
+                    .pSubpasses(subpasses)
+                    .pDependencies(dependencies);
             final var pRenderPass = stack.mallocLong(1);
             final var result = vkCreateRenderPass(this.device, createInfo, null, pRenderPass);
             if (result != VK_SUCCESS) {

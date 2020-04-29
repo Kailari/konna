@@ -38,6 +38,7 @@ public class CommandPool implements AutoCloseable {
         try (final var stack = stackPush()) {
             final var allocInfo = VkCommandBufferAllocateInfo
                     .callocStack()
+                    .sType(VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO)
                     .commandPool(this.handle)
                     .level(VK_COMMAND_BUFFER_LEVEL_PRIMARY)
                     .commandBufferCount(count);

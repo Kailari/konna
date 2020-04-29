@@ -34,6 +34,14 @@ public class Swapchain implements AutoCloseable {
         return this.imageViews;
     }
 
+    public int getImageCount() {
+        return this.imageViews.length;
+    }
+
+    public long getHandle() {
+        return this.handle;
+    }
+
     public Swapchain(
             final DeviceContext deviceContext,
             final WindowSurface surface,
@@ -104,10 +112,6 @@ public class Swapchain implements AutoCloseable {
         }
         this.extent.free();
         vkDestroySwapchainKHR(this.device, this.handle, null);
-    }
-
-    public int getImageCount() {
-        return this.imageViews.length;
     }
 
     private static long[] getSwapchainImages(final VkDevice device, final long handle) {

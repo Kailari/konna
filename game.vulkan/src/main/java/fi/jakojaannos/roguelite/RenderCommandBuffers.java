@@ -35,4 +35,8 @@ public class RenderCommandBuffers {
             }
         }
     }
+
+    public CommandBuffer get(final int imageIndex) {
+        return this.commandBuffers[imageIndex];
+    }
 }

@@ -2,6 +2,8 @@ package fi.jakojaannos.roguelite.vulkan.rendering;
 
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -15,6 +17,8 @@ import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.VK10.*;
 
 public class GraphicsPipeline implements AutoCloseable {
+    private static final Logger LOG = LoggerFactory.getLogger(GraphicsPipeline.class);
+
     private static final int ALL_COLOR_COMPONENTS = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
 
     private final VkDevice device;
