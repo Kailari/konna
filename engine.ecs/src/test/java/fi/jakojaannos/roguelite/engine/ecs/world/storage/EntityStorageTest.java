@@ -369,6 +369,110 @@ public class EntityStorageTest {
         assertEquals(100, stream.count());
     }
 
+    @Test
+    void creatingMultipleEntitiesAndAddingAndRemovingComponentsResultsInCorrectNumberOfEntities() {
+        for (int i = 0; i < 20; i++) {
+            storage.createEntity(new ComponentB(), new ComponentA());
+            final var handle = storage.createEntity(new ComponentB(), new ComponentA());
+            handle.removeComponent(ComponentB.class);
+
+            storage.createEntity(new ComponentB(), new ComponentA(), new ComponentC());
+        }
+
+        storage.commitModifications();
+
+        final var streamA = createStreamOf(ComponentA.class);
+        final var streamB = createStreamOf(ComponentB.class);
+        final var streamC = createStreamOf(ComponentC.class);
+        assertEquals(260, streamA.count());
+        assertEquals(240, streamB.count());
+        assertEquals(20, streamC.count());
+    }
+
+    @Test
+    void creatingMultipleEntitiesAndAddingAndRemovingComponentsResultsInExactCorrectInstances() {
+        final var componentA1 = new ComponentA();
+        final var componentA3 = new ComponentA();
+
+        final var componentB1 = new ComponentB();
+        final var componentB2 = new ComponentB();
+        final var componentB3 = new ComponentB();
+
+        final var componentC1 = new ComponentC();
+        final var componentC2 = new ComponentC();
+        final var componentC3 = new ComponentC();
+
+        final var entity1 = storage.createEntity();
+        final var entity2 = storage.createEntity();
+        final var entity3 = storage.createEntity();
+
+        // "random" component adds/removes
+        entity1.addComponent(componentA1);
+        entity2.addComponent(new ComponentA());
+        entity2.addComponent(componentB2);
+        entity2.addComponent(componentC2);
+        entity1.addComponent(componentB1);
+        entity3.addComponent(componentB3);
+        entity2.removeComponent(ComponentA.class);
+        entity1.addComponent(componentC1);
+        entity3.addComponent(componentA3);
+        entity3.addComponent(componentC3);
+
+        storage.commitModifications();
+        assertEquals(componentA1, entity1.getComponent(ComponentA.class).orElseThrow());
+        assertTrue(entity2.getComponent(ComponentA.class).isEmpty());
+        assertEquals(componentA3, entity3.getComponent(ComponentA.class).orElseThrow());
+
+        assertEquals(componentB1, entity1.getComponent(ComponentB.class).orElseThrow());
+        assertEquals(componentB2, entity2.getComponent(ComponentB.class).orElseThrow());
+        assertEquals(componentB3, entity3.getComponent(ComponentB.class).orElseThrow());
+
+        assertEquals(componentC1, entity1.getComponent(ComponentC.class).orElseThrow());
+        assertEquals(componentC2, entity2.getComponent(ComponentC.class).orElseThrow());
+        assertEquals(componentC3, entity3.getComponent(ComponentC.class).orElseThrow());
+    }
+
+    @Test
+    void creatingMultipleEntitiesAndAddingAndRemovingComponentsResultsInExactCorrectInstances_removeNonExistentComponent() {
+        final var componentA1 = new ComponentA();
+        final var componentA3 = new ComponentA();
+
+        final var componentB1 = new ComponentB();
+        final var componentB2 = new ComponentB();
+        final var componentB3 = new ComponentB();
+
+        final var componentC1 = new ComponentC();
+        final var componentC2 = new ComponentC();
+        final var componentC3 = new ComponentC();
+
+        final var entity1 = storage.createEntity();
+        final var entity2 = storage.createEntity();
+        final var entity3 = storage.createEntity();
+
+        // "random" component adds/removes
+        entity1.addComponent(componentA1);
+        entity2.addComponent(componentB2);
+        entity2.addComponent(componentC2);
+        entity1.addComponent(componentB1);
+        entity3.addComponent(componentB3);
+        entity2.removeComponent(ComponentB.class);
+        entity1.addComponent(componentC1);
+        entity3.addComponent(componentA3);
+        entity3.addComponent(componentC3);
+
+        storage.commitModifications();
+        assertEquals(componentA1, entity1.getComponent(ComponentA.class).orElseThrow());
+        assertEquals(componentA3, entity3.getComponent(ComponentA.class).orElseThrow());
+
+        assertEquals(componentB1, entity1.getComponent(ComponentB.class).orElseThrow());
+        assertTrue(entity2.getComponent(ComponentB.class).isEmpty());
+        assertEquals(componentB3, entity3.getComponent(ComponentB.class).orElseThrow());
+
+        assertEquals(componentC1, entity1.getComponent(ComponentC.class).orElseThrow());
+        assertEquals(componentC2, entity2.getComponent(ComponentC.class).orElseThrow());
+        assertEquals(componentC3, entity3.getComponent(ComponentC.class).orElseThrow());
+    }
+
     @SuppressWarnings("rawtypes")
     private Stream<EntityDataHandle<Object>> createStreamOf(final Class... components) {
         return storage.stream(components,
