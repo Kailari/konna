@@ -3,40 +3,52 @@ package fi.jakojaannos.roguelite.game.systems;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
+import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
+import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
+import fi.jakojaannos.roguelite.engine.ecs.annotation.DisableOn;
+import fi.jakojaannos.roguelite.engine.ecs.annotation.DisabledByDefault;
+import fi.jakojaannos.roguelite.engine.ecs.annotation.EnableOn;
+import fi.jakojaannos.roguelite.engine.ecs.data.resources.Entities;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.SpawnerComponent;
+import fi.jakojaannos.roguelite.game.data.events.HordeEndEvent;
+import fi.jakojaannos.roguelite.game.data.events.HordeStartEvent;
 
-public class SpawnerSystem implements ECSSystem {
-    @Override
-    public void declareRequirements(final RequirementsBuilder requirements) {
-        requirements.addToGroup(SystemGroups.EARLY_TICK)
-                    .withComponent(SpawnerComponent.class)
-                    .withComponent(Transform.class);
-    }
-
+@DisabledByDefault
+public class SpawnerSystem implements EcsSystem<SpawnerSystem.Resources, SpawnerSystem.EntityData, SpawnerSystem.EventData> {
     @Override
     public void tick(
-            final Stream<Entity> entities,
-            final World world
+            final Resources resources,
+            final Stream<EntityDataHandle<EntityData>> entities,
+            final EventData eventData
     ) {
-        final var delta = world.fetchResource(TimeManager.class).getTimeStepInSeconds();
-        final EntityManager cluster = world.getEntityManager();
+        final var delta = resources.timeManager.getTimeStepInSeconds();
 
         entities.forEach(entity -> {
-            final var myPos = cluster.getComponentOf(entity, Transform.class).orElseThrow();
-            final var spawnComp = cluster.getComponentOf(entity, SpawnerComponent.class).orElseThrow();
+            final var transform = entity.getData().transform;
+            final var spawner = entity.getData().spawner;
 
-            spawnComp.spawnCoolDown -= delta;
+            spawner.spawnCoolDown -= delta;
 
-            if (spawnComp.spawnCoolDown <= 0.0f) {
-                spawnComp.spawnCoolDown = spawnComp.spawnFrequency;
-                spawnComp.entityFactory.get(cluster, myPos, spawnComp);
+            if (spawner.spawnCoolDown <= 0.0f) {
+                spawner.spawnCoolDown = spawner.spawnFrequency;
+                spawner.entityFactory.get(resources.entities, transform, spawner);
             }
         });
     }
+
+    public static record EntityData(
+            SpawnerComponent spawner,
+            Transform transform
+    ) {}
+
+    public static record Resources(
+            TimeManager timeManager,
+            Entities entities
+    ) {}
+
+    public static record EventData(
+            @EnableOn HordeStartEvent hordeStart,
+            @DisableOn HordeEndEvent hordeEnd
+    ) {}
 }

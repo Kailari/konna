@@ -1,28 +1,26 @@
 package fi.jakojaannos.roguelite.game.data.archetypes;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
+import fi.jakojaannos.roguelite.engine.ecs.data.resources.Entities;
 import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.ObstacleTag;
 import fi.jakojaannos.roguelite.game.data.components.SpriteInfo;
 
 public class ObstacleArchetype {
-    public static Entity create(
-            final EntityManager entityManager,
+    public static EntityHandle create(
+            final Entities entities,
             final Transform transform,
             final double size
     ) {
-        final var obstacle = entityManager.createEntity();
-        entityManager.addComponentTo(obstacle, transform);
-        entityManager.addComponentTo(obstacle, new Collider(CollisionLayer.OBSTACLE,
-                                                            size,
-                                                            size,
-                                                            size / 2.0,
-                                                            size / 2.0));
-        entityManager.addComponentTo(obstacle, new SpriteInfo("sprites/obstacle"));
-        entityManager.addComponentTo(obstacle, new ObstacleTag());
-        return obstacle;
+        return entities.createEntity(new Transform(transform),
+                                     new Collider(CollisionLayer.OBSTACLE,
+                                                                size,
+                                                                size,
+                                                                size / 2.0,
+                                                                size / 2.0),
+                                     new SpriteInfo("sprites/obstacle"),
+                                     new ObstacleTag());
     }
 }

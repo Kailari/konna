@@ -8,6 +8,7 @@ import fi.jakojaannos.roguelite.engine.ecs.annotation.DisabledByDefault;
 import fi.jakojaannos.roguelite.engine.ecs.annotation.EnableOn;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.state.StateEvent;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.events.GameLostEvent;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
 import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;
@@ -25,7 +26,8 @@ public class RestartGameSystem implements EcsSystem<RestartGameSystem.Resources,
         if (inputs.inputRestart) {
             resources.events()
                      .state()
-                     .fire(new StateEvent.ChangeMode(GameplayGameMode.create(System.nanoTime())));
+                     .fire(new StateEvent.ChangeMode(GameplayGameMode.create(System.nanoTime(),
+                                                                             resources.timeManager)));
         } else if (inputs.inputMenu) {
             resources.events()
                      .state()
@@ -33,7 +35,7 @@ public class RestartGameSystem implements EcsSystem<RestartGameSystem.Resources,
         }
     }
 
-    public static record Resources(Inputs inputs, Events events) {}
+    public static record Resources(Inputs inputs, Events events, TimeManager timeManager) {}
 
     public static record EventData(@EnableOn GameLostEvent gameLost) {}
 }

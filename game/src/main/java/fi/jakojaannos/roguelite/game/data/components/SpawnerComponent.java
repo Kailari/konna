@@ -5,13 +5,12 @@ import org.joml.Vector2d;
 import java.util.Random;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
+import fi.jakojaannos.roguelite.engine.ecs.data.resources.Entities;
 
 public class SpawnerComponent {
     public final Random random;
     public final EntityFactory entityFactory;
-    private final Vector2d temp = new Vector2d();
     public double spawnFrequency;
     public double spawnCoolDown;
     public double maxSpawnDistance;
@@ -37,13 +36,14 @@ public class SpawnerComponent {
     private static Vector2d getRandomSpotAround(
             final Transform origin,
             final double maxDist,
-            final Random random,
-            final Vector2d result
+            final Random random
     ) {
         final double xDir = random.nextDouble() * 2.0f - 1.0f;
         final double yDir = random.nextDouble() * 2.0f - 1.0f;
-        result.set(xDir, yDir);
-        if (result.lengthSquared() != 0.0) result.normalize();
+        final var result = new Vector2d(xDir, yDir);
+        if (result.lengthSquared() != 0.0) {
+            result.normalize();
+        }
 
         result.mul(maxDist * random.nextDouble());
         result.add(origin.position);
@@ -56,18 +56,13 @@ public class SpawnerComponent {
             return (entityManager, spawnerTransform, spawnerComponent) -> {
                 final var randomPosition = getRandomSpotAround(spawnerTransform,
                                                                spawnerComponent.maxSpawnDistance,
-                                                               spawnerComponent.random,
-                                                               spawnerComponent.temp);
+                                                               spawnerComponent.random);
 
                 return factory.get(entityManager, new Transform(randomPosition.x, randomPosition.y), spawnerComponent);
             };
 
         }
 
-        Entity get(
-                EntityManager entityManager,
-                Transform spawnerPos,
-                SpawnerComponent spawnerComponent
-        );
+        EntityHandle get(Entities entities, Transform spawnerTransform, SpawnerComponent spawnerComponent);
     }
 }

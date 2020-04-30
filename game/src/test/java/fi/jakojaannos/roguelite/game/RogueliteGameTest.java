@@ -37,7 +37,7 @@ class RogueliteGameTest {
             protected void onModeChange(final GameMode gameMode) {
             }
         };
-        state = gameRunner.setActiveGameMode(GameplayGameMode.create(6969));
+        state = gameRunner.setActiveGameMode(GameplayGameMode.create(6969, gameRunner.getTimeManager()));
     }
 
     @Test

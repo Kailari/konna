@@ -37,13 +37,15 @@ public class HandleMainMenuUIEventsSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
+        final var timeManager = world.fetchResource(TimeManager.class);
         final var uiEvents = world.fetchResource(Events.class).ui();
         final var stateEvents = world.fetchResource(Events.class).state();
         while (uiEvents.hasEvents()) {
             final var event = uiEvents.pollEvent();
             if (event.type() == UIEvent.Type.CLICK) {
                 if (event.element().equalsIgnoreCase("play_button")) {
-                    stateEvents.fire(new StateEvent.ChangeMode(GameplayGameMode.create(System.nanoTime())));
+                    stateEvents.fire(new StateEvent.ChangeMode(GameplayGameMode.create(System.nanoTime(),
+                                                                                       timeManager)));
                 } else if (event.element().equalsIgnoreCase("quit_button")) {
                     stateEvents.fire(new StateEvent.Shutdown());
                 } else if (event.element().equalsIgnoreCase("connect_button")) {

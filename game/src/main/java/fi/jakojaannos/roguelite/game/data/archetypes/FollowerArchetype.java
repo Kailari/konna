@@ -1,55 +1,48 @@
 package fi.jakojaannos.roguelite.game.data.archetypes;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
+import fi.jakojaannos.roguelite.engine.ecs.data.resources.Entities;
 import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.DamageSource;
-import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponInventory;
-import fi.jakojaannos.roguelite.game.data.resources.Weapons;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import fi.jakojaannos.roguelite.game.data.components.character.*;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.AttackAI;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.EnemyTag;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.FollowerAI;
-import fi.jakojaannos.roguelite.game.weapons.*;
+import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponInventory;
+import fi.jakojaannos.roguelite.game.data.resources.Weapons;
 
 public class FollowerArchetype {
-    public static Entity spawnFollower(
-            final EntityManager entityManager,
+    public static EntityHandle spawnFollower(
+            final Entities entities,
             final Transform spawnerTransform,
             final SpawnerComponent spawnerComponent
     ) {
-        return create(entityManager, new Transform(spawnerTransform));
+        return create(entities, spawnerTransform);
     }
 
-    public static Entity create(
-            final EntityManager entityManager,
+    public static EntityHandle create(
+            final Entities entities,
             final Transform transform
     ) {
-        final var entity = entityManager.createEntity();
-        entityManager.addComponentTo(entity, transform);
-        entityManager.addComponentTo(entity, new Velocity());
-        entityManager.addComponentTo(entity, Physics.builder().friction(35.0).build());
-        entityManager.addComponentTo(entity, new Health(2));
-        entityManager.addComponentTo(entity, new Collider(CollisionLayer.ENEMY, 1.0, 1.0, 0.5, 0.5));
-        entityManager.addComponentTo(entity, new SpriteInfo("sprites/enemy"));
-        entityManager.addComponentTo(entity, new EnemyTag());
-
-        entityManager.addComponentTo(entity, new FollowerAI(25.0f, 1.0f));
-        entityManager.addComponentTo(entity, new MovementInput());
-        entityManager.addComponentTo(entity, new WalkingMovementAbility(4.0, 50.0));
-
-        entityManager.addComponentTo(entity, new AttackAI(1.25));
-        entityManager.addComponentTo(entity, new WeaponInput());
-        entityManager.addComponentTo(entity, new AttackAbility(new DamageSource.LegacyEntity(entity),
-                                                               CollisionLayer.ENEMY,
-                                                               0.0,
-                                                               0.0));
-        final var wepInv = new WeaponInventory(1);
-        entityManager.addComponentTo(entity, wepInv);
-
-        wepInv.slots[0] = new InventoryWeapon(Weapons.FOLLOWER_MELEE);
+        final var entity = entities.createEntity(new Transform(transform),
+                                                 new Velocity(),
+                                                 Physics.builder().friction(35.0).build(),
+                                                 new Health(2),
+                                                 new Collider(CollisionLayer.ENEMY, 1.0, 1.0, 0.5, 0.5),
+                                                 new SpriteInfo("sprites/enemy"),
+                                                 new EnemyTag(),
+                                                 new FollowerAI(25.0f, 1.0f),
+                                                 new MovementInput(),
+                                                 new WalkingMovementAbility(4.0, 50.0),
+                                                 new AttackAI(1.25),
+                                                 new WeaponInput(),
+                                                 new WeaponInventory(Weapons.FOLLOWER_MELEE));
+        entity.addComponent(new AttackAbility(new DamageSource.Entity(entity),
+                                              CollisionLayer.ENEMY,
+                                              0.0,
+                                              0.0));
 
         return entity;
     }

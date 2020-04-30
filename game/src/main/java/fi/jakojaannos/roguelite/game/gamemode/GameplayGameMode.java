@@ -17,6 +17,7 @@ import fi.jakojaannos.roguelite.game.data.components.*;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
+import fi.jakojaannos.roguelite.game.data.resources.Weapons;
 import fi.jakojaannos.roguelite.game.data.resources.collision.Colliders;
 import fi.jakojaannos.roguelite.game.data.resources.collision.Collisions;
 import fi.jakojaannos.roguelite.game.systems.*;
@@ -33,7 +34,6 @@ import fi.jakojaannos.roguelite.game.systems.collision.*;
 import fi.jakojaannos.roguelite.game.systems.physics.ApplyForceSystem;
 import fi.jakojaannos.roguelite.game.systems.physics.ApplyFrictionSystem;
 import fi.jakojaannos.roguelite.game.systems.physics.ApplyVelocitySystem;
-import fi.jakojaannos.roguelite.game.data.resources.Weapons;
 import fi.jakojaannos.roguelite.game.world.WorldGenerator;
 
 public final class GameplayGameMode {
@@ -42,8 +42,8 @@ public final class GameplayGameMode {
     private GameplayGameMode() {
     }
 
-    public static GameMode create(final long seed) {
-        return new GameMode(GAME_MODE_ID, createDispatcher(), world -> createState(world, seed));
+    public static GameMode create(final long seed, final TimeManager timeManager) {
+        return new GameMode(GAME_MODE_ID, createDispatcher(timeManager), world -> createState(world, seed));
     }
 
     private static void createState(final World world, final long seed) {
@@ -94,7 +94,7 @@ public final class GameplayGameMode {
         entityManager.applyModifications();
     }
 
-    private static SystemDispatcher createDispatcher() {
+    private static SystemDispatcher createDispatcher(final TimeManager timeManager) {
         final var builder = SystemDispatcher.builder();
         final var input = builder.group("input")
                                  .withSystem(new LegacyInputHandler())
@@ -106,6 +106,9 @@ public final class GameplayGameMode {
                                  .buildGroup();
 
         final var earlyTick = builder.group("early-tick")
+                                     .withSystem(new HordeControllerSystem(timeManager.convertToTicks(5.0),
+                                                                           timeManager.convertToTicks(20.0),
+                                                                           timeManager.convertToTicks(20.0)))
                                      .withSystem(new SpawnerSystem())
                                      .withSystem(new TileColliderCollectorSystem())
                                      .withSystem(new ColliderDataCollectorSystem())

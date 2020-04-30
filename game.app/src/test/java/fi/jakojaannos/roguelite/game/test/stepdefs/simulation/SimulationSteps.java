@@ -13,7 +13,7 @@ import static fi.jakojaannos.roguelite.game.test.global.GlobalState.*;
 public class SimulationSteps {
     @Given("the game world just finished loading")
     public void the_game_world_just_finished_loading() {
-        mode = GameplayGameMode.create(6969);
+        mode = GameplayGameMode.create(6969, gameRunner.getTimeManager());
         state = gameRunner.setActiveGameMode(mode);
         gameRenderer.changeGameMode(mode);
 

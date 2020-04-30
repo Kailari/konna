@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
 
@@ -112,5 +113,10 @@ public class LegacyCompat implements EntityManager {
                                           objects -> new Object(),
                                           parallel)
                          .map(dataHandle -> dataHandle.getHandle().asLegacyEntity());
+    }
+
+    @Override
+    public EntityHandle createEntity(final Object... components) {
+        return this.world.createEntity(components);
     }
 }
