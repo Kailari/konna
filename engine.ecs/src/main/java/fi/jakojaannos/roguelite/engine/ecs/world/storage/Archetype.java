@@ -101,6 +101,7 @@ public class Archetype {
             chunk = chunk.getNext();
         } while (chunk != null);
 
+        // Sort remove tasks by descending storage index to ensure we do not swap to-be-removed entities for no reason
         this.removed.sort(Comparator.<Removed>comparingInt(task -> task.storageIndex)
                                   .reversed());
         for (final var removeTask : this.removed) {

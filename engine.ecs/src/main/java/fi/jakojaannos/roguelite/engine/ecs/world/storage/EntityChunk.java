@@ -49,11 +49,6 @@ public class EntityChunk {
         return this.next;
     }
 
-    @Nullable
-    public EntityChunk getPrevious() {
-        return this.previous;
-    }
-
     public Archetype getArchetype() {
         return this.archetype;
     }
@@ -215,7 +210,6 @@ public class EntityChunk {
         this.entities[lastIndex] = null;
 
         // Only move if the entity has not already been moved out of this chunk
-        // TODO: Why is this necessary?
         if (handle.getChunk() == this) {
             handle.moveToChunk(this, storageIndex);
         }

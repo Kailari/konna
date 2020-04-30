@@ -95,9 +95,9 @@ public class WorldGenerator<TTile> {
 
             final var spawnerXH = hallwayStartX + hallwaySize / 2;
             final var spawnerYH = hallwayLength - 2;
-            final var stalkerFreq = 2;//15.0;
-            final var followerFreq = 2;//12.5;
-            final var slimeFrequency = 2;//30;
+            final var stalkerFreq = 15.0;
+            final var followerFreq = 12.5;
+            final var slimeFrequency = 30;
 
             final var followerFactory =
                     SpawnerComponent.EntityFactory.withRandomDistance(FollowerArchetype::spawnFollower);
