@@ -76,9 +76,9 @@ public class SplitOnDeathSystem implements ECSSystem {
 
                 // FIXME: Add field to component for defining the factory
                 final Entity child = SlimeArchetype.createSlimeOfSize(entityManager,
-                                                                      myPos.position.x,
-                                                                      myPos.position.y,
-                                                                      childSize);
+                                                                      myPos,
+                                                                      childSize)
+                                                   .asLegacyEntity();
 
                 entityManager.getComponentOf(child, Physics.class)
                              .ifPresent(physics -> physics.applyForce(this.tempDir.mul(physics.mass)));

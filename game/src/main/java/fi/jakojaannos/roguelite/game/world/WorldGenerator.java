@@ -6,7 +6,7 @@ import java.util.Random;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.data.resources.Entities;
 import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
 import fi.jakojaannos.roguelite.game.data.archetypes.FollowerArchetype;
 import fi.jakojaannos.roguelite.game.data.archetypes.ObstacleArchetype;
@@ -77,7 +77,7 @@ public class WorldGenerator<TTile> {
         }
 
         // Generate hallways
-        final var entities = world.getEntityManager();
+        final Entities entities = world::createEntity;
         for (int i = 0; i < hallwaysPerWall; ++i) {
             final var hallwayStartX = startX + hallwaySize + i * unitsPerHallwayHorizontal;
             final var hallwayStartY = startY + hallwaySize + i * unitsPerHallwayVertical;
@@ -95,9 +95,9 @@ public class WorldGenerator<TTile> {
 
             final var spawnerXH = hallwayStartX + hallwaySize / 2;
             final var spawnerYH = hallwayLength - 2;
-            final var stalkerFreq = 15.0;
-            final var followerFreq = 12.5;
-            final var slimeFrequency = 30;
+            final var stalkerFreq = 7.5;
+            final var followerFreq = 4.0;
+            final var slimeFrequency = 10;
 
             final var followerFactory =
                     SpawnerComponent.EntityFactory.withRandomDistance(FollowerArchetype::spawnFollower);
@@ -137,14 +137,12 @@ public class WorldGenerator<TTile> {
             final int x,
             final int y,
             final double spawnFrequency,
-            final EntityManager entityManager,
+            final Entities entities,
             final SpawnerComponent.EntityFactory factory
     ) {
-        final var spawner = entityManager.createEntity();
-        entityManager.addComponentTo(spawner, new Transform(x, y));
         final var spawnerComponent = new SpawnerComponent(spawnFrequency, factory);
         spawnerComponent.maxSpawnDistance = 0.25;
         spawnerComponent.spawnCoolDown = 1.0;
-        entityManager.addComponentTo(spawner, spawnerComponent);
+        entities.createEntity(new Transform(x, y), spawnerComponent);
     }
 }

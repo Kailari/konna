@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.stream.Stream;
 
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
@@ -24,7 +25,8 @@ public class SplitOnDeathSystemTest {
 
         world.registerResource(TimeManager.class, new SimpleTimeManager(20));
 
-        Entity slime = SlimeArchetype.createLargeSlime(entityManager, 0.0, 0.0);
+        Entity slime = SlimeArchetype.createLargeSlime(entityManager, new Transform(0.0, 0.0))
+                                     .asLegacyEntity();
         entityManager.addComponentTo(slime, new DeadTag());
 
         entityManager.applyModifications();

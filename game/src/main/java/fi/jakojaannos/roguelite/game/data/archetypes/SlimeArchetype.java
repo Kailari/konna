@@ -1,19 +1,18 @@
 package fi.jakojaannos.roguelite.game.data.archetypes;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
+import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
+import fi.jakojaannos.roguelite.engine.ecs.data.resources.Entities;
 import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.DamageSource;
-import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponInventory;
-import fi.jakojaannos.roguelite.game.data.resources.Weapons;
 import fi.jakojaannos.roguelite.game.data.components.*;
 import fi.jakojaannos.roguelite.game.data.components.character.*;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.AttackAI;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.EnemyTag;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.FollowerAI;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.SplitOnDeath;
-import fi.jakojaannos.roguelite.game.weapons.*;
+import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponInventory;
+import fi.jakojaannos.roguelite.game.data.resources.Weapons;
 
 public class SlimeArchetype {
     public static final double LARGE_SLIME_SIZE = 16.0;
@@ -37,75 +36,64 @@ public class SlimeArchetype {
     public static final double SIZE_MAX = 5.0;
     public static final double MASS_MAX = 70.0;
 
-    public static Entity createLargeSlime(
-            final EntityManager entityManager,
+    public static EntityHandle createLargeSlime(
+            final Entities entities,
             final Transform spawnerTransform,
             final SpawnerComponent spawnerComponent
     ) {
-        return createLargeSlime(entityManager, spawnerTransform.position.x, spawnerTransform.position.y);
+        return createLargeSlime(entities, spawnerTransform);
     }
 
-    public static Entity createLargeSlime(
-            final EntityManager entityManager,
-            final double xPos,
-            final double yPos
+    public static EntityHandle createLargeSlime(
+            final Entities entities,
+            final Transform transform
     ) {
-        return createSlimeOfSize(entityManager, xPos, yPos, LARGE_SLIME_SIZE);
+        return createSlimeOfSize(entities, transform, LARGE_SLIME_SIZE);
     }
 
-    public static Entity createSlimeOfSize(
-            final EntityManager entityManager,
-            final double xPos,
-            final double yPos,
+    public static EntityHandle createSlimeOfSize(
+            final Entities entities,
+            final Transform transform,
             final double slimeSize
     ) {
         final var maxHp = Math.floor(getStatValue(slimeSize, HP_CURVE_A, HP_CURVE_B, HP_CURVE_C, HP_MIN, HP_MAX));
         final var spriteSize = getStatValue(slimeSize, SIZE_CURVE_A, SIZE_CURVE_B, SIZE_CURVE_C, SIZE_MIN, SIZE_MAX);
         final var mass = getStatValue(slimeSize, MASS_CURVE_A, MASS_CURVE_B, MASS_CURVE_C, MASS_MIN, MASS_MAX);
         final var jumpForce = (0.0 + 5.0 * slimeSize);
-        return createSlime(entityManager, xPos, yPos, maxHp, spriteSize, mass, jumpForce, slimeSize);
+        return createSlime(entities, transform, maxHp, spriteSize, mass, jumpForce, slimeSize);
     }
 
-    public static Entity createSlime(
-            final EntityManager entityManager,
-            final double xPos,
-            final double yPos,
+    public static EntityHandle createSlime(
+            final Entities entities,
+            final Transform transform,
             final double maxHp,
             final double spriteSize,
             final double mass,
             final double jumpForce,
             final double slimeSize
     ) {
-        final var entity = entityManager.createEntity();
-        //entities.addComponentTo(entity, new InAir(-1000000, 0));
-
-        entityManager.addComponentTo(entity, new Health(maxHp));
-        entityManager.addComponentTo(entity, new SplitOnDeath(slimeSize));
-        entityManager.addComponentTo(entity, new Collider(CollisionLayer.ENEMY,
-                                                          spriteSize,
-                                                          spriteSize,
-                                                          spriteSize / 2,
-                                                          spriteSize / 2));
-        entityManager.addComponentTo(entity, new SpriteInfo("sprites/slime"));
-        entityManager.addComponentTo(entity, new EnemyTag());
-
-        entityManager.addComponentTo(entity, new Transform(xPos, yPos));
-        entityManager.addComponentTo(entity, new Velocity());
-        entityManager.addComponentTo(entity, Physics.builder().friction(10.0).mass(mass).build());
-
-        entityManager.addComponentTo(entity, new FollowerAI(100, 1));
-        entityManager.addComponentTo(entity, new MovementInput());
-        entityManager.addComponentTo(entity, JumpingMovementAbility.builder().jumpForce(jumpForce).build());
-
-        entityManager.addComponentTo(entity, new AttackAI(spriteSize * 0.6));
-        entityManager.addComponentTo(entity, new WeaponInput());
-        entityManager.addComponentTo(entity, new AttackAbility(new DamageSource.LegacyEntity(entity),
-                                                               CollisionLayer.ENEMY,
-                                                               0.0,
-                                                               0.0));
-        final var wepInv = new WeaponInventory(10);
-        entityManager.addComponentTo(entity, wepInv);
-        wepInv.slots[0] = new InventoryWeapon(Weapons.SLIME_MELEE);
+        final var entity = entities.createEntity(new Health(maxHp),
+                                                 new SplitOnDeath(slimeSize),
+                                                 new Collider(CollisionLayer.ENEMY,
+                                                              spriteSize,
+                                                              spriteSize,
+                                                              spriteSize / 2,
+                                                              spriteSize / 2),
+                                                 new SpriteInfo("sprites/slime"),
+                                                 new EnemyTag(),
+                                                 new Transform(transform),
+                                                 new Velocity(),
+                                                 Physics.builder().friction(10.0).mass(mass).build(),
+                                                 new FollowerAI(100, 1),
+                                                 new MovementInput(),
+                                                 JumpingMovementAbility.builder().jumpForce(jumpForce).build(),
+                                                 new AttackAI(spriteSize * 0.6),
+                                                 new WeaponInput(),
+                                                 new WeaponInventory(Weapons.SLIME_MELEE));
+        entity.addComponent(new AttackAbility(new DamageSource.Entity(entity),
+                                              CollisionLayer.ENEMY,
+                                              0.0,
+                                              0.0));
 
         return entity;
     }

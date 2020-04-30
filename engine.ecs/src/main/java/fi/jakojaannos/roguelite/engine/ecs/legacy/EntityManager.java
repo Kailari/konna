@@ -5,8 +5,12 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
+import fi.jakojaannos.roguelite.engine.ecs.data.resources.Entities;
+import fi.jakojaannos.roguelite.engine.ecs.world.WorldImpl;
+
 @Deprecated
-public interface EntityManager {
+public interface EntityManager extends Entities {
     /**
      * Gets a stream containing ALL of the entities in the world. Heavy performance cost if whole stream is iterated,
      * use sparingly and only when absolutely necessary.
