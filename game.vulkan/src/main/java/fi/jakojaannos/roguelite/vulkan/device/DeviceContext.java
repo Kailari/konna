@@ -1,13 +1,15 @@
 package fi.jakojaannos.roguelite.vulkan.device;
 
-import org.lwjgl.PointerBuffer;
 import org.lwjgl.vulkan.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+
 import fi.jakojaannos.roguelite.util.BufferUtil;
 
-import static fi.jakojaannos.roguelite.util.VkUtil.translateVulkanResult;
+import static fi.jakojaannos.roguelite.util.VkUtil.ensureSuccess;
 import static org.lwjgl.system.MemoryStack.stackGet;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.VK10.*;
@@ -50,15 +52,20 @@ public class DeviceContext implements AutoCloseable {
     public DeviceContext(
             final VkPhysicalDevice physicalDevice,
             final QueueFamilies queueFamilies,
-            final PointerBuffer pExtensions
+            final String[] extensionNames
     ) {
+        LOG.debug("Creating device context");
+
         this.physicalDevice = physicalDevice;
         this.queueFamilies = queueFamilies;
 
-        BufferUtil.forEachAsStringUTF8(pExtensions,
-                                       name -> LOG.info("-> Device extension: {}", name));
-
         try (final var stack = stackPush()) {
+            final var pExtensions = stack.pointers(Arrays.stream(extensionNames)
+                                                         .map(stack::UTF8)
+                                                         .toArray(ByteBuffer[]::new));
+
+            BufferUtil.forEachAsStringUTF8(pExtensions, name -> LOG.debug("-> Enabled device extension: {}", name));
+
             final var queueCreateInfos = createQueueCreateInfos(queueFamilies);
 
             final var deviceFeatures = VkPhysicalDeviceFeatures.callocStack();
@@ -71,11 +78,8 @@ public class DeviceContext implements AutoCloseable {
                     .ppEnabledExtensionNames(pExtensions);
 
             final var pDevice = stack.mallocPointer(1);
-            final var result = vkCreateDevice(this.physicalDevice, createInfo, null, pDevice);
-            if (result != VK_SUCCESS) {
-                throw new IllegalStateException("Creating logical device failed: "
-                                                + translateVulkanResult(result));
-            }
+            ensureSuccess(vkCreateDevice(this.physicalDevice, createInfo, null, pDevice),
+                          "Creating logical device failed");
 
             this.device = new VkDevice(pDevice.get(0), physicalDevice, createInfo);
         }

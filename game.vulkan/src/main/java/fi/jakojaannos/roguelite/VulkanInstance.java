@@ -6,11 +6,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 import fi.jakojaannos.roguelite.util.BufferUtil;
 import fi.jakojaannos.roguelite.util.DebugMessenger;
 
-import static fi.jakojaannos.roguelite.util.VkUtil.translateVulkanResult;
+import static fi.jakojaannos.roguelite.util.VkUtil.ensureSuccess;
+import static org.lwjgl.glfw.GLFWVulkan.glfwGetRequiredInstanceExtensions;
+import static org.lwjgl.system.MemoryStack.stackGet;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.VK10.*;
 import static org.lwjgl.vulkan.VK11.VK_API_VERSION_1_1;
@@ -26,14 +29,13 @@ public class VulkanInstance implements AutoCloseable {
     }
 
     public VulkanInstance(
-            final PointerBuffer pLayerNames,
-            final PointerBuffer pExtensionNames
+            final String[] layerNames,
+            final String[] extensionNames
     ) {
+        LOG.debug("Creating Vulkan instance");
         try (final var stack = stackPush()) {
-            BufferUtil.forEachAsStringUTF8(pLayerNames,
-                                           name -> LOG.info("-> Validation layer: {}", name));
-            BufferUtil.forEachAsStringUTF8(pExtensionNames,
-                                           name -> LOG.info("-> Instance extension: {}", name));
+            final var pLayerNames = selectLayers(layerNames);
+            final var pExtensionNames = selectExtensions(extensionNames);
 
             if (checkLayerSupport(pLayerNames)) {
                 throw new IllegalStateException("One or more requested validation layers are not available!");
@@ -41,6 +43,9 @@ public class VulkanInstance implements AutoCloseable {
             if (checkExtensionSupport(pExtensionNames)) {
                 throw new IllegalStateException("One or more requested instance extensions are not available!");
             }
+
+            BufferUtil.forEachAsStringUTF8(pLayerNames, name -> LOG.debug("-> Enabled validation layer: {}", name));
+            BufferUtil.forEachAsStringUTF8(pExtensionNames, name -> LOG.debug("-> Enabled instance extension: {}", name));
 
             final var appInfo = VkApplicationInfo
                     .callocStack()
@@ -62,34 +67,49 @@ public class VulkanInstance implements AutoCloseable {
 
 
             final var pInstance = stack.mallocPointer(1);
-            final var result = vkCreateInstance(createInfo, null, pInstance);
-            if (result != VK_SUCCESS) {
-                throw new IllegalStateException("Oh no! VkInstance creation failed! "
-                                                + translateVulkanResult(result));
-            }
+            ensureSuccess(vkCreateInstance(createInfo, null, pInstance),
+                          "Vulkan instance creation failed");
 
             this.instance = new VkInstance(pInstance.get(0), createInfo);
             this.debugMessenger = new DebugMessenger(debugInfo, this.instance);
         }
     }
 
+    private PointerBuffer selectLayers(final String[] layerNames) {
+        final var stack = stackGet();
+        return stack.pointers(Arrays.stream(layerNames)
+                                    .map(stack::UTF8)
+                                    .toArray(ByteBuffer[]::new));
+    }
+
+    private PointerBuffer selectExtensions(final String[] extensionNames) {
+        final var stack = stackGet();
+        final var pRequired = glfwGetRequiredInstanceExtensions();
+        if (pRequired == null) {
+            throw new IllegalStateException("GLFW could not figure out required extensions!");
+        }
+
+        final var pExtensionNames = stack.mallocPointer(pRequired.remaining() + extensionNames.length);
+        pExtensionNames.put(pRequired);
+        for (final var name : extensionNames) {
+            pExtensionNames.put(stack.UTF8(name));
+        }
+        pExtensionNames.flip();
+
+        return pExtensionNames;
+    }
+
     private boolean checkLayerSupport(final PointerBuffer pRequiredLayerNames) {
         try (final var stack = stackPush()) {
             // Query count
             final var pCount = stack.mallocInt(1);
-            final var countResult = vkEnumerateInstanceLayerProperties(pCount, null);
-            if (countResult != VK_SUCCESS) {
-                throw new IllegalStateException("Getting layer property count failed: "
-                                                + translateVulkanResult(countResult));
-            }
+            ensureSuccess(vkEnumerateInstanceLayerProperties(pCount, null),
+                          "Getting layer property count failed");
 
             // Query layer list
             final var pAvailableLayers = VkLayerProperties.calloc(pCount.get(0));
-            final var queryResult = vkEnumerateInstanceLayerProperties(pCount, pAvailableLayers);
-            if (queryResult != VK_SUCCESS) {
-                throw new IllegalStateException("Querying layer properties failed: "
-                                                + translateVulkanResult(countResult));
-            }
+            ensureSuccess(vkEnumerateInstanceLayerProperties(pCount, pAvailableLayers),
+                          "Querying layer properties failed");
 
             return BufferUtil.filteredForEachAsStringUTF8(
                     pRequiredLayerNames,
@@ -104,19 +124,13 @@ public class VulkanInstance implements AutoCloseable {
         try (final var stack = stackPush()) {
             // Query count
             final var pCount = stack.mallocInt(1);
-            final var countResult = vkEnumerateInstanceExtensionProperties((ByteBuffer) null, pCount, null);
-            if (countResult != VK_SUCCESS) {
-                throw new IllegalStateException("Getting extension count failed: "
-                                                + translateVulkanResult(countResult));
-            }
+            ensureSuccess(vkEnumerateInstanceExtensionProperties((ByteBuffer) null, pCount, null),
+                          "Getting extension count failed");
 
             // Query layer list
-            final var pAvailableExtensions = VkExtensionProperties.calloc(pCount.get(0));
-            final var queryResult = vkEnumerateInstanceExtensionProperties((ByteBuffer) null, pCount, pAvailableExtensions);
-            if (queryResult != VK_SUCCESS) {
-                throw new IllegalStateException("Querying extensions failed: "
-                                                + translateVulkanResult(countResult));
-            }
+            final var pAvailableExtensions = VkExtensionProperties.callocStack(pCount.get(0));
+            ensureSuccess(vkEnumerateInstanceExtensionProperties((ByteBuffer) null, pCount, pAvailableExtensions),
+                          "Querying extensions failed");
 
             return BufferUtil.filteredForEachAsStringUTF8(
                     pRequiredExtensions,

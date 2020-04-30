@@ -9,9 +9,15 @@ import static org.lwjgl.vulkan.KHRSwapchain.VK_SUBOPTIMAL_KHR;
 import static org.lwjgl.vulkan.VK10.*;
 
 public class VkUtil {
+    public static void ensureSuccess(final int result, final String message) {
+        if (result != VK_SUCCESS) {
+            throw new IllegalStateException(message + ": " + translateVulkanResult(result));
+        }
+    }
+
     /**
-     * Translates the given vulkan result code into a human-readable message. Messages as per LWJGL3
-     * vulkan examples `VKUtil.java`
+     * Translates the given vulkan result code into a human-readable message. Messages as per LWJGL3 vulkan examples
+     * `VKUtil.java`
      *
      * @param result result code to translate
      *

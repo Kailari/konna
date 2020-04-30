@@ -2,31 +2,48 @@ package fi.jakojaannos.roguelite.vulkan.rendering;
 
 import org.lwjgl.vulkan.*;
 
+import fi.jakojaannos.roguelite.util.RecreateCloseable;
 import fi.jakojaannos.roguelite.vulkan.CommandBuffer;
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
 
-import static fi.jakojaannos.roguelite.util.VkUtil.translateVulkanResult;
+import static fi.jakojaannos.roguelite.util.VkUtil.ensureSuccess;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.KHRSwapchain.VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 import static org.lwjgl.vulkan.VK10.*;
 
-public class RenderPass implements AutoCloseable {
+public class RenderPass extends RecreateCloseable {
     private static final int COLOR_ATTACHMENT_INDEX = 0;
 
     private final VkDevice device;
-    private final long handle;
+    private final Swapchain swapchain;
+
+    private int swapchainImageFormat;
+    private long handle;
 
     public long getHandle() {
         return this.handle;
     }
 
-    public RenderPass(final DeviceContext deviceContext, final int swapchainImageFormat) {
-        this.device = deviceContext.getDevice();
+    @Override
+    protected boolean isRecreateRequired() {
+        return this.swapchain.getImageFormat() != this.swapchainImageFormat;
+    }
 
+    public RenderPass(final DeviceContext deviceContext, final Swapchain swapchain) {
+        this.device = deviceContext.getDevice();
+        this.swapchain = swapchain;
+
+        this.swapchainImageFormat = -1;
+        tryRecreate();
+    }
+
+    @Override
+    protected void recreate() {
+        this.swapchainImageFormat = this.swapchain.getImageFormat();
         try (final var stack = stackPush()) {
             final var attachments = VkAttachmentDescription.callocStack(1);
             attachments.get(COLOR_ATTACHMENT_INDEX)
-                       .format(swapchainImageFormat)
+                       .format(this.swapchainImageFormat)
                        .samples(VK_SAMPLE_COUNT_1_BIT)
                        .loadOp(VK_ATTACHMENT_LOAD_OP_CLEAR)
                        .storeOp(VK_ATTACHMENT_STORE_OP_STORE)
@@ -62,17 +79,14 @@ public class RenderPass implements AutoCloseable {
                     .pSubpasses(subpasses)
                     .pDependencies(dependencies);
             final var pRenderPass = stack.mallocLong(1);
-            final var result = vkCreateRenderPass(this.device, createInfo, null, pRenderPass);
-            if (result != VK_SUCCESS) {
-                throw new IllegalStateException("Creating render pass failed: "
-                                                + translateVulkanResult(result));
-            }
+            ensureSuccess(vkCreateRenderPass(this.device, createInfo, null, pRenderPass),
+                          "Creating render pass failed");
             this.handle = pRenderPass.get(0);
         }
     }
 
     @Override
-    public void close() {
+    protected void cleanup() {
         vkDestroyRenderPass(this.device, this.handle, null);
     }
 
@@ -83,7 +97,7 @@ public class RenderPass implements AutoCloseable {
     public static final class Scope implements AutoCloseable {
         private final CommandBuffer commandBuffer;
 
-        public Scope(
+        private Scope(
                 final RenderPass renderPass,
                 final Framebuffer framebuffer,
                 final CommandBuffer commandBuffer

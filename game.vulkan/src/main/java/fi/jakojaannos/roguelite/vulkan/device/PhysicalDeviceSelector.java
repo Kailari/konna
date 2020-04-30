@@ -4,6 +4,8 @@ import org.lwjgl.PointerBuffer;
 import org.lwjgl.vulkan.VkExtensionProperties;
 import org.lwjgl.vulkan.VkInstance;
 import org.lwjgl.vulkan.VkPhysicalDevice;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -13,39 +15,42 @@ import fi.jakojaannos.roguelite.VulkanInstance;
 import fi.jakojaannos.roguelite.util.BufferUtil;
 import fi.jakojaannos.roguelite.vulkan.window.WindowSurface;
 
+import static fi.jakojaannos.roguelite.util.VkUtil.ensureSuccess;
 import static fi.jakojaannos.roguelite.util.VkUtil.translateVulkanResult;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.VK10.*;
 
 public class PhysicalDeviceSelector {
+    private static final Logger LOG = LoggerFactory.getLogger(PhysicalDeviceSelector.class);
+
     private PhysicalDeviceSelector() {
     }
 
     public static DeviceCandidate pickPhysicalDevice(
             final VulkanInstance instance,
-            final PointerBuffer pRequiredExtensions,
+            final String[] requiredExtensions,
             final WindowSurface surface
     ) {
-        final var devices = getPhysicalDevices(instance.getHandle());
-        return pickBest(instance.getHandle(), devices, pRequiredExtensions, surface);
+        try (final var stack = stackPush()) {
+            final var pRequiredExtensions = stack.pointers(Arrays.stream(requiredExtensions)
+                                                                 .map(stack::UTF8)
+                                                                 .toArray(ByteBuffer[]::new));
+
+            final var devices = getPhysicalDevices(instance.getHandle());
+            return pickBest(instance.getHandle(), devices, pRequiredExtensions, surface);
+        }
     }
 
     private static long[] getPhysicalDevices(final VkInstance instance) {
         final long[] physicalDevices;
         try (final var stack = stackPush()) {
             final var pCount = stack.mallocInt(1);
-            final var countResult = vkEnumeratePhysicalDevices(instance, pCount, null);
-            if (countResult != VK_SUCCESS) {
-                throw new IllegalStateException("Getting physical device count failed: "
-                                                + translateVulkanResult(countResult));
-            }
+            ensureSuccess(vkEnumeratePhysicalDevices(instance, pCount, null),
+                          "Getting physical device count failed");
 
             final var pDevices = stack.mallocPointer(pCount.get(0));
-            final var queryResult = vkEnumeratePhysicalDevices(instance, pCount, pDevices);
-            if (queryResult != VK_SUCCESS) {
-                throw new IllegalStateException("Querying physical devices failed: "
-                                                + translateVulkanResult(countResult));
-            }
+            ensureSuccess(vkEnumeratePhysicalDevices(instance, pCount, pDevices),
+                          "Querying physical devices failed");
 
             physicalDevices = new long[pCount.get(0)];
             pDevices.get(physicalDevices);
@@ -126,10 +131,20 @@ public class PhysicalDeviceSelector {
         int suitability = 0;
         try (final var stack = stackPush()) {
             final var pCount = stack.mallocInt(1);
-            vkEnumerateDeviceExtensionProperties(device, (ByteBuffer) null, pCount, null);
+            final var countResult = vkEnumerateDeviceExtensionProperties(device, (ByteBuffer) null, pCount, null);
+            if (countResult != VK_SUCCESS) {
+                LOG.warn("Getting supported extension count for a physical device failed: {}",
+                         translateVulkanResult(countResult));
+                return -100_000;
+            }
 
             final var pAvailable = VkExtensionProperties.callocStack(pCount.get(0));
-            vkEnumerateDeviceExtensionProperties(device, (ByteBuffer) null, pCount, pAvailable);
+            final var queryResult = vkEnumerateDeviceExtensionProperties(device, (ByteBuffer) null, pCount, pAvailable);
+            if (queryResult != VK_SUCCESS) {
+                LOG.warn("Querying supported extensions for a physical device failed: {}",
+                         translateVulkanResult(countResult));
+                return -100_000;
+            }
 
             final var allSupported = BufferUtil.filteredForEachAsStringUTF8(
                     pRequiredExtensions,

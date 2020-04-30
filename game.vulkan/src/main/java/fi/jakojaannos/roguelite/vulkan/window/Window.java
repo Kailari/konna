@@ -16,13 +16,6 @@ public class Window implements AutoCloseable {
     }
 
     public Window(final int width, final int height) {
-        if (!glfwInit()) {
-            throw new IllegalStateException("Initializing GLFW failed!");
-        }
-        if (!glfwVulkanSupported()) {
-            throw new IllegalStateException("No vulkan loader available.");
-        }
-
         glfwDefaultWindowHints();
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);

@@ -3,26 +3,20 @@ package fi.jakojaannos.roguelite;
 import java.nio.file.Path;
 
 import fi.jakojaannos.roguelite.vulkan.CommandPool;
-import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
-import fi.jakojaannos.roguelite.vulkan.device.PhysicalDeviceSelector;
+import fi.jakojaannos.roguelite.vulkan.RenderingBackend;
 import fi.jakojaannos.roguelite.vulkan.rendering.Framebuffers;
 import fi.jakojaannos.roguelite.vulkan.rendering.GraphicsPipeline;
 import fi.jakojaannos.roguelite.vulkan.rendering.RenderPass;
 import fi.jakojaannos.roguelite.vulkan.rendering.Swapchain;
 import fi.jakojaannos.roguelite.vulkan.window.Window;
-import fi.jakojaannos.roguelite.vulkan.window.WindowSurface;
 
-import static org.lwjgl.glfw.GLFWVulkan.glfwGetRequiredInstanceExtensions;
-import static org.lwjgl.system.MemoryStack.stackPush;
-import static org.lwjgl.vulkan.EXTDebugUtils.VK_EXT_DEBUG_UTILS_EXTENSION_NAME;
-import static org.lwjgl.vulkan.KHRSwapchain.VK_KHR_SWAPCHAIN_EXTENSION_NAME;
+import static org.lwjgl.glfw.GLFW.glfwInit;
+import static org.lwjgl.glfw.GLFWVulkan.glfwVulkanSupported;
 
 
 public record Application(
         Window window,
-        VulkanInstance vulkanInstance,
-        WindowSurface surface,
-        DeviceContext deviceContext,
+        RenderingBackend backend,
         Swapchain swapchain,
         RenderPass renderPass,
         GraphicsPipeline graphicsPipeline,
@@ -30,30 +24,34 @@ public record Application(
         CommandPool graphicsCommandPool
 ) implements AutoCloseable {
     public static Application initialize(final int windowWidth, final int windowHeight, final Path assetRoot) {
+        if (!glfwInit()) {
+            throw new IllegalStateException("Initializing GLFW failed!");
+        }
+        if (!glfwVulkanSupported()) {
+            throw new IllegalStateException("No vulkan loader available.");
+        }
+
         final var window = new Window(windowWidth, windowHeight);
-        final var instance = createInstance();
-        final var surface = new WindowSurface(instance, window);
+        final var backend = RenderingBackend.create(window);
+        final var swapchain = new Swapchain(backend.deviceContext(), backend.surface(), windowWidth, windowHeight);
 
-        final var deviceContext = createDeviceContext(instance, surface);
-        final var swapchain = new Swapchain(deviceContext, surface, windowWidth, windowHeight);
-
-        final var renderPass = new RenderPass(deviceContext, swapchain.getImageFormat());
-        final var framebuffers = new Framebuffers(deviceContext,
+        final var renderPass = new RenderPass(backend.deviceContext(), swapchain);
+        final var framebuffers = new Framebuffers(backend.deviceContext(),
                                                   swapchain.getExtent(),
                                                   swapchain.getImageViews(),
                                                   renderPass);
         final var graphicsPipeline = new GraphicsPipeline(assetRoot,
-                                                          deviceContext,
+                                                          backend.deviceContext(),
                                                           swapchain.getExtent(),
                                                           renderPass);
 
-        final var graphicsCommandPool = new CommandPool(deviceContext,
-                                                        deviceContext.getQueueFamilies().graphics());
+        final var graphicsCommandPool = new CommandPool(backend.deviceContext(),
+                                                        backend.deviceContext()
+                                                               .getQueueFamilies()
+                                                               .graphics());
 
         return new Application(window,
-                               instance,
-                               surface,
-                               deviceContext,
+                               backend,
                                swapchain,
                                renderPass,
                                graphicsPipeline,
@@ -69,44 +67,7 @@ public record Application(
         this.graphicsPipeline.close();
 
         this.swapchain.close();
-        this.deviceContext.close();
-        this.surface.close();
+        this.backend.close();
         this.window.close();
-        this.vulkanInstance.close();
-    }
-
-    private static VulkanInstance createInstance() {
-        try (final var stack = stackPush()) {
-            final var pValidationLayers = stack.pointers(
-                    stack.UTF8("VK_LAYER_KHRONOS_validation"),
-                    stack.UTF8("VK_LAYER_LUNARG_standard_validation")
-            );
-
-            final var pRequired = glfwGetRequiredInstanceExtensions();
-            if (pRequired == null) {
-                throw new IllegalStateException("GLFW could not figure out required extensions!");
-            }
-            final var pExtensionNames = stack.mallocPointer(pRequired.remaining() + 1);
-            pExtensionNames.put(pRequired);
-            pExtensionNames.put(stack.UTF8(VK_EXT_DEBUG_UTILS_EXTENSION_NAME));
-            pExtensionNames.flip();
-
-            return new VulkanInstance(pValidationLayers, pExtensionNames);
-        }
-    }
-
-    private static DeviceContext createDeviceContext(final VulkanInstance instance, final WindowSurface surface) {
-        final PhysicalDeviceSelector.DeviceCandidate deviceCandidate;
-        try (final var stack = stackPush()) {
-            final var pExtensions = stack.pointers(
-                    stack.UTF8(VK_KHR_SWAPCHAIN_EXTENSION_NAME)
-            );
-
-            deviceCandidate = PhysicalDeviceSelector.pickPhysicalDevice(instance, pExtensions, surface);
-
-            return new DeviceContext(deviceCandidate.physicalDevice(),
-                                     deviceCandidate.queueFamilies(),
-                                     pExtensions);
-        }
     }
 }
