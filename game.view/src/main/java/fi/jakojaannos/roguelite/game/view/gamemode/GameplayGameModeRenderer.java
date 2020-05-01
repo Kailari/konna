@@ -49,7 +49,8 @@ public final class GameplayGameModeRenderer {
                                                             camera,
                                                             assetManager,
                                                             backend,
-                                                            audioContext);
+                                                            audioContext,
+                                                            timeManager);
         final var renderDispatcher = createRenderDispatcher(assetRoot,
                                                             assetManager,
                                                             backend,
@@ -80,7 +81,8 @@ public final class GameplayGameModeRenderer {
             final Camera camera,
             final AssetManager assetManager,
             final RenderingBackend backend,
-            final AudioContext audioContext
+            final AudioContext audioContext,
+            final TimeManager timeManager
     ) {
         final var fontRegistry = assetManager.getAssetRegistry(Font.class);
         final var spriteRegistry = assetManager.getAssetRegistry(Sprite.class);
@@ -97,6 +99,8 @@ public final class GameplayGameModeRenderer {
                                     .buildGroup();
 
         final var ui = builder.group("ui")
+                              .withSystem(new UpdateHordeMessageSystem(userInterface,
+                                                                       timeManager.convertToTicks(4.0)))
                               .withSystem(new UpdateHUDSystem(userInterface))
                               .withSystem(new UpdateGameOverSplashSystem(userInterface))
                               .withSystem(new HealthBarUpdateSystem(camera, userInterface))
@@ -141,6 +145,8 @@ public final class GameplayGameModeRenderer {
                                      GameplayGameModeRenderer::buildTimePlayedTimer)
                             .element("score-kills",
                                      GameplayGameModeRenderer::buildKillsCounter)
+                            .element("horde-message",
+                                     GameplayGameModeRenderer::buildHordeMessage)
                             .element("game-over-container",
                                      GameplayGameModeRenderer::buildGameOverSplash)
                             .element("weapon-ammo",
@@ -177,6 +183,16 @@ public final class GameplayGameModeRenderer {
                .fontSize(36)
                .text("Heat")
                .color(1.0, 1.0, 1.0);
+    }
+
+    private static void buildHordeMessage(final UIElementBuilder builder) {
+        builder.anchorX(percentOf(parentWidth(0.5)))
+               .anchorY(percentOf(parentHeight(0.3)))
+               .left(percentOf(ownWidth(-0.5)))
+               .top(percentOf(ownHeight(-0.5)))
+               .fontSize(42)
+               .text("Horde #X starting")
+               .color(0.95, 0.15, 0.15);
     }
 
     private static void buildAmmoCounter(final UIElementBuilder builder) {

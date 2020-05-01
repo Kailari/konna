@@ -5,9 +5,11 @@ import java.util.stream.Stream;
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.event.Events;
+import fi.jakojaannos.roguelite.engine.event.RenderEvents;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.events.HordeEndEvent;
 import fi.jakojaannos.roguelite.game.data.events.HordeStartEvent;
+import fi.jakojaannos.roguelite.game.data.resources.Horde;
 import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
 
 public class HordeControllerSystem implements EcsSystem<HordeControllerSystem.Resources, EcsSystem.NoEntities, EcsSystem.NoEvents> {
@@ -34,15 +36,21 @@ public class HordeControllerSystem implements EcsSystem<HordeControllerSystem.Re
 
         final var relativeTime = (currentTime - this.initialCalm) % this.hordeTimePeriod;
         if (relativeTime == 0) {
+            resources.horde.startTimestamp = resources.timeManager.getCurrentGameTime();
+            ++resources.horde.hordeIndex;
             resources.events.system().fire(new HordeStartEvent());
+            resources.renderEvents.fire(new HordeStartEvent());
         } else if (relativeTime == this.calmDuration) {
             resources.events.system().fire(new HordeEndEvent());
+            resources.renderEvents.fire(new HordeEndEvent());
         }
     }
 
     public static record Resources(
             TimeManager timeManager,
             SessionStats sessionStats,
+            Horde horde,
+            RenderEvents renderEvents,
             Events events
     ) {}
 }

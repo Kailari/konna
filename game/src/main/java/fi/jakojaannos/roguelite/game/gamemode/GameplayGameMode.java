@@ -14,10 +14,7 @@ import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.archetypes.PlayerArchetype;
 import fi.jakojaannos.roguelite.game.data.archetypes.TurretArchetype;
 import fi.jakojaannos.roguelite.game.data.components.*;
-import fi.jakojaannos.roguelite.game.data.resources.Inputs;
-import fi.jakojaannos.roguelite.game.data.resources.Players;
-import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
-import fi.jakojaannos.roguelite.game.data.resources.Weapons;
+import fi.jakojaannos.roguelite.game.data.resources.*;
 import fi.jakojaannos.roguelite.game.data.resources.collision.Colliders;
 import fi.jakojaannos.roguelite.game.data.resources.collision.Collisions;
 import fi.jakojaannos.roguelite.game.systems.*;
@@ -49,6 +46,7 @@ public final class GameplayGameMode {
     private static void createState(final World world, final long seed) {
         final var timeManager = world.fetchResource(TimeManager.class);
 
+        world.registerResource(new Horde());
         world.registerResource(new Colliders());
         world.registerResource(new Collisions());
         world.registerResource(new Weapons());
