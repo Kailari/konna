@@ -54,6 +54,11 @@ public class SystemDispatcherImpl implements SystemDispatcher {
     private boolean parallel;
     private int tick;
 
+    @Override
+    public void setParallel(final boolean state) {
+        this.parallel = state;
+    }
+
     public SystemDispatcherImpl(final List<SystemGroup> systemGroups) {
         this.parallel = true;
 
@@ -77,11 +82,6 @@ public class SystemDispatcherImpl implements SystemDispatcher {
     }
 
     @Override
-    public void setParallel(final boolean state) {
-        this.parallel = state;
-    }
-
-    @Override
     public SystemState createDefaultState() {
         return new SystemStateImpl(this.allSystems, this.systemGroups);
     }
@@ -98,7 +98,7 @@ public class SystemDispatcherImpl implements SystemDispatcher {
             final Collection<Object> systemEvents
     ) {
         final var events = constructEventLookup(systemEvents);
-        enableEventListeners(systemState, events);
+        enableEventListeners(systemState, events.keySet());
 
         final var queue = new HashSet<>(this.systemGroups);
 
@@ -127,7 +127,7 @@ public class SystemDispatcherImpl implements SystemDispatcher {
 
     private void enableEventListeners(
             final SystemState systemState,
-            final Map<Class<?>, Object> events
+            final Set<Class<?>> eventClasses
     ) {
         for (final var systemObj : this.allSystems) {
             if (systemObj instanceof EcsSystem<?, ?, ?> system) {
@@ -139,7 +139,7 @@ public class SystemDispatcherImpl implements SystemDispatcher {
 
                 for (int i = 0; i < requiredTypes.length; i++) {
                     // Skip all event types that are not present in the lookup
-                    if (!events.containsKey(requiredTypes[i])) {
+                    if (!eventClasses.contains(requiredTypes[i])) {
                         continue;
                     }
 
@@ -167,7 +167,7 @@ public class SystemDispatcherImpl implements SystemDispatcher {
             final SystemGroup group,
             final World world,
             final SystemState systemState,
-            final Map<Class<?>, Object> events
+            final Map<Class<?>, Collection<Object>> events
     ) {
         LOG.trace(LogCategories.DISPATCHER_GROUP, "Ticking group \"{}\"", group.getName());
 
@@ -206,7 +206,7 @@ public class SystemDispatcherImpl implements SystemDispatcher {
             final World world,
             final EcsSystem<TResources, TEntityData, TEvents> system,
             final ForkJoinPool threadPool,
-            final Map<Class<?>, Object> events
+            final Map<Class<?>, Collection<Object>> events
     ) {
         final var requirements = requirementsFor(system);
         final var systemEvents = requirements.constructEvents(events);
@@ -294,9 +294,10 @@ public class SystemDispatcherImpl implements SystemDispatcher {
         return ((Class<?>) type.getRawType()).isAssignableFrom(EcsSystem.class);
     }
 
-    private static Map<Class<?>, Object> constructEventLookup(final Collection<Object> eventList) {
-        final var lookup = new HashMap<Class<?>, Object>();
-        eventList.forEach(event -> lookup.put(event.getClass(), event));
+    private static Map<Class<?>, Collection<Object>> constructEventLookup(final Collection<Object> eventList) {
+        final var lookup = new HashMap<Class<?>, Collection<Object>>();
+        eventList.forEach(event -> lookup.computeIfAbsent(event.getClass(), key -> new ArrayList<>())
+                                         .add(event));
         return lookup;
     }
 

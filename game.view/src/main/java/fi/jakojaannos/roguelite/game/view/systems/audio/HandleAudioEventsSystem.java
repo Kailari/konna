@@ -10,7 +10,7 @@ import fi.jakojaannos.roguelite.engine.view.audio.AudioContext;
 import fi.jakojaannos.roguelite.engine.view.audio.SoundEffect;
 import fi.jakojaannos.roguelite.game.data.events.render.GunshotEvent;
 
-public class HandleAudioEventsSystem implements EcsSystem<HandleAudioEventsSystem.Resources, EcsSystem.NoEntities, EcsSystem.NoEvents>, AutoCloseable {
+public class HandleAudioEventsSystem implements EcsSystem<HandleAudioEventsSystem.Resources, EcsSystem.NoEntities, HandleAudioEventsSystem.EventData>, AutoCloseable {
     private final SoundEffect shotgun;
     private final SoundEffect melee;
     private final SoundEffect gatling;
@@ -37,20 +37,18 @@ public class HandleAudioEventsSystem implements EcsSystem<HandleAudioEventsSyste
     @Override
     public void tick(
             final Resources resources,
-            final Stream<EntityDataHandle<NoEntities>> entities,
-            final NoEvents noEvents
+            final Stream<EntityDataHandle<NoEntities>> noEntities,
+            final EventData eventData
     ) {
-        resources.events.events().forEach(event -> {
-            if (event instanceof GunshotEvent gunshot) {
-                switch (gunshot.variant()) {
-                    case SHOTGUN -> this.rifle.play(2, 0.75f, 1.0f);
-                    case RIFLE -> this.rifle.play(2, 0.75f, 1.5f);
-                    case CLICK -> this.click.play(2, 1.5f, 2.0f);
-                    case SHOTGUN_RELOAD -> this.shotgunReload.play(2, 1.0f, 1.0f);
-                    case PUMP -> this.pump.play(2, 1.0f, 1.0f);
-                    case MELEE -> this.melee.play(1, 1.0f, 0.5f);
-                    case GATLING -> this.gatling.play(0, 0.3f, 2.0f);
-                }
+        eventData.gunshot.forEach(gunshot -> {
+            switch (gunshot.variant()) {
+                case SHOTGUN -> this.rifle.play(2, 0.75f, 1.0f);
+                case RIFLE -> this.rifle.play(2, 0.75f, 1.5f);
+                case CLICK -> this.click.play(2, 1.5f, 2.0f);
+                case SHOTGUN_RELOAD -> this.shotgunReload.play(2, 1.0f, 1.0f);
+                case PUMP -> this.pump.play(2, 1.0f, 1.0f);
+                case MELEE -> this.melee.play(1, 1.0f, 0.5f);
+                case GATLING -> this.gatling.play(0, 0.3f, 2.0f);
             }
         });
     }
@@ -66,4 +64,6 @@ public class HandleAudioEventsSystem implements EcsSystem<HandleAudioEventsSyste
     }
 
     public static record Resources(RenderEvents events) {}
+
+    public static record EventData(Iterable<GunshotEvent>gunshot) {}
 }

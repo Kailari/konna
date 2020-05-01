@@ -103,6 +103,38 @@ public interface SystemInputRecord<T> {
         }
     }
 
+    private static Optional<Class<?>> asWrapperType(
+            final RecordComponent recordComponent,
+            final Class<?> wrapperClass
+    ) {
+        final var componentClass = recordComponent.getType();
+        if (wrapperClass.isAssignableFrom(componentClass)) {
+            final var genericType = recordComponent.getGenericType();
+            if (genericType instanceof ParameterizedType paramType) {
+                // It is wrapper and parameterized, we may "safely" assume it also has a single type parameter
+                final var typeArguments = paramType.getActualTypeArguments();
+                if (typeArguments.length != 1) {
+                    LOG.warn("System had input requirement of type {} which has more than one type parameter!",
+                             paramType.getTypeName());
+                    return Optional.empty();
+                }
+                final var typeParam = typeArguments[0];
+
+                // The returned type parameter is actually always instance of `Class`, even though the signature
+                // claims it may be any `Type`. Do checked cast, just to be safe. This is executed only once, so
+                // we are not in a hurry here.
+                if (typeParam instanceof Class<?> paramClass) {
+                    // All checks passed, it actually is an `Wrapper<T>`
+                    // Return the unwrapped `T` to be used as the storage type
+                    return Optional.of(paramClass);
+                }
+            }
+        }
+
+        // One of more checks failed, return empty
+        return Optional.empty();
+    }
+
     record Resources<T>(
             Constructor<T>constructor,
             Class<?>[]componentTypes
@@ -176,36 +208,25 @@ public interface SystemInputRecord<T> {
             excluded[index] = recordComponent.isAnnotationPresent(Without.class);
 
             final var componentClass = recordComponent.getType();
-            if (Optional.class.isAssignableFrom(componentClass)) {
-                final var genericType = recordComponent.getGenericType();
-                if (genericType instanceof ParameterizedType paramType) {
-                    // It is optional and parameterized, we may safely assume it also has a single type parameter
-                    final var typeParam = paramType.getActualTypeArguments()[0];
 
-                    // The returned type parameter is actually always instance of `Class`, even though the signature
-                    // claims it may be any `Type`. Do checked cast, just to be safe. This is executed only once, so
-                    // we are not in a hurry here.
-                    if (typeParam instanceof Class<?> paramClass) {
-                        // All checks passed, it actually is an `Optional<T>`
-                        // Use the unwrapped `T` for component type and mark as optional
-                        componentTypes[index] = paramClass;
-                        optional[index] = true;
-                        return;
-                    }
-                }
+            final var asOptional = asWrapperType(recordComponent, Optional.class);
+            if (asOptional.isPresent()) {
+                componentTypes[index] = asOptional.get();
+                optional[index] = true;
+            } else {
+                // Not optional, use the type directly.
+                componentTypes[index] = componentClass;
             }
-
-            // Not optional or some other check failed. Use the type directly and mark as non-optional.
-            componentTypes[index] = componentClass;
-            optional[index] = false;
         }
+
     }
 
     record Events<T>(
             Constructor<T>constructor,
             Class<?>[]componentTypes,
             boolean[]enableOn,
-            boolean[]disableOn
+            boolean[]disableOn,
+            boolean[]iterable
     ) implements SystemInputRecord<T> {
         public static <T> Events<T> createFor(final Class<T> clazz) {
             LOG.debug(LogCategories.SYSTEM_DATA_DUMP,
@@ -215,22 +236,32 @@ public interface SystemInputRecord<T> {
             final var recordComponents = resolveComponents(clazz);
             final var constructor = resolveConstructor(clazz, recordComponents);
 
-            final var componentTypes = Arrays.stream(recordComponents)
-                                             .map(RecordComponent::getType)
-                                             .toArray(Class<?>[]::new);
+            final var componentTypes = new Class<?>[recordComponents.length];
 
             final boolean[] enableOn = new boolean[recordComponents.length];
             final boolean[] disableOn = new boolean[recordComponents.length];
+            final boolean[] iterable = new boolean[recordComponents.length];
             for (var i = 0; i < recordComponents.length; ++i) {
-                enableOn[i] = recordComponents[i].isAnnotationPresent(EnableOn.class);
-                disableOn[i] = recordComponents[i].isAnnotationPresent(DisableOn.class);
-                LOG.debug(LogCategories.SYSTEM_DATA_DUMP, "-> {} {} (@EnableOn: {}, @DisableOn: {})",
-                          recordComponents[i].getType().getSimpleName(),
-                          recordComponents[i].getName(),
-                          enableOn[i], disableOn[i]);
+                final var recordComponent = recordComponents[i];
+
+                enableOn[i] = recordComponent.isAnnotationPresent(EnableOn.class);
+                disableOn[i] = recordComponent.isAnnotationPresent(DisableOn.class);
+
+                final var asIterable = asWrapperType(recordComponent, Iterable.class);
+                if (asIterable.isPresent()) {
+                    componentTypes[i] = asIterable.get();
+                    iterable[i] = true;
+                } else {
+                    componentTypes[i] = recordComponent.getType();
+                }
+
+                LOG.debug(LogCategories.SYSTEM_DATA_DUMP, "-> {} {} (@EnableOn: {}, @DisableOn: {}, Accepts Multiple: {})",
+                          componentTypes[i].getSimpleName(),
+                          recordComponent.getName(),
+                          enableOn[i], disableOn[i], iterable[i]);
             }
 
-            return new Events<>(constructor, componentTypes, enableOn, disableOn);
+            return new Events<>(constructor, componentTypes, enableOn, disableOn, iterable);
         }
     }
 }

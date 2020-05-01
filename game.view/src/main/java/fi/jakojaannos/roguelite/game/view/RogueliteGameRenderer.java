@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
@@ -14,6 +13,7 @@ import fi.jakojaannos.roguelite.engine.content.AssetManager;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.engine.event.Events;
+import fi.jakojaannos.roguelite.engine.event.RenderEvents;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.view.*;
 import fi.jakojaannos.roguelite.engine.view.audio.AudioContext;
@@ -94,11 +94,13 @@ public class RogueliteGameRenderer implements GameRenderer {
                 .ifPresent(cameraTransform -> this.camera.setPosition(cameraTransform.position.x,
                                                                       cameraTransform.position.y));
 
+        final var renderEvents = world.fetchResource(RenderEvents.class).events();
         Optional.ofNullable(this.stateRenderer)
                 .ifPresent(renderer -> {
-                    renderer.legacyDispatcher().tick(state.world(), List.of());
+                    renderer.legacyDispatcher().tick(state.world(), renderEvents);
                     renderer.renderDispatcher().render(state, accumulator);
                 });
+        renderEvents.clear();
     }
 
     @Override
