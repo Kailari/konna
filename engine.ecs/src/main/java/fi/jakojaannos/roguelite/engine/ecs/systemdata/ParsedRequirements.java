@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
 import java.util.Map;
 import javax.annotation.Nullable;
 
@@ -33,16 +34,29 @@ public record ParsedRequirements<TResources, TEntityData, TEvents>(
     }
 
     @Nullable
-    public TEvents constructEvents(final Map<Class<?>, Object> eventLookup) {
+    public TEvents constructEvents(final Map<Class<?>, Collection<Object>> eventLookup) {
         final var eventTypes = this.events.componentTypes();
+        final var iterable = this.events.iterable();
         final var params = new Object[eventTypes.length];
         for (int i = 0; i < params.length; ++i) {
-            params[i] = eventLookup.get(eventTypes[i]);
+            final var eventsOfType = eventLookup.get(eventTypes[i]);
 
             // Allow non-required events to be null
             final var isRequiredEvent = !this.events.enableOn()[i] && !this.events.disableOn()[i];
-            if (params[i] == null && isRequiredEvent) {
+            if (eventsOfType == null && isRequiredEvent) {
                 return null;
+            }
+
+            // Three options:
+            //  1. not present but not required -> set parameter to `null`
+            //  2. iterable, should pass the collection as-is
+            //  3. accepts only one event, pass first one of the events
+            if (eventsOfType == null) {
+                params[i] = null;
+            } else if (iterable[i]) {
+                params[i] = eventsOfType;
+            } else {
+                params[i] = eventsOfType.iterator().next();
             }
         }
 
