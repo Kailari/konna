@@ -9,7 +9,9 @@ import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;
+import fi.jakojaannos.roguelite.game.data.events.HordeEndEvent;
 import fi.jakojaannos.roguelite.game.data.events.HordeStartEvent;
+import fi.jakojaannos.roguelite.game.data.events.HordeStopEvent;
 import fi.jakojaannos.roguelite.game.data.resources.Horde;
 
 import static fi.jakojaannos.roguelite.engine.view.ui.query.UIMatchers.withName;
@@ -34,15 +36,24 @@ public class UpdateHordeMessageSystem implements EcsSystem<UpdateHordeMessageSys
             final Stream<EntityDataHandle<NoEntities>> entities,
             final EventData eventData
     ) {
-        // The event is present only on the first tick of the horde
+        // HACK: The events are present only on the first frame they are fired from the main dispatcher
+        //       (@EnableOn marks them as non-required so system ticks even without them)
         if (eventData.hordeStart != null) {
             this.hordeMessage.setProperty(UIProperty.TEXT,
                                           "Wave #" + resources.horde.hordeIndex + " incoming");
             this.hordeMessage.setProperty(UIProperty.HIDDEN, false);
+        } else if (eventData.hordeStop != null) {
+            this.hordeMessage.setProperty(UIProperty.TEXT,
+                                          "Kill all remaining enemies");
+            this.hordeMessage.setProperty(UIProperty.HIDDEN, false);
+        } else if (eventData.hordeEnd != null) {
+            this.hordeMessage.setProperty(UIProperty.TEXT,
+                                          "Wave complete!");
+            this.hordeMessage.setProperty(UIProperty.HIDDEN, false);
         }
 
         final var currentTime = resources.timeManager.getCurrentGameTime();
-        final var elapsed = currentTime - resources.horde.startTimestamp;
+        final var elapsed = currentTime - resources.horde.changeTimestamp;
         if (elapsed > this.messageDuration) {
             this.hordeMessage.setProperty(UIProperty.HIDDEN, true);
         }
@@ -54,6 +65,8 @@ public class UpdateHordeMessageSystem implements EcsSystem<UpdateHordeMessageSys
     ) {}
 
     public static record EventData(
-            @EnableOn HordeStartEvent hordeStart
+            @EnableOn HordeStartEvent hordeStart,
+            @EnableOn HordeStopEvent hordeStop,
+            @EnableOn HordeEndEvent hordeEnd
     ) {}
 }

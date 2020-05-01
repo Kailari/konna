@@ -11,25 +11,25 @@ import fi.jakojaannos.roguelite.engine.ecs.data.resources.Entities;
 public class SpawnerComponent {
     public final Random random;
     public final EntityFactory entityFactory;
-    public double spawnFrequency;
-    public double spawnCoolDown;
+    public long timeBetweenSpawns;
+    public long spawnTimestamp;
     public double maxSpawnDistance;
 
-    public SpawnerComponent(final double spawnFrequency, final EntityFactory entityFactory) {
-        this(spawnFrequency, entityFactory, 3.0f, System.currentTimeMillis());
+    public SpawnerComponent(final long timeBetweenSpawns, final EntityFactory entityFactory) {
+        this(timeBetweenSpawns, entityFactory, 3.0f, System.nanoTime());
     }
 
     public SpawnerComponent(
-            final double spawnFrequency,
+            final long timeBetweenSpawns,
             final EntityFactory entityFactory,
             final double maxSpawnDistance,
             final long seed
     ) {
-        this.spawnFrequency = spawnFrequency;
+        this.timeBetweenSpawns = timeBetweenSpawns;
         this.maxSpawnDistance = maxSpawnDistance;
         this.entityFactory = entityFactory;
 
-        this.spawnCoolDown = spawnFrequency;
+        this.spawnTimestamp = -timeBetweenSpawns;
         this.random = new Random(seed);
     }
 
