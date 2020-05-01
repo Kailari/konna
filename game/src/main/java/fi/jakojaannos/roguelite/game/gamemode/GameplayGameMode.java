@@ -105,8 +105,9 @@ public final class GameplayGameMode {
 
         final var earlyTick = builder.group("early-tick")
                                      .withSystem(new HordeControllerSystem(timeManager.convertToTicks(5.0),
-                                                                           timeManager.convertToTicks(20.0),
-                                                                           timeManager.convertToTicks(20.0)))
+                                                                           timeManager.convertToTicks(5.0),
+                                                                           timeManager.convertToTicks(10.0),
+                                                                           0.25))
                                      .withSystem(new SpawnerSystem())
                                      .withSystem(new TileColliderCollectorSystem())
                                      .withSystem(new ColliderDataCollectorSystem())

@@ -8,6 +8,7 @@ import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.data.resources.Entities;
 import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.archetypes.FollowerArchetype;
 import fi.jakojaannos.roguelite.game.data.archetypes.ObstacleArchetype;
 import fi.jakojaannos.roguelite.game.data.archetypes.SlimeArchetype;
@@ -78,6 +79,7 @@ public class WorldGenerator<TTile> {
 
         // Generate hallways
         final Entities entities = world::createEntity;
+        final var timeManager = world.fetchResource(TimeManager.class);
         for (int i = 0; i < hallwaysPerWall; ++i) {
             final var hallwayStartX = startX + hallwaySize + i * unitsPerHallwayHorizontal;
             final var hallwayStartY = startY + hallwaySize + i * unitsPerHallwayVertical;
@@ -95,28 +97,28 @@ public class WorldGenerator<TTile> {
 
             final var spawnerXH = hallwayStartX + hallwaySize / 2;
             final var spawnerYH = hallwayLength - 2;
-            final var stalkerFreq = 7.5;
-            final var followerFreq = 4.0;
-            final var slimeFrequency = 10;
+            final var stalkerFreq = 8.5;
+            final var followerFreq = 5.25;
+            final var slimeFrequency = 15;
 
             final var followerFactory =
                     SpawnerComponent.EntityFactory.withRandomDistance(FollowerArchetype::spawnFollower);
             final var stalkerFactory =
                     SpawnerComponent.EntityFactory.withRandomDistance(StalkerArchetype::spawnStalker);
 
-            createSpawner(spawnerXH - 1, startY - spawnerYH - 1, stalkerFreq, entities, stalkerFactory);
-            createSpawner(spawnerXH + 1, startY - spawnerYH - 1, followerFreq, entities, followerFactory);
-            createSpawner(spawnerXH - 1, startY + mainRoomHeight + spawnerYH, stalkerFreq, entities, stalkerFactory);
-            createSpawner(spawnerXH + 1, startY + mainRoomHeight + spawnerYH, followerFreq, entities, followerFactory);
-            createSpawner(spawnerXH, startY - spawnerYH, slimeFrequency, entities, SlimeArchetype::createLargeSlime);
+            createSpawner(spawnerXH - 1, startY - spawnerYH - 1, stalkerFreq, entities, stalkerFactory, timeManager);
+            createSpawner(spawnerXH + 1, startY - spawnerYH - 1, followerFreq, entities, followerFactory, timeManager);
+            createSpawner(spawnerXH - 1, startY + mainRoomHeight + spawnerYH, stalkerFreq, entities, stalkerFactory, timeManager);
+            createSpawner(spawnerXH + 1, startY + mainRoomHeight + spawnerYH, followerFreq, entities, followerFactory, timeManager);
+            createSpawner(spawnerXH, startY - spawnerYH, slimeFrequency, entities, SlimeArchetype::createLargeSlime, timeManager);
 
             final var spawnerXV = hallwayLength - 2;
             final var spawnerYV = hallwayStartY + hallwaySize / 2;
 
-            createSpawner(startX - spawnerXV - 1, spawnerYV - 1, stalkerFreq, entities, stalkerFactory);
-            createSpawner(startX - spawnerXV - 1, spawnerYV + 1, followerFreq, entities, followerFactory);
-            createSpawner(startX + mainRoomWidth + spawnerXV, spawnerYV - 1, stalkerFreq, entities, stalkerFactory);
-            createSpawner(startX + mainRoomWidth + spawnerXV, spawnerYV + 1, followerFreq, entities, followerFactory);
+            createSpawner(startX - spawnerXV - 1, spawnerYV - 1, stalkerFreq, entities, stalkerFactory, timeManager);
+            createSpawner(startX - spawnerXV - 1, spawnerYV + 1, followerFreq, entities, followerFactory, timeManager);
+            createSpawner(startX + mainRoomWidth + spawnerXV, spawnerYV - 1, stalkerFreq, entities, stalkerFactory, timeManager);
+            createSpawner(startX + mainRoomWidth + spawnerXV, spawnerYV + 1, followerFreq, entities, followerFactory, timeManager);
         }
 
         final var nObstacles = 10;
@@ -136,13 +138,13 @@ public class WorldGenerator<TTile> {
     private void createSpawner(
             final int x,
             final int y,
-            final double spawnFrequency,
+            final double timeBetweenSpawns,
             final Entities entities,
-            final SpawnerComponent.EntityFactory factory
+            final SpawnerComponent.EntityFactory factory,
+            final TimeManager timeManager
     ) {
-        final var spawnerComponent = new SpawnerComponent(spawnFrequency, factory);
+        final var spawnerComponent = new SpawnerComponent(timeManager.convertToTicks(timeBetweenSpawns), factory);
         spawnerComponent.maxSpawnDistance = 0.25;
-        spawnerComponent.spawnCoolDown = 1.0;
         entities.createEntity(new Transform(x, y), spawnerComponent);
     }
 }

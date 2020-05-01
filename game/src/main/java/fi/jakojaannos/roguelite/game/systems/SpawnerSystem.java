@@ -11,8 +11,9 @@ import fi.jakojaannos.roguelite.engine.ecs.annotation.EnableOn;
 import fi.jakojaannos.roguelite.engine.ecs.data.resources.Entities;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.SpawnerComponent;
-import fi.jakojaannos.roguelite.game.data.events.HordeEndEvent;
 import fi.jakojaannos.roguelite.game.data.events.HordeStartEvent;
+import fi.jakojaannos.roguelite.game.data.events.HordeStopEvent;
+import fi.jakojaannos.roguelite.game.data.resources.Horde;
 
 @DisabledByDefault
 public class SpawnerSystem implements EcsSystem<SpawnerSystem.Resources, SpawnerSystem.EntityData, SpawnerSystem.EventData> {
@@ -22,16 +23,17 @@ public class SpawnerSystem implements EcsSystem<SpawnerSystem.Resources, Spawner
             final Stream<EntityDataHandle<EntityData>> entities,
             final EventData eventData
     ) {
-        final var delta = resources.timeManager.getTimeStepInSeconds();
+        final var currentTime = resources.timeManager.getCurrentGameTime();
 
         entities.forEach(entity -> {
             final var transform = entity.getData().transform;
             final var spawner = entity.getData().spawner;
 
-            spawner.spawnCoolDown -= delta;
-
-            if (spawner.spawnCoolDown <= 0.0f) {
-                spawner.spawnCoolDown = spawner.spawnFrequency;
+            final var hordeRelativeTimestamp = Math.max(resources.horde.startTimestamp - spawner.timeBetweenSpawns,
+                                                        spawner.spawnTimestamp);
+            final var timeSinceLastSpawn = currentTime - hordeRelativeTimestamp;
+            if (timeSinceLastSpawn >= spawner.timeBetweenSpawns) {
+                spawner.spawnTimestamp = currentTime;
                 spawner.entityFactory.get(resources.entities, transform, spawner);
             }
         });
@@ -44,11 +46,13 @@ public class SpawnerSystem implements EcsSystem<SpawnerSystem.Resources, Spawner
 
     public static record Resources(
             TimeManager timeManager,
-            Entities entities
-    ) {}
+            Entities entities,
+            Horde horde
+    ) {
+    }
 
     public static record EventData(
             @EnableOn HordeStartEvent hordeStart,
-            @DisableOn HordeEndEvent hordeEnd
+            @DisableOn HordeStopEvent hordeEnd
     ) {}
 }
