@@ -1,91 +1,49 @@
 package fi.jakojaannos.roguelite.game.systems;
 
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
-import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.roguelite.engine.ecs.data.resources.Entities;
 import fi.jakojaannos.roguelite.game.data.components.SpawnerComponent;
-import fi.jakojaannos.roguelite.game.data.components.character.enemy.FollowerAI;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static fi.jakojaannos.roguelite.engine.utilities.assertions.world.GameExpect.whenGame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 public class SpawnerSystemTest {
-    private SpawnerSystem spawnerSystem;
-    private World world;
-    private EntityManager entityManager;
+    private SpawnerComponent spawner;
+    private SpawnerComponent.EntityFactory mockFactory;
 
-
-    @BeforeEach
-    void beforeEach() {
-        this.spawnerSystem = new SpawnerSystem();
-        this.world = World.createNew();
-        this.entityManager = world.getEntityManager();
-
-        world.registerResource(TimeManager.class, new SimpleTimeManager(20));
-
-        entityManager.applyModifications();
-    }
-
-
-    @Test
-    void spawnerCreatesCorrectAmountOfEnemies(
-    ) {
+    void beforeEach(final World world) {
         double spawnFrequency = 1.0;
-        int nTicks = 100;
-        double delta = 0.02;
-        long expectedAmount = 2;
-
-        Entity spawner = this.entityManager.createEntity();
-        entityManager.addComponentTo(spawner, new Transform());
-        entityManager.addComponentTo(spawner,
-                                     new SpawnerComponent(spawnFrequency, (entities, spawnerPos, spawnerComponent) -> {
-                                         Entity e = entities.createEntity();
-                                         entities.addComponentTo(e, new FollowerAI(0, 0));
-                                         return e;
-                                     }));
-
-        entityManager.applyModifications();
-
-        long enemiesBefore = this.world.getEntityManager().getEntitiesWith(FollowerAI.class).count();
-
-        for (int i = 0; i < nTicks; i++) {
-            this.spawnerSystem.tick(Stream.of(spawner), this.world);
-        }
-
-        entityManager.applyModifications();
-
-        long enemiesAfter = this.world.getEntityManager().getEntitiesWith(FollowerAI.class).count();
-
-        assertEquals(expectedAmount, (enemiesAfter - enemiesBefore));
+        mockFactory = mock(SpawnerComponent.EntityFactory.class);
+        spawner = new SpawnerComponent(spawnFrequency, mockFactory);
+        world.createEntity(new Transform(), spawner);
     }
 
     @Test
-    void entityFactoryIsCalledCorrectly() {
-        Entity spawnedEnemy = mock(Entity.class);
-        SpawnerComponent.EntityFactory mockFactory = mock(SpawnerComponent.EntityFactory.class);
-        when(mockFactory.get(any(), any(), any())).thenReturn(spawnedEnemy);
+    void spawnerTriggersCorrectNumberOfSpawns() {
+        int nTicks = 100;
+        int expectedSpawns = 2;
 
-        SpawnerComponent spawnerComponent = new SpawnerComponent(1.0f, mockFactory);
-        Entity spawner = entityManager.createEntity();
-        entityManager.addComponentTo(spawner, spawnerComponent);
-        entityManager.addComponentTo(spawner, new Transform());
-
-        for (int i = 0; i < 200; i++) {
-            spawnerSystem.tick(Stream.of(spawner), world);
-        }
-
-        verify(mockFactory, times(4)).get(eq(entityManager), any(), eq(spawnerComponent));
-
+        whenGame().withSystems(new SpawnerSystem())
+                  .withState(this::beforeEach)
+                  .withSystemState(systemState -> systemState.setState(SpawnerSystem.class, true))
+                  .runsForTicks(nTicks)
+                  .expect(state -> verify(mockFactory, times(expectedSpawns)).get(any(), any(), any()));
     }
 
+    @Test
+    void entityFactoryIsCalledWithExpectedParameters() {
+        whenGame().withSystems(new SpawnerSystem())
+                  .withState(this::beforeEach)
+                  .withSystemState(systemState -> systemState.setState(SpawnerSystem.class, true))
+                  .runsForTicks(200)
+                  .expect(state -> {
+                      final var entities = state.world().fetchResource(Entities.class);
+                      verify(mockFactory, times(4)).get(eq(entities), any(), eq(spawner));
+                  });
+    }
 }

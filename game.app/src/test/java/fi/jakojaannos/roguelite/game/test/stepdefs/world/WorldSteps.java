@@ -29,19 +29,26 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class WorldSteps {
+    private static void setPlayerKills(final int amount) {
+        final var localPlayerDamageSource = getLocalPlayer()
+                .flatMap(player -> player.getComponent(AttackAbility.class))
+                .orElseThrow().damageSource;
+        state.world()
+             .fetchResource(SessionStats.class)
+             .setKillsOf(localPlayerDamageSource, amount);
+    }
+
     @Given("the world is blank with {int} enemies with {int} hp each scattered about")
     public void theWorldIsBlankWithEnemiesScatteredAbout(int numberOfEnemies, int initialHealth) {
         state.world()
-             .getEntityManager()
-             .clearEntities();
+             .clearAllEntities();
         state.world()
              .fetchResource(Players.class)
              .setLocalPlayer(null);
 
-        final var camera = state.world().getEntityManager().createEntity();
-        state.world().getEntityManager().addComponentTo(camera, new Transform());
-        state.world().getEntityManager().addComponentTo(camera, new NoDrawTag());
-        state.world().fetchResource(CameraProperties.class).cameraEntity = camera.asHandle();
+        final var cameraProperties = state.world().fetchResource(CameraProperties.class);
+        cameraProperties.cameraEntity = state.world().createEntity(new Transform(),
+                                                                   new NoDrawTag());
 
         final var areaWidth = 20;
         final var areaHeight = 20;
@@ -49,16 +56,13 @@ public class WorldSteps {
                  .mapToObj(ignored -> new Vector2d((random.nextDouble() * 2.0 - 1.0) * areaWidth,
                                                    (random.nextDouble() * 2.0 - 1.0) * areaHeight))
                  .forEach(enemyPosition -> {
-                     final var entity = FollowerArchetype.create(state.world().getEntityManager(),
+                     final var entity = FollowerArchetype.create(state.world()::createEntity,
                                                                  new Transform(enemyPosition.x, enemyPosition.y));
-                     final var health = state.world()
-                                             .getEntityManager()
-                                             .getComponentOf(entity, Health.class)
-                                             .orElseThrow();
+                     final var health = entity.getComponent(Health.class).orElseThrow();
                      health.maxHealth = initialHealth;
                      health.currentHealth = initialHealth;
                  });
-        state.world().getEntityManager().applyModifications();
+        state.world().commitEntityModifications();
     }
 
     @Given("the player has no kills")
@@ -147,14 +151,5 @@ public class WorldSteps {
             Health health = state.world().getEntityManager().getComponentOf(player.get(), Health.class).orElseThrow();
             assertFalse(health.currentHealth > 0);
         }
-    }
-
-    private static void setPlayerKills(final int amount) {
-        final var localPlayerDamageSource = getLocalPlayer()
-                .flatMap(player -> player.getComponent(AttackAbility.class))
-                .orElseThrow().damageSource;
-        state.world()
-             .fetchResource(SessionStats.class)
-             .setKillsOf(localPlayerDamageSource, amount);
     }
 }
