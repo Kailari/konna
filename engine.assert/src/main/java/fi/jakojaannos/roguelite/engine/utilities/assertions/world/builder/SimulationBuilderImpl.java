@@ -1,10 +1,12 @@
 package fi.jakojaannos.roguelite.engine.utilities.assertions.world.builder;
 
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import fi.jakojaannos.roguelite.engine.GameMode;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.ecs.SystemGroup;
+import fi.jakojaannos.roguelite.engine.ecs.SystemState;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.utilities.assertions.world.SimulationBuilder;
 import fi.jakojaannos.roguelite.engine.utilities.assertions.world.SimulationInspector;
@@ -14,10 +16,17 @@ import fi.jakojaannos.roguelite.engine.utilities.assertions.world.runner.TestGam
 public class SimulationBuilderImpl implements SimulationBuilder {
     private final SystemDispatcher.Builder dispatcherBuilder = SystemDispatcher.builder();
     private Consumer<World> initialStateFactory = world -> {};
+    private Consumer<SystemState> systemStateFactory = systemState -> {};
 
     @Override
     public SimulationBuilder withState(final Consumer<World> builder) {
         this.initialStateFactory = this.initialStateFactory.andThen(builder);
+        return this;
+    }
+
+    @Override
+    public SimulationBuilder withSystemState(final Consumer<SystemState> builder) {
+        this.systemStateFactory = this.systemStateFactory.andThen(builder);
         return this;
     }
 
@@ -48,9 +57,20 @@ public class SimulationBuilderImpl implements SimulationBuilder {
     }
 
     private SimulationInspector build() {
+        final var dispatcher = this.dispatcherBuilder.build();
+        final Supplier<SystemState> systemStateFactory = this.systemStateFactory == null
+                ? dispatcher::createDefaultState
+                : () -> buildSystemState(dispatcher);
         final var gameMode = new GameMode(0,
-                                          this.dispatcherBuilder.build(),
-                                          this.initialStateFactory);
+                                          dispatcher,
+                                          this.initialStateFactory,
+                                          systemStateFactory);
         return new SimulationRunnerImpl(new TestGameRunner(gameMode));
+    }
+
+    private SystemState buildSystemState(final SystemDispatcher dispatcher) {
+        final var systemState = dispatcher.createDefaultState();
+        this.systemStateFactory.accept(systemState);
+        return systemState;
     }
 }
