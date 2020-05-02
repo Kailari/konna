@@ -62,14 +62,14 @@ public final class GameplayGameMode {
         final var players = new Players(player);
         world.registerResource(players);
 
-        final var crosshair = world.createEntity(
-                new Transform(-999.0, -999.0),
-                new CrosshairTag());
         final var crosshairCollider = new Collider(CollisionLayer.NONE);
         crosshairCollider.width = 0.3;
         crosshairCollider.height = 0.3;
         crosshairCollider.origin.set(0.15);
-        crosshair.addComponent(crosshairCollider);
+        world.createEntity(
+                new Transform(-999.0, -999.0),
+                new CrosshairTag(),
+                crosshairCollider);
 
         final var emptiness = new TileType(0, false);
         final var floor = new TileType(1, false);
