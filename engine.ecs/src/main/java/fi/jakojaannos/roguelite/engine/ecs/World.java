@@ -3,6 +3,7 @@ package fi.jakojaannos.roguelite.engine.ecs;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import fi.jakojaannos.roguelite.engine.ecs.data.resources.Entities;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
 import fi.jakojaannos.roguelite.engine.ecs.world.WorldImpl;
 
@@ -17,7 +18,7 @@ import fi.jakojaannos.roguelite.engine.ecs.world.WorldImpl;
  * @see SystemDispatcher
  * @see EcsSystem
  */
-public interface World {
+public interface World extends Entities {
     /**
      * @deprecated Getter for legacy-compatible entity manager for this world. Due for removal once legacy systems are
      *         refactored to the new ECS.
