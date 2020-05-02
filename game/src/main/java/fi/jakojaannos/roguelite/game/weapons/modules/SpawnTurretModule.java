@@ -48,7 +48,6 @@ public class SpawnTurretModule implements WeaponModule<SpawnTurretModule.Attribu
                                new Transform(targetPos));
     }
 
-
     public static class State {
     }
 

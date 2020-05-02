@@ -58,7 +58,6 @@ public class ChargedTriggerModule implements WeaponModule<ChargedTriggerModule.A
         state.isCharging = false;
     }
 
-
     private void onEquip(final Weapon weapon, final WeaponEquipEvent event, final ActionInfo info) {
         final var state = weapon.getState(State.class);
 
@@ -72,7 +71,6 @@ public class ChargedTriggerModule implements WeaponModule<ChargedTriggerModule.A
         state.isCharging = false;
         state.hasFired = false;
     }
-
 
     private void stateQuery(final Weapon weapon, final WeaponStateQuery query, final ActionInfo info) {
         final var state = weapon.getState(State.class);

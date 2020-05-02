@@ -51,8 +51,7 @@ public final class GameplayGameMode {
         world.registerResource(new Collisions());
         world.registerResource(new Weapons());
         world.registerResource(CameraProperties.class, new CameraProperties(world.createEntity(new Transform(),
-                                                                                               new NoDrawTag())
-                                                                                 .asLegacyEntity()));
+                                                                                               new NoDrawTag())));
         world.registerResource(new SessionStats(timeManager.getCurrentGameTime()));
         world.registerResource(new Mouse());
         world.registerResource(new Inputs());
@@ -63,15 +62,14 @@ public final class GameplayGameMode {
         final var players = new Players(player);
         world.registerResource(players);
 
-        final var entityManager = world.getEntityManager();
-        final var crosshair = entityManager.createEntity();
-        entityManager.addComponentTo(crosshair, new Transform(-999.0, -999.0));
-        entityManager.addComponentTo(crosshair, new CrosshairTag());
+        final var crosshair = world.createEntity(
+                new Transform(-999.0, -999.0),
+                new CrosshairTag());
         final var crosshairCollider = new Collider(CollisionLayer.NONE);
         crosshairCollider.width = 0.3;
         crosshairCollider.height = 0.3;
         crosshairCollider.origin.set(0.15);
-        entityManager.addComponentTo(crosshair, crosshairCollider);
+        crosshair.addComponent(crosshairCollider);
 
         final var emptiness = new TileType(0, false);
         final var floor = new TileType(1, false);
@@ -79,17 +77,16 @@ public final class GameplayGameMode {
         final var generator = new WorldGenerator<>(emptiness);
         generator.prepareInitialRoom(seed, world, floor, wall, 25, 45, 5, 5, 2);
 
-        final var levelEntity = entityManager.createEntity();
         final var layer = new TileMapLayer(generator.getTileMap(), true);
-        entityManager.addComponentTo(levelEntity, layer);
+        world.createEntity(layer);
 
         final var random = new Random(seed + 1337);
         for (int i = 0; i < 1; i++) {
-            TurretArchetype.create(entityManager, timeManager, new Transform((random.nextDouble() * 2.0 - 1.0) * 10.0,
-                                                                             (random.nextDouble() * 2.0 - 1.0) * 10.0));
+            TurretArchetype.create(world, timeManager, new Transform((random.nextDouble() * 2.0 - 1.0) * 10.0,
+                                                                     (random.nextDouble() * 2.0 - 1.0) * 10.0));
         }
 
-        entityManager.applyModifications();
+        world.commitEntityModifications();
     }
 
     private static SystemDispatcher createDispatcher(final TimeManager timeManager) {
