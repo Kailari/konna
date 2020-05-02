@@ -26,9 +26,6 @@ public class JumpingCharacterMovementSystem implements EcsSystem<JumpingCharacte
     }
 
     private boolean wantsToMove(final EntityDataHandle<EntityData> entity) {
-        entity.getComponent(InAir.class)
-              .ifPresent(tag -> System.out.println(tag));
-
         return entity.getData().input.move.lengthSquared() > 0;
     }
 
