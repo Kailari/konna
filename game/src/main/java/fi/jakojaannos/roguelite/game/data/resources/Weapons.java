@@ -131,6 +131,14 @@ public class Weapons {
                                                                           GunshotEvent.Variant.GATLING)),
             new ModularWeapon.Module<>(new ClipMagazineModule(),
                                        new ClipMagazineModule.Attributes(500, 180)));
+    public static ModularWeapon PLAYER_TURRET_BUILDER = new ModularWeapon(
+            new ModularWeapon.Module<>(new ChargedTriggerModule(),
+                                       new ChargedTriggerModule.Attributes(60)),
+            new ModularWeapon.Module<>(new SpawnTurretModule(),
+                                       new SpawnTurretModule.Attributes(5)),
+            new ModularWeapon.Module<>(new RechargingMagazineModule(),
+                                       new RechargingMagazineModule.Attributes(2, 200))
+    );
     public static ModularWeapon TURRET_GATLING = new ModularWeapon(
             new ModularWeapon.Module<>(new AutomaticTriggerModule(),
                                        new NoAttributes()),
