@@ -6,7 +6,9 @@ import org.junit.jupiter.api.Test;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.data.resources.Entities;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.SpawnerComponent;
+import fi.jakojaannos.roguelite.game.data.resources.Horde;
 
 import static fi.jakojaannos.roguelite.engine.utilities.assertions.world.GameExpect.whenGame;
 import static org.mockito.ArgumentMatchers.any;
@@ -17,9 +19,13 @@ public class SpawnerSystemTest {
     private SpawnerComponent.EntityFactory mockFactory;
 
     void beforeEach(final World world) {
+        final var timeManager = world.fetchResource(TimeManager.class);
+        final var horde = new Horde();
+        world.registerResource(horde);
+
         double spawnFrequency = 1.0;
         mockFactory = mock(SpawnerComponent.EntityFactory.class);
-        spawner = new SpawnerComponent(spawnFrequency, mockFactory);
+        spawner = new SpawnerComponent(timeManager.convertToTicks(spawnFrequency), mockFactory);
         world.createEntity(new Transform(), spawner);
     }
 

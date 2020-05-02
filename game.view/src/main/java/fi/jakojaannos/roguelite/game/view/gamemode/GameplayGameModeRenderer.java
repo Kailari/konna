@@ -190,7 +190,7 @@ public final class GameplayGameModeRenderer {
                .anchorY(percentOf(parentHeight(0.3)))
                .left(percentOf(ownWidth(-0.5)))
                .top(percentOf(ownHeight(-0.5)))
-               .fontSize(42)
+               .fontSize(36)
                .text("Horde #X starting")
                .color(0.95, 0.15, 0.15);
     }
