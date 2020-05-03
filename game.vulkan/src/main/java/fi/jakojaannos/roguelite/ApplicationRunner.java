@@ -1,10 +1,13 @@
 package fi.jakojaannos.roguelite;
 
+import org.lwjgl.vulkan.VkFenceCreateInfo;
 import org.lwjgl.vulkan.VkPresentInfoKHR;
 import org.lwjgl.vulkan.VkSemaphoreCreateInfo;
 import org.lwjgl.vulkan.VkSubmitInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Arrays;
 
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
 
@@ -16,9 +19,13 @@ import static org.lwjgl.vulkan.VK10.*;
 
 public class ApplicationRunner implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(ApplicationRunner.class);
+    private static final int MAX_FRAMES_IN_FLIGHT = 2;
 
-    private final long imageAvailableSemaphore;
-    private final long renderFinishedSemaphore;
+    private final long[] imageAvailableSemaphores;
+    private final long[] renderFinishedSemaphores;
+    private final long[] inFlightFences;
+
+    private final long[] imagesInFlight;
 
     private final Application application;
 
@@ -26,8 +33,17 @@ public class ApplicationRunner implements AutoCloseable {
         this.application = application;
 
         final var deviceContext = application.backend().deviceContext();
-        this.imageAvailableSemaphore = createSemaphore(deviceContext);
-        this.renderFinishedSemaphore = createSemaphore(deviceContext);
+        this.imageAvailableSemaphores = new long[MAX_FRAMES_IN_FLIGHT];
+        this.renderFinishedSemaphores = new long[MAX_FRAMES_IN_FLIGHT];
+        this.inFlightFences = new long[MAX_FRAMES_IN_FLIGHT];
+        for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+            this.imageAvailableSemaphores[i] = createSemaphore(deviceContext);
+            this.renderFinishedSemaphores[i] = createSemaphore(deviceContext);
+
+            this.inFlightFences[i] = createFence(deviceContext);
+        }
+        this.imagesInFlight = new long[application.swapchain().getImageCount()];
+        Arrays.fill(this.imagesInFlight, VK_NULL_HANDLE);
     }
 
     public void run() {
@@ -40,24 +56,27 @@ public class ApplicationRunner implements AutoCloseable {
         this.application.window().show();
 
         try {
-            final var deviceContext = this.application.backend().deviceContext();
-
+            var currentFrame = 0;
             while (this.application.window().isOpen()) {
                 this.application.window().handleOSEvents();
 
-                drawFrame(commands);
+                drawFrame(commands, currentFrame);
 
-                vkQueueWaitIdle(deviceContext.getGraphicsQueue());
-                vkQueueWaitIdle(deviceContext.getPresentQueue());
+                ++currentFrame;
             }
         } catch (final Throwable t) {
             LOG.error("Application has crashed: " + t.getMessage());
         }
     }
 
-    private void drawFrame(final RenderCommandBuffers renderCommandBuffers) {
+    private void drawFrame(final RenderCommandBuffers renderCommandBuffers, final int currentFrame) {
         final var app = this.application;
         final var deviceContext = app.backend().deviceContext();
+
+        final var syncIndex = currentFrame % MAX_FRAMES_IN_FLIGHT;
+
+        final var imageAvailableSemaphore = this.imageAvailableSemaphores[syncIndex];
+        final var renderFinishedSemaphore = this.renderFinishedSemaphores[syncIndex];
 
         final int imageIndex;
         try (final var stack = stackPush()) {
@@ -65,7 +84,7 @@ public class ApplicationRunner implements AutoCloseable {
             final var result = vkAcquireNextImageKHR(deviceContext.getDevice(),
                                                      app.swapchain().getHandle(),
                                                      -1L,
-                                                     this.imageAvailableSemaphore,
+                                                     imageAvailableSemaphore,
                                                      VK_NULL_HANDLE,
                                                      pImageIndex);
             if (result != VK_SUCCESS) {
@@ -75,30 +94,33 @@ public class ApplicationRunner implements AutoCloseable {
             imageIndex = pImageIndex.get(0);
         }
 
+        if (this.imagesInFlight[imageIndex] != VK_NULL_HANDLE) {
+            vkWaitForFences(deviceContext.getDevice(), this.imagesInFlight[imageIndex], true, -1L);
+        }
+        this.imagesInFlight[imageIndex] = this.inFlightFences[syncIndex];
+
         try (final var stack = stackPush()) {
             final var submitInfo = VkSubmitInfo
                     .callocStack(1)
                     .sType(VK_STRUCTURE_TYPE_SUBMIT_INFO)
                     .waitSemaphoreCount(1)
-                    .pWaitSemaphores(stack.longs(this.imageAvailableSemaphore))
+                    .pWaitSemaphores(stack.longs(imageAvailableSemaphore))
                     .pWaitDstStageMask(stack.ints(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT))
                     .pCommandBuffers(stack.pointers(renderCommandBuffers.get(imageIndex).getHandle()))
-                    .pSignalSemaphores(stack.longs(this.renderFinishedSemaphore));
+                    .pSignalSemaphores(stack.longs(renderFinishedSemaphore));
 
-            final var result = vkQueueSubmit(deviceContext.getGraphicsQueue(),
-                                             submitInfo,
-                                             VK_NULL_HANDLE);
-            if (result != VK_SUCCESS) {
-                throw new IllegalStateException("Queue submit failed: "
-                                                + translateVulkanResult(result));
-            }
+            vkResetFences(deviceContext.getDevice(), this.inFlightFences[syncIndex]);
+            ensureSuccess(vkQueueSubmit(deviceContext.getGraphicsQueue(),
+                                        submitInfo,
+                                        this.inFlightFences[syncIndex]),
+                          "Rendering command submit failed");
         }
 
         try (final var stack = stackPush()) {
             final var presentInfo = VkPresentInfoKHR
                     .callocStack()
                     .sType(VK_STRUCTURE_TYPE_PRESENT_INFO_KHR)
-                    .pWaitSemaphores(stack.longs(this.renderFinishedSemaphore))
+                    .pWaitSemaphores(stack.longs(renderFinishedSemaphore))
                     .swapchainCount(1)
                     .pSwapchains(stack.longs(app.swapchain().getHandle()))
                     .pImageIndices(stack.ints(imageIndex));
@@ -115,8 +137,11 @@ public class ApplicationRunner implements AutoCloseable {
         final var deviceContext = this.application.backend().deviceContext();
         vkDeviceWaitIdle(deviceContext.getDevice());
 
-        vkDestroySemaphore(deviceContext.getDevice(), this.imageAvailableSemaphore, null);
-        vkDestroySemaphore(deviceContext.getDevice(), this.renderFinishedSemaphore, null);
+        for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+            vkDestroySemaphore(deviceContext.getDevice(), this.imageAvailableSemaphores[i], null);
+            vkDestroySemaphore(deviceContext.getDevice(), this.renderFinishedSemaphores[i], null);
+            vkDestroyFence(deviceContext.getDevice(), this.inFlightFences[i], null);
+        }
     }
 
     private static long createSemaphore(final DeviceContext deviceContext) {
@@ -130,6 +155,21 @@ public class ApplicationRunner implements AutoCloseable {
                           "Creating semaphore failed");
 
             return pSemaphore.get(0);
+        }
+    }
+
+    private static long createFence(final DeviceContext deviceContext) {
+        try (final var stack = stackPush()) {
+            final var createInfo = VkFenceCreateInfo
+                    .callocStack()
+                    .sType(VK_STRUCTURE_TYPE_FENCE_CREATE_INFO)
+                    .flags(VK_FENCE_CREATE_SIGNALED_BIT);
+
+            final var pFence = stack.mallocLong(1);
+            ensureSuccess(vkCreateFence(deviceContext.getDevice(), createInfo, null, pFence),
+                          "Creating fence failed");
+
+            return pFence.get(0);
         }
     }
 }
