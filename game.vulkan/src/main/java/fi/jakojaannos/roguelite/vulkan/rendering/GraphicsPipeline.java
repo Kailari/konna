@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
 
+import fi.jakojaannos.roguelite.util.RecreateCloseable;
 import fi.jakojaannos.roguelite.util.shader.ShaderCompiler;
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
 
@@ -14,28 +15,37 @@ import static fi.jakojaannos.roguelite.util.VkUtil.translateVulkanResult;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.VK10.*;
 
-public class GraphicsPipeline implements AutoCloseable {
+public class GraphicsPipeline extends RecreateCloseable {
     private static final int ALL_COLOR_COMPONENTS = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
 
-    private final VkDevice device;
+    private final DeviceContext deviceContext;
+    private final Swapchain swapchain;
+    private final RenderPass renderPass;
 
     private final ByteBuffer compiledVertexShader;
     private final ByteBuffer compiledFragmentShader;
 
-    private final long pipelineLayout;
-    private final long handle;
+    private long pipelineLayout;
+    private long handle;
 
     public long getHandle() {
         return this.handle;
     }
 
+    @Override
+    protected boolean isRecreateRequired() {
+        return true;
+    }
+
     public GraphicsPipeline(
             final Path assetRoot,
             final DeviceContext deviceContext,
-            final VkExtent2D swapchainExtent,
+            final Swapchain swapchain,
             final RenderPass renderPass
     ) {
-        this.device = deviceContext.getDevice();
+        this.deviceContext = deviceContext;
+        this.swapchain = swapchain;
+        this.renderPass = renderPass;
 
         try {
             this.compiledVertexShader = ShaderCompiler.loadGLSLShader(assetRoot.resolve("shaders/vulkan/shader.vert"),
@@ -46,14 +56,27 @@ public class GraphicsPipeline implements AutoCloseable {
             throw new IllegalStateException("Loading shaders failed: " + e);
         }
 
+        tryRecreate();
+    }
+
+    @Override
+    protected void cleanup() {
+        vkDestroyPipeline(this.deviceContext.getDevice(), this.handle, null);
+        vkDestroyPipelineLayout(this.deviceContext.getDevice(), this.pipelineLayout, null);
+    }
+
+    @Override
+    protected void recreate() {
         try (final var stack = stackPush();
-             final var vertexShaderModule = new ShaderModule(deviceContext, this.compiledVertexShader);
-             final var fragmentShaderModule = new ShaderModule(deviceContext, this.compiledFragmentShader)
+             final var vertexShaderModule = new ShaderModule(this.deviceContext.getDevice(),
+                                                             this.compiledVertexShader);
+             final var fragmentShaderModule = new ShaderModule(this.deviceContext.getDevice(),
+                                                               this.compiledFragmentShader)
         ) {
             final var shaderStages = createShaderStages(stack, vertexShaderModule, fragmentShaderModule);
             final var vertexInputState = createVertexInputInfo();
             final var inputAssembly = createInputAssembly();
-            final var viewportState = createViewportState(swapchainExtent);
+            final var viewportState = createViewportState(this.swapchain.getExtent());
             final var rasterizer = createRasterizer();
             final var multisampling = createMultisamplingStateInfo();
             // FIXME: States for Depth/Stencil testing
@@ -73,11 +96,11 @@ public class GraphicsPipeline implements AutoCloseable {
                     .pMultisampleState(multisampling)
                     .pColorBlendState(colorBlendAttachments)
                     .layout(this.pipelineLayout)
-                    .renderPass(renderPass.getHandle())
+                    .renderPass(this.renderPass.getHandle())
                     .subpass(0);
 
             final var pPipeline = stack.mallocLong(1);
-            final var result = vkCreateGraphicsPipelines(this.device,
+            final var result = vkCreateGraphicsPipelines(this.deviceContext.getDevice(),
                                                          VK_NULL_HANDLE,
                                                          createInfo,
                                                          null,
@@ -97,7 +120,10 @@ public class GraphicsPipeline implements AutoCloseable {
                     .sType(VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO);
 
             final var pLayout = stack.mallocLong(1);
-            final var result = vkCreatePipelineLayout(this.device, createInfo, null, pLayout);
+            final var result = vkCreatePipelineLayout(this.deviceContext.getDevice(),
+                                                      createInfo,
+                                                      null,
+                                                      pLayout);
             if (result != VK_SUCCESS) {
                 throw new IllegalStateException("Creating pipeline layout failed: "
                                                 + translateVulkanResult(result));
@@ -198,11 +224,5 @@ public class GraphicsPipeline implements AutoCloseable {
                     .pName(stack.UTF8("main"));
 
         return shaderStages;
-    }
-
-    @Override
-    public void close() {
-        vkDestroyPipeline(this.device, this.handle, null);
-        vkDestroyPipelineLayout(this.device, this.pipelineLayout, null);
     }
 }

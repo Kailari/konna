@@ -9,10 +9,13 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 
+import fi.jakojaannos.roguelite.vulkan.CommandBuffer;
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
 
 import static fi.jakojaannos.roguelite.util.VkUtil.ensureSuccess;
 import static fi.jakojaannos.roguelite.util.VkUtil.translateVulkanResult;
+import static org.lwjgl.glfw.GLFW.glfwGetFramebufferSize;
+import static org.lwjgl.glfw.GLFW.glfwWaitEvents;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.KHRSwapchain.*;
 import static org.lwjgl.vulkan.VK10.*;
@@ -29,6 +32,10 @@ public class ApplicationRunner implements AutoCloseable {
 
     private final Application application;
 
+    private boolean framebufferResized;
+
+    private RenderCommandBuffers commands;
+
     public ApplicationRunner(final Application application) {
         this.application = application;
 
@@ -44,15 +51,18 @@ public class ApplicationRunner implements AutoCloseable {
         }
         this.imagesInFlight = new long[application.swapchain().getImageCount()];
         Arrays.fill(this.imagesInFlight, VK_NULL_HANDLE);
+
+        this.commands = new RenderCommandBuffers(this.application.graphicsCommandPool(),
+                                                 this.application.swapchain().getImageCount(),
+                                                 this.application.renderPass(),
+                                                 this.application.framebuffers(),
+                                                 this.application.graphicsPipeline());
+
+        this.application.window()
+                        .onResize((width, height) -> this.framebufferResized = true);
     }
 
     public void run() {
-        final var commands = new RenderCommandBuffers(this.application.graphicsCommandPool(),
-                                                      this.application.swapchain().getImageCount(),
-                                                      this.application.renderPass(),
-                                                      this.application.framebuffers(),
-                                                      this.application.graphicsPipeline());
-
         this.application.window().show();
 
         try {
@@ -60,7 +70,9 @@ public class ApplicationRunner implements AutoCloseable {
             while (this.application.window().isOpen()) {
                 this.application.window().handleOSEvents();
 
-                drawFrame(commands, currentFrame);
+                if (drawFrame(this.commands, currentFrame)) {
+                    continue;
+                }
 
                 ++currentFrame;
             }
@@ -69,25 +81,45 @@ public class ApplicationRunner implements AutoCloseable {
         }
     }
 
-    private void drawFrame(final RenderCommandBuffers renderCommandBuffers, final int currentFrame) {
-        final var app = this.application;
-        final var deviceContext = app.backend().deviceContext();
-
+    /**
+     * Draws the next frame.
+     *
+     * @param renderCommandBuffers command buffers to use for rendering
+     * @param currentFrame         current frame
+     *
+     * @return <code>false</code> if the frame was rendered, <code>true</code> if swapchain required re-creation before
+     *         rendering the frame
+     */
+    private boolean drawFrame(final RenderCommandBuffers renderCommandBuffers, final int currentFrame) {
         final var syncIndex = currentFrame % MAX_FRAMES_IN_FLIGHT;
 
-        final var imageAvailableSemaphore = this.imageAvailableSemaphores[syncIndex];
-        final var renderFinishedSemaphore = this.renderFinishedSemaphores[syncIndex];
+        final int imageIndex = acquireNextImage(syncIndex);
+        if (imageIndex == -1) {
+            return true;
+        }
+
+        submitDrawCommandBuffer(renderCommandBuffers.get(imageIndex), syncIndex);
+        presentImage(syncIndex, imageIndex);
+
+        return false;
+    }
+
+    private int acquireNextImage(final int syncIndex) {
+        final var deviceContext = this.application.backend().deviceContext();
 
         final int imageIndex;
         try (final var stack = stackPush()) {
             final var pImageIndex = stack.mallocInt(1);
             final var result = vkAcquireNextImageKHR(deviceContext.getDevice(),
-                                                     app.swapchain().getHandle(),
+                                                     this.application.swapchain().getHandle(),
                                                      -1L,
-                                                     imageAvailableSemaphore,
+                                                     this.imageAvailableSemaphores[syncIndex],
                                                      VK_NULL_HANDLE,
                                                      pImageIndex);
-            if (result != VK_SUCCESS) {
+            if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+                recreateSwapchain();
+                return -1;
+            } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
                 throw new IllegalStateException("Acquiring swapchain image failed: "
                                                 + translateVulkanResult(result));
             }
@@ -98,16 +130,24 @@ public class ApplicationRunner implements AutoCloseable {
             vkWaitForFences(deviceContext.getDevice(), this.imagesInFlight[imageIndex], true, -1L);
         }
         this.imagesInFlight[imageIndex] = this.inFlightFences[syncIndex];
+        return imageIndex;
+    }
+
+    private void submitDrawCommandBuffer(
+            final CommandBuffer commandBuffer,
+            final int syncIndex
+    ) {
+        final var deviceContext = this.application.backend().deviceContext();
 
         try (final var stack = stackPush()) {
             final var submitInfo = VkSubmitInfo
                     .callocStack(1)
                     .sType(VK_STRUCTURE_TYPE_SUBMIT_INFO)
                     .waitSemaphoreCount(1)
-                    .pWaitSemaphores(stack.longs(imageAvailableSemaphore))
+                    .pWaitSemaphores(stack.longs(this.imageAvailableSemaphores[syncIndex]))
                     .pWaitDstStageMask(stack.ints(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT))
-                    .pCommandBuffers(stack.pointers(renderCommandBuffers.get(imageIndex).getHandle()))
-                    .pSignalSemaphores(stack.longs(renderFinishedSemaphore));
+                    .pCommandBuffers(stack.pointers(commandBuffer.getHandle()))
+                    .pSignalSemaphores(stack.longs(this.renderFinishedSemaphores[syncIndex]));
 
             vkResetFences(deviceContext.getDevice(), this.inFlightFences[syncIndex]);
             ensureSuccess(vkQueueSubmit(deviceContext.getGraphicsQueue(),
@@ -115,19 +155,61 @@ public class ApplicationRunner implements AutoCloseable {
                                         this.inFlightFences[syncIndex]),
                           "Rendering command submit failed");
         }
+    }
 
+    private void presentImage(
+            final int syncIndex,
+            final int imageIndex
+    ) {
         try (final var stack = stackPush()) {
             final var presentInfo = VkPresentInfoKHR
                     .callocStack()
                     .sType(VK_STRUCTURE_TYPE_PRESENT_INFO_KHR)
-                    .pWaitSemaphores(stack.longs(renderFinishedSemaphore))
+                    .pWaitSemaphores(stack.longs(this.renderFinishedSemaphores[syncIndex]))
                     .swapchainCount(1)
-                    .pSwapchains(stack.longs(app.swapchain().getHandle()))
+                    .pSwapchains(stack.longs(this.application.swapchain().getHandle()))
                     .pImageIndices(stack.ints(imageIndex));
+
+            final var deviceContext = this.application.backend().deviceContext();
             final var result = vkQueuePresentKHR(deviceContext.getPresentQueue(), presentInfo);
-            if (result != VK_SUCCESS) {
+            if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || this.framebufferResized) {
+                recreateSwapchain();
+            } else if (result != VK_SUCCESS) {
                 throw new IllegalStateException("Presenting swapchain image failed: "
                                                 + translateVulkanResult(result));
+            }
+        }
+    }
+
+    public void recreateSwapchain() {
+        waitUntilNotMinimized();
+
+        vkDeviceWaitIdle(this.application.backend().deviceContext().getDevice());
+        LOG.debug("Recreating swapchain!");
+        this.framebufferResized = false;
+
+        this.application.recreateSwapchain();
+
+        this.commands.close();
+        this.commands = new RenderCommandBuffers(this.application.graphicsCommandPool(),
+                                                 this.application.swapchain().getImageCount(),
+                                                 this.application.renderPass(),
+                                                 this.application.framebuffers(),
+                                                 this.application.graphicsPipeline());
+    }
+
+    private void waitUntilNotMinimized() {
+        try (final var stack = stackPush()) {
+            final var pWidth = stack.mallocInt(1);
+            final var pHeight = stack.mallocInt(1);
+
+            glfwGetFramebufferSize(this.application.window().getHandle(), pWidth, pHeight);
+            // Loop until framebuffer area is non-zero
+            while (pWidth.get(0) == 0 || pHeight.get(0) == 0) {
+                glfwGetFramebufferSize(this.application.window().getHandle(), pWidth, pHeight);
+
+                // Block until any window event occurs
+                glfwWaitEvents();
             }
         }
     }

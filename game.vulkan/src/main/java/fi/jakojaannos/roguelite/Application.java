@@ -12,6 +12,7 @@ import fi.jakojaannos.roguelite.vulkan.window.Window;
 
 import static org.lwjgl.glfw.GLFW.glfwInit;
 import static org.lwjgl.glfw.GLFWVulkan.glfwVulkanSupported;
+import static org.lwjgl.vulkan.VK10.vkDeviceWaitIdle;
 
 
 public record Application(
@@ -33,16 +34,15 @@ public record Application(
 
         final var window = new Window(windowWidth, windowHeight);
         final var backend = RenderingBackend.create(window);
-        final var swapchain = new Swapchain(backend.deviceContext(), backend.surface(), windowWidth, windowHeight);
+        final var swapchain = new Swapchain(backend.deviceContext(), window, backend.surface());
 
         final var renderPass = new RenderPass(backend.deviceContext(), swapchain);
         final var framebuffers = new Framebuffers(backend.deviceContext(),
-                                                  swapchain.getExtent(),
-                                                  swapchain.getImageViews(),
+                                                  swapchain,
                                                   renderPass);
         final var graphicsPipeline = new GraphicsPipeline(assetRoot,
                                                           backend.deviceContext(),
-                                                          swapchain.getExtent(),
+                                                          swapchain,
                                                           renderPass);
 
         final var graphicsCommandPool = new CommandPool(backend.deviceContext(),
@@ -57,6 +57,13 @@ public record Application(
                                graphicsPipeline,
                                framebuffers,
                                graphicsCommandPool);
+    }
+
+    public void recreateSwapchain() {
+        this.swapchain.tryRecreate();
+        this.renderPass.tryRecreate();
+        this.graphicsPipeline.tryRecreate();
+        this.framebuffers.tryRecreate();
     }
 
     @Override

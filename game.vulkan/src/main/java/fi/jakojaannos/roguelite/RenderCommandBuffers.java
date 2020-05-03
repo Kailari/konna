@@ -6,10 +6,12 @@ import fi.jakojaannos.roguelite.vulkan.rendering.Framebuffers;
 import fi.jakojaannos.roguelite.vulkan.rendering.GraphicsPipeline;
 import fi.jakojaannos.roguelite.vulkan.rendering.RenderPass;
 
+import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.VK10.*;
 
-public class RenderCommandBuffers {
+public class RenderCommandBuffers implements AutoCloseable {
     private final CommandBuffer[] commandBuffers;
+    private final CommandPool commandPool;
 
     public RenderCommandBuffers(
             final CommandPool graphicsCommandPool,
@@ -18,6 +20,7 @@ public class RenderCommandBuffers {
             final Framebuffers framebuffers,
             final GraphicsPipeline graphicsPipeline
     ) {
+        this.commandPool = graphicsCommandPool;
         this.commandBuffers = graphicsCommandPool.allocate(swapchainImageCount);
 
         for (int i = 0; i < this.commandBuffers.length; i++) {
@@ -38,5 +41,18 @@ public class RenderCommandBuffers {
 
     public CommandBuffer get(final int imageIndex) {
         return this.commandBuffers[imageIndex];
+    }
+
+    @Override
+    public void close() {
+        try (final var stack = stackPush()) {
+            final var pBuffers = stack.mallocPointer(this.commandBuffers.length);
+            for (int i = 0; i < this.commandBuffers.length; i++) {
+                pBuffers.put(i, this.commandBuffers[i].getHandle());
+            }
+            vkFreeCommandBuffers(this.commandPool.getDevice(),
+                                 this.commandPool.getHandle(),
+                                 pBuffers);
+        }
     }
 }

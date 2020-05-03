@@ -25,12 +25,12 @@ public class Framebuffer implements AutoCloseable {
     }
 
     public Framebuffer(
-            final DeviceContext deviceContext,
+            final VkDevice device,
             final VkExtent2D swapchainExtent,
             final ImageView swapchainImageView,
             final RenderPass renderPass
     ) {
-        this.device = deviceContext.getDevice();
+        this.device = device;
         this.swapchainExtent = swapchainExtent;
 
         try (final var stack = stackPush()) {

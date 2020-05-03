@@ -14,6 +14,14 @@ public class CommandPool implements AutoCloseable {
     private final VkDevice device;
     private final long handle;
 
+    public VkDevice getDevice() {
+        return this.device;
+    }
+
+    public long getHandle() {
+        return this.handle;
+    }
+
     public CommandPool(final DeviceContext deviceContext, final int queueFamilyIndex) {
         this.device = deviceContext.getDevice();
 

@@ -5,8 +5,6 @@ import org.lwjgl.vulkan.VkShaderModuleCreateInfo;
 
 import java.nio.ByteBuffer;
 
-import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
-
 import static fi.jakojaannos.roguelite.util.VkUtil.translateVulkanResult;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.VK10.*;
@@ -19,8 +17,8 @@ public class ShaderModule implements AutoCloseable {
         return this.handle;
     }
 
-    public ShaderModule(final DeviceContext deviceContext, final ByteBuffer compiledSource) {
-        this.device = deviceContext.getDevice();
+    public ShaderModule(final VkDevice device, final ByteBuffer compiledSource) {
+        this.device = device;
 
         try (final var stack = stackPush()) {
             final var createInfo = VkShaderModuleCreateInfo

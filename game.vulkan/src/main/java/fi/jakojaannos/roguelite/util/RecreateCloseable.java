@@ -1,7 +1,7 @@
 package fi.jakojaannos.roguelite.util;
 
 public abstract class RecreateCloseable implements AutoCloseable {
-    private boolean cleanedUp;
+    private boolean cleanedUp = true;
 
     protected abstract boolean isRecreateRequired();
 

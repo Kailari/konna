@@ -2,25 +2,29 @@ package fi.jakojaannos.roguelite.vulkan.rendering;
 
 import org.lwjgl.vulkan.*;
 
+import fi.jakojaannos.roguelite.util.RecreateCloseable;
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
 import fi.jakojaannos.roguelite.vulkan.device.SwapchainSupportDetails;
+import fi.jakojaannos.roguelite.vulkan.window.Window;
 import fi.jakojaannos.roguelite.vulkan.window.WindowSurface;
 
 import static fi.jakojaannos.roguelite.util.VkUtil.translateVulkanResult;
+import static org.lwjgl.glfw.GLFW.glfwGetFramebufferSize;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.KHRSurface.*;
 import static org.lwjgl.vulkan.KHRSwapchain.*;
 import static org.lwjgl.vulkan.VK10.*;
 
-public class Swapchain implements AutoCloseable {
-    private final VkDevice device;
-    private final long handle;
-
+public class Swapchain extends RecreateCloseable {
+    private final DeviceContext deviceContext;
+    private final WindowSurface surface;
     private final VkExtent2D extent;
+    private final Window window;
 
-    private final long[] images;
-    private final ImageView[] imageViews;
-    private final int imageFormat;
+    private long handle;
+
+    private ImageView[] imageViews;
+    private int imageFormat;
 
     public int getImageFormat() {
         return this.imageFormat;
@@ -42,22 +46,36 @@ public class Swapchain implements AutoCloseable {
         return this.handle;
     }
 
+    @Override
+    protected boolean isRecreateRequired() {
+        return true;
+    }
+
     public Swapchain(
             final DeviceContext deviceContext,
-            final WindowSurface surface,
-            final int windowWidth,
-            final int windowHeight
+            final Window window,
+            final WindowSurface surface
     ) {
-        this.device = deviceContext.getDevice();
-        final var queueFamilies = deviceContext.getQueueFamilies();
+        this.deviceContext = deviceContext;
+        this.window = window;
+        this.surface = surface;
+        this.extent = VkExtent2D.calloc();
+
+        tryRecreate();
+    }
+
+    @Override
+    protected void recreate() {
+        final var queueFamilies = this.deviceContext.getQueueFamilies();
 
         try (final var stack = stackPush()) {
-            final var swapChainSupport = SwapchainSupportDetails.query(deviceContext.getPhysicalDevice(),
-                                                                       surface);
+            final var swapChainSupport = SwapchainSupportDetails.query(this.deviceContext.getPhysicalDevice(),
+                                                                       this.surface);
 
             final var surfaceFormat = chooseSurfaceFormat(swapChainSupport.formats());
             final var presentMode = choosePresentMode(swapChainSupport.presentModes());
-            final var extent = chooseExtent(swapChainSupport.capabilities(), windowWidth, windowHeight);
+
+            final var extent = chooseExtent(this.window, swapChainSupport.capabilities());
 
             final int imageCount = Math.min(swapChainSupport.capabilities().minImageCount() + 1,
                                             swapChainSupport.capabilities().maxImageCount());
@@ -65,7 +83,7 @@ public class Swapchain implements AutoCloseable {
             final var createInfo = VkSwapchainCreateInfoKHR
                     .callocStack()
                     .sType(VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR)
-                    .surface(surface.getHandle())
+                    .surface(this.surface.getHandle())
                     .minImageCount(imageCount)
                     .imageFormat(surfaceFormat.format())
                     .imageColorSpace(surfaceFormat.colorSpace())
@@ -88,30 +106,38 @@ public class Swapchain implements AutoCloseable {
             }
 
             final var pSwapchain = stack.mallocLong(1);
-            final var result = vkCreateSwapchainKHR(this.device, createInfo, null, pSwapchain);
+            final var result = vkCreateSwapchainKHR(this.deviceContext.getDevice(),
+                                                    createInfo,
+                                                    null,
+                                                    pSwapchain);
             if (result != VK_SUCCESS) {
                 throw new IllegalStateException("Creating swapchain failed: "
                                                 + translateVulkanResult(result));
             }
             this.handle = pSwapchain.get(0);
-            this.extent = VkExtent2D.calloc().set(swapChainSupport.capabilities().currentExtent());
+            this.extent.set(swapChainSupport.capabilities().currentExtent());
             this.imageFormat = surfaceFormat.format();
 
-            this.images = getSwapchainImages(this.device, this.handle);
-            this.imageViews = new ImageView[this.images.length];
+            final long[] images = getSwapchainImages(this.deviceContext.getDevice(), this.handle);
+            this.imageViews = new ImageView[images.length];
             for (int i = 0; i < this.imageViews.length; i++) {
-                this.imageViews[i] = new ImageView(deviceContext, this.images[i], this.imageFormat);
+                this.imageViews[i] = new ImageView(this.deviceContext, images[i], this.imageFormat);
             }
         }
     }
 
     @Override
-    public void close() {
+    protected void cleanup() {
         for (final var imageView : this.imageViews) {
             imageView.close();
         }
+        vkDestroySwapchainKHR(this.deviceContext.getDevice(), this.handle, null);
+    }
+
+    @Override
+    public void close() {
+        super.close();
         this.extent.free();
-        vkDestroySwapchainKHR(this.device, this.handle, null);
     }
 
     private static long[] getSwapchainImages(final VkDevice device, final long handle) {
@@ -136,16 +162,19 @@ public class Swapchain implements AutoCloseable {
         }
     }
 
-    private static VkExtent2D chooseExtent(
-            final VkSurfaceCapabilitiesKHR capabilities,
-            final int windowWidth,
-            final int windowHeight
-    ) {
-        try (final var ignored = stackPush()) {
+    private static VkExtent2D chooseExtent(final Window window, final VkSurfaceCapabilitiesKHR capabilities) {
+        try (final var stack = stackPush()) {
             // -1L == UINT32_MAX
-            if (capabilities.currentExtent().width() != -1L) {
+            if (capabilities.currentExtent().width() != -1L && capabilities.currentExtent().height() != -1L) {
                 return capabilities.currentExtent();
             } else {
+                final var pWidth = stack.mallocInt(1);
+                final var pHeight = stack.mallocInt(1);
+                glfwGetFramebufferSize(window.getHandle(), pWidth, pHeight);
+
+                final var windowWidth = pWidth.get(0);
+                final var windowHeight = pHeight.get(0);
+
                 final var actualExtent = VkExtent2D
                         .callocStack()
                         .set(windowWidth, windowHeight);
