@@ -32,8 +32,7 @@ public class ApplicationRunner implements AutoCloseable {
     private final Application application;
 
     private boolean framebufferResized;
-
-    private RenderCommandBuffers commands;
+    private int frameIndex;
 
     public ApplicationRunner(final Application application) {
         this.application = application;
@@ -48,14 +47,8 @@ public class ApplicationRunner implements AutoCloseable {
 
             this.inFlightFences[i] = createFence(deviceContext);
         }
-        this.imagesInFlight = new long[application.swapchain().getImageCount()];
+        this.imagesInFlight = new long[application.renderer().getSwapchainImageCount()];
         Arrays.fill(this.imagesInFlight, VK_NULL_HANDLE);
-
-        this.commands = new RenderCommandBuffers(this.application.graphicsCommandPool(),
-                                                 this.application.swapchain().getImageCount(),
-                                                 this.application.renderPass(),
-                                                 this.application.framebuffers(),
-                                                 this.application.graphicsPipeline());
 
         this.application.window()
                         .onResize((width, height) -> this.framebufferResized = true);
@@ -63,60 +56,43 @@ public class ApplicationRunner implements AutoCloseable {
 
     public void run() {
         this.application.window().show();
+        this.frameIndex = -1;
 
         try {
-            var currentFrame = 0;
             while (this.application.window().isOpen()) {
                 this.application.window().handleOSEvents();
 
-                if (drawFrame(this.commands, currentFrame)) {
+                // Proceed to the next frame and wait until the frame fence is free. This prevents
+                // CPU from pushing more frames than what GPU can handle.
+                this.frameIndex = (this.frameIndex + 1) % MAX_FRAMES_IN_FLIGHT;
+                vkWaitForFences(this.application.backend().deviceContext().getDevice(),
+                                this.inFlightFences[this.frameIndex],
+                                true,
+                                -1L);
+
+                final int imageIndex = acquireNextImage();
+                if (imageIndex == -1) {
                     continue;
                 }
 
-                ++currentFrame;
+                submitDrawCommands(this.application.renderer().getCommands(imageIndex));
+                presentImage(imageIndex);
             }
         } catch (final Throwable t) {
             LOG.error("Application has crashed: " + t.getMessage());
         }
     }
 
-    /**
-     * Draws the next frame.
-     *
-     * @param renderCommandBuffers command buffers to use for rendering
-     * @param currentFrame         current frame
-     *
-     * @return <code>false</code> if the frame was rendered, <code>true</code> if swapchain required re-creation before
-     *         rendering the frame
-     */
-    private boolean drawFrame(final RenderCommandBuffers renderCommandBuffers, final int currentFrame) {
-        final var syncIndex = currentFrame % MAX_FRAMES_IN_FLIGHT;
-        vkWaitForFences(this.application.backend().deviceContext().getDevice(),
-                        this.inFlightFences[syncIndex],
-                        true,
-                        -1L);
-
-        final int imageIndex = acquireNextImage(syncIndex);
-        if (imageIndex == -1) {
-            return true;
-        }
-
-        submitDrawCommands(renderCommandBuffers.get(imageIndex), syncIndex);
-        presentImage(syncIndex, imageIndex);
-
-        return false;
-    }
-
-    private int acquireNextImage(final int syncIndex) {
+    private int acquireNextImage() {
         final var deviceContext = this.application.backend().deviceContext();
 
         final int imageIndex;
         try (final var stack = stackPush()) {
             final var pImageIndex = stack.mallocInt(1);
             final var result = vkAcquireNextImageKHR(deviceContext.getDevice(),
-                                                     this.application.swapchain().getHandle(),
+                                                     this.application.renderer().getSwapchain().getHandle(),
                                                      -1L,
-                                                     this.imageAvailableSemaphores[syncIndex],
+                                                     this.imageAvailableSemaphores[this.frameIndex],
                                                      VK_NULL_HANDLE,
                                                      pImageIndex);
             if (result == VK_ERROR_OUT_OF_DATE_KHR) {
@@ -128,38 +104,35 @@ public class ApplicationRunner implements AutoCloseable {
             imageIndex = pImageIndex.get(0);
         }
 
+        // Wait until the image has finished rendering. This ensures that the resources associated
+        // with the image are free to use when we start recording/submitting the command buffers etc.
         if (this.imagesInFlight[imageIndex] != VK_NULL_HANDLE) {
             vkWaitForFences(deviceContext.getDevice(), this.imagesInFlight[imageIndex], true, -1L);
         }
-        this.imagesInFlight[imageIndex] = this.inFlightFences[syncIndex];
+        this.imagesInFlight[imageIndex] = this.inFlightFences[this.frameIndex];
+
         return imageIndex;
     }
 
-    private void submitDrawCommands(final CommandBuffer commandBuffer, final int syncIndex) {
-        final var deviceContext = this.application.backend().deviceContext();
-        final var imageAvailableSemaphore = this.imageAvailableSemaphores[syncIndex];
-        final var renderFinishedSemaphore = this.renderFinishedSemaphores[syncIndex];
-        final var inFlightFence = this.inFlightFences[syncIndex];
-
-        deviceContext.getGraphicsQueue()
-                     .submit(commandBuffer,
-                             inFlightFence,
-                             new long[]{imageAvailableSemaphore},
-                             new int[]{VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT},
-                             new long[]{renderFinishedSemaphore});
+    private void submitDrawCommands(final CommandBuffer commandBuffer) {
+        this.application.backend()
+                        .deviceContext()
+                        .getGraphicsQueue()
+                        .submit(commandBuffer,
+                                this.inFlightFences[this.frameIndex],
+                                new long[]{this.imageAvailableSemaphores[this.frameIndex]},
+                                new int[]{VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT},
+                                new long[]{this.renderFinishedSemaphores[this.frameIndex]});
     }
 
-    private void presentImage(
-            final int syncIndex,
-            final int imageIndex
-    ) {
+    private void presentImage(final int imageIndex) {
         try (final var stack = stackPush()) {
             final var presentInfo = VkPresentInfoKHR
                     .callocStack()
                     .sType(VK_STRUCTURE_TYPE_PRESENT_INFO_KHR)
-                    .pWaitSemaphores(stack.longs(this.renderFinishedSemaphores[syncIndex]))
+                    .pWaitSemaphores(stack.longs(this.renderFinishedSemaphores[this.frameIndex]))
                     .swapchainCount(1)
-                    .pSwapchains(stack.longs(this.application.swapchain().getHandle()))
+                    .pSwapchains(stack.longs(this.application.renderer().getSwapchain().getHandle()))
                     .pImageIndices(stack.ints(imageIndex));
 
             final var deviceContext = this.application.backend().deviceContext();
@@ -174,7 +147,7 @@ public class ApplicationRunner implements AutoCloseable {
         }
     }
 
-    public void recreateSwapchain() {
+    private void recreateSwapchain() {
         waitUntilNotMinimized();
 
         vkDeviceWaitIdle(this.application.backend().deviceContext().getDevice());
@@ -182,13 +155,6 @@ public class ApplicationRunner implements AutoCloseable {
         this.framebufferResized = false;
 
         this.application.recreateSwapchain();
-
-        this.commands.close();
-        this.commands = new RenderCommandBuffers(this.application.graphicsCommandPool(),
-                                                 this.application.swapchain().getImageCount(),
-                                                 this.application.renderPass(),
-                                                 this.application.framebuffers(),
-                                                 this.application.graphicsPipeline());
     }
 
     private void waitUntilNotMinimized() {
