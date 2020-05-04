@@ -9,6 +9,8 @@ import java.util.Arrays;
 
 import fi.jakojaannos.roguelite.util.BufferUtil;
 import fi.jakojaannos.roguelite.vulkan.command.GPUQueue;
+import fi.jakojaannos.roguelite.vulkan.memory.MemoryManager;
+import fi.jakojaannos.roguelite.vulkan.memory.slice.SliceMemoryManager;
 
 import static fi.jakojaannos.roguelite.util.VkUtil.ensureSuccess;
 import static org.lwjgl.system.MemoryStack.stackGet;
@@ -25,6 +27,8 @@ public class DeviceContext implements AutoCloseable {
     private final GPUQueue transferQueue;
     private final GPUQueue presentQueue;
     private final QueueFamilies queueFamilies;
+
+    private final MemoryManager memoryManager;
 
     public GPUQueue getGraphicsQueue() {
         return this.graphicsQueue;
@@ -48,6 +52,10 @@ public class DeviceContext implements AutoCloseable {
 
     public QueueFamilies getQueueFamilies() {
         return this.queueFamilies;
+    }
+
+    public MemoryManager getMemoryManager() {
+        return this.memoryManager;
     }
 
     public DeviceContext(
@@ -88,6 +96,8 @@ public class DeviceContext implements AutoCloseable {
         this.graphicsQueue = new GPUQueue(this.device, queueFamilies.graphics(), 0);
         this.transferQueue = new GPUQueue(this.device, queueFamilies.transfer(), 0);
         this.presentQueue = new GPUQueue(this.device, queueFamilies.present(), 0);
+
+        this.memoryManager = new SliceMemoryManager(this);
     }
 
     public VkDeviceQueueCreateInfo.Buffer createQueueCreateInfos(final QueueFamilies queueFamilies) {
