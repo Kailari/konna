@@ -38,7 +38,7 @@ public class GPUMemorySlice implements GPUMemory {
         ensureSuccess(vkBindBufferMemory(this.allocation.getDevice(),
                                          handle,
                                          this.allocation.getHandle(),
-                                         offset),
+                                         this.offset + offset),
                       "Binding buffer memory failed");
     }
 
@@ -47,7 +47,7 @@ public class GPUMemorySlice implements GPUMemory {
         ensureSuccess(vkBindImageMemory(this.allocation.getDevice(),
                                         handle,
                                         this.allocation.getHandle(),
-                                        offset),
+                                        this.offset + offset),
                       "Binding image memory failed");
     }
 

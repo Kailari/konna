@@ -16,12 +16,12 @@ public record Vertex(
             .writer(Vertex::write)
             .build();
 
-    public void write(final ByteBuffer buffer) {
-        buffer.putFloat(this.position.x);
-        buffer.putFloat(this.position.y);
-        buffer.putFloat(this.position.z);
-        buffer.putFloat(this.color.x);
-        buffer.putFloat(this.color.y);
-        buffer.putFloat(this.color.z);
+    public void write(final int offset, final ByteBuffer buffer) {
+        buffer.putFloat(offset, this.position.x);
+        buffer.putFloat(offset + 4, this.position.y);
+        buffer.putFloat(offset + 8, this.position.z);
+        buffer.putFloat(offset + 12, this.color.x);
+        buffer.putFloat(offset + 16, this.color.y);
+        buffer.putFloat(offset + 20, this.color.z);
     }
 }

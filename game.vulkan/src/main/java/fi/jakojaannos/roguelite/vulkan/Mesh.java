@@ -1,14 +1,11 @@
 package fi.jakojaannos.roguelite.vulkan;
 
-import java.nio.ByteBuffer;
-import java.util.function.BiConsumer;
-
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
 
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.VK10.*;
 
-public class Mesh implements AutoCloseable {
+public class Mesh<TVertex> implements AutoCloseable {
     private final GPUBuffer vertexBuffer;
     private final GPUBuffer indexBuffer;
     private final int indexCount;
@@ -27,10 +24,10 @@ public class Mesh implements AutoCloseable {
 
     public Mesh(
             final DeviceContext deviceContext,
-            final Vertex[] vertices,
+            final VertexFormat<TVertex> vertexFormat,
+            final TVertex[] vertices,
             final Short[] indices
     ) {
-        final var vertexFormat = Vertex.FORMAT;
         this.indexCount = indices.length;
 
         this.vertexBuffer = new GPUBuffer(deviceContext,
@@ -41,7 +38,7 @@ public class Mesh implements AutoCloseable {
                      deviceContext,
                      vertices,
                      vertexFormat.getSizeInBytes(),
-                     (buffer, vertex) -> vertex.write(buffer));
+                     vertexFormat::write);
 
         this.indexBuffer = new GPUBuffer(deviceContext,
                                          indices.length * Short.BYTES,
@@ -51,7 +48,7 @@ public class Mesh implements AutoCloseable {
                      deviceContext,
                      indices,
                      Short.BYTES,
-                     ByteBuffer::putShort);
+                     (index, offset, buffer) -> buffer.putShort(offset, index));
     }
 
     @Override
@@ -65,7 +62,7 @@ public class Mesh implements AutoCloseable {
             final DeviceContext deviceContext,
             final T[] values,
             final int elementSize,
-            final BiConsumer<ByteBuffer, T> writer
+            final GPUBuffer.Writer<T> writer
     ) {
         final var commandPool = deviceContext.getTransferCommandPool();
         final var dataSizeInBytes = values.length * elementSize;
@@ -77,11 +74,10 @@ public class Mesh implements AutoCloseable {
                      VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
                      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)
         ) {
-            final var data = stack.malloc(dataSizeInBytes);
-            for (final var value : values) {
-                writer.accept(data, value);
+            final var data = stack.calloc(dataSizeInBytes);
+            for (int i = 0; i < values.length; ++i) {
+                writer.write(values[i], i * elementSize, data);
             }
-            data.flip();
 
             stagingBuffer.push(data, 0, dataSizeInBytes);
             stagingBuffer.copyToAndWait(commandPool, deviceContext.getTransferQueue(), buffer);

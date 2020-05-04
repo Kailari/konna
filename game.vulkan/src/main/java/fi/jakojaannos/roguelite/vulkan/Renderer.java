@@ -21,7 +21,7 @@ public class Renderer implements AutoCloseable {
     private final GraphicsPipeline<Vertex> graphicsPipeline;
     private final Framebuffers framebuffers;
     private final CommandPool commandPool;
-    private final Mesh mesh;
+    private final Mesh<Vertex> mesh;
     private CommandBuffer[] commandBuffers;
 
     public int getSwapchainImageCount() {
@@ -50,15 +50,18 @@ public class Renderer implements AutoCloseable {
                                                   .getQueueFamilies()
                                                   .graphics());
 
-        this.mesh = new Mesh(backend.deviceContext(),
-                             new Vertex[]{
-                                     new Vertex(new Vector3f(0.0f, -0.5f, 0.0f), new Vector3f(1.0f, 0.0f, 0.0f)),
-                                     new Vertex(new Vector3f(0.5f, 0.5f, 0.0f), new Vector3f(0.0f, 1.0f, 0.0f)),
-                                     new Vertex(new Vector3f(-0.5f, 0.5f, 0.0f), new Vector3f(0.0f, 0.0f, 1.0f)),
-                             },
-                             new Short[]{
-                                     0, 1, 2
-                             });
+        this.mesh = new Mesh<>(backend.deviceContext(),
+                               Vertex.FORMAT,
+                               new Vertex[]{
+                                       new Vertex(new Vector3f(-0.5f, -0.5f, 0.0f), new Vector3f(1.0f, 0.0f, 0.0f)),
+                                       new Vertex(new Vector3f(0.5f, -0.5f, 0.0f), new Vector3f(0.0f, 1.0f, 0.0f)),
+                                       new Vertex(new Vector3f(0.5f, 0.5f, 0.0f), new Vector3f(0.0f, 0.0f, 1.0f)),
+                                       new Vertex(new Vector3f(-0.5f, 0.5f, 0.0f), new Vector3f(1.0f, 0.0f, 1.0f)),
+                               },
+                               new Short[]{
+                                       0, 1, 2,
+                                       2, 3, 0
+                               });
 
         recordCommandBuffers();
     }

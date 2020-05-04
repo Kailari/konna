@@ -137,4 +137,8 @@ public class GPUBuffer implements AutoCloseable {
             return deviceContext.getMemoryManager().allocate(memoryRequirements, memoryPropertyFlags);
         }
     }
+
+    public interface Writer<TVertex> {
+        void write(final TVertex vertex, final int offset, final ByteBuffer buffer);
+    }
 }
