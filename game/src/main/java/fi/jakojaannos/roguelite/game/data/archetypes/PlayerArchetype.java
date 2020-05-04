@@ -25,9 +25,9 @@ public class PlayerArchetype {
         weaponInventory.slots[1] = new InventoryWeapon(Weapons.PLAYER_AR);
         weaponInventory.slots[2] = new InventoryWeapon(Weapons.PLAYER_SHOTGUN);
         weaponInventory.slots[3] = new InventoryWeapon(Weapons.PLAYER_MINIGUN_OVERHEAT_1);
-        weaponInventory.slots[4] = new InventoryWeapon(Weapons.PLAYER_MINIGUN_OVERHEAT_2);
-        weaponInventory.slots[5] = new InventoryWeapon(Weapons.PLAYER_MINIGUN_OVERHEAT_3);
-        weaponInventory.slots[6] = new InventoryWeapon(Weapons.PLAYER_MINIGUN_SPREAD);
+        //weaponInventory.slots[4] = new InventoryWeapon(Weapons.PLAYER_MINIGUN_OVERHEAT_2);
+        //weaponInventory.slots[5] = new InventoryWeapon(Weapons.PLAYER_MINIGUN_OVERHEAT_3);
+        //weaponInventory.slots[6] = new InventoryWeapon(Weapons.PLAYER_MINIGUN_SPREAD);
         weaponInventory.slots[7] = new InventoryWeapon(Weapons.PLAYER_TURRET_BUILDER);
         weaponInventory.slots[0] = new InventoryWeapon(Weapons.PLAYER_TEST_AR);
 

@@ -8,6 +8,7 @@ import fi.jakojaannos.roguelite.game.weapons.events.*;
  * Overheat module that increases weapon's overheat from every shot fired, and starts cooling down weapon once user
  * releases trigger. Once overheat reaches its maximum value, the weapon jams for a while.
  */
+@Deprecated
 public class OverheatModule implements WeaponModule<OverheatModule.Attributes> {
     @Override
     public void register(final WeaponHooks hooks, final Attributes attributes) {
