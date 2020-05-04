@@ -20,10 +20,15 @@ public class CommandBuffer implements AutoCloseable {
     }
 
     public CommandBuffer begin() {
+        return begin(0);
+    }
+
+    public CommandBuffer begin(final int flags) {
         try (final var ignored = stackPush()) {
             final var beginInfo = VkCommandBufferBeginInfo
                     .callocStack()
-                    .sType(VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO);
+                    .sType(VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO)
+                    .flags(flags);
             ensureSuccess(vkBeginCommandBuffer(this.handle, beginInfo),
                           "Starting command buffer recording failed");
         }

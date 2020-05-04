@@ -8,6 +8,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import fi.jakojaannos.roguelite.util.BufferUtil;
+import fi.jakojaannos.roguelite.vulkan.command.CommandPool;
 import fi.jakojaannos.roguelite.vulkan.command.GPUQueue;
 import fi.jakojaannos.roguelite.vulkan.memory.MemoryManager;
 import fi.jakojaannos.roguelite.vulkan.memory.slice.SliceMemoryManager;
@@ -23,6 +24,7 @@ public class DeviceContext implements AutoCloseable {
     private final VkPhysicalDevice physicalDevice;
     private final VkDevice device;
 
+    private final CommandPool transferCommandPool;
     private final GPUQueue graphicsQueue;
     private final GPUQueue transferQueue;
     private final GPUQueue presentQueue;
@@ -56,6 +58,10 @@ public class DeviceContext implements AutoCloseable {
 
     public MemoryManager getMemoryManager() {
         return this.memoryManager;
+    }
+
+    public CommandPool getTransferCommandPool() {
+        return this.transferCommandPool;
     }
 
     public DeviceContext(
@@ -98,6 +104,7 @@ public class DeviceContext implements AutoCloseable {
         this.presentQueue = new GPUQueue(this.device, queueFamilies.present(), 0);
 
         this.memoryManager = new SliceMemoryManager(this);
+        this.transferCommandPool = new CommandPool(this.device, queueFamilies.transfer());
     }
 
     public VkDeviceQueueCreateInfo.Buffer createQueueCreateInfos(final QueueFamilies queueFamilies) {
@@ -120,6 +127,8 @@ public class DeviceContext implements AutoCloseable {
 
     @Override
     public void close() {
+        this.memoryManager.close();
+        this.transferCommandPool.close();
         vkDestroyDevice(this.device, null);
     }
 }

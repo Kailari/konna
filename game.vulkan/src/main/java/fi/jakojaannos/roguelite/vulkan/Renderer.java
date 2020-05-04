@@ -1,5 +1,7 @@
 package fi.jakojaannos.roguelite.vulkan;
 
+import org.joml.Vector3f;
+
 import java.nio.file.Path;
 
 import fi.jakojaannos.roguelite.vulkan.command.CommandBuffer;
@@ -16,10 +18,10 @@ import static org.lwjgl.vulkan.VK10.*;
 public class Renderer implements AutoCloseable {
     private final Swapchain swapchain;
     private final RenderPass renderPass;
-    private final GraphicsPipeline graphicsPipeline;
+    private final GraphicsPipeline<Vertex> graphicsPipeline;
     private final Framebuffers framebuffers;
     private final CommandPool commandPool;
-
+    private final Mesh mesh;
     private CommandBuffer[] commandBuffers;
 
     public int getSwapchainImageCount() {
@@ -37,15 +39,26 @@ public class Renderer implements AutoCloseable {
         this.framebuffers = new Framebuffers(backend.deviceContext(),
                                              this.swapchain,
                                              this.renderPass);
-        this.graphicsPipeline = new GraphicsPipeline(assetRoot,
-                                                     backend.deviceContext(),
-                                                     this.swapchain,
-                                                     this.renderPass);
+        this.graphicsPipeline = new GraphicsPipeline<>(assetRoot,
+                                                       backend.deviceContext(),
+                                                       this.swapchain,
+                                                       this.renderPass,
+                                                       Vertex.FORMAT);
 
         this.commandPool = new CommandPool(backend.deviceContext().getDevice(),
                                            backend.deviceContext()
                                                   .getQueueFamilies()
                                                   .graphics());
+
+        this.mesh = new Mesh(backend.deviceContext(),
+                             new Vertex[]{
+                                     new Vertex(new Vector3f(0.0f, -0.5f, 0.0f), new Vector3f(1.0f, 0.0f, 0.0f)),
+                                     new Vertex(new Vector3f(0.5f, 0.5f, 0.0f), new Vector3f(0.0f, 1.0f, 0.0f)),
+                                     new Vertex(new Vector3f(-0.5f, 0.5f, 0.0f), new Vector3f(0.0f, 0.0f, 1.0f)),
+                             },
+                             new Short[]{
+                                     0, 1, 2
+                             });
 
         recordCommandBuffers();
     }
@@ -71,14 +84,29 @@ public class Renderer implements AutoCloseable {
             final var commandBuffer = this.commandBuffers[i];
             final var framebuffer = this.framebuffers.get(i);
 
-            try (final var ignored = commandBuffer.begin();
+            try (final var stack = stackPush();
+                 final var ignored = commandBuffer.begin();
                  final var ignored2 = this.renderPass.begin(framebuffer, commandBuffer)
             ) {
                 vkCmdBindPipeline(commandBuffer.getHandle(),
                                   VK_PIPELINE_BIND_POINT_GRAPHICS,
                                   this.graphicsPipeline.getHandle());
 
-                vkCmdDraw(commandBuffer.getHandle(), 3, 1, 0, 0);
+                vkCmdBindVertexBuffers(commandBuffer.getHandle(),
+                                       0,
+                                       stack.longs(this.mesh.getVertexBuffer().getHandle()),
+                                       stack.longs(0L));
+                vkCmdBindIndexBuffer(commandBuffer.getHandle(),
+                                     this.mesh.getIndexBuffer().getHandle(),
+                                     0,
+                                     VK_INDEX_TYPE_UINT16);
+
+                vkCmdDrawIndexed(commandBuffer.getHandle(),
+                                 this.mesh.getIndexCount(),
+                                 1,
+                                 0,
+                                 0,
+                                 0);
             }
         }
     }
@@ -97,6 +125,8 @@ public class Renderer implements AutoCloseable {
 
     @Override
     public void close() {
+        this.mesh.close();
+
         this.commandPool.close();
         this.framebuffers.close();
         this.renderPass.close();

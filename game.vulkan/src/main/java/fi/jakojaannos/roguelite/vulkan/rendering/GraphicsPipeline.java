@@ -10,12 +10,13 @@ import java.nio.file.Path;
 import fi.jakojaannos.roguelite.util.RecreateCloseable;
 import fi.jakojaannos.roguelite.util.shader.ShaderCompiler;
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
+import fi.jakojaannos.roguelite.vulkan.VertexFormat;
 
 import static fi.jakojaannos.roguelite.util.VkUtil.translateVulkanResult;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.VK10.*;
 
-public class GraphicsPipeline extends RecreateCloseable {
+public class GraphicsPipeline<TVertex> extends RecreateCloseable {
     private static final int ALL_COLOR_COMPONENTS = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
 
     private final DeviceContext deviceContext;
@@ -24,6 +25,7 @@ public class GraphicsPipeline extends RecreateCloseable {
 
     private final ByteBuffer compiledVertexShader;
     private final ByteBuffer compiledFragmentShader;
+    private final VertexFormat<TVertex> vertexFormat;
 
     private long pipelineLayout;
     private long handle;
@@ -41,11 +43,13 @@ public class GraphicsPipeline extends RecreateCloseable {
             final Path assetRoot,
             final DeviceContext deviceContext,
             final Swapchain swapchain,
-            final RenderPass renderPass
+            final RenderPass renderPass,
+            final VertexFormat<TVertex> vertexFormat
     ) {
         this.deviceContext = deviceContext;
         this.swapchain = swapchain;
         this.renderPass = renderPass;
+        this.vertexFormat = vertexFormat;
 
         try {
             this.compiledVertexShader = ShaderCompiler.loadGLSLShader(assetRoot.resolve("shaders/vulkan/shader.vert"),
@@ -154,7 +158,9 @@ public class GraphicsPipeline extends RecreateCloseable {
     private VkPipelineVertexInputStateCreateInfo createVertexInputInfo() {
         return VkPipelineVertexInputStateCreateInfo
                 .callocStack()
-                .sType(VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO);
+                .sType(VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO)
+                .pVertexAttributeDescriptions(this.vertexFormat.getAttributes())
+                .pVertexBindingDescriptions(this.vertexFormat.getBindings());
     }
 
     private VkPipelineInputAssemblyStateCreateInfo createInputAssembly() {

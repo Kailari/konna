@@ -12,4 +12,7 @@ public interface MemoryManager extends AutoCloseable {
      * @return handle to the allocated memory region
      */
     GPUMemory allocate(VkMemoryRequirements memoryRequirements, int propertyFlags);
+
+    @Override
+    void close();
 }
