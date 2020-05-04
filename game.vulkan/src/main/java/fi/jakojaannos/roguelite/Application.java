@@ -2,7 +2,7 @@ package fi.jakojaannos.roguelite;
 
 import java.nio.file.Path;
 
-import fi.jakojaannos.roguelite.vulkan.CommandPool;
+import fi.jakojaannos.roguelite.vulkan.command.CommandPool;
 import fi.jakojaannos.roguelite.vulkan.RenderingBackend;
 import fi.jakojaannos.roguelite.vulkan.rendering.Framebuffers;
 import fi.jakojaannos.roguelite.vulkan.rendering.GraphicsPipeline;
@@ -12,7 +12,6 @@ import fi.jakojaannos.roguelite.vulkan.window.Window;
 
 import static org.lwjgl.glfw.GLFW.glfwInit;
 import static org.lwjgl.glfw.GLFWVulkan.glfwVulkanSupported;
-import static org.lwjgl.vulkan.VK10.vkDeviceWaitIdle;
 
 
 public record Application(

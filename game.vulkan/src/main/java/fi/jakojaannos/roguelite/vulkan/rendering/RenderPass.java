@@ -3,7 +3,7 @@ package fi.jakojaannos.roguelite.vulkan.rendering;
 import org.lwjgl.vulkan.*;
 
 import fi.jakojaannos.roguelite.util.RecreateCloseable;
-import fi.jakojaannos.roguelite.vulkan.CommandBuffer;
+import fi.jakojaannos.roguelite.vulkan.command.CommandBuffer;
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
 
 import static fi.jakojaannos.roguelite.util.VkUtil.ensureSuccess;

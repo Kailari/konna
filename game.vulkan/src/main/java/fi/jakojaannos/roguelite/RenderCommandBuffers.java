@@ -1,7 +1,7 @@
 package fi.jakojaannos.roguelite;
 
-import fi.jakojaannos.roguelite.vulkan.CommandBuffer;
-import fi.jakojaannos.roguelite.vulkan.CommandPool;
+import fi.jakojaannos.roguelite.vulkan.command.CommandBuffer;
+import fi.jakojaannos.roguelite.vulkan.command.CommandPool;
 import fi.jakojaannos.roguelite.vulkan.rendering.Framebuffers;
 import fi.jakojaannos.roguelite.vulkan.rendering.GraphicsPipeline;
 import fi.jakojaannos.roguelite.vulkan.rendering.RenderPass;

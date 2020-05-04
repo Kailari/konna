@@ -8,6 +8,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import fi.jakojaannos.roguelite.util.BufferUtil;
+import fi.jakojaannos.roguelite.vulkan.command.GPUQueue;
 
 import static fi.jakojaannos.roguelite.util.VkUtil.ensureSuccess;
 import static org.lwjgl.system.MemoryStack.stackGet;
@@ -20,20 +21,20 @@ public class DeviceContext implements AutoCloseable {
     private final VkPhysicalDevice physicalDevice;
     private final VkDevice device;
 
-    private final VkQueue graphicsQueue;
-    private final VkQueue transferQueue;
-    private final VkQueue presentQueue;
+    private final GPUQueue graphicsQueue;
+    private final GPUQueue transferQueue;
+    private final GPUQueue presentQueue;
     private final QueueFamilies queueFamilies;
 
-    public VkQueue getGraphicsQueue() {
+    public GPUQueue getGraphicsQueue() {
         return this.graphicsQueue;
     }
 
-    public VkQueue getTransferQueue() {
+    public GPUQueue getTransferQueue() {
         return this.transferQueue;
     }
 
-    public VkQueue getPresentQueue() {
+    public GPUQueue getPresentQueue() {
         return this.presentQueue;
     }
 
@@ -84,18 +85,9 @@ public class DeviceContext implements AutoCloseable {
             this.device = new VkDevice(pDevice.get(0), physicalDevice, createInfo);
         }
 
-        this.graphicsQueue = getQueue(queueFamilies.graphics(), 0);
-        this.transferQueue = getQueue(queueFamilies.transfer(), 0);
-        this.presentQueue = getQueue(queueFamilies.present(), 0);
-    }
-
-    public VkQueue getQueue(final int queueFamilyIndex, final int index) {
-        try (final var stack = stackPush()) {
-            final var pQueue = stack.mallocPointer(1);
-            vkGetDeviceQueue(this.device, queueFamilyIndex, index, pQueue);
-
-            return new VkQueue(pQueue.get(0), this.device);
-        }
+        this.graphicsQueue = new GPUQueue(this.device, queueFamilies.graphics(), 0);
+        this.transferQueue = new GPUQueue(this.device, queueFamilies.transfer(), 0);
+        this.presentQueue = new GPUQueue(this.device, queueFamilies.present(), 0);
     }
 
     public VkDeviceQueueCreateInfo.Buffer createQueueCreateInfos(final QueueFamilies queueFamilies) {

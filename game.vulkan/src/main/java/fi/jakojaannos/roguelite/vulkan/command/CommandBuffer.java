@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.vulkan;
+package fi.jakojaannos.roguelite.vulkan.command;
 
 import org.lwjgl.vulkan.VkCommandBuffer;
 import org.lwjgl.vulkan.VkCommandBufferBeginInfo;

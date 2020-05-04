@@ -3,13 +3,12 @@ package fi.jakojaannos.roguelite;
 import org.lwjgl.vulkan.VkFenceCreateInfo;
 import org.lwjgl.vulkan.VkPresentInfoKHR;
 import org.lwjgl.vulkan.VkSemaphoreCreateInfo;
-import org.lwjgl.vulkan.VkSubmitInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 
-import fi.jakojaannos.roguelite.vulkan.CommandBuffer;
+import fi.jakojaannos.roguelite.vulkan.command.CommandBuffer;
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
 
 import static fi.jakojaannos.roguelite.util.VkUtil.ensureSuccess;
@@ -92,13 +91,17 @@ public class ApplicationRunner implements AutoCloseable {
      */
     private boolean drawFrame(final RenderCommandBuffers renderCommandBuffers, final int currentFrame) {
         final var syncIndex = currentFrame % MAX_FRAMES_IN_FLIGHT;
+        vkWaitForFences(this.application.backend().deviceContext().getDevice(),
+                        this.inFlightFences[syncIndex],
+                        true,
+                        -1L);
 
         final int imageIndex = acquireNextImage(syncIndex);
         if (imageIndex == -1) {
             return true;
         }
 
-        submitDrawCommandBuffer(renderCommandBuffers.get(imageIndex), syncIndex);
+        submitDrawCommands(renderCommandBuffers.get(imageIndex), syncIndex);
         presentImage(syncIndex, imageIndex);
 
         return false;
@@ -120,8 +123,7 @@ public class ApplicationRunner implements AutoCloseable {
                 recreateSwapchain();
                 return -1;
             } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
-                throw new IllegalStateException("Acquiring swapchain image failed: "
-                                                + translateVulkanResult(result));
+                throw new IllegalStateException("Acquiring swapchain image failed: " + translateVulkanResult(result));
             }
             imageIndex = pImageIndex.get(0);
         }
@@ -133,28 +135,18 @@ public class ApplicationRunner implements AutoCloseable {
         return imageIndex;
     }
 
-    private void submitDrawCommandBuffer(
-            final CommandBuffer commandBuffer,
-            final int syncIndex
-    ) {
+    private void submitDrawCommands(final CommandBuffer commandBuffer, final int syncIndex) {
         final var deviceContext = this.application.backend().deviceContext();
+        final var imageAvailableSemaphore = this.imageAvailableSemaphores[syncIndex];
+        final var renderFinishedSemaphore = this.renderFinishedSemaphores[syncIndex];
+        final var inFlightFence = this.inFlightFences[syncIndex];
 
-        try (final var stack = stackPush()) {
-            final var submitInfo = VkSubmitInfo
-                    .callocStack(1)
-                    .sType(VK_STRUCTURE_TYPE_SUBMIT_INFO)
-                    .waitSemaphoreCount(1)
-                    .pWaitSemaphores(stack.longs(this.imageAvailableSemaphores[syncIndex]))
-                    .pWaitDstStageMask(stack.ints(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT))
-                    .pCommandBuffers(stack.pointers(commandBuffer.getHandle()))
-                    .pSignalSemaphores(stack.longs(this.renderFinishedSemaphores[syncIndex]));
-
-            vkResetFences(deviceContext.getDevice(), this.inFlightFences[syncIndex]);
-            ensureSuccess(vkQueueSubmit(deviceContext.getGraphicsQueue(),
-                                        submitInfo,
-                                        this.inFlightFences[syncIndex]),
-                          "Rendering command submit failed");
-        }
+        deviceContext.getGraphicsQueue()
+                     .submit(commandBuffer,
+                             inFlightFence,
+                             new long[]{imageAvailableSemaphore},
+                             new int[]{VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT},
+                             new long[]{renderFinishedSemaphore});
     }
 
     private void presentImage(
@@ -171,7 +163,8 @@ public class ApplicationRunner implements AutoCloseable {
                     .pImageIndices(stack.ints(imageIndex));
 
             final var deviceContext = this.application.backend().deviceContext();
-            final var result = vkQueuePresentKHR(deviceContext.getPresentQueue(), presentInfo);
+            final var result = vkQueuePresentKHR(deviceContext.getPresentQueue().getHandle(),
+                                                 presentInfo);
             if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || this.framebufferResized) {
                 recreateSwapchain();
             } else if (result != VK_SUCCESS) {
