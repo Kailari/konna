@@ -29,6 +29,14 @@ public class GPUBuffer implements AutoCloseable {
         return this.handle;
     }
 
+    public GPUMemory getMemory() {
+        return this.memory;
+    }
+
+    public long getSize() {
+        return this.size;
+    }
+
     public GPUBuffer(
             final DeviceContext deviceContext,
             final long size,
@@ -138,7 +146,4 @@ public class GPUBuffer implements AutoCloseable {
         }
     }
 
-    public interface Writer<TVertex> {
-        void write(final TVertex vertex, final int offset, final ByteBuffer buffer);
-    }
 }

@@ -1,5 +1,6 @@
 package fi.jakojaannos.roguelite.vulkan;
 
+import fi.jakojaannos.roguelite.util.BufferWriter;
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
 
 import static org.lwjgl.system.MemoryStack.stackPush;
@@ -62,7 +63,7 @@ public class Mesh<TVertex> implements AutoCloseable {
             final DeviceContext deviceContext,
             final T[] values,
             final int elementSize,
-            final GPUBuffer.Writer<T> writer
+            final BufferWriter<T> writer
     ) {
         final var commandPool = deviceContext.getTransferCommandPool();
         final var dataSizeInBytes = values.length * elementSize;

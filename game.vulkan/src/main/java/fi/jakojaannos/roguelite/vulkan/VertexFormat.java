@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import fi.jakojaannos.roguelite.util.BufferWriter;
+
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.VK10.*;
 
@@ -17,7 +19,7 @@ public class VertexFormat<TVertex> implements AutoCloseable {
     private final VkVertexInputAttributeDescription.Buffer attributes;
     private final int sizeInBytes;
 
-    private final GPUBuffer.Writer<TVertex> writer;
+    private final BufferWriter<TVertex> writer;
 
     public VkVertexInputBindingDescription.Buffer getBindings() {
         return this.bindings;
@@ -35,7 +37,7 @@ public class VertexFormat<TVertex> implements AutoCloseable {
             final List<VkVertexInputBindingDescription> bindings,
             final List<VkVertexInputAttributeDescription> attributes,
             final int sizeInBytes,
-            final GPUBuffer.Writer<TVertex> writer
+            final BufferWriter<TVertex> writer
     ) {
         this.bindings = VkVertexInputBindingDescription.calloc(bindings.size());
         for (int i = 0; i < bindings.size(); i++) {
@@ -67,7 +69,7 @@ public class VertexFormat<TVertex> implements AutoCloseable {
     public static class Builder<TVertex> {
         private final List<VkVertexInputAttributeDescription> attributes = new ArrayList<>();
 
-        private GPUBuffer.Writer<TVertex> writer;
+        private BufferWriter<TVertex> writer;
         private int sizeInBytes;
 
         /**
@@ -101,7 +103,7 @@ public class VertexFormat<TVertex> implements AutoCloseable {
          *
          * @return this builder for chaining
          */
-        public Builder<TVertex> writer(final GPUBuffer.Writer<TVertex> writer) {
+        public Builder<TVertex> writer(final BufferWriter<TVertex> writer) {
             this.writer = writer;
             return this;
         }

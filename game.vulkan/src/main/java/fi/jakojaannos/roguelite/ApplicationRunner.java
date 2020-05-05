@@ -23,6 +23,9 @@ public class ApplicationRunner implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(ApplicationRunner.class);
     private static final int MAX_FRAMES_IN_FLIGHT = 2;
 
+    private static final double DEGREES_PER_SECOND = 33.0;
+    private static final double RADIANS_PER_SECOND = Math.toRadians(DEGREES_PER_SECOND);
+
     private final long[] imageAvailableSemaphores;
     private final long[] renderFinishedSemaphores;
     private final long[] inFlightFences;
@@ -33,6 +36,8 @@ public class ApplicationRunner implements AutoCloseable {
 
     private boolean framebufferResized;
     private int frameIndex;
+
+    private double angle;
 
     public ApplicationRunner(final Application application) {
         this.application = application;
@@ -59,7 +64,12 @@ public class ApplicationRunner implements AutoCloseable {
         this.frameIndex = -1;
 
         try {
+            var timestamp = System.currentTimeMillis();
             while (this.application.window().isOpen()) {
+                final var currentTime = System.currentTimeMillis();
+                final var delta = (currentTime - timestamp) / 1000.0;
+                timestamp = currentTime;
+
                 this.application.window().handleOSEvents();
 
                 // Proceed to the next frame and wait until the frame fence is free. This prevents
@@ -75,11 +85,11 @@ public class ApplicationRunner implements AutoCloseable {
                     continue;
                 }
 
-                submitDrawCommands(this.application.renderer().getCommands(imageIndex));
+                drawFrame(delta, this.application.renderer().getCommands(imageIndex), imageIndex);
                 presentImage(imageIndex);
             }
         } catch (final Throwable t) {
-            LOG.error("Application has crashed: " + t.getMessage());
+            LOG.error("Application has crashed: " + t);
         }
     }
 
@@ -114,7 +124,12 @@ public class ApplicationRunner implements AutoCloseable {
         return imageIndex;
     }
 
-    private void submitDrawCommands(final CommandBuffer commandBuffer) {
+    private void drawFrame(final double delta, final CommandBuffer commandBuffer, final int imageIndex) {
+        this.angle += delta * RADIANS_PER_SECOND;
+        this.application.renderer()
+                        .getCameraUBO()
+                        .update(imageIndex, this.angle);
+
         this.application.backend()
                         .deviceContext()
                         .getGraphicsQueue()
