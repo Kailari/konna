@@ -74,8 +74,12 @@ public class UniformBufferObject extends RecreateCloseable {
         this.descriptorSets = allocateDescriptorSets();
 
         for (int imageIndex = 0; imageIndex < this.descriptorSets.length; imageIndex++) {
+            final var descriptorWrites = VkWriteDescriptorSet.callocStack(this.bindings.length);
+
             // FIXME: This is basically "full write" for all bindings?
-            for (final var binding : this.bindings) {
+            for (var i = 0; i < this.bindings.length; ++i) {
+                final var binding = this.bindings[i];
+
                 final var buffer = binding.getBuffer(imageIndex);
                 final var bufferInfo = VkDescriptorBufferInfo
                         .callocStack(1)
@@ -83,22 +87,21 @@ public class UniformBufferObject extends RecreateCloseable {
                         .offset(0)
                         .range(buffer.getSize());
 
-                final var descriptorWrites = VkWriteDescriptorSet
-                        .callocStack(1)
-                        .sType(VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
-                        .dstSet(this.descriptorSets[imageIndex])
-                        .dstBinding(binding.getBinding())
-                        .descriptorType(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
-                        .descriptorCount(1)
-                        .pBufferInfo(bufferInfo)
-                        .dstArrayElement(0);
-
-                // NOTE: Why don't we need to call this every frame? Well, the bindings allocate the buffers
-                //       as HOST_COHERENT, so we point the GPU at the memory once and it knows where to look
-                //       from there on.
-                // FIXME: This should happen in binding update(), too (in cases where backing buffer is not HOST_COHERENT)
-                vkUpdateDescriptorSets(this.deviceContext.getDevice(), descriptorWrites, null);
+                descriptorWrites.get(i)
+                                .sType(VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
+                                .dstSet(this.descriptorSets[imageIndex])
+                                .dstBinding(binding.getBinding())
+                                .descriptorType(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
+                                .descriptorCount(1)
+                                .pBufferInfo(bufferInfo)
+                                .dstArrayElement(0);
             }
+
+            // NOTE: Why don't we need to call this every frame? Well, the bindings allocate the buffers
+            //       as HOST_COHERENT, so we point the GPU at the memory once and it knows where to look
+            //       from there on.
+            // FIXME: This should happen in binding update(), too (in cases where backing buffer is not HOST_COHERENT)
+            vkUpdateDescriptorSets(this.deviceContext.getDevice(), descriptorWrites, null);
         }
     }
 

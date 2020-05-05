@@ -7,12 +7,15 @@ layout(location = 1) in vec3 inColor;
 layout(location = 0) out vec3 fragColor;
 
 layout(binding = 0) uniform CameraInfo {
-    mat4 model;
     mat4 view;
     mat4 projection;
 } camera;
 
+layout(binding = 1) uniform InstanceInfo {
+    mat4 model;
+} instance;
+
 void main() {
-    gl_Position = camera.projection * camera.view * camera.model * vec4(inPosition, 1.0);
+    gl_Position = camera.projection * camera.view * instance.model * vec4(inPosition, 1.0);
     fragColor = inColor;
 }

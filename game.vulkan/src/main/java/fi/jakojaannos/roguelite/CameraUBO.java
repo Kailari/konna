@@ -14,17 +14,13 @@ import fi.jakojaannos.roguelite.vulkan.uniform.UniformBufferObject;
 import static org.lwjgl.vulkan.VK10.VK_SHADER_STAGE_VERTEX_BIT;
 
 public class CameraUBO implements AutoCloseable {
-    private static final int SIZE_IN_BYTES = 3 * 16 * Float.BYTES;
-
-    private static final int OFFSET_MODEL = 0;
-    private static final int OFFSET_VIEW = 16 * Float.BYTES;
-    private static final int OFFSET_PROJECTION = 32 * Float.BYTES;
-
     private final Swapchain swapchain;
     private final UniformBufferObject ubo;
-    private final UniformBinding<Matrices> matrixBinding;
+    private final UniformBinding<CameraMatrices> cameraBinding;
+    private final UniformBinding<InstanceMatrices> instanceBinding;
 
-    private final Matrices matrices;
+    private final CameraMatrices cameraMatrices;
+    private final InstanceMatrices instanceMatrices;
 
     private final Vector3f eyePosition;
     private final Vector3f lookAtTarget;
@@ -40,16 +36,28 @@ public class CameraUBO implements AutoCloseable {
             final DescriptorPool descriptorPool
     ) {
         this.swapchain = swapchain;
-        this.matrixBinding = new UniformBinding<>(deviceContext,
+        this.cameraBinding = new UniformBinding<>(deviceContext,
                                                   swapchain,
                                                   0,
                                                   VK_SHADER_STAGE_VERTEX_BIT,
                                                   1,
-                                                  SIZE_IN_BYTES,
-                                                  Matrices::write);
-        this.ubo = new UniformBufferObject(deviceContext, swapchain, descriptorPool, this.matrixBinding);
+                                                  CameraMatrices.SIZE_IN_BYTES,
+                                                  CameraMatrices::write);
+        this.instanceBinding = new UniformBinding<>(deviceContext,
+                                                    swapchain,
+                                                    1,
+                                                    VK_SHADER_STAGE_VERTEX_BIT,
+                                                    1,
+                                                    InstanceMatrices.SIZE_IN_BYTES,
+                                                    InstanceMatrices::write);
+        this.ubo = new UniformBufferObject(deviceContext,
+                                           swapchain,
+                                           descriptorPool,
+                                           this.cameraBinding,
+                                           this.instanceBinding);
 
-        this.matrices = new Matrices();
+        this.cameraMatrices = new CameraMatrices();
+        this.instanceMatrices = new InstanceMatrices();
 
         this.eyePosition = new Vector3f(2.0f, 2.0f, 2.0f);
         this.lookAtTarget = new Vector3f(0.0f, 0.0f, 0.0f);
@@ -62,20 +70,24 @@ public class CameraUBO implements AutoCloseable {
 
     public void update(final int imageIndex, final double angle) {
         final var aspectRatio = this.swapchain.getExtent().width() / (float) this.swapchain.getExtent().height();
-        this.matrices.projection.identity()
-                                .perspective((float) Math.toRadians(45.0),
-                                             aspectRatio,
-                                             0.1f, 1000.0f, true);
+        this.cameraMatrices.projection.identity()
+                                      .perspective((float) Math.toRadians(45.0),
+                                                   aspectRatio,
+                                                   0.1f, 1000.0f, true);
         // Flip the Y-axis
-        this.matrices.projection.m11(this.matrices.projection.m11() * -1.0f);
+        this.cameraMatrices.projection.m11(this.cameraMatrices.projection.m11() * -1.0f);
 
-        this.matrices.view.identity()
-                          .lookAt(this.eyePosition, this.lookAtTarget, this.up);
+        this.cameraMatrices.view.identity()
+                                .lookAt(this.eyePosition, this.lookAtTarget, this.up);
 
-        this.matrices.model.identity()
-                           .rotateZ((float) angle);
 
-        this.matrixBinding.update(imageIndex, 0, this.matrices);
+        this.cameraBinding.update(imageIndex, 0, this.cameraMatrices);
+
+
+        this.instanceMatrices.model.identity()
+                                   .rotateZ((float) angle);
+
+        this.instanceBinding.update(imageIndex, 0, this.instanceMatrices);
     }
 
     @Override
@@ -83,13 +95,28 @@ public class CameraUBO implements AutoCloseable {
         this.ubo.close();
     }
 
-    private static class Matrices {
+    private static class InstanceMatrices {
+        private static final int OFFSET_MODEL = 0;
+
+        private static final int SIZE_IN_BYTES = 16 * Float.BYTES;
+
         private final Matrix4f model = new Matrix4f().identity();
+
+        public void write(final int offset, final ByteBuffer buffer) {
+            this.model.get(offset + OFFSET_MODEL, buffer);
+        }
+    }
+
+    private static class CameraMatrices {
+        private static final int SIZE_IN_BYTES = 2 * 16 * Float.BYTES;
+
+        private static final int OFFSET_VIEW = 0;
+        private static final int OFFSET_PROJECTION = 16 * Float.BYTES;
+
         private final Matrix4f view = new Matrix4f().identity();
         private final Matrix4f projection = new Matrix4f().identity();
 
         public void write(final int offset, final ByteBuffer buffer) {
-            this.model.get(offset + OFFSET_MODEL, buffer);
             this.view.get(offset + OFFSET_VIEW, buffer);
             this.projection.get(offset + OFFSET_PROJECTION, buffer);
         }
