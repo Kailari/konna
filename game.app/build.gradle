@@ -38,7 +38,7 @@ dependencies {
     implementation "org.lwjgl:lwjgl"
     for (lwjglModule in ["", "-assimp", "-glfw", "-openal", "-opengl", "-stb", "-opengl"]) {
         testImplementation "org.lwjgl:lwjgl${lwjglModule}"
-        testRuntime "org.lwjgl:lwjgl${lwjglModule}::${lwjglNatives}"
+        testRuntimeOnly "org.lwjgl:lwjgl${lwjglModule}::${lwjglNatives}"
     }
 
     // Cucumber for fancy tests
