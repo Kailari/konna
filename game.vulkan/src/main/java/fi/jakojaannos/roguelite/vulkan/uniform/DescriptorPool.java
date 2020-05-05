@@ -3,18 +3,28 @@ package fi.jakojaannos.roguelite.vulkan.uniform;
 import org.lwjgl.vulkan.VkDescriptorPoolCreateInfo;
 import org.lwjgl.vulkan.VkDescriptorPoolSize;
 
+import fi.jakojaannos.roguelite.util.RecreateCloseable;
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
 
 import static fi.jakojaannos.roguelite.util.VkUtil.ensureSuccess;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.VK10.*;
 
-public class DescriptorPool implements AutoCloseable {
+public class DescriptorPool extends RecreateCloseable {
     private final DeviceContext deviceContext;
-    private final long handle;
+
+    private final int maxSets;
+    private final Pool[] pools;
+
+    private long handle;
 
     public long getHandle() {
         return this.handle;
+    }
+
+    @Override
+    protected boolean isRecreateRequired() {
+        return true;
     }
 
     public DescriptorPool(
@@ -23,19 +33,28 @@ public class DescriptorPool implements AutoCloseable {
             final Pool... pools
     ) {
         this.deviceContext = deviceContext;
+
+        this.maxSets = maxSets;
+        this.pools = pools;
+
+        tryRecreate();
+    }
+
+    @Override
+    protected void recreate() {
         try (final var stack = stackPush()) {
-            final var poolSizes = VkDescriptorPoolSize.callocStack(pools.length);
-            for (int i = 0; i < pools.length; i++) {
+            final var poolSizes = VkDescriptorPoolSize.callocStack(this.pools.length);
+            for (int i = 0; i < this.pools.length; i++) {
                 poolSizes.get(i)
-                         .type(pools[i].type)
-                         .descriptorCount(pools[i].descriptorCount);
+                         .type(this.pools[i].type)
+                         .descriptorCount(this.pools[i].descriptorCount);
             }
 
             final var createInfo = VkDescriptorPoolCreateInfo
                     .callocStack()
                     .sType(VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO)
                     .pPoolSizes(poolSizes)
-                    .maxSets(maxSets);
+                    .maxSets(this.maxSets);
 
             final var pPool = stack.mallocLong(1);
             ensureSuccess(vkCreateDescriptorPool(this.deviceContext.getDevice(),
@@ -48,7 +67,7 @@ public class DescriptorPool implements AutoCloseable {
     }
 
     @Override
-    public void close() {
+    public void cleanup() {
         vkDestroyDescriptorPool(this.deviceContext.getDevice(), this.handle, null);
     }
 

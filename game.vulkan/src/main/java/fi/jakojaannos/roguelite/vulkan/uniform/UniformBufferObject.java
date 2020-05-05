@@ -1,8 +1,6 @@
 package fi.jakojaannos.roguelite.vulkan.uniform;
 
-import org.lwjgl.vulkan.VkCommandBuffer;
-import org.lwjgl.vulkan.VkDescriptorSetLayoutBinding;
-import org.lwjgl.vulkan.VkDescriptorSetLayoutCreateInfo;
+import org.lwjgl.vulkan.*;
 
 import fi.jakojaannos.roguelite.util.RecreateCloseable;
 import fi.jakojaannos.roguelite.vulkan.GPUBuffer;
@@ -16,10 +14,10 @@ import static org.lwjgl.vulkan.VK10.*;
 /**
  * Collection of shader uniforms, stored in a GPU buffer.
  * <p>
- * Each UBO contains one or more <strong>bindings</strong>, which each describe a separate uniform block/variable on the
- * shader. How these bindings are used is described by <i>descriptor set layout</i>. The layout can then be used within
- * a {@link fi.jakojaannos.roguelite.vulkan.rendering.GraphicsPipeline Graphics Pipeline} to tell the pipeline how to
- * use the uniforms.
+ * Each UBO contains one or more <i>bindings</i>, which each describe a separate uniform block/variable on the shader.
+ * How these bindings are used is described by <i>the descriptor set layout</i>. The layout can then be used within a
+ * {@link fi.jakojaannos.roguelite.vulkan.rendering.GraphicsPipeline Graphics Pipeline} to describe what kind of
+ * uniforms the pipeline expects to receive.
  * <p>
  * To update the UBO, use the {@link UniformBinding#update(int, int, Object) update} method on the bindings. Behind the
  * scenes, contents of the UBO are updated by pushing the data to the underlying {@link GPUBuffer buffer}. This buffer
@@ -32,14 +30,16 @@ import static org.lwjgl.vulkan.VK10.*;
 public class UniformBufferObject extends RecreateCloseable {
     private final DeviceContext deviceContext;
     private final Swapchain swapchain;
+    private final DescriptorPool descriptorPool;
+
     private final UniformBinding<?>[] bindings;
 
     private long descriptorSetLayout;
-    private long oldSwapchainImageCount;
+    private long[] descriptorSets;
 
     @Override
     public boolean isRecreateRequired() {
-        return this.oldSwapchainImageCount != this.swapchain.getImageCount();
+        return true;
     }
 
     public long getLayoutHandle() {
@@ -49,18 +49,60 @@ public class UniformBufferObject extends RecreateCloseable {
     public UniformBufferObject(
             final DeviceContext deviceContext,
             final Swapchain swapchain,
+            final DescriptorPool descriptorPool,
             final UniformBinding<?>... bindings
     ) {
         this.deviceContext = deviceContext;
         this.swapchain = swapchain;
+        this.descriptorPool = descriptorPool;
         this.bindings = bindings;
 
         tryRecreate();
     }
 
+    public long getDescriptorSet(final int imageIndex) {
+        return this.descriptorSets[imageIndex];
+    }
+
     @Override
     protected void recreate() {
-        this.oldSwapchainImageCount = this.swapchain.getImageCount();
+        for (final var binding : this.bindings) {
+            binding.tryRecreate();
+        }
+
+        this.descriptorSetLayout = createDescriptorSetLayout();
+        this.descriptorSets = allocateDescriptorSets();
+
+        for (int imageIndex = 0; imageIndex < this.descriptorSets.length; imageIndex++) {
+            // FIXME: This is basically "full write" for all bindings?
+            for (final var binding : this.bindings) {
+                final var buffer = binding.getBuffer(imageIndex);
+                final var bufferInfo = VkDescriptorBufferInfo
+                        .callocStack(1)
+                        .buffer(buffer.getHandle())
+                        .offset(0)
+                        .range(buffer.getSize());
+
+                final var descriptorWrites = VkWriteDescriptorSet
+                        .callocStack(1)
+                        .sType(VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
+                        .dstSet(this.descriptorSets[imageIndex])
+                        .dstBinding(binding.getBinding())
+                        .descriptorType(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
+                        .descriptorCount(1)
+                        .pBufferInfo(bufferInfo)
+                        .dstArrayElement(0);
+
+                // NOTE: Why don't we need to call this every frame? Well, the bindings allocate the buffers
+                //       as HOST_COHERENT, so we point the GPU at the memory once and it knows where to look
+                //       from there on.
+                // FIXME: This should happen in binding update(), too (in cases where backing buffer is not HOST_COHERENT)
+                vkUpdateDescriptorSets(this.deviceContext.getDevice(), descriptorWrites, null);
+            }
+        }
+    }
+
+    private long createDescriptorSetLayout() {
         try (final var stack = stackPush()) {
             final var layoutBindings = VkDescriptorSetLayoutBinding.callocStack(this.bindings.length);
             for (int i = 0; i < this.bindings.length; i++) {
@@ -83,8 +125,31 @@ public class UniformBufferObject extends RecreateCloseable {
                                                       null,
                                                       pLayout),
                           "Creating descriptor set layout failed");
-            this.descriptorSetLayout = pLayout.get(0);
+            return pLayout.get(0);
         }
+    }
+
+    private long[] allocateDescriptorSets() {
+        final var descriptorSets = new long[this.swapchain.getImageCount()];
+
+        try (final var stack = stackPush()) {
+            final var layouts = stack.mallocLong(this.swapchain.getImageCount());
+            for (int i = 0; i < this.swapchain.getImageCount(); i++) {
+                layouts.put(i, this.descriptorSetLayout);
+            }
+            final var allocateInfo = VkDescriptorSetAllocateInfo
+                    .callocStack()
+                    .sType(VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO)
+                    .descriptorPool(this.descriptorPool.getHandle())
+                    .pSetLayouts(layouts);
+
+            ensureSuccess(vkAllocateDescriptorSets(this.deviceContext.getDevice(),
+                                                   allocateInfo,
+                                                   descriptorSets),
+                          "Allocating descriptor sets failed!");
+        }
+
+        return descriptorSets;
     }
 
     @Override
@@ -93,9 +158,5 @@ public class UniformBufferObject extends RecreateCloseable {
             binding.close();
         }
         vkDestroyDescriptorSetLayout(this.deviceContext.getDevice(), this.descriptorSetLayout, null);
-    }
-
-    public GPUBuffer getBindingBuffer(final int binding, final int imageIndex) {
-        return this.bindings[binding].getBuffer(imageIndex);
     }
 }

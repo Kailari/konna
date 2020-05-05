@@ -7,6 +7,7 @@ import java.nio.ByteBuffer;
 
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
 import fi.jakojaannos.roguelite.vulkan.rendering.Swapchain;
+import fi.jakojaannos.roguelite.vulkan.uniform.DescriptorPool;
 import fi.jakojaannos.roguelite.vulkan.uniform.UniformBinding;
 import fi.jakojaannos.roguelite.vulkan.uniform.UniformBufferObject;
 
@@ -33,16 +34,20 @@ public class CameraUBO implements AutoCloseable {
         return this.ubo;
     }
 
-    public CameraUBO(final DeviceContext deviceContext, final Swapchain swapchain) {
+    public CameraUBO(
+            final DeviceContext deviceContext,
+            final Swapchain swapchain,
+            final DescriptorPool descriptorPool
+    ) {
         this.swapchain = swapchain;
-        this.matrixBinding = UniformBinding.mutable(deviceContext,
-                                                    swapchain,
-                                                    0,
-                                                    VK_SHADER_STAGE_VERTEX_BIT,
-                                                    SIZE_IN_BYTES,
-                                                    1,
-                                                    Matrices::write);
-        this.ubo = new UniformBufferObject(deviceContext, swapchain, this.matrixBinding);
+        this.matrixBinding = new UniformBinding<>(deviceContext,
+                                                  swapchain,
+                                                  0,
+                                                  VK_SHADER_STAGE_VERTEX_BIT,
+                                                  1,
+                                                  SIZE_IN_BYTES,
+                                                  Matrices::write);
+        this.ubo = new UniformBufferObject(deviceContext, swapchain, descriptorPool, this.matrixBinding);
 
         this.matrices = new Matrices();
 
