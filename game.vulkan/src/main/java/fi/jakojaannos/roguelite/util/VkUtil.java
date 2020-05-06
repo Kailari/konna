@@ -7,6 +7,7 @@ import static org.lwjgl.vulkan.KHRSurface.VK_ERROR_SURFACE_LOST_KHR;
 import static org.lwjgl.vulkan.KHRSwapchain.VK_ERROR_OUT_OF_DATE_KHR;
 import static org.lwjgl.vulkan.KHRSwapchain.VK_SUBOPTIMAL_KHR;
 import static org.lwjgl.vulkan.VK10.*;
+import static org.lwjgl.vulkan.VK11.VK_ERROR_OUT_OF_POOL_MEMORY;
 
 public class VkUtil {
     public static void ensureSuccess(final int result, final String message) {
@@ -57,6 +58,7 @@ public class VkUtil {
             case VK_ERROR_INCOMPATIBLE_DISPLAY_KHR -> "The display used by a swapchain does not use the same presentable image "
                                                       + "layout, or is incompatible in a way that prevents sharing an image.";
             case VK_ERROR_VALIDATION_FAILED_EXT -> "A validation layer found an error.";
+            case VK_ERROR_OUT_OF_POOL_MEMORY -> "A pool is out of memory";
             default -> String.format("%s [%d]", "Unknown", result);
         };
     }

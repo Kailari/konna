@@ -27,6 +27,7 @@ public class DeviceContext implements AutoCloseable {
     private final VkPhysicalDeviceProperties deviceProperties;
 
     private final CommandPool transferCommandPool;
+    private final CommandPool graphicsCommandPool;
     private final GPUQueue graphicsQueue;
     private final GPUQueue transferQueue;
     private final GPUQueue presentQueue;
@@ -64,6 +65,10 @@ public class DeviceContext implements AutoCloseable {
 
     public CommandPool getTransferCommandPool() {
         return this.transferCommandPool;
+    }
+
+    public CommandPool getGraphicsCommandPool() {
+        return this.graphicsCommandPool;
     }
 
     public VkPhysicalDeviceProperties getDeviceProperties() {
@@ -114,6 +119,7 @@ public class DeviceContext implements AutoCloseable {
 
         this.memoryManager = new SliceMemoryManager(this);
         this.transferCommandPool = new CommandPool(this.device, queueFamilies.transfer());
+        this.graphicsCommandPool = new CommandPool(this.device, queueFamilies.graphics());
     }
 
     public VkDeviceQueueCreateInfo.Buffer createQueueCreateInfos(final QueueFamilies queueFamilies) {
@@ -140,6 +146,7 @@ public class DeviceContext implements AutoCloseable {
 
         this.memoryManager.close();
         this.transferCommandPool.close();
+        this.graphicsCommandPool.close();
         vkDestroyDevice(this.device, null);
     }
 }

@@ -1,9 +1,6 @@
 package fi.jakojaannos.roguelite.vulkan;
 
-import org.lwjgl.vulkan.VkBufferCopy;
-import org.lwjgl.vulkan.VkBufferCreateInfo;
-import org.lwjgl.vulkan.VkDevice;
-import org.lwjgl.vulkan.VkMemoryRequirements;
+import org.lwjgl.vulkan.*;
 
 import java.nio.ByteBuffer;
 
@@ -11,6 +8,7 @@ import fi.jakojaannos.roguelite.vulkan.command.CommandPool;
 import fi.jakojaannos.roguelite.vulkan.command.GPUQueue;
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
 import fi.jakojaannos.roguelite.vulkan.memory.GPUMemory;
+import fi.jakojaannos.roguelite.vulkan.textures.GPUImage;
 
 import static fi.jakojaannos.roguelite.util.VkUtil.ensureSuccess;
 import static org.lwjgl.system.MemoryStack.stackPush;
@@ -68,7 +66,7 @@ public class GPUBuffer implements AutoCloseable {
 
     public void copyToAndWait(
             final CommandPool commandPool,
-            final GPUQueue transferQueue,
+            final GPUQueue queue,
             final GPUBuffer target
     ) {
         final var commandBuffer = commandPool.allocate(1)[0];
@@ -87,13 +85,55 @@ public class GPUBuffer implements AutoCloseable {
                             target.handle,
                             copyRegions);
         }
-        transferQueue.submit(commandBuffer,
+        queue.submit(commandBuffer,
                              VK_NULL_HANDLE,
                              new long[0],
                              new int[0],
                              new long[0]);
 
-        vkQueueWaitIdle(transferQueue.getHandle());
+        vkQueueWaitIdle(queue.getHandle());
+
+        vkFreeCommandBuffers(this.device, commandPool.getHandle(), commandBuffer.getHandle());
+    }
+
+    public void copyToAndWait(
+            final CommandPool commandPool,
+            final GPUQueue queue,
+            final GPUImage target
+    ) {
+        final var commandBuffer = commandPool.allocate(1)[0];
+        try (final var ignored = stackPush();
+             final var ignored2 = commandBuffer.begin(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT)
+        ) {
+            // Execute the copy
+            final var copyRegion = VkBufferImageCopy
+                    .callocStack(1)
+                    .bufferOffset(0)
+                    .bufferRowLength(0)
+                    .bufferImageHeight(0);
+            copyRegion.imageSubresource()
+                      .aspectMask(VK_IMAGE_ASPECT_COLOR_BIT)
+                      .mipLevel(0)
+                      .baseArrayLayer(0)
+                      .layerCount(1);
+            copyRegion.imageOffset()
+                      .set(0, 0, 0);
+            copyRegion.imageExtent()
+                      .set(target.getWidth(), target.getHeight(), 1);
+
+            vkCmdCopyBufferToImage(commandBuffer.getHandle(),
+                                   this.handle,
+                                   target.getHandle(),
+                                   VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                   copyRegion);
+        }
+        queue.submit(commandBuffer,
+                             VK_NULL_HANDLE,
+                             new long[0],
+                             new int[0],
+                             new long[0]);
+
+        vkQueueWaitIdle(queue.getHandle());
 
         vkFreeCommandBuffers(this.device, commandPool.getHandle(), commandBuffer.getHandle());
     }
@@ -110,6 +150,8 @@ public class GPUBuffer implements AutoCloseable {
                     ? stack.ints(graphicsFamilyIndex, transferFamilyIndex)
                     : stack.ints(graphicsFamilyIndex);
 
+            // FIXME: This should not be necessary; transfer ownership to one queue at a time using
+            //        barriers or sth
             final var sharingMode = graphicsFamilyIndex != transferFamilyIndex
                     ? VK_SHARING_MODE_CONCURRENT
                     : VK_SHARING_MODE_EXCLUSIVE;
@@ -145,5 +187,4 @@ public class GPUBuffer implements AutoCloseable {
             return deviceContext.getMemoryManager().allocate(memoryRequirements, memoryPropertyFlags);
         }
     }
-
 }

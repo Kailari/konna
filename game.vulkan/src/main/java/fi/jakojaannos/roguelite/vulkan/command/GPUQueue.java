@@ -66,4 +66,17 @@ public class GPUQueue {
                           "Submitting command buffer to a queue failed");
         }
     }
+
+    public void submit(final CommandBuffer commandBuffer) {
+        try (final var stack = stackPush()) {
+            final var submitInfo = VkSubmitInfo
+                    .callocStack(1)
+                    .sType(VK_STRUCTURE_TYPE_SUBMIT_INFO)
+                    .pCommandBuffers(stack.pointers(commandBuffer.getHandle()))
+                    .waitSemaphoreCount(0);
+
+            ensureSuccess(vkQueueSubmit(this.queue, submitInfo, VK_NULL_HANDLE),
+                          "Submitting command buffer to a queue failed");
+        }
+    }
 }

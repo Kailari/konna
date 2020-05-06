@@ -11,8 +11,8 @@ repositories {
 
 application.mainClassName = "fi.jakojaannos.roguelite.Main"
 
-def final implementationModules = ['', '-glfw', '-vulkan', '-shaderc']
-def final runtimeModules = ['', '-glfw', '-shaderc']
+def final implementationModules = ['', '-glfw', '-vulkan', '-shaderc', '-stb']
+def final runtimeModules = ['', '-glfw', '-shaderc', '-stb']
 
 dependencies {
     implementation project(":engine.utilities")

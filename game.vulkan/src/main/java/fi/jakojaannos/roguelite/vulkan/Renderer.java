@@ -1,17 +1,20 @@
 package fi.jakojaannos.roguelite.vulkan;
 
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 import java.nio.file.Path;
 
-import fi.jakojaannos.roguelite.vulkan.descriptor.uniform.CameraUniformBufferObject;
+import fi.jakojaannos.roguelite.CameraUniformBufferObject;
+import fi.jakojaannos.roguelite.TextureDescriptor;
 import fi.jakojaannos.roguelite.vulkan.command.CommandBuffer;
 import fi.jakojaannos.roguelite.vulkan.command.CommandPool;
+import fi.jakojaannos.roguelite.vulkan.descriptor.DescriptorPool;
 import fi.jakojaannos.roguelite.vulkan.rendering.Framebuffers;
 import fi.jakojaannos.roguelite.vulkan.rendering.GraphicsPipeline;
 import fi.jakojaannos.roguelite.vulkan.rendering.RenderPass;
 import fi.jakojaannos.roguelite.vulkan.rendering.Swapchain;
-import fi.jakojaannos.roguelite.vulkan.descriptor.uniform.DescriptorPool;
+import fi.jakojaannos.roguelite.vulkan.textures.GPUImage;
 import fi.jakojaannos.roguelite.vulkan.window.Window;
 
 import static org.lwjgl.system.MemoryStack.stackPush;
@@ -25,8 +28,11 @@ public class Renderer implements AutoCloseable {
     private final DescriptorPool descriptorPool;
 
     private final GraphicsPipeline<Vertex> graphicsPipeline;
-    private final Mesh<Vertex> mesh;
     private final CameraUniformBufferObject cameraUBO;
+    private final Mesh<Vertex> mesh;
+    private final GPUImage image;
+    private final Texture texture;
+    private final TextureDescriptor textureDescriptor;
 
     private CommandBuffer[] commandBuffers;
 
@@ -43,38 +49,49 @@ public class Renderer implements AutoCloseable {
     }
 
     public Renderer(final Path assetRoot, final RenderingBackend backend, final Window window) {
+        this.commandPool = backend.deviceContext().getGraphicsCommandPool();
+
         this.swapchain = new Swapchain(backend.deviceContext(), window, backend.surface());
         this.renderPass = new RenderPass(backend.deviceContext(), this.swapchain);
         this.framebuffers = new Framebuffers(backend.deviceContext(),
                                              this.swapchain,
                                              this.renderPass);
 
+        // We have swapchainImageCount copies of two descriptor sets
         this.descriptorPool = new DescriptorPool(backend.deviceContext(),
-                                                 this.swapchain.getImageCount(),
+                                                 this.swapchain.getImageCount() * 2,
                                                  new DescriptorPool.Pool(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                                                                         this.swapchain.getImageCount()),
+                                                 new DescriptorPool.Pool(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                                                                          this.swapchain.getImageCount()));
         this.cameraUBO = new CameraUniformBufferObject(backend.deviceContext(),
                                                        this.swapchain,
                                                        this.descriptorPool);
+        this.image = new GPUImage(backend.deviceContext(),
+                                  assetRoot.resolve("textures/vulkan/texture.jpg"),
+                                  VK_IMAGE_TILING_OPTIMAL,
+                                  VK_IMAGE_USAGE_SAMPLED_BIT,
+                                  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+        this.texture = new Texture(backend.deviceContext(), this.image);
+        this.textureDescriptor = new TextureDescriptor(backend.deviceContext(),
+                                                       this.swapchain,
+                                                       this.descriptorPool,
+                                                       this.texture);
         this.graphicsPipeline = new GraphicsPipeline<>(assetRoot,
                                                        backend.deviceContext(),
                                                        this.swapchain,
                                                        this.renderPass,
                                                        Vertex.FORMAT,
-                                                       this.cameraUBO.getLayout());
-
-        this.commandPool = new CommandPool(backend.deviceContext().getDevice(),
-                                           backend.deviceContext()
-                                                  .getQueueFamilies()
-                                                  .graphics());
+                                                       this.cameraUBO.getLayout(),
+                                                       this.textureDescriptor.getLayout());
 
         this.mesh = new Mesh<>(backend.deviceContext(),
                                Vertex.FORMAT,
                                new Vertex[]{
-                                       new Vertex(new Vector3f(-0.5f, -0.5f, 0.0f), new Vector3f(1.0f, 0.0f, 0.0f)),
-                                       new Vertex(new Vector3f(0.5f, -0.5f, 0.0f), new Vector3f(0.0f, 1.0f, 0.0f)),
-                                       new Vertex(new Vector3f(0.5f, 0.5f, 0.0f), new Vector3f(0.0f, 0.0f, 1.0f)),
-                                       new Vertex(new Vector3f(-0.5f, 0.5f, 0.0f), new Vector3f(1.0f, 0.0f, 1.0f)),
+                                       new Vertex(new Vector3f(-0.5f, -0.5f, 0.0f), new Vector2f(0.0f, 0.0f), new Vector3f(1.0f, 0.0f, 0.0f)),
+                                       new Vertex(new Vector3f(0.5f, -0.5f, 0.0f), new Vector2f(1.0f, 0.0f), new Vector3f(0.0f, 1.0f, 0.0f)),
+                                       new Vertex(new Vector3f(0.5f, 0.5f, 0.0f), new Vector2f(1.0f, 1.0f), new Vector3f(0.0f, 0.0f, 1.0f)),
+                                       new Vertex(new Vector3f(-0.5f, 0.5f, 0.0f), new Vector2f(0.0f, 1.0f), new Vector3f(1.0f, 0.0f, 1.0f)),
                                },
                                new Short[]{
                                        0, 1, 2,
@@ -98,6 +115,7 @@ public class Renderer implements AutoCloseable {
 
         this.descriptorPool.tryRecreate();
         this.cameraUBO.tryRecreate();
+        this.textureDescriptor.tryRecreate();
         this.graphicsPipeline.tryRecreate();
 
         recordCommandBuffers();
@@ -120,7 +138,8 @@ public class Renderer implements AutoCloseable {
                                         VK_PIPELINE_BIND_POINT_GRAPHICS,
                                         this.graphicsPipeline.getLayout(),
                                         0,
-                                        stack.longs(this.cameraUBO.getDescriptorSet(imageIndex)),
+                                        stack.longs(this.cameraUBO.getDescriptorSet(imageIndex),
+                                                    this.textureDescriptor.get(imageIndex)),
                                         null);
 
                 vkCmdBindVertexBuffers(commandBuffer.getHandle(),
@@ -158,9 +177,12 @@ public class Renderer implements AutoCloseable {
     public void close() {
         this.descriptorPool.close();
         this.cameraUBO.close();
+        this.textureDescriptor.close();
+
+        this.texture.close();
+        this.image.close();
         this.mesh.close();
 
-        this.commandPool.close();
         this.framebuffers.close();
         this.renderPass.close();
         this.graphicsPipeline.close();

@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.vulkan.descriptor.uniform;
+package fi.jakojaannos.roguelite;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -10,6 +10,7 @@ import java.nio.ByteBuffer;
 import fi.jakojaannos.roguelite.util.RecreateCloseable;
 import fi.jakojaannos.roguelite.vulkan.GPUBuffer;
 import fi.jakojaannos.roguelite.vulkan.descriptor.DescriptorBinding;
+import fi.jakojaannos.roguelite.vulkan.descriptor.DescriptorPool;
 import fi.jakojaannos.roguelite.vulkan.descriptor.DescriptorSetLayout;
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
 import fi.jakojaannos.roguelite.vulkan.rendering.Swapchain;

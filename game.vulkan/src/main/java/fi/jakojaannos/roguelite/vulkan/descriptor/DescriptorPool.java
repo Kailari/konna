@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.vulkan.descriptor.uniform;
+package fi.jakojaannos.roguelite.vulkan.descriptor;
 
 import org.lwjgl.vulkan.VkDescriptorPoolCreateInfo;
 import org.lwjgl.vulkan.VkDescriptorPoolSize;
@@ -7,7 +7,6 @@ import org.lwjgl.vulkan.VkDescriptorSetAllocateInfo;
 import java.util.Arrays;
 
 import fi.jakojaannos.roguelite.util.RecreateCloseable;
-import fi.jakojaannos.roguelite.vulkan.descriptor.DescriptorSetLayout;
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
 
 import static fi.jakojaannos.roguelite.util.VkUtil.ensureSuccess;
@@ -91,7 +90,7 @@ public class DescriptorPool extends RecreateCloseable {
             ensureSuccess(vkAllocateDescriptorSets(this.deviceContext.getDevice(),
                                                    allocateInfo,
                                                    handles),
-                          "Allocating descriptor sets failed!");
+                          "Allocating descriptor sets failed");
         }
 
         return handles;
