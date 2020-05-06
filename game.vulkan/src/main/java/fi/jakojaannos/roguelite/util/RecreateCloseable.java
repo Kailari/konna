@@ -9,7 +9,7 @@ public abstract class RecreateCloseable implements AutoCloseable {
 
     protected abstract void cleanup();
 
-    public void tryRecreate() {
+    public final void tryRecreate() {
         // Always recreate if cleaned up; otherwise, ask the implementation if the recreate is required
         if (!this.cleanedUp && !isRecreateRequired()) {
             return;
@@ -22,6 +22,11 @@ public abstract class RecreateCloseable implements AutoCloseable {
         this.cleanedUp = false;
     }
 
+    @Override
+    public void close() {
+        tryCleanup();
+    }
+
     private void tryCleanup() {
         if (this.cleanedUp) {
             return;
@@ -30,10 +35,5 @@ public abstract class RecreateCloseable implements AutoCloseable {
         cleanup();
 
         this.cleanedUp = true;
-    }
-
-    @Override
-    public void close() {
-        tryCleanup();
     }
 }

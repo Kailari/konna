@@ -6,12 +6,13 @@ import org.lwjgl.vulkan.*;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
+import java.util.Arrays;
 
 import fi.jakojaannos.roguelite.util.RecreateCloseable;
 import fi.jakojaannos.roguelite.util.shader.ShaderCompiler;
 import fi.jakojaannos.roguelite.vulkan.VertexFormat;
+import fi.jakojaannos.roguelite.vulkan.descriptor.DescriptorSetLayout;
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
-import fi.jakojaannos.roguelite.vulkan.uniform.UniformBufferObject;
 
 import static fi.jakojaannos.roguelite.util.VkUtil.ensureSuccess;
 import static fi.jakojaannos.roguelite.util.VkUtil.translateVulkanResult;
@@ -28,7 +29,7 @@ public class GraphicsPipeline<TVertex> extends RecreateCloseable {
     private final ByteBuffer compiledVertexShader;
     private final ByteBuffer compiledFragmentShader;
     private final VertexFormat<TVertex> vertexFormat;
-    private final UniformBufferObject[] uniformBufferObjects;
+    private final DescriptorSetLayout[] descriptorSetLayouts;
 
     private long pipelineLayout;
     private long handle;
@@ -52,13 +53,13 @@ public class GraphicsPipeline<TVertex> extends RecreateCloseable {
             final Swapchain swapchain,
             final RenderPass renderPass,
             final VertexFormat<TVertex> vertexFormat,
-            final UniformBufferObject... uniformBufferObjects
+            final DescriptorSetLayout... descriptorSetLayouts
     ) {
         this.deviceContext = deviceContext;
         this.swapchain = swapchain;
         this.renderPass = renderPass;
         this.vertexFormat = vertexFormat;
-        this.uniformBufferObjects = uniformBufferObjects;
+        this.descriptorSetLayouts = descriptorSetLayouts;
 
         try {
             this.compiledVertexShader = ShaderCompiler.loadGLSLShader(assetRoot.resolve("shaders/vulkan/shader.vert"),
@@ -128,15 +129,12 @@ public class GraphicsPipeline<TVertex> extends RecreateCloseable {
 
     private long createPipelineLayout() {
         try (final var stack = stackPush()) {
-            final var setLayouts = stack.mallocLong(this.uniformBufferObjects.length);
-            for (int i = 0; i < this.uniformBufferObjects.length; i++) {
-                setLayouts.put(i, this.uniformBufferObjects[i].getLayoutHandle());
-            }
-
             final var createInfo = VkPipelineLayoutCreateInfo
                     .callocStack()
                     .sType(VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO)
-                    .pSetLayouts(setLayouts);
+                    .pSetLayouts(stack.longs(Arrays.stream(this.descriptorSetLayouts)
+                                                   .mapToLong(DescriptorSetLayout::getHandle)
+                                                   .toArray()));
 
             final var pLayout = stack.mallocLong(1);
             ensureSuccess(vkCreatePipelineLayout(this.deviceContext.getDevice(),

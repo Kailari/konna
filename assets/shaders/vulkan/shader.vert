@@ -6,12 +6,12 @@ layout(location = 1) in vec3 inColor;
 
 layout(location = 0) out vec3 fragColor;
 
-layout(binding = 0) uniform CameraInfo {
+layout(set = 0, binding = 0) uniform CameraInfo {
     mat4 view;
     mat4 projection;
 } camera;
 
-layout(binding = 1) uniform InstanceInfo {
+layout(set = 0, binding = 1) uniform InstanceInfo {
     mat4 model;
 } instance;
 

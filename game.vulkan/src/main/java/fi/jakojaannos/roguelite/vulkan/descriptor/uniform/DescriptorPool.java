@@ -1,9 +1,13 @@
-package fi.jakojaannos.roguelite.vulkan.uniform;
+package fi.jakojaannos.roguelite.vulkan.descriptor.uniform;
 
 import org.lwjgl.vulkan.VkDescriptorPoolCreateInfo;
 import org.lwjgl.vulkan.VkDescriptorPoolSize;
+import org.lwjgl.vulkan.VkDescriptorSetAllocateInfo;
+
+import java.util.Arrays;
 
 import fi.jakojaannos.roguelite.util.RecreateCloseable;
+import fi.jakojaannos.roguelite.vulkan.descriptor.DescriptorSetLayout;
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
 
 import static fi.jakojaannos.roguelite.util.VkUtil.ensureSuccess;
@@ -69,6 +73,28 @@ public class DescriptorPool extends RecreateCloseable {
     @Override
     public void cleanup() {
         vkDestroyDescriptorPool(this.deviceContext.getDevice(), this.handle, null);
+    }
+
+    public long[] allocate(final DescriptorSetLayout layout, final int count) {
+        final var handles = new long[count];
+
+        try (final var stack = stackPush()) {
+            final var layouts = new long[count];
+            Arrays.fill(layouts, layout.getHandle());
+
+            final var allocateInfo = VkDescriptorSetAllocateInfo
+                    .callocStack()
+                    .sType(VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO)
+                    .descriptorPool(this.handle)
+                    .pSetLayouts(stack.longs(layouts));
+
+            ensureSuccess(vkAllocateDescriptorSets(this.deviceContext.getDevice(),
+                                                   allocateInfo,
+                                                   handles),
+                          "Allocating descriptor sets failed!");
+        }
+
+        return handles;
     }
 
     public record Pool(int type, int descriptorCount) {}

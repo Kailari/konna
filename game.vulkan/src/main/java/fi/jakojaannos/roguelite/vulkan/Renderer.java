@@ -4,14 +4,14 @@ import org.joml.Vector3f;
 
 import java.nio.file.Path;
 
-import fi.jakojaannos.roguelite.CameraUBO;
+import fi.jakojaannos.roguelite.CameraUniformBufferObject;
 import fi.jakojaannos.roguelite.vulkan.command.CommandBuffer;
 import fi.jakojaannos.roguelite.vulkan.command.CommandPool;
 import fi.jakojaannos.roguelite.vulkan.rendering.Framebuffers;
 import fi.jakojaannos.roguelite.vulkan.rendering.GraphicsPipeline;
 import fi.jakojaannos.roguelite.vulkan.rendering.RenderPass;
 import fi.jakojaannos.roguelite.vulkan.rendering.Swapchain;
-import fi.jakojaannos.roguelite.vulkan.uniform.DescriptorPool;
+import fi.jakojaannos.roguelite.vulkan.descriptor.uniform.DescriptorPool;
 import fi.jakojaannos.roguelite.vulkan.window.Window;
 
 import static org.lwjgl.system.MemoryStack.stackPush;
@@ -26,7 +26,7 @@ public class Renderer implements AutoCloseable {
 
     private final GraphicsPipeline<Vertex> graphicsPipeline;
     private final Mesh<Vertex> mesh;
-    private final CameraUBO cameraUBO;
+    private final CameraUniformBufferObject cameraUBO;
 
     private CommandBuffer[] commandBuffers;
 
@@ -38,7 +38,7 @@ public class Renderer implements AutoCloseable {
         return this.swapchain;
     }
 
-    public CameraUBO getCameraUBO() {
+    public CameraUniformBufferObject getCameraUBO() {
         return this.cameraUBO;
     }
 
@@ -53,15 +53,15 @@ public class Renderer implements AutoCloseable {
                                                  this.swapchain.getImageCount(),
                                                  new DescriptorPool.Pool(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                                                                          this.swapchain.getImageCount()));
-        this.cameraUBO = new CameraUBO(backend.deviceContext(),
-                                       this.swapchain,
-                                       this.descriptorPool);
+        this.cameraUBO = new CameraUniformBufferObject(backend.deviceContext(),
+                                                       this.swapchain,
+                                                       this.descriptorPool);
         this.graphicsPipeline = new GraphicsPipeline<>(assetRoot,
                                                        backend.deviceContext(),
                                                        this.swapchain,
                                                        this.renderPass,
                                                        Vertex.FORMAT,
-                                                       this.cameraUBO.getUBO());
+                                                       this.cameraUBO.getLayout());
 
         this.commandPool = new CommandPool(backend.deviceContext().getDevice(),
                                            backend.deviceContext()
@@ -105,9 +105,9 @@ public class Renderer implements AutoCloseable {
 
     private void recordCommandBuffers() {
         this.commandBuffers = this.commandPool.allocate(this.swapchain.getImageCount());
-        for (int i = 0; i < this.commandBuffers.length; i++) {
-            final var commandBuffer = this.commandBuffers[i];
-            final var framebuffer = this.framebuffers.get(i);
+        for (int imageIndex = 0; imageIndex < this.commandBuffers.length; imageIndex++) {
+            final var commandBuffer = this.commandBuffers[imageIndex];
+            final var framebuffer = this.framebuffers.get(imageIndex);
 
             try (final var stack = stackPush();
                  final var ignored = commandBuffer.begin();
@@ -120,7 +120,7 @@ public class Renderer implements AutoCloseable {
                                         VK_PIPELINE_BIND_POINT_GRAPHICS,
                                         this.graphicsPipeline.getLayout(),
                                         0,
-                                        stack.longs(this.cameraUBO.getUBO().getDescriptorSet(i)),
+                                        stack.longs(this.cameraUBO.getDescriptorSet(imageIndex)),
                                         null);
 
                 vkCmdBindVertexBuffers(commandBuffer.getHandle(),
