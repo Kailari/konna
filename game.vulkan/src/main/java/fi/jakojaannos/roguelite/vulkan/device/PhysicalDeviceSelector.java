@@ -4,6 +4,7 @@ import org.lwjgl.PointerBuffer;
 import org.lwjgl.vulkan.VkExtensionProperties;
 import org.lwjgl.vulkan.VkInstance;
 import org.lwjgl.vulkan.VkPhysicalDevice;
+import org.lwjgl.vulkan.VkPhysicalDeviceFeatures;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -166,7 +167,17 @@ public class PhysicalDeviceSelector {
     }
 
     private static int deviceFeatureSuitability(final VkPhysicalDevice device) {
-        return 0;
+        int suitability = 0;
+        try (final var ignored = stackPush()) {
+            final var features = VkPhysicalDeviceFeatures.callocStack();
+            vkGetPhysicalDeviceFeatures(device, features);
+
+            if (features.samplerAnisotropy()) {
+                suitability += 100;
+            }
+        }
+
+        return suitability;
     }
 
     public static record DeviceCandidate(

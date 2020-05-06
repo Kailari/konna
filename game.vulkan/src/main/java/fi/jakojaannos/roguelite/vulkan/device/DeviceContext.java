@@ -98,6 +98,7 @@ public class DeviceContext implements AutoCloseable {
             final var queueCreateInfos = createQueueCreateInfos(queueFamilies);
 
             final var deviceFeatures = VkPhysicalDeviceFeatures.callocStack();
+            deviceFeatures.samplerAnisotropy(true);
 
             final var createInfo = VkDeviceCreateInfo
                     .callocStack()
