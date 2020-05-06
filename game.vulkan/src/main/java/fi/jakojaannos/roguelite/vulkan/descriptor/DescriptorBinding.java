@@ -1,6 +1,6 @@
 package fi.jakojaannos.roguelite.vulkan.descriptor;
 
-public record DescriptorSetBinding(
+public record DescriptorBinding(
         int slot,
         int descriptorType,
         int descriptorCount,

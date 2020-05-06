@@ -19,7 +19,7 @@ public class DescriptorSetLayout implements AutoCloseable {
 
     public DescriptorSetLayout(
             final DeviceContext deviceContext,
-            final DescriptorSetBinding... bindings
+            final DescriptorBinding... bindings
     ) {
         this.deviceContext = deviceContext;
 

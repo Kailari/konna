@@ -4,7 +4,7 @@ import org.joml.Vector3f;
 
 import java.nio.file.Path;
 
-import fi.jakojaannos.roguelite.CameraUniformBufferObject;
+import fi.jakojaannos.roguelite.vulkan.descriptor.uniform.CameraUniformBufferObject;
 import fi.jakojaannos.roguelite.vulkan.command.CommandBuffer;
 import fi.jakojaannos.roguelite.vulkan.command.CommandPool;
 import fi.jakojaannos.roguelite.vulkan.rendering.Framebuffers;
