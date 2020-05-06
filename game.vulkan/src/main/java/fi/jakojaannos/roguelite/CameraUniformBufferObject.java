@@ -24,6 +24,8 @@ public class CameraUniformBufferObject extends RecreateCloseable {
     private final DescriptorPool descriptorPool;
     private final DescriptorSetLayout layout;
 
+    private final long minUniformBufferOffsetAlignment;
+
     private final CameraMatrices cameraMatrices;
     private final InstanceMatrices instanceMatrices;
 
@@ -31,7 +33,8 @@ public class CameraUniformBufferObject extends RecreateCloseable {
     private final Vector3f lookAtTarget;
     private final Vector3f up;
 
-    private final GPUBuffer[][] buffers;
+    private GPUBuffer[] buffers;
+    private long[] bindingOffsets;
     private long[] descriptorSets;
 
     @Override
@@ -61,7 +64,6 @@ public class CameraUniformBufferObject extends RecreateCloseable {
                                                                        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                                                                        1,
                                                                        VK_SHADER_STAGE_VERTEX_BIT));
-        this.buffers = new GPUBuffer[2][];
 
         this.cameraMatrices = new CameraMatrices();
         this.instanceMatrices = new InstanceMatrices();
@@ -69,6 +71,10 @@ public class CameraUniformBufferObject extends RecreateCloseable {
         this.eyePosition = new Vector3f(2.0f, 2.0f, 2.0f);
         this.lookAtTarget = new Vector3f(0.0f, 0.0f, 0.0f);
         this.up = new Vector3f(0.0f, 0.0f, 1.0f);
+
+        this.minUniformBufferOffsetAlignment = deviceContext.getDeviceProperties()
+                                                            .limits()
+                                                            .minUniformBufferOffsetAlignment();
 
         tryRecreate();
     }
@@ -79,17 +85,24 @@ public class CameraUniformBufferObject extends RecreateCloseable {
 
     @Override
     protected void recreate() {
-        this.buffers[0] = new GPUBuffer[this.swapchain.getImageCount()];
-        this.buffers[1] = new GPUBuffer[this.swapchain.getImageCount()];
-        for (int i = 0; i < this.swapchain.getImageCount(); i++) {
-            this.buffers[0][i] = new GPUBuffer(this.deviceContext,
-                                               CameraMatrices.SIZE_IN_BYTES,
-                                               VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                                               VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-            this.buffers[1][i] = new GPUBuffer(this.deviceContext,
-                                               InstanceMatrices.SIZE_IN_BYTES,
-                                               VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                                               VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        this.buffers = new GPUBuffer[this.swapchain.getImageCount()];
+        this.bindingOffsets = new long[2];
+
+        for (int i = 0; i < this.buffers.length; i++) {
+            // Size is determined by the minimum required length of a single binding (which may be
+            // hardware-specific). We cannot start a new binding from offset which is not a multiple
+            // of the minimum length, so make sure we can fit `n * minSize + lastBindingSize`, where
+            // `n` is the smallest possible multiple of `minSize` to fit `n - 1` bindings.
+            final var minSize = this.minUniformBufferOffsetAlignment;
+            final var n = (int) Math.ceil(CameraMatrices.SIZE_IN_BYTES / (double) minSize);
+            final var lastBindingSize = InstanceMatrices.SIZE_IN_BYTES;
+            this.bindingOffsets[1] = n * minSize;
+
+            final var sizeInBytes = n * minSize + lastBindingSize;
+            this.buffers[i] = new GPUBuffer(this.deviceContext,
+                                            sizeInBytes,
+                                            VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                                            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
         }
 
         this.descriptorSets = this.descriptorPool.allocate(this.layout, this.swapchain.getImageCount());
@@ -99,7 +112,7 @@ public class CameraUniformBufferObject extends RecreateCloseable {
                 final var descriptorWrites = VkWriteDescriptorSet.callocStack(2);
 
                 // FIXME: This is basically "full write for all bindings"? Bindings should be generalized somehow to allow iterating over them
-                final var matrixBuffer = this.buffers[0][imageIndex];
+                final var buffer = this.buffers[imageIndex];
                 descriptorWrites.get(0)
                                 .sType(VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
                                 .dstSet(this.descriptorSets[imageIndex])
@@ -107,12 +120,11 @@ public class CameraUniformBufferObject extends RecreateCloseable {
                                 .descriptorType(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
                                 .descriptorCount(1)
                                 .pBufferInfo(VkDescriptorBufferInfo.callocStack(1)
-                                                                   .buffer(matrixBuffer.getHandle())
-                                                                   .offset(0)
+                                                                   .buffer(buffer.getHandle())
+                                                                   .offset(this.bindingOffsets[0])
                                                                    .range(CameraMatrices.SIZE_IN_BYTES))
                                 .dstArrayElement(0);
 
-                final var instanceBuffer = this.buffers[1][imageIndex];
                 descriptorWrites.get(1)
                                 .sType(VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)
                                 .dstSet(this.descriptorSets[imageIndex])
@@ -120,8 +132,8 @@ public class CameraUniformBufferObject extends RecreateCloseable {
                                 .descriptorType(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
                                 .descriptorCount(1)
                                 .pBufferInfo(VkDescriptorBufferInfo.callocStack(1)
-                                                                   .buffer(instanceBuffer.getHandle())
-                                                                   .offset(0)
+                                                                   .buffer(buffer.getHandle())
+                                                                   .offset(this.bindingOffsets[1])
                                                                    .range(InstanceMatrices.SIZE_IN_BYTES))
                                 .dstArrayElement(0);
 
@@ -136,10 +148,8 @@ public class CameraUniformBufferObject extends RecreateCloseable {
 
     @Override
     protected void cleanup() {
-        for (final var bindingBuffers : this.buffers) {
-            for (final var buffer : bindingBuffers) {
-                buffer.close();
-            }
+        for (final var buffer : this.buffers) {
+            buffer.close();
         }
     }
 
@@ -163,16 +173,12 @@ public class CameraUniformBufferObject extends RecreateCloseable {
         this.instanceMatrices.model.identity().rotateZ((float) angle);
 
         try (final var stack = stackPush()) {
-            final var data = stack.malloc(CameraMatrices.SIZE_IN_BYTES);
+            final var data = stack.malloc((int) this.buffers[imageIndex].getSize());
 
-            this.cameraMatrices.write(0, data);
-            this.buffers[0][imageIndex].push(data, 0, CameraMatrices.SIZE_IN_BYTES);
-        }
-        try (final var stack = stackPush()) {
-            final var data = stack.malloc(InstanceMatrices.SIZE_IN_BYTES);
+            this.cameraMatrices.write((int) this.bindingOffsets[0], data);
+            this.instanceMatrices.write((int) this.bindingOffsets[1], data);
 
-            this.instanceMatrices.write(0, data);
-            this.buffers[1][imageIndex].push(data, 0, InstanceMatrices.SIZE_IN_BYTES);
+            this.buffers[imageIndex].push(data, 0, this.buffers[imageIndex].getSize());
         }
     }
 

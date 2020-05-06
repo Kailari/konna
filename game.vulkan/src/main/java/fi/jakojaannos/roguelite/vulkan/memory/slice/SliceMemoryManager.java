@@ -3,7 +3,6 @@ package fi.jakojaannos.roguelite.vulkan.memory.slice;
 import org.lwjgl.vulkan.VkDevice;
 import org.lwjgl.vulkan.VkMemoryRequirements;
 import org.lwjgl.vulkan.VkPhysicalDeviceMemoryProperties;
-import org.lwjgl.vulkan.VkPhysicalDeviceProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,9 +11,7 @@ import java.util.*;
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
 import fi.jakojaannos.roguelite.vulkan.memory.MemoryManager;
 
-import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.VK10.vkGetPhysicalDeviceMemoryProperties;
-import static org.lwjgl.vulkan.VK10.vkGetPhysicalDeviceProperties;
 
 public class SliceMemoryManager implements MemoryManager {
     private static final Logger LOG = LoggerFactory.getLogger(SliceMemoryManager.class);
@@ -53,12 +50,9 @@ public class SliceMemoryManager implements MemoryManager {
         this.device = deviceContext.getDevice();
         this.defaultAllocationSize = defaultAllocationSize;
 
-        try (final var ignored = stackPush()) {
-            final var properties = VkPhysicalDeviceProperties.callocStack();
-            vkGetPhysicalDeviceProperties(deviceContext.getPhysicalDevice(), properties);
-
-            this.maxAllocations = properties.limits().maxMemoryAllocationCount();
-        }
+        this.maxAllocations = deviceContext.getDeviceProperties()
+                                           .limits()
+                                           .maxMemoryAllocationCount();
 
         this.memoryProperties = VkPhysicalDeviceMemoryProperties.calloc();
         vkGetPhysicalDeviceMemoryProperties(deviceContext.getPhysicalDevice(), this.memoryProperties);

@@ -24,6 +24,8 @@ public class DeviceContext implements AutoCloseable {
     private final VkPhysicalDevice physicalDevice;
     private final VkDevice device;
 
+    private final VkPhysicalDeviceProperties deviceProperties;
+
     private final CommandPool transferCommandPool;
     private final GPUQueue graphicsQueue;
     private final GPUQueue transferQueue;
@@ -64,6 +66,10 @@ public class DeviceContext implements AutoCloseable {
         return this.transferCommandPool;
     }
 
+    public VkPhysicalDeviceProperties getDeviceProperties() {
+        return this.deviceProperties;
+    }
+
     public DeviceContext(
             final VkPhysicalDevice physicalDevice,
             final QueueFamilies queueFamilies,
@@ -72,6 +78,9 @@ public class DeviceContext implements AutoCloseable {
         LOG.debug("Creating device context");
 
         this.physicalDevice = physicalDevice;
+        this.deviceProperties = VkPhysicalDeviceProperties.calloc();
+        vkGetPhysicalDeviceProperties(this.physicalDevice, this.deviceProperties);
+
         this.queueFamilies = queueFamilies;
 
         try (final var stack = stackPush()) {
@@ -127,6 +136,8 @@ public class DeviceContext implements AutoCloseable {
 
     @Override
     public void close() {
+        this.deviceProperties.free();
+
         this.memoryManager.close();
         this.transferCommandPool.close();
         vkDestroyDevice(this.device, null);
