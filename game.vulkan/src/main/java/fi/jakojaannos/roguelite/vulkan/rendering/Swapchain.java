@@ -6,9 +6,11 @@ import fi.jakojaannos.roguelite.util.RecreateCloseable;
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
 import fi.jakojaannos.roguelite.vulkan.device.SwapchainSupportDetails;
 import fi.jakojaannos.roguelite.vulkan.types.VkFormat;
+import fi.jakojaannos.roguelite.vulkan.types.VkImageAspectFlags;
 import fi.jakojaannos.roguelite.vulkan.window.Window;
 import fi.jakojaannos.roguelite.vulkan.window.WindowSurface;
 
+import static fi.jakojaannos.roguelite.util.BitMask.bitMask;
 import static fi.jakojaannos.roguelite.util.VkUtil.translateVulkanResult;
 import static org.lwjgl.glfw.GLFW.glfwGetFramebufferSize;
 import static org.lwjgl.system.MemoryStack.stackPush;
@@ -122,7 +124,10 @@ public class Swapchain extends RecreateCloseable {
             final long[] images = getSwapchainImages(this.deviceContext.getDevice(), this.handle);
             this.imageViews = new ImageView[images.length];
             for (int i = 0; i < this.imageViews.length; i++) {
-                this.imageViews[i] = new ImageView(this.deviceContext, images[i], this.imageFormat);
+                this.imageViews[i] = new ImageView(this.deviceContext,
+                                                   images[i],
+                                                   this.imageFormat,
+                                                   bitMask(VkImageAspectFlags.COLOR_BIT));
             }
         }
     }

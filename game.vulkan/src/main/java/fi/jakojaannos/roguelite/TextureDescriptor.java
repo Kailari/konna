@@ -4,11 +4,12 @@ import org.lwjgl.vulkan.VkDescriptorImageInfo;
 import org.lwjgl.vulkan.VkWriteDescriptorSet;
 
 import fi.jakojaannos.roguelite.util.RecreateCloseable;
-import fi.jakojaannos.roguelite.vulkan.Texture;
+import fi.jakojaannos.roguelite.vulkan.TextureSampler;
 import fi.jakojaannos.roguelite.vulkan.descriptor.DescriptorBinding;
 import fi.jakojaannos.roguelite.vulkan.descriptor.DescriptorPool;
 import fi.jakojaannos.roguelite.vulkan.descriptor.DescriptorSetLayout;
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
+import fi.jakojaannos.roguelite.vulkan.rendering.ImageView;
 import fi.jakojaannos.roguelite.vulkan.rendering.Swapchain;
 
 import static org.lwjgl.system.MemoryStack.stackPush;
@@ -23,9 +24,11 @@ public class TextureDescriptor extends RecreateCloseable {
     private final Swapchain swapchain;
 
     private final DescriptorSetLayout layout;
+    private final TextureSampler sampler;
     private final DescriptorPool descriptorPool;
 
-    private final Texture texture;
+    private final ImageView imageView;
+
     private long[] descriptorSets;
 
     @Override
@@ -41,13 +44,15 @@ public class TextureDescriptor extends RecreateCloseable {
             final DeviceContext deviceContext,
             final Swapchain swapchain,
             final DescriptorPool descriptorPool,
-            final Texture texture
+            final ImageView imageView,
+            final TextureSampler sampler
     ) {
         this.deviceContext = deviceContext;
         this.swapchain = swapchain;
         this.descriptorPool = descriptorPool;
+        this.imageView = imageView;
 
-        this.texture = texture;
+        this.sampler = sampler;
 
         this.layout = new DescriptorSetLayout(deviceContext,
                                               new DescriptorBinding(0,
@@ -71,8 +76,8 @@ public class TextureDescriptor extends RecreateCloseable {
                 final var imageInfo = VkDescriptorImageInfo
                         .callocStack(1)
                         .imageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
-                        .imageView(this.texture.getImageViewHandle())
-                        .sampler(this.texture.getSamplerHandle());
+                        .imageView(this.imageView.getHandle())
+                        .sampler(this.sampler.getHandle());
 
                 final var descriptorWrites = VkWriteDescriptorSet
                         .callocStack(1)

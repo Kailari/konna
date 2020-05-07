@@ -10,12 +10,10 @@ import fi.jakojaannos.roguelite.TextureDescriptor;
 import fi.jakojaannos.roguelite.vulkan.command.CommandBuffer;
 import fi.jakojaannos.roguelite.vulkan.command.CommandPool;
 import fi.jakojaannos.roguelite.vulkan.descriptor.DescriptorPool;
-import fi.jakojaannos.roguelite.vulkan.rendering.Framebuffers;
-import fi.jakojaannos.roguelite.vulkan.rendering.GraphicsPipeline;
-import fi.jakojaannos.roguelite.vulkan.rendering.RenderPass;
-import fi.jakojaannos.roguelite.vulkan.rendering.Swapchain;
-import fi.jakojaannos.roguelite.vulkan.textures.GPUImage;
+import fi.jakojaannos.roguelite.vulkan.rendering.*;
+import fi.jakojaannos.roguelite.vulkan.types.VkImageAspectFlags;
 import fi.jakojaannos.roguelite.vulkan.types.VkImageTiling;
+import fi.jakojaannos.roguelite.vulkan.types.VkImageUsageFlags;
 import fi.jakojaannos.roguelite.vulkan.types.VkMemoryPropertyFlags;
 import fi.jakojaannos.roguelite.vulkan.window.Window;
 
@@ -25,6 +23,7 @@ import static org.lwjgl.vulkan.VK10.*;
 
 public class Renderer implements AutoCloseable {
     private final Swapchain swapchain;
+    private final DepthTexture depthTexture;
     private final RenderPass renderPass;
     private final Framebuffers framebuffers;
     private final CommandPool commandPool;
@@ -33,8 +32,9 @@ public class Renderer implements AutoCloseable {
     private final GraphicsPipeline<Vertex> graphicsPipeline;
     private final CameraUniformBufferObject cameraUBO;
     private final Mesh<Vertex> mesh;
-    private final GPUImage image;
-    private final Texture texture;
+    private final TextureSampler textureSampler;
+    private final GPUImage textureImage;
+    private final ImageView textureView;
     private final TextureDescriptor textureDescriptor;
 
     private CommandBuffer[] commandBuffers;
@@ -53,11 +53,14 @@ public class Renderer implements AutoCloseable {
 
     public Renderer(final Path assetRoot, final RenderingBackend backend, final Window window) {
         this.commandPool = backend.deviceContext().getGraphicsCommandPool();
-
         this.swapchain = new Swapchain(backend.deviceContext(), window, backend.surface());
+
+        this.depthTexture = new DepthTexture(backend.deviceContext(), this.swapchain);
+
         this.renderPass = new RenderPass(backend.deviceContext(), this.swapchain);
         this.framebuffers = new Framebuffers(backend.deviceContext(),
                                              this.swapchain,
+                                             this.depthTexture,
                                              this.renderPass);
 
         // We have swapchainImageCount copies of two descriptor sets
@@ -70,16 +73,21 @@ public class Renderer implements AutoCloseable {
         this.cameraUBO = new CameraUniformBufferObject(backend.deviceContext(),
                                                        this.swapchain,
                                                        this.descriptorPool);
-        this.image = new GPUImage(backend.deviceContext(),
-                                  assetRoot.resolve("textures/vulkan/texture.jpg"),
-                                  VkImageTiling.OPTIMAL,
-                                  VK_IMAGE_USAGE_SAMPLED_BIT,
-                                  bitMask(VkMemoryPropertyFlags.DEVICE_LOCAL_BIT));
-        this.texture = new Texture(backend.deviceContext(), this.image);
+
+        this.textureSampler = new TextureSampler(backend.deviceContext());
+
+        this.textureImage = new GPUImage(backend.deviceContext(),
+                                         assetRoot.resolve("textures/vulkan/texture.jpg"),
+                                         VkImageTiling.OPTIMAL,
+                                         bitMask(VkImageUsageFlags.SAMPLED_BIT),
+                                         bitMask(VkMemoryPropertyFlags.DEVICE_LOCAL_BIT));
+        this.textureView = new ImageView(backend.deviceContext(), this.textureImage, bitMask(VkImageAspectFlags.COLOR_BIT));
         this.textureDescriptor = new TextureDescriptor(backend.deviceContext(),
                                                        this.swapchain,
                                                        this.descriptorPool,
-                                                       this.texture);
+                                                       this.textureView,
+                                                       this.textureSampler);
+
         this.graphicsPipeline = new GraphicsPipeline<>(assetRoot,
                                                        backend.deviceContext(),
                                                        this.swapchain,
@@ -121,6 +129,8 @@ public class Renderer implements AutoCloseable {
         freeCommandBuffers();
 
         this.swapchain.tryRecreate();
+        this.depthTexture.tryRecreate();
+
         this.renderPass.tryRecreate();
         this.framebuffers.tryRecreate();
 
@@ -190,9 +200,12 @@ public class Renderer implements AutoCloseable {
         this.cameraUBO.close();
         this.textureDescriptor.close();
 
-        this.texture.close();
-        this.image.close();
+        this.textureSampler.close();
+        this.textureView.close();
+        this.textureImage.close();
         this.mesh.close();
+
+        this.depthTexture.close();
 
         this.framebuffers.close();
         this.renderPass.close();

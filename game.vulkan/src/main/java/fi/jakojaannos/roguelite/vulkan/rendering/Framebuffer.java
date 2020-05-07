@@ -4,8 +4,6 @@ import org.lwjgl.vulkan.VkDevice;
 import org.lwjgl.vulkan.VkExtent2D;
 import org.lwjgl.vulkan.VkFramebufferCreateInfo;
 
-import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
-
 import static fi.jakojaannos.roguelite.util.VkUtil.translateVulkanResult;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.VK10.*;
@@ -28,6 +26,7 @@ public class Framebuffer implements AutoCloseable {
             final VkDevice device,
             final VkExtent2D swapchainExtent,
             final ImageView swapchainImageView,
+            final ImageView depthImageView,
             final RenderPass renderPass
     ) {
         this.device = device;
@@ -38,7 +37,8 @@ public class Framebuffer implements AutoCloseable {
                     .callocStack()
                     .sType(VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO)
                     .renderPass(renderPass.getHandle())
-                    .pAttachments(stack.longs(swapchainImageView.getHandle()))
+                    .pAttachments(stack.longs(swapchainImageView.getHandle(),
+                                              depthImageView.getHandle()))
                     .width(swapchainExtent.width())
                     .height(swapchainExtent.height())
                     .layers(1);

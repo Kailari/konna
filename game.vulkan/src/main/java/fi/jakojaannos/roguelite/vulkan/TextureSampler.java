@@ -3,36 +3,23 @@ package fi.jakojaannos.roguelite.vulkan;
 import org.lwjgl.vulkan.VkSamplerCreateInfo;
 
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
-import fi.jakojaannos.roguelite.vulkan.rendering.ImageView;
-import fi.jakojaannos.roguelite.vulkan.textures.GPUImage;
 
 import static fi.jakojaannos.roguelite.util.VkUtil.ensureSuccess;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.VK10.*;
+import static org.lwjgl.vulkan.VK10.vkCreateSampler;
 
-public class Texture implements AutoCloseable {
+public class TextureSampler implements AutoCloseable {
     private final DeviceContext deviceContext;
 
-    private final ImageView imageView;
+    private final long handle;
 
-    // FIXME: Move the sampler out of here, it can very well be re-used for multiple textures
-    private final long samplerHandle;
-
-    public long getImageViewHandle() {
-        return this.imageView.getHandle();
+    public long getHandle() {
+        return this.handle;
     }
 
-    public long getSamplerHandle() {
-        return this.samplerHandle;
-    }
-
-    public Texture(
-            final DeviceContext deviceContext,
-            final GPUImage image
-    ) {
+    public TextureSampler(final DeviceContext deviceContext) {
         this.deviceContext = deviceContext;
-
-        this.imageView = new ImageView(deviceContext, image);
 
         try (final var stack = stackPush()) {
             final var pSampler = stack.mallocLong(1);
@@ -60,13 +47,13 @@ public class Texture implements AutoCloseable {
                                           null,
                                           pSampler),
                           "Creating texture sampler failed");
-            this.samplerHandle = pSampler.get(0);
+            this.handle = pSampler.get(0);
         }
     }
 
     @Override
     public void close() {
-        vkDestroySampler(this.deviceContext.getDevice(), this.samplerHandle, null);
-        this.imageView.close();
+        vkDestroySampler(this.deviceContext.getDevice(), this.handle, null);
+
     }
 }

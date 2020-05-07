@@ -3,9 +3,11 @@ package fi.jakojaannos.roguelite.vulkan.rendering;
 import org.lwjgl.vulkan.VkDevice;
 import org.lwjgl.vulkan.VkImageViewCreateInfo;
 
+import fi.jakojaannos.roguelite.util.BitMask;
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
-import fi.jakojaannos.roguelite.vulkan.textures.GPUImage;
+import fi.jakojaannos.roguelite.vulkan.GPUImage;
 import fi.jakojaannos.roguelite.vulkan.types.VkFormat;
+import fi.jakojaannos.roguelite.vulkan.types.VkImageAspectFlags;
 
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.VK10.*;
@@ -18,11 +20,20 @@ public class ImageView implements AutoCloseable {
         return this.handle;
     }
 
-    public ImageView(final DeviceContext deviceContext, final GPUImage image) {
-        this(deviceContext, image.getHandle(), image.getFormat());
+    public ImageView(
+            final DeviceContext deviceContext,
+            final GPUImage image,
+            final BitMask<VkImageAspectFlags> aspects
+    ) {
+        this(deviceContext, image.getHandle(), image.getFormat(), aspects);
     }
 
-    public ImageView(final DeviceContext deviceContext, final long handle, final VkFormat format) {
+    public ImageView(
+            final DeviceContext deviceContext,
+            final long handle,
+            final VkFormat format,
+            final BitMask<VkImageAspectFlags> aspects
+    ) {
         this.device = deviceContext.getDevice();
 
         try (final var stack = stackPush()) {
@@ -38,7 +49,7 @@ public class ImageView implements AutoCloseable {
                       .b(VK_COMPONENT_SWIZZLE_IDENTITY)
                       .a(VK_COMPONENT_SWIZZLE_IDENTITY);
             createInfo.subresourceRange()
-                      .aspectMask(VK_IMAGE_ASPECT_COLOR_BIT)
+                      .aspectMask(aspects.mask())
                       .baseMipLevel(0)
                       .levelCount(1)
                       .baseArrayLayer(0)

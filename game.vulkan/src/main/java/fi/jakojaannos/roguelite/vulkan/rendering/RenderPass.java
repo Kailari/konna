@@ -14,8 +14,9 @@ import static org.lwjgl.vulkan.VK10.*;
 
 public class RenderPass extends RecreateCloseable {
     private static final int COLOR_ATTACHMENT_INDEX = 0;
+    private static final int DEPTH_ATTACHMENT_INDEX = 1;
 
-    private final VkDevice device;
+    private final DeviceContext deviceContext;
     private final Swapchain swapchain;
 
     private VkFormat swapchainImageFormat;
@@ -31,7 +32,7 @@ public class RenderPass extends RecreateCloseable {
     }
 
     public RenderPass(final DeviceContext deviceContext, final Swapchain swapchain) {
-        this.device = deviceContext.getDevice();
+        this.deviceContext = deviceContext;
         this.swapchain = swapchain;
 
         this.swapchainImageFormat = null;
@@ -42,7 +43,7 @@ public class RenderPass extends RecreateCloseable {
     protected void recreate() {
         this.swapchainImageFormat = this.swapchain.getImageFormat();
         try (final var stack = stackPush()) {
-            final var attachments = VkAttachmentDescription.callocStack(1);
+            final var attachments = VkAttachmentDescription.callocStack(2);
             attachments.get(COLOR_ATTACHMENT_INDEX)
                        .format(this.swapchainImageFormat.asInt())
                        .samples(VK_SAMPLE_COUNT_1_BIT)
@@ -53,16 +54,33 @@ public class RenderPass extends RecreateCloseable {
                        .initialLayout(VK_IMAGE_LAYOUT_UNDEFINED)
                        .finalLayout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
+            attachments.get(DEPTH_ATTACHMENT_INDEX)
+                       .format(VkFormat.findDepthFormat(this.deviceContext).asInt())
+                       .samples(VK_SAMPLE_COUNT_1_BIT)
+                       .loadOp(VK_ATTACHMENT_LOAD_OP_CLEAR)
+                       .storeOp(VK_ATTACHMENT_STORE_OP_DONT_CARE)
+                       .stencilLoadOp(VK_ATTACHMENT_LOAD_OP_DONT_CARE)
+                       .stencilStoreOp(VK_ATTACHMENT_STORE_OP_DONT_CARE)
+                       .initialLayout(VK_IMAGE_LAYOUT_UNDEFINED)
+                       .finalLayout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+
             final var colorAttachmentRef = VkAttachmentReference
                     .callocStack(1)
                     .attachment(COLOR_ATTACHMENT_INDEX)
                     .layout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
+            final var depthAttachmentRef = VkAttachmentReference
+                    .callocStack()
+                    .attachment(DEPTH_ATTACHMENT_INDEX)
+                    .layout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+
+
             final var subpasses = VkSubpassDescription
                     .callocStack(1)
                     .pipelineBindPoint(VK_PIPELINE_BIND_POINT_GRAPHICS)
                     .colorAttachmentCount(1)
-                    .pColorAttachments(colorAttachmentRef);
+                    .pColorAttachments(colorAttachmentRef)
+                    .pDepthStencilAttachment(depthAttachmentRef);
 
             final var dependencies = VkSubpassDependency
                     .callocStack(1)
@@ -80,7 +98,10 @@ public class RenderPass extends RecreateCloseable {
                     .pSubpasses(subpasses)
                     .pDependencies(dependencies);
             final var pRenderPass = stack.mallocLong(1);
-            ensureSuccess(vkCreateRenderPass(this.device, createInfo, null, pRenderPass),
+            ensureSuccess(vkCreateRenderPass(this.deviceContext.getDevice(),
+                                             createInfo,
+                                             null,
+                                             pRenderPass),
                           "Creating render pass failed");
             this.handle = pRenderPass.get(0);
         }
@@ -88,7 +109,9 @@ public class RenderPass extends RecreateCloseable {
 
     @Override
     protected void cleanup() {
-        vkDestroyRenderPass(this.device, this.handle, null);
+        vkDestroyRenderPass(this.deviceContext.getDevice(),
+                            this.handle,
+                            null);
     }
 
     public Scope begin(final Framebuffer framebuffer, final CommandBuffer commandBuffer) {
@@ -115,11 +138,14 @@ public class RenderPass extends RecreateCloseable {
                          .offset(VkOffset2D.callocStack().set(0, 0))
                          .extent(framebuffer.getExtent());
 
-                final var clearValues = VkClearValue.callocStack(1);
-                clearValues.get(0).color().float32(0, 0.0f);
-                clearValues.get(0).color().float32(1, 0.0f);
-                clearValues.get(0).color().float32(2, 0.0f);
-                clearValues.get(0).color().float32(3, 1.0f);
+                final var clearValues = VkClearValue.callocStack(2);
+                clearValues.get(COLOR_ATTACHMENT_INDEX).color()
+                           .float32(0, 0.0f)
+                           .float32(1, 0.0f)
+                           .float32(2, 0.0f)
+                           .float32(3, 1.0f);
+                clearValues.get(DEPTH_ATTACHMENT_INDEX).depthStencil()
+                           .set(1.0f, 0);
 
                 beginInfo.pClearValues(clearValues);
 

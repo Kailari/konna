@@ -9,7 +9,6 @@ import fi.jakojaannos.roguelite.vulkan.command.CommandPool;
 import fi.jakojaannos.roguelite.vulkan.command.GPUQueue;
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
 import fi.jakojaannos.roguelite.vulkan.memory.GPUMemory;
-import fi.jakojaannos.roguelite.vulkan.textures.GPUImage;
 import fi.jakojaannos.roguelite.vulkan.types.VkMemoryPropertyFlags;
 
 import static fi.jakojaannos.roguelite.util.VkUtil.ensureSuccess;

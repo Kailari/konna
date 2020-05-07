@@ -93,7 +93,7 @@ public class GraphicsPipeline<TVertex> extends RecreateCloseable {
             final var viewportState = createViewportState(this.swapchain.getExtent());
             final var rasterizer = createRasterizer();
             final var multisampling = createMultisamplingStateInfo();
-            // FIXME: States for Depth/Stencil testing
+            final var depthStencil = createDepthStencilState();
             final var colorBlendAttachments = createColorBlendAttachment();
             //final var dynamicState = createDynamicState();
 
@@ -108,6 +108,7 @@ public class GraphicsPipeline<TVertex> extends RecreateCloseable {
                     .pViewportState(viewportState)
                     .pRasterizationState(rasterizer)
                     .pMultisampleState(multisampling)
+                    .pDepthStencilState(depthStencil)
                     .pColorBlendState(colorBlendAttachments)
                     .layout(this.pipelineLayout)
                     .renderPass(this.renderPass.getHandle())
@@ -125,6 +126,17 @@ public class GraphicsPipeline<TVertex> extends RecreateCloseable {
             }
             this.handle = pPipeline.get(0);
         }
+    }
+
+    private VkPipelineDepthStencilStateCreateInfo createDepthStencilState() {
+        return VkPipelineDepthStencilStateCreateInfo
+                .callocStack()
+                .sType(VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO)
+                .depthTestEnable(true)
+                .depthWriteEnable(true)
+                .depthCompareOp(VK_COMPARE_OP_LESS)
+                .depthBoundsTestEnable(false)
+                .stencilTestEnable(false);
     }
 
     private long createPipelineLayout() {
