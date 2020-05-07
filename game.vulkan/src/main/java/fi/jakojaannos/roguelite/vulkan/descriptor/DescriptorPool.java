@@ -5,6 +5,7 @@ import org.lwjgl.vulkan.VkDescriptorPoolSize;
 import org.lwjgl.vulkan.VkDescriptorSetAllocateInfo;
 
 import java.util.Arrays;
+import java.util.function.IntSupplier;
 
 import fi.jakojaannos.roguelite.util.RecreateCloseable;
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
@@ -16,7 +17,7 @@ import static org.lwjgl.vulkan.VK10.*;
 public class DescriptorPool extends RecreateCloseable {
     private final DeviceContext deviceContext;
 
-    private final int maxSets;
+    private final IntSupplier maxSetsSupplier;
     private final Pool[] pools;
 
     private long handle;
@@ -32,15 +33,13 @@ public class DescriptorPool extends RecreateCloseable {
 
     public DescriptorPool(
             final DeviceContext deviceContext,
-            final int maxSets,
+            final IntSupplier maxSetsSupplier,
             final Pool... pools
     ) {
         this.deviceContext = deviceContext;
 
-        this.maxSets = maxSets;
+        this.maxSetsSupplier = maxSetsSupplier;
         this.pools = pools;
-
-        tryRecreate();
     }
 
     @Override
@@ -50,14 +49,14 @@ public class DescriptorPool extends RecreateCloseable {
             for (int i = 0; i < this.pools.length; i++) {
                 poolSizes.get(i)
                          .type(this.pools[i].type)
-                         .descriptorCount(this.pools[i].descriptorCount);
+                         .descriptorCount(this.pools[i].descriptorCountSupplier.getAsInt());
             }
 
             final var createInfo = VkDescriptorPoolCreateInfo
                     .callocStack()
                     .sType(VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO)
                     .pPoolSizes(poolSizes)
-                    .maxSets(this.maxSets);
+                    .maxSets(this.maxSetsSupplier.getAsInt());
 
             final var pPool = stack.mallocLong(1);
             ensureSuccess(vkCreateDescriptorPool(this.deviceContext.getDevice(),
@@ -96,5 +95,5 @@ public class DescriptorPool extends RecreateCloseable {
         return handles;
     }
 
-    public record Pool(int type, int descriptorCount) {}
+    public record Pool(int type, IntSupplier descriptorCountSupplier) {}
 }

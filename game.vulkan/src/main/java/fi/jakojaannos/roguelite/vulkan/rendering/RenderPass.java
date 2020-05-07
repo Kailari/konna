@@ -36,7 +36,6 @@ public class RenderPass extends RecreateCloseable {
         this.swapchain = swapchain;
 
         this.swapchainImageFormat = null;
-        tryRecreate();
     }
 
     @Override

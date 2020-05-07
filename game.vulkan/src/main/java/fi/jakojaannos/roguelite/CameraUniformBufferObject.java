@@ -72,8 +72,6 @@ public class CameraUniformBufferObject extends RecreateCloseable {
         this.minUniformBufferOffsetAlignment = deviceContext.getDeviceProperties()
                                                             .limits()
                                                             .minUniformBufferOffsetAlignment();
-
-        tryRecreate();
     }
 
     public long getDescriptorSet(final int imageIndex) {

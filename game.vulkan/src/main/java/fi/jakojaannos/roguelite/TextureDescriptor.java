@@ -59,8 +59,6 @@ public class TextureDescriptor extends RecreateCloseable {
                                                                     VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                                                                     1,
                                                                     VK_SHADER_STAGE_FRAGMENT_BIT));
-
-        tryRecreate();
     }
 
     public long get(final int imageIndex) {

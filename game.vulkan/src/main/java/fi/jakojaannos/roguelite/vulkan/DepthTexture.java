@@ -34,8 +34,6 @@ public class DepthTexture extends RecreateCloseable {
         this.deviceContext = deviceContext;
         this.swapchain = swapchain;
         this.oldExtent = VkExtent2D.calloc();
-
-        tryRecreate();
     }
 
     @Override

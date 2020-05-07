@@ -69,8 +69,6 @@ public class GraphicsPipeline<TVertex> extends RecreateCloseable {
         } catch (final IOException e) {
             throw new IllegalStateException("Loading shaders failed: " + e);
         }
-
-        tryRecreate();
     }
 
     @Override

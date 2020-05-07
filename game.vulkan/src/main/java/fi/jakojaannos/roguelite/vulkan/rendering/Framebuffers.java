@@ -29,8 +29,6 @@ public class Framebuffers extends RecreateCloseable {
         this.swapchain = swapchain;
         this.depthTexture = depthTexture;
         this.renderPass = renderPass;
-
-        tryRecreate();
     }
 
     @Override

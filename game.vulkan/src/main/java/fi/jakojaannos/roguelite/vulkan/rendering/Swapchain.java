@@ -63,8 +63,6 @@ public class Swapchain extends RecreateCloseable {
         this.window = window;
         this.surface = surface;
         this.extent = VkExtent2D.calloc();
-
-        tryRecreate();
     }
 
     @Override

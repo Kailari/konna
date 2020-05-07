@@ -63,13 +63,15 @@ public class Renderer implements AutoCloseable {
                                              this.depthTexture,
                                              this.renderPass);
 
-        // We have swapchainImageCount copies of two descriptor sets
+        // We have swapchainImageCount copies of two descriptor sets. Why use suppliers? That way we
+        // can delay the descriptorCount/maxSets calculations to `tryRecreate`, where all resources
+        // are already initialized. E.g. we do not yet know the image count here
         this.descriptorPool = new DescriptorPool(backend.deviceContext(),
-                                                 this.swapchain.getImageCount() * 2,
+                                                 () -> this.swapchain.getImageCount() * 2,
                                                  new DescriptorPool.Pool(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                                                                         this.swapchain.getImageCount()),
+                                                                         this.swapchain::getImageCount),
                                                  new DescriptorPool.Pool(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                                                                         this.swapchain.getImageCount()));
+                                                                         this.swapchain::getImageCount));
         this.cameraUBO = new CameraUniformBufferObject(backend.deviceContext(),
                                                        this.swapchain,
                                                        this.descriptorPool);
@@ -117,8 +119,7 @@ public class Renderer implements AutoCloseable {
                                        6, 7, 4,
                                });
 
-        // TODO: Call recreate here? Remove all tryRecreate calls from ctors and trigger a re-create here
-        recordCommandBuffers();
+        recreateSwapchain();
     }
 
     public CommandBuffer getCommands(final int imageIndex) {
@@ -183,6 +184,11 @@ public class Renderer implements AutoCloseable {
     }
 
     private void freeCommandBuffers() {
+        // In case command buffers haven't yet been initialized or are already cleaned up
+        if (this.commandBuffers == null) {
+            return;
+        }
+
         try (final var stack = stackPush()) {
             final var pBuffers = stack.mallocPointer(this.commandBuffers.length);
             for (int i = 0; i < this.commandBuffers.length; i++) {
