@@ -7,12 +7,17 @@ import org.lwjgl.vulkan.VkMemoryRequirements;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
 
+import fi.jakojaannos.roguelite.util.BitMask;
 import fi.jakojaannos.roguelite.vulkan.GPUBuffer;
 import fi.jakojaannos.roguelite.vulkan.command.CommandPool;
 import fi.jakojaannos.roguelite.vulkan.command.GPUQueue;
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
 import fi.jakojaannos.roguelite.vulkan.memory.GPUMemory;
+import fi.jakojaannos.roguelite.vulkan.types.VkFormat;
+import fi.jakojaannos.roguelite.vulkan.types.VkImageTiling;
+import fi.jakojaannos.roguelite.vulkan.types.VkMemoryPropertyFlags;
 
+import static fi.jakojaannos.roguelite.util.BitMask.bitMask;
 import static fi.jakojaannos.roguelite.util.VkUtil.ensureSuccess;
 import static org.lwjgl.stb.STBImage.*;
 import static org.lwjgl.system.MemoryStack.stackPush;
@@ -26,7 +31,7 @@ public class GPUImage implements AutoCloseable {
 
     private final int width;
     private final int height;
-    private final int format;
+    private final VkFormat format;
 
     public int getWidth() {
         return this.width;
@@ -40,20 +45,20 @@ public class GPUImage implements AutoCloseable {
         return this.handle;
     }
 
-    public int getFormat() {
+    public VkFormat getFormat() {
         return this.format;
     }
 
     public GPUImage(
             final DeviceContext deviceContext,
             final Path assetPath,
-            final int tiling,
+            final VkImageTiling tiling,
             final int usageFlags,
-            final int memoryPropertyFlags
+            final BitMask<VkMemoryPropertyFlags> memoryProperties
     ) {
         this.deviceContext = deviceContext;
 
-        this.format = VK_FORMAT_R8G8B8A8_SRGB;
+        this.format = VkFormat.R8G8B8A8_SRGB;
 
         final GPUBuffer stagingBuffer;
         try (final var image = Image.loadFrom(assetPath)) {
@@ -61,7 +66,7 @@ public class GPUImage implements AutoCloseable {
             stagingBuffer = new GPUBuffer(deviceContext,
                                           imageSize,
                                           VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                                          VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+                                          bitMask(VkMemoryPropertyFlags.HOST_VISIBLE_BIT, VkMemoryPropertyFlags.HOST_COHERENT_BIT));
             stagingBuffer.push(image.pixels, 0, imageSize);
             this.width = image.width();
             this.height = image.height();
@@ -73,7 +78,7 @@ public class GPUImage implements AutoCloseable {
                                   this.format,
                                   tiling,
                                   VK_IMAGE_USAGE_TRANSFER_DST_BIT | usageFlags);
-        this.memory = allocateMemory(this.handle, deviceContext, memoryPropertyFlags);
+        this.memory = allocateMemory(this.handle, deviceContext, memoryProperties);
         this.memory.bindImage(this.handle, 0);
 
         // Prepare the image for copy. This claims the image ownership on the transfer queue
@@ -112,7 +117,7 @@ public class GPUImage implements AutoCloseable {
 
     public void transitionLayout(
             final CommandPool commandPool,
-            final int format,
+            final VkFormat format,
             final int srcQueueFamilyIndex,
             final int dstQueueFamilyIndex,
             final GPUQueue queue,
@@ -201,8 +206,8 @@ public class GPUImage implements AutoCloseable {
             final DeviceContext deviceContext,
             final int textureWidth,
             final int textureHeight,
-            final int format,
-            final int tiling,
+            final VkFormat format,
+            final VkImageTiling tiling,
             final int usageFlags
     ) {
         try (final var stack = stackPush()) {
@@ -212,8 +217,8 @@ public class GPUImage implements AutoCloseable {
                     .imageType(VK_IMAGE_TYPE_2D)
                     .mipLevels(1)
                     .arrayLayers(1)
-                    .format(format)
-                    .tiling(tiling)
+                    .format(format.asInt())
+                    .tiling(tiling.asInt())
                     .initialLayout(VK_IMAGE_LAYOUT_UNDEFINED)
                     .usage(usageFlags)
                     .sharingMode(VK_SHARING_MODE_EXCLUSIVE)
@@ -236,13 +241,13 @@ public class GPUImage implements AutoCloseable {
     private static GPUMemory allocateMemory(
             final long handle,
             final DeviceContext deviceContext,
-            final int memoryPropertyFlags
+            final BitMask<VkMemoryPropertyFlags> memoryProperties
     ) {
         try (final var ignored = stackPush()) {
             final var memoryRequirements = VkMemoryRequirements.callocStack();
             vkGetImageMemoryRequirements(deviceContext.getDevice(), handle, memoryRequirements);
 
-            return deviceContext.getMemoryManager().allocate(memoryRequirements, memoryPropertyFlags);
+            return deviceContext.getMemoryManager().allocate(memoryRequirements, memoryProperties);
         }
     }
 

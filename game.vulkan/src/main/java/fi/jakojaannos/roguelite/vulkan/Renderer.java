@@ -15,8 +15,11 @@ import fi.jakojaannos.roguelite.vulkan.rendering.GraphicsPipeline;
 import fi.jakojaannos.roguelite.vulkan.rendering.RenderPass;
 import fi.jakojaannos.roguelite.vulkan.rendering.Swapchain;
 import fi.jakojaannos.roguelite.vulkan.textures.GPUImage;
+import fi.jakojaannos.roguelite.vulkan.types.VkImageTiling;
+import fi.jakojaannos.roguelite.vulkan.types.VkMemoryPropertyFlags;
 import fi.jakojaannos.roguelite.vulkan.window.Window;
 
+import static fi.jakojaannos.roguelite.util.BitMask.bitMask;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.VK10.*;
 
@@ -69,9 +72,9 @@ public class Renderer implements AutoCloseable {
                                                        this.descriptorPool);
         this.image = new GPUImage(backend.deviceContext(),
                                   assetRoot.resolve("textures/vulkan/texture.jpg"),
-                                  VK_IMAGE_TILING_OPTIMAL,
+                                  VkImageTiling.OPTIMAL,
                                   VK_IMAGE_USAGE_SAMPLED_BIT,
-                                  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+                                  bitMask(VkMemoryPropertyFlags.DEVICE_LOCAL_BIT));
         this.texture = new Texture(backend.deviceContext(), this.image);
         this.textureDescriptor = new TextureDescriptor(backend.deviceContext(),
                                                        this.swapchain,
@@ -92,10 +95,18 @@ public class Renderer implements AutoCloseable {
                                        new Vertex(new Vector3f(0.5f, -0.5f, 0.0f), new Vector2f(1.0f, 0.0f), new Vector3f(0.0f, 1.0f, 0.0f)),
                                        new Vertex(new Vector3f(0.5f, 0.5f, 0.0f), new Vector2f(1.0f, 1.0f), new Vector3f(0.0f, 0.0f, 1.0f)),
                                        new Vertex(new Vector3f(-0.5f, 0.5f, 0.0f), new Vector2f(0.0f, 1.0f), new Vector3f(1.0f, 0.0f, 1.0f)),
+
+                                       new Vertex(new Vector3f(-0.5f, -0.5f, -0.5f), new Vector2f(0.0f, 0.0f), new Vector3f(1.0f, 0.0f, 0.0f)),
+                                       new Vertex(new Vector3f(0.5f, -0.5f, -0.5f), new Vector2f(1.0f, 0.0f), new Vector3f(0.0f, 1.0f, 0.0f)),
+                                       new Vertex(new Vector3f(0.5f, 0.5f, -0.5f), new Vector2f(1.0f, 1.0f), new Vector3f(0.0f, 0.0f, 1.0f)),
+                                       new Vertex(new Vector3f(-0.5f, 0.5f, -0.5f), new Vector2f(0.0f, 1.0f), new Vector3f(1.0f, 0.0f, 1.0f)),
                                },
                                new Short[]{
                                        0, 1, 2,
-                                       2, 3, 0
+                                       2, 3, 0,
+
+                                       4, 5, 6,
+                                       6, 7, 4,
                                });
 
         // TODO: Call recreate here? Remove all tryRecreate calls from ctors and trigger a re-create here

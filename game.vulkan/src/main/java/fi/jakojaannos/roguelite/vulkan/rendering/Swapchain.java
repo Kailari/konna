@@ -5,6 +5,7 @@ import org.lwjgl.vulkan.*;
 import fi.jakojaannos.roguelite.util.RecreateCloseable;
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
 import fi.jakojaannos.roguelite.vulkan.device.SwapchainSupportDetails;
+import fi.jakojaannos.roguelite.vulkan.types.VkFormat;
 import fi.jakojaannos.roguelite.vulkan.window.Window;
 import fi.jakojaannos.roguelite.vulkan.window.WindowSurface;
 
@@ -24,9 +25,9 @@ public class Swapchain extends RecreateCloseable {
     private long handle;
 
     private ImageView[] imageViews;
-    private int imageFormat;
+    private VkFormat imageFormat;
 
-    public int getImageFormat() {
+    public VkFormat getImageFormat() {
         return this.imageFormat;
     }
 
@@ -116,7 +117,7 @@ public class Swapchain extends RecreateCloseable {
             }
             this.handle = pSwapchain.get(0);
             this.extent.set(swapChainSupport.capabilities().currentExtent());
-            this.imageFormat = surfaceFormat.format();
+            this.imageFormat = VkFormat.valueOf(surfaceFormat.format());
 
             final long[] images = getSwapchainImages(this.deviceContext.getDevice(), this.handle);
             this.imageViews = new ImageView[images.length];

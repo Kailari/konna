@@ -2,7 +2,9 @@ package fi.jakojaannos.roguelite.vulkan;
 
 import fi.jakojaannos.roguelite.util.BufferWriter;
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
+import fi.jakojaannos.roguelite.vulkan.types.VkMemoryPropertyFlags;
 
+import static fi.jakojaannos.roguelite.util.BitMask.bitMask;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.VK10.*;
 
@@ -34,7 +36,7 @@ public class Mesh<TVertex> implements AutoCloseable {
         this.vertexBuffer = new GPUBuffer(deviceContext,
                                           vertices.length * vertexFormat.getSizeInBytes(),
                                           VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-                                          VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+                                          bitMask(VkMemoryPropertyFlags.DEVICE_LOCAL_BIT));
         pushToBuffer(this.vertexBuffer,
                      deviceContext,
                      vertices,
@@ -44,7 +46,7 @@ public class Mesh<TVertex> implements AutoCloseable {
         this.indexBuffer = new GPUBuffer(deviceContext,
                                          indices.length * Short.BYTES,
                                          VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-                                         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+                                         bitMask(VkMemoryPropertyFlags.DEVICE_LOCAL_BIT));
         pushToBuffer(this.indexBuffer,
                      deviceContext,
                      indices,
@@ -73,7 +75,8 @@ public class Mesh<TVertex> implements AutoCloseable {
                      deviceContext,
                      dataSizeInBytes,
                      VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                     VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)
+                     bitMask(VkMemoryPropertyFlags.HOST_VISIBLE_BIT,
+                             VkMemoryPropertyFlags.HOST_COHERENT_BIT))
         ) {
             final var data = stack.calloc(dataSizeInBytes);
             for (int i = 0; i < values.length; ++i) {

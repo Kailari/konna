@@ -14,7 +14,9 @@ import fi.jakojaannos.roguelite.vulkan.descriptor.DescriptorPool;
 import fi.jakojaannos.roguelite.vulkan.descriptor.DescriptorSetLayout;
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
 import fi.jakojaannos.roguelite.vulkan.rendering.Swapchain;
+import fi.jakojaannos.roguelite.vulkan.types.VkMemoryPropertyFlags;
 
+import static fi.jakojaannos.roguelite.util.BitMask.bitMask;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.VK10.*;
 
@@ -109,7 +111,8 @@ public class CameraUniformBufferObject extends RecreateCloseable {
             this.buffers[imageIndex] = new GPUBuffer(this.deviceContext,
                                                      accumulatedSize,
                                                      VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                                                     VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+                                                     bitMask(VkMemoryPropertyFlags.HOST_VISIBLE_BIT,
+                                                             VkMemoryPropertyFlags.HOST_COHERENT_BIT));
         }
 
         this.descriptorSets = this.descriptorPool.allocate(this.layout, this.swapchain.getImageCount());

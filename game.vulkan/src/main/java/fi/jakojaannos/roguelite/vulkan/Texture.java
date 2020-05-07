@@ -32,9 +32,7 @@ public class Texture implements AutoCloseable {
     ) {
         this.deviceContext = deviceContext;
 
-        this.imageView = new ImageView(deviceContext,
-                                       image.getHandle(),
-                                       image.getFormat());
+        this.imageView = new ImageView(deviceContext, image);
 
         try (final var stack = stackPush()) {
             final var pSampler = stack.mallocLong(1);

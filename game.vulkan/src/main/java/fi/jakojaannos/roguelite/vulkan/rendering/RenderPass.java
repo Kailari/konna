@@ -5,6 +5,7 @@ import org.lwjgl.vulkan.*;
 import fi.jakojaannos.roguelite.util.RecreateCloseable;
 import fi.jakojaannos.roguelite.vulkan.command.CommandBuffer;
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
+import fi.jakojaannos.roguelite.vulkan.types.VkFormat;
 
 import static fi.jakojaannos.roguelite.util.VkUtil.ensureSuccess;
 import static org.lwjgl.system.MemoryStack.stackPush;
@@ -17,7 +18,7 @@ public class RenderPass extends RecreateCloseable {
     private final VkDevice device;
     private final Swapchain swapchain;
 
-    private int swapchainImageFormat;
+    private VkFormat swapchainImageFormat;
     private long handle;
 
     public long getHandle() {
@@ -33,7 +34,7 @@ public class RenderPass extends RecreateCloseable {
         this.device = deviceContext.getDevice();
         this.swapchain = swapchain;
 
-        this.swapchainImageFormat = -1;
+        this.swapchainImageFormat = null;
         tryRecreate();
     }
 
@@ -43,7 +44,7 @@ public class RenderPass extends RecreateCloseable {
         try (final var stack = stackPush()) {
             final var attachments = VkAttachmentDescription.callocStack(1);
             attachments.get(COLOR_ATTACHMENT_INDEX)
-                       .format(this.swapchainImageFormat)
+                       .format(this.swapchainImageFormat.asInt())
                        .samples(VK_SAMPLE_COUNT_1_BIT)
                        .loadOp(VK_ATTACHMENT_LOAD_OP_CLEAR)
                        .storeOp(VK_ATTACHMENT_STORE_OP_STORE)

@@ -8,8 +8,10 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+import fi.jakojaannos.roguelite.util.BitMask;
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
 import fi.jakojaannos.roguelite.vulkan.memory.MemoryManager;
+import fi.jakojaannos.roguelite.vulkan.types.VkMemoryPropertyFlags;
 
 import static org.lwjgl.vulkan.VK10.vkGetPhysicalDeviceMemoryProperties;
 
@@ -58,17 +60,12 @@ public class SliceMemoryManager implements MemoryManager {
         vkGetPhysicalDeviceMemoryProperties(deviceContext.getPhysicalDevice(), this.memoryProperties);
     }
 
-    /**
-     * Allocates memory for a GPU resource.
-     *
-     * @param memoryRequirements description of the memory required
-     * @param propertyFlags      desired memory properties
-     *
-     * @return memory slice from some allocation, matching the given requirements and properties
-     */
     @Override
-    public GPUMemorySlice allocate(final VkMemoryRequirements memoryRequirements, final int propertyFlags) {
-        final var memoryType = findMemoryType(memoryRequirements.memoryTypeBits(), propertyFlags);
+    public GPUMemorySlice allocate(
+            final VkMemoryRequirements memoryRequirements,
+            final BitMask<VkMemoryPropertyFlags> properties
+    ) {
+        final var memoryType = findMemoryType(memoryRequirements.memoryTypeBits(), properties);
         return findSuitableAllocation(memoryRequirements, memoryType)
                 .orElseGet(() -> allocateAndSlice(memoryRequirements, memoryType));
     }
@@ -121,19 +118,11 @@ public class SliceMemoryManager implements MemoryManager {
         return allocation.slice(memoryRequirements).orElseThrow();
     }
 
-    /**
-     * Searches the physical device for a memory type matching the given type filter and property flags.
-     *
-     * @param typeFilter    memory type filter bit flags
-     * @param propertyFlags property bit flags
-     *
-     * @return the selected memory type
-     */
-    private int findMemoryType(final int typeFilter, final int propertyFlags) {
+    private int findMemoryType(final int typeFilter, final BitMask<VkMemoryPropertyFlags> properties) {
         for (var memoryType = 0; memoryType < this.memoryProperties.memoryTypeCount(); ++memoryType) {
             final var typeIsSuitable = (typeFilter & (1 << memoryType)) != 0;
-            final var hasAllProperties =
-                    (this.memoryProperties.memoryTypes(memoryType).propertyFlags() & propertyFlags) == propertyFlags;
+            final var hasAllProperties = properties.matches(this.memoryProperties.memoryTypes(memoryType)
+                                                                                 .propertyFlags());
 
             if (typeIsSuitable && hasAllProperties) {
                 return memoryType;

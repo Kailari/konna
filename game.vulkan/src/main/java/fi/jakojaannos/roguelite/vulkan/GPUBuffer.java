@@ -4,11 +4,13 @@ import org.lwjgl.vulkan.*;
 
 import java.nio.ByteBuffer;
 
+import fi.jakojaannos.roguelite.util.BitMask;
 import fi.jakojaannos.roguelite.vulkan.command.CommandPool;
 import fi.jakojaannos.roguelite.vulkan.command.GPUQueue;
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
 import fi.jakojaannos.roguelite.vulkan.memory.GPUMemory;
 import fi.jakojaannos.roguelite.vulkan.textures.GPUImage;
+import fi.jakojaannos.roguelite.vulkan.types.VkMemoryPropertyFlags;
 
 import static fi.jakojaannos.roguelite.util.VkUtil.ensureSuccess;
 import static org.lwjgl.system.MemoryStack.stackPush;
@@ -39,14 +41,14 @@ public class GPUBuffer implements AutoCloseable {
             final DeviceContext deviceContext,
             final long size,
             final int usageFlags,
-            final int memoryPropertyFlags
+            final BitMask<VkMemoryPropertyFlags> memoryProperties
     ) {
         this.device = deviceContext.getDevice();
-        this.deviceLocal = (memoryPropertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) != 0;
+        this.deviceLocal = memoryProperties.hasBit(VkMemoryPropertyFlags.DEVICE_LOCAL_BIT);
 
         this.size = size;
         this.handle = createBuffer(deviceContext, size, usageFlags);
-        this.memory = allocateMemory(this.handle, deviceContext, memoryPropertyFlags);
+        this.memory = allocateMemory(this.handle, deviceContext, memoryProperties);
         this.memory.bindBuffer(this.handle, 0);
     }
 
@@ -178,13 +180,13 @@ public class GPUBuffer implements AutoCloseable {
     private static GPUMemory allocateMemory(
             final long handle,
             final DeviceContext deviceContext,
-            final int memoryPropertyFlags
+            final BitMask<VkMemoryPropertyFlags> memoryProperties
     ) {
         try (final var ignored = stackPush()) {
             final var memoryRequirements = VkMemoryRequirements.callocStack();
             vkGetBufferMemoryRequirements(deviceContext.getDevice(), handle, memoryRequirements);
 
-            return deviceContext.getMemoryManager().allocate(memoryRequirements, memoryPropertyFlags);
+            return deviceContext.getMemoryManager().allocate(memoryRequirements, memoryProperties);
         }
     }
 }

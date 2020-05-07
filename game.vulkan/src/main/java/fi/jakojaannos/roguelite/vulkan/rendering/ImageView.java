@@ -4,6 +4,8 @@ import org.lwjgl.vulkan.VkDevice;
 import org.lwjgl.vulkan.VkImageViewCreateInfo;
 
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
+import fi.jakojaannos.roguelite.vulkan.textures.GPUImage;
+import fi.jakojaannos.roguelite.vulkan.types.VkFormat;
 
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.VK10.*;
@@ -16,16 +18,20 @@ public class ImageView implements AutoCloseable {
         return this.handle;
     }
 
-    public ImageView(final DeviceContext deviceContext, final long image, final int imageFormat) {
+    public ImageView(final DeviceContext deviceContext, final GPUImage image) {
+        this(deviceContext, image.getHandle(), image.getFormat());
+    }
+
+    public ImageView(final DeviceContext deviceContext, final long handle, final VkFormat format) {
         this.device = deviceContext.getDevice();
 
         try (final var stack = stackPush()) {
             final var createInfo = VkImageViewCreateInfo
                     .callocStack()
                     .sType(VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO)
-                    .image(image)
+                    .image(handle)
                     .viewType(VK_IMAGE_VIEW_TYPE_2D)
-                    .format(imageFormat);
+                    .format(format.asInt());
             createInfo.components()
                       .r(VK_COMPONENT_SWIZZLE_IDENTITY)
                       .g(VK_COMPONENT_SWIZZLE_IDENTITY)
