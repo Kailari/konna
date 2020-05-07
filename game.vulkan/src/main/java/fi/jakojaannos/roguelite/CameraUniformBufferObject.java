@@ -65,7 +65,7 @@ public class CameraUniformBufferObject extends RecreateCloseable {
                                               this.cameraMatrices.getDescriptorBinding(),
                                               this.instanceMatrices.getDescriptorBinding());
 
-        this.eyePosition = new Vector3f(2.0f, 2.0f, 2.0f);
+        this.eyePosition = new Vector3f(0.0f, -3.0f, 2.0f);
         this.lookAtTarget = new Vector3f(0.0f, 0.0f, 0.0f);
         this.up = new Vector3f(0.0f, 0.0f, 1.0f);
 
@@ -160,12 +160,18 @@ public class CameraUniformBufferObject extends RecreateCloseable {
 
     public void update(final int imageIndex, final double angle) {
         final var aspectRatio = this.swapchain.getExtent().width() / (float) this.swapchain.getExtent().height();
+        // Create right-handed perspective projection matrix with Y-axis flipped
+        // (Vulkan NDC has Y pointing down which we need to correct with projection matrix)
+        //
+        // This results in coordinate system where:
+        //  -X: Left       +X: Right
+        //  -Y: Back       +Y: Forward
+        //  -Z: Down       +Z: Up
         this.cameraMatrices.projection.identity()
+                                      .scale(1, -1, 1)
                                       .perspective((float) Math.toRadians(45.0),
                                                    aspectRatio,
                                                    0.1f, 1000.0f, true);
-        // Flip the Y-axis
-        this.cameraMatrices.projection.m11(this.cameraMatrices.projection.m11() * -1.0f);
 
         this.cameraMatrices.view.identity().lookAt(this.eyePosition, this.lookAtTarget, this.up);
 
