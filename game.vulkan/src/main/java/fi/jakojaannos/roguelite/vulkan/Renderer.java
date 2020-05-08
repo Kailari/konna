@@ -4,6 +4,7 @@ import java.nio.file.Path;
 
 import fi.jakojaannos.roguelite.CameraUniformBufferObject;
 import fi.jakojaannos.roguelite.MaterialInstance;
+import fi.jakojaannos.roguelite.SceneUniformBufferObject;
 import fi.jakojaannos.roguelite.assets.Mesh;
 import fi.jakojaannos.roguelite.assets.MeshLoader;
 import fi.jakojaannos.roguelite.assets.MeshVertex;
@@ -31,8 +32,10 @@ public class Renderer implements AutoCloseable {
     private final GraphicsPipeline<MeshVertex> graphicsPipeline;
     private final DescriptorSetLayout materialDescriptorLayout;
     private final CameraUniformBufferObject cameraUBO;
+    private final SceneUniformBufferObject sceneUBO;
     private final TextureSampler textureSampler;
 
+    private final MeshLoader meshLoader;
     private final Mesh[] meshes;
 
     private CommandBuffer[] commandBuffers;
@@ -65,14 +68,18 @@ public class Renderer implements AutoCloseable {
         // can delay the descriptorCount/maxSets calculations to `tryRecreate`, where all resources
         // are already initialized. E.g. we do not yet know the image count here
         this.descriptorPool = new DescriptorPool(backend.deviceContext(),
-                                                 () -> this.swapchain.getImageCount() * 2 + this.swapchain.getImageCount() * 7,
+                                                 () -> this.swapchain.getImageCount() * 3 + this.swapchain.getImageCount() * 7,
                                                  new DescriptorPool.Pool(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                                                                         () -> this.swapchain.getImageCount() * 8),
+                                                                         () -> this.swapchain.getImageCount() * 2 + this.swapchain
+                                                                                                                            .getImageCount() * 7),
                                                  new DescriptorPool.Pool(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                                                                          this.swapchain::getImageCount));
         this.cameraUBO = new CameraUniformBufferObject(backend.deviceContext(),
                                                        this.swapchain,
                                                        this.descriptorPool);
+        this.sceneUBO = new SceneUniformBufferObject(backend.deviceContext(),
+                                                     this.swapchain,
+                                                     this.descriptorPool);
 
         this.textureSampler = new TextureSampler(backend.deviceContext());
 
@@ -86,15 +93,16 @@ public class Renderer implements AutoCloseable {
                                                        this.renderPass,
                                                        MeshVertex.FORMAT,
                                                        this.cameraUBO.getLayout(),
+                                                       this.sceneUBO.getLayout(),
                                                        this.materialDescriptorLayout);
 
-        final MeshLoader meshLoader = new MeshLoader(backend.deviceContext(),
-                                                     this.swapchain,
-                                                     this.descriptorPool,
-                                                     this.materialDescriptorLayout,
-                                                     this.textureSampler,
-                                                     assetRoot);
-        this.meshes = meshLoader.load(Path.of("models/arena.obj"));
+        this.meshLoader = new MeshLoader(backend.deviceContext(),
+                                         this.swapchain,
+                                         this.descriptorPool,
+                                         this.materialDescriptorLayout,
+                                         this.textureSampler,
+                                         assetRoot);
+        this.meshes = this.meshLoader.load(Path.of("models/arena.obj"));
 
         /*
         this.mesh = new GPUMesh<>(backend.deviceContext(),
@@ -136,6 +144,7 @@ public class Renderer implements AutoCloseable {
 
         this.descriptorPool.tryRecreate();
         this.cameraUBO.tryRecreate();
+        this.sceneUBO.tryRecreate();
         // Recreate mesh material instances
         for (final var mesh : this.meshes) {
             mesh.tryRecreate();
@@ -162,7 +171,8 @@ public class Renderer implements AutoCloseable {
                                         VK_PIPELINE_BIND_POINT_GRAPHICS,
                                         this.graphicsPipeline.getLayout(),
                                         0,
-                                        stack.longs(this.cameraUBO.getDescriptorSet(imageIndex)),
+                                        stack.longs(this.cameraUBO.getDescriptorSet(imageIndex),
+                                                    this.sceneUBO.getDescriptorSet(imageIndex)),
                                         null);
 
 
@@ -171,7 +181,7 @@ public class Renderer implements AutoCloseable {
                     vkCmdBindDescriptorSets(commandBuffer.getHandle(),
                                             VK_PIPELINE_BIND_POINT_GRAPHICS,
                                             this.graphicsPipeline.getLayout(),
-                                            1,
+                                            2,
                                             stack.longs(mesh.getMaterialInstance().getDescriptorSet(imageIndex)),
                                             null);
 
@@ -216,9 +226,11 @@ public class Renderer implements AutoCloseable {
     public void close() {
         this.descriptorPool.close();
         this.cameraUBO.close();
+        this.sceneUBO.close();
         this.materialDescriptorLayout.close();
 
         this.textureSampler.close();
+        this.meshLoader.close();
         for (final Mesh mesh : this.meshes) {
             mesh.close();
         }

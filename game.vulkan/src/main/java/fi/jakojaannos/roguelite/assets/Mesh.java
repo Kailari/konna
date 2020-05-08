@@ -70,5 +70,6 @@ public class Mesh extends RecreateCloseable {
     public void close() {
         super.close();
         this.gpuMesh.close();
+        this.material.close();
     }
 }

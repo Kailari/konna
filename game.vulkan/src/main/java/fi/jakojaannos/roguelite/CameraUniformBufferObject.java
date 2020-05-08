@@ -33,7 +33,6 @@ public class CameraUniformBufferObject extends RecreateCloseable {
     private final InstanceMatrices instanceMatrices;
     private final UniformBinding[] bindings;
 
-    private final Vector3f eyePosition;
     private final Vector3f lookAtTarget;
     private final Vector3f up;
 
@@ -66,7 +65,7 @@ public class CameraUniformBufferObject extends RecreateCloseable {
                                               this.cameraMatrices.getDescriptorBinding(),
                                               this.instanceMatrices.getDescriptorBinding());
 
-        this.eyePosition = new Vector3f(0.0f, -20.0f, 25.0f);
+        this.cameraMatrices.eyePosition.set(0.0f, -10.0f, 15.0f);
         this.lookAtTarget = new Vector3f(0.0f, 0.0f, 0.0f);
         this.up = new Vector3f(0.0f, 0.0f, 1.0f);
 
@@ -174,9 +173,11 @@ public class CameraUniformBufferObject extends RecreateCloseable {
                                                    aspectRatio,
                                                    0.1f, 10_000.0f, true);
 
-        this.cameraMatrices.view.identity().lookAt(this.eyePosition, this.lookAtTarget, this.up);
+        this.cameraMatrices.view.identity()
+                                .lookAt(this.cameraMatrices.eyePosition, this.lookAtTarget, this.up)
+                                .rotateZ((float) angle);
 
-        this.instanceMatrices.model.identity().rotateZ((float) angle);
+        this.instanceMatrices.model.identity();
 
         try (final var stack = stackPush()) {
             final var data = stack.malloc((int) this.buffers[imageIndex].getSize());
@@ -191,10 +192,12 @@ public class CameraUniformBufferObject extends RecreateCloseable {
     private static class CameraMatrices implements UniformBinding {
         private static final int OFFSET_VIEW = 0;
         private static final int OFFSET_PROJECTION = 16 * Float.BYTES;
+        private static final int OFFSET_EYE_POSITION = 2 * 16 * Float.BYTES;
 
         private final DescriptorBinding descriptorBinding;
         private final Matrix4f view = new Matrix4f().identity();
         private final Matrix4f projection = new Matrix4f().identity();
+        private final Vector3f eyePosition = new Vector3f();
 
         @Override
         public DescriptorBinding getDescriptorBinding() {
@@ -203,20 +206,21 @@ public class CameraUniformBufferObject extends RecreateCloseable {
 
         @Override
         public long getSizeInBytes() {
-            return 2 * 16 * Float.BYTES;
+            return 2 * 16 * Float.BYTES + 3 * Float.BYTES;
         }
 
         private CameraMatrices() {
             this.descriptorBinding = new DescriptorBinding(0,
                                                            VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                                                            1,
-                                                           VK_SHADER_STAGE_VERTEX_BIT);
+                                                           VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
         }
 
         @Override
         public void write(final int offset, final ByteBuffer buffer) {
             this.view.get(offset + OFFSET_VIEW, buffer);
             this.projection.get(offset + OFFSET_PROJECTION, buffer);
+            this.eyePosition.get(offset + OFFSET_EYE_POSITION, buffer);
         }
     }
 
