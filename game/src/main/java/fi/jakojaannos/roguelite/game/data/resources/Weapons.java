@@ -79,9 +79,11 @@ public class Weapons {
             new ModularWeapon.Module<>(new OverheatBaseModule(),
                                        new OverheatBaseModule.Attributes()),
             new ModularWeapon.Module<>(new OverheatFromShotsModule(),
-                                       new OverheatFromShotsModule.Attributes(1.5)),
+                                       new OverheatFromShotsModule.Attributes(0.8)),
             new ModularWeapon.Module<>(new HeatSinkModule(),
-                                       new HeatSinkModule.Attributes(0.2, true, true)));
+                                       new HeatSinkModule.Attributes(0.4, true, true)),
+            new ModularWeapon.Module<>(new JamOnOverheatModule(),
+                                       new JamOnOverheatModule.Attributes(100, 120)));
     /*public static ModularWeapon PLAYER_MINIGUN_OVERHEAT_2 = new ModularWeapon(
             new ModularWeapon.Module<>(new AutomaticTriggerModule(),
                                        new NoAttributes()),
