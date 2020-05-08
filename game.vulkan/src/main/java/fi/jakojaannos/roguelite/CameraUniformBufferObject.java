@@ -15,6 +15,7 @@ import fi.jakojaannos.roguelite.vulkan.descriptor.DescriptorSetLayout;
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
 import fi.jakojaannos.roguelite.vulkan.rendering.Swapchain;
 import fi.jakojaannos.roguelite.vulkan.types.VkMemoryPropertyFlags;
+import fi.jakojaannos.roguelite.vulkan.uniform.UniformBinding;
 
 import static fi.jakojaannos.roguelite.util.BitMask.bitMask;
 import static org.lwjgl.system.MemoryStack.stackPush;
@@ -65,7 +66,7 @@ public class CameraUniformBufferObject extends RecreateCloseable {
                                               this.cameraMatrices.getDescriptorBinding(),
                                               this.instanceMatrices.getDescriptorBinding());
 
-        this.eyePosition = new Vector3f(0.0f, -3.0f, 2.0f);
+        this.eyePosition = new Vector3f(0.0f, -20.0f, 25.0f);
         this.lookAtTarget = new Vector3f(0.0f, 0.0f, 0.0f);
         this.up = new Vector3f(0.0f, 0.0f, 1.0f);
 
@@ -171,7 +172,7 @@ public class CameraUniformBufferObject extends RecreateCloseable {
                                       .scale(1, -1, 1)
                                       .perspective((float) Math.toRadians(45.0),
                                                    aspectRatio,
-                                                   0.1f, 1000.0f, true);
+                                                   0.1f, 10_000.0f, true);
 
         this.cameraMatrices.view.identity().lookAt(this.eyePosition, this.lookAtTarget, this.up);
 
@@ -187,17 +188,7 @@ public class CameraUniformBufferObject extends RecreateCloseable {
         }
     }
 
-    private interface UniformBinding {
-        long getSizeInBytes();
-
-        DescriptorBinding getDescriptorBinding();
-
-        void write(int offset, ByteBuffer buffer);
-    }
-
     private static class CameraMatrices implements UniformBinding {
-        private static final int SIZE_IN_BYTES = 2 * 16 * Float.BYTES;
-
         private static final int OFFSET_VIEW = 0;
         private static final int OFFSET_PROJECTION = 16 * Float.BYTES;
 
@@ -212,7 +203,7 @@ public class CameraUniformBufferObject extends RecreateCloseable {
 
         @Override
         public long getSizeInBytes() {
-            return SIZE_IN_BYTES;
+            return 2 * 16 * Float.BYTES;
         }
 
         private CameraMatrices() {
@@ -230,8 +221,6 @@ public class CameraUniformBufferObject extends RecreateCloseable {
     }
 
     private static class InstanceMatrices implements UniformBinding {
-        private static final int SIZE_IN_BYTES = 16 * Float.BYTES;
-
         private static final int OFFSET_MODEL = 0;
         private final DescriptorBinding descriptorBinding;
 
@@ -244,7 +233,7 @@ public class CameraUniformBufferObject extends RecreateCloseable {
 
         @Override
         public long getSizeInBytes() {
-            return SIZE_IN_BYTES;
+            return 16 * Float.BYTES;
         }
 
         private InstanceMatrices() {

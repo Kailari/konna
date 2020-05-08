@@ -9,10 +9,10 @@ repositories {
     mavenCentral()
 }
 
-application.mainClassName = "fi.jakojaannos.roguelite.Main"
+application.mainClassName = "roguelite.vulkan/fi.jakojaannos.roguelite.Main"
 
-def final implementationModules = ['', '-glfw', '-vulkan', '-shaderc', '-stb']
-def final runtimeModules = ['', '-glfw', '-shaderc', '-stb']
+def final implementationModules = ['', '-glfw', '-vulkan', '-shaderc', '-stb', '-assimp']
+def final runtimeModules = ['', '-glfw', '-shaderc', '-stb', '-assimp']
 
 dependencies {
     implementation project(":engine.utilities")
@@ -23,8 +23,16 @@ dependencies {
     implementation platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")
     final def lwjglNatives = selectNatives(OperatingSystem.current())
     for (final modulePostfix in implementationModules) { implementation "org.lwjgl:lwjgl${modulePostfix}" }
-    for (final modulePostfix in runtimeModules) { runtimeOnly "org.lwjgl:lwjgl${modulePostfix}::${lwjglNatives}" }
+
+    // FIXME: This should be `runtimeOnly` instead of `implementation` but that breaks `module-info.java`
+    for (final modulePostfix in runtimeModules) { implementation "org.lwjgl:lwjgl${modulePostfix}::${lwjglNatives}" }
     if (lwjglNatives == "natives-macos") runtimeOnly "org.lwjgl:lwjgl-vulkan::${lwjglNatives}"
+}
+
+test {
+    moduleOptions {
+        runOnClasspath = true
+    }
 }
 
 static String selectNatives(final OperatingSystem platform) {

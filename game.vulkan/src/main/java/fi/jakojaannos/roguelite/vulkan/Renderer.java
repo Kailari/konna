@@ -1,23 +1,22 @@
 package fi.jakojaannos.roguelite.vulkan;
 
-import org.joml.Vector2f;
-import org.joml.Vector3f;
-
 import java.nio.file.Path;
 
 import fi.jakojaannos.roguelite.CameraUniformBufferObject;
-import fi.jakojaannos.roguelite.TextureDescriptor;
+import fi.jakojaannos.roguelite.MaterialInstance;
+import fi.jakojaannos.roguelite.assets.Mesh;
+import fi.jakojaannos.roguelite.assets.MeshLoader;
+import fi.jakojaannos.roguelite.assets.MeshVertex;
 import fi.jakojaannos.roguelite.vulkan.command.CommandBuffer;
 import fi.jakojaannos.roguelite.vulkan.command.CommandPool;
 import fi.jakojaannos.roguelite.vulkan.descriptor.DescriptorPool;
-import fi.jakojaannos.roguelite.vulkan.rendering.*;
-import fi.jakojaannos.roguelite.vulkan.types.VkImageAspectFlags;
-import fi.jakojaannos.roguelite.vulkan.types.VkImageTiling;
-import fi.jakojaannos.roguelite.vulkan.types.VkImageUsageFlags;
-import fi.jakojaannos.roguelite.vulkan.types.VkMemoryPropertyFlags;
+import fi.jakojaannos.roguelite.vulkan.descriptor.DescriptorSetLayout;
+import fi.jakojaannos.roguelite.vulkan.rendering.Framebuffers;
+import fi.jakojaannos.roguelite.vulkan.rendering.GraphicsPipeline;
+import fi.jakojaannos.roguelite.vulkan.rendering.RenderPass;
+import fi.jakojaannos.roguelite.vulkan.rendering.Swapchain;
 import fi.jakojaannos.roguelite.vulkan.window.Window;
 
-import static fi.jakojaannos.roguelite.util.BitMask.bitMask;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.VK10.*;
 
@@ -29,13 +28,12 @@ public class Renderer implements AutoCloseable {
     private final CommandPool commandPool;
     private final DescriptorPool descriptorPool;
 
-    private final GraphicsPipeline<Vertex> graphicsPipeline;
+    private final GraphicsPipeline<MeshVertex> graphicsPipeline;
+    private final DescriptorSetLayout materialDescriptorLayout;
     private final CameraUniformBufferObject cameraUBO;
-    private final Mesh<Vertex> mesh;
     private final TextureSampler textureSampler;
-    private final GPUImage textureImage;
-    private final ImageView textureView;
-    private final TextureDescriptor textureDescriptor;
+
+    private final Mesh[] meshes;
 
     private CommandBuffer[] commandBuffers;
 
@@ -67,9 +65,9 @@ public class Renderer implements AutoCloseable {
         // can delay the descriptorCount/maxSets calculations to `tryRecreate`, where all resources
         // are already initialized. E.g. we do not yet know the image count here
         this.descriptorPool = new DescriptorPool(backend.deviceContext(),
-                                                 () -> this.swapchain.getImageCount() * 2,
+                                                 () -> this.swapchain.getImageCount() * 2 + this.swapchain.getImageCount() * 7,
                                                  new DescriptorPool.Pool(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                                                                         this.swapchain::getImageCount),
+                                                                         () -> this.swapchain.getImageCount() * 8),
                                                  new DescriptorPool.Pool(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                                                                          this.swapchain::getImageCount));
         this.cameraUBO = new CameraUniformBufferObject(backend.deviceContext(),
@@ -78,29 +76,30 @@ public class Renderer implements AutoCloseable {
 
         this.textureSampler = new TextureSampler(backend.deviceContext());
 
-        this.textureImage = new GPUImage(backend.deviceContext(),
-                                         assetRoot.resolve("textures/vulkan/texture.jpg"),
-                                         VkImageTiling.OPTIMAL,
-                                         bitMask(VkImageUsageFlags.SAMPLED_BIT),
-                                         bitMask(VkMemoryPropertyFlags.DEVICE_LOCAL_BIT));
-        this.textureView = new ImageView(backend.deviceContext(), this.textureImage, bitMask(VkImageAspectFlags.COLOR_BIT));
-        this.textureDescriptor = new TextureDescriptor(backend.deviceContext(),
-                                                       this.swapchain,
-                                                       this.descriptorPool,
-                                                       this.textureView,
-                                                       this.textureSampler);
+        this.materialDescriptorLayout = new DescriptorSetLayout(backend.deviceContext(),
+                                                                MaterialInstance.TEXTURE_DESCRIPTOR_BINDING,
+                                                                MaterialInstance.MATERIAL_DESCRIPTOR_BINDING);
 
         this.graphicsPipeline = new GraphicsPipeline<>(assetRoot,
                                                        backend.deviceContext(),
                                                        this.swapchain,
                                                        this.renderPass,
-                                                       Vertex.FORMAT,
+                                                       MeshVertex.FORMAT,
                                                        this.cameraUBO.getLayout(),
-                                                       this.textureDescriptor.getLayout());
+                                                       this.materialDescriptorLayout);
 
-        this.mesh = new Mesh<>(backend.deviceContext(),
-                               Vertex.FORMAT,
-                               new Vertex[]{
+        final MeshLoader meshLoader = new MeshLoader(backend.deviceContext(),
+                                                     this.swapchain,
+                                                     this.descriptorPool,
+                                                     this.materialDescriptorLayout,
+                                                     this.textureSampler,
+                                                     assetRoot);
+        this.meshes = meshLoader.load(Path.of("models/arena.obj"));
+
+        /*
+        this.mesh = new GPUMesh<>(backend.deviceContext(),
+                                  Vertex.FORMAT,
+                                  new Vertex[]{
                                        new Vertex(new Vector3f(-0.5f, -0.5f, 0.0f), new Vector2f(0.0f, 0.0f), new Vector3f(1.0f, 0.0f, 0.0f)),
                                        new Vertex(new Vector3f(0.5f, -0.5f, 0.0f), new Vector2f(1.0f, 0.0f), new Vector3f(0.0f, 1.0f, 0.0f)),
                                        new Vertex(new Vector3f(0.5f, 0.5f, 0.0f), new Vector2f(1.0f, 1.0f), new Vector3f(0.0f, 0.0f, 1.0f)),
@@ -111,13 +110,13 @@ public class Renderer implements AutoCloseable {
                                        new Vertex(new Vector3f(0.5f, 0.5f, -0.5f), new Vector2f(1.0f, 1.0f), new Vector3f(0.0f, 0.0f, 1.0f)),
                                        new Vertex(new Vector3f(-0.5f, 0.5f, -0.5f), new Vector2f(0.0f, 1.0f), new Vector3f(1.0f, 0.0f, 1.0f)),
                                },
-                               new Short[]{
+                                  new Short[]{
                                        0, 1, 2,
                                        2, 3, 0,
 
                                        4, 5, 6,
                                        6, 7, 4,
-                               });
+                               });*/
 
         recreateSwapchain();
     }
@@ -137,7 +136,10 @@ public class Renderer implements AutoCloseable {
 
         this.descriptorPool.tryRecreate();
         this.cameraUBO.tryRecreate();
-        this.textureDescriptor.tryRecreate();
+        // Recreate mesh material instances
+        for (final var mesh : this.meshes) {
+            mesh.tryRecreate();
+        }
         this.graphicsPipeline.tryRecreate();
 
         recordCommandBuffers();
@@ -160,25 +162,35 @@ public class Renderer implements AutoCloseable {
                                         VK_PIPELINE_BIND_POINT_GRAPHICS,
                                         this.graphicsPipeline.getLayout(),
                                         0,
-                                        stack.longs(this.cameraUBO.getDescriptorSet(imageIndex),
-                                                    this.textureDescriptor.get(imageIndex)),
+                                        stack.longs(this.cameraUBO.getDescriptorSet(imageIndex)),
                                         null);
 
-                vkCmdBindVertexBuffers(commandBuffer.getHandle(),
-                                       0,
-                                       stack.longs(this.mesh.getVertexBuffer().getHandle()),
-                                       stack.longs(0L));
-                vkCmdBindIndexBuffer(commandBuffer.getHandle(),
-                                     this.mesh.getIndexBuffer().getHandle(),
-                                     0,
-                                     VK_INDEX_TYPE_UINT16);
 
-                vkCmdDrawIndexed(commandBuffer.getHandle(),
-                                 this.mesh.getIndexCount(),
-                                 1,
-                                 0,
-                                 0,
-                                 0);
+                for (final var mesh : this.meshes) {
+                    // FIXME: Get from mesh material
+                    vkCmdBindDescriptorSets(commandBuffer.getHandle(),
+                                            VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                            this.graphicsPipeline.getLayout(),
+                                            1,
+                                            stack.longs(mesh.getMaterialInstance().getDescriptorSet(imageIndex)),
+                                            null);
+
+                    vkCmdBindVertexBuffers(commandBuffer.getHandle(),
+                                           0,
+                                           stack.longs(mesh.getVertexBuffer().getHandle()),
+                                           stack.longs(0L));
+                    vkCmdBindIndexBuffer(commandBuffer.getHandle(),
+                                         mesh.getIndexBuffer().getHandle(),
+                                         0,
+                                         VK_INDEX_TYPE_UINT16);
+
+                    vkCmdDrawIndexed(commandBuffer.getHandle(),
+                                     mesh.getIndexCount(),
+                                     1,
+                                     0,
+                                     0,
+                                     0);
+                }
             }
         }
     }
@@ -204,12 +216,12 @@ public class Renderer implements AutoCloseable {
     public void close() {
         this.descriptorPool.close();
         this.cameraUBO.close();
-        this.textureDescriptor.close();
+        this.materialDescriptorLayout.close();
 
         this.textureSampler.close();
-        this.textureView.close();
-        this.textureImage.close();
-        this.mesh.close();
+        for (final Mesh mesh : this.meshes) {
+            mesh.close();
+        }
 
         this.depthTexture.close();
 

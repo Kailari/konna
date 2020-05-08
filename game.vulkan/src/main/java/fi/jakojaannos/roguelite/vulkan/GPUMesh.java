@@ -5,10 +5,11 @@ import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
 import fi.jakojaannos.roguelite.vulkan.types.VkMemoryPropertyFlags;
 
 import static fi.jakojaannos.roguelite.util.BitMask.bitMask;
-import static org.lwjgl.system.MemoryStack.stackPush;
+import static org.lwjgl.system.MemoryUtil.memAlloc;
+import static org.lwjgl.system.MemoryUtil.memFree;
 import static org.lwjgl.vulkan.VK10.*;
 
-public class Mesh<TVertex> implements AutoCloseable {
+public class GPUMesh<TVertex> implements AutoCloseable {
     private final GPUBuffer vertexBuffer;
     private final GPUBuffer indexBuffer;
     private final int indexCount;
@@ -25,7 +26,7 @@ public class Mesh<TVertex> implements AutoCloseable {
         return this.vertexBuffer;
     }
 
-    public Mesh(
+    public GPUMesh(
             final DeviceContext deviceContext,
             final VertexFormat<TVertex> vertexFormat,
             final TVertex[] vertices,
@@ -70,21 +71,22 @@ public class Mesh<TVertex> implements AutoCloseable {
         final var commandPool = deviceContext.getTransferCommandPool();
         final var dataSizeInBytes = values.length * elementSize;
 
-        try (final var stack = stackPush();
-             final var stagingBuffer = new GPUBuffer(
-                     deviceContext,
-                     dataSizeInBytes,
-                     VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                     bitMask(VkMemoryPropertyFlags.HOST_VISIBLE_BIT,
-                             VkMemoryPropertyFlags.HOST_COHERENT_BIT))
+        final var data = memAlloc(dataSizeInBytes);
+        try (final var stagingBuffer = new GPUBuffer(
+                deviceContext,
+                dataSizeInBytes,
+                VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                bitMask(VkMemoryPropertyFlags.HOST_VISIBLE_BIT,
+                        VkMemoryPropertyFlags.HOST_COHERENT_BIT))
         ) {
-            final var data = stack.calloc(dataSizeInBytes);
             for (int i = 0; i < values.length; ++i) {
                 writer.write(values[i], i * elementSize, data);
             }
 
             stagingBuffer.push(data, 0, dataSizeInBytes);
             stagingBuffer.copyToAndWait(commandPool, deviceContext.getTransferQueue(), buffer);
+        } finally {
+            memFree(data);
         }
     }
 }

@@ -10,9 +10,10 @@ import java.util.List;
 import java.util.Objects;
 
 import fi.jakojaannos.roguelite.util.BufferWriter;
+import fi.jakojaannos.roguelite.vulkan.types.VkFormat;
 
 import static org.lwjgl.system.MemoryStack.stackPush;
-import static org.lwjgl.vulkan.VK10.*;
+import static org.lwjgl.vulkan.VK10.VK_VERTEX_INPUT_RATE_VERTEX;
 
 public class VertexFormat<TVertex> implements AutoCloseable {
     private final VkVertexInputBindingDescription.Buffer bindings;
@@ -77,21 +78,20 @@ public class VertexFormat<TVertex> implements AutoCloseable {
          * must match the attribute location values defined in shaders used with this format)</i>
          *
          * @param location attribute location in the shader
-         * @param format   vulkan vertex attribute format e.g. {@link org.lwjgl.vulkan.VK11#VK_FORMAT_R32_SFLOAT
-         *                 VK_FORMAT_R32_SFLOAT}
+         * @param format   attribute format
          *
          * @return this builder for chaining
          */
         public Builder<TVertex> attribute(
                 final int location,
-                final int format
+                final VkFormat format
         ) {
             this.attributes.add(VkVertexInputAttributeDescription.calloc()
                                                                  .binding(0)
                                                                  .location(location)
-                                                                 .format(format)
+                                                                 .format(format.asInt())
                                                                  .offset(this.sizeInBytes));
-            this.sizeInBytes += sizeOf(format);
+            this.sizeInBytes += format.getSize();
             return this;
         }
 
@@ -124,15 +124,6 @@ public class VertexFormat<TVertex> implements AutoCloseable {
                 this.attributes.forEach(Struct::free);
                 return format;
             }
-        }
-
-        private static int sizeOf(final int format) {
-            return switch (format) {
-                case VK_FORMAT_R32_SFLOAT -> Float.BYTES;
-                case VK_FORMAT_R32G32_SFLOAT -> 2 * Float.BYTES;
-                case VK_FORMAT_R32G32B32_SFLOAT -> 3 * Float.BYTES;
-                default -> throw new IllegalArgumentException("Unknown vertex attribute format: " + format);
-            };
         }
     }
 }

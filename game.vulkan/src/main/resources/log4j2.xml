@@ -32,6 +32,7 @@
 
                 <!-- Assets/IO -->
                 <MarkerFilter onMismatch="NEUTRAL" marker="ASSET_LOADING" onMatch="DENY"/>
+                <MarkerFilter onMismatch="NEUTRAL" marker="MESH_LOADING" onMatch="ACCEPT"/>
             </Filters>
         </Console>
     </Appenders>

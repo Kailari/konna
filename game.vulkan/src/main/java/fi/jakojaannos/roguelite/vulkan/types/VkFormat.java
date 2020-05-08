@@ -117,18 +117,18 @@ public enum VkFormat {
     R16G16B16A16_UINT(VK_FORMAT_R16G16B16A16_UINT),
     R16G16B16A16_SINT(VK_FORMAT_R16G16B16A16_SINT),
     R16G16B16A16_SFLOAT(VK_FORMAT_R16G16B16A16_SFLOAT),
-    R32_UINT(VK_FORMAT_R32_UINT),
-    R32_SINT(VK_FORMAT_R32_SINT),
-    R32_SFLOAT(VK_FORMAT_R32_SFLOAT),
-    R32G32_UINT(VK_FORMAT_R32G32_UINT),
-    R32G32_SINT(VK_FORMAT_R32G32_SINT),
-    R32G32_SFLOAT(VK_FORMAT_R32G32_SFLOAT),
-    R32G32B32_UINT(VK_FORMAT_R32G32B32_UINT),
-    R32G32B32_SINT(VK_FORMAT_R32G32B32_SINT),
-    R32G32B32_SFLOAT(VK_FORMAT_R32G32B32_SFLOAT),
-    R32G32B32A32_UINT(VK_FORMAT_R32G32B32A32_UINT),
-    R32G32B32A32_SINT(VK_FORMAT_R32G32B32A32_SINT),
-    R32G32B32A32_SFLOAT(VK_FORMAT_R32G32B32A32_SFLOAT),
+    R32_UINT(VK_FORMAT_R32_UINT, Integer.BYTES),
+    R32_SINT(VK_FORMAT_R32_SINT, Integer.BYTES),
+    R32_SFLOAT(VK_FORMAT_R32_SFLOAT, Float.BYTES),
+    R32G32_UINT(VK_FORMAT_R32G32_UINT, 2 * Integer.BYTES),
+    R32G32_SINT(VK_FORMAT_R32G32_SINT, 2 * Integer.BYTES),
+    R32G32_SFLOAT(VK_FORMAT_R32G32_SFLOAT, 2 * Float.BYTES),
+    R32G32B32_UINT(VK_FORMAT_R32G32B32_UINT, 3 * Integer.BYTES),
+    R32G32B32_SINT(VK_FORMAT_R32G32B32_SINT, 3 * Integer.BYTES),
+    R32G32B32_SFLOAT(VK_FORMAT_R32G32B32_SFLOAT, 3 * Float.BYTES),
+    R32G32B32A32_UINT(VK_FORMAT_R32G32B32A32_UINT, 4 * Integer.BYTES),
+    R32G32B32A32_SINT(VK_FORMAT_R32G32B32A32_SINT, 4 * Integer.BYTES),
+    R32G32B32A32_SFLOAT(VK_FORMAT_R32G32B32A32_SFLOAT, 4 * Float.BYTES),
     R64_UINT(VK_FORMAT_R64_UINT),
     R64_SINT(VK_FORMAT_R64_SINT),
     R64_SFLOAT(VK_FORMAT_R64_SFLOAT),
@@ -219,9 +219,23 @@ public enum VkFormat {
     }
 
     private final int format;
+    private final int size;
+
+    public int getSize() {
+        if (this.size == -1) {
+            throw new UnsupportedOperationException("Tried to get size of VkFormat with no defined size in the enum. "
+                                                    + "Offending VkFormat: " + this.name());
+        }
+        return this.size;
+    }
 
     VkFormat(final int format) {
+        this(format, -1);
+    }
+
+    VkFormat(final int format, final int size) {
         this.format = format;
+        this.size = size;
     }
 
     public static VkFormat findDepthFormat(final DeviceContext deviceContext) {
