@@ -36,7 +36,9 @@ public class Renderer implements AutoCloseable {
     private final TextureSampler textureSampler;
 
     private final MeshLoader meshLoader;
-    private final Mesh[] meshes;
+    private final Mesh[] staticMeshes;
+
+    private final Mesh[] humanoid;
 
     private CommandBuffer[] commandBuffers;
 
@@ -102,29 +104,8 @@ public class Renderer implements AutoCloseable {
                                          this.materialDescriptorLayout,
                                          this.textureSampler,
                                          assetRoot);
-        this.meshes = this.meshLoader.load(Path.of("models/arena.obj"));
-
-        /*
-        this.mesh = new GPUMesh<>(backend.deviceContext(),
-                                  Vertex.FORMAT,
-                                  new Vertex[]{
-                                       new Vertex(new Vector3f(-0.5f, -0.5f, 0.0f), new Vector2f(0.0f, 0.0f), new Vector3f(1.0f, 0.0f, 0.0f)),
-                                       new Vertex(new Vector3f(0.5f, -0.5f, 0.0f), new Vector2f(1.0f, 0.0f), new Vector3f(0.0f, 1.0f, 0.0f)),
-                                       new Vertex(new Vector3f(0.5f, 0.5f, 0.0f), new Vector2f(1.0f, 1.0f), new Vector3f(0.0f, 0.0f, 1.0f)),
-                                       new Vertex(new Vector3f(-0.5f, 0.5f, 0.0f), new Vector2f(0.0f, 1.0f), new Vector3f(1.0f, 0.0f, 1.0f)),
-
-                                       new Vertex(new Vector3f(-0.5f, -0.5f, -0.5f), new Vector2f(0.0f, 0.0f), new Vector3f(1.0f, 0.0f, 0.0f)),
-                                       new Vertex(new Vector3f(0.5f, -0.5f, -0.5f), new Vector2f(1.0f, 0.0f), new Vector3f(0.0f, 1.0f, 0.0f)),
-                                       new Vertex(new Vector3f(0.5f, 0.5f, -0.5f), new Vector2f(1.0f, 1.0f), new Vector3f(0.0f, 0.0f, 1.0f)),
-                                       new Vertex(new Vector3f(-0.5f, 0.5f, -0.5f), new Vector2f(0.0f, 1.0f), new Vector3f(1.0f, 0.0f, 1.0f)),
-                               },
-                                  new Short[]{
-                                       0, 1, 2,
-                                       2, 3, 0,
-
-                                       4, 5, 6,
-                                       6, 7, 4,
-                               });*/
+        this.staticMeshes = this.meshLoader.load(Path.of("models/arena.obj"));
+        this.humanoid = this.meshLoader.load(Path.of("models/humanoid.fbx"));
 
         recreateSwapchain();
     }
@@ -146,9 +127,12 @@ public class Renderer implements AutoCloseable {
         this.cameraUBO.tryRecreate();
         this.sceneUBO.tryRecreate();
         // Recreate mesh material instances
-        for (final var mesh : this.meshes) {
+        for (final var mesh : this.staticMeshes) {
+            mesh.tryRecreate();
+        }for (final var mesh : this.humanoid) {
             mesh.tryRecreate();
         }
+
         this.graphicsPipeline.tryRecreate();
 
         recordCommandBuffers();
@@ -176,8 +160,32 @@ public class Renderer implements AutoCloseable {
                                         null);
 
 
-                for (final var mesh : this.meshes) {
-                    // FIXME: Get from mesh material
+                for (final var mesh : this.staticMeshes) {
+                    vkCmdBindDescriptorSets(commandBuffer.getHandle(),
+                                            VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                            this.graphicsPipeline.getLayout(),
+                                            2,
+                                            stack.longs(mesh.getMaterialInstance().getDescriptorSet(imageIndex)),
+                                            null);
+
+                    vkCmdBindVertexBuffers(commandBuffer.getHandle(),
+                                           0,
+                                           stack.longs(mesh.getVertexBuffer().getHandle()),
+                                           stack.longs(0L));
+                    vkCmdBindIndexBuffer(commandBuffer.getHandle(),
+                                         mesh.getIndexBuffer().getHandle(),
+                                         0,
+                                         VK_INDEX_TYPE_UINT16);
+
+                    vkCmdDrawIndexed(commandBuffer.getHandle(),
+                                     mesh.getIndexCount(),
+                                     1,
+                                     0,
+                                     0,
+                                     0);
+                }
+
+                for (final var mesh : this.humanoid) {
                     vkCmdBindDescriptorSets(commandBuffer.getHandle(),
                                             VK_PIPELINE_BIND_POINT_GRAPHICS,
                                             this.graphicsPipeline.getLayout(),
@@ -231,7 +239,10 @@ public class Renderer implements AutoCloseable {
 
         this.textureSampler.close();
         this.meshLoader.close();
-        for (final Mesh mesh : this.meshes) {
+        for (final var mesh : this.staticMeshes) {
+            mesh.close();
+        }
+        for (final var mesh : this.humanoid) {
             mesh.close();
         }
 
