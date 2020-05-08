@@ -1,6 +1,7 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
+// FIXME: Allow injecting this from the engine
 #define MAX_LIGHTS 10
 
 layout(set = 0, binding = 0) uniform CameraInfo {
@@ -11,6 +12,7 @@ layout(set = 0, binding = 0) uniform CameraInfo {
 
 struct Light {
     vec3 position;
+    float maxRadius;
     vec3 color;
 };
 
@@ -52,6 +54,11 @@ vec3 f_unlit(vec3 normal, vec3 viewVector) {
     return vec3(0.0, 0.0, 0.0);
 }
 
+float f_distance(float r, float maxRadius) {
+    float x = max(0, 1 - pow(r / maxRadius, 4));
+    return x * x;
+}
+
 void main() {
     vec3 normal = normalize(vNormal);
     vec3 viewVector = normalize(camera.eyePosition - vPosition);
@@ -59,11 +66,15 @@ void main() {
     vec3 unlitContribution = f_unlit(normal, viewVector);
     vec3 totalLightContribution = vec3(0, 0, 0);
     for (int i = 0; i < lightCount; ++i) {
-        vec3 lightDirection = normalize(lights[i].position - vPosition);
+        vec3 lightDelta = lights[i].position - vPosition;
+        float lightDistance = length(lightDelta);
+        vec3 lightDirection = lightDelta / lightDistance;
+
+        vec3 lightColor = lights[i].color * f_distance(lightDistance, lights[i].maxRadius);
 
         // Clamp light contributions to zero when facing away from the light source
         float directionDot = clamp(dot(lightDirection, normal), 0.0, 1.0);
-        vec3 lightContribution = directionDot * lights[i].color * f_lit(lightDirection, normal, viewVector);
+        vec3 lightContribution = directionDot * lightColor * f_lit(lightDirection, normal, viewVector);
 
         totalLightContribution += lightContribution;
     }

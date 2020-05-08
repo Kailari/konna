@@ -75,8 +75,9 @@ public class SceneUniformBufferObject extends RecreateCloseable {
                                                             .minUniformBufferOffsetAlignment();
 
         this.lightCount.count = 1;
-        this.lights.colors[0] = new Vector3f(1.0f, 1.0f, 1.0f);
-        this.lights.positions[0] = new Vector3f(0.0f, 0.0f, 25.0f);
+        this.lights.colors[0] = new Vector3f(1.0f, 0.05f, 0.0f);
+        this.lights.positions[0] = new Vector3f(0.0f, 0.0f, 2.0f);
+        this.lights.radius[0] = 6.5f;
     }
 
     public long getDescriptorSet(final int imageIndex) {
@@ -170,12 +171,14 @@ public class SceneUniformBufferObject extends RecreateCloseable {
 
     private static class LightsBinding implements UniformBinding {
         private static final int OFFSET_POSITION = 0;
-        // NOTE: Alignment must be multiple of 16 (by the specification)
+        private static final int OFFSET_RADIUS = 3 * Float.BYTES;
         private static final int OFFSET_COLOR = 4 * Float.BYTES;
+
         private static final int STRIDE = 8 * Float.BYTES;
 
         private final Vector3f[] positions = new Vector3f[MAX_LIGHTS];
         private final Vector3f[] colors = new Vector3f[MAX_LIGHTS];
+        private final float[] radius = new float[MAX_LIGHTS];
 
         @Override
         public DescriptorBinding getDescriptorBinding() {
@@ -198,6 +201,7 @@ public class SceneUniformBufferObject extends RecreateCloseable {
 
                 this.positions[i].get(actualOffset + OFFSET_POSITION, buffer);
                 this.colors[i].get(actualOffset + OFFSET_COLOR, buffer);
+                buffer.putFloat(actualOffset + OFFSET_RADIUS, this.radius[i]);
             }
         }
     }
