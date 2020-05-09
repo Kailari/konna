@@ -6,6 +6,9 @@ import fi.jakojaannos.roguelite.game.weapons.events.TriggerPullEvent;
 import fi.jakojaannos.roguelite.game.weapons.events.TriggerReleaseEvent;
 import fi.jakojaannos.roguelite.game.weapons.events.WeaponUnequipEvent;
 
+/**
+ * Module that increases weapon's heat every tick when trigger is held. Requires {@link OverheatBaseModule}.
+ */
 public class OverheatFromTriggerDownModule implements WeaponModule<OverheatFromTriggerDownModule.Attributes>, HeatSource {
     @Override
     public void register(final WeaponHooks hooks, final Attributes attributes) {
@@ -17,9 +20,7 @@ public class OverheatFromTriggerDownModule implements WeaponModule<OverheatFromT
         hooks.postRegister(this::postRegister);
     }
 
-    private void postRegister(
-            final WeaponModules modules
-    ) {
+    private void postRegister(final WeaponModules modules) {
         modules.require(OverheatBaseModule.class)
                .registerHeatSource(this);
     }
@@ -44,7 +45,7 @@ public class OverheatFromTriggerDownModule implements WeaponModule<OverheatFromT
         final var attributes = weapon.getAttributes(Attributes.class);
 
         state.isTriggerDown = false;
-        updateAccumulated(state, attributes, info.timeManager());
+        updateAccumulatedHeat(state, attributes, info.timeManager());
     }
 
     public void unequip(
@@ -56,25 +57,30 @@ public class OverheatFromTriggerDownModule implements WeaponModule<OverheatFromT
         final var attributes = weapon.getAttributes(Attributes.class);
 
         state.isTriggerDown = false;
-        updateAccumulated(state, attributes, info.timeManager());
+        updateAccumulatedHeat(state, attributes, info.timeManager());
     }
 
-    private void updateAccumulated(
+    /**
+     * Gets accumulated heat since last query or trigger pull, and stores it in state. Sets {@code
+     * state.lastQueryTimestamp} to current game tick.
+     *
+     * @param state       State
+     * @param attributes  Attributes
+     * @param timeManager TimeManager
+     */
+    private void updateAccumulatedHeat(
             final State state,
             final Attributes attributes,
             final TimeManager timeManager
     ) {
-
-        if (state.firstQuery) {
-            state.firstQuery = false;
-            return;
-        }
+        final var lastQuery = state.lastQueryTimestamp;
+        state.lastQueryTimestamp = timeManager.getCurrentGameTime();
 
         if (!state.isTriggerDown) {
             return;
         }
 
-        final var latest = Math.max(state.lastQueryTimestamp, state.triggerPullTimestamp);
+        final var latest = Math.max(lastQuery, state.triggerPullTimestamp);
         state.accumulated = (timeManager.getCurrentGameTime() - latest) * attributes.heatPerTick;
     }
 
@@ -85,12 +91,10 @@ public class OverheatFromTriggerDownModule implements WeaponModule<OverheatFromT
     ) {
         final var state = weapon.getState(State.class);
         final var attributes = weapon.getAttributes(Attributes.class);
-
-        updateAccumulated(state, attributes, timeManager);
+        updateAccumulatedHeat(state, attributes, timeManager);
 
         final var delta = state.accumulated;
         state.accumulated = 0;
-        state.lastQueryTimestamp = timeManager.getCurrentGameTime();
         return delta;
     }
 
@@ -99,7 +103,6 @@ public class OverheatFromTriggerDownModule implements WeaponModule<OverheatFromT
         private long lastQueryTimestamp;
         private long triggerPullTimestamp;
 
-        private boolean firstQuery;
         private boolean isTriggerDown;
     }
 

@@ -6,6 +6,9 @@ import java.util.List;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.weapons.*;
 
+/**
+ * Base module for overheat mechanic.
+ */
 public class OverheatBaseModule implements WeaponModule<OverheatBaseModule.Attributes> {
     private final List<HeatSource> heatSources = new ArrayList<>();
 
@@ -42,7 +45,7 @@ public class OverheatBaseModule implements WeaponModule<OverheatBaseModule.Attri
                     .sum();
 
             this.heat += delta;
-            if(this.heat < 0){
+            if (this.heat < 0) {
                 this.heat = 0;
             }
             return this.heat;

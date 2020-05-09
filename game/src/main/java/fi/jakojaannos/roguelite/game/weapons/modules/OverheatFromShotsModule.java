@@ -4,6 +4,10 @@ import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.weapons.*;
 import fi.jakojaannos.roguelite.game.weapons.events.WeaponFireEvent;
 
+/**
+ * Module that adds a fixed amount of heat (as defined in {@link Attributes}) after every shot fired. Requires {@link
+ * OverheatBaseModule}.
+ */
 public class OverheatFromShotsModule implements WeaponModule<OverheatFromShotsModule.Attributes>, HeatSource {
     @Override
     public void register(final WeaponHooks hooks, final Attributes attributes) {
@@ -13,11 +17,9 @@ public class OverheatFromShotsModule implements WeaponModule<OverheatFromShotsMo
         hooks.registerStateFactory(State.class, State::new);
     }
 
-    private void postRegister(
-            final WeaponModules modules
-    ) {
-        final var base = modules.require(OverheatBaseModule.class);
-        base.registerHeatSource(this);
+    private void postRegister(final WeaponModules modules) {
+        modules.require(OverheatBaseModule.class)
+               .registerHeatSource(this);
     }
 
     public void afterFire(

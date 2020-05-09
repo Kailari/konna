@@ -4,8 +4,7 @@ import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 
 public interface HeatSource {
     /**
-     * Get change in heat value since last query. Return positive values for heat gain and negative for heat loss. You
-     * must reset values on query.
+     * Gets change in heat value since last query. Returns positive values for heat gain and negative for cooling.
      *
      * @param weapon      weapon
      * @param timeManager timeManager

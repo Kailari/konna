@@ -4,6 +4,10 @@ import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.weapons.*;
 import fi.jakojaannos.roguelite.game.weapons.events.WeaponFireEvent;
 
+/**
+ * Module that prevents weapon from firing when overheat reaches its maximum threshold. Jammed weapon takes some time to
+ * clear. Heat is set to 0 after jam clears. Requires {@link OverheatBaseModule}.
+ */
 public class JamOnOverheatModule implements WeaponModule<JamOnOverheatModule.Attributes>, HeatSource {
 
     @Override
@@ -29,10 +33,9 @@ public class JamOnOverheatModule implements WeaponModule<JamOnOverheatModule.Att
         }
     }
 
-    private void postRegister(
-            final WeaponModules modules
-    ) {
-        modules.require(OverheatBaseModule.class).registerHeatSource(this);
+    private void postRegister(final WeaponModules modules) {
+        modules.require(OverheatBaseModule.class)
+               .registerHeatSource(this);
     }
 
     private void stateQuery(
@@ -74,6 +77,7 @@ public class JamOnOverheatModule implements WeaponModule<JamOnOverheatModule.Att
         final var attributes = weapon.getAttributes(Attributes.class);
         if (state.isJammed) {
             // "reset" heat to zero on overheat
+            // FIXME: this could cause a bug, if this method is not called once during the jam (heat might not be set to 0)
             return -attributes.maxHeat;
         }
         return 0;

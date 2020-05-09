@@ -7,6 +7,9 @@ import fi.jakojaannos.roguelite.game.weapons.events.TriggerReleaseEvent;
 import fi.jakojaannos.roguelite.game.weapons.events.WeaponEquipEvent;
 import fi.jakojaannos.roguelite.game.weapons.events.WeaponUnequipEvent;
 
+/**
+ * Module that passively cools down weapon. Requires {@link OverheatBaseModule} to be in the weapon.
+ */
 public class HeatSinkModule implements WeaponModule<HeatSinkModule.Attributes>, HeatSource {
     @Override
     public void register(final WeaponHooks hooks, final Attributes attributes) {
@@ -17,6 +20,11 @@ public class HeatSinkModule implements WeaponModule<HeatSinkModule.Attributes>, 
         hooks.registerStateFactory(State.class, State::new);
 
         hooks.postRegister(this::postRegister);
+    }
+
+    private void postRegister(final WeaponModules modules) {
+        modules.require(OverheatBaseModule.class)
+               .registerHeatSource(this);
     }
 
     private void triggerPull(
@@ -63,28 +71,27 @@ public class HeatSinkModule implements WeaponModule<HeatSinkModule.Attributes>, 
         updateAccumulatedCooling(state, attributes, info.timeManager());
     }
 
-    private void postRegister(final WeaponModules modules) {
-        final var base = modules.require(OverheatBaseModule.class);
-        base.registerHeatSource(this);
-    }
 
+    /**
+     * Gets accumulated cooling since last query/weapon equip/trigger release, and stores it in state. Sets {@code
+     * state.lastQueryTimeStamp} to current game tick.
+     *
+     * @param state       State
+     * @param attributes  Attributes
+     * @param timeManager TimeManager
+     */
     private void updateAccumulatedCooling(
             final State state,
             final Attributes attributes,
             final TimeManager timeManager
     ) {
-        if (state.firstQuery) {
-            state.firstQuery = false;
-            return;
-        }
-
         var latest = state.lastQueryTimeStamp;
+        state.lastQueryTimeStamp = timeManager.getCurrentGameTime();
 
         if (attributes.coolOnlyWhenEquipped) {
             if (!state.isEquipped) {
                 return;
             }
-
             latest = Math.max(latest, state.equipTimestamp);
         }
 
@@ -102,19 +109,16 @@ public class HeatSinkModule implements WeaponModule<HeatSinkModule.Attributes>, 
     public double getHeatDeltaSinceLastQuery(final Weapon weapon, final TimeManager timeManager) {
         final var state = weapon.getState(State.class);
         final var attributes = weapon.getAttributes(Attributes.class);
-
         updateAccumulatedCooling(state, attributes, timeManager);
 
         final var delta = state.accumulated;
         state.accumulated = 0;
-        state.lastQueryTimeStamp = timeManager.getCurrentGameTime();
         return -delta;
     }
 
     public static class State {
         private double accumulated;
 
-        private boolean firstQuery = true;
         private long lastQueryTimeStamp;
         private long triggerReleaseTimestamp;
         private long equipTimestamp;
