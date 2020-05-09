@@ -8,8 +8,6 @@ import fi.jakojaannos.roguelite.game.weapons.events.WeaponEquipEvent;
 import fi.jakojaannos.roguelite.game.weapons.events.WeaponUnequipEvent;
 
 public class HeatSinkModule implements WeaponModule<HeatSinkModule.Attributes>, HeatSource {
-
-
     @Override
     public void register(final WeaponHooks hooks, final Attributes attributes) {
         hooks.weaponEquip(this::equip, Phase.TRIGGER);
@@ -60,7 +58,7 @@ public class HeatSinkModule implements WeaponModule<HeatSinkModule.Attributes>, 
         final var state = weapon.getState(State.class);
         final var attributes = weapon.getAttributes(Attributes.class);
         state.isEquipped = false;
-        state.isTriggerDown=false;
+        state.isTriggerDown = false;
 
         updateAccumulatedCooling(state, attributes, info.timeManager());
     }
@@ -77,29 +75,27 @@ public class HeatSinkModule implements WeaponModule<HeatSinkModule.Attributes>, 
     ) {
         if (state.firstQuery) {
             state.firstQuery = false;
-            state.lastQueryTimeStamp = timeManager.getCurrentGameTime();
             return;
         }
 
-        var lastQuery = state.lastQueryTimeStamp;
-        state.lastQueryTimeStamp = timeManager.getCurrentGameTime();
+        var latest = state.lastQueryTimeStamp;
 
         if (attributes.coolOnlyWhenEquipped) {
             if (!state.isEquipped) {
                 return;
             }
 
-            lastQuery = Math.max(lastQuery, state.equipTimestamp);
+            latest = Math.max(latest, state.equipTimestamp);
         }
 
         if (attributes.coolOnlyWhenTriggerReleased) {
             if (state.isTriggerDown) {
                 return;
             }
-            lastQuery = Math.max(lastQuery, state.triggerReleaseTimestamp);
+            latest = Math.max(latest, state.triggerReleaseTimestamp);
         }
 
-        state.accumulated += (timeManager.getCurrentGameTime() - lastQuery) * attributes.heatDissipationPerTick;
+        state.accumulated += (timeManager.getCurrentGameTime() - latest) * attributes.heatDissipationPerTick;
     }
 
     @Override
@@ -111,6 +107,7 @@ public class HeatSinkModule implements WeaponModule<HeatSinkModule.Attributes>, 
 
         final var delta = state.accumulated;
         state.accumulated = 0;
+        state.lastQueryTimeStamp = timeManager.getCurrentGameTime();
         return -delta;
     }
 

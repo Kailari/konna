@@ -61,7 +61,7 @@ public class Weapons {
                                        new NoAttributes()),
             new ModularWeapon.Module<>(new ShotgunMagazineModule(),
                                        new ShotgunMagazineModule.Attributes(6, 30)));
-    public static ModularWeapon PLAYER_MINIGUN_OVERHEAT_1 = new ModularWeapon(
+    public static ModularWeapon PLAYER_MINIGUN_OVERHEAT_FROM_SHOTS = new ModularWeapon(
             new ModularWeapon.Module<>(new AutomaticTriggerModule(),
                                        new NoAttributes()),
             new ModularWeapon.Module<>(new ProjectileFiringModule(),
@@ -84,7 +84,7 @@ public class Weapons {
                                        new HeatSinkModule.Attributes(0.4, true, true)),
             new ModularWeapon.Module<>(new JamOnOverheatModule(),
                                        new JamOnOverheatModule.Attributes(100, 120)));
-    /*public static ModularWeapon PLAYER_MINIGUN_OVERHEAT_2 = new ModularWeapon(
+    public static ModularWeapon PLAYER_MINIGUN_OVERHEAT_OVER_TIME = new ModularWeapon(
             new ModularWeapon.Module<>(new AutomaticTriggerModule(),
                                        new NoAttributes()),
             new ModularWeapon.Module<>(new ProjectileFiringModule(),
@@ -99,44 +99,14 @@ public class Weapons {
                                                                              GunshotEvent.Variant.GATLING)),
             new ModularWeapon.Module<>(new ClipMagazineModule(),
                                        new ClipMagazineModule.Attributes(452, 180)),
-            new ModularWeapon.Module<>(new OverheatFromShotsModule(),
-                                       new OverheatFromShotsModule.Attributes(1.5, 100, 0.25, 200)));
-    public static ModularWeapon PLAYER_MINIGUN_OVERHEAT_3 = new ModularWeapon(
-            new ModularWeapon.Module<>(new AutomaticTriggerModule(),
-                                       new NoAttributes()),
-            new ModularWeapon.Module<>(new ProjectileFiringModule(),
-                                       new ProjectileFiringModule.Attributes(new Vector2d(0.0),
-                                                                             3,
-                                                                             80,
-                                                                             8.0,
-                                                                             8.0,
-                                                                             -1,
-                                                                             10.0,
-                                                                             0.85,
-                                                                             GunshotEvent.Variant.GATLING)),
-            new ModularWeapon.Module<>(new ClipMagazineModule(),
-                                       new ClipMagazineModule.Attributes(453, 180)),
+            new ModularWeapon.Module<>(new OverheatBaseModule(),
+                                       new OverheatBaseModule.Attributes()),
             new ModularWeapon.Module<>(new OverheatFromTriggerDownModule(),
-                                       new OverheatFromTriggerDownModule.Attributes(1.1, 100, 1.0, 200)));
-    public static ModularWeapon PLAYER_MINIGUN_SPREAD = new ModularWeapon(
-            new ModularWeapon.Module<>(new AutomaticTriggerModule(),
-                                       new NoAttributes()),
-            new ModularWeapon.Module<>(new MinigunFiringModule(),
-                                       new MinigunFiringModule.Attributes(new Vector2d(0.0),
-                                                                          15,
-                                                                          0.5,
-                                                                          3,
-                                                                          80,
-                                                                          24.0,
-                                                                          1.5,
-                                                                          4.0,
-                                                                          8.0,
-                                                                          -1,
-                                                                          10.0,
-                                                                          0.85,
-                                                                          GunshotEvent.Variant.GATLING)),
-            new ModularWeapon.Module<>(new ClipMagazineModule(),
-                                       new ClipMagazineModule.Attributes(500, 180)));*/
+                                       new OverheatFromTriggerDownModule.Attributes(0.6)),
+            new ModularWeapon.Module<>(new HeatSinkModule(),
+                                       new HeatSinkModule.Attributes(0.5, true, true)),
+            new ModularWeapon.Module<>(new JamOnOverheatModule(),
+                                       new JamOnOverheatModule.Attributes(100, 120)));
     public static ModularWeapon PLAYER_TURRET_BUILDER = new ModularWeapon(
             new ModularWeapon.Module<>(new ChargedTriggerModule(),
                                        new ChargedTriggerModule.Attributes(60)),
