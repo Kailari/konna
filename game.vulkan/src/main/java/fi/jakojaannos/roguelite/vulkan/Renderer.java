@@ -5,9 +5,9 @@ import java.nio.file.Path;
 import fi.jakojaannos.roguelite.CameraUniformBufferObject;
 import fi.jakojaannos.roguelite.MaterialInstance;
 import fi.jakojaannos.roguelite.SceneUniformBufferObject;
-import fi.jakojaannos.roguelite.assets.Mesh;
-import fi.jakojaannos.roguelite.assets.MeshLoader;
-import fi.jakojaannos.roguelite.assets.MeshVertex;
+import fi.jakojaannos.roguelite.assets.*;
+import fi.jakojaannos.roguelite.assets.loader.SkeletalMeshLoader;
+import fi.jakojaannos.roguelite.assets.loader.StaticMeshLoader;
 import fi.jakojaannos.roguelite.vulkan.command.CommandBuffer;
 import fi.jakojaannos.roguelite.vulkan.command.CommandPool;
 import fi.jakojaannos.roguelite.vulkan.descriptor.DescriptorPool;
@@ -29,16 +29,18 @@ public class Renderer implements AutoCloseable {
     private final CommandPool commandPool;
     private final DescriptorPool descriptorPool;
 
-    private final GraphicsPipeline<MeshVertex> graphicsPipeline;
+    private final GraphicsPipeline<StaticMeshVertex> staticPipeline;
+    private final GraphicsPipeline<SkeletalMeshVertex> skeletalPipeline;
     private final DescriptorSetLayout materialDescriptorLayout;
+    private final DescriptorSetLayout boneDescriptorLayout;
     private final CameraUniformBufferObject cameraUBO;
     private final SceneUniformBufferObject sceneUBO;
     private final TextureSampler textureSampler;
+    private final Texture defaultTexture;
 
-    private final MeshLoader meshLoader;
-    private final Mesh[] staticMeshes;
+    private final StaticMesh[] staticMeshes;
 
-    private final Mesh[] humanoid;
+    private final AnimatedMesh humanoid;
 
     private CommandBuffer[] commandBuffers;
 
@@ -88,24 +90,48 @@ public class Renderer implements AutoCloseable {
         this.materialDescriptorLayout = new DescriptorSetLayout(backend.deviceContext(),
                                                                 MaterialInstance.TEXTURE_DESCRIPTOR_BINDING,
                                                                 MaterialInstance.MATERIAL_DESCRIPTOR_BINDING);
+        this.boneDescriptorLayout = new DescriptorSetLayout(backend.deviceContext(),
+                                                            AnimatedMesh.BONE_DESCRIPTOR_BINDING);
 
-        this.graphicsPipeline = new GraphicsPipeline<>(assetRoot,
-                                                       backend.deviceContext(),
+        this.staticPipeline = new GraphicsPipeline<>(backend.deviceContext(),
+                                                     this.swapchain,
+                                                     this.renderPass,
+                                                     assetRoot.resolve("shaders/vulkan/staticMesh.vert"),
+                                                     assetRoot.resolve("shaders/vulkan/shader.frag"),
+                                                     StaticMeshVertex.FORMAT,
+                                                     this.cameraUBO.getLayout(),
+                                                     this.sceneUBO.getLayout(),
+                                                     this.materialDescriptorLayout);
+        this.skeletalPipeline = new GraphicsPipeline<>(backend.deviceContext(),
                                                        this.swapchain,
                                                        this.renderPass,
-                                                       MeshVertex.FORMAT,
+                                                       assetRoot.resolve("shaders/vulkan/skeletalMesh.vert"),
+                                                       assetRoot.resolve("shaders/vulkan/shader.frag"),
+                                                       SkeletalMeshVertex.FORMAT,
                                                        this.cameraUBO.getLayout(),
                                                        this.sceneUBO.getLayout(),
-                                                       this.materialDescriptorLayout);
+                                                       this.materialDescriptorLayout,
+                                                       this.boneDescriptorLayout);
 
-        this.meshLoader = new MeshLoader(backend.deviceContext(),
-                                         this.swapchain,
-                                         this.descriptorPool,
-                                         this.materialDescriptorLayout,
-                                         this.textureSampler,
-                                         assetRoot);
-        this.staticMeshes = this.meshLoader.load(Path.of("models/arena.obj"));
-        this.humanoid = this.meshLoader.load(Path.of("models/humanoid.fbx"));
+        this.defaultTexture = new Texture(backend.deviceContext(),
+                                          assetRoot.resolve("textures/vulkan/texture.jpg"));
+        final StaticMeshLoader staticMeshLoader = new StaticMeshLoader(backend.deviceContext(),
+                                                                       this.swapchain,
+                                                                       this.descriptorPool,
+                                                                       this.materialDescriptorLayout,
+                                                                       this.textureSampler,
+                                                                       this.defaultTexture,
+                                                                       assetRoot);
+        final SkeletalMeshLoader skeletalMeshLoader = new SkeletalMeshLoader(backend.deviceContext(),
+                                                                             this.swapchain,
+                                                                             this.descriptorPool,
+                                                                             this.materialDescriptorLayout,
+                                                                             this.boneDescriptorLayout,
+                                                                             this.textureSampler,
+                                                                             this.defaultTexture,
+                                                                             assetRoot);
+        this.staticMeshes = staticMeshLoader.load(Path.of("models/arena.obj"));
+        this.humanoid = skeletalMeshLoader.load(Path.of("models/humanoid.fbx"));
 
         recreateSwapchain();
     }
@@ -129,11 +155,11 @@ public class Renderer implements AutoCloseable {
         // Recreate mesh material instances
         for (final var mesh : this.staticMeshes) {
             mesh.tryRecreate();
-        }for (final var mesh : this.humanoid) {
-            mesh.tryRecreate();
         }
+        this.humanoid.tryRecreate();
 
-        this.graphicsPipeline.tryRecreate();
+        this.staticPipeline.tryRecreate();
+        this.skeletalPipeline.tryRecreate();
 
         recordCommandBuffers();
     }
@@ -150,10 +176,10 @@ public class Renderer implements AutoCloseable {
             ) {
                 vkCmdBindPipeline(commandBuffer.getHandle(),
                                   VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                  this.graphicsPipeline.getHandle());
+                                  this.staticPipeline.getHandle());
                 vkCmdBindDescriptorSets(commandBuffer.getHandle(),
                                         VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                        this.graphicsPipeline.getLayout(),
+                                        this.staticPipeline.getLayout(),
                                         0,
                                         stack.longs(this.cameraUBO.getDescriptorSet(imageIndex),
                                                     this.sceneUBO.getDescriptorSet(imageIndex)),
@@ -161,53 +187,30 @@ public class Renderer implements AutoCloseable {
 
 
                 for (final var mesh : this.staticMeshes) {
-                    vkCmdBindDescriptorSets(commandBuffer.getHandle(),
-                                            VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                            this.graphicsPipeline.getLayout(),
-                                            2,
-                                            stack.longs(mesh.getMaterialInstance().getDescriptorSet(imageIndex)),
-                                            null);
-
-                    vkCmdBindVertexBuffers(commandBuffer.getHandle(),
-                                           0,
-                                           stack.longs(mesh.getVertexBuffer().getHandle()),
-                                           stack.longs(0L));
-                    vkCmdBindIndexBuffer(commandBuffer.getHandle(),
-                                         mesh.getIndexBuffer().getHandle(),
-                                         0,
-                                         VK_INDEX_TYPE_UINT16);
-
-                    vkCmdDrawIndexed(commandBuffer.getHandle(),
-                                     mesh.getIndexCount(),
-                                     1,
-                                     0,
-                                     0,
-                                     0);
+                    mesh.draw(this.staticPipeline, commandBuffer, imageIndex);
                 }
 
-                for (final var mesh : this.humanoid) {
-                    vkCmdBindDescriptorSets(commandBuffer.getHandle(),
-                                            VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                            this.graphicsPipeline.getLayout(),
-                                            2,
-                                            stack.longs(mesh.getMaterialInstance().getDescriptorSet(imageIndex)),
-                                            null);
 
-                    vkCmdBindVertexBuffers(commandBuffer.getHandle(),
-                                           0,
-                                           stack.longs(mesh.getVertexBuffer().getHandle()),
-                                           stack.longs(0L));
-                    vkCmdBindIndexBuffer(commandBuffer.getHandle(),
-                                         mesh.getIndexBuffer().getHandle(),
-                                         0,
-                                         VK_INDEX_TYPE_UINT16);
+                vkCmdBindPipeline(commandBuffer.getHandle(),
+                                  VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                  this.skeletalPipeline.getHandle());
+                vkCmdBindDescriptorSets(commandBuffer.getHandle(),
+                                        VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                        this.skeletalPipeline.getLayout(),
+                                        0,
+                                        stack.longs(this.cameraUBO.getDescriptorSet(imageIndex),
+                                                    this.sceneUBO.getDescriptorSet(imageIndex)),
+                                        null);
 
-                    vkCmdDrawIndexed(commandBuffer.getHandle(),
-                                     mesh.getIndexCount(),
-                                     1,
-                                     0,
-                                     0,
-                                     0);
+                vkCmdBindDescriptorSets(commandBuffer.getHandle(),
+                                        VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                        this.skeletalPipeline.getLayout(),
+                                        3,
+                                        stack.longs(this.humanoid.getBoneDescriptorSet(imageIndex)),
+                                        null);
+
+                for (final var mesh : this.humanoid.getMeshes()) {
+                    mesh.draw(this.skeletalPipeline, commandBuffer, imageIndex);
                 }
             }
         }
@@ -236,21 +239,21 @@ public class Renderer implements AutoCloseable {
         this.cameraUBO.close();
         this.sceneUBO.close();
         this.materialDescriptorLayout.close();
+        this.boneDescriptorLayout.close();
 
         this.textureSampler.close();
-        this.meshLoader.close();
+        this.defaultTexture.close();
         for (final var mesh : this.staticMeshes) {
             mesh.close();
         }
-        for (final var mesh : this.humanoid) {
-            mesh.close();
-        }
+        this.humanoid.close();
 
         this.depthTexture.close();
 
         this.framebuffers.close();
         this.renderPass.close();
-        this.graphicsPipeline.close();
+        this.staticPipeline.close();
+        this.skeletalPipeline.close();
 
         this.swapchain.close();
     }

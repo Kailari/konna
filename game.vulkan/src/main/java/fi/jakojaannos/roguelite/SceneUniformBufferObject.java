@@ -28,7 +28,7 @@ public class SceneUniformBufferObject extends RecreateCloseable {
                                                                                                   VK_SHADER_STAGE_FRAGMENT_BIT);
     private static final DescriptorBinding LIGHTS_DESCRIPTOR_BINDING = new DescriptorBinding(0,
                                                                                              VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                                                                                             MAX_LIGHTS,
+                                                                                             1,
                                                                                              VK_SHADER_STAGE_FRAGMENT_BIT);
     private final DeviceContext deviceContext;
     private final Swapchain swapchain;
@@ -74,10 +74,13 @@ public class SceneUniformBufferObject extends RecreateCloseable {
                                                             .limits()
                                                             .minUniformBufferOffsetAlignment();
 
-        this.lightCount.count = 1;
+        this.lightCount.count = 2;
         this.lights.colors[0] = new Vector3f(1.0f, 0.05f, 0.0f);
         this.lights.positions[0] = new Vector3f(0.0f, 0.0f, 2.0f);
         this.lights.radius[0] = 6.5f;
+        this.lights.colors[1] = new Vector3f(1.0f, 1.00f, 1.0f);
+        this.lights.positions[1] = new Vector3f(5.5f, 0.0f, 2.0f);
+        this.lights.radius[1] = 3.5f;
     }
 
     public long getDescriptorSet(final int imageIndex) {
@@ -132,14 +135,11 @@ public class SceneUniformBufferObject extends RecreateCloseable {
                     final var binding = this.bindings[bindingIndex];
                     final var descriptor = binding.getDescriptorBinding();
 
-                    // FIXME: Seems horribly hacky to write the buffer n times, but it works
-                    final var bufferInfos = VkDescriptorBufferInfo.callocStack(MAX_LIGHTS);
-                    for (int i = 0; i < MAX_LIGHTS; i++) {
-                        bufferInfos.get(i)
-                                   .buffer(buffer.getHandle())
-                                   .offset(this.bindingOffsets[bindingIndex])
-                                   .range(binding.getSizeInBytes());
-                    }
+                    final var bufferInfos = VkDescriptorBufferInfo
+                            .callocStack(1)
+                            .buffer(buffer.getHandle())
+                            .offset(this.bindingOffsets[bindingIndex])
+                            .range(binding.getSizeInBytes());
 
                     descriptorWrites.get(bindingIndex)
                                     .sType(VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET)

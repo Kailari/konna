@@ -64,7 +64,7 @@ public class DebugMessenger implements AutoCloseable {
             final long pUserData
     ) {
         final var callbackData = VkDebugUtilsMessengerCallbackDataEXT.create(pCallbackData);
-        LOG.error("Validation layer: {}", callbackData.pMessageString());
+        LOG.error(callbackData.pMessageString());
         return VK_FALSE;
     }
 }

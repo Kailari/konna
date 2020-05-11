@@ -30,7 +30,7 @@ public class GPUMesh<TVertex> implements AutoCloseable {
             final DeviceContext deviceContext,
             final VertexFormat<TVertex> vertexFormat,
             final TVertex[] vertices,
-            final Short[] indices
+            final Integer[] indices
     ) {
         this.indexCount = indices.length;
 
@@ -45,14 +45,14 @@ public class GPUMesh<TVertex> implements AutoCloseable {
                      vertexFormat::write);
 
         this.indexBuffer = new GPUBuffer(deviceContext,
-                                         indices.length * Short.BYTES,
+                                         indices.length * Integer.BYTES,
                                          VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
                                          bitMask(VkMemoryPropertyFlags.DEVICE_LOCAL_BIT));
         pushToBuffer(this.indexBuffer,
                      deviceContext,
                      indices,
-                     Short.BYTES,
-                     (index, offset, buffer) -> buffer.putShort(offset, index));
+                     Integer.BYTES,
+                     (index, offset, buffer) -> buffer.putInt(offset, index));
     }
 
     @Override

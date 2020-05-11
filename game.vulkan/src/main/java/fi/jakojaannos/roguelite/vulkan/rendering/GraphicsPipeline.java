@@ -48,10 +48,11 @@ public class GraphicsPipeline<TVertex> extends RecreateCloseable {
     }
 
     public GraphicsPipeline(
-            final Path assetRoot,
             final DeviceContext deviceContext,
             final Swapchain swapchain,
             final RenderPass renderPass,
+            final Path vertexShaderPath,
+            final Path fragmentShaderPath,
             final VertexFormat<TVertex> vertexFormat,
             final DescriptorSetLayout... descriptorSetLayouts
     ) {
@@ -62,9 +63,9 @@ public class GraphicsPipeline<TVertex> extends RecreateCloseable {
         this.descriptorSetLayouts = descriptorSetLayouts;
 
         try {
-            this.compiledVertexShader = ShaderCompiler.loadGLSLShader(assetRoot.resolve("shaders/vulkan/shader.vert"),
+            this.compiledVertexShader = ShaderCompiler.loadGLSLShader(vertexShaderPath,
                                                                       VK_SHADER_STAGE_VERTEX_BIT);
-            this.compiledFragmentShader = ShaderCompiler.loadGLSLShader(assetRoot.resolve("shaders/vulkan/shader.frag"),
+            this.compiledFragmentShader = ShaderCompiler.loadGLSLShader(fragmentShaderPath,
                                                                         VK_SHADER_STAGE_FRAGMENT_BIT);
         } catch (final IOException e) {
             throw new IllegalStateException("Loading shaders failed: " + e);

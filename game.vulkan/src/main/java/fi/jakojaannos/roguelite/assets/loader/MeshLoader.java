@@ -1,7 +1,5 @@
-package fi.jakojaannos.roguelite.assets;
+package fi.jakojaannos.roguelite.assets.loader;
 
-import org.joml.Vector2f;
-import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.assimp.AIColor4D;
 import org.lwjgl.assimp.AIMaterial;
@@ -15,6 +13,9 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import javax.annotation.Nullable;
 
+import fi.jakojaannos.roguelite.assets.AssimpProcess;
+import fi.jakojaannos.roguelite.assets.Material;
+import fi.jakojaannos.roguelite.assets.Texture;
 import fi.jakojaannos.roguelite.util.BitMask;
 import fi.jakojaannos.roguelite.vulkan.LogCategories;
 import fi.jakojaannos.roguelite.vulkan.TextureSampler;
@@ -27,90 +28,53 @@ import static fi.jakojaannos.roguelite.util.BitMask.bitMask;
 import static org.lwjgl.assimp.Assimp.*;
 import static org.lwjgl.system.MemoryStack.stackPush;
 
-public final class MeshLoader implements AutoCloseable {
+public abstract class MeshLoader<TMesh> {
     private static final Logger LOG = LoggerFactory.getLogger(MeshLoader.class);
 
-    private static final Material DEFAULT_MATERIAL = new Material(Material.DEFAULT_COLOR,
-                                                                  Material.DEFAULT_COLOR,
-                                                                  Material.DEFAULT_COLOR,
-                                                                  null,
-                                                                  false,
-                                                                  0.0f);
-    private final DeviceContext deviceContext;
-    private final Swapchain swapchain;
-    private final DescriptorPool descriptorPool;
-    private final DescriptorSetLayout materialLayout;
-    private final TextureSampler sampler;
+    protected final DeviceContext deviceContext;
+    protected final Swapchain swapchain;
+    protected final DescriptorPool descriptorPool;
+    protected final DescriptorSetLayout descriptorLayout;
+    protected final TextureSampler textureSampler;
 
-    private final Path assetRoot;
-    private final Texture defaultTexture;
+    protected final Path assetRoot;
+    protected final Texture defaultTexture;
+    protected final Material defaultMaterial;
 
-    public MeshLoader(
+    protected MeshLoader(
             final DeviceContext deviceContext,
             final Swapchain swapchain,
             final DescriptorPool descriptorPool,
-            final DescriptorSetLayout materialLayout,
-            final TextureSampler sampler,
+            final DescriptorSetLayout descriptorLayout,
+            final TextureSampler textureSampler,
+            final Texture defaultTexture,
             final Path assetRoot
     ) {
         this.deviceContext = deviceContext;
         this.swapchain = swapchain;
         this.descriptorPool = descriptorPool;
-        this.materialLayout = materialLayout;
-        this.sampler = sampler;
+        this.descriptorLayout = descriptorLayout;
+        this.textureSampler = textureSampler;
 
         this.assetRoot = assetRoot;
-
-        this.defaultTexture = new Texture(deviceContext,
-                                          assetRoot.resolve("textures/vulkan/texture.jpg"));
+        this.defaultTexture = defaultTexture;
+        this.defaultMaterial = new Material(Material.DEFAULT_COLOR,
+                                            Material.DEFAULT_COLOR,
+                                            Material.DEFAULT_COLOR,
+                                            this.defaultTexture,
+                                            false,
+                                            0.0f);
     }
 
-    public Mesh[] load(final Path path) {
+    public TMesh load(final Path path) {
         return load(path,
                     bitMask(AssimpProcess.JoinIdenticalVertices,
                             AssimpProcess.Triangulate));
     }
 
-    public Mesh[] load(
-            final Path path,
-            final BitMask<AssimpProcess> flags
-    ) {
-        LOG.debug(LogCategories.MESH_LOADING, "Importing model \"{}\"",
-                  path);
-        final var scene = aiImportFile(this.assetRoot.resolve(path)
-                                                     .toString(),
-                                       flags.mask());
-        if (scene == null) {
-            throw new IllegalStateException("Error importing model: " + aiGetErrorString());
-        }
+    public abstract TMesh load(final Path path, final BitMask<AssimpProcess> flags);
 
-        final var numMaterials = scene.mNumMaterials();
-        final var materials = scene.mMaterials();
-        final var processedMaterials = new ArrayList<Material>();
-        for (int i = 0; i < numMaterials; i++) {
-            final var aiMaterial = AIMaterial.create(materials.get(i));
-            processMaterial(aiMaterial, processedMaterials);
-        }
-
-        LOG.debug(LogCategories.MESH_LOADING, "\t-> Loaded {} materials.",
-                  processedMaterials.size());
-
-        final var numMeshes = scene.mNumMeshes();
-        final var meshes = scene.mMeshes();
-        final var processedMeshes = new Mesh[numMeshes];
-        for (int i = 0; i < numMeshes; i++) {
-            final var mesh = AIMesh.create(meshes.get(i));
-            final var processedMesh = processMesh(mesh, processedMaterials);
-            processedMeshes[i] = processedMesh;
-        }
-
-        LOG.debug(LogCategories.MESH_LOADING, "\t-> Loaded {} submeshes.",
-                  processedMaterials.size());
-
-        return processedMeshes;
-    }
-
-    private void processMaterial(
+    protected void processMaterial(
             final AIMaterial material,
             final ArrayList<Material> processedMaterials
     ) {
@@ -185,32 +149,10 @@ public final class MeshLoader implements AutoCloseable {
         }
     }
 
-    private Mesh processMesh(final AIMesh mesh, final ArrayList<Material> materials) {
-        final var vertices = new MeshVertex[mesh.mNumVertices()];
-
-        final var vertexBuffer = mesh.mVertices();
-        final var normalBuffer = mesh.mNormals();
-
-        // NOTE: There may be multiple UV sets, load just the first one
-        final var uvBuffer = mesh.mTextureCoords(0);
-        for (int i = 0; i < mesh.mNumVertices(); i++) {
-            final var position = vertexBuffer.get(i);
-            final var normal = normalBuffer.get(i);
-            final var textureCoordinates = uvBuffer.get(i);
-
-            vertices[i] = new MeshVertex(new Vector3f(position.x(),
-                                                      position.y(),
-                                                      position.z()),
-                                         new Vector3f(normal.x(),
-                                                      normal.y(),
-                                                      normal.z()),
-                                         new Vector2f(textureCoordinates.x(),
-                                                      textureCoordinates.y()));
-        }
-
+    protected Integer[] processIndices(final AIMesh mesh) {
         // NOTE: Assumes that primitives are triangles.
         // NOTE: Assumes that short is large enough for indices
-        final var indices = new Short[mesh.mNumFaces() * 3];
+        final var indices = new Integer[mesh.mNumFaces() * 3];
 
         final var faceBuffer = mesh.mFaces();
         for (int i = 0, count = 0; i < mesh.mNumFaces(); ++i) {
@@ -222,25 +164,11 @@ public final class MeshLoader implements AutoCloseable {
             final var indexBuffer = face.mIndices();
             for (int j = 0; j < face.mNumIndices(); ++j, ++count) {
                 // NOTE: Assumes the meshes have at most ~32k (2^15) indices
-                indices[count] = (short) indexBuffer.get(j);
+                indices[count] = indexBuffer.get(j);
             }
         }
 
-        final Material material;
-        final int materialIdx = mesh.mMaterialIndex();
-        if (materialIdx >= 0 && materialIdx < materials.size()) {
-            material = materials.get(materialIdx);
-        } else {
-            material = DEFAULT_MATERIAL;
-        }
-        return new Mesh(this.deviceContext,
-                        this.swapchain,
-                        this.descriptorPool,
-                        this.materialLayout,
-                        this.sampler,
-                        vertices,
-                        indices,
-                        material);
+        return indices;
     }
 
     @Nullable
@@ -248,10 +176,5 @@ public final class MeshLoader implements AutoCloseable {
         final var fullPath = this.assetRoot.resolve(path);
 
         throw new UnsupportedOperationException("Not implemented");
-    }
-
-    @Override
-    public void close() {
-        this.defaultTexture.close();
     }
 }
