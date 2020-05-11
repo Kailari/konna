@@ -63,9 +63,11 @@ public class OverheatFromTriggerDownModule implements WeaponModule<OverheatFromT
     /**
      * Gets accumulated heat since last query or trigger pull, and stores it in state. Sets {@code
      * state.lastQueryTimestamp} to current game tick.
+     * <p>
+     * This method should be called when weapon stops firing (trigger release or unequip).
      *
-     * @param state       State
-     * @param attributes  Attributes
+     * @param state       state of the module
+     * @param attributes  module attributes
      * @param timeManager TimeManager
      */
     private void updateAccumulatedHeat(
@@ -77,6 +79,7 @@ public class OverheatFromTriggerDownModule implements WeaponModule<OverheatFromT
         state.lastQueryTimestamp = timeManager.getCurrentGameTime();
 
         if (!state.isTriggerDown) {
+            // weapon is in state where it can't gain heat
             return;
         }
 

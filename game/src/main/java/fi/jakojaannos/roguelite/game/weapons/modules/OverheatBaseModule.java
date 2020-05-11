@@ -7,13 +7,16 @@ import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.weapons.*;
 
 /**
- * Base module for overheat mechanic.
+ * Base module for overheat mechanic. Provides heat value for other modules.
+ * <p>
+ * To add heatSource to this module, register the module for {@code WeaponHooks.postRegister(...)} and require this
+ * class via {@code weaponModules.require(OverheatBaseModule.class)}.
  */
-public class OverheatBaseModule implements WeaponModule<OverheatBaseModule.Attributes> {
+public class OverheatBaseModule implements WeaponModule<NoAttributes> {
     private final List<HeatSource> heatSources = new ArrayList<>();
 
     @Override
-    public void register(final WeaponHooks hooks, final Attributes attributes) {
+    public void register(final WeaponHooks hooks, final NoAttributes attributes) {
         hooks.weaponStateQuery(this::stateQuery, Phase.TRIGGER);
 
         hooks.registerStateFactory(State.class, State::new);
@@ -33,11 +36,17 @@ public class OverheatBaseModule implements WeaponModule<OverheatBaseModule.Attri
         this.heatSources.add(source);
     }
 
-    public static record Attributes() {}
-
     public class State {
         private double heat;
 
+        /**
+         * Gets current heat of weapon by querying all heat sources. Heat value will never be negative.
+         *
+         * @param weapon      weapon instance
+         * @param timeManager timeManager
+         *
+         * @return current heat of weapon
+         */
         public double getHeat(final Weapon weapon, final TimeManager timeManager) {
             final var delta = OverheatBaseModule.this.heatSources
                     .stream()

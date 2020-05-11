@@ -71,13 +71,30 @@ public class HeatSinkModule implements WeaponModule<HeatSinkModule.Attributes>, 
         updateAccumulatedCooling(state, attributes, info.timeManager());
     }
 
-
     /**
      * Gets accumulated cooling since last query/weapon equip/trigger release, and stores it in state. Sets {@code
      * state.lastQueryTimeStamp} to current game tick.
+     * <p>
+     * Brief explanation on how accumulated cooling is calculated:<br> Weapon can start cooling after certain events
+     * (assuming the corresponding attribute is set, otherwise we ignore that event). These events can be:
+     * <ul>
+     *     <li>trigger is released</li>
+     *     <li>weapon is equipped</li>
+     *     <li>last query</li>
+     * </ul>
+     * We get the most recent of these events and calculate amount of ticks passed and multiply that by cooling per tick,
+     * as specified in attributes. If weapon is in a state where it can't be cooling (for example weapon is unequipped
+     * while {@code coolOnlyWhenEquipped = true}) then nothing is added to accumulated cooling.
+     * <p>
+     * As certain events can interrupt weapon cooling, this method should be called when starting those events.
+     * These events are:
+     * <ul>
+     *     <li>unequipping weapon</li>
+     *     <li>pulling trigger</li>
+     * </ul>
      *
-     * @param state       State
-     * @param attributes  Attributes
+     * @param state       state of the module
+     * @param attributes  module attributes
      * @param timeManager TimeManager
      */
     private void updateAccumulatedCooling(
@@ -90,6 +107,7 @@ public class HeatSinkModule implements WeaponModule<HeatSinkModule.Attributes>, 
 
         if (attributes.coolOnlyWhenEquipped) {
             if (!state.isEquipped) {
+                // weapon is in state where it can't be cooled
                 return;
             }
             latest = Math.max(latest, state.equipTimestamp);
@@ -97,6 +115,7 @@ public class HeatSinkModule implements WeaponModule<HeatSinkModule.Attributes>, 
 
         if (attributes.coolOnlyWhenTriggerReleased) {
             if (state.isTriggerDown) {
+                // weapon is in state where it can't be cooled
                 return;
             }
             latest = Math.max(latest, state.triggerReleaseTimestamp);
