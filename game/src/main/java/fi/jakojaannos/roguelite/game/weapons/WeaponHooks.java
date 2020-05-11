@@ -24,4 +24,6 @@ public interface WeaponHooks {
     void weaponStateQuery(WeaponEventHandler<WeaponStateQuery> query, Phase phase);
 
     <TState> void registerStateFactory(Class<TState> stateClass, Supplier<TState> factory);
+
+    void postRegister(PostRegisterHandler postRegister);
 }

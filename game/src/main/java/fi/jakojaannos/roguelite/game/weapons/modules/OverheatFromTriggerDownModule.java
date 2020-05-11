@@ -2,64 +2,27 @@ package fi.jakojaannos.roguelite.game.weapons.modules;
 
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.weapons.*;
-import fi.jakojaannos.roguelite.game.weapons.events.*;
+import fi.jakojaannos.roguelite.game.weapons.events.TriggerPullEvent;
+import fi.jakojaannos.roguelite.game.weapons.events.TriggerReleaseEvent;
+import fi.jakojaannos.roguelite.game.weapons.events.WeaponUnequipEvent;
 
 /**
- * Overheat module that increases weapon's overheat while trigger is held down, and starts cooling down weapon once user
- * releases trigger. Once overheat reaches its maximum value, the weapon jams for a while.
+ * Module that increases weapon's heat every tick when trigger is held. Requires {@link OverheatBaseModule}.
  */
-public class OverheatFromTriggerDownModule implements WeaponModule<OverheatFromTriggerDownModule.Attributes> {
+public class OverheatFromTriggerDownModule implements WeaponModule<OverheatFromTriggerDownModule.Attributes>, HeatSource {
     @Override
     public void register(final WeaponHooks hooks, final Attributes attributes) {
-        hooks.weaponFire(this::checkIfCanFire, Phase.CHECK);
-        hooks.weaponStateQuery(this::stateQuery, Phase.TRIGGER);
         hooks.triggerPull(this::triggerPull, Phase.TRIGGER);
         hooks.triggerRelease(this::triggerRelease, Phase.TRIGGER);
-        hooks.weaponEquip(this::equip, Phase.CHECK);
-        hooks.weaponUnequip(this::unequip, Phase.CHECK);
+        hooks.weaponUnequip(this::unequip, Phase.TRIGGER);
 
         hooks.registerStateFactory(State.class, State::new);
+        hooks.postRegister(this::postRegister);
     }
 
-    public void equip(
-            final Weapon weapon,
-            final WeaponEquipEvent event,
-            final ActionInfo info
-    ) {
-        final var state = weapon.getState(State.class);
-        final var attributes = weapon.getAttributes(Attributes.class);
-
-        updateHeatState(state, attributes, info.timeManager());
-        state.isTriggerDown = false;
-        state.heatAtTriggerRelease = state.heat;
-        state.triggerReleaseTimestamp = info.timeManager().getCurrentGameTime();
-    }
-
-    public void unequip(
-            final Weapon weapon,
-            final WeaponUnequipEvent event,
-            final ActionInfo info
-    ) {
-        final var state = weapon.getState(State.class);
-        final var attributes = weapon.getAttributes(Attributes.class);
-
-        state.isTriggerDown = false;
-        state.heatAtTriggerRelease = state.heat;
-        state.triggerReleaseTimestamp = info.timeManager().getCurrentGameTime();
-    }
-
-    public void checkIfCanFire(
-            final Weapon weapon,
-            final WeaponFireEvent event,
-            final ActionInfo info
-    ) {
-        final var state = weapon.getState(State.class);
-        final var attributes = weapon.getAttributes(Attributes.class);
-
-        updateHeatState(state, attributes, info.timeManager());
-        if (state.isJammed || !state.isTriggerDown) {
-            event.cancel();
-        }
+    private void postRegister(final WeaponModules modules) {
+        modules.require(OverheatBaseModule.class)
+               .registerHeatSource(this);
     }
 
     public void triggerPull(
@@ -68,11 +31,8 @@ public class OverheatFromTriggerDownModule implements WeaponModule<OverheatFromT
             final ActionInfo info
     ) {
         final var state = weapon.getState(State.class);
-        final var attributes = weapon.getAttributes(Attributes.class);
 
-        updateHeatState(state, attributes, info.timeManager());
         state.isTriggerDown = true;
-        state.heatAtTriggerPull = state.heat;
         state.triggerPullTimestamp = info.timeManager().getCurrentGameTime();
     }
 
@@ -84,78 +44,72 @@ public class OverheatFromTriggerDownModule implements WeaponModule<OverheatFromT
         final var state = weapon.getState(State.class);
         final var attributes = weapon.getAttributes(Attributes.class);
 
-        updateHeatState(state, attributes, info.timeManager());
         state.isTriggerDown = false;
-        state.heatAtTriggerRelease = state.heat;
-        state.triggerReleaseTimestamp = info.timeManager().getCurrentGameTime();
+        updateAccumulatedHeat(state, attributes, info.timeManager());
     }
 
-    private void updateHeatState(
-            final State state,
-            final Attributes attributes,
-            final TimeManager timeManager
-    ) {
-        if (state.isJammed) {
-            final var timeJammed = timeManager.getCurrentGameTime() - state.jamStartTimestamp;
-            if (timeJammed >= attributes.jamDurationInTicks) {
-                state.isJammed = false;
-                state.heat = 0;
-            }
-        } else {
-            if (state.isTriggerDown) {
-                // heating up
-                final var timeTriggerDown = timeManager.getCurrentGameTime() - state.triggerPullTimestamp;
-                final var heatGathered = attributes.heatPerTick * timeTriggerDown;
-                state.heat = state.heatAtTriggerPull + heatGathered;
-
-                if (state.heat >= attributes.maxHeat) {
-                    state.isJammed = true;
-                    state.heat = attributes.maxHeat;
-                    state.jamStartTimestamp = timeManager.getCurrentGameTime();
-                    // by having this line the weapon doesn't start shooting once jam has cleared (if user holds the trigger down)
-                    state.isTriggerDown = false;
-                }
-            } else {
-                // cooling down
-                final var timeTriggerDown = timeManager.getCurrentGameTime() - state.triggerReleaseTimestamp;
-                final var heatDissipated = attributes.heatDissipationPerTick * timeTriggerDown;
-                state.heat = state.heatAtTriggerRelease - heatDissipated;
-
-                if (state.heat <= 0) {
-                    state.heat = 0;
-                }
-            }
-        }
-    }
-
-    public void stateQuery(
+    public void unequip(
             final Weapon weapon,
-            final WeaponStateQuery event,
+            final WeaponUnequipEvent event,
             final ActionInfo info
     ) {
         final var state = weapon.getState(State.class);
         final var attributes = weapon.getAttributes(Attributes.class);
 
-        updateHeatState(state, attributes, info.timeManager());
-        event.heat = state.heat;
-        event.jammed = state.isJammed;
+        state.isTriggerDown = false;
+        updateAccumulatedHeat(state, attributes, info.timeManager());
+    }
+
+    /**
+     * Gets accumulated heat since last query or trigger pull, and stores it in state. Sets {@code
+     * state.lastQueryTimestamp} to current game tick.
+     * <p>
+     * This method should be called when weapon stops firing (trigger release or unequip).
+     *
+     * @param state       state of the module
+     * @param attributes  module attributes
+     * @param timeManager TimeManager
+     */
+    private void updateAccumulatedHeat(
+            final State state,
+            final Attributes attributes,
+            final TimeManager timeManager
+    ) {
+        final var lastQuery = state.lastQueryTimestamp;
+        state.lastQueryTimestamp = timeManager.getCurrentGameTime();
+
+        if (!state.isTriggerDown) {
+            // weapon is in state where it can't gain heat
+            return;
+        }
+
+        final var latest = Math.max(lastQuery, state.triggerPullTimestamp);
+        state.accumulated = (timeManager.getCurrentGameTime() - latest) * attributes.heatPerTick;
+    }
+
+    @Override
+    public double getHeatDeltaSinceLastQuery(
+            final Weapon weapon,
+            final TimeManager timeManager
+    ) {
+        final var state = weapon.getState(State.class);
+        final var attributes = weapon.getAttributes(Attributes.class);
+        updateAccumulatedHeat(state, attributes, timeManager);
+
+        final var delta = state.accumulated;
+        state.accumulated = 0;
+        return delta;
     }
 
     public static class State {
-        private double heat;
-        private double heatAtTriggerPull;
-        private double heatAtTriggerRelease;
+        private double accumulated;
+        private long lastQueryTimestamp;
         private long triggerPullTimestamp;
-        private long triggerReleaseTimestamp;
-        private boolean isJammed;
-        private long jamStartTimestamp;
+
         private boolean isTriggerDown;
     }
 
     public static record Attributes(
-            double heatPerTick,
-            double maxHeat,
-            double heatDissipationPerTick,
-            long jamDurationInTicks
+            double heatPerTick
     ) {}
 }

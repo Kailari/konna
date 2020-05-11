@@ -39,6 +39,15 @@ public class ModularWeapon {
         this.unequipListeners = List.copyOf(hooks.unequipListeners);
         this.equipListeners = List.copyOf(hooks.equipListeners);
         this.queryListeners = List.copyOf(hooks.queryListeners);
+
+        final var mods = new WeaponModules(Arrays.stream(modules)
+                                                 .map(Module::module)
+                                                 .collect(Collectors.toUnmodifiableMap(Object::getClass,
+                                                                                       module -> module)));
+
+        for (final var handler : hooks.postRegisterHandlers) {
+            handler.handle(mods);
+        }
     }
 
     public void reload(final Weapon instance, final ActionInfo info) {
@@ -159,11 +168,12 @@ public class ModularWeapon {
             List<InternalHandler<WeaponEquipEvent>>equipListeners,
             List<InternalHandler<WeaponUnequipEvent>>unequipListeners,
             List<InternalHandler<WeaponStateQuery>>queryListeners,
+            List<PostRegisterHandler>postRegisterHandlers,
             Map<Class<?>, Supplier<?>>stateFactories,
             Map<Class<?>, Object>attributes
     ) implements WeaponHooks {
         Hooks() {
-            this(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new HashMap<>(), new HashMap<>());
+            this(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new HashMap<>(), new HashMap<>());
         }
 
         @Override
@@ -208,6 +218,11 @@ public class ModularWeapon {
                                                 + ")! Multiple modules registered factories for the same state!");
             }
             this.stateFactories.put(stateClass, factory);
+        }
+
+        @Override
+        public void postRegister(final PostRegisterHandler postRegister) {
+            this.postRegisterHandlers.add(postRegister);
         }
 
         void sort() {
