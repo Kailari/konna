@@ -65,7 +65,10 @@ public class CameraUniformBufferObject extends RecreateCloseable {
                                               this.cameraMatrices.getDescriptorBinding(),
                                               this.instanceMatrices.getDescriptorBinding());
 
-        this.cameraMatrices.eyePosition.set(0.0f, -10.0f, 15.0f);
+        final var lookAtDistance = 7.5f;
+        this.cameraMatrices.eyePosition.set(0.0f, -1.0f, 1.5f)
+                                       .normalize()
+                                       .mul(lookAtDistance);
         this.lookAtTarget = new Vector3f(0.0f, 0.0f, 0.0f);
         this.up = new Vector3f(0.0f, 0.0f, 1.0f);
 

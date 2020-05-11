@@ -56,6 +56,10 @@ public class Renderer implements AutoCloseable {
         return this.cameraUBO;
     }
 
+    public AnimatedMesh getHumanoid() {
+        return this.humanoid;
+    }
+
     public Renderer(final Path assetRoot, final RenderingBackend backend, final Window window) {
         this.commandPool = backend.deviceContext().getGraphicsCommandPool();
         this.swapchain = new Swapchain(backend.deviceContext(), window, backend.surface());

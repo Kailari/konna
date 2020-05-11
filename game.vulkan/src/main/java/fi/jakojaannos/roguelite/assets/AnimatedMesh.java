@@ -23,12 +23,11 @@ import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.VK10.*;
 
 public class AnimatedMesh extends RecreateCloseable {
-    private static final Logger LOG = LoggerFactory.getLogger(AnimatedMesh.class);
-
     public static final DescriptorBinding BONE_DESCRIPTOR_BINDING = new DescriptorBinding(0,
                                                                                           VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                                                                                           1,
                                                                                           VK_SHADER_STAGE_VERTEX_BIT);
+    private static final Logger LOG = LoggerFactory.getLogger(AnimatedMesh.class);
     private static final int MAX_BONES = 150;
     private static final long SIZE_IN_BYTES = MAX_BONES * 16 * Float.BYTES;
 
@@ -79,6 +78,22 @@ public class AnimatedMesh extends RecreateCloseable {
         }
     }
 
+    public void setFrame(final int imageIndex, final String animationName, final int frameIndex) {
+        try (final var stack = stackPush()) {
+            final var data = stack.malloc((int) this.buffers[imageIndex].getSize());
+
+            final var animation = this.animations.get(animationName);
+            final var frame = animation.frames().get(frameIndex);
+            for (int i = 0; i < frame.boneTransforms().length; i++) {
+                final var matrix = frame.boneTransforms()[i];
+
+                final var offset = i * 16 * Float.BYTES;
+                matrix.get(offset, data);
+            }
+            this.buffers[imageIndex].push(data, 0, this.buffers[imageIndex].getSize());
+        }
+    }
+
     @Override
     protected void recreate() {
         for (final var mesh : this.meshes) {
@@ -93,19 +108,10 @@ public class AnimatedMesh extends RecreateCloseable {
                                                      bitMask(VkMemoryPropertyFlags.HOST_VISIBLE_BIT,
                                                              VkMemoryPropertyFlags.HOST_COHERENT_BIT));
 
-            try (final var stack = stackPush()) {
-                final var data = stack.malloc((int) this.buffers[imageIndex].getSize());
-
-                final var animation = this.animations.get("metarig|idle");
-                final var frame = animation.frames().get(0);
-                for (int i = 0; i < frame.boneTransforms().length; i++) {
-                    final var matrix = frame.boneTransforms()[i];
-
-                    final var offset = i * 16 * Float.BYTES;
-                    matrix.get(offset, data);
-                }
-                this.buffers[imageIndex].push(data, 0, this.buffers[imageIndex].getSize());
-            }
+            final var defaultAnimationName = this.animations.isEmpty()
+                    ? "idle"
+                    : this.animations.keySet().iterator().next();
+            setFrame(imageIndex, defaultAnimationName, 0);
         }
 
         this.descriptorSets = this.descriptorPool.allocate(this.layout, this.swapchain.getImageCount());

@@ -38,6 +38,7 @@ public class ApplicationRunner implements AutoCloseable {
     private int frameIndex;
 
     private double angle;
+    private int meshFrame;
 
     public ApplicationRunner(final Application application) {
         this.application = application;
@@ -129,6 +130,13 @@ public class ApplicationRunner implements AutoCloseable {
         this.application.renderer()
                         .getCameraUBO()
                         .update(imageIndex, this.angle);
+
+
+        ++this.meshFrame;
+        this.application.renderer()
+                        .getHumanoid()
+                        //.setFrame(imageIndex, "metarig|idle", 20);
+                        .setFrame(imageIndex, "metarig|idle", (this.meshFrame / 200) % 40);
 
         this.application.backend()
                         .deviceContext()

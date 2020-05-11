@@ -56,8 +56,23 @@ public record Animation(
                 final Matrix4f nodeTransform;
                 if (node.transforms != null) {
                     final var frameTransform = node.transforms.get(frame);
-                    nodeTransform = Optional.ofNullable(frameTransform)
-                                            .orElseGet(Matrix4f::new);
+
+                    if (frameTransform != null) {
+                        nodeTransform = frameTransform;
+                    } else if (node.transforms.size() > 0) {
+                        final var lastFrame = node.transforms.keySet()
+                                                             .stream()
+                                                             .mapToDouble(value -> value)
+                                                             .max()
+                                                             .orElseThrow();
+                        if (lastFrame > frame) {
+                            nodeTransform = node.transforms.get(lastFrame);
+                        } else {
+                            nodeTransform = new Matrix4f();
+                        }
+                    } else {
+                        nodeTransform = new Matrix4f();
+                    }
                 } else {
                     nodeTransform = new Matrix4f();
                 }
