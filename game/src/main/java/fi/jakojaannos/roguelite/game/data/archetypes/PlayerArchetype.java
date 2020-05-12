@@ -16,6 +16,8 @@ import fi.jakojaannos.roguelite.game.data.resources.Weapons;
 import fi.jakojaannos.roguelite.game.weapons.InventoryWeapon;
 
 public class PlayerArchetype {
+    private static final boolean GRENADE_ENABLED = true;
+
     public static EntityHandle create(
             final World world,
             final TimeManager timeManager,
@@ -28,6 +30,11 @@ public class PlayerArchetype {
         weaponInventory.slots[4] = new InventoryWeapon(Weapons.PLAYER_MINIGUN_OVERHEAT_OVER_TIME);
         weaponInventory.slots[7] = new InventoryWeapon(Weapons.PLAYER_TURRET_BUILDER);
         weaponInventory.slots[0] = new InventoryWeapon(Weapons.PLAYER_TEST_AR);
+
+        if(GRENADE_ENABLED){
+            weaponInventory.slots[5] = new InventoryWeapon(Weapons.PLAYER_GRENADE_THROWN);
+            weaponInventory.slots[6] = new InventoryWeapon(Weapons.PLAYER_GRENADE_LAUNCHER);
+        }
 
         final var player = world.createEntity(
                 new Transform(transform),
