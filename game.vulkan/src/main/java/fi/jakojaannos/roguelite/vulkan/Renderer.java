@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import fi.jakojaannos.roguelite.CameraUniformBufferObject;
 import fi.jakojaannos.roguelite.MaterialInstance;
 import fi.jakojaannos.roguelite.SceneUniformBufferObject;
+import fi.jakojaannos.roguelite.SwapchainImageDependentDescriptorPool;
 import fi.jakojaannos.roguelite.assets.*;
 import fi.jakojaannos.roguelite.assets.loader.SkeletalMeshLoader;
 import fi.jakojaannos.roguelite.assets.loader.StaticMeshLoader;
@@ -75,13 +76,14 @@ public class Renderer implements AutoCloseable {
         // We have swapchainImageCount copies of two descriptor sets. Why use suppliers? That way we
         // can delay the descriptorCount/maxSets calculations to `tryRecreate`, where all resources
         // are already initialized. E.g. we do not yet know the image count here
-        this.descriptorPool = new DescriptorPool(backend.deviceContext(),
-                                                 () -> this.swapchain.getImageCount() * 3 + this.swapchain.getImageCount() * 7,
-                                                 new DescriptorPool.Pool(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                                                                         () -> this.swapchain.getImageCount() * 2 + this.swapchain
-                                                                                                                            .getImageCount() * 7),
-                                                 new DescriptorPool.Pool(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                                                                         this.swapchain::getImageCount));
+        this.descriptorPool = new SwapchainImageDependentDescriptorPool(
+                backend.deviceContext(),
+                this.swapchain,
+                2 + 7 + 1,
+                new DescriptorPool.Pool(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                                        () -> this.swapchain.getImageCount() * (2 + 7)),
+                new DescriptorPool.Pool(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                                        this.swapchain::getImageCount));
         this.cameraUBO = new CameraUniformBufferObject(backend.deviceContext(),
                                                        this.swapchain,
                                                        this.descriptorPool);

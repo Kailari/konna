@@ -50,10 +50,7 @@ public class MaterialInstance extends RecreateCloseable {
 
     @Override
     public boolean isRecreateRequired() {
-        // FIXME: Does not work because descriptor pool always gets re-created
-        // return this.buffers == null || this.buffers.length != this.swapchain.getImageCount()
-        //        || this.descriptorSets == null || this.descriptorSets.length != this.swapchain.getImageCount();
-        return true;
+        return this.isOlderThan(this.descriptorPool);
     }
 
     public MaterialInstance(

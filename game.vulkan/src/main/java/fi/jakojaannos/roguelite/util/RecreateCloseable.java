@@ -2,6 +2,11 @@ package fi.jakojaannos.roguelite.util;
 
 public abstract class RecreateCloseable implements AutoCloseable {
     private boolean cleanedUp = true;
+    private long generation;
+
+    protected boolean isOlderThan(final RecreateCloseable other) {
+        return this.generation < other.generation;
+    }
 
     protected abstract boolean isRecreateRequired();
 
@@ -17,6 +22,7 @@ public abstract class RecreateCloseable implements AutoCloseable {
 
         tryCleanup();
         recreate();
+        ++this.generation;
 
         // Recreation done, not cleaned up anymore
         this.cleanedUp = false;

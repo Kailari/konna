@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import fi.jakojaannos.roguelite.vulkan.command.CommandBuffer;
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
@@ -90,7 +91,19 @@ public class ApplicationRunner implements AutoCloseable {
                 presentImage(imageIndex);
             }
         } catch (final Throwable t) {
-            LOG.error("Application has crashed: " + t);
+            LOG.error("Application has crashed:");
+            LOG.error("\tException:\t{}", t.getClass().getName());
+            LOG.error("\tAt:\t\t{}:{}", t.getStackTrace()[0].getFileName(), t.getStackTrace()[0].getLineNumber());
+            LOG.error("\tCause:\t\t{}", Optional.ofNullable(t.getCause())
+                                                .map(Throwable::toString)
+                                                .orElse("Cause not defined."));
+            LOG.error("\tMessage:\t{}", t.getMessage());
+
+            LOG.error("\tStackTrace:\n{}",
+                      Arrays.stream(t.getStackTrace())
+                            .map(StackTraceElement::toString)
+                            .reduce(t.toString(),
+                                    (accumulator, element) -> String.format("%s\n\t%s", accumulator, element)));
         }
     }
 

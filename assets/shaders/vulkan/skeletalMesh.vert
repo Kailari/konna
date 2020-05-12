@@ -60,6 +60,6 @@ void main() {
     vPosition = worldPos.xyz;
 
     // Apply rotations only to normals. This is done by setting `w` to zero before multiplying
-    // (homogeneous coordinates)
+    // (homogeneous coordinates, normal has `w` set to zero, indicating it is a direction vector)
     vNormal = (instance.model * normal).xyz;
 }

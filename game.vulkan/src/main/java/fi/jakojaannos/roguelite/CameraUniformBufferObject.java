@@ -42,7 +42,7 @@ public class CameraUniformBufferObject extends RecreateCloseable {
 
     @Override
     protected boolean isRecreateRequired() {
-        return true;
+        return this.isOlderThan(this.descriptorPool);
     }
 
     public DescriptorSetLayout getLayout() {
