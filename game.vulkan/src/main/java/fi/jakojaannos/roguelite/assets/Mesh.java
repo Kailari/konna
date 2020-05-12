@@ -2,7 +2,6 @@ package fi.jakojaannos.roguelite.assets;
 
 import fi.jakojaannos.roguelite.MaterialInstance;
 import fi.jakojaannos.roguelite.util.RecreateCloseable;
-import fi.jakojaannos.roguelite.vulkan.GPUBuffer;
 import fi.jakojaannos.roguelite.vulkan.GPUMesh;
 import fi.jakojaannos.roguelite.vulkan.TextureSampler;
 import fi.jakojaannos.roguelite.vulkan.VertexFormat;
@@ -20,25 +19,9 @@ public class Mesh<TVertex> extends RecreateCloseable {
     private final GPUMesh<TVertex> gpuMesh;
     private final MaterialInstance material;
 
-    public GPUBuffer getVertexBuffer() {
-        return this.gpuMesh.getVertexBuffer();
-    }
-
-    public GPUBuffer getIndexBuffer() {
-        return this.gpuMesh.getIndexBuffer();
-    }
-
-    public int getIndexCount() {
-        return this.gpuMesh.getIndexCount();
-    }
-
     @Override
     protected boolean isRecreateRequired() {
-        return this.material.isRecreateRequired();
-    }
-
-    public MaterialInstance getMaterialInstance() {
-        return this.material;
+        return true;
     }
 
     public Mesh(

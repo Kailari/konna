@@ -34,6 +34,8 @@ public class Renderer implements AutoCloseable {
     private final GraphicsPipeline<SkeletalMeshVertex> skeletalPipeline;
     private final DescriptorSetLayout materialDescriptorLayout;
     private final DescriptorSetLayout boneDescriptorLayout;
+    private final DescriptorSetLayout cameraDescriptorLayout;
+    private final DescriptorSetLayout sceneDescriptorLayout;
     private final CameraUniformBufferObject cameraUBO;
     private final SceneUniformBufferObject sceneUBO;
     private final TextureSampler textureSampler;
@@ -84,12 +86,21 @@ public class Renderer implements AutoCloseable {
                                         () -> this.swapchain.getImageCount() * (2 + 7)),
                 new DescriptorPool.Pool(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                                         this.swapchain::getImageCount));
+        this.cameraDescriptorLayout = new DescriptorSetLayout(backend.deviceContext(),
+                                                              CameraUniformBufferObject.CAMERA_DESCRIPTOR_BINDING,
+                                                              CameraUniformBufferObject.INSTANCE_DESCRIPTOR_BINDING);
         this.cameraUBO = new CameraUniformBufferObject(backend.deviceContext(),
                                                        this.swapchain,
-                                                       this.descriptorPool);
+                                                       this.descriptorPool,
+                                                       this.cameraDescriptorLayout);
+
+        this.sceneDescriptorLayout = new DescriptorSetLayout(backend.deviceContext(),
+                                                             SceneUniformBufferObject.LIGHTS_DESCRIPTOR_BINDING,
+                                                             SceneUniformBufferObject.LIGHT_COUNT_DESCRIPTOR_BINDING);
         this.sceneUBO = new SceneUniformBufferObject(backend.deviceContext(),
                                                      this.swapchain,
-                                                     this.descriptorPool);
+                                                     this.descriptorPool,
+                                                     this.sceneDescriptorLayout);
 
         this.textureSampler = new TextureSampler(backend.deviceContext());
 
@@ -246,6 +257,8 @@ public class Renderer implements AutoCloseable {
         this.sceneUBO.close();
         this.materialDescriptorLayout.close();
         this.boneDescriptorLayout.close();
+        this.cameraDescriptorLayout.close();
+        this.sceneDescriptorLayout.close();
 
         this.textureSampler.close();
         this.defaultTexture.close();

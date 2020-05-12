@@ -27,7 +27,7 @@ public class AnimatedMesh extends RecreateCloseable {
                                                                                           VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                                                                                           1,
                                                                                           VK_SHADER_STAGE_VERTEX_BIT);
-    private static final Logger LOG = LoggerFactory.getLogger(AnimatedMesh.class);
+
     private static final int MAX_BONES = 150;
     private static final long SIZE_IN_BYTES = MAX_BONES * 16 * Float.BYTES;
 
