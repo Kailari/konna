@@ -13,7 +13,9 @@ import fi.jakojaannos.roguelite.engine.GameMode;
 import fi.jakojaannos.roguelite.engine.GameState;
 import fi.jakojaannos.roguelite.engine.MainThread;
 import fi.jakojaannos.roguelite.engine.MainThreadTask;
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.Network;
+import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.event.EventBus;
 import fi.jakojaannos.roguelite.engine.event.Events;
@@ -23,23 +25,20 @@ import fi.jakojaannos.roguelite.engine.input.InputProvider;
 import fi.jakojaannos.roguelite.engine.network.NetworkImpl;
 import fi.jakojaannos.roguelite.engine.state.StateEvent;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.roguelite.game.data.components.NoDrawTag;
+import fi.jakojaannos.roguelite.game.data.components.SpriteInfo;
 
 public class VulkanGameRunner implements MainThread {
     private static final Logger LOG = LoggerFactory.getLogger(VulkanGameRunner.class);
-
+    @Deprecated
+    protected final RenderEvents renderEvents;
     private final TimeManager timeManager;
     private final InputProvider inputProvider;
-
     private final EventBus<InputEvent> inputBus;
     private final List<StateEvent> stateEvents;
     private final List<Object> systemEvents;
     private final Events events;
-
     private final Network network;
-
-    @Deprecated
-    protected final RenderEvents renderEvents;
-
     private final Object taskQueueLock = new Object();
     private final Queue<MainThreadTask> mainThreadTaskQueue = new ArrayDeque<>();
 
@@ -130,12 +129,33 @@ public class VulkanGameRunner implements MainThread {
 
         if (modeHasChanged) {
             // TODO: is this required anymore?
+            //   -> just subclass the runner and change the `GameModeRenderer/Adapter` in `changeGameState`
             //onModeChange(this.activeGameMode);
         }
 
         if (stateHasChanged) {
             // TODO: is this required anymore?
+            //  (no, I don't think this is. Figure out how networking can be done without hacks involving
+            //   this thing and remove)
             //onStateChange();
         }
+    }
+
+    // TODO: Move this to `GameModeRenderer`s
+    public void recordPresentableState(final PresentableState state) {
+        // TODO: copy all transform positions from `currentState` into `state`
+        // TODO: do the above, but use render adapters
+
+        state.positions().clear();
+        this.currentState.world()
+                         .iterateEntities(new Class[]{Transform.class, NoDrawTag.class, SpriteInfo.class},
+                                          new boolean[]{false, true, false},
+                                          new boolean[]{false, false, false},
+                                          objects -> objects[0],
+                                          false)
+                         .map(EntityDataHandle::getData)
+                         .map(Transform.class::cast)
+                         .map(transform -> transform.position)
+                         .forEach(position -> state.positions().add(position));
     }
 }

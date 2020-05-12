@@ -15,8 +15,10 @@ import fi.jakojaannos.roguelite.vulkan.command.CommandPool;
 import fi.jakojaannos.roguelite.vulkan.command.GPUQueue;
 import fi.jakojaannos.roguelite.vulkan.memory.MemoryManager;
 import fi.jakojaannos.roguelite.vulkan.memory.slice.SliceMemoryManager;
+import fi.jakojaannos.roguelite.vulkan.types.VkCommandPoolCreateFlags;
 import fi.jakojaannos.roguelite.vulkan.types.VkFormat;
 
+import static fi.jakojaannos.roguelite.util.BitMask.bitMask;
 import static fi.jakojaannos.roguelite.util.VkUtil.ensureSuccess;
 import static org.lwjgl.system.MemoryStack.stackGet;
 import static org.lwjgl.system.MemoryStack.stackPush;
@@ -124,7 +126,9 @@ public class DeviceContext implements AutoCloseable {
 
         this.memoryManager = new SliceMemoryManager(this);
         this.transferCommandPool = new CommandPool(this.device, queueFamilies.transfer());
-        this.graphicsCommandPool = new CommandPool(this.device, queueFamilies.graphics());
+        this.graphicsCommandPool = new CommandPool(this.device,
+                                                   queueFamilies.graphics(),
+                                                   bitMask(VkCommandPoolCreateFlags.RESET_COMMAND_BUFFER_BIT));
     }
 
     public VkDeviceQueueCreateInfo.Buffer createQueueCreateInfos(final QueueFamilies queueFamilies) {

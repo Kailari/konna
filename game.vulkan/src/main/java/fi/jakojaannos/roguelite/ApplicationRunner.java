@@ -41,16 +41,16 @@ public class ApplicationRunner implements AutoCloseable {
     private final long[] imagesInFlight;
 
     private final Application application;
-
+    private final PresentableStateQueue presentableStateQueue;
     private Runnable simulatorTerminateCallback = () -> {};
-
     private boolean framebufferResized;
     private int frameIndex;
 
     private double angle;
-    private int meshFrame;
+    private double meshFrame;
 
     public ApplicationRunner(final Application application) {
+        this.presentableStateQueue = new PresentableStateQueue();
         this.application = application;
 
         final var deviceContext = application.backend().deviceContext();
@@ -88,6 +88,10 @@ public class ApplicationRunner implements AutoCloseable {
                 () -> {
                     runner.simulateTick(this.simulatorTerminateCallback);
                     timeManager.nextTick();
+
+                    final PresentableState state;
+                    state = this.presentableStateQueue.swapWriting();
+                    runner.recordPresentableState(state);
                 },
                 0L,
                 timeManager.getTimeStep(),
@@ -121,6 +125,10 @@ public class ApplicationRunner implements AutoCloseable {
                 if (imageIndex == -1) {
                     continue;
                 }
+
+                final var state = this.presentableStateQueue.swapReading();
+                this.application.renderer()
+                                .recordFrame(imageIndex, state);
 
                 drawFrame(delta, this.application.renderer().getCommands(imageIndex), imageIndex);
                 presentImage(imageIndex);
@@ -189,10 +197,11 @@ public class ApplicationRunner implements AutoCloseable {
                         .update(imageIndex, this.angle);
 
 
-        ++this.meshFrame;
+        final var animationFramesPerSecond = 20;
+        this.meshFrame += delta;
         this.application.renderer()
                         .getHumanoid()
-                        .setFrame(imageIndex, "Armature|idle", (this.meshFrame / 200) % 33);
+                        .setFrame(imageIndex, "Armature|idle", (int) (this.meshFrame * animationFramesPerSecond) % 33);
 
         this.application.backend()
                         .deviceContext()

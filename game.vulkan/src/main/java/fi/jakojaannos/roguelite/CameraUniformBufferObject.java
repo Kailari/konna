@@ -38,14 +38,16 @@ public class CameraUniformBufferObject extends DescriptorObject {
             final DeviceContext deviceContext,
             final Swapchain swapchain,
             final DescriptorPool descriptorPool,
-            final DescriptorSetLayout layout
+            final DescriptorSetLayout layout,
+            final float lookAtDistance
     ) {
         this(deviceContext,
              swapchain,
              descriptorPool,
              layout,
              new InstanceMatrices(),
-             new CameraMatrices());
+             new CameraMatrices(),
+             lookAtDistance);
     }
 
     private CameraUniformBufferObject(
@@ -54,7 +56,8 @@ public class CameraUniformBufferObject extends DescriptorObject {
             final DescriptorPool descriptorPool,
             final DescriptorSetLayout layout,
             final InstanceMatrices instanceMatrices,
-            final CameraMatrices cameraMatrices
+            final CameraMatrices cameraMatrices,
+            final float lookAtDistance
     ) {
         super(deviceContext,
               swapchain,
@@ -66,7 +69,6 @@ public class CameraUniformBufferObject extends DescriptorObject {
         this.cameraMatrices = cameraMatrices;
         this.instanceMatrices = instanceMatrices;
 
-        final var lookAtDistance = 7.5f;
         this.cameraMatrices.eyePosition.set(0.0f, -1.0f, 1.5f)
                                        .normalize()
                                        .mul(lookAtDistance);

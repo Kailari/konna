@@ -4,8 +4,12 @@ import org.lwjgl.vulkan.VkCommandBufferAllocateInfo;
 import org.lwjgl.vulkan.VkCommandPoolCreateInfo;
 import org.lwjgl.vulkan.VkDevice;
 
+import fi.jakojaannos.roguelite.util.BitFlags;
+import fi.jakojaannos.roguelite.util.BitMask;
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
+import fi.jakojaannos.roguelite.vulkan.types.VkCommandPoolCreateFlags;
 
+import static fi.jakojaannos.roguelite.util.BitMask.bitMask;
 import static fi.jakojaannos.roguelite.util.VkUtil.ensureSuccess;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.VK10.*;
@@ -23,6 +27,14 @@ public class CommandPool implements AutoCloseable {
     }
 
     public CommandPool(final VkDevice device, final int queueFamilyIndex) {
+        this(device, queueFamilyIndex, bitMask());
+    }
+
+    public CommandPool(
+            final VkDevice device,
+            final int queueFamilyIndex,
+            final BitMask<VkCommandPoolCreateFlags> flags
+    ) {
         this.device = device;
 
         try (final var stack = stackPush()) {
@@ -30,7 +42,7 @@ public class CommandPool implements AutoCloseable {
                     .callocStack()
                     .sType(VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO)
                     .queueFamilyIndex(queueFamilyIndex)
-                    .flags(0);
+                    .flags(flags.mask());
 
             final var pPool = stack.mallocLong(1);
             ensureSuccess(vkCreateCommandPool(this.device, createInfo, null, pPool),

@@ -140,9 +140,16 @@ public class GraphicsPipeline<TVertex> extends RecreateCloseable {
 
     private long createPipelineLayout() {
         try (final var stack = stackPush()) {
+            final var constantRanges = VkPushConstantRange
+                    .callocStack(1)
+                    .offset(0)
+                    .size(16 * Float.BYTES)
+                    .stageFlags(VK_SHADER_STAGE_VERTEX_BIT);
+
             final var createInfo = VkPipelineLayoutCreateInfo
                     .callocStack()
                     .sType(VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO)
+                    .pPushConstantRanges(constantRanges)
                     .pSetLayouts(stack.longs(Arrays.stream(this.descriptorSetLayouts)
                                                    .mapToLong(DescriptorSetLayout::getHandle)
                                                    .toArray()));

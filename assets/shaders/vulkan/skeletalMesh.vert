@@ -20,7 +20,7 @@ layout(set = 0, binding = 0) uniform CameraInfo {
     vec3 eyePosition;
 } camera;
 
-layout(set = 0, binding = 1) uniform InstanceInfo {
+layout(push_constant) uniform InstanceInfo {
     mat4 model;
 } instance;
 

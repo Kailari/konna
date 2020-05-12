@@ -1,11 +1,10 @@
 package fi.jakojaannos.roguelite.vulkan;
 
+import org.joml.Matrix4f;
+
 import java.nio.file.Path;
 
-import fi.jakojaannos.roguelite.CameraUniformBufferObject;
-import fi.jakojaannos.roguelite.MaterialInstance;
-import fi.jakojaannos.roguelite.SceneUniformBufferObject;
-import fi.jakojaannos.roguelite.SwapchainImageDependentDescriptorPool;
+import fi.jakojaannos.roguelite.*;
 import fi.jakojaannos.roguelite.assets.*;
 import fi.jakojaannos.roguelite.assets.loader.SkeletalMeshLoader;
 import fi.jakojaannos.roguelite.assets.loader.StaticMeshLoader;
@@ -94,7 +93,8 @@ public class Renderer implements AutoCloseable {
         this.cameraUBO = new CameraUniformBufferObject(backend.deviceContext(),
                                                        this.swapchain,
                                                        this.descriptorPool,
-                                                       this.cameraDescriptorLayout);
+                                                       this.cameraDescriptorLayout,
+                                                       12.5f);
 
         this.sceneDescriptorLayout = new DescriptorSetLayout(backend.deviceContext(),
                                                              SceneUniformBufferObject.LIGHTS_DESCRIPTOR_BINDING,
@@ -180,53 +180,67 @@ public class Renderer implements AutoCloseable {
         this.staticPipeline.tryRecreate();
         this.skeletalPipeline.tryRecreate();
 
-        recordCommandBuffers();
+        this.commandBuffers = this.commandPool.allocate(this.swapchain.getImageCount());
     }
 
-    private void recordCommandBuffers() {
-        this.commandBuffers = this.commandPool.allocate(this.swapchain.getImageCount());
-        for (int imageIndex = 0; imageIndex < this.commandBuffers.length; imageIndex++) {
-            final var commandBuffer = this.commandBuffers[imageIndex];
-            final var framebuffer = this.framebuffers.get(imageIndex);
+    public void recordFrame(final int imageIndex, final PresentableState state) {
+        final var commandBuffer = this.commandBuffers[imageIndex];
+        final var framebuffer = this.framebuffers.get(imageIndex);
 
-            try (final var stack = stackPush();
-                 final var ignored = commandBuffer.begin();
-                 final var ignored2 = this.renderPass.begin(framebuffer, commandBuffer)
-            ) {
-                vkCmdBindPipeline(commandBuffer.getHandle(),
-                                  VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                  this.staticPipeline.getHandle());
+        try (final var stack = stackPush();
+             final var ignored = commandBuffer.begin();
+             final var ignored2 = this.renderPass.begin(framebuffer, commandBuffer)
+        ) {
+            vkCmdBindPipeline(commandBuffer.getHandle(),
+                              VK_PIPELINE_BIND_POINT_GRAPHICS,
+                              this.staticPipeline.getHandle());
 
-                // NOTE: This needs to be done again for the skeletal pipeline if descriptor sets
-                //       and/or push constant ranges are changed so that they become incompatible
-                vkCmdBindDescriptorSets(commandBuffer.getHandle(),
-                                        VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                        this.staticPipeline.getLayout(),
-                                        0,
-                                        stack.longs(this.cameraUBO.getDescriptorSet(imageIndex),
-                                                    this.sceneUBO.getDescriptorSet(imageIndex)),
-                                        null);
+            // NOTE: This needs to be done again for the skeletal pipeline if descriptor sets
+            //       and/or push constant ranges are changed so that they become incompatible
+            vkCmdBindDescriptorSets(commandBuffer.getHandle(),
+                                    VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                    this.staticPipeline.getLayout(),
+                                    0,
+                                    stack.longs(this.cameraUBO.getDescriptorSet(imageIndex),
+                                                this.sceneUBO.getDescriptorSet(imageIndex)),
+                                    null);
 
-                for (final var mesh : this.staticMeshes) {
-                    mesh.draw(this.staticPipeline, commandBuffer, imageIndex);
-                }
+            for (final var mesh : this.staticMeshes) {
+                mesh.draw(this.staticPipeline, commandBuffer, imageIndex);
+            }
 
 
-                vkCmdBindPipeline(commandBuffer.getHandle(),
-                                  VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                  this.skeletalPipeline.getHandle());
+            vkCmdBindPipeline(commandBuffer.getHandle(),
+                              VK_PIPELINE_BIND_POINT_GRAPHICS,
+                              this.skeletalPipeline.getHandle());
 
-                // XXX: Re-bind the scene/camera UBOs here if necessary (see comment above)
+            // XXX: Re-bind the scene/camera UBOs here if necessary (see comment above)
 
-                vkCmdBindDescriptorSets(commandBuffer.getHandle(),
-                                        VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                        this.skeletalPipeline.getLayout(),
-                                        3,
-                                        stack.longs(this.humanoid.getBoneDescriptorSet(imageIndex)),
-                                        null);
+            vkCmdBindDescriptorSets(commandBuffer.getHandle(),
+                                    VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                    this.skeletalPipeline.getLayout(),
+                                    3,
+                                    stack.longs(this.humanoid.getBoneDescriptorSet(imageIndex)),
+                                    null);
 
-                for (final var mesh : this.humanoid.getMeshes()) {
-                    mesh.draw(this.skeletalPipeline, commandBuffer, imageIndex);
+            try (final var stack1 = stackPush()) {
+                final var pushConstantData = stack1.malloc(16 * Float.BYTES);
+                final var modelMatrix = new Matrix4f();
+
+                for (final var entity : state.positions()) {
+                    modelMatrix.identity()
+                               .translate((float) entity.x, (float) entity.y, 0.0f);
+                    modelMatrix.get(0, pushConstantData);
+
+                    vkCmdPushConstants(commandBuffer.getHandle(),
+                                       this.skeletalPipeline.getLayout(),
+                                       VK_SHADER_STAGE_VERTEX_BIT,
+                                       0,
+                                       pushConstantData);
+
+                    for (final var mesh : this.humanoid.getMeshes()) {
+                        mesh.draw(this.skeletalPipeline, commandBuffer, imageIndex);
+                    }
                 }
             }
         }
