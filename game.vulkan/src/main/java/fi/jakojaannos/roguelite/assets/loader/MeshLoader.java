@@ -78,7 +78,7 @@ public abstract class MeshLoader<TMesh> {
             final AIMaterial material,
             final ArrayList<Material> processedMaterials
     ) {
-        LOG.trace(LogCategories.MESH_LOADING, "\tProcessing material");
+        LOG.trace(LogCategories.MESH_LOADING, "\t-> Processing material");
         try (final var ignored = stackPush()) {
             final var color = AIColor4D.callocStack();
 
@@ -98,46 +98,40 @@ public abstract class MeshLoader<TMesh> {
             ) {
                 hasTexture = true;
                 texture = tryGetTexture(path.dataString());
-                LOG.trace(LogCategories.MESH_LOADING, "\t\t-> Got texture: {}",
-                          path.dataString());
             } else {
                 hasTexture = false;
                 texture = this.defaultTexture;
-                LOG.trace(LogCategories.MESH_LOADING, "\t\t-> No texture.");
             }
 
             // Try fetching the ambient color
             final Vector4f ambient;
             if (aiGetMaterialColor(material, AI_MATKEY_COLOR_AMBIENT, aiTextureType_NONE, 0, color) == aiReturn_SUCCESS) {
                 ambient = new Vector4f(color.r(), color.g(), color.b(), color.a());
-                LOG.trace(LogCategories.MESH_LOADING, "\t\t-> Got ambient: {}",
-                          ambient);
             } else {
                 ambient = Material.DEFAULT_COLOR;
-                LOG.trace(LogCategories.MESH_LOADING, "\t\t-> No ambient.");
             }
 
             // Try fetching the diffuse color
             final Vector4f diffuse;
             if (aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, aiTextureType_NONE, 0, color) == aiReturn_SUCCESS) {
                 diffuse = new Vector4f(color.r(), color.g(), color.b(), color.a());
-                LOG.trace(LogCategories.MESH_LOADING, "\t\t-> Got diffuse: {}",
-                          diffuse);
             } else {
                 diffuse = Material.DEFAULT_COLOR;
-                LOG.trace(LogCategories.MESH_LOADING, "\t\t-> No diffuse.");
             }
 
             // Try fetching the diffuse color
             final Vector4f specular;
             if (aiGetMaterialColor(material, AI_MATKEY_COLOR_SPECULAR, aiTextureType_NONE, 0, color) == aiReturn_SUCCESS) {
                 specular = new Vector4f(color.r(), color.g(), color.b(), color.a());
-                LOG.trace(LogCategories.MESH_LOADING, "\t\t-> Got specular: {}",
-                          specular);
             } else {
                 specular = Material.DEFAULT_COLOR;
-                LOG.trace(LogCategories.MESH_LOADING, "\t\t-> No specular.");
             }
+
+            LOG.trace(LogCategories.MESH_LOADING, "\t\t-> texture: {}, ambient: {}, diffuse: {}, specular: {}",
+                      hasTexture ? path.dataString() : "No texture",
+                      formatColor(ambient),
+                      formatColor(diffuse),
+                      formatColor(specular));
 
             final var processed = new Material(ambient,
                                                diffuse,
@@ -147,6 +141,12 @@ public abstract class MeshLoader<TMesh> {
                                                1.0f);
             processedMaterials.add(processed);
         }
+    }
+
+    private String formatColor(final Vector4f color) {
+        return color != Material.DEFAULT_COLOR
+                ? String.format("(%.2f, %.2f, %.2f, %.2f)", color.x, color.y, color.z, color.w)
+                : "Default";
     }
 
     protected Integer[] processIndices(final AIMesh mesh) {
