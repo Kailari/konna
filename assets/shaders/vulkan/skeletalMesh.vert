@@ -30,6 +30,7 @@ layout(set = 3, binding = 0) uniform Bones {
 
 void main() {
     vec4 position = vec4(0.0, 0.0, 0.0, 0.0);
+    vec4 normal = vec4(0.0, 0.0, 0.0, 0.0);
     int count = 0;
     for (int i = 0; i < MAX_WEIGHTS; ++i) {
         float weight = inBoneWeights[i];
@@ -38,11 +39,14 @@ void main() {
             uint boneIndex = inBoneIds[i];
             vec4 tmpPos = bones.transforms[boneIndex] * vec4(inPosition, 1.0);
             position += weight * tmpPos;
+            vec4 tmpNormal = bones.transforms[boneIndex] * vec4(inNormal, 0.0);
+            normal += weight * tmpNormal;
         }
     }
 
     if (count == 0) {
         position = vec4(inPosition, 1.0);
+        normal = vec4(inNormal, 0.0);
     }
 
     // Calculate non-projected position
@@ -57,5 +61,5 @@ void main() {
 
     // Apply rotations only to normals. This is done by setting `w` to zero before multiplying
     // (homogeneous coordinates)
-    vNormal = (instance.model * vec4(inNormal, 0.0)).xyz;
+    vNormal = (instance.model * normal).xyz;
 }

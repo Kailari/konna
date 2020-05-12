@@ -102,7 +102,7 @@ public class SkeletalMeshLoader extends MeshLoader<AnimatedMesh> {
         if (rootNode != null) {
             final var rootTransform = asMatrix(rootNode.mTransformation());
             final var rootAnimationNode = processNodeHierarchy(rootNode, null);
-            final Map<String, Animation> animations = processAnimations(scene, bones, rootAnimationNode, rootTransform);
+            final var animations = processAnimations(scene, bones, rootAnimationNode, rootTransform);
             return new AnimatedMesh(this.deviceContext,
                                     this.swapchain,
                                     this.descriptorPool,
@@ -173,6 +173,13 @@ public class SkeletalMeshLoader extends MeshLoader<AnimatedMesh> {
             animations.put(processedAnimation.name(), processedAnimation);
         }
 
+        LOG.debug(LogCategories.MESH_LOADING, "\t-> Loaded {} animations with {} frames.",
+                  animations.size(),
+                  animations.values()
+                            .stream()
+                            .map(Animation::frames)
+                            .mapToInt(List::size)
+                            .toArray());
         return animations;
     }
 
@@ -195,9 +202,8 @@ public class SkeletalMeshLoader extends MeshLoader<AnimatedMesh> {
                 final var node = rootNode.findByName(bone.name());
                 final var boneMatrix = Animation.Node.getParentTransforms(node, frameKey);
                 boneMatrix.mul(bone.transform());
-                rootTransform.mul(boneMatrix, new Matrix4f());
 
-                frame.boneTransforms()[boneIndex] = boneMatrix;
+                frame.boneTransforms()[boneIndex] = rootTransform.mul(boneMatrix, new Matrix4f());
             }
         }
 
@@ -249,17 +255,17 @@ public class SkeletalMeshLoader extends MeshLoader<AnimatedMesh> {
         keySet.addAll(frameRotations.keySet());
         keySet.addAll(frameScalings.keySet());
 
-        final var frames = new HashMap<Double, Matrix4f>();
+        final var frames = new HashMap<Double, FrameTransform>();
         for (final var key : keySet) {
             final var translation = frameTranslations.computeIfAbsent(key, ignored -> new Vector3f());
             final var rotation = frameRotations.computeIfAbsent(key, ignored -> new Quaternionf());
             final var scaling = frameScalings.computeIfAbsent(key, ignored -> new Vector3f(1.0f));
 
-            final var transform = new Matrix4f().translate(translation)
-                                                .rotate(rotation)
-                                                .scale(scaling);
+            final var matrix = new Matrix4f().translate(translation)
+                                             .rotate(rotation)
+                                             .scale(scaling);
 
-            frames.put(key, transform);
+            frames.put(key, new FrameTransform(translation, rotation, scaling, matrix));
         }
 
         node.setFrameTransforms(frames);
@@ -297,8 +303,11 @@ public class SkeletalMeshLoader extends MeshLoader<AnimatedMesh> {
         final var numBones = mesh.mNumBones();
         final var boneBuffer = mesh.mBones();
         if (boneBuffer == null) {
-            // FIXME: Fail gracefully
-            throw new IllegalStateException("No bones found on skeletal mesh");
+            LOG.error("\t-> No bones found");
+
+            final var boneWeights = new BoneWeights[mesh.mNumVertices()];
+            Arrays.fill(boneWeights, new BoneWeights(new Vector4i(-1), new Vector4f(0.0f)));
+            return boneWeights;
         }
 
         for (int i = 0; i < numBones; ++i) {
@@ -327,7 +336,10 @@ public class SkeletalMeshLoader extends MeshLoader<AnimatedMesh> {
 
             final int numWeights;
             if (vertexWeights != null) {
-                vertexWeights.sort(Comparator.comparingDouble(VertexWeight::weight));
+                // NOTE: This should not be necessary unless importer is ran with exotic parameters
+                //       The default parameters already limit weights to maximum of four per vertex.
+                vertexWeights.sort(Comparator.comparingDouble(VertexWeight::weight)
+                                             .reversed());
                 numWeights = vertexWeights.size();
             } else {
                 numWeights = 0;
@@ -362,6 +374,15 @@ public class SkeletalMeshLoader extends MeshLoader<AnimatedMesh> {
 
         // NOTE: There may be multiple UV sets, load just the first one
         final var uvBuffer = mesh.mTextureCoords(0);
+
+        if (normalBuffer == null) {
+            // FIXME: Fail gracefully
+            throw new IllegalStateException("Mesh has no normals!");
+        }
+        if (uvBuffer == null) {
+            // FIXME: Fail gracefully
+            throw new IllegalStateException("Mesh has no UV coordinates!");
+        }
         for (int vertex = 0; vertex < mesh.mNumVertices(); vertex++) {
             final var position = vertexBuffer.get(vertex);
             final var normal = normalBuffer.get(vertex);

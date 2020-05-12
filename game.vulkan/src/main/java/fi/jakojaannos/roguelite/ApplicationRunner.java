@@ -135,8 +135,7 @@ public class ApplicationRunner implements AutoCloseable {
         ++this.meshFrame;
         this.application.renderer()
                         .getHumanoid()
-                        //.setFrame(imageIndex, "metarig|idle", 20);
-                        .setFrame(imageIndex, "metarig|idle", (this.meshFrame / 200) % 40);
+                        .setFrame(imageIndex, "Armature|idle", (this.meshFrame / 200) % 33);
 
         this.application.backend()
                         .deviceContext()
