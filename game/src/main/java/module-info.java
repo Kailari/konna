@@ -6,7 +6,6 @@ module roguelite.game {
     requires transitive roguelite.engine;
     requires transitive roguelite.engine.utilities;
     requires transitive roguelite.engine.ecs;
-    requires transitive roguelite.engine.lwjgl;
 
     opens fi.jakojaannos.roguelite.game.systems to roguelite.engine.ecs;
     opens fi.jakojaannos.roguelite.game.systems.characters to roguelite.engine.ecs;

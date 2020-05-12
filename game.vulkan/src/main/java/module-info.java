@@ -4,6 +4,9 @@ module roguelite.vulkan {
     requires org.joml;
     requires jsr305;
 
+    requires roguelite.game;
+    requires roguelite.engine;
+    requires roguelite.engine.ecs;
     requires roguelite.engine.utilities;
 
     requires org.lwjgl;

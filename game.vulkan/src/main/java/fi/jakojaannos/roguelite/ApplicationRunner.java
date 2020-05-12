@@ -6,16 +6,23 @@ import org.lwjgl.vulkan.VkSemaphoreCreateInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.Queue;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
+import fi.jakojaannos.roguelite.engine.GameRunnerTimeManager;
+import fi.jakojaannos.roguelite.engine.input.InputEvent;
+import fi.jakojaannos.roguelite.engine.input.InputProvider;
+import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;
 import fi.jakojaannos.roguelite.vulkan.command.CommandBuffer;
 import fi.jakojaannos.roguelite.vulkan.device.DeviceContext;
 
 import static fi.jakojaannos.roguelite.util.VkUtil.ensureSuccess;
 import static fi.jakojaannos.roguelite.util.VkUtil.translateVulkanResult;
-import static org.lwjgl.glfw.GLFW.glfwGetFramebufferSize;
-import static org.lwjgl.glfw.GLFW.glfwWaitEvents;
+import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.KHRSwapchain.*;
 import static org.lwjgl.vulkan.VK10.*;
@@ -34,6 +41,8 @@ public class ApplicationRunner implements AutoCloseable {
     private final long[] imagesInFlight;
 
     private final Application application;
+
+    private Runnable simulatorTerminateCallback = () -> {};
 
     private boolean framebufferResized;
     private int frameIndex;
@@ -62,6 +71,32 @@ public class ApplicationRunner implements AutoCloseable {
     }
 
     public void run() {
+        final var updateExecutor = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, "riista-tick-thread"));
+        final var timeManager = new GameRunnerTimeManager(20L);
+        final var inputProvider = new InputProvider() {
+            @Override
+            public Queue<InputEvent> pollEvents() {
+                // TODO: Adapt/re-write the LWJGL input provider
+                return new ArrayDeque<>();
+            }
+        };
+
+        final var runner = new VulkanGameRunner(timeManager,
+                                                inputProvider,
+                                                GameplayGameMode.create(420, timeManager));
+        final var runnerFuture = updateExecutor.scheduleAtFixedRate(
+                () -> {
+                    runner.simulateTick(this.simulatorTerminateCallback);
+                    timeManager.nextTick();
+                },
+                0L,
+                timeManager.getTimeStep(),
+                TimeUnit.MILLISECONDS);
+        this.simulatorTerminateCallback = () -> {
+            runnerFuture.cancel(false);
+            glfwWindowShouldClose(this.application.window().getHandle());
+        };
+
         this.application.window().show();
         this.frameIndex = -1;
 
@@ -104,6 +139,15 @@ public class ApplicationRunner implements AutoCloseable {
                             .map(StackTraceElement::toString)
                             .reduce(t.toString(),
                                     (accumulator, element) -> String.format("%s\n\t%s", accumulator, element)));
+        }
+
+        updateExecutor.shutdown();
+        try {
+            if (!updateExecutor.awaitTermination(5L, TimeUnit.SECONDS)) {
+                LOG.error("Simulation thread was not terminated within time limit! Forcing shutdown.");
+            }
+        } catch (final InterruptedException ignored) {
+            LOG.warn("Main thread was interrupted while waiting for simulation thread to terminate!");
         }
     }
 

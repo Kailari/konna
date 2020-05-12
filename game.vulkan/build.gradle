@@ -15,7 +15,11 @@ def final implementationModules = ['', '-glfw', '-vulkan', '-shaderc', '-stb', '
 def final runtimeModules = ['', '-glfw', '-shaderc', '-stb', '-assimp']
 
 dependencies {
+    implementation project(":engine")
+    implementation project(":engine.ecs")
     implementation project(":engine.utilities")
+
+    implementation project(":game")
 
     implementation "org.joml:joml:${jomlVersion}"
 

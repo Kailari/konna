@@ -75,9 +75,10 @@ public class Renderer implements AutoCloseable {
                                              this.depthTexture,
                                              this.renderPass);
 
-        // We have swapchainImageCount copies of two descriptor sets. Why use suppliers? That way we
+        // We have swapchainImageCount copies of n descriptor sets. Why use suppliers? That way we
         // can delay the descriptorCount/maxSets calculations to `tryRecreate`, where all resources
-        // are already initialized. E.g. we do not yet know the image count here
+        // are already initialized. In other words: we do not yet know the image count here so use
+        // suppliers to move the time of making the decision to a later point in time
         this.descriptorPool = new SwapchainImageDependentDescriptorPool(
                 backend.deviceContext(),
                 this.swapchain,
@@ -86,6 +87,7 @@ public class Renderer implements AutoCloseable {
                                         () -> this.swapchain.getImageCount() * (2 + 7)),
                 new DescriptorPool.Pool(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                                         this.swapchain::getImageCount));
+
         this.cameraDescriptorLayout = new DescriptorSetLayout(backend.deviceContext(),
                                                               CameraUniformBufferObject.CAMERA_DESCRIPTOR_BINDING,
                                                               CameraUniformBufferObject.INSTANCE_DESCRIPTOR_BINDING);
@@ -132,21 +134,21 @@ public class Renderer implements AutoCloseable {
 
         this.defaultTexture = new Texture(backend.deviceContext(),
                                           assetRoot.resolve("textures/vulkan/texture.jpg"));
-        final StaticMeshLoader staticMeshLoader = new StaticMeshLoader(backend.deviceContext(),
-                                                                       this.swapchain,
-                                                                       this.descriptorPool,
-                                                                       this.materialDescriptorLayout,
-                                                                       this.textureSampler,
-                                                                       this.defaultTexture,
-                                                                       assetRoot);
-        final SkeletalMeshLoader skeletalMeshLoader = new SkeletalMeshLoader(backend.deviceContext(),
-                                                                             this.swapchain,
-                                                                             this.descriptorPool,
-                                                                             this.materialDescriptorLayout,
-                                                                             this.boneDescriptorLayout,
-                                                                             this.textureSampler,
-                                                                             this.defaultTexture,
-                                                                             assetRoot);
+        final var staticMeshLoader = new StaticMeshLoader(backend.deviceContext(),
+                                                          this.swapchain,
+                                                          this.descriptorPool,
+                                                          this.materialDescriptorLayout,
+                                                          this.textureSampler,
+                                                          this.defaultTexture,
+                                                          assetRoot);
+        final var skeletalMeshLoader = new SkeletalMeshLoader(backend.deviceContext(),
+                                                              this.swapchain,
+                                                              this.descriptorPool,
+                                                              this.materialDescriptorLayout,
+                                                              this.boneDescriptorLayout,
+                                                              this.textureSampler,
+                                                              this.defaultTexture,
+                                                              assetRoot);
         this.staticMeshes = staticMeshLoader.load(Path.of("models/arena.obj"));
         this.humanoid = skeletalMeshLoader.load(Path.of("models/humanoid.fbx"));
 
@@ -194,6 +196,9 @@ public class Renderer implements AutoCloseable {
                 vkCmdBindPipeline(commandBuffer.getHandle(),
                                   VK_PIPELINE_BIND_POINT_GRAPHICS,
                                   this.staticPipeline.getHandle());
+
+                // NOTE: This needs to be done again for the skeletal pipeline if descriptor sets
+                //       and/or push constant ranges are changed so that they become incompatible
                 vkCmdBindDescriptorSets(commandBuffer.getHandle(),
                                         VK_PIPELINE_BIND_POINT_GRAPHICS,
                                         this.staticPipeline.getLayout(),
@@ -201,7 +206,6 @@ public class Renderer implements AutoCloseable {
                                         stack.longs(this.cameraUBO.getDescriptorSet(imageIndex),
                                                     this.sceneUBO.getDescriptorSet(imageIndex)),
                                         null);
-
 
                 for (final var mesh : this.staticMeshes) {
                     mesh.draw(this.staticPipeline, commandBuffer, imageIndex);
@@ -211,13 +215,8 @@ public class Renderer implements AutoCloseable {
                 vkCmdBindPipeline(commandBuffer.getHandle(),
                                   VK_PIPELINE_BIND_POINT_GRAPHICS,
                                   this.skeletalPipeline.getHandle());
-                vkCmdBindDescriptorSets(commandBuffer.getHandle(),
-                                        VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                        this.skeletalPipeline.getLayout(),
-                                        0,
-                                        stack.longs(this.cameraUBO.getDescriptorSet(imageIndex),
-                                                    this.sceneUBO.getDescriptorSet(imageIndex)),
-                                        null);
+
+                // XXX: Re-bind the scene/camera UBOs here if necessary (see comment above)
 
                 vkCmdBindDescriptorSets(commandBuffer.getHandle(),
                                         VK_PIPELINE_BIND_POINT_GRAPHICS,
