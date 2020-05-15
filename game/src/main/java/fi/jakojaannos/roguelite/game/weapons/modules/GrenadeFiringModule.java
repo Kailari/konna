@@ -2,15 +2,16 @@ package fi.jakojaannos.roguelite.game.weapons.modules;
 
 import org.joml.Vector2d;
 
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.archetypes.GrenadeArchetype;
 import fi.jakojaannos.roguelite.game.data.components.weapon.GrenadeStats;
 import fi.jakojaannos.roguelite.game.weapons.*;
 import fi.jakojaannos.roguelite.game.weapons.events.WeaponFireEvent;
 
 /**
- * Requires {@link ThrowableChargeModule}
+ * Module that throws a grenade. Speed and air time depend on charge amount. Requires {@link ThrowableChargeModule}
  */
-public class GrenadeFiringModule implements WeaponModule<GrenadeFiringModule.Attributes> {
+public class GrenadeFiringModule implements WeaponModule<GrenadeFiringModule.Attributes>, FiringModule {
 
     @Override
     public void register(final WeaponHooks hooks, final Attributes attributes) {
@@ -26,13 +27,18 @@ public class GrenadeFiringModule implements WeaponModule<GrenadeFiringModule.Att
             final WeaponFireEvent event,
             final ActionInfo info
     ) {
+        if (!isReadyToFire(weapon, info.timeManager())) {
+            event.cancel();
+        }
+    }
+
+    @Override
+    public boolean isReadyToFire(final Weapon weapon, final TimeManager timeManager) {
         final var state = weapon.getState(State.class);
         final var attributes = weapon.getAttributes(Attributes.class);
 
-        final var timePassed = info.timeManager().getCurrentGameTime() - state.lastShotTimestamp;
-        if (timePassed < attributes.timeBetweenShots) {
-            event.cancel();
-        }
+        final var timePassed = timeManager.getCurrentGameTime() - state.lastShotTimestamp;
+        return timePassed >= attributes.timeBetweenShots;
     }
 
     private void fire(
@@ -69,7 +75,6 @@ public class GrenadeFiringModule implements WeaponModule<GrenadeFiringModule.Att
             final ActionInfo info
     ) {
         final var state = weapon.getState(State.class);
-        final var attributes = weapon.getAttributes(Attributes.class);
 
         state.lastShotTimestamp = info.timeManager().getCurrentGameTime();
     }

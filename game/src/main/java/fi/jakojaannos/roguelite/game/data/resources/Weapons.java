@@ -116,34 +116,34 @@ public class Weapons {
             new ModularWeapon.Module<>(new RechargingMagazineModule(),
                                        new RechargingMagazineModule.Attributes(2, 200)));
     public static ModularWeapon PLAYER_GRENADE_THROWN = new ModularWeapon(
-            new ModularWeapon.Module<>(new ThrowableFiringModule(),
-                                       new ThrowableFiringModule.Attributes(4,
-                                                                            15,
-                                                                            80,
-                                                                            10)),
+            new ModularWeapon.Module<>(new ThrowableTriggerModule(GrenadeFiringModule.class),
+                                       new ThrowableTriggerModule.Attributes(4,
+                                                                             15,
+                                                                             80,
+                                                                             10)),
             new ModularWeapon.Module<>(new GrenadeFiringModule(),
                                        new GrenadeFiringModule.Attributes(120,
                                                                           GrenadeStats.builder()
                                                                                       .fuseTime(10)
                                                                                       .build(),
-                                                                          0.25/4,
+                                                                          0.25 / 4,
                                                                           0.05)),
             new ModularWeapon.Module<>(new ThrowableChargeModule(),
-                                       new ThrowableChargeModule.Attributes()));
+                                       new ThrowableChargeModule.Attributes(0)));
     public static ModularWeapon PLAYER_GRENADE_LAUNCHER = new ModularWeapon(
             new ModularWeapon.Module<>(new AutomaticTriggerModule(),
                                        new NoAttributes()),
             new ModularWeapon.Module<>(new ClipMagazineModule(),
                                        new ClipMagazineModule.Attributes(6, 80)),
             new ModularWeapon.Module<>(new GrenadeFiringModule(),
-                                       new GrenadeFiringModule.Attributes(25,
+                                       new GrenadeFiringModule.Attributes(45,
                                                                           GrenadeStats.builder()
                                                                                       .fuseTime(10)
                                                                                       .build(),
-                                                                          5,
-                                                                          45)),
+                                                                          0.15,
+                                                                          0.3)),
             new ModularWeapon.Module<>(new ThrowableChargeModule(),
-                                       new ThrowableChargeModule.Attributes()));
+                                       new ThrowableChargeModule.Attributes(100)));
     public static ModularWeapon TURRET_GATLING = new ModularWeapon(
             new ModularWeapon.Module<>(new AutomaticTriggerModule(),
                                        new NoAttributes()),

@@ -4,9 +4,25 @@ import fi.jakojaannos.roguelite.game.weapons.*;
 import fi.jakojaannos.roguelite.game.weapons.events.*;
 
 /**
- * Requires {@link ThrowableChargeModule}
+ * Trigger module for throwable weapons. Press and hold fire button to start charging the attack, release to fire.
+ * Charge does not start before firing mechanism is ready to fire. Requires {@link ThrowableChargeModule}
  */
-public class ThrowableFiringModule implements WeaponModule<ThrowableFiringModule.Attributes> {
+public class ThrowableTriggerModule implements WeaponModule<ThrowableTriggerModule.Attributes> {
+    private final Class<? extends FiringModule>[] firingModuleClasses;
+    private final FiringModule[] firingModules;
+
+    /**
+     * Takes a list of firing modules in this weapon: if any of them is not ready to fire when user pulls trigger, that
+     * trigger pull does not start charging attack. If the weapon has multiple firing modules, only add the ones that
+     * should block charge from starting
+     *
+     * @param firingModuleClasses list of firing modules in this weapon that can block charging
+     */
+    @SafeVarargs
+    public ThrowableTriggerModule(final Class<? extends FiringModule>... firingModuleClasses) {
+        this.firingModuleClasses = firingModuleClasses;
+        this.firingModules = new FiringModule[firingModuleClasses.length];
+    }
 
     @Override
     public void register(final WeaponHooks hooks, final Attributes attributes) {
@@ -19,6 +35,7 @@ public class ThrowableFiringModule implements WeaponModule<ThrowableFiringModule
 
         hooks.weaponStateQuery(this::stateQuery, Phase.TRIGGER);
         hooks.registerStateFactory(State.class, State::new);
+        hooks.postRegister(this::postRegister);
     }
 
     private void equip(
@@ -27,7 +44,6 @@ public class ThrowableFiringModule implements WeaponModule<ThrowableFiringModule
             final ActionInfo info
     ) {
         final var state = weapon.getState(State.class);
-        final var attributes = weapon.getAttributes(Attributes.class);
 
         state.isTriggerPulled = false;
         state.shouldFire = false;
@@ -39,7 +55,6 @@ public class ThrowableFiringModule implements WeaponModule<ThrowableFiringModule
             final ActionInfo info
     ) {
         final var state = weapon.getState(State.class);
-        final var attributes = weapon.getAttributes(Attributes.class);
 
         state.isTriggerPulled = false;
         state.shouldFire = false;
@@ -73,7 +88,6 @@ public class ThrowableFiringModule implements WeaponModule<ThrowableFiringModule
             final ActionInfo info
     ) {
         final var state = weapon.getState(State.class);
-        final var attributes = weapon.getAttributes(Attributes.class);
 
         state.hasFired = true;
         state.shouldFire = false;
@@ -84,9 +98,13 @@ public class ThrowableFiringModule implements WeaponModule<ThrowableFiringModule
             final TriggerPullEvent triggerPullEvent,
             final ActionInfo info
     ) {
-        final var state = weapon.getState(State.class);
-        final var attributes = weapon.getAttributes(Attributes.class);
+        for (final var firingModule : this.firingModules) {
+            if (!firingModule.isReadyToFire(weapon, info.timeManager())) {
+                return;
+            }
+        }
 
+        final var state = weapon.getState(State.class);
         state.triggerPullTimestamp = info.timeManager().getCurrentGameTime();
         state.isTriggerPulled = true;
         state.shouldFire = false;
@@ -102,7 +120,7 @@ public class ThrowableFiringModule implements WeaponModule<ThrowableFiringModule
         final var chargeState = weapon.getState(ThrowableChargeModule.State.class);
         final var attributes = weapon.getAttributes(Attributes.class);
 
-        // this check is to make sure weapon doesn't fire if user switches to weapon while holding fire key and then release it
+        // make sure weapon doesn't fire if user switches to weapon while holding fire key and then release it
         if (state.isTriggerPulled) {
             final var timeCharged = info.timeManager().getCurrentGameTime() - state.triggerPullTimestamp;
 
@@ -138,6 +156,12 @@ public class ThrowableFiringModule implements WeaponModule<ThrowableFiringModule
         query.heat = charge;
     }
 
+    private void postRegister(final WeaponModules modules) {
+        for (int i = 0; i < this.firingModuleClasses.length; i++) {
+            this.firingModules[i] = modules.require(this.firingModuleClasses[i]);
+        }
+    }
+
     public static class State {
         private boolean shouldFire;
         private boolean hasFired;
@@ -151,7 +175,7 @@ public class ThrowableFiringModule implements WeaponModule<ThrowableFiringModule
             double chargePerTick,
             long minChargeTimeInTicks,
             long maxChargeTimeInTicks,
-            // if weapon isn't immediately ready after releasing trigger, allow firing for this many ticks
+            // TODO: delet this
             long gracePeriodAfterRelease
     ) {}
 }
