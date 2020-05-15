@@ -2,4 +2,4 @@
     org.junit.jupiter.api,org.junit.jupiter.params,org.mockito
 
 --add-reads
-    roguelite.vulkan=org.junit.jupiter.api,org.junit.jupiter.params,org.mockito
+    konna.vulkan=org.junit.jupiter.api,org.junit.jupiter.params,org.mockito

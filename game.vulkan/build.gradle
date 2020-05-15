@@ -9,7 +9,7 @@ repositories {
     mavenCentral()
 }
 
-application.mainClassName = "roguelite.vulkan/fi.jakojaannos.roguelite.Main"
+application.mainClassName = "konna.vulkan/fi.jakojaannos.konna.Main"
 
 def final implementationModules = ['', '-glfw', '-vulkan', '-shaderc', '-stb', '-assimp']
 def final runtimeModules = ['', '-glfw', '-shaderc', '-stb', '-assimp']

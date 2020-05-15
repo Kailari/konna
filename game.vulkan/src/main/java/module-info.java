@@ -1,4 +1,4 @@
-module roguelite.vulkan {
+module konna.vulkan {
     requires org.slf4j;
     requires org.apache.logging.log4j;
     requires org.joml;
