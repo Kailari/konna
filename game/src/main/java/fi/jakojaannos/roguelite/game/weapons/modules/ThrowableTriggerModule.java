@@ -66,7 +66,6 @@ public class ThrowableTriggerModule implements WeaponModule<ThrowableTriggerModu
             final ActionInfo info
     ) {
         final var state = weapon.getState(State.class);
-        final var attributes = weapon.getAttributes(Attributes.class);
 
         if (state.hasFired) {
             event.cancel();
@@ -76,8 +75,7 @@ public class ThrowableTriggerModule implements WeaponModule<ThrowableTriggerModu
             event.cancel();
         }
 
-        final var timeSinceRelease = info.timeManager().getCurrentGameTime() - state.triggerReleaseTimestamp;
-        if (timeSinceRelease > attributes.gracePeriodAfterRelease) {
+        if (state.triggerReleaseTimestamp != info.timeManager().getCurrentGameTime()) {
             event.cancel();
         }
     }
@@ -174,8 +172,6 @@ public class ThrowableTriggerModule implements WeaponModule<ThrowableTriggerModu
     public static record Attributes(
             double chargePerTick,
             long minChargeTimeInTicks,
-            long maxChargeTimeInTicks,
-            // TODO: delet this
-            long gracePeriodAfterRelease
+            long maxChargeTimeInTicks
     ) {}
 }

@@ -82,7 +82,7 @@ public class GrenadeFiringModule implements WeaponModule<GrenadeFiringModule.Att
     public static class State {
         private final Vector2d velocity = new Vector2d();
 
-        private long lastShotTimestamp;
+        private long lastShotTimestamp = -1000;
     }
 
     public static record Attributes(

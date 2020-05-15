@@ -119,8 +119,7 @@ public class Weapons {
             new ModularWeapon.Module<>(new ThrowableTriggerModule(GrenadeFiringModule.class),
                                        new ThrowableTriggerModule.Attributes(4,
                                                                              15,
-                                                                             80,
-                                                                             10)),
+                                                                             80)),
             new ModularWeapon.Module<>(new GrenadeFiringModule(),
                                        new GrenadeFiringModule.Attributes(120,
                                                                           GrenadeStats.builder()
