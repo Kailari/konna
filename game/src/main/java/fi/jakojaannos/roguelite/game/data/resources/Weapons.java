@@ -2,6 +2,7 @@ package fi.jakojaannos.roguelite.game.data.resources;
 
 import org.joml.Vector2d;
 
+import fi.jakojaannos.roguelite.game.data.components.weapon.GrenadeStats;
 import fi.jakojaannos.roguelite.game.data.events.render.GunshotEvent;
 import fi.jakojaannos.roguelite.game.weapons.ModularWeapon;
 import fi.jakojaannos.roguelite.game.weapons.NoAttributes;
@@ -113,8 +114,35 @@ public class Weapons {
             new ModularWeapon.Module<>(new SpawnTurretModule(),
                                        new SpawnTurretModule.Attributes(5)),
             new ModularWeapon.Module<>(new RechargingMagazineModule(),
-                                       new RechargingMagazineModule.Attributes(2, 200))
-    );
+                                       new RechargingMagazineModule.Attributes(2, 200)));
+    public static ModularWeapon PLAYER_GRENADE_THROWN = new ModularWeapon(
+            new ModularWeapon.Module<>(new ThrowableTriggerModule(GrenadeFiringModule.class),
+                                       new ThrowableTriggerModule.Attributes(4,
+                                                                             15,
+                                                                             80)),
+            new ModularWeapon.Module<>(new GrenadeFiringModule(),
+                                       new GrenadeFiringModule.Attributes(120,
+                                                                          GrenadeStats.builder()
+                                                                                      .fuseTime(10)
+                                                                                      .build(),
+                                                                          0.25 / 4,
+                                                                          0.05)),
+            new ModularWeapon.Module<>(new ThrowableChargeModule(),
+                                       new ThrowableChargeModule.Attributes(0)));
+    public static ModularWeapon PLAYER_GRENADE_LAUNCHER = new ModularWeapon(
+            new ModularWeapon.Module<>(new AutomaticTriggerModule(),
+                                       new NoAttributes()),
+            new ModularWeapon.Module<>(new ClipMagazineModule(),
+                                       new ClipMagazineModule.Attributes(6, 80)),
+            new ModularWeapon.Module<>(new GrenadeFiringModule(),
+                                       new GrenadeFiringModule.Attributes(45,
+                                                                          GrenadeStats.builder()
+                                                                                      .fuseTime(10)
+                                                                                      .build(),
+                                                                          0.15,
+                                                                          0.3)),
+            new ModularWeapon.Module<>(new ThrowableChargeModule(),
+                                       new ThrowableChargeModule.Attributes(100)));
     public static ModularWeapon TURRET_GATLING = new ModularWeapon(
             new ModularWeapon.Module<>(new AutomaticTriggerModule(),
                                        new NoAttributes()),
