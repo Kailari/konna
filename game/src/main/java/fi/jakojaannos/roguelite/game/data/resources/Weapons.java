@@ -117,14 +117,19 @@ public class Weapons {
                                        new RechargingMagazineModule.Attributes(2, 200)));
     public static ModularWeapon PLAYER_GRENADE_THROWN = new ModularWeapon(
             new ModularWeapon.Module<>(new ThrowableFiringModule(),
-                                       new ThrowableFiringModule.Attributes(1, 20, 10)),
+                                       new ThrowableFiringModule.Attributes(4,
+                                                                            15,
+                                                                            80,
+                                                                            10)),
             new ModularWeapon.Module<>(new GrenadeFiringModule(),
                                        new GrenadeFiringModule.Attributes(120,
                                                                           GrenadeStats.builder()
                                                                                       .fuseTime(10)
                                                                                       .build(),
-                                                                          20,
-                                                                          15)));
+                                                                          0.25/4,
+                                                                          0.05)),
+            new ModularWeapon.Module<>(new ThrowableChargeModule(),
+                                       new ThrowableChargeModule.Attributes()));
     public static ModularWeapon PLAYER_GRENADE_LAUNCHER = new ModularWeapon(
             new ModularWeapon.Module<>(new AutomaticTriggerModule(),
                                        new NoAttributes()),
@@ -136,7 +141,9 @@ public class Weapons {
                                                                                       .fuseTime(10)
                                                                                       .build(),
                                                                           5,
-                                                                          45)));
+                                                                          45)),
+            new ModularWeapon.Module<>(new ThrowableChargeModule(),
+                                       new ThrowableChargeModule.Attributes()));
     public static ModularWeapon TURRET_GATLING = new ModularWeapon(
             new ModularWeapon.Module<>(new AutomaticTriggerModule(),
                                        new NoAttributes()),

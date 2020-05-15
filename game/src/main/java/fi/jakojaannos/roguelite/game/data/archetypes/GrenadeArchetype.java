@@ -28,7 +28,7 @@ public class GrenadeArchetype {
                 new Collider(collisionLayer, 1.0, 1.0, 0.5, 0.5),
                 stats,
                 new Physics.Builder()
-                        .friction(45.0)
+                        .friction(90.0)
                         .mass(7.5)
                         .build(),
                 new SpriteInfo("sprites/bomb"),

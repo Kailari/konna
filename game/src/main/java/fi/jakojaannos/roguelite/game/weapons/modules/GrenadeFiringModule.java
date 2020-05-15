@@ -7,6 +7,9 @@ import fi.jakojaannos.roguelite.game.data.components.weapon.GrenadeStats;
 import fi.jakojaannos.roguelite.game.weapons.*;
 import fi.jakojaannos.roguelite.game.weapons.events.WeaponFireEvent;
 
+/**
+ * Requires {@link ThrowableChargeModule}
+ */
 public class GrenadeFiringModule implements WeaponModule<GrenadeFiringModule.Attributes> {
 
     @Override
@@ -38,14 +41,18 @@ public class GrenadeFiringModule implements WeaponModule<GrenadeFiringModule.Att
             final ActionInfo info
     ) {
         final var state = weapon.getState(State.class);
+        final var chargeState = weapon.getState(ThrowableChargeModule.State.class);
         final var attributes = weapon.getAttributes(Attributes.class);
         final var attackAbility = info.attackAbility();
+        final double flightSpeed = chargeState.chargeAmount * attributes.flightSpeedMult;
 
         state.velocity.set(attackAbility.targetPosition)
                       .sub(info.shooterTransform().position);
         if (state.velocity.lengthSquared() != 0) {
-            state.velocity.normalize(attributes.flightSpeed);
+            state.velocity.normalize(flightSpeed);
         }
+
+        final long flightTime = (long) (chargeState.chargeAmount * attributes.flightDurationMult);
 
         GrenadeArchetype.createGrenade(info.entities(),
                                        info.shooterTransform().position,
@@ -53,7 +60,7 @@ public class GrenadeFiringModule implements WeaponModule<GrenadeFiringModule.Att
                                        attackAbility.projectileLayer,
                                        attributes.stats,
                                        info.timeManager().getCurrentGameTime(),
-                                       attributes.flightDuration);
+                                       flightTime);
     }
 
     private void afterFire(
@@ -76,7 +83,7 @@ public class GrenadeFiringModule implements WeaponModule<GrenadeFiringModule.Att
     public static record Attributes(
             long timeBetweenShots,
             GrenadeStats stats,
-            long flightDuration,
-            double flightSpeed
+            double flightDurationMult,
+            double flightSpeedMult
     ) {}
 }
