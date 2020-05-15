@@ -3,8 +3,8 @@ package fi.jakojaannos.konna.engine.vulkan;
 import java.nio.file.Path;
 
 import fi.jakojaannos.konna.engine.CameraUniformBufferObject;
-import fi.jakojaannos.konna.engine.PresentableState;
-import fi.jakojaannos.konna.engine.renderer.impl.RendererImpl;
+import fi.jakojaannos.konna.engine.application.PresentableState;
+import fi.jakojaannos.konna.engine.view.adapters.RendererImpl;
 import fi.jakojaannos.konna.engine.vulkan.rendering.Swapchain;
 import fi.jakojaannos.konna.engine.vulkan.window.Window;
 

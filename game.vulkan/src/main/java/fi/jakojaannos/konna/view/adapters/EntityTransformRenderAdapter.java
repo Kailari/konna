@@ -2,8 +2,8 @@ package fi.jakojaannos.konna.view.adapters;
 
 import java.util.stream.Stream;
 
-import fi.jakojaannos.konna.engine.adapters.EcsRenderAdapter;
-import fi.jakojaannos.konna.engine.renderer.Renderer;
+import fi.jakojaannos.konna.engine.view.EcsRenderAdapter;
+import fi.jakojaannos.konna.engine.view.Renderer;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.ecs.annotation.Without;

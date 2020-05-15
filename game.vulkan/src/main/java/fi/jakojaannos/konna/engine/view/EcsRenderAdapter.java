@@ -1,8 +1,7 @@
-package fi.jakojaannos.konna.engine.adapters;
+package fi.jakojaannos.konna.engine.view;
 
 import java.util.stream.Stream;
 
-import fi.jakojaannos.konna.engine.renderer.Renderer;
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 
 public interface EcsRenderAdapter<TResources, TEntityData> {

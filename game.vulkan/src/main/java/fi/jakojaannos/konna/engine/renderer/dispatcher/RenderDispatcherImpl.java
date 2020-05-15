@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import fi.jakojaannos.konna.engine.adapters.EcsRenderAdapter;
+import fi.jakojaannos.konna.engine.view.EcsRenderAdapter;
 import fi.jakojaannos.konna.engine.renderer.RenderDispatcher;
-import fi.jakojaannos.konna.engine.renderer.Renderer;
+import fi.jakojaannos.konna.engine.view.Renderer;
 import fi.jakojaannos.roguelite.engine.GameState;
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.systemdata.ParsedRequirements;

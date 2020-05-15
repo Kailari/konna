@@ -1,4 +1,4 @@
-package fi.jakojaannos.konna.engine.renderer.impl;
+package fi.jakojaannos.konna.engine.view.adapters;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -6,8 +6,8 @@ import org.joml.Vector3f;
 import java.nio.file.Path;
 
 import fi.jakojaannos.konna.engine.CameraUniformBufferObject;
-import fi.jakojaannos.konna.engine.PresentableState;
-import fi.jakojaannos.konna.engine.renderer.DebugRenderer;
+import fi.jakojaannos.konna.engine.application.PresentableState;
+import fi.jakojaannos.konna.engine.view.DebugRenderer;
 import fi.jakojaannos.konna.engine.renderer.debug.DebugLineVertex;
 import fi.jakojaannos.konna.engine.util.RecreateCloseable;
 import fi.jakojaannos.konna.engine.vulkan.GPUMesh;

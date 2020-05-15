@@ -1,4 +1,4 @@
-package fi.jakojaannos.konna.engine;
+package fi.jakojaannos.konna.engine.application;
 
 import org.lwjgl.vulkan.VkFenceCreateInfo;
 import org.lwjgl.vulkan.VkPresentInfoKHR;

@@ -1,4 +1,4 @@
-package fi.jakojaannos.konna.engine;
+package fi.jakojaannos.konna.engine.assets;
 
 import java.nio.ByteBuffer;
 

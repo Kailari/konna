@@ -5,6 +5,8 @@ import java.util.Iterator;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
+import fi.jakojaannos.konna.engine.view.Presentable;
+
 public class RenderBuffer<TOutput extends Presentable> implements Iterable<TOutput> {
     private final Supplier<TOutput> elementFactory;
 

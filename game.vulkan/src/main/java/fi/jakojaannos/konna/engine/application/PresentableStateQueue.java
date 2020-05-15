@@ -1,4 +1,4 @@
-package fi.jakojaannos.konna.engine;
+package fi.jakojaannos.konna.engine.application;
 
 public class PresentableStateQueue {
     private PresentableState writing;

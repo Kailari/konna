@@ -1,4 +1,4 @@
-package fi.jakojaannos.konna.engine;
+package fi.jakojaannos.konna.engine.application;
 
 import java.nio.file.Path;
 

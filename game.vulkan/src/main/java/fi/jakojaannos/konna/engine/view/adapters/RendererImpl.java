@@ -1,11 +1,11 @@
-package fi.jakojaannos.konna.engine.renderer.impl;
+package fi.jakojaannos.konna.engine.view.adapters;
 
 import java.nio.file.Path;
 
 import fi.jakojaannos.konna.engine.CameraUniformBufferObject;
-import fi.jakojaannos.konna.engine.PresentableState;
-import fi.jakojaannos.konna.engine.renderer.DebugRenderer;
-import fi.jakojaannos.konna.engine.renderer.Renderer;
+import fi.jakojaannos.konna.engine.application.PresentableState;
+import fi.jakojaannos.konna.engine.view.DebugRenderer;
+import fi.jakojaannos.konna.engine.view.Renderer;
 import fi.jakojaannos.konna.engine.util.RecreateCloseable;
 import fi.jakojaannos.konna.engine.vulkan.DepthTexture;
 import fi.jakojaannos.konna.engine.vulkan.command.CommandBuffer;

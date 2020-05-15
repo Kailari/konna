@@ -1,4 +1,4 @@
-package fi.jakojaannos.konna.engine;
+package fi.jakojaannos.konna.engine.application;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,7 +9,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import fi.jakojaannos.konna.engine.renderer.RenderDispatcher;
-import fi.jakojaannos.konna.engine.renderer.impl.RendererImpl;
+import fi.jakojaannos.konna.engine.view.adapters.RendererImpl;
 import fi.jakojaannos.konna.view.adapters.EntityTransformRenderAdapter;
 import fi.jakojaannos.roguelite.engine.GameMode;
 import fi.jakojaannos.roguelite.engine.GameRunnerTimeManager;

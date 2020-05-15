@@ -4,8 +4,8 @@ import java.nio.file.Path;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
-import fi.jakojaannos.konna.engine.Application;
-import fi.jakojaannos.konna.engine.ApplicationRunner;
+import fi.jakojaannos.konna.engine.application.Application;
+import fi.jakojaannos.konna.engine.application.ApplicationRunner;
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.input.InputProvider;
 import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;

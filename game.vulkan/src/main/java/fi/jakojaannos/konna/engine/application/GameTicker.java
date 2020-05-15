@@ -1,4 +1,4 @@
-package fi.jakojaannos.konna.engine;
+package fi.jakojaannos.konna.engine.application;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

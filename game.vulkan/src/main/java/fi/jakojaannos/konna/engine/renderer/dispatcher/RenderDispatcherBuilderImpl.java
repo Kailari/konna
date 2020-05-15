@@ -3,7 +3,7 @@ package fi.jakojaannos.konna.engine.renderer.dispatcher;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import fi.jakojaannos.konna.engine.adapters.EcsRenderAdapter;
+import fi.jakojaannos.konna.engine.view.EcsRenderAdapter;
 import fi.jakojaannos.konna.engine.renderer.RenderDispatcher;
 
 public class RenderDispatcherBuilderImpl implements RenderDispatcher.Builder {
