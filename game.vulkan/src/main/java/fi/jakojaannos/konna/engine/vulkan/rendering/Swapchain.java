@@ -49,11 +49,6 @@ public class Swapchain extends RecreateCloseable {
         return this.handle;
     }
 
-    @Override
-    protected boolean isRecreateRequired() {
-        return true;
-    }
-
     public Swapchain(
             final DeviceContext deviceContext,
             final Window window,

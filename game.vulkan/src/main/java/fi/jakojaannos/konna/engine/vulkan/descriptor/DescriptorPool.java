@@ -26,11 +26,6 @@ public class DescriptorPool extends RecreateCloseable {
         return this.handle;
     }
 
-    @Override
-    protected boolean isRecreateRequired() {
-        return true;
-    }
-
     public DescriptorPool(
             final DeviceContext deviceContext,
             final IntSupplier maxSetsSupplier,

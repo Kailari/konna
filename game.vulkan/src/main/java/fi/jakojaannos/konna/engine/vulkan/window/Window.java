@@ -18,6 +18,10 @@ public class Window implements AutoCloseable {
         return this.handle;
     }
 
+    public void setShouldClose() {
+        glfwSetWindowShouldClose(this.handle, true);
+    }
+
     public Window(final int width, final int height) {
         glfwDefaultWindowHints();
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);

@@ -1,10 +1,13 @@
 package fi.jakojaannos.konna.engine.vulkan;
 
 import fi.jakojaannos.konna.engine.util.BufferWriter;
+import fi.jakojaannos.konna.engine.vulkan.command.CommandBuffer;
 import fi.jakojaannos.konna.engine.vulkan.device.DeviceContext;
+import fi.jakojaannos.konna.engine.vulkan.rendering.GraphicsPipeline;
 import fi.jakojaannos.konna.engine.vulkan.types.VkMemoryPropertyFlags;
 
 import static fi.jakojaannos.konna.engine.util.BitMask.bitMask;
+import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.memAlloc;
 import static org.lwjgl.system.MemoryUtil.memFree;
 import static org.lwjgl.vulkan.VK10.*;
@@ -53,6 +56,26 @@ public class GPUMesh<TVertex> implements AutoCloseable {
                      indices,
                      Integer.BYTES,
                      (index, offset, buffer) -> buffer.putInt(offset, index));
+    }
+
+    public void draw(final CommandBuffer commandBuffer) {
+        try (final var stack = stackPush()) {
+            vkCmdBindVertexBuffers(commandBuffer.getHandle(),
+                                   0,
+                                   stack.longs(this.vertexBuffer.getHandle()),
+                                   stack.longs(0L));
+            vkCmdBindIndexBuffer(commandBuffer.getHandle(),
+                                 this.indexBuffer.getHandle(),
+                                 0,
+                                 VK_INDEX_TYPE_UINT32);
+
+            vkCmdDrawIndexed(commandBuffer.getHandle(),
+                             this.indexCount,
+                             1,
+                             0,
+                             0,
+                             0);
+        }
     }
 
     @Override

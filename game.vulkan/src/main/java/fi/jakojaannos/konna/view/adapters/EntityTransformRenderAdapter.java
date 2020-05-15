@@ -1,0 +1,38 @@
+package fi.jakojaannos.konna.view.adapters;
+
+import java.util.stream.Stream;
+
+import fi.jakojaannos.konna.engine.adapters.EcsRenderAdapter;
+import fi.jakojaannos.konna.engine.renderer.Renderer;
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
+import fi.jakojaannos.roguelite.engine.ecs.annotation.Without;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.roguelite.game.data.components.NoDrawTag;
+
+/**
+ * Renders any entities with transform as debug transform handles.
+ */
+public class EntityTransformRenderAdapter implements EcsRenderAdapter<EntityTransformRenderAdapter.Resources, EntityTransformRenderAdapter.EntityData> {
+    @Override
+    public void draw(
+            final Renderer renderer,
+            final Resources resources,
+            final Stream<EntityDataHandle<EntityData>> entities,
+            final long accumulator
+    ) {
+        entities.forEach(entity -> {
+            final var transform = entity.getData().transform;
+            renderer.debug().drawTransform(transform);
+        });
+    }
+
+    public static record EntityData(
+            Transform transform,
+            @Without NoDrawTag noDraw
+    ) {}
+
+    public static record Resources(
+            TimeManager timeManager
+    ) {}
+}

@@ -20,11 +20,6 @@ public class Mesh<TVertex> extends RecreateCloseable {
     private final GPUMesh<TVertex> gpuMesh;
     private final MaterialInstance material;
 
-    @Override
-    protected boolean isRecreateRequired() {
-        return true;
-    }
-
     public Mesh(
             final DeviceContext deviceContext,
             final Swapchain swapchain,
@@ -57,22 +52,7 @@ public class Mesh<TVertex> extends RecreateCloseable {
                                     2,
                                     stack.longs(this.material.getDescriptorSet(imageIndex)),
                                     null);
-
-            vkCmdBindVertexBuffers(commandBuffer.getHandle(),
-                                   0,
-                                   stack.longs(this.gpuMesh.getVertexBuffer().getHandle()),
-                                   stack.longs(0L));
-            vkCmdBindIndexBuffer(commandBuffer.getHandle(),
-                                 this.gpuMesh.getIndexBuffer().getHandle(),
-                                 0,
-                                 VK_INDEX_TYPE_UINT32);
-
-            vkCmdDrawIndexed(commandBuffer.getHandle(),
-                             this.gpuMesh.getIndexCount(),
-                             1,
-                             0,
-                             0,
-                             0);
+            this.gpuMesh.draw(commandBuffer);
         }
     }
 

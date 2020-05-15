@@ -16,7 +16,9 @@ public class Framebuffers extends RecreateCloseable {
 
     @Override
     protected boolean isRecreateRequired() {
-        return true;
+        return isOlderThan(this.swapchain)
+               || isOlderThan(this.renderPass)
+               || isOlderThan(this.depthTexture);
     }
 
     public Framebuffers(

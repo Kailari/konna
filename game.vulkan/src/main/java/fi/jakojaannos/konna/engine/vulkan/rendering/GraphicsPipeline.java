@@ -13,6 +13,7 @@ import fi.jakojaannos.konna.engine.util.shader.ShaderCompiler;
 import fi.jakojaannos.konna.engine.vulkan.VertexFormat;
 import fi.jakojaannos.konna.engine.vulkan.descriptor.DescriptorSetLayout;
 import fi.jakojaannos.konna.engine.vulkan.device.DeviceContext;
+import fi.jakojaannos.konna.engine.vulkan.types.VkPrimitiveTopology;
 
 import static fi.jakojaannos.konna.engine.util.VkUtil.ensureSuccess;
 import static fi.jakojaannos.konna.engine.util.VkUtil.translateVulkanResult;
@@ -25,6 +26,8 @@ public class GraphicsPipeline<TVertex> extends RecreateCloseable {
     private final DeviceContext deviceContext;
     private final Swapchain swapchain;
     private final RenderPass renderPass;
+
+    private final VkPrimitiveTopology topology;
 
     private final ByteBuffer compiledVertexShader;
     private final ByteBuffer compiledFragmentShader;
@@ -40,7 +43,7 @@ public class GraphicsPipeline<TVertex> extends RecreateCloseable {
 
     @Override
     protected boolean isRecreateRequired() {
-        return true;
+        return isOlderThan(this.swapchain) || isOlderThan(this.renderPass);
     }
 
     public long getLayout() {
@@ -53,12 +56,15 @@ public class GraphicsPipeline<TVertex> extends RecreateCloseable {
             final RenderPass renderPass,
             final Path vertexShaderPath,
             final Path fragmentShaderPath,
+            final VkPrimitiveTopology topology,
             final VertexFormat<TVertex> vertexFormat,
             final DescriptorSetLayout... descriptorSetLayouts
     ) {
         this.deviceContext = deviceContext;
         this.swapchain = swapchain;
         this.renderPass = renderPass;
+
+        this.topology = topology;
         this.vertexFormat = vertexFormat;
         this.descriptorSetLayouts = descriptorSetLayouts;
 
@@ -195,7 +201,7 @@ public class GraphicsPipeline<TVertex> extends RecreateCloseable {
         return VkPipelineInputAssemblyStateCreateInfo
                 .callocStack()
                 .sType(VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO)
-                .topology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
+                .topology(this.topology.asInt())
                 .primitiveRestartEnable(false);
     }
 

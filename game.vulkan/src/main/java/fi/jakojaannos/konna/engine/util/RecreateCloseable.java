@@ -8,7 +8,9 @@ public abstract class RecreateCloseable implements AutoCloseable {
         return this.generation < other.generation;
     }
 
-    protected abstract boolean isRecreateRequired();
+    protected boolean isRecreateRequired() {
+        return true;
+    }
 
     protected abstract void recreate();
 

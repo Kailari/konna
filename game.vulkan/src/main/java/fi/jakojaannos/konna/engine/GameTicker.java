@@ -13,9 +13,7 @@ import fi.jakojaannos.roguelite.engine.GameMode;
 import fi.jakojaannos.roguelite.engine.GameState;
 import fi.jakojaannos.roguelite.engine.MainThread;
 import fi.jakojaannos.roguelite.engine.MainThreadTask;
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.Network;
-import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.event.EventBus;
 import fi.jakojaannos.roguelite.engine.event.Events;
@@ -25,11 +23,9 @@ import fi.jakojaannos.roguelite.engine.input.InputProvider;
 import fi.jakojaannos.roguelite.engine.network.NetworkImpl;
 import fi.jakojaannos.roguelite.engine.state.StateEvent;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
-import fi.jakojaannos.roguelite.game.data.components.NoDrawTag;
-import fi.jakojaannos.roguelite.game.data.components.SpriteInfo;
 
-public class VulkanGameRunner implements MainThread {
-    private static final Logger LOG = LoggerFactory.getLogger(VulkanGameRunner.class);
+public class GameTicker implements MainThread {
+    private static final Logger LOG = LoggerFactory.getLogger(GameTicker.class);
     @Deprecated
     protected final RenderEvents renderEvents;
     private final TimeManager timeManager;
@@ -45,7 +41,11 @@ public class VulkanGameRunner implements MainThread {
     private GameMode activeGameMode;
     private GameState currentState;
 
-    public VulkanGameRunner(
+    public GameState getState() {
+        return this.currentState;
+    }
+
+    public GameTicker(
             final TimeManager timeManager,
             final InputProvider inputProvider,
             final GameMode initialGameMode
@@ -139,24 +139,5 @@ public class VulkanGameRunner implements MainThread {
             //   this thing and remove)
             //onStateChange();
         }
-    }
-
-    // TODO: Move this to `GameModeRenderer`s
-    public void recordPresentableState(final PresentableState state) {
-        // TODO: copy all transform positions from `currentState` into `state`
-        // TODO: do the above, but use render adapters
-
-        state.clear(this.timeManager);
-
-        this.currentState.world()
-                         .iterateEntities(new Class[]{Transform.class, NoDrawTag.class, SpriteInfo.class},
-                                          new boolean[]{false, true, false},
-                                          new boolean[]{false, false, false},
-                                          objects -> objects[0],
-                                          false)
-                         .map(EntityDataHandle::getData)
-                         .map(Transform.class::cast)
-                         .map(transform -> transform.position)
-                         .forEach(position -> state.positions().add(position));
     }
 }

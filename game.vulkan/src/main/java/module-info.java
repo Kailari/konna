@@ -21,4 +21,6 @@ module konna.vulkan {
     requires org.lwjgl.stb.natives;
     requires org.lwjgl.glfw.natives;
     requires org.lwjgl.assimp.natives;
+
+    opens fi.jakojaannos.konna.view.adapters to roguelite.engine.ecs;
 }

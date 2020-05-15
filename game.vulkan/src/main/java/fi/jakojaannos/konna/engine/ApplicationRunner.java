@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.Optional;
 
-import fi.jakojaannos.konna.engine.vulkan.command.CommandBuffer;
 import fi.jakojaannos.konna.engine.vulkan.device.DeviceContext;
 import fi.jakojaannos.roguelite.engine.GameMode;
 import fi.jakojaannos.roguelite.engine.GameRunnerTimeManager;
@@ -18,7 +17,8 @@ import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 
 import static fi.jakojaannos.konna.engine.util.VkUtil.ensureSuccess;
 import static fi.jakojaannos.konna.engine.util.VkUtil.translateVulkanResult;
-import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.glfw.GLFW.glfwGetFramebufferSize;
+import static org.lwjgl.glfw.GLFW.glfwWaitEvents;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.KHRSwapchain.*;
 import static org.lwjgl.vulkan.VK10.*;
@@ -37,7 +37,6 @@ public class ApplicationRunner implements AutoCloseable {
     private final long[] imagesInFlight;
 
     private final Application application;
-    private final PresentableStateQueue presentableStateQueue;
 
     private final GameRunnerTimeManager timeManager;
 
@@ -52,7 +51,6 @@ public class ApplicationRunner implements AutoCloseable {
     }
 
     public ApplicationRunner(final Application application) {
-        this.presentableStateQueue = new PresentableStateQueue();
         this.application = application;
 
         this.timeManager = new GameRunnerTimeManager(20L);
@@ -67,7 +65,7 @@ public class ApplicationRunner implements AutoCloseable {
 
             this.inFlightFences[i] = createFence(deviceContext);
         }
-        this.imagesInFlight = new long[application.renderer().getSwapchainImageCount()];
+        this.imagesInFlight = new long[application.renderingContext().getSwapchainImageCount()];
         Arrays.fill(this.imagesInFlight, VK_NULL_HANDLE);
 
         this.application.window()
@@ -75,21 +73,19 @@ public class ApplicationRunner implements AutoCloseable {
     }
 
     public void run(final InputProvider inputProvider, final GameMode initialGameMode) {
-        final var simulationRunner = new SimulationRunner(initialGameMode,
-                                                          "riista-tick-thread",
-                                                          inputProvider,
-                                                          this.timeManager,
-                                                          this.presentableStateQueue,
-                                                          () -> glfwWindowShouldClose(this.application.window()
-                                                                                                      .getHandle()));
-        simulationRunner.start();
-
-        this.application.window().show();
-        this.frameIndex = -1;
-
         final var startTime = System.currentTimeMillis();
+
         var frameCounter = 0;
-        try {
+        try (final var simulationRunner = new SimulationThread(initialGameMode,
+                                                               "riista-tick-thread",
+                                                               inputProvider,
+                                                               this.timeManager,
+                                                               this.application.renderingContext().getRenderer(),
+                                                               this.application.window()::setShouldClose)
+        ) {
+            this.application.window().show();
+            this.frameIndex = -1;
+
             var timestamp = System.currentTimeMillis();
             while (this.application.window().isOpen()) {
                 final var currentTime = System.currentTimeMillis();
@@ -99,7 +95,7 @@ public class ApplicationRunner implements AutoCloseable {
                 this.application.window().handleOSEvents();
 
                 // Proceed to the next frame and wait until the frame fence is free. This prevents
-                // CPU from pushing more frames than what GPU can handle.
+                // CPU from pushing more frames than what the GPU can handle.
                 this.frameIndex = (this.frameIndex + 1) % MAX_FRAMES_IN_FLIGHT;
                 vkWaitForFences(this.application.backend().deviceContext().getDevice(),
                                 this.inFlightFences[this.frameIndex],
@@ -111,9 +107,9 @@ public class ApplicationRunner implements AutoCloseable {
                     continue;
                 }
 
-                final var state = this.presentableStateQueue.swapReading();
-                this.application.renderer().recordFrame(imageIndex, state);
-                drawFrame(delta, this.application.renderer().getCommands(imageIndex), imageIndex);
+                final var state = simulationRunner.fetchPresentableState();
+                this.application.renderingContext().recordFrame(imageIndex, state);
+                drawFrame(delta, imageIndex);
 
                 presentImage(imageIndex);
                 ++frameCounter;
@@ -133,8 +129,6 @@ public class ApplicationRunner implements AutoCloseable {
                             .reduce(t.toString(),
                                     (accumulator, element) -> String.format("%s\n\t%s", accumulator, element)));
         }
-
-        simulationRunner.terminate();
 
         final var totalTime = System.currentTimeMillis() - startTime;
         final var totalTimeSeconds = totalTime / 1000.0;
@@ -160,7 +154,7 @@ public class ApplicationRunner implements AutoCloseable {
         try (final var stack = stackPush()) {
             final var pImageIndex = stack.mallocInt(1);
             final var result = vkAcquireNextImageKHR(deviceContext.getDevice(),
-                                                     this.application.renderer().getSwapchain().getHandle(),
+                                                     this.application.renderingContext().getSwapchain().getHandle(),
                                                      -1L,
                                                      this.imageAvailableSemaphores[this.frameIndex],
                                                      VK_NULL_HANDLE,
@@ -184,27 +178,24 @@ public class ApplicationRunner implements AutoCloseable {
         return imageIndex;
     }
 
-    private void drawFrame(final double delta, final CommandBuffer commandBuffer, final int imageIndex) {
+    private void drawFrame(final double delta, final int imageIndex) {
         this.angle += delta * RADIANS_PER_SECOND;
-        this.application.renderer()
+        this.application.renderingContext()
                         .getCameraUBO()
                         .update(imageIndex, this.angle);
 
 
         final var animationFramesPerSecond = 40;
         this.meshFrame += delta;
-        this.application.renderer()
-                        .getHumanoid()
-                        .setFrame(imageIndex, "Armature|idle", (int) (this.meshFrame * animationFramesPerSecond) % 33);
+        //this.application.renderingContext()
+        //                .getHumanoid()
+        //                .setFrame(imageIndex, "Armature|idle", (int) (this.meshFrame * animationFramesPerSecond) % 33);
 
-        this.application.backend()
-                        .deviceContext()
-                        .getGraphicsQueue()
-                        .submit(commandBuffer,
+        this.application.renderingContext()
+                        .submit(imageIndex,
                                 this.inFlightFences[this.frameIndex],
-                                new long[]{this.imageAvailableSemaphores[this.frameIndex]},
-                                new int[]{VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT},
-                                new long[]{this.renderFinishedSemaphores[this.frameIndex]});
+                                this.imageAvailableSemaphores[this.frameIndex],
+                                this.renderFinishedSemaphores[this.frameIndex]);
     }
 
     private void presentImage(final int imageIndex) {
@@ -214,7 +205,7 @@ public class ApplicationRunner implements AutoCloseable {
                     .sType(VK_STRUCTURE_TYPE_PRESENT_INFO_KHR)
                     .pWaitSemaphores(stack.longs(this.renderFinishedSemaphores[this.frameIndex]))
                     .swapchainCount(1)
-                    .pSwapchains(stack.longs(this.application.renderer().getSwapchain().getHandle()))
+                    .pSwapchains(stack.longs(this.application.renderingContext().getSwapchain().getHandle()))
                     .pImageIndices(stack.ints(imageIndex));
 
             final var deviceContext = this.application.backend().deviceContext();
