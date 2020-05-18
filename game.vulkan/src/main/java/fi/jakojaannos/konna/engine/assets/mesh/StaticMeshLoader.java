@@ -1,4 +1,4 @@
-package fi.jakojaannos.konna.engine.assets.loader;
+package fi.jakojaannos.konna.engine.assets.mesh;
 
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -10,9 +10,8 @@ import org.slf4j.LoggerFactory;
 import java.nio.file.Path;
 import java.util.ArrayList;
 
-import fi.jakojaannos.konna.engine.assets.*;
-import fi.jakojaannos.konna.engine.assets.mesh.StaticMesh;
-import fi.jakojaannos.konna.engine.assets.mesh.StaticMeshVertex;
+import fi.jakojaannos.konna.engine.assets.material.Material;
+import fi.jakojaannos.konna.engine.assets.texture.Texture;
 import fi.jakojaannos.konna.engine.util.BitMask;
 import fi.jakojaannos.konna.engine.vulkan.LogCategories;
 import fi.jakojaannos.konna.engine.vulkan.TextureSampler;

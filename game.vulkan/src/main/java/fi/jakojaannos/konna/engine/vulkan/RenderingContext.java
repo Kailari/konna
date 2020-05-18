@@ -4,6 +4,7 @@ import java.nio.file.Path;
 
 import fi.jakojaannos.konna.engine.CameraUniformBufferObject;
 import fi.jakojaannos.konna.engine.application.PresentableState;
+import fi.jakojaannos.konna.engine.assets.AssetManager;
 import fi.jakojaannos.konna.engine.view.renderer.RendererExecutor;
 import fi.jakojaannos.konna.engine.vulkan.rendering.Swapchain;
 import fi.jakojaannos.konna.engine.vulkan.window.Window;
@@ -113,10 +114,10 @@ public class RenderingContext implements AutoCloseable {
     }
      */
 
-    public RenderingContext(final Path assetRoot, final RenderingBackend backend, final Window window) {
+    public RenderingContext(final AssetManager assetManager, final RenderingBackend backend, final Window window) {
         this.swapchain = new Swapchain(backend.deviceContext(), window, backend.surface());
 
-        this.renderer = new RendererExecutor(backend.deviceContext(), this.swapchain, assetRoot);
+        this.renderer = new RendererExecutor(backend.deviceContext(), this.swapchain, assetManager);
 
         /*
         this.sceneDescriptorLayout = new DescriptorSetLayout(backend.deviceContext(),

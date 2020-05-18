@@ -1,7 +1,7 @@
 package fi.jakojaannos.konna.engine.assets.mesh;
 
-import fi.jakojaannos.konna.engine.assets.MaterialInstance;
-import fi.jakojaannos.konna.engine.assets.Material;
+import fi.jakojaannos.konna.engine.assets.material.MaterialInstance;
+import fi.jakojaannos.konna.engine.assets.material.Material;
 import fi.jakojaannos.konna.engine.util.RecreateCloseable;
 import fi.jakojaannos.konna.engine.vulkan.GPUMesh;
 import fi.jakojaannos.konna.engine.vulkan.TextureSampler;

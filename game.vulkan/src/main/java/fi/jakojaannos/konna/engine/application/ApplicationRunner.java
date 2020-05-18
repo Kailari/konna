@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.Optional;
 
+import fi.jakojaannos.konna.engine.assets.AssetManager;
 import fi.jakojaannos.konna.engine.view.renderer.RendererRecorder;
 import fi.jakojaannos.konna.engine.vulkan.device.DeviceContext;
 import fi.jakojaannos.roguelite.engine.GameMode;
@@ -38,6 +39,7 @@ public class ApplicationRunner implements AutoCloseable {
     private final long[] imagesInFlight;
 
     private final Application application;
+    private final AssetManager assetManager;
 
     private final GameRunnerTimeManager timeManager;
 
@@ -51,8 +53,9 @@ public class ApplicationRunner implements AutoCloseable {
         return this.timeManager;
     }
 
-    public ApplicationRunner(final Application application) {
+    public ApplicationRunner(final Application application, final AssetManager assetManager) {
         this.application = application;
+        this.assetManager = assetManager;
 
         this.timeManager = new GameRunnerTimeManager(20L);
 
@@ -77,7 +80,8 @@ public class ApplicationRunner implements AutoCloseable {
         final var startTime = System.currentTimeMillis();
 
         var frameCounter = 0;
-        try (final var simulationRunner = new SimulationThread(initialGameMode,
+        try (final var simulationRunner = new SimulationThread(this.assetManager,
+                                                               initialGameMode,
                                                                "riista-tick-thread",
                                                                inputProvider,
                                                                this.timeManager,

@@ -1,6 +1,6 @@
 package fi.jakojaannos.konna.engine.assets.mesh;
 
-import fi.jakojaannos.konna.engine.assets.Material;
+import fi.jakojaannos.konna.engine.assets.material.Material;
 import fi.jakojaannos.konna.engine.vulkan.TextureSampler;
 import fi.jakojaannos.konna.engine.vulkan.descriptor.DescriptorPool;
 import fi.jakojaannos.konna.engine.vulkan.descriptor.DescriptorSetLayout;

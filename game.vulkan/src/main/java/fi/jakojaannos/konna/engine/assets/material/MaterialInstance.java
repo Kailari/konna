@@ -1,8 +1,7 @@
-package fi.jakojaannos.konna.engine.assets;
+package fi.jakojaannos.konna.engine.assets.material;
 
 import java.nio.ByteBuffer;
 
-import fi.jakojaannos.konna.engine.assets.Material;
 import fi.jakojaannos.konna.engine.vulkan.TextureSampler;
 import fi.jakojaannos.konna.engine.vulkan.descriptor.DescriptorBinding;
 import fi.jakojaannos.konna.engine.vulkan.descriptor.DescriptorPool;

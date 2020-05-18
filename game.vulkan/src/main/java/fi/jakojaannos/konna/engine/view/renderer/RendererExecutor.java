@@ -1,10 +1,10 @@
 package fi.jakojaannos.konna.engine.view.renderer;
 
-import java.nio.file.Path;
-
 import fi.jakojaannos.konna.engine.CameraUniformBufferObject;
 import fi.jakojaannos.konna.engine.application.PresentableState;
+import fi.jakojaannos.konna.engine.assets.AssetManager;
 import fi.jakojaannos.konna.engine.util.RecreateCloseable;
+import fi.jakojaannos.konna.engine.view.renderer.debug.DebugRendererExecutor;
 import fi.jakojaannos.konna.engine.vulkan.DepthTexture;
 import fi.jakojaannos.konna.engine.vulkan.command.CommandBuffer;
 import fi.jakojaannos.konna.engine.vulkan.descriptor.DescriptorPool;
@@ -41,7 +41,7 @@ public class RendererExecutor extends RecreateCloseable {
     public RendererExecutor(
             final DeviceContext deviceContext,
             final Swapchain swapchain,
-            final Path assetRoot
+            final AssetManager assetManager
     ) {
         this.deviceContext = deviceContext;
         this.swapchain = swapchain;
@@ -78,7 +78,7 @@ public class RendererExecutor extends RecreateCloseable {
         this.debugRenderer = new DebugRendererExecutor(deviceContext,
                                                        swapchain,
                                                        this.renderPass,
-                                                       assetRoot,
+                                                       assetManager,
                                                        this.cameraDescriptorLayout);
     }
 

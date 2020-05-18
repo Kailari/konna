@@ -1,6 +1,8 @@
-package fi.jakojaannos.konna.engine.assets;
+package fi.jakojaannos.konna.engine.assets.material;
 
 import org.joml.Vector4f;
+
+import fi.jakojaannos.konna.engine.assets.texture.Texture;
 
 public record Material(
         Vector4f ambient,

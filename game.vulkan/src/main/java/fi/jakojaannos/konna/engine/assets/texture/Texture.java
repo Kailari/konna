@@ -1,4 +1,4 @@
-package fi.jakojaannos.konna.engine.assets;
+package fi.jakojaannos.konna.engine.assets.texture;
 
 import java.nio.file.Path;
 

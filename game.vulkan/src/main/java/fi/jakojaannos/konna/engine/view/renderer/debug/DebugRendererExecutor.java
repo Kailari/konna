@@ -1,4 +1,4 @@
-package fi.jakojaannos.konna.engine.view.renderer;
+package fi.jakojaannos.konna.engine.view.renderer.debug;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -7,6 +7,7 @@ import java.nio.file.Path;
 
 import fi.jakojaannos.konna.engine.CameraUniformBufferObject;
 import fi.jakojaannos.konna.engine.application.PresentableState;
+import fi.jakojaannos.konna.engine.assets.AssetManager;
 import fi.jakojaannos.konna.engine.util.RecreateCloseable;
 import fi.jakojaannos.konna.engine.view.renderer.debug.DebugLineVertex;
 import fi.jakojaannos.konna.engine.vulkan.GPUMesh;
@@ -29,7 +30,7 @@ public class DebugRendererExecutor extends RecreateCloseable {
             final DeviceContext deviceContext,
             final Swapchain swapchain,
             final RenderPass renderPass,
-            final Path assetRoot,
+            final AssetManager assetManager,
             final DescriptorSetLayout cameraDescriptorLayout
     ) {
         final var transformVertices = new DebugLineVertex[]{
@@ -51,8 +52,9 @@ public class DebugRendererExecutor extends RecreateCloseable {
         this.linePipeline = new GraphicsPipeline<>(deviceContext,
                                                    swapchain,
                                                    renderPass,
-                                                   assetRoot.resolve("shaders/vulkan/debug/line.vert"),
-                                                   assetRoot.resolve("shaders/vulkan/debug/line.frag"),
+                                                   assetManager,
+                                                   "shaders/vulkan/debug/line.vert",
+                                                   "shaders/vulkan/debug/line.frag",
                                                    VkPrimitiveTopology.LINE_LIST,
                                                    DebugLineVertex.FORMAT,
                                                    cameraDescriptorLayout);

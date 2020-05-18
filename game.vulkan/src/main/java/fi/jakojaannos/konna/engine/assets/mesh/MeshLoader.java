@@ -1,4 +1,4 @@
-package fi.jakojaannos.konna.engine.assets.loader;
+package fi.jakojaannos.konna.engine.assets.mesh;
 
 import org.joml.Vector4f;
 import org.lwjgl.assimp.AIColor4D;
@@ -13,8 +13,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import javax.annotation.Nullable;
 
-import fi.jakojaannos.konna.engine.assets.Material;
-import fi.jakojaannos.konna.engine.assets.Texture;
+import fi.jakojaannos.konna.engine.assets.material.Material;
+import fi.jakojaannos.konna.engine.assets.texture.Texture;
 import fi.jakojaannos.konna.engine.util.BitMask;
 import fi.jakojaannos.konna.engine.vulkan.LogCategories;
 import fi.jakojaannos.konna.engine.vulkan.TextureSampler;

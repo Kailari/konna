@@ -6,17 +6,18 @@ import java.util.Queue;
 
 import fi.jakojaannos.konna.engine.application.Application;
 import fi.jakojaannos.konna.engine.application.ApplicationRunner;
+import fi.jakojaannos.konna.engine.assets.storage.AssetManagerImpl;
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.input.InputProvider;
-import fi.jakojaannos.roguelite.engine.lwjgl.input.LWJGLInputProvider;
 import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;
 
 public class Main {
     public static void main(final String[] args) {
-        try (final var app = Application.initialize(800,
+        try (final var assetManager = new AssetManagerImpl(Path.of("../assets"));
+             final var app = Application.initialize(800,
                                                     600,
-                                                    Path.of("../assets"));
-             final var runner = new ApplicationRunner(app)
+                                                    assetManager);
+             final var runner = new ApplicationRunner(app, assetManager)
         ) {
             /*
             final var inputProvider = new LWJGLInputProvider(app.window().getHandle(),

@@ -1,4 +1,4 @@
-package fi.jakojaannos.konna.engine.view.renderer;
+package fi.jakojaannos.konna.engine.view.renderer.debug;
 
 import fi.jakojaannos.konna.engine.application.PresentableState;
 import fi.jakojaannos.konna.engine.view.DebugRenderer;

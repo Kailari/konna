@@ -3,13 +3,11 @@ package fi.jakojaannos.konna.engine.vulkan.rendering;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.*;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.file.Path;
 import java.util.Arrays;
 
+import fi.jakojaannos.konna.engine.assets.AssetManager;
+import fi.jakojaannos.konna.engine.assets.internal.Shader;
 import fi.jakojaannos.konna.engine.util.RecreateCloseable;
-import fi.jakojaannos.konna.engine.util.shader.ShaderCompiler;
 import fi.jakojaannos.konna.engine.vulkan.VertexFormat;
 import fi.jakojaannos.konna.engine.vulkan.descriptor.DescriptorSetLayout;
 import fi.jakojaannos.konna.engine.vulkan.device.DeviceContext;
@@ -29,8 +27,8 @@ public class GraphicsPipeline<TVertex> extends RecreateCloseable {
 
     private final VkPrimitiveTopology topology;
 
-    private final ByteBuffer compiledVertexShader;
-    private final ByteBuffer compiledFragmentShader;
+    private final Shader vertexShader;
+    private final Shader fragmentShader;
     private final VertexFormat<TVertex> vertexFormat;
     private final DescriptorSetLayout[] descriptorSetLayouts;
 
@@ -54,8 +52,9 @@ public class GraphicsPipeline<TVertex> extends RecreateCloseable {
             final DeviceContext deviceContext,
             final Swapchain swapchain,
             final RenderPass renderPass,
-            final Path vertexShaderPath,
-            final Path fragmentShaderPath,
+            final AssetManager assetManager,
+            final String vertexShaderAsset,
+            final String fragmentShaderAsset,
             final VkPrimitiveTopology topology,
             final VertexFormat<TVertex> vertexFormat,
             final DescriptorSetLayout... descriptorSetLayouts
@@ -68,14 +67,10 @@ public class GraphicsPipeline<TVertex> extends RecreateCloseable {
         this.vertexFormat = vertexFormat;
         this.descriptorSetLayouts = descriptorSetLayouts;
 
-        try {
-            this.compiledVertexShader = ShaderCompiler.loadGLSLShader(vertexShaderPath,
-                                                                      VK_SHADER_STAGE_VERTEX_BIT);
-            this.compiledFragmentShader = ShaderCompiler.loadGLSLShader(fragmentShaderPath,
-                                                                        VK_SHADER_STAGE_FRAGMENT_BIT);
-        } catch (final IOException e) {
-            throw new IllegalStateException("Loading shaders failed: " + e);
-        }
+        this.vertexShader = assetManager.getStorage(Shader.class)
+                                        .get(vertexShaderAsset);
+        this.fragmentShader = assetManager.getStorage(Shader.class)
+                                          .get(fragmentShaderAsset);
     }
 
     @Override
@@ -88,9 +83,9 @@ public class GraphicsPipeline<TVertex> extends RecreateCloseable {
     protected void recreate() {
         try (final var stack = stackPush();
              final var vertexShaderModule = new ShaderModule(this.deviceContext.getDevice(),
-                                                             this.compiledVertexShader);
+                                                             this.vertexShader.compiled());
              final var fragmentShaderModule = new ShaderModule(this.deviceContext.getDevice(),
-                                                               this.compiledFragmentShader)
+                                                               this.fragmentShader.compiled())
         ) {
             final var shaderStages = createShaderStages(stack, vertexShaderModule, fragmentShaderModule);
             final var vertexInputState = createVertexInputInfo();

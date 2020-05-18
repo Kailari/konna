@@ -1,9 +1,8 @@
 package fi.jakojaannos.konna.engine.application;
 
-import java.nio.file.Path;
-
-import fi.jakojaannos.konna.engine.vulkan.RenderingContext;
+import fi.jakojaannos.konna.engine.assets.AssetManager;
 import fi.jakojaannos.konna.engine.vulkan.RenderingBackend;
+import fi.jakojaannos.konna.engine.vulkan.RenderingContext;
 import fi.jakojaannos.konna.engine.vulkan.window.Window;
 
 import static org.lwjgl.glfw.GLFW.glfwInit;
@@ -15,7 +14,11 @@ public record Application(
         RenderingBackend backend,
         RenderingContext renderingContext
 ) implements AutoCloseable {
-    public static Application initialize(final int windowWidth, final int windowHeight, final Path assetRoot) {
+    public static Application initialize(
+            final int windowWidth,
+            final int windowHeight,
+            final AssetManager assetManager
+    ) {
         if (!glfwInit()) {
             throw new IllegalStateException("Initializing GLFW failed!");
         }
@@ -25,7 +28,7 @@ public record Application(
 
         final var window = new Window(windowWidth, windowHeight);
         final var backend = RenderingBackend.create(window);
-        final var renderer = new RenderingContext(assetRoot, backend, window);
+        final var renderer = new RenderingContext(assetManager, backend, window);
 
         return new Application(window, backend, renderer);
     }

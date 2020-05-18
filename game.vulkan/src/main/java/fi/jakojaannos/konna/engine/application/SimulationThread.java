@@ -8,7 +8,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
+import fi.jakojaannos.konna.engine.assets.AssetManager;
 import fi.jakojaannos.konna.engine.view.RenderDispatcher;
+import fi.jakojaannos.konna.view.adapters.PlayerCharacterRenderAdapter;
 import fi.jakojaannos.konna.engine.view.renderer.RendererRecorder;
 import fi.jakojaannos.konna.view.adapters.EntityTransformRenderAdapter;
 import fi.jakojaannos.roguelite.engine.GameMode;
@@ -31,6 +33,7 @@ public class SimulationThread implements AutoCloseable {
     private Runnable simulatorTerminateCallback = () -> LOG.warn("Simulation terminated before initialization was done!");
 
     public SimulationThread(
+            final AssetManager assetManager,
             final GameMode initialGameMode,
             final String threadName,
             final InputProvider inputProvider,
@@ -50,6 +53,7 @@ public class SimulationThread implements AutoCloseable {
         this.ticker = new GameTicker(this.timeManager, inputProvider, initialGameMode);
         this.renderDispatcher = RenderDispatcher.builder()
                                                 .withAdapter(new EntityTransformRenderAdapter())
+                                                .withAdapter(new PlayerCharacterRenderAdapter(assetManager))
                                                 .build();
 
         startSimulation();

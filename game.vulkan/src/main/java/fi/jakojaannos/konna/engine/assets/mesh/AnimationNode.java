@@ -1,4 +1,4 @@
-package fi.jakojaannos.konna.engine.assets.loader;
+package fi.jakojaannos.konna.engine.assets.mesh;
 
 import org.joml.Matrix4f;
 

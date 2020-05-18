@@ -1,4 +1,4 @@
-package fi.jakojaannos.konna.engine.assets.loader;
+package fi.jakojaannos.konna.engine.assets.mesh;
 
 import org.joml.*;
 import org.lwjgl.assimp.*;
@@ -9,8 +9,8 @@ import java.nio.file.Path;
 import java.util.*;
 import javax.annotation.Nullable;
 
-import fi.jakojaannos.konna.engine.assets.*;
-import fi.jakojaannos.konna.engine.assets.mesh.*;
+import fi.jakojaannos.konna.engine.assets.material.Material;
+import fi.jakojaannos.konna.engine.assets.texture.Texture;
 import fi.jakojaannos.konna.engine.util.BitMask;
 import fi.jakojaannos.konna.engine.vulkan.LogCategories;
 import fi.jakojaannos.konna.engine.vulkan.TextureSampler;
