@@ -1,7 +1,7 @@
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 @FieldsAreNonnullByDefault
-package fi.jakojaannos.konna.engine.renderer.dispatcher;
+package fi.jakojaannos.konna.engine.view.dispatcher;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 

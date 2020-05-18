@@ -1,8 +1,6 @@
-package fi.jakojaannos.konna.engine.renderer;
+package fi.jakojaannos.konna.engine.view;
 
-import fi.jakojaannos.konna.engine.view.EcsRenderAdapter;
-import fi.jakojaannos.konna.engine.view.Renderer;
-import fi.jakojaannos.konna.engine.renderer.dispatcher.RenderDispatcherBuilderImpl;
+import fi.jakojaannos.konna.engine.view.dispatcher.RenderDispatcherBuilderImpl;
 import fi.jakojaannos.roguelite.engine.GameState;
 
 public interface RenderDispatcher {

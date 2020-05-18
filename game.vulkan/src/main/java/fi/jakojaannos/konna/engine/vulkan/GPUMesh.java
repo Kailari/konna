@@ -1,9 +1,10 @@
 package fi.jakojaannos.konna.engine.vulkan;
 
+import javax.annotation.Nullable;
+
 import fi.jakojaannos.konna.engine.util.BufferWriter;
 import fi.jakojaannos.konna.engine.vulkan.command.CommandBuffer;
 import fi.jakojaannos.konna.engine.vulkan.device.DeviceContext;
-import fi.jakojaannos.konna.engine.vulkan.rendering.GraphicsPipeline;
 import fi.jakojaannos.konna.engine.vulkan.types.VkMemoryPropertyFlags;
 
 import static fi.jakojaannos.konna.engine.util.BitMask.bitMask;
@@ -14,19 +15,27 @@ import static org.lwjgl.vulkan.VK10.*;
 
 public class GPUMesh<TVertex> implements AutoCloseable {
     private final GPUBuffer vertexBuffer;
-    private final GPUBuffer indexBuffer;
     private final int indexCount;
+
+    @Nullable private final GPUBuffer indexBuffer;
 
     public int getIndexCount() {
         return this.indexCount;
     }
 
     public GPUBuffer getIndexBuffer() {
+        if (this.indexBuffer == null) {
+            throw new IllegalStateException("Tried getting index buffer of non-indexed mesh!");
+        }
         return this.indexBuffer;
     }
 
     public GPUBuffer getVertexBuffer() {
         return this.vertexBuffer;
+    }
+
+    public boolean isIndexed() {
+        return this.indexBuffer != null && this.indexCount > 0;
     }
 
     public GPUMesh(
@@ -47,15 +56,19 @@ public class GPUMesh<TVertex> implements AutoCloseable {
                      vertexFormat.getSizeInBytes(),
                      vertexFormat::write);
 
-        this.indexBuffer = new GPUBuffer(deviceContext,
-                                         indices.length * Integer.BYTES,
-                                         VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-                                         bitMask(VkMemoryPropertyFlags.DEVICE_LOCAL_BIT));
-        pushToBuffer(this.indexBuffer,
-                     deviceContext,
-                     indices,
-                     Integer.BYTES,
-                     (index, offset, buffer) -> buffer.putInt(offset, index));
+        if (indices.length != 0) {
+            this.indexBuffer = new GPUBuffer(deviceContext,
+                                             indices.length * Integer.BYTES,
+                                             VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+                                             bitMask(VkMemoryPropertyFlags.DEVICE_LOCAL_BIT));
+            pushToBuffer(this.indexBuffer,
+                         deviceContext,
+                         indices,
+                         Integer.BYTES,
+                         (index, offset, buffer) -> buffer.putInt(offset, index));
+        } else {
+            this.indexBuffer = null;
+        }
     }
 
     public void draw(final CommandBuffer commandBuffer) {
@@ -81,7 +94,9 @@ public class GPUMesh<TVertex> implements AutoCloseable {
     @Override
     public void close() {
         this.vertexBuffer.close();
-        this.indexBuffer.close();
+        if (this.indexBuffer != null) {
+            this.indexBuffer.close();
+        }
     }
 
     private static <T> void pushToBuffer(

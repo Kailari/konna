@@ -1,11 +1,9 @@
-package fi.jakojaannos.konna.engine.view.adapters;
+package fi.jakojaannos.konna.engine.view.renderer;
 
 import java.nio.file.Path;
 
 import fi.jakojaannos.konna.engine.CameraUniformBufferObject;
 import fi.jakojaannos.konna.engine.application.PresentableState;
-import fi.jakojaannos.konna.engine.view.DebugRenderer;
-import fi.jakojaannos.konna.engine.view.Renderer;
 import fi.jakojaannos.konna.engine.util.RecreateCloseable;
 import fi.jakojaannos.konna.engine.vulkan.DepthTexture;
 import fi.jakojaannos.konna.engine.vulkan.command.CommandBuffer;
@@ -20,7 +18,7 @@ import fi.jakojaannos.konna.engine.vulkan.rendering.Swapchain;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.VK10.*;
 
-public class RendererImpl extends RecreateCloseable implements Renderer {
+public class RendererExecutor extends RecreateCloseable {
     private final DeviceContext deviceContext;
     private final Swapchain swapchain;
 
@@ -32,7 +30,7 @@ public class RendererImpl extends RecreateCloseable implements Renderer {
     private final DescriptorSetLayout cameraDescriptorLayout;
     private final CameraUniformBufferObject cameraUBO;
 
-    private final DebugRendererImpl debugRenderer;
+    private final DebugRendererExecutor debugRenderer;
 
     private CommandBuffer[] commandBuffers;
 
@@ -40,11 +38,7 @@ public class RendererImpl extends RecreateCloseable implements Renderer {
         return this.cameraUBO;
     }
 
-    public void setWriteState(final PresentableState state) {
-        this.debugRenderer.setWriteState(state);
-    }
-
-    public RendererImpl(
+    public RendererExecutor(
             final DeviceContext deviceContext,
             final Swapchain swapchain,
             final Path assetRoot
@@ -81,11 +75,11 @@ public class RendererImpl extends RecreateCloseable implements Renderer {
                                                        this.cameraDescriptorLayout,
                                                        25.0f);
 
-        this.debugRenderer = new DebugRendererImpl(deviceContext,
-                                                   swapchain,
-                                                   this.renderPass,
-                                                   assetRoot,
-                                                   this.cameraDescriptorLayout);
+        this.debugRenderer = new DebugRendererExecutor(deviceContext,
+                                                       swapchain,
+                                                       this.renderPass,
+                                                       assetRoot,
+                                                       this.cameraDescriptorLayout);
     }
 
     public void flush(
@@ -98,8 +92,7 @@ public class RendererImpl extends RecreateCloseable implements Renderer {
         try (final var ignored = commandBuffer.begin();
              final var ignored2 = this.renderPass.begin(framebuffer, commandBuffer)
         ) {
-            this.debugRenderer.setReadState(presentableState);
-            this.debugRenderer.flush(this.cameraUBO, commandBuffer, imageIndex);
+            this.debugRenderer.flush(presentableState, this.cameraUBO, commandBuffer, imageIndex);
         }
     }
 
@@ -117,10 +110,6 @@ public class RendererImpl extends RecreateCloseable implements Renderer {
                                   new long[]{renderFinishedSemaphore});
     }
 
-    @Override
-    public DebugRenderer debug() {
-        return this.debugRenderer;
-    }
 
     @Override
     protected void recreate() {

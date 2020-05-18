@@ -6,6 +6,8 @@ module konna.vulkan {
 
     requires roguelite.game;
     requires roguelite.engine;
+    requires roguelite.engine.view;
+    requires roguelite.engine.lwjgl;
     requires roguelite.engine.ecs;
     requires roguelite.engine.utilities;
 

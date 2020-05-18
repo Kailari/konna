@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.Optional;
 
+import fi.jakojaannos.konna.engine.view.renderer.RendererRecorder;
 import fi.jakojaannos.konna.engine.vulkan.device.DeviceContext;
 import fi.jakojaannos.roguelite.engine.GameMode;
 import fi.jakojaannos.roguelite.engine.GameRunnerTimeManager;
@@ -80,7 +81,7 @@ public class ApplicationRunner implements AutoCloseable {
                                                                "riista-tick-thread",
                                                                inputProvider,
                                                                this.timeManager,
-                                                               this.application.renderingContext().getRenderer(),
+                                                               new RendererRecorder(),
                                                                this.application.window()::setShouldClose)
         ) {
             this.application.window().show();
@@ -179,7 +180,7 @@ public class ApplicationRunner implements AutoCloseable {
     }
 
     private void drawFrame(final double delta, final int imageIndex) {
-        this.angle += delta * RADIANS_PER_SECOND;
+        //this.angle += delta * RADIANS_PER_SECOND;
         this.application.renderingContext()
                         .getCameraUBO()
                         .update(imageIndex, this.angle);

@@ -8,6 +8,7 @@ import fi.jakojaannos.konna.engine.application.Application;
 import fi.jakojaannos.konna.engine.application.ApplicationRunner;
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.input.InputProvider;
+import fi.jakojaannos.roguelite.engine.lwjgl.input.LWJGLInputProvider;
 import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;
 
 public class Main {
@@ -17,7 +18,18 @@ public class Main {
                                                     Path.of("../assets"));
              final var runner = new ApplicationRunner(app)
         ) {
+            /*
+            final var inputProvider = new LWJGLInputProvider(app.window().getHandle(),
+                                                              800,
+                                                              600,
+                                                              legacyCallback -> app.window().onResize(legacyCallback::call));
+             */
             final var inputProvider = new InputProvider() {
+                @Override
+                public Object getLock() {
+                    return this;
+                }
+
                 @Override
                 public Queue<InputEvent> pollEvents() {
                     // TODO: Adapt/re-write the LWJGL input provider

@@ -1,10 +1,10 @@
-package fi.jakojaannos.konna.engine.renderer.dispatcher;
+package fi.jakojaannos.konna.engine.view.dispatcher;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
 import fi.jakojaannos.konna.engine.view.EcsRenderAdapter;
-import fi.jakojaannos.konna.engine.renderer.RenderDispatcher;
+import fi.jakojaannos.konna.engine.view.RenderDispatcher;
 
 public class RenderDispatcherBuilderImpl implements RenderDispatcher.Builder {
     private final Collection<EcsRenderAdapter<?, ?>> adapters = new ArrayList<>();

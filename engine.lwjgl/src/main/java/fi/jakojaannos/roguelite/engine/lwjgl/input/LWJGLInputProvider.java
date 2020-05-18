@@ -6,9 +6,11 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayDeque;
 import java.util.Optional;
 import java.util.Queue;
+import java.util.function.Consumer;
 
 import fi.jakojaannos.roguelite.engine.input.*;
 import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLWindow;
+import fi.jakojaannos.roguelite.engine.view.Window;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -24,48 +26,66 @@ public class LWJGLInputProvider implements InputProvider {
     private double mouseY;
     private boolean justResized;
 
+    private final Object lock = new Object();
+
+    @Override
+    public Object getLock() {
+        return this.lock;
+    }
+
     public LWJGLInputProvider(final LWJGLWindow window) {
+        this(window.getId(), window.getWidth(), window.getHeight(), window::addResizeCallback);
+    }
+
+    public LWJGLInputProvider(
+            final long window,
+            final int viewportWidth,
+            final int viewportHeight,
+            final Consumer<Window.ResizeCallback> resizeCallbackConsumer
+    ) {
         this.inputEvents = new ArrayDeque<>();
 
-        this.viewportWidth = window.getWidth();
-        this.viewportHeight = window.getHeight();
-        window.addResizeCallback((width, height) -> {
+        this.viewportWidth = viewportWidth;
+        this.viewportHeight = viewportHeight;
+        resizeCallbackConsumer.accept((width, height) -> {
             this.viewportWidth = width;
             this.viewportHeight = height;
             this.justResized = true;
         });
 
-        glfwSetKeyCallback(window.getId(), this::keyCallback);
-        glfwSetMouseButtonCallback(window.getId(), this::mouseButtonCallback);
-        glfwSetCursorPosCallback(window.getId(), this::cursorPositionCallback);
+        glfwSetKeyCallback(window, this::keyCallback);
+        glfwSetMouseButtonCallback(window, this::mouseButtonCallback);
+        glfwSetCursorPosCallback(window, this::cursorPositionCallback);
     }
 
     private void cursorPositionCallback(final long window, final double windowX, final double windowY) {
-        final var x = windowX / this.viewportWidth;
-        final var y = windowY / this.viewportHeight;
+        synchronized (this.getLock()) {
+            final var x = windowX / this.viewportWidth;
+            final var y = windowY / this.viewportHeight;
 
-        // In case we just resized, update cached position and skip sending delta-events
-        if (this.justResized) {
-            this.inputEvents.offer(InputEvent.axial(new AxialInput(InputAxis.Mouse.X_POS, x)));
-            this.inputEvents.offer(InputEvent.axial(new AxialInput(InputAxis.Mouse.Y_POS, y)));
-            this.mouseX = x;
-            this.mouseY = y;
-            this.justResized = false;
-            return;
-        }
+            // In case we just resized, update cached position and skip sending delta-events
+            if (this.justResized) {
+                this.inputEvents.offer(InputEvent.axial(new AxialInput(InputAxis.Mouse.X_POS, x)));
+                this.inputEvents.offer(InputEvent.axial(new AxialInput(InputAxis.Mouse.Y_POS, y)));
+                this.mouseX = x;
+                this.mouseY = y;
+                this.justResized = false;
+                return;
+            }
 
-        final var deltaX = this.mouseX - x;
-        if (Math.abs(deltaX) > MOUSE_EPSILON) {
-            this.inputEvents.offer(InputEvent.axial(new AxialInput(InputAxis.Mouse.X, deltaX)));
-            this.inputEvents.offer(InputEvent.axial(new AxialInput(InputAxis.Mouse.X_POS, x)));
-            this.mouseX = x;
-        }
+            final var deltaX = this.mouseX - x;
+            if (Math.abs(deltaX) > MOUSE_EPSILON) {
+                this.inputEvents.offer(InputEvent.axial(new AxialInput(InputAxis.Mouse.X, deltaX)));
+                this.inputEvents.offer(InputEvent.axial(new AxialInput(InputAxis.Mouse.X_POS, x)));
+                this.mouseX = x;
+            }
 
-        final var deltaY = this.mouseY - y;
-        if (Math.abs(deltaY) > MOUSE_EPSILON) {
-            this.inputEvents.offer(InputEvent.axial(new AxialInput(InputAxis.Mouse.Y, deltaY)));
-            this.inputEvents.offer(InputEvent.axial(new AxialInput(InputAxis.Mouse.Y_POS, y)));
-            this.mouseY = y;
+            final var deltaY = this.mouseY - y;
+            if (Math.abs(deltaY) > MOUSE_EPSILON) {
+                this.inputEvents.offer(InputEvent.axial(new AxialInput(InputAxis.Mouse.Y, deltaY)));
+                this.inputEvents.offer(InputEvent.axial(new AxialInput(InputAxis.Mouse.Y_POS, y)));
+                this.mouseY = y;
+            }
         }
     }
 
@@ -76,8 +96,10 @@ public class LWJGLInputProvider implements InputProvider {
             final int action,
             final int mods
     ) {
-        mapAction(action).ifPresent(
-                inputAction -> this.inputEvents.offer(ButtonInput.event(keyOrUnknown(key), inputAction)));
+        synchronized (this.getLock()) {
+            mapAction(action).ifPresent(
+                    inputAction -> this.inputEvents.offer(ButtonInput.event(keyOrUnknown(key), inputAction)));
+        }
     }
 
     private InputButton.Keyboard keyOrUnknown(final int key) {
@@ -86,9 +108,11 @@ public class LWJGLInputProvider implements InputProvider {
     }
 
     private void mouseButtonCallback(final long window, final int button, final int action, final int mods) {
-        mapAction(action)
-                .ifPresent(inputAction -> this.inputEvents.offer(ButtonInput.event(InputButton.Mouse.button(button),
-                                                                                   inputAction)));
+        synchronized (this.getLock()) {
+            mapAction(action)
+                    .ifPresent(inputAction -> this.inputEvents.offer(ButtonInput.event(InputButton.Mouse.button(button),
+                                                                                       inputAction)));
+        }
     }
 
     private Optional<ButtonInput.Action> mapAction(final int action) {

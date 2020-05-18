@@ -4,13 +4,13 @@ import java.nio.file.Path;
 
 import fi.jakojaannos.konna.engine.CameraUniformBufferObject;
 import fi.jakojaannos.konna.engine.application.PresentableState;
-import fi.jakojaannos.konna.engine.view.adapters.RendererImpl;
+import fi.jakojaannos.konna.engine.view.renderer.RendererExecutor;
 import fi.jakojaannos.konna.engine.vulkan.rendering.Swapchain;
 import fi.jakojaannos.konna.engine.vulkan.window.Window;
 
 public class RenderingContext implements AutoCloseable {
     private final Swapchain swapchain;
-    private final RendererImpl renderer;
+    private final RendererExecutor renderer;
 
     /*private final GraphicsPipeline<StaticMeshVertex> staticPipeline;
     private final GraphicsPipeline<SkeletalMeshVertex> skeletalPipeline;
@@ -41,12 +41,6 @@ public class RenderingContext implements AutoCloseable {
     @Deprecated
     public CameraUniformBufferObject getCameraUBO() {
         return this.renderer.getCameraUBO();
-    }
-
-    // TODO: Get rid of this (separate drawcall recorder and renderer)
-    @Deprecated
-    public RendererImpl getRenderer() {
-        return this.renderer;
     }
 
     /*
@@ -122,7 +116,7 @@ public class RenderingContext implements AutoCloseable {
     public RenderingContext(final Path assetRoot, final RenderingBackend backend, final Window window) {
         this.swapchain = new Swapchain(backend.deviceContext(), window, backend.surface());
 
-        this.renderer = new RendererImpl(backend.deviceContext(), this.swapchain, assetRoot);
+        this.renderer = new RendererExecutor(backend.deviceContext(), this.swapchain, assetRoot);
 
         /*
         this.sceneDescriptorLayout = new DescriptorSetLayout(backend.deviceContext(),

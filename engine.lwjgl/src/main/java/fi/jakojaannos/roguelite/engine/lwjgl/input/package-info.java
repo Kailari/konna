@@ -1,7 +1,7 @@
-@FieldsAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-package fi.jakojaannos.konna.engine.renderer;
+@MethodsReturnNonnullByDefault
+@FieldsAreNonnullByDefault
+package fi.jakojaannos.roguelite.engine.lwjgl.input;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 

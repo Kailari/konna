@@ -95,8 +95,10 @@ public class GameTicker implements MainThread {
             }
         }
 
-        this.inputProvider.pollEvents()
-                          .forEach(this.inputBus::fire);
+        synchronized (this.inputProvider.getLock()) {
+            this.inputProvider.pollEvents()
+                              .forEach(this.inputBus::fire);
+        }
 
         final var systemEventsFromLastTick = List.copyOf(this.systemEvents);
         this.systemEvents.clear();

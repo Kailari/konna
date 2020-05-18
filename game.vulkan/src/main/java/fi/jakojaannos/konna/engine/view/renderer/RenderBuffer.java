@@ -1,4 +1,4 @@
-package fi.jakojaannos.konna.engine.renderer;
+package fi.jakojaannos.konna.engine.view.renderer;
 
 import java.util.Arrays;
 import java.util.Iterator;

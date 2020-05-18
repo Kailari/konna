@@ -1,7 +1,7 @@
 package fi.jakojaannos.konna.engine.application;
 
 import fi.jakojaannos.konna.engine.view.DebugRenderer;
-import fi.jakojaannos.konna.engine.renderer.RenderBuffer;
+import fi.jakojaannos.konna.engine.view.renderer.RenderBuffer;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 
 public class PresentableState {

@@ -1,4 +1,4 @@
-package fi.jakojaannos.konna.engine.renderer.dispatcher;
+package fi.jakojaannos.konna.engine.view.dispatcher;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import fi.jakojaannos.konna.engine.view.EcsRenderAdapter;
-import fi.jakojaannos.konna.engine.renderer.RenderDispatcher;
+import fi.jakojaannos.konna.engine.view.RenderDispatcher;
 import fi.jakojaannos.konna.engine.view.Renderer;
 import fi.jakojaannos.roguelite.engine.GameState;
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;

@@ -1,4 +1,4 @@
-package fi.jakojaannos.konna.engine.renderer.debug;
+package fi.jakojaannos.konna.engine.view.renderer.debug;
 
 import org.joml.Vector3f;
 

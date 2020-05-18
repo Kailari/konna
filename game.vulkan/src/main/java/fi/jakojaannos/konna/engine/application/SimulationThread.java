@@ -8,8 +8,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
-import fi.jakojaannos.konna.engine.renderer.RenderDispatcher;
-import fi.jakojaannos.konna.engine.view.adapters.RendererImpl;
+import fi.jakojaannos.konna.engine.view.RenderDispatcher;
+import fi.jakojaannos.konna.engine.view.renderer.RendererRecorder;
 import fi.jakojaannos.konna.view.adapters.EntityTransformRenderAdapter;
 import fi.jakojaannos.roguelite.engine.GameMode;
 import fi.jakojaannos.roguelite.engine.GameRunnerTimeManager;
@@ -18,7 +18,7 @@ import fi.jakojaannos.roguelite.engine.input.InputProvider;
 public class SimulationThread implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(SimulationThread.class);
 
-    private final RendererImpl renderer;
+    private final RendererRecorder renderer;
 
     private final ScheduledExecutorService executor;
     private final GameRunnerTimeManager timeManager;
@@ -35,7 +35,7 @@ public class SimulationThread implements AutoCloseable {
             final String threadName,
             final InputProvider inputProvider,
             final GameRunnerTimeManager timeManager,
-            final RendererImpl renderer,
+            final RendererRecorder renderer,
             final Runnable onTerminate
     ) {
         this.renderer = renderer;
@@ -68,13 +68,17 @@ public class SimulationThread implements AutoCloseable {
     }
 
     private void tick() {
-        this.ticker.simulateTick(this.simulatorTerminateCallback);
-
-        final var state = this.presentableStateQueue.swapWriting();
-        state.clear(this.timeManager);
-
-        this.renderer.setWriteState(state);
         try {
+            this.ticker.simulateTick(this.simulatorTerminateCallback);
+        } catch (final Throwable t) {
+            LOG.error("Simulation tick encountered an error:", t);
+        }
+
+        try {
+            final var state = this.presentableStateQueue.swapWriting();
+            state.clear(this.timeManager);
+
+            this.renderer.setWriteState(state);
             this.renderDispatcher.dispatch(this.renderer,
                                            this.ticker.getState(),
                                            0L);
