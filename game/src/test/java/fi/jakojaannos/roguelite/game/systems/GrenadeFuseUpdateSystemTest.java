@@ -1,0 +1,61 @@
+package fi.jakojaannos.roguelite.game.systems;
+
+import org.joml.Vector2d;
+import org.junit.jupiter.api.Test;
+
+import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
+import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.roguelite.game.data.components.weapon.Fuse;
+import fi.jakojaannos.roguelite.game.data.components.weapon.GrenadeStats;
+import fi.jakojaannos.roguelite.game.data.resources.Explosions;
+
+import static fi.jakojaannos.roguelite.engine.utilities.assertions.world.GameExpect.whenGame;
+import static org.junit.jupiter.api.Assertions.*;
+
+public class GrenadeFuseUpdateSystemTest {
+    private final double damage = 12;
+    private final double radiusSquared = 69;
+    private final Vector2d location = new Vector2d(123, 456);
+    private Explosions explosions;
+
+    void beforeEach(final World world) {
+        explosions = new Explosions();
+        world.registerResource(explosions);
+
+        TimeManager timeManager = new SimpleTimeManager(20);
+        world.registerResource(timeManager);
+
+        world.createEntity(
+                new Transform(location),
+                GrenadeStats.builder()
+                            .fuseTime(20)
+                            .explosionDamage(damage)
+                            .explosionRadiusSquared(radiusSquared)
+                            .build(),
+                new Fuse(timeManager.getCurrentGameTime(), 20)
+        );
+    }
+
+    @Test
+    void explosionEntryIsAddedAfterFuseTimeIsUp() {
+        whenGame().withSystems(new GrenadeFuseUpdateSystem())
+                  .withState(this::beforeEach)
+                  .runsForTicks(25)
+                  .expect(state -> assertAll(
+                          () -> assertEquals(1, explosions.getExplosions().size()),
+                          () -> assertEquals(damage, explosions.getExplosions().get(0).damage()),
+                          () -> assertEquals(radiusSquared, explosions.getExplosions().get(0).radiusSquared()),
+                          () -> assertEquals(location, explosions.getExplosions().get(0).location())
+                  ));
+    }
+
+    @Test
+    void explosionEntryIsNotAddedPrematurely() {
+        whenGame().withSystems(new GrenadeFuseUpdateSystem())
+                  .withState(this::beforeEach)
+                  .runsForTicks(15)
+                  .expect(state -> assertTrue(explosions.getExplosions().isEmpty()));
+    }
+}
