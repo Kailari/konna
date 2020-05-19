@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.game.data.DamageSource;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
 import fi.jakojaannos.roguelite.game.data.components.character.Health;
 import fi.jakojaannos.roguelite.game.data.resources.Explosions;
@@ -18,7 +19,7 @@ public class ExplosionHandlerSystemTest {
 
     void beforeEach(final World world) {
         explosions = new Explosions();
-        explosions.addExplosion(new RecentExplosion(new Vector2d(0, 0), 10, 10));
+        explosions.addExplosion(new RecentExplosion(new Vector2d(0, 0), 10, 10, 100, DamageSource.Generic.UNDEFINED));
         world.registerResource(explosions);
     }
 
@@ -41,7 +42,7 @@ public class ExplosionHandlerSystemTest {
 
         whenGame().withSystems(new ExplosionHandlerSystem())
                   .withState(this::beforeEach)
-                  .withState(state -> state.createEntity(new Transform(0, 0),
+                  .withState(state -> state.createEntity(new Transform(-1, -1),
                                                          new Health(100, 100),
                                                          physics))
                   .runsSingleTick()
@@ -55,10 +56,10 @@ public class ExplosionHandlerSystemTest {
         whenGame().withSystems(new ExplosionHandlerSystem())
                   .withState(this::beforeEach)
                   .withState(state -> {
-                      explosions.addExplosion(new RecentExplosion(new Vector2d(1, 1), 1, 10));
-                      explosions.addExplosion(new RecentExplosion(new Vector2d(2, 2), 1, 10));
-                      explosions.addExplosion(new RecentExplosion(new Vector2d(3, 3), 1, 10));
-                      explosions.addExplosion(new RecentExplosion(new Vector2d(4, 4), 1, 10));
+                      explosions.addExplosion(new RecentExplosion(new Vector2d(1, 1), 1, 999, 10, DamageSource.Generic.UNDEFINED));
+                      explosions.addExplosion(new RecentExplosion(new Vector2d(2, 2), 1, 999, 10, DamageSource.Generic.UNDEFINED));
+                      explosions.addExplosion(new RecentExplosion(new Vector2d(3, 3), 1, 999, 10, DamageSource.Generic.UNDEFINED));
+                      explosions.addExplosion(new RecentExplosion(new Vector2d(4, 4), 1, 999, 10, DamageSource.Generic.UNDEFINED));
 
                   })
                   .withState(state -> state.createEntity(new Transform(1, 1),
@@ -106,5 +107,18 @@ public class ExplosionHandlerSystemTest {
                           () -> assertEquals(0, health.damageInstances.size()),
                           () -> assertEquals(100, health.currentHealth))
                   );
+    }
+
+    // TODO:
+    void friendlyEntitiesAreNotAffected() {
+
+    }
+
+    void friendlyEntitiesAreNotAffectedWhenNearEnemies() {
+
+    }
+
+    void enemiesAreAffectedWhenNearFriendlyEntities() {
+
     }
 }

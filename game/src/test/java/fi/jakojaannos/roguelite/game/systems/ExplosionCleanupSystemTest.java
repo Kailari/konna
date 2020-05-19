@@ -4,6 +4,7 @@ import org.joml.Vector2d;
 import org.junit.jupiter.api.Test;
 
 import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.roguelite.game.data.DamageSource;
 import fi.jakojaannos.roguelite.game.data.resources.Explosions;
 import fi.jakojaannos.roguelite.game.data.resources.RecentExplosion;
 
@@ -17,7 +18,7 @@ public class ExplosionCleanupSystemTest {
         explosions = new Explosions();
         world.registerResource(explosions);
 
-        explosions.addExplosion(new RecentExplosion(new Vector2d(1, 2), 3.4, 5.6));
+        explosions.addExplosion(new RecentExplosion(new Vector2d(1, 2), 3.4, 5.6, 20, DamageSource.Generic.UNDEFINED));
     }
 
     @Test
@@ -27,5 +28,4 @@ public class ExplosionCleanupSystemTest {
                   .runsSingleTick()
                   .expect(state -> assertTrue(explosions.getExplosions().isEmpty()));
     }
-
 }
