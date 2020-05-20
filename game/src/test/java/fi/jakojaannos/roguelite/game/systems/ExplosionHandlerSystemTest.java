@@ -112,17 +112,4 @@ public class ExplosionHandlerSystemTest {
                           () -> assertEquals(100, health.currentHealth))
                   );
     }
-
-    // TODO:
-    void friendlyEntitiesAreNotAffected() {
-
-    }
-
-    void friendlyEntitiesAreNotAffectedWhenNearEnemies() {
-
-    }
-
-    void enemiesAreAffectedWhenNearFriendlyEntities() {
-
-    }
 }

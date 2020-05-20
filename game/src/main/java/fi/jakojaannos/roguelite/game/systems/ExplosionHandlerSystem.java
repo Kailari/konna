@@ -33,7 +33,7 @@ public class ExplosionHandlerSystem implements EcsSystem<ExplosionHandlerSystem.
                                  resources.timeManager.getCurrentGameTime());
 
             final var physics = entity.getData().physics;
-            final var pushForce = new Vector2d(explosion.location()).sub(entityPos);
+            final var pushForce = new Vector2d(entityPos).sub(explosion.location());
             if (pushForce.lengthSquared() != 0) {
                 pushForce.normalize(explosion.pushForce());
                 physics.applyForce(pushForce);
@@ -45,7 +45,6 @@ public class ExplosionHandlerSystem implements EcsSystem<ExplosionHandlerSystem.
             Transform transform,
             Health health,
             Physics physics
-            // TODO: add collider so you only damage enemies
     ) {}
 
     public static record Resources(
