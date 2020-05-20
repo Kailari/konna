@@ -16,7 +16,7 @@ import fi.jakojaannos.roguelite.game.data.resources.Weapons;
 import fi.jakojaannos.roguelite.game.weapons.InventoryWeapon;
 
 public class PlayerArchetype {
-    private static final boolean GRENADE_ENABLED = false;
+    private static final boolean GRENADE_ENABLED = true;
 
     public static EntityHandle create(
             final World world,

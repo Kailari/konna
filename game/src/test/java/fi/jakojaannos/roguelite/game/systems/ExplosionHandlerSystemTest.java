@@ -46,7 +46,11 @@ public class ExplosionHandlerSystemTest {
                                                          new Health(100, 100),
                                                          physics))
                   .runsSingleTick()
-                  .expect(state -> assertNotEquals(0, physics.acceleration.lengthSquared()));
+                  .expect(state -> assertAll(
+                          // explosions happens at (0,0), entity is at (-1,-1) -> expect to move to negative dir
+                          () -> assertTrue(physics.acceleration.x < 0),
+                          () -> assertTrue(physics.acceleration.y < 0)
+                  ));
     }
 
     @Test

@@ -29,7 +29,7 @@ public class GrenadeFuseUpdateSystem implements EcsSystem<GrenadeFuseUpdateSyste
                                                     stats.explosionDamage,
                                                     stats.explosionRadiusSquared,
                                                     stats.explosionPushForce,
-                                                    stats.damageSource);
+                                                    fuse.damageSource);
                 resources.explosions.addExplosion(exp);
 
                 entity.destroy();

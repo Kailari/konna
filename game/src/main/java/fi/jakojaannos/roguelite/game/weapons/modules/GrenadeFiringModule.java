@@ -65,6 +65,7 @@ public class GrenadeFiringModule implements WeaponModule<GrenadeFiringModule.Att
                                        state.velocity,
                                        attackAbility.projectileLayer,
                                        attributes.stats,
+                                       attackAbility.damageSource,
                                        info.timeManager().getCurrentGameTime(),
                                        flightTime);
     }

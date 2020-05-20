@@ -55,6 +55,7 @@ public final class GameplayGameMode {
         world.registerResource(new SessionStats(timeManager.getCurrentGameTime()));
         world.registerResource(new Mouse());
         world.registerResource(new Inputs());
+        world.registerResource(new Explosions());
 
         final var player = PlayerArchetype.create(world, timeManager, new Transform(0, 0));
         player.addComponent(new CameraFollowTargetTag());
@@ -137,6 +138,8 @@ public final class GameplayGameMode {
                                     .withSystem(new HealthUpdateSystem())
                                     .withSystem(new SplitOnDeathSystem())
                                     .withSystem(new CameraControlSystem())
+                                    .withSystem(new GrenadeFuseUpdateSystem())
+                                    .withSystem(new ExplosionHandlerSystem())
                                     .dependsOn(input, earlyTick, characterTick, physicsTick, collisionHandler)
                                     .buildGroup();
 
@@ -150,6 +153,7 @@ public final class GameplayGameMode {
                .withSystem(new CleanUpEntitiesWithLifetime())
                .withSystem(new ReaperSystem())
                .withSystem(new LoseGameOnPlayerDeathSystem())
+               .withSystem(new ExplosionCleanupSystem())
                .dependsOn(input, earlyTick, characterTick, physicsTick, collisionHandler, lateTick)
                .buildGroup();
 
