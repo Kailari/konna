@@ -9,6 +9,7 @@ import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.weapon.Fuse;
 import fi.jakojaannos.roguelite.game.data.components.weapon.GrenadeStats;
 import fi.jakojaannos.roguelite.game.data.resources.Explosions;
+import fi.jakojaannos.roguelite.game.data.resources.RecentExplosion;
 
 public class GrenadeFuseUpdateSystem implements EcsSystem<GrenadeFuseUpdateSystem.Resources, GrenadeFuseUpdateSystem.EntityData, EcsSystem.NoEvents> {
 
@@ -18,7 +19,22 @@ public class GrenadeFuseUpdateSystem implements EcsSystem<GrenadeFuseUpdateSyste
             final Stream<EntityDataHandle<EntityData>> entities,
             final NoEvents noEvents
     ) {
+        final var timeManager = resources.timeManager;
+        entities.forEach(entity -> {
+            final var fuse = entity.getData().fuse;
 
+            if (timeManager.getCurrentGameTime() >= fuse.fuseStart + fuse.fuseTime) {
+                final var stats = entity.getData().stats;
+                final var exp = new RecentExplosion(entity.getData().transform.position,
+                                                    stats.explosionDamage,
+                                                    stats.explosionRadiusSquared,
+                                                    stats.explosionPushForce,
+                                                    stats.damageSource);
+                resources.explosions.addExplosion(exp);
+
+                entity.destroy();
+            }
+        });
     }
 
     public static record EntityData(
