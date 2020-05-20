@@ -5,7 +5,9 @@ import fi.jakojaannos.konna.engine.application.PresentableState;
 import fi.jakojaannos.konna.engine.assets.AssetManager;
 import fi.jakojaannos.konna.engine.util.RecreateCloseable;
 import fi.jakojaannos.konna.engine.view.renderer.debug.DebugRendererExecutor;
+import fi.jakojaannos.konna.engine.view.renderer.mesh.MeshRendererExecutor;
 import fi.jakojaannos.konna.engine.vulkan.DepthTexture;
+import fi.jakojaannos.konna.engine.vulkan.RenderingBackend;
 import fi.jakojaannos.konna.engine.vulkan.command.CommandBuffer;
 import fi.jakojaannos.konna.engine.vulkan.descriptor.DescriptorPool;
 import fi.jakojaannos.konna.engine.vulkan.descriptor.DescriptorSetLayout;
@@ -28,9 +30,11 @@ public class RendererExecutor extends RecreateCloseable {
     private final DescriptorPool descriptorPool;
 
     private final DescriptorSetLayout cameraDescriptorLayout;
+
     private final CameraUniformBufferObject cameraUBO;
 
     private final DebugRendererExecutor debugRenderer;
+    private final MeshRendererExecutor meshRenderer;
 
     private CommandBuffer[] commandBuffers;
 
@@ -39,17 +43,16 @@ public class RendererExecutor extends RecreateCloseable {
     }
 
     public RendererExecutor(
-            final DeviceContext deviceContext,
-            final Swapchain swapchain,
+            final RenderingBackend backend,
             final AssetManager assetManager
     ) {
-        this.deviceContext = deviceContext;
-        this.swapchain = swapchain;
+        this.deviceContext = backend.deviceContext();
+        this.swapchain = backend.swapchain();
 
-        this.depthTexture = new DepthTexture(deviceContext, this.swapchain);
+        this.depthTexture = new DepthTexture(this.deviceContext, this.swapchain);
 
-        this.renderPass = new RenderPass(deviceContext, this.swapchain);
-        this.framebuffers = new Framebuffers(deviceContext,
+        this.renderPass = new RenderPass(this.deviceContext, this.swapchain);
+        this.framebuffers = new Framebuffers(this.deviceContext,
                                              this.swapchain,
                                              this.depthTexture,
                                              this.renderPass);
@@ -58,8 +61,10 @@ public class RendererExecutor extends RecreateCloseable {
         // can delay the descriptorCount/maxSets calculations to `tryRecreate`, where all resources
         // are already initialized. In other words: we do not yet know the image count here so use
         // suppliers to move the time of making the decision to a later point in time
+        // FIXME: Counts are not right
+        // FIXME: Add own pool for debug renderer (own pool for each renderer?)
         this.descriptorPool = new SwapchainImageDependentDescriptorPool(
-                deviceContext,
+                this.deviceContext,
                 this.swapchain,
                 2 + 7 + 1,
                 new DescriptorPool.Pool(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
@@ -67,19 +72,26 @@ public class RendererExecutor extends RecreateCloseable {
                 new DescriptorPool.Pool(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                                         this.swapchain::getImageCount));
 
-        this.cameraDescriptorLayout = new DescriptorSetLayout(deviceContext,
+        this.cameraDescriptorLayout = new DescriptorSetLayout(this.deviceContext,
                                                               CameraUniformBufferObject.CAMERA_DESCRIPTOR_BINDING);
-        this.cameraUBO = new CameraUniformBufferObject(deviceContext,
-                                                       swapchain,
+
+        this.cameraUBO = new CameraUniformBufferObject(this.deviceContext,
+                                                       this.swapchain,
                                                        this.descriptorPool,
                                                        this.cameraDescriptorLayout,
                                                        25.0f);
 
-        this.debugRenderer = new DebugRendererExecutor(deviceContext,
-                                                       swapchain,
+        this.debugRenderer = new DebugRendererExecutor(this.deviceContext,
+                                                       this.swapchain,
                                                        this.renderPass,
                                                        assetManager,
                                                        this.cameraDescriptorLayout);
+        this.meshRenderer = new MeshRendererExecutor(backend,
+                                                     this.renderPass,
+                                                     assetManager,
+                                                     this.cameraDescriptorLayout);
+
+        tryRecreate();
     }
 
     public void flush(
@@ -93,6 +105,7 @@ public class RendererExecutor extends RecreateCloseable {
              final var ignored2 = this.renderPass.begin(framebuffer, commandBuffer)
         ) {
             this.debugRenderer.flush(presentableState, this.cameraUBO, commandBuffer, imageIndex);
+            this.meshRenderer.flush(presentableState, this.cameraUBO, commandBuffer, imageIndex);
         }
     }
 
@@ -125,6 +138,7 @@ public class RendererExecutor extends RecreateCloseable {
         this.cameraUBO.tryRecreate();
 
         this.debugRenderer.tryRecreate();
+        this.meshRenderer.tryRecreate();
     }
 
     private void freeCommandBuffers() {
@@ -158,6 +172,7 @@ public class RendererExecutor extends RecreateCloseable {
         this.cameraUBO.close();
 
         this.debugRenderer.close();
+        this.meshRenderer.close();
 
         this.cameraDescriptorLayout.close();
         super.close();

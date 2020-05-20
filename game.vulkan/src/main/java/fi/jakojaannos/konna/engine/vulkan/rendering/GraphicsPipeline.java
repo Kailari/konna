@@ -68,9 +68,9 @@ public class GraphicsPipeline<TVertex> extends RecreateCloseable {
         this.descriptorSetLayouts = descriptorSetLayouts;
 
         this.vertexShader = assetManager.getStorage(Shader.class)
-                                        .get(vertexShaderAsset);
+                                        .getOrDefault(vertexShaderAsset);
         this.fragmentShader = assetManager.getStorage(Shader.class)
-                                          .get(fragmentShaderAsset);
+                                          .getOrDefault(fragmentShaderAsset);
     }
 
     @Override

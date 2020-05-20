@@ -1,17 +1,7 @@
 package fi.jakojaannos.konna.engine.vulkan;
 
-import java.nio.file.Path;
-
-import fi.jakojaannos.konna.engine.CameraUniformBufferObject;
-import fi.jakojaannos.konna.engine.application.PresentableState;
-import fi.jakojaannos.konna.engine.assets.AssetManager;
-import fi.jakojaannos.konna.engine.view.renderer.RendererExecutor;
-import fi.jakojaannos.konna.engine.vulkan.rendering.Swapchain;
-import fi.jakojaannos.konna.engine.vulkan.window.Window;
-
-public class RenderingContext implements AutoCloseable {
-    private final Swapchain swapchain;
-    private final RendererExecutor renderer;
+@Deprecated
+public class RenderingContext {
 
     /*private final GraphicsPipeline<StaticMeshVertex> staticPipeline;
     private final GraphicsPipeline<SkeletalMeshVertex> skeletalPipeline;
@@ -24,25 +14,6 @@ public class RenderingContext implements AutoCloseable {
 
     private final StaticMesh[] staticMeshes;
     private final AnimatedMesh humanoid;*/
-
-    public int getSwapchainImageCount() {
-        return this.swapchain.getImageCount();
-    }
-
-    public Swapchain getSwapchain() {
-        return this.swapchain;
-    }
-
-    /*
-    public AnimatedMesh getHumanoid() {
-        return this.humanoid;
-    }
-     */
-
-    @Deprecated
-    public CameraUniformBufferObject getCameraUBO() {
-        return this.renderer.getCameraUBO();
-    }
 
     /*
     public void recordFrame(final int imageIndex, final PresentableState state) {
@@ -114,11 +85,7 @@ public class RenderingContext implements AutoCloseable {
     }
      */
 
-    public RenderingContext(final AssetManager assetManager, final RenderingBackend backend, final Window window) {
-        this.swapchain = new Swapchain(backend.deviceContext(), window, backend.surface());
-
-        this.renderer = new RendererExecutor(backend.deviceContext(), this.swapchain, assetManager);
-
+    public RenderingContext() {
         /*
         this.sceneDescriptorLayout = new DescriptorSetLayout(backend.deviceContext(),
                                                              SceneUniformBufferObject.LIGHTS_DESCRIPTOR_BINDING,
@@ -176,32 +143,5 @@ public class RenderingContext implements AutoCloseable {
         this.staticMeshes = staticMeshLoader.load(Path.of("models/arena.obj"));
         this.humanoid = skeletalMeshLoader.load(Path.of("models/humanoid.fbx"));
          */
-
-        recreateSwapchain();
-    }
-
-    public void recreateSwapchain() {
-        this.swapchain.tryRecreate();
-
-        this.renderer.tryRecreate();
-    }
-
-    @Override
-    public void close() {
-        this.renderer.close();
-        this.swapchain.close();
-    }
-
-    public void recordFrame(final int imageIndex, final PresentableState state) {
-        this.renderer.flush(state, imageIndex);
-    }
-
-    public void submit(
-            final int imageIndex,
-            final long fence,
-            final long imageAvailableSemaphore,
-            final long renderFinishedSemaphore
-    ) {
-        this.renderer.submit(imageIndex, fence, imageAvailableSemaphore, renderFinishedSemaphore);
     }
 }

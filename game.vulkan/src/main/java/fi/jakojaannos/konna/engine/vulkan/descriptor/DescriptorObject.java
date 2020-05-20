@@ -106,6 +106,23 @@ public abstract class DescriptorObject extends RecreateCloseable {
         }
     }
 
+    protected void flushAllCombinedImageSamplerBindings(final int imageIndex) {
+        try (final var ignored = stackPush()) {
+            final var writes = VkWriteDescriptorSet
+                    .callocStack(this.imageSamplerBindings.length);
+
+            var writeIndex = 0;
+            for (final var imageSamplerBinding : this.imageSamplerBindings) {
+                writeCombinedImageSampler(imageSamplerBinding,
+                                          this.descriptorSets[imageIndex],
+                                          writes.get(writeIndex));
+                ++writeIndex;
+            }
+
+            vkUpdateDescriptorSets(this.deviceContext.getDevice(), writes, null);
+        }
+    }
+
     @Override
     protected void recreate() {
         this.buffers = new GPUBuffer[this.swapchain.getImageCount()];

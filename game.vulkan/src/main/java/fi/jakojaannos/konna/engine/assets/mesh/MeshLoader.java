@@ -11,71 +11,54 @@ import org.slf4j.LoggerFactory;
 import java.nio.IntBuffer;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import javax.annotation.Nullable;
+import java.util.Optional;
 
-import fi.jakojaannos.konna.engine.assets.material.Material;
-import fi.jakojaannos.konna.engine.assets.texture.Texture;
+import fi.jakojaannos.konna.engine.assets.AssetLoader;
+import fi.jakojaannos.konna.engine.assets.AssetManager;
+import fi.jakojaannos.konna.engine.assets.Texture;
+import fi.jakojaannos.konna.engine.assets.material.MaterialImpl;
 import fi.jakojaannos.konna.engine.util.BitMask;
 import fi.jakojaannos.konna.engine.vulkan.LogCategories;
+import fi.jakojaannos.konna.engine.vulkan.RenderingBackend;
 import fi.jakojaannos.konna.engine.vulkan.TextureSampler;
-import fi.jakojaannos.konna.engine.vulkan.descriptor.DescriptorPool;
-import fi.jakojaannos.konna.engine.vulkan.descriptor.DescriptorSetLayout;
-import fi.jakojaannos.konna.engine.vulkan.device.DeviceContext;
-import fi.jakojaannos.konna.engine.vulkan.rendering.Swapchain;
 
 import static fi.jakojaannos.konna.engine.util.BitMask.bitMask;
 import static org.lwjgl.assimp.Assimp.*;
 import static org.lwjgl.system.MemoryStack.stackPush;
 
-public abstract class MeshLoader<TMesh> {
+public abstract class MeshLoader<TMesh> implements AssetLoader<TMesh> {
     private static final Logger LOG = LoggerFactory.getLogger(MeshLoader.class);
 
-    protected final DeviceContext deviceContext;
-    protected final Swapchain swapchain;
-    protected final DescriptorPool descriptorPool;
-    protected final DescriptorSetLayout descriptorLayout;
-    protected final TextureSampler textureSampler;
+    protected final RenderingBackend backend;
+    protected final AssetManager assetManager;
 
-    protected final Path assetRoot;
-    protected final Texture defaultTexture;
-    protected final Material defaultMaterial;
+    protected final MaterialImpl defaultMaterial;
 
     protected MeshLoader(
-            final DeviceContext deviceContext,
-            final Swapchain swapchain,
-            final DescriptorPool descriptorPool,
-            final DescriptorSetLayout descriptorLayout,
-            final TextureSampler textureSampler,
-            final Texture defaultTexture,
-            final Path assetRoot
+            final RenderingBackend backend,
+            final AssetManager assetManager
     ) {
-        this.deviceContext = deviceContext;
-        this.swapchain = swapchain;
-        this.descriptorPool = descriptorPool;
-        this.descriptorLayout = descriptorLayout;
-        this.textureSampler = textureSampler;
+        this.backend = backend;
+        this.assetManager = assetManager;
 
-        this.assetRoot = assetRoot;
-        this.defaultTexture = defaultTexture;
-        this.defaultMaterial = new Material(Material.DEFAULT_COLOR,
-                                            Material.DEFAULT_COLOR,
-                                            Material.DEFAULT_COLOR,
-                                            this.defaultTexture,
-                                            false,
-                                            0.0f);
+        this.defaultMaterial = new MaterialImpl(MaterialImpl.DEFAULT_COLOR,
+                                                MaterialImpl.DEFAULT_COLOR,
+                                                MaterialImpl.DEFAULT_COLOR,
+                                                null,
+                                                0.0f);
     }
 
-    public TMesh load(final Path path) {
+    public Optional<TMesh> load(final Path path) {
         return load(path,
                     bitMask(AssimpProcess.JoinIdenticalVertices,
                             AssimpProcess.Triangulate));
     }
 
-    public abstract TMesh load(final Path path, final BitMask<AssimpProcess> flags);
+    public abstract Optional<TMesh> load(final Path path, final BitMask<AssimpProcess> flags);
 
     protected void processMaterial(
             final AIMaterial material,
-            final ArrayList<Material> processedMaterials
+            final ArrayList<MaterialImpl> processedMaterials
     ) {
         LOG.trace(LogCategories.MESH_LOADING, "\t-> Processing material");
         try (final var ignored = stackPush()) {
@@ -99,7 +82,7 @@ public abstract class MeshLoader<TMesh> {
                 texture = tryGetTexture(path.dataString());
             } else {
                 hasTexture = false;
-                texture = this.defaultTexture;
+                texture = null;
             }
 
             // Try fetching the ambient color
@@ -107,7 +90,7 @@ public abstract class MeshLoader<TMesh> {
             if (aiGetMaterialColor(material, AI_MATKEY_COLOR_AMBIENT, aiTextureType_NONE, 0, color) == aiReturn_SUCCESS) {
                 ambient = new Vector4f(color.r(), color.g(), color.b(), color.a());
             } else {
-                ambient = Material.DEFAULT_COLOR;
+                ambient = MaterialImpl.DEFAULT_COLOR;
             }
 
             // Try fetching the diffuse color
@@ -115,7 +98,7 @@ public abstract class MeshLoader<TMesh> {
             if (aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, aiTextureType_NONE, 0, color) == aiReturn_SUCCESS) {
                 diffuse = new Vector4f(color.r(), color.g(), color.b(), color.a());
             } else {
-                diffuse = Material.DEFAULT_COLOR;
+                diffuse = MaterialImpl.DEFAULT_COLOR;
             }
 
             // Try fetching the diffuse color
@@ -123,7 +106,7 @@ public abstract class MeshLoader<TMesh> {
             if (aiGetMaterialColor(material, AI_MATKEY_COLOR_SPECULAR, aiTextureType_NONE, 0, color) == aiReturn_SUCCESS) {
                 specular = new Vector4f(color.r(), color.g(), color.b(), color.a());
             } else {
-                specular = Material.DEFAULT_COLOR;
+                specular = MaterialImpl.DEFAULT_COLOR;
             }
 
             LOG.trace(LogCategories.MESH_LOADING, "\t\t-> texture: {}, ambient: {}, diffuse: {}, specular: {}",
@@ -132,18 +115,17 @@ public abstract class MeshLoader<TMesh> {
                       formatColor(diffuse),
                       formatColor(specular));
 
-            final var processed = new Material(ambient,
-                                               diffuse,
-                                               specular,
-                                               texture,
-                                               hasTexture,
-                                               1.0f);
+            final var processed = new MaterialImpl(ambient,
+                                                   diffuse,
+                                                   specular,
+                                                   texture,
+                                                   1.0f);
             processedMaterials.add(processed);
         }
     }
 
     private String formatColor(final Vector4f color) {
-        return color != Material.DEFAULT_COLOR
+        return color != MaterialImpl.DEFAULT_COLOR
                 ? String.format("(%.2f, %.2f, %.2f, %.2f)", color.x, color.y, color.z, color.w)
                 : "Default";
     }
@@ -170,10 +152,8 @@ public abstract class MeshLoader<TMesh> {
         return indices;
     }
 
-    @Nullable
     private Texture tryGetTexture(final String path) {
-        final var fullPath = this.assetRoot.resolve(path);
-
-        throw new UnsupportedOperationException("Not implemented");
+        return this.assetManager.getStorage(Texture.class)
+                                .getOrDefault(path);
     }
 }

@@ -31,11 +31,17 @@ public class AssetStorageImpl<TAsset> implements AssetStorage<TAsset> {
     }
 
     @Override
-    public TAsset get(final String assetPath) {
-        return this.loadedAssets.computeIfAbsent(assetPath, this::loadAsset);
+    public TAsset getOrDefault(final String assetPath) {
+        return this.loadedAssets.computeIfAbsent(assetPath, this::loadAssetOrDefault);
     }
 
-    private TAsset loadAsset(final String path) {
+    @Override
+    @Nullable
+    public TAsset getOrNull(final String assetPath) {
+        return this.loadedAssets.computeIfAbsent(assetPath, this::loadAssetOrNull);
+    }
+
+    private TAsset loadAssetOrDefault(final String path) {
         if (this.defaultAsset != null) {
             return this.loader.load(this.assetRoot.resolve(path))
                               .orElseGet(() -> {
@@ -51,12 +57,19 @@ public class AssetStorageImpl<TAsset> implements AssetStorage<TAsset> {
                                   + "Not recoverable as default asset of this type has not been specified."));
     }
 
+    @Nullable
+    private TAsset loadAssetOrNull(final String path) {
+        return this.loader.load(this.assetRoot.resolve(path))
+                          .orElse(null);
+    }
+
     @Override
     public void close() {
         this.loadedAssets.values().forEach(AssetStorageImpl::tryCloseAsset);
+        tryCloseAsset(this.defaultAsset);
     }
 
-    private static <TAsset> void tryCloseAsset(final TAsset asset) {
+    private static <TAsset> void tryCloseAsset(@Nullable final TAsset asset) {
         if (asset instanceof AutoCloseable closeable) {
             try {
                 closeable.close();

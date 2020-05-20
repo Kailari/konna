@@ -9,48 +9,33 @@ import java.nio.file.Path;
 import java.util.*;
 import javax.annotation.Nullable;
 
-import fi.jakojaannos.konna.engine.assets.material.Material;
-import fi.jakojaannos.konna.engine.assets.texture.Texture;
+import fi.jakojaannos.konna.engine.assets.AssetManager;
+import fi.jakojaannos.konna.engine.assets.Material;
+import fi.jakojaannos.konna.engine.assets.Mesh;
+import fi.jakojaannos.konna.engine.assets.SkeletalMesh;
+import fi.jakojaannos.konna.engine.assets.material.MaterialImpl;
 import fi.jakojaannos.konna.engine.util.BitMask;
 import fi.jakojaannos.konna.engine.vulkan.LogCategories;
+import fi.jakojaannos.konna.engine.vulkan.RenderingBackend;
 import fi.jakojaannos.konna.engine.vulkan.TextureSampler;
 import fi.jakojaannos.konna.engine.vulkan.descriptor.DescriptorPool;
 import fi.jakojaannos.konna.engine.vulkan.descriptor.DescriptorSetLayout;
-import fi.jakojaannos.konna.engine.vulkan.device.DeviceContext;
-import fi.jakojaannos.konna.engine.vulkan.rendering.Swapchain;
 
 import static fi.jakojaannos.konna.engine.util.BitMask.bitMask;
 import static org.lwjgl.assimp.Assimp.aiGetErrorString;
 import static org.lwjgl.assimp.Assimp.aiImportFile;
 
-public class SkeletalMeshLoader extends MeshLoader<AnimatedMesh> {
+public class SkeletalMeshLoader extends MeshLoader<SkeletalMesh> {
     private static final Logger LOG = LoggerFactory.getLogger(SkeletalMeshLoader.class);
 
     private static final int MAX_WEIGHTS = 4;
-    private final DescriptorSetLayout boneDescriptorLayout;
 
-    public SkeletalMeshLoader(
-            final DeviceContext deviceContext,
-            final Swapchain swapchain,
-            final DescriptorPool descriptorPool,
-            final DescriptorSetLayout descriptorLayout,
-            final DescriptorSetLayout boneDescriptorLayout,
-            final TextureSampler textureSampler,
-            final Texture defaultTexture,
-            final Path assetRoot
-    ) {
-        super(deviceContext,
-              swapchain,
-              descriptorPool,
-              descriptorLayout,
-              textureSampler,
-              defaultTexture,
-              assetRoot);
-        this.boneDescriptorLayout = boneDescriptorLayout;
+    public SkeletalMeshLoader(final RenderingBackend backend, final AssetManager assetManager) {
+        super(backend, assetManager);
     }
 
     @Override
-    public AnimatedMesh load(final Path path) {
+    public Optional<SkeletalMesh> load(final Path path) {
         return load(path,
                     bitMask(AssimpProcess.JoinIdenticalVertices,
                             AssimpProcess.Triangulate,
@@ -58,20 +43,22 @@ public class SkeletalMeshLoader extends MeshLoader<AnimatedMesh> {
     }
 
     @Override
-    public AnimatedMesh load(final Path path, final BitMask<AssimpProcess> flags) {
+    public Optional<SkeletalMesh> load(final Path path, final BitMask<AssimpProcess> flags) {
         LOG.debug(LogCategories.MESH_LOADING, "Importing skeletal mesh \"{}\"",
                   path);
-        final var scene = aiImportFile(this.assetRoot.resolve(path)
-                                                     .toString(),
+        final var scene = aiImportFile(this.assetManager.getRootPath()
+                                                        .resolve(path)
+                                                        .toString(),
                                        flags.mask());
         if (scene == null) {
-            throw new IllegalStateException("Error importing model: " + aiGetErrorString());
+            LOG.error("Error importing model: " + aiGetErrorString());
+            return Optional.empty();
         }
 
         final var numMaterials = scene.mNumMaterials();
         final var materials = scene.mMaterials();
 
-        final var processedMaterials = new ArrayList<Material>();
+        final var processedMaterials = new ArrayList<MaterialImpl>();
         if (materials != null) {
             for (int i = 0; i < numMaterials; i++) {
                 final var aiMaterial = AIMaterial.create(materials.get(i));
@@ -85,7 +72,7 @@ public class SkeletalMeshLoader extends MeshLoader<AnimatedMesh> {
         final var numMeshes = scene.mNumMeshes();
         final var meshes = scene.mMeshes();
 
-        final var processedMeshes = new SkeletalMesh[numMeshes];
+        final var processedMeshes = new Mesh[numMeshes];
         final var bones = new ArrayList<MeshBone>();
         if (meshes != null) {
             for (int i = 0; i < numMeshes; i++) {
@@ -104,12 +91,7 @@ public class SkeletalMeshLoader extends MeshLoader<AnimatedMesh> {
             final var rootTransform = asMatrix(rootNode.mTransformation());
             final var rootAnimationNode = processNodeHierarchy(rootNode, null);
             final var animations = processAnimations(scene, bones, rootAnimationNode, rootTransform);
-            return new AnimatedMesh(this.deviceContext,
-                                    this.swapchain,
-                                    this.descriptorPool,
-                                    this.boneDescriptorLayout,
-                                    processedMeshes,
-                                    animations);
+            return Optional.of(SkeletalMesh.from(animations, processedMeshes));
         } else {
             throw new IllegalStateException("No root node found on skeletal mesh!");
         }
@@ -272,9 +254,9 @@ public class SkeletalMeshLoader extends MeshLoader<AnimatedMesh> {
         node.setFrameTransforms(frames);
     }
 
-    protected SkeletalMesh processMesh(
+    protected Mesh processMesh(
             final AIMesh mesh,
-            final ArrayList<Material> materials,
+            final ArrayList<MaterialImpl> materials,
             final List<MeshBone> bones
     ) {
         final Material material;
@@ -288,14 +270,11 @@ public class SkeletalMeshLoader extends MeshLoader<AnimatedMesh> {
         final var boneWeights = processBones(mesh, bones);
         final var vertices = processVertices(mesh, boneWeights);
         final var indices = processIndices(mesh);
-        return new SkeletalMesh(this.deviceContext,
-                                this.swapchain,
-                                this.descriptorPool,
-                                this.descriptorLayout,
-                                this.textureSampler,
-                                vertices,
-                                indices,
-                                material);
+        return Mesh.from(this.backend,
+                         SkeletalMeshVertex.FORMAT,
+                         vertices,
+                         indices,
+                         material);
     }
 
     private BoneWeights[] processBones(final AIMesh mesh, final List<MeshBone> bones) {

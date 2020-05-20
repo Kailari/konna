@@ -2,6 +2,7 @@ package fi.jakojaannos.konna.engine.assets.texture;
 
 import java.nio.file.Path;
 
+import fi.jakojaannos.konna.engine.assets.Texture;
 import fi.jakojaannos.konna.engine.vulkan.GPUImage;
 import fi.jakojaannos.konna.engine.vulkan.device.DeviceContext;
 import fi.jakojaannos.konna.engine.vulkan.rendering.ImageView;
@@ -12,7 +13,7 @@ import fi.jakojaannos.konna.engine.vulkan.types.VkMemoryPropertyFlags;
 
 import static fi.jakojaannos.konna.engine.util.BitMask.bitMask;
 
-public class Texture implements AutoCloseable {
+public class TextureImpl implements Texture {
     private final GPUImage image;
     private final ImageView imageView;
 
@@ -20,7 +21,7 @@ public class Texture implements AutoCloseable {
         return this.imageView;
     }
 
-    public Texture(final DeviceContext deviceContext, final Path path) {
+    public TextureImpl(final DeviceContext deviceContext, final Path path) {
         this.image = new GPUImage(deviceContext,
                                   path,
                                   VkImageTiling.OPTIMAL,

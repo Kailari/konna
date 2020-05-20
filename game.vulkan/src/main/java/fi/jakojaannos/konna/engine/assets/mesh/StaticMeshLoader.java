@@ -9,49 +9,37 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Optional;
 
-import fi.jakojaannos.konna.engine.assets.material.Material;
-import fi.jakojaannos.konna.engine.assets.texture.Texture;
+import fi.jakojaannos.konna.engine.assets.AssetManager;
+import fi.jakojaannos.konna.engine.assets.Material;
+import fi.jakojaannos.konna.engine.assets.Mesh;
+import fi.jakojaannos.konna.engine.assets.StaticMesh;
+import fi.jakojaannos.konna.engine.assets.material.MaterialImpl;
 import fi.jakojaannos.konna.engine.util.BitMask;
 import fi.jakojaannos.konna.engine.vulkan.LogCategories;
-import fi.jakojaannos.konna.engine.vulkan.TextureSampler;
-import fi.jakojaannos.konna.engine.vulkan.descriptor.DescriptorPool;
-import fi.jakojaannos.konna.engine.vulkan.descriptor.DescriptorSetLayout;
-import fi.jakojaannos.konna.engine.vulkan.device.DeviceContext;
-import fi.jakojaannos.konna.engine.vulkan.rendering.Swapchain;
+import fi.jakojaannos.konna.engine.vulkan.RenderingBackend;
 
 import static org.lwjgl.assimp.Assimp.aiGetErrorString;
 import static org.lwjgl.assimp.Assimp.aiImportFile;
 
-public class StaticMeshLoader extends MeshLoader<StaticMesh[]> {
+public class StaticMeshLoader extends MeshLoader<StaticMesh> {
     private static final Logger LOG = LoggerFactory.getLogger(StaticMeshLoader.class);
 
-    public StaticMeshLoader(
-            final DeviceContext deviceContext,
-            final Swapchain swapchain,
-            final DescriptorPool descriptorPool,
-            final DescriptorSetLayout descriptorLayout,
-            final TextureSampler textureSampler,
-            final Texture defaultTexture,
-            final Path assetRoot
-    ) {
-        super(deviceContext,
-              swapchain,
-              descriptorPool,
-              descriptorLayout,
-              textureSampler,
-              defaultTexture,
-              assetRoot);
+    public StaticMeshLoader(final RenderingBackend backend, final AssetManager assetManager) {
+        super(backend, assetManager);
     }
 
     @Override
-    public StaticMesh[] load(
-            final Path path, final BitMask<AssimpProcess> flags
+    public Optional<StaticMesh> load(
+            final Path path,
+            final BitMask<AssimpProcess> flags
     ) {
         LOG.debug(LogCategories.MESH_LOADING, "Importing static mesh \"{}\"",
                   path);
-        final var scene = aiImportFile(this.assetRoot.resolve(path)
-                                                     .toString(),
+        final var scene = aiImportFile(this.assetManager.getRootPath()
+                                                        .resolve(path)
+                                                        .toString(),
                                        flags.mask());
         if (scene == null) {
             throw new IllegalStateException("Error importing model: " + aiGetErrorString());
@@ -60,7 +48,7 @@ public class StaticMeshLoader extends MeshLoader<StaticMesh[]> {
         final var numMaterials = scene.mNumMaterials();
         final var materials = scene.mMaterials();
 
-        final var processedMaterials = new ArrayList<Material>();
+        final var processedMaterials = new ArrayList<MaterialImpl>();
         if (materials != null) {
             for (int i = 0; i < numMaterials; i++) {
                 final var aiMaterial = AIMaterial.create(materials.get(i));
@@ -74,7 +62,7 @@ public class StaticMeshLoader extends MeshLoader<StaticMesh[]> {
         final var numMeshes = scene.mNumMeshes();
         final var meshes = scene.mMeshes();
 
-        final var processedMeshes = new StaticMesh[numMeshes];
+        final var processedMeshes = new Mesh[numMeshes];
         if (meshes != null) {
             for (int i = 0; i < numMeshes; i++) {
                 final var mesh = AIMesh.create(meshes.get(i));
@@ -86,12 +74,12 @@ public class StaticMeshLoader extends MeshLoader<StaticMesh[]> {
         LOG.debug(LogCategories.MESH_LOADING, "\t-> Loaded {} submeshes.",
                   processedMaterials.size());
 
-        return processedMeshes;
+        return Optional.of(StaticMesh.from(processedMeshes));
     }
 
-    private StaticMesh processMesh(
+    private Mesh processMesh(
             final AIMesh mesh,
-            final ArrayList<Material> materials
+            final ArrayList<MaterialImpl> materials
     ) {
         final var vertices = processVertices(mesh);
         final var indices = processIndices(mesh);
@@ -103,14 +91,11 @@ public class StaticMeshLoader extends MeshLoader<StaticMesh[]> {
         } else {
             material = this.defaultMaterial;
         }
-        return new StaticMesh(this.deviceContext,
-                              this.swapchain,
-                              this.descriptorPool,
-                              this.descriptorLayout,
-                              this.textureSampler,
-                              vertices,
-                              indices,
-                              material);
+        return Mesh.from(this.backend,
+                         StaticMeshVertex.FORMAT,
+                         vertices,
+                         indices,
+                         material);
     }
 
     private StaticMeshVertex[] processVertices(final AIMesh mesh) {

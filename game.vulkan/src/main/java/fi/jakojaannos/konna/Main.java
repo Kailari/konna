@@ -13,10 +13,10 @@ import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;
 
 public class Main {
     public static void main(final String[] args) {
-        try (final var assetManager = new AssetManagerImpl(Path.of("../assets"));
-             final var app = Application.initialize(800,
-                                                    600,
-                                                    assetManager);
+        try (final var app = Application.initialize(800,
+                                                    600);
+             final var assetManager = new AssetManagerImpl(app.backend(),
+                                                           Path.of("../assets"));
              final var runner = new ApplicationRunner(app, assetManager)
         ) {
             /*

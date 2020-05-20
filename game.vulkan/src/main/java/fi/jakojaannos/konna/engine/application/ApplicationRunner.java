@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import fi.jakojaannos.konna.engine.assets.AssetManager;
+import fi.jakojaannos.konna.engine.view.renderer.RendererExecutor;
 import fi.jakojaannos.konna.engine.view.renderer.RendererRecorder;
 import fi.jakojaannos.konna.engine.vulkan.device.DeviceContext;
 import fi.jakojaannos.roguelite.engine.GameMode;
@@ -41,6 +42,8 @@ public class ApplicationRunner implements AutoCloseable {
     private final Application application;
     private final AssetManager assetManager;
 
+    private final RendererExecutor renderer;
+
     private final GameRunnerTimeManager timeManager;
 
     private boolean framebufferResized;
@@ -57,9 +60,12 @@ public class ApplicationRunner implements AutoCloseable {
         this.application = application;
         this.assetManager = assetManager;
 
+        final var deviceContext = application.backend().deviceContext();
+        final var swapchain = application.backend().swapchain();
+        this.renderer = new RendererExecutor(application.backend(), assetManager);
+
         this.timeManager = new GameRunnerTimeManager(20L);
 
-        final var deviceContext = application.backend().deviceContext();
         this.imageAvailableSemaphores = new long[MAX_FRAMES_IN_FLIGHT];
         this.renderFinishedSemaphores = new long[MAX_FRAMES_IN_FLIGHT];
         this.inFlightFences = new long[MAX_FRAMES_IN_FLIGHT];
@@ -69,7 +75,7 @@ public class ApplicationRunner implements AutoCloseable {
 
             this.inFlightFences[i] = createFence(deviceContext);
         }
-        this.imagesInFlight = new long[application.renderingContext().getSwapchainImageCount()];
+        this.imagesInFlight = new long[swapchain.getImageCount()];
         Arrays.fill(this.imagesInFlight, VK_NULL_HANDLE);
 
         this.application.window()
@@ -113,7 +119,7 @@ public class ApplicationRunner implements AutoCloseable {
                 }
 
                 final var state = simulationRunner.fetchPresentableState();
-                this.application.renderingContext().recordFrame(imageIndex, state);
+                this.renderer.flush(state, imageIndex);
                 drawFrame(delta, imageIndex);
 
                 presentImage(imageIndex);
@@ -159,7 +165,7 @@ public class ApplicationRunner implements AutoCloseable {
         try (final var stack = stackPush()) {
             final var pImageIndex = stack.mallocInt(1);
             final var result = vkAcquireNextImageKHR(deviceContext.getDevice(),
-                                                     this.application.renderingContext().getSwapchain().getHandle(),
+                                                     this.application.backend().swapchain().getHandle(),
                                                      -1L,
                                                      this.imageAvailableSemaphores[this.frameIndex],
                                                      VK_NULL_HANDLE,
@@ -185,22 +191,20 @@ public class ApplicationRunner implements AutoCloseable {
 
     private void drawFrame(final double delta, final int imageIndex) {
         //this.angle += delta * RADIANS_PER_SECOND;
-        this.application.renderingContext()
-                        .getCameraUBO()
-                        .update(imageIndex, this.angle);
+        this.renderer.getCameraUBO()
+                     .update(imageIndex, this.angle);
 
 
-        final var animationFramesPerSecond = 40;
+        //final var animationFramesPerSecond = 40;
         this.meshFrame += delta;
         //this.application.renderingContext()
         //                .getHumanoid()
         //                .setFrame(imageIndex, "Armature|idle", (int) (this.meshFrame * animationFramesPerSecond) % 33);
 
-        this.application.renderingContext()
-                        .submit(imageIndex,
-                                this.inFlightFences[this.frameIndex],
-                                this.imageAvailableSemaphores[this.frameIndex],
-                                this.renderFinishedSemaphores[this.frameIndex]);
+        this.renderer.submit(imageIndex,
+                             this.inFlightFences[this.frameIndex],
+                             this.imageAvailableSemaphores[this.frameIndex],
+                             this.renderFinishedSemaphores[this.frameIndex]);
     }
 
     private void presentImage(final int imageIndex) {
@@ -210,7 +214,7 @@ public class ApplicationRunner implements AutoCloseable {
                     .sType(VK_STRUCTURE_TYPE_PRESENT_INFO_KHR)
                     .pWaitSemaphores(stack.longs(this.renderFinishedSemaphores[this.frameIndex]))
                     .swapchainCount(1)
-                    .pSwapchains(stack.longs(this.application.renderingContext().getSwapchain().getHandle()))
+                    .pSwapchains(stack.longs(this.application.backend().swapchain().getHandle()))
                     .pImageIndices(stack.ints(imageIndex));
 
             final var deviceContext = this.application.backend().deviceContext();
@@ -232,7 +236,8 @@ public class ApplicationRunner implements AutoCloseable {
         LOG.debug("Recreating swapchain!");
         this.framebufferResized = false;
 
-        this.application.recreateSwapchain();
+        this.application.backend().tryRecreate();
+        this.renderer.tryRecreate();
     }
 
     private void waitUntilNotMinimized() {
@@ -261,6 +266,8 @@ public class ApplicationRunner implements AutoCloseable {
             vkDestroySemaphore(deviceContext.getDevice(), this.renderFinishedSemaphores[i], null);
             vkDestroyFence(deviceContext.getDevice(), this.inFlightFences[i], null);
         }
+
+        this.renderer.close();
     }
 
     private static long createSemaphore(final DeviceContext deviceContext) {

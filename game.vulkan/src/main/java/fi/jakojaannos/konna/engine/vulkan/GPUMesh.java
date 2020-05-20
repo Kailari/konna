@@ -2,15 +2,12 @@ package fi.jakojaannos.konna.engine.vulkan;
 
 import javax.annotation.Nullable;
 
-import fi.jakojaannos.konna.engine.util.BufferWriter;
 import fi.jakojaannos.konna.engine.vulkan.command.CommandBuffer;
 import fi.jakojaannos.konna.engine.vulkan.device.DeviceContext;
 import fi.jakojaannos.konna.engine.vulkan.types.VkMemoryPropertyFlags;
 
 import static fi.jakojaannos.konna.engine.util.BitMask.bitMask;
 import static org.lwjgl.system.MemoryStack.stackPush;
-import static org.lwjgl.system.MemoryUtil.memAlloc;
-import static org.lwjgl.system.MemoryUtil.memFree;
 import static org.lwjgl.vulkan.VK10.*;
 
 public class GPUMesh<TVertex> implements AutoCloseable {
@@ -50,44 +47,20 @@ public class GPUMesh<TVertex> implements AutoCloseable {
                                           vertices.length * vertexFormat.getSizeInBytes(),
                                           VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
                                           bitMask(VkMemoryPropertyFlags.DEVICE_LOCAL_BIT));
-        pushToBuffer(this.vertexBuffer,
-                     deviceContext,
-                     vertices,
-                     vertexFormat.getSizeInBytes(),
-                     vertexFormat::write);
+        this.vertexBuffer.pushWithStagingAndWait(vertices,
+                                                 vertexFormat.getSizeInBytes(),
+                                                 vertexFormat::write);
 
         if (indices.length != 0) {
             this.indexBuffer = new GPUBuffer(deviceContext,
                                              indices.length * Integer.BYTES,
                                              VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
                                              bitMask(VkMemoryPropertyFlags.DEVICE_LOCAL_BIT));
-            pushToBuffer(this.indexBuffer,
-                         deviceContext,
-                         indices,
-                         Integer.BYTES,
-                         (index, offset, buffer) -> buffer.putInt(offset, index));
+            this.indexBuffer.pushWithStagingAndWait(indices,
+                                                    Integer.BYTES,
+                                                    (index, offset, buffer) -> buffer.putInt(offset, index));
         } else {
             this.indexBuffer = null;
-        }
-    }
-
-    public void draw(final CommandBuffer commandBuffer) {
-        try (final var stack = stackPush()) {
-            vkCmdBindVertexBuffers(commandBuffer.getHandle(),
-                                   0,
-                                   stack.longs(this.vertexBuffer.getHandle()),
-                                   stack.longs(0L));
-            vkCmdBindIndexBuffer(commandBuffer.getHandle(),
-                                 this.indexBuffer.getHandle(),
-                                 0,
-                                 VK_INDEX_TYPE_UINT32);
-
-            vkCmdDrawIndexed(commandBuffer.getHandle(),
-                             this.indexCount,
-                             1,
-                             0,
-                             0,
-                             0);
         }
     }
 
@@ -96,35 +69,6 @@ public class GPUMesh<TVertex> implements AutoCloseable {
         this.vertexBuffer.close();
         if (this.indexBuffer != null) {
             this.indexBuffer.close();
-        }
-    }
-
-    private static <T> void pushToBuffer(
-            final GPUBuffer buffer,
-            final DeviceContext deviceContext,
-            final T[] values,
-            final int elementSize,
-            final BufferWriter<T> writer
-    ) {
-        final var commandPool = deviceContext.getTransferCommandPool();
-        final var dataSizeInBytes = values.length * elementSize;
-
-        final var data = memAlloc(dataSizeInBytes);
-        try (final var stagingBuffer = new GPUBuffer(
-                deviceContext,
-                dataSizeInBytes,
-                VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                bitMask(VkMemoryPropertyFlags.HOST_VISIBLE_BIT,
-                        VkMemoryPropertyFlags.HOST_COHERENT_BIT))
-        ) {
-            for (int i = 0; i < values.length; ++i) {
-                writer.write(values[i], i * elementSize, data);
-            }
-
-            stagingBuffer.push(data, 0, dataSizeInBytes);
-            stagingBuffer.copyToAndWait(commandPool, deviceContext.getTransferQueue(), buffer);
-        } finally {
-            memFree(data);
         }
     }
 }

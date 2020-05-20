@@ -2,6 +2,7 @@ package fi.jakojaannos.konna.engine.vulkan;
 
 import fi.jakojaannos.konna.engine.vulkan.device.DeviceContext;
 import fi.jakojaannos.konna.engine.vulkan.device.PhysicalDeviceSelector;
+import fi.jakojaannos.konna.engine.vulkan.rendering.Swapchain;
 import fi.jakojaannos.konna.engine.vulkan.window.Window;
 import fi.jakojaannos.konna.engine.vulkan.window.WindowSurface;
 
@@ -11,7 +12,8 @@ import static org.lwjgl.vulkan.KHRSwapchain.VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 public record RenderingBackend(
         VulkanInstance instance,
         WindowSurface surface,
-        DeviceContext deviceContext
+        DeviceContext deviceContext,
+        Swapchain swapchain
 ) implements AutoCloseable {
     public static RenderingBackend create(final Window window) {
         final String[] instanceLayers = {
@@ -34,12 +36,28 @@ public record RenderingBackend(
         final var deviceContext = new DeviceContext(deviceCandidate.physicalDevice(),
                                                     deviceCandidate.queueFamilies(),
                                                     deviceExtensions);
+        final var swapchain = new Swapchain(deviceContext, window, surface);
 
-        return new RenderingBackend(instance, surface, deviceContext);
+        return new RenderingBackend(instance, surface, deviceContext, swapchain);
+    }
+
+    public RenderingBackend {
+        this.instance = instance;
+        this.surface = surface;
+        this.deviceContext = deviceContext;
+        this.swapchain = swapchain;
+
+        tryRecreate();
+    }
+
+    public void tryRecreate() {
+        this.swapchain.tryRecreate();
     }
 
     @Override
     public void close() {
+        this.swapchain.close();
+
         this.deviceContext.close();
         this.surface.close();
         this.instance.close();

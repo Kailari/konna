@@ -5,18 +5,22 @@ import org.lwjgl.vulkan.*;
 import java.nio.ByteBuffer;
 
 import fi.jakojaannos.konna.engine.util.BitMask;
+import fi.jakojaannos.konna.engine.util.BufferWriter;
 import fi.jakojaannos.konna.engine.vulkan.command.CommandPool;
 import fi.jakojaannos.konna.engine.vulkan.command.GPUQueue;
 import fi.jakojaannos.konna.engine.vulkan.device.DeviceContext;
 import fi.jakojaannos.konna.engine.vulkan.memory.GPUMemory;
 import fi.jakojaannos.konna.engine.vulkan.types.VkMemoryPropertyFlags;
 
+import static fi.jakojaannos.konna.engine.util.BitMask.bitMask;
 import static fi.jakojaannos.konna.engine.util.VkUtil.ensureSuccess;
 import static org.lwjgl.system.MemoryStack.stackPush;
+import static org.lwjgl.system.MemoryUtil.memAlloc;
+import static org.lwjgl.system.MemoryUtil.memFree;
 import static org.lwjgl.vulkan.VK10.*;
 
 public class GPUBuffer implements AutoCloseable {
-    private final VkDevice device;
+    private final DeviceContext deviceContext;
 
     private final GPUMemory memory;
     private final long handle;
@@ -42,13 +46,40 @@ public class GPUBuffer implements AutoCloseable {
             final int usageFlags,
             final BitMask<VkMemoryPropertyFlags> memoryProperties
     ) {
-        this.device = deviceContext.getDevice();
+        this.deviceContext = deviceContext;
         this.deviceLocal = memoryProperties.hasBit(VkMemoryPropertyFlags.DEVICE_LOCAL_BIT);
 
         this.size = size;
         this.handle = createBuffer(deviceContext, size, usageFlags);
         this.memory = allocateMemory(this.handle, deviceContext, memoryProperties);
         this.memory.bindBuffer(this.handle, 0);
+    }
+
+    public <T> void pushWithStagingAndWait(
+            final T[] values,
+            final int elementSize,
+            final BufferWriter<T> writer
+    ) {
+        final var commandPool = this.deviceContext.getTransferCommandPool();
+        final var dataSizeInBytes = values.length * elementSize;
+
+        final var data = memAlloc(dataSizeInBytes);
+        try (final var stagingBuffer = new GPUBuffer(
+                this.deviceContext,
+                dataSizeInBytes,
+                VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                bitMask(VkMemoryPropertyFlags.HOST_VISIBLE_BIT,
+                        VkMemoryPropertyFlags.HOST_COHERENT_BIT))
+        ) {
+            for (int i = 0; i < values.length; ++i) {
+                writer.write(values[i], i * elementSize, data);
+            }
+
+            stagingBuffer.push(data, 0, dataSizeInBytes);
+            stagingBuffer.copyToAndWait(commandPool, this.deviceContext.getTransferQueue(), this);
+        } finally {
+            memFree(data);
+        }
     }
 
     public void push(final ByteBuffer data, final long offset, final long size) {
@@ -61,7 +92,7 @@ public class GPUBuffer implements AutoCloseable {
 
     @Override
     public void close() {
-        vkDestroyBuffer(this.device, this.handle, null);
+        vkDestroyBuffer(this.deviceContext.getDevice(), this.handle, null);
         this.memory.close();
     }
 
@@ -94,7 +125,7 @@ public class GPUBuffer implements AutoCloseable {
 
         vkQueueWaitIdle(queue.getHandle());
 
-        vkFreeCommandBuffers(this.device, commandPool.getHandle(), commandBuffer.getHandle());
+        vkFreeCommandBuffers(this.deviceContext.getDevice(), commandPool.getHandle(), commandBuffer.getHandle());
     }
 
     public void copyToAndWait(
@@ -136,7 +167,7 @@ public class GPUBuffer implements AutoCloseable {
 
         vkQueueWaitIdle(queue.getHandle());
 
-        vkFreeCommandBuffers(this.device, commandPool.getHandle(), commandBuffer.getHandle());
+        vkFreeCommandBuffers(this.deviceContext.getDevice(), commandPool.getHandle(), commandBuffer.getHandle());
     }
 
     private static long createBuffer(

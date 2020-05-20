@@ -1,23 +1,18 @@
 package fi.jakojaannos.konna.engine.application;
 
-import fi.jakojaannos.konna.engine.assets.AssetManager;
 import fi.jakojaannos.konna.engine.vulkan.RenderingBackend;
-import fi.jakojaannos.konna.engine.vulkan.RenderingContext;
 import fi.jakojaannos.konna.engine.vulkan.window.Window;
 
 import static org.lwjgl.glfw.GLFW.glfwInit;
 import static org.lwjgl.glfw.GLFWVulkan.glfwVulkanSupported;
 
-
 public record Application(
         Window window,
-        RenderingBackend backend,
-        RenderingContext renderingContext
+        RenderingBackend backend
 ) implements AutoCloseable {
     public static Application initialize(
             final int windowWidth,
-            final int windowHeight,
-            final AssetManager assetManager
+            final int windowHeight
     ) {
         if (!glfwInit()) {
             throw new IllegalStateException("Initializing GLFW failed!");
@@ -28,18 +23,12 @@ public record Application(
 
         final var window = new Window(windowWidth, windowHeight);
         final var backend = RenderingBackend.create(window);
-        final var renderer = new RenderingContext(assetManager, backend, window);
 
-        return new Application(window, backend, renderer);
-    }
-
-    public void recreateSwapchain() {
-        this.renderingContext.recreateSwapchain();
+        return new Application(window, backend);
     }
 
     @Override
     public void close() {
-        this.renderingContext.close();
         this.backend.close();
         this.window.close();
     }

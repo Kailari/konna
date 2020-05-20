@@ -1,28 +1,63 @@
 package fi.jakojaannos.konna.engine.assets.storage;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nullable;
 
-import fi.jakojaannos.konna.engine.assets.AssetLoader;
-import fi.jakojaannos.konna.engine.assets.AssetManager;
-import fi.jakojaannos.konna.engine.assets.AssetStorage;
-import fi.jakojaannos.konna.engine.assets.SkeletalMesh;
+import fi.jakojaannos.konna.engine.assets.*;
 import fi.jakojaannos.konna.engine.assets.internal.Shader;
 import fi.jakojaannos.konna.engine.assets.internal.ShaderLoader;
+import fi.jakojaannos.konna.engine.assets.mesh.SkeletalMeshLoader;
+import fi.jakojaannos.konna.engine.assets.mesh.StaticMeshLoader;
+import fi.jakojaannos.konna.engine.assets.texture.TextureLoader;
+import fi.jakojaannos.konna.engine.vulkan.RenderingBackend;
 
 public class AssetManagerImpl implements AssetManager {
+    private static final Logger LOG = LoggerFactory.getLogger(AssetManager.class);
 
     private final Map<Class<?>, AssetStorage<?>> storages = new HashMap<>();
 
     private final Path assetRoot;
 
-    public AssetManagerImpl(final Path assetRoot) {
+    @Override
+    public Path getRootPath() {
+        return this.assetRoot;
+    }
+
+    public AssetManagerImpl(
+            final RenderingBackend backend,
+            final Path assetRoot
+    ) {
         this.assetRoot = assetRoot;
 
-        register(Shader.class, new ShaderLoader(), null);
-        //register(SkeletalMesh.class, new ShaderLoader(), null);
+        register(Shader.class, new ShaderLoader());
+        register(Texture.class, new TextureLoader(backend), "textures/vulkan/texture.jpg");
+        register(StaticMesh.class, new StaticMeshLoader(backend, this));
+        register(SkeletalMesh.class, new SkeletalMeshLoader(backend, this));
+    }
+
+    private <TAsset> void register(
+            final Class<TAsset> assetClass,
+            final AssetLoader<TAsset> loader
+    ) {
+        register(assetClass, loader, (TAsset) null);
+    }
+
+    private <TAsset> void register(
+            final Class<TAsset> assetClass,
+            final AssetLoader<TAsset> loader,
+            final String defaultAsset
+    ) {
+        register(assetClass, loader, loader.load(this.assetRoot.resolve(defaultAsset))
+                                           .orElseGet(() -> {
+                                               LOG.error("Loading default asset from path \""
+                                                         + defaultAsset + "\" failed!");
+                                               return null;
+                                           }));
     }
 
     private <TAsset> void register(
