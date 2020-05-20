@@ -123,7 +123,10 @@ public class Weapons {
             new ModularWeapon.Module<>(new GrenadeFiringModule(),
                                        new GrenadeFiringModule.Attributes(120,
                                                                           GrenadeStats.builder()
-                                                                                      .fuseTime(10)
+                                                                                      .fuseTime(80)
+                                                                                      .explosionRadiusSquared(16)
+                                                                                      .explosionDamage(3)
+                                                                                      .explosionPushForce(25)
                                                                                       .build(),
                                                                           0.25 / 4,
                                                                           0.05)),
@@ -137,7 +140,10 @@ public class Weapons {
             new ModularWeapon.Module<>(new GrenadeFiringModule(),
                                        new GrenadeFiringModule.Attributes(45,
                                                                           GrenadeStats.builder()
-                                                                                      .fuseTime(10)
+                                                                                      .fuseTime(30)
+                                                                                      .explosionRadiusSquared(6)
+                                                                                      .explosionDamage(1.5)
+                                                                                      .explosionPushForce(15)
                                                                                       .build(),
                                                                           0.15,
                                                                           0.3)),

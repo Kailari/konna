@@ -31,7 +31,7 @@ public class PlayerArchetype {
         weaponInventory.slots[7] = new InventoryWeapon(Weapons.PLAYER_TURRET_BUILDER);
         weaponInventory.slots[0] = new InventoryWeapon(Weapons.PLAYER_TEST_AR);
 
-        if(GRENADE_ENABLED){
+        if (GRENADE_ENABLED) {
             weaponInventory.slots[5] = new InventoryWeapon(Weapons.PLAYER_GRENADE_THROWN);
             weaponInventory.slots[6] = new InventoryWeapon(Weapons.PLAYER_GRENADE_LAUNCHER);
         }
