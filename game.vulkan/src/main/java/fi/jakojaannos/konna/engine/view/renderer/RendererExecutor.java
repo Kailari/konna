@@ -1,6 +1,6 @@
 package fi.jakojaannos.konna.engine.view.renderer;
 
-import fi.jakojaannos.konna.engine.CameraUniformBufferObject;
+import fi.jakojaannos.konna.engine.CameraDescriptor;
 import fi.jakojaannos.konna.engine.application.PresentableState;
 import fi.jakojaannos.konna.engine.assets.AssetManager;
 import fi.jakojaannos.konna.engine.util.RecreateCloseable;
@@ -16,7 +16,10 @@ import fi.jakojaannos.konna.engine.vulkan.device.DeviceContext;
 import fi.jakojaannos.konna.engine.vulkan.rendering.Framebuffers;
 import fi.jakojaannos.konna.engine.vulkan.rendering.RenderPass;
 import fi.jakojaannos.konna.engine.vulkan.rendering.Swapchain;
+import fi.jakojaannos.konna.engine.vulkan.types.VkDescriptorPoolCreateFlags;
+import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 
+import static fi.jakojaannos.konna.engine.util.BitMask.bitMask;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.VK10.*;
 
@@ -31,16 +34,12 @@ public class RendererExecutor extends RecreateCloseable {
 
     private final DescriptorSetLayout cameraDescriptorLayout;
 
-    private final CameraUniformBufferObject cameraUBO;
+    private final CameraDescriptor cameraDescriptor;
 
     private final DebugRendererExecutor debugRenderer;
     private final MeshRendererExecutor meshRenderer;
 
     private CommandBuffer[] commandBuffers;
-
-    public CameraUniformBufferObject getCameraUBO() {
-        return this.cameraUBO;
-    }
 
     public RendererExecutor(
             final RenderingBackend backend,
@@ -57,32 +56,23 @@ public class RendererExecutor extends RecreateCloseable {
                                              this.depthTexture,
                                              this.renderPass);
 
-        // We have swapchainImageCount copies of n descriptor sets. Why use suppliers? That way we
-        // can delay the descriptorCount/maxSets calculations to `tryRecreate`, where all resources
-        // are already initialized. In other words: we do not yet know the image count here so use
-        // suppliers to move the time of making the decision to a later point in time
-        // FIXME: Counts are not right
-        // FIXME: Add own pool for debug renderer (own pool for each renderer?)
         this.descriptorPool = new SwapchainImageDependentDescriptorPool(
                 this.deviceContext,
                 this.swapchain,
-                2 + 7 + 1,
-                new DescriptorPool.Pool(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                                        () -> this.swapchain.getImageCount() * (2 + 7)),
-                new DescriptorPool.Pool(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                                        this.swapchain::getImageCount));
+                1,
+                bitMask(VkDescriptorPoolCreateFlags.FREE_DESCRIPTOR_SET_BIT),
+                new DescriptorPool.Pool(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this.swapchain::getImageCount));
 
         this.cameraDescriptorLayout = new DescriptorSetLayout(this.deviceContext,
-                                                              CameraUniformBufferObject.CAMERA_DESCRIPTOR_BINDING);
+                                                              CameraDescriptor.CAMERA_DESCRIPTOR_BINDING);
 
-        this.cameraUBO = new CameraUniformBufferObject(this.deviceContext,
-                                                       this.swapchain,
-                                                       this.descriptorPool,
-                                                       this.cameraDescriptorLayout,
-                                                       25.0f);
+        this.cameraDescriptor = new CameraDescriptor(this.deviceContext,
+                                                     this.swapchain,
+                                                     this.descriptorPool,
+                                                     this.cameraDescriptorLayout,
+                                                     25.0f);
 
-        this.debugRenderer = new DebugRendererExecutor(this.deviceContext,
-                                                       this.swapchain,
+        this.debugRenderer = new DebugRendererExecutor(backend,
                                                        this.renderPass,
                                                        assetManager,
                                                        this.cameraDescriptorLayout);
@@ -94,18 +84,29 @@ public class RendererExecutor extends RecreateCloseable {
         tryRecreate();
     }
 
-    public void flush(
+    public void updateCameraProperties(final CameraProperties cameraProperties) {
+        final var realProjection = this.cameraDescriptor.getProjectionMatrix();
+        cameraProperties.projection.set(realProjection);
+        cameraProperties.inverseProjection.set(realProjection)
+                                          .invert();
+    }
+
+    public void recordFrame(
             final PresentableState presentableState,
             final int imageIndex
     ) {
+        final var viewMatrix = presentableState.viewMatrix();
+        final var eyePosition = presentableState.eyePosition();
+        this.cameraDescriptor.update(imageIndex, eyePosition, viewMatrix);
+
         final var commandBuffer = this.commandBuffers[imageIndex];
         final var framebuffer = this.framebuffers.get(imageIndex);
 
         try (final var ignored = commandBuffer.begin();
              final var ignored2 = this.renderPass.begin(framebuffer, commandBuffer)
         ) {
-            this.debugRenderer.flush(presentableState, this.cameraUBO, commandBuffer, imageIndex);
-            this.meshRenderer.flush(presentableState, this.cameraUBO, commandBuffer, imageIndex);
+            this.debugRenderer.flush(presentableState, this.cameraDescriptor, commandBuffer, imageIndex);
+            this.meshRenderer.flush(presentableState, this.cameraDescriptor, commandBuffer, imageIndex);
         }
     }
 
@@ -135,7 +136,7 @@ public class RendererExecutor extends RecreateCloseable {
         this.framebuffers.tryRecreate();
         this.descriptorPool.tryRecreate();
 
-        this.cameraUBO.tryRecreate();
+        this.cameraDescriptor.tryRecreate();
 
         this.debugRenderer.tryRecreate();
         this.meshRenderer.tryRecreate();
@@ -169,7 +170,7 @@ public class RendererExecutor extends RecreateCloseable {
         this.framebuffers.close();
         this.descriptorPool.close();
 
-        this.cameraUBO.close();
+        this.cameraDescriptor.close();
 
         this.debugRenderer.close();
         this.meshRenderer.close();

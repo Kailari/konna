@@ -2,21 +2,17 @@ package fi.jakojaannos.konna.engine;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.lwjgl.vulkan.VkExtent2D;
 
 import java.nio.ByteBuffer;
 
-import fi.jakojaannos.konna.engine.vulkan.descriptor.DescriptorBinding;
-import fi.jakojaannos.konna.engine.vulkan.descriptor.DescriptorPool;
-import fi.jakojaannos.konna.engine.vulkan.descriptor.DescriptorSetLayout;
+import fi.jakojaannos.konna.engine.vulkan.descriptor.*;
 import fi.jakojaannos.konna.engine.vulkan.device.DeviceContext;
 import fi.jakojaannos.konna.engine.vulkan.rendering.Swapchain;
-import fi.jakojaannos.konna.engine.vulkan.descriptor.CombinedImageSamplerBinding;
-import fi.jakojaannos.konna.engine.vulkan.descriptor.DescriptorObject;
-import fi.jakojaannos.konna.engine.vulkan.descriptor.UniformBufferBinding;
 
 import static org.lwjgl.vulkan.VK10.*;
 
-public class CameraUniformBufferObject extends DescriptorObject {
+public class CameraDescriptor extends DescriptorObject {
     public static final DescriptorBinding CAMERA_DESCRIPTOR_BINDING = new DescriptorBinding(0,
                                                                                             VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                                                                                             1,
@@ -24,10 +20,18 @@ public class CameraUniformBufferObject extends DescriptorObject {
 
     private final CameraMatrices cameraMatrices;
 
-    private final Vector3f lookAtTarget;
-    private final Vector3f up;
+    private final VkExtent2D oldSwapchainExtent;
 
-    public CameraUniformBufferObject(
+    @Override
+    protected boolean isRecreateRequired() {
+        return super.isRecreateRequired() || widthHasChanged() || heightHasChanged();
+    }
+
+    public Matrix4f getProjectionMatrix() {
+        return this.cameraMatrices.projection;
+    }
+
+    public CameraDescriptor(
             final DeviceContext deviceContext,
             final Swapchain swapchain,
             final DescriptorPool descriptorPool,
@@ -42,7 +46,7 @@ public class CameraUniformBufferObject extends DescriptorObject {
              lookAtDistance);
     }
 
-    private CameraUniformBufferObject(
+    private CameraDescriptor(
             final DeviceContext deviceContext,
             final Swapchain swapchain,
             final DescriptorPool descriptorPool,
@@ -57,16 +61,31 @@ public class CameraUniformBufferObject extends DescriptorObject {
               new CombinedImageSamplerBinding[0],
               new UniformBufferBinding[]{cameraMatrices});
 
+        this.oldSwapchainExtent = VkExtent2D.calloc();
         this.cameraMatrices = cameraMatrices;
-
-        this.cameraMatrices.eyePosition.set(0.0f, -1.0f, 1.5f)
-                                       .normalize()
-                                       .mul(lookAtDistance);
-        this.lookAtTarget = new Vector3f(0.0f, 0.0f, 0.0f);
-        this.up = new Vector3f(0.0f, 0.0f, 1.0f);
     }
 
-    public void update(final int imageIndex, final double angle) {
+    private boolean widthHasChanged() {
+        return this.oldSwapchainExtent.width() != getSwapchain().getExtent().width();
+    }
+
+    private boolean heightHasChanged() {
+        return this.oldSwapchainExtent.height() != getSwapchain().getExtent().height();
+    }
+
+    @Override
+    protected void recreate() {
+        this.oldSwapchainExtent.set(getSwapchain().getExtent());
+        super.recreate();
+    }
+
+    @Override
+    public void close() {
+        super.close();
+        this.oldSwapchainExtent.free();
+    }
+
+    public void update(final int imageIndex, final Vector3f position, final Matrix4f view) {
         final var swapchainExtent = getSwapchain().getExtent();
         final var aspectRatio = swapchainExtent.width() / (float) swapchainExtent.height();
 
@@ -83,9 +102,8 @@ public class CameraUniformBufferObject extends DescriptorObject {
                                                    aspectRatio,
                                                    0.1f, 10_000.0f, true);
 
-        this.cameraMatrices.view.identity()
-                                .lookAt(this.cameraMatrices.eyePosition, this.lookAtTarget, this.up)
-                                .rotateZ((float) angle);
+        this.cameraMatrices.view.set(view);
+        this.cameraMatrices.eyePosition.set(position);
 
         flushAllUniformBufferBindings(imageIndex);
     }

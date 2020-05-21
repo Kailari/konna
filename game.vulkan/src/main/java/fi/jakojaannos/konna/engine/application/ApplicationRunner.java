@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
-import java.util.Optional;
+import java.util.Objects;
 
 import fi.jakojaannos.konna.engine.assets.AssetManager;
 import fi.jakojaannos.konna.engine.view.renderer.RendererExecutor;
@@ -30,9 +30,6 @@ public class ApplicationRunner implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(ApplicationRunner.class);
     private static final int MAX_FRAMES_IN_FLIGHT = 2;
 
-    private static final double DEGREES_PER_SECOND = 33.0;
-    private static final double RADIANS_PER_SECOND = Math.toRadians(DEGREES_PER_SECOND);
-
     private final long[] imageAvailableSemaphores;
     private final long[] renderFinishedSemaphores;
     private final long[] inFlightFences;
@@ -48,9 +45,6 @@ public class ApplicationRunner implements AutoCloseable {
 
     private boolean framebufferResized;
     private int frameIndex;
-
-    private double angle;
-    private double meshFrame;
 
     public TimeManager getTimeManager() {
         return this.timeManager;
@@ -92,12 +86,14 @@ public class ApplicationRunner implements AutoCloseable {
                                                                inputProvider,
                                                                this.timeManager,
                                                                new RendererRecorder(),
-                                                               this.application.window()::setShouldClose)
+                                                               this.application.window()::setShouldClose,
+                                                               this.renderer::updateCameraProperties)
         ) {
             this.application.window().show();
             this.frameIndex = -1;
 
             var timestamp = System.currentTimeMillis();
+            final var deltaBuffer = new double[120];
             while (this.application.window().isOpen()) {
                 final var currentTime = System.currentTimeMillis();
                 final var delta = (currentTime - timestamp) / 1000.0;
@@ -119,8 +115,21 @@ public class ApplicationRunner implements AutoCloseable {
                 }
 
                 final var state = simulationRunner.fetchPresentableState();
-                this.renderer.flush(state, imageIndex);
-                drawFrame(delta, imageIndex);
+
+                final var deltaIndex = frameCounter % deltaBuffer.length;
+                deltaBuffer[deltaIndex] = delta;
+                if (deltaIndex == 0 && frameCounter > 0) {
+                    // FIXME: Print to debug UI (write the avg. to presentable state like the rest of the UI)
+                    LOG.debug("Average FPS for last {} frames: {}",
+                              deltaBuffer.length,
+                              String.format("%.2f", deltaBuffer.length / Arrays.stream(deltaBuffer).sum()));
+                }
+
+                this.renderer.recordFrame(state, imageIndex);
+                this.renderer.submit(imageIndex,
+                                     this.inFlightFences[this.frameIndex],
+                                     this.imageAvailableSemaphores[this.frameIndex],
+                                     this.renderFinishedSemaphores[this.frameIndex]);
 
                 presentImage(imageIndex);
                 ++frameCounter;
@@ -129,9 +138,7 @@ public class ApplicationRunner implements AutoCloseable {
             LOG.error("Application has crashed:");
             LOG.error("\tException:\t{}", t.getClass().getName());
             LOG.error("\tAt:\t\t{}:{}", t.getStackTrace()[0].getFileName(), t.getStackTrace()[0].getLineNumber());
-            LOG.error("\tCause:\t\t{}", Optional.ofNullable(t.getCause())
-                                                .map(Throwable::toString)
-                                                .orElse("Cause not defined."));
+            LOG.error("\tCause:\t\t{}", Objects.requireNonNullElse(t.getCause(), "Cause not defined."));
             LOG.error("\tMessage:\t{}", t.getMessage());
 
             LOG.error("\tStackTrace:\n{}",
@@ -187,24 +194,6 @@ public class ApplicationRunner implements AutoCloseable {
         this.imagesInFlight[imageIndex] = this.inFlightFences[this.frameIndex];
 
         return imageIndex;
-    }
-
-    private void drawFrame(final double delta, final int imageIndex) {
-        //this.angle += delta * RADIANS_PER_SECOND;
-        this.renderer.getCameraUBO()
-                     .update(imageIndex, this.angle);
-
-
-        //final var animationFramesPerSecond = 40;
-        this.meshFrame += delta;
-        //this.application.renderingContext()
-        //                .getHumanoid()
-        //                .setFrame(imageIndex, "Armature|idle", (int) (this.meshFrame * animationFramesPerSecond) % 33);
-
-        this.renderer.submit(imageIndex,
-                             this.inFlightFences[this.frameIndex],
-                             this.imageAvailableSemaphores[this.frameIndex],
-                             this.renderFinishedSemaphores[this.frameIndex]);
     }
 
     private void presentImage(final int imageIndex) {

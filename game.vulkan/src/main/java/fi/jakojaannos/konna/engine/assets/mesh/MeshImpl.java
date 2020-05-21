@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 
 import fi.jakojaannos.konna.engine.assets.Material;
 import fi.jakojaannos.konna.engine.assets.Mesh;
+import fi.jakojaannos.konna.engine.assets.material.MaterialImpl;
 import fi.jakojaannos.konna.engine.vulkan.GPUBuffer;
 import fi.jakojaannos.konna.engine.vulkan.RenderingBackend;
 import fi.jakojaannos.konna.engine.vulkan.VertexFormat;
@@ -13,6 +14,12 @@ import static fi.jakojaannos.konna.engine.util.BitMask.bitMask;
 import static org.lwjgl.vulkan.VK10.*;
 
 public class MeshImpl implements Mesh {
+    private static final Material DEFAULT_MATERIAL = new MaterialImpl(MaterialImpl.DEFAULT_COLOR,
+                                                                      MaterialImpl.DEFAULT_COLOR,
+                                                                      MaterialImpl.DEFAULT_COLOR,
+                                                                      null,
+                                                                      1.0f);
+
     private final GPUBuffer vertexBuffer;
     private final GPUBuffer indexBuffer;
     private final int indexCount;
@@ -25,6 +32,10 @@ public class MeshImpl implements Mesh {
 
     @Override
     public GPUBuffer getIndexBuffer() {
+        if (this.indexBuffer == null) {
+            throw new IllegalStateException("Tried getting index buffer for non-indexed mesh!");
+        }
+
         return this.indexBuffer;
     }
 
@@ -55,19 +66,24 @@ public class MeshImpl implements Mesh {
             final GPUBuffer vertexBuffer,
             @Nullable final GPUBuffer indexBuffer,
             final int indexCount,
-            final Material material
+            @Nullable final Material material
     ) {
         this.vertexBuffer = vertexBuffer;
         this.indexBuffer = indexBuffer;
         this.indexCount = indexCount;
 
-        this.material = material;
+        this.material = material != null
+                ? material
+                : DEFAULT_MATERIAL;
     }
 
     @Override
     public void close() {
         this.vertexBuffer.close();
-        this.indexBuffer.close();
+
+        if (this.indexBuffer != null) {
+            this.indexBuffer.close();
+        }
     }
 
     private static <TVertex> GPUBuffer createVertexBuffer(

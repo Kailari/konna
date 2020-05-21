@@ -6,6 +6,7 @@ import fi.jakojaannos.konna.engine.view.MeshRenderer;
 import fi.jakojaannos.konna.engine.view.Renderer;
 import fi.jakojaannos.konna.engine.view.renderer.debug.DebugRendererRecorder;
 import fi.jakojaannos.konna.engine.view.renderer.mesh.MeshRendererRecorder;
+import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 
 public class RendererRecorder implements Renderer {
     private final DebugRendererRecorder debugRenderer = new DebugRendererRecorder();

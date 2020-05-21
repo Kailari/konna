@@ -3,32 +3,27 @@ package fi.jakojaannos.konna.engine.view.renderer.debug;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-import java.nio.file.Path;
-
-import fi.jakojaannos.konna.engine.CameraUniformBufferObject;
+import fi.jakojaannos.konna.engine.CameraDescriptor;
 import fi.jakojaannos.konna.engine.application.PresentableState;
 import fi.jakojaannos.konna.engine.assets.AssetManager;
+import fi.jakojaannos.konna.engine.assets.Mesh;
 import fi.jakojaannos.konna.engine.util.RecreateCloseable;
-import fi.jakojaannos.konna.engine.view.renderer.debug.DebugLineVertex;
-import fi.jakojaannos.konna.engine.vulkan.GPUMesh;
+import fi.jakojaannos.konna.engine.vulkan.RenderingBackend;
 import fi.jakojaannos.konna.engine.vulkan.command.CommandBuffer;
 import fi.jakojaannos.konna.engine.vulkan.descriptor.DescriptorSetLayout;
-import fi.jakojaannos.konna.engine.vulkan.device.DeviceContext;
 import fi.jakojaannos.konna.engine.vulkan.rendering.GraphicsPipeline;
 import fi.jakojaannos.konna.engine.vulkan.rendering.RenderPass;
-import fi.jakojaannos.konna.engine.vulkan.rendering.Swapchain;
 import fi.jakojaannos.konna.engine.vulkan.types.VkPrimitiveTopology;
 
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.VK10.*;
 
 public class DebugRendererExecutor extends RecreateCloseable {
-    private final GPUMesh<DebugLineVertex> transformMesh;
+    private final Mesh transformMesh;
     private final GraphicsPipeline<DebugLineVertex> linePipeline;
 
     public DebugRendererExecutor(
-            final DeviceContext deviceContext,
-            final Swapchain swapchain,
+            final RenderingBackend backend,
             final RenderPass renderPass,
             final AssetManager assetManager,
             final DescriptorSetLayout cameraDescriptorLayout
@@ -44,13 +39,13 @@ public class DebugRendererExecutor extends RecreateCloseable {
                 new DebugLineVertex(new Vector3f(0, 0, 1), new Vector3f(0.0f, 0.0f, 1.0f)),
         };
 
-        this.transformMesh = new GPUMesh<>(deviceContext,
-                                           DebugLineVertex.FORMAT,
-                                           transformVertices,
-                                           new Integer[0]);
 
-        this.linePipeline = new GraphicsPipeline<>(deviceContext,
-                                                   swapchain,
+        this.transformMesh = Mesh.from(backend,
+                                       DebugLineVertex.FORMAT,
+                                       transformVertices);
+
+        this.linePipeline = new GraphicsPipeline<>(backend.deviceContext(),
+                                                   backend.swapchain(),
                                                    renderPass,
                                                    assetManager,
                                                    "shaders/vulkan/debug/line.vert",
@@ -62,7 +57,7 @@ public class DebugRendererExecutor extends RecreateCloseable {
 
     public void flush(
             final PresentableState state,
-            final CameraUniformBufferObject cameraUBO,
+            final CameraDescriptor cameraUBO,
             final CommandBuffer commandBuffer,
             final int imageIndex
     ) {

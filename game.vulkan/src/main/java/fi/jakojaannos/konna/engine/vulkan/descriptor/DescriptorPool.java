@@ -7,8 +7,10 @@ import org.lwjgl.vulkan.VkDescriptorSetAllocateInfo;
 import java.util.Arrays;
 import java.util.function.IntSupplier;
 
+import fi.jakojaannos.konna.engine.util.BitMask;
 import fi.jakojaannos.konna.engine.util.RecreateCloseable;
 import fi.jakojaannos.konna.engine.vulkan.device.DeviceContext;
+import fi.jakojaannos.konna.engine.vulkan.types.VkDescriptorPoolCreateFlags;
 
 import static fi.jakojaannos.konna.engine.util.VkUtil.ensureSuccess;
 import static org.lwjgl.system.MemoryStack.stackPush;
@@ -19,6 +21,7 @@ public class DescriptorPool extends RecreateCloseable {
 
     private final IntSupplier maxSetsSupplier;
     private final Pool[] pools;
+    private final int createFlags;
 
     private long handle;
 
@@ -29,9 +32,11 @@ public class DescriptorPool extends RecreateCloseable {
     public DescriptorPool(
             final DeviceContext deviceContext,
             final IntSupplier maxSetsSupplier,
+            final BitMask<VkDescriptorPoolCreateFlags> flags,
             final Pool... pools
     ) {
         this.deviceContext = deviceContext;
+        this.createFlags = flags.mask();
 
         this.maxSetsSupplier = maxSetsSupplier;
         this.pools = pools;
@@ -51,7 +56,8 @@ public class DescriptorPool extends RecreateCloseable {
                     .callocStack()
                     .sType(VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO)
                     .pPoolSizes(poolSizes)
-                    .maxSets(this.maxSetsSupplier.getAsInt());
+                    .maxSets(this.maxSetsSupplier.getAsInt())
+                    .flags(this.createFlags);
 
             final var pPool = stack.mallocLong(1);
             ensureSuccess(vkCreateDescriptorPool(this.deviceContext.getDevice(),
@@ -88,6 +94,11 @@ public class DescriptorPool extends RecreateCloseable {
         }
 
         return handles;
+    }
+
+    public void free(final long... descriptorSets) {
+        ensureSuccess(vkFreeDescriptorSets(this.deviceContext.getDevice(), this.handle, descriptorSets),
+                      "Freeing descriptor sets failed");
     }
 
     public record Pool(int type, IntSupplier descriptorCountSupplier) {}

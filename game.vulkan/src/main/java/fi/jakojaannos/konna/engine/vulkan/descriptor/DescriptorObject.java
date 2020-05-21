@@ -170,6 +170,13 @@ public abstract class DescriptorObject extends RecreateCloseable {
         for (final var buffer : this.buffers) {
             buffer.close();
         }
+
+        // Release descriptors if descriptor pool has not been reset. This means that a subclass
+        // has defined a re-create condition which does not require re-creating the whole pool.
+        // Additionally, make sure the pool is not cleaned up (to prevent crash when shutting down)
+        if (!isOlderThan(this.descriptorPool) && !this.descriptorPool.isCleanedUp()) {
+            this.descriptorPool.free(this.descriptorSets);
+        }
     }
 
     private void writeBuffer(

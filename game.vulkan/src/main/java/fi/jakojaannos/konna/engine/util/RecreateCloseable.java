@@ -4,12 +4,12 @@ public abstract class RecreateCloseable implements AutoCloseable {
     private boolean cleanedUp = true;
     private long generation;
 
-    protected boolean isOlderThan(final RecreateCloseable other) {
-        return this.generation < other.generation;
-    }
-
     protected boolean isRecreateRequired() {
         return true;
+    }
+
+    protected boolean isOlderThan(final RecreateCloseable other) {
+        return this.generation < other.generation;
     }
 
     protected abstract void recreate();
@@ -43,5 +43,9 @@ public abstract class RecreateCloseable implements AutoCloseable {
         cleanup();
 
         this.cleanedUp = true;
+    }
+
+    public boolean isCleanedUp() {
+        return this.cleanedUp;
     }
 }

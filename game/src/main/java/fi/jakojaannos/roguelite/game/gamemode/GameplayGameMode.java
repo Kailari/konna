@@ -1,5 +1,8 @@
 package fi.jakojaannos.roguelite.game.gamemode;
 
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+
 import java.util.Random;
 
 import fi.jakojaannos.roguelite.engine.GameMode;
@@ -50,8 +53,13 @@ public final class GameplayGameMode {
         world.registerResource(new Colliders());
         world.registerResource(new Collisions());
         world.registerResource(new Weapons());
-        world.registerResource(CameraProperties.class, new CameraProperties(world.createEntity(new Transform(),
-                                                                                               new NoDrawTag())));
+
+        final var cameraProperties = new CameraProperties(world.createEntity(new Transform(),
+                                                                             new NoDrawTag()));
+        cameraProperties.setPosition(new Vector3f(0.0f, 0.0f, 25.0f));
+        // FIXME: why on earth does identity quaternion point downwards?
+        cameraProperties.setRotation(new Quaternionf());
+        world.registerResource(CameraProperties.class, cameraProperties);
         world.registerResource(new SessionStats(timeManager.getCurrentGameTime()));
         world.registerResource(new Mouse());
         world.registerResource(new Inputs());

@@ -1,6 +1,6 @@
 package fi.jakojaannos.konna.engine.view.renderer.mesh;
 
-import fi.jakojaannos.konna.engine.CameraUniformBufferObject;
+import fi.jakojaannos.konna.engine.CameraDescriptor;
 import fi.jakojaannos.konna.engine.SceneUniformBufferObject;
 import fi.jakojaannos.konna.engine.application.PresentableState;
 import fi.jakojaannos.konna.engine.assets.AssetManager;
@@ -20,6 +20,7 @@ import fi.jakojaannos.konna.engine.vulkan.rendering.GraphicsPipeline;
 import fi.jakojaannos.konna.engine.vulkan.rendering.RenderPass;
 import fi.jakojaannos.konna.engine.vulkan.types.VkPrimitiveTopology;
 
+import static fi.jakojaannos.konna.engine.util.BitMask.bitMask;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.VK10.*;
 
@@ -65,6 +66,7 @@ public class MeshRendererExecutor extends RecreateCloseable {
                 backend.deviceContext(),
                 backend.swapchain(),
                 SETS_PER_IMAGE,
+                bitMask(),
                 new DescriptorPool.Pool(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                                         () -> backend.swapchain()
                                                      .getImageCount() * (1 + 1 + 1)),
@@ -116,7 +118,7 @@ public class MeshRendererExecutor extends RecreateCloseable {
 
     public void flush(
             final PresentableState state,
-            final CameraUniformBufferObject cameraUBO,
+            final CameraDescriptor cameraUBO,
             final CommandBuffer commandBuffer,
             final int imageIndex
     ) {
@@ -199,6 +201,8 @@ public class MeshRendererExecutor extends RecreateCloseable {
     public void close() {
         super.close();
 
+        this.descriptorPool.close();
+
         this.textureSampler.close();
         this.materialDescriptor.close();
         this.sceneUBO.close();
@@ -208,7 +212,6 @@ public class MeshRendererExecutor extends RecreateCloseable {
         this.materialDescriptorLayout.close();
         this.sceneDescriptorLayout.close();
 
-        this.descriptorPool.close();
         this.skeletalPipeline.close();
     }
 }

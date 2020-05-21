@@ -19,7 +19,7 @@ public class SkeletalMeshImpl implements SkeletalMesh {
 
     public SkeletalMeshImpl(
             final Map<String, Animation> animations,
-            final Mesh[] submeshes
+            final Mesh... submeshes
     ) {
         this.submeshes = List.of(submeshes);
 

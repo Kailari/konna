@@ -7,6 +7,7 @@ import java.util.Queue;
 import fi.jakojaannos.konna.engine.application.Application;
 import fi.jakojaannos.konna.engine.application.ApplicationRunner;
 import fi.jakojaannos.konna.engine.assets.storage.AssetManagerImpl;
+import fi.jakojaannos.konna.engine.input.GLFWInputProvider;
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.input.InputProvider;
 import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;
@@ -25,22 +26,10 @@ public class Main {
                                                               600,
                                                               legacyCallback -> app.window().onResize(legacyCallback::call));
              */
-            final var inputProvider = new InputProvider() {
-                @Override
-                public Object getLock() {
-                    return this;
-                }
+            final var inputProvider = new GLFWInputProvider(app.window());
 
-                @Override
-                public Queue<InputEvent> pollEvents() {
-                    // TODO: Adapt/re-write the LWJGL input provider
-                    return new ArrayDeque<>();
-                }
-            };
-
-            final var timeManager = runner.getTimeManager();
             runner.run(inputProvider,
-                       GameplayGameMode.create(420, timeManager));
+                       GameplayGameMode.create(420, runner.getTimeManager()));
         }
     }
 }
