@@ -12,6 +12,7 @@ import java.util.function.Consumer;
 import fi.jakojaannos.konna.engine.assets.AssetManager;
 import fi.jakojaannos.konna.engine.view.RenderDispatcher;
 import fi.jakojaannos.konna.engine.view.renderer.RendererRecorder;
+import fi.jakojaannos.konna.view.adapters.CharacterHealthbarRenderAdapter;
 import fi.jakojaannos.konna.view.adapters.EntityTransformRenderAdapter;
 import fi.jakojaannos.konna.view.adapters.PlayerCharacterRenderAdapter;
 import fi.jakojaannos.roguelite.engine.GameMode;
@@ -57,10 +58,12 @@ public class SimulationThread implements AutoCloseable {
         this.onTerminate = onTerminate;
 
         this.ticker = new GameTicker(this.timeManager, inputProvider, initialGameMode);
-        this.renderDispatcher = RenderDispatcher.builder()
-                                                .withAdapter(new EntityTransformRenderAdapter())
-                                                .withAdapter(new PlayerCharacterRenderAdapter(assetManager))
-                                                .build();
+        this.renderDispatcher = RenderDispatcher
+                .builder()
+                .withAdapter(new EntityTransformRenderAdapter())
+                .withAdapter(new PlayerCharacterRenderAdapter(assetManager))
+                .withAdapter(new CharacterHealthbarRenderAdapter(timeManager.convertToTicks(5.0)))
+                .build();
 
         startSimulation();
     }
