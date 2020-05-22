@@ -1,7 +1,5 @@
 package fi.jakojaannos.roguelite.game.systems;
 
-import org.joml.Vector2d;
-
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
@@ -17,8 +15,6 @@ import fi.jakojaannos.roguelite.game.data.components.character.WeaponInput;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
 
 public class PlayerInputSystem implements ECSSystem {
-    private final Vector2d tmpCursorPos = new Vector2d();
-
     @Override
     public void declareRequirements(final RequirementsBuilder requirements) {
         requirements.addToGroup(SystemGroups.INPUT)
@@ -36,13 +32,11 @@ public class PlayerInputSystem implements ECSSystem {
             final Stream<Entity> entities,
             final World world
     ) {
-
         final var inputs = world.fetchResource(Inputs.class);
         final var mouse = world.fetchResource(Mouse.class);
         final var cameraProperties = world.fetchResource(CameraProperties.class);
 
-        final var entityManager = world.getEntityManager();
-        mouse.calculateCursorPositionRelativeToCamera(cameraProperties, this.tmpCursorPos);
+        final var cursorPosition = mouse.calculatePositionUnderCursor(cameraProperties);
 
         final var inputHorizontal = (inputs.inputRight ? 1 : 0) - (inputs.inputLeft ? 1 : 0);
         final var inputVertical = (inputs.inputDown ? 1 : 0) - (inputs.inputUp ? 1 : 0);
@@ -56,7 +50,7 @@ public class PlayerInputSystem implements ECSSystem {
             moveInput.move.set(inputHorizontal,
                                inputVertical);
             attackInput.attack = inputAttack;
-            attackAbility.targetPosition.set(this.tmpCursorPos);
+            attackAbility.targetPosition.set(cursorPosition);
 
             if (inputs.inputWeaponSlot0) {
                 attackAbility.equippedSlot = 0;
