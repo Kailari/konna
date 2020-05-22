@@ -19,17 +19,14 @@ public class LWJGLInputProvider implements InputProvider {
 
     private static final double MOUSE_EPSILON = 0.0001;
     private final Queue<InputEvent> inputEvents;
-
+    private final Object lock = new Object();
     private int viewportWidth;
     private int viewportHeight;
     private double mouseX;
     private double mouseY;
     private boolean justResized;
 
-    private final Object lock = new Object();
-
-    @Override
-    public Object getLock() {
+    private Object getLock() {
         return this.lock;
     }
 
@@ -65,8 +62,8 @@ public class LWJGLInputProvider implements InputProvider {
 
             // In case we just resized, update cached position and skip sending delta-events
             if (this.justResized) {
-                this.inputEvents.offer(InputEvent.axial(new AxialInput(InputAxis.Mouse.X_POS, x)));
-                this.inputEvents.offer(InputEvent.axial(new AxialInput(InputAxis.Mouse.Y_POS, y)));
+                this.inputEvents.offer(InputEvent.axis(InputAxis.Mouse.X_POS, x));
+                this.inputEvents.offer(InputEvent.axis(InputAxis.Mouse.Y_POS, y));
                 this.mouseX = x;
                 this.mouseY = y;
                 this.justResized = false;
@@ -75,15 +72,15 @@ public class LWJGLInputProvider implements InputProvider {
 
             final var deltaX = this.mouseX - x;
             if (Math.abs(deltaX) > MOUSE_EPSILON) {
-                this.inputEvents.offer(InputEvent.axial(new AxialInput(InputAxis.Mouse.X, deltaX)));
-                this.inputEvents.offer(InputEvent.axial(new AxialInput(InputAxis.Mouse.X_POS, x)));
+                this.inputEvents.offer(InputEvent.axis(InputAxis.Mouse.X, deltaX));
+                this.inputEvents.offer(InputEvent.axis(InputAxis.Mouse.X_POS, x));
                 this.mouseX = x;
             }
 
             final var deltaY = this.mouseY - y;
             if (Math.abs(deltaY) > MOUSE_EPSILON) {
-                this.inputEvents.offer(InputEvent.axial(new AxialInput(InputAxis.Mouse.Y, deltaY)));
-                this.inputEvents.offer(InputEvent.axial(new AxialInput(InputAxis.Mouse.Y_POS, y)));
+                this.inputEvents.offer(InputEvent.axis(InputAxis.Mouse.Y, deltaY));
+                this.inputEvents.offer(InputEvent.axis(InputAxis.Mouse.Y_POS, y));
                 this.mouseY = y;
             }
         }

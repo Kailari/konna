@@ -1,8 +1,6 @@
 package fi.jakojaannos.roguelite.engine.input;
 
 public interface InputProvider {
-    Object getLock();
-
     /**
      * Gets all input events gathered since last frame.
      *
