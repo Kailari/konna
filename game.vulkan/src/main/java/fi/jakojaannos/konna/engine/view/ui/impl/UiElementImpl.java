@@ -5,8 +5,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
+import javax.annotation.Nullable;
+
 import fi.jakojaannos.konna.engine.view.ui.*;
 
+// Fields may NOT be final here; GSON does not always work properly if things are `final`
+@SuppressWarnings("FieldMayBeFinal")
 public class UiElementImpl implements UiElement {
     private Collection<UiElementImpl> children = List.of();
     private Anchor anchor = new Anchor();
@@ -83,6 +87,7 @@ public class UiElementImpl implements UiElement {
     }
 
     @Override
+    @Nullable
     public UiUnit offset(final Sides side) {
         return switch (side) {
             case TOP -> this.bounds.top();
@@ -100,10 +105,20 @@ public class UiElementImpl implements UiElement {
         return this;
     }
 
+    @Nullable
+    public UiUnit width() {
+        return this.bounds.width();
+    }
+
     @Override
     public UiElement height(final UiUnit value) {
         this.bounds.height(value);
         return this;
+    }
+
+    @Nullable
+    public UiUnit height() {
+        return this.bounds.height();
     }
 
     @Override

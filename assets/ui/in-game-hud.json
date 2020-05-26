@@ -9,8 +9,8 @@
       "bounds": {
         "top": 5,
         "left": -200,
-        "right": 200,
-        "bottom": 500
+        "width": 400,
+        "height": 100
       },
       "color": {
         "r": 1.0,

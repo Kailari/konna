@@ -4,17 +4,16 @@ import javax.annotation.Nullable;
 
 import fi.jakojaannos.konna.engine.view.ui.UiUnit;
 
-import static fi.jakojaannos.konna.engine.view.ui.UiUnit.zero;
-
 public final class Bounds {
-    private UiUnit top = zero();
-    private UiUnit bottom = zero();
-    private UiUnit left = zero();
-    private UiUnit right = zero();
+    @Nullable private UiUnit top;
+    @Nullable private UiUnit bottom;
+    @Nullable private UiUnit left;
+    @Nullable private UiUnit right;
 
     @Nullable private UiUnit width;
     @Nullable private UiUnit height;
 
+    @Nullable
     public UiUnit top() {
         return this.top;
     }
@@ -23,6 +22,7 @@ public final class Bounds {
         this.top = value;
     }
 
+    @Nullable
     UiUnit bottom() {
         return this.bottom;
     }
@@ -31,6 +31,7 @@ public final class Bounds {
         this.bottom = value;
     }
 
+    @Nullable
     UiUnit left() {
         return this.left;
     }
@@ -39,6 +40,7 @@ public final class Bounds {
         this.left = value;
     }
 
+    @Nullable
     UiUnit right() {
         return this.right;
     }
@@ -47,23 +49,21 @@ public final class Bounds {
         this.right = value;
     }
 
+    @Nullable
     UiUnit width() {
-        // FIXME: Calculate from left+right+parent if null
         return this.width;
     }
 
     void width(final UiUnit value) {
-        // FIXME: Log error if left+right are set
         this.width = value;
     }
 
+    @Nullable
     UiUnit height() {
-        // FIXME: Calculate from left+right+parent if null
         return this.height;
     }
 
     void height(final UiUnit value) {
-        // FIXME: Log error if top+bottom are set
         this.height = value;
     }
 }

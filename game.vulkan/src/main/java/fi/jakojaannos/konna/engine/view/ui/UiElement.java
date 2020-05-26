@@ -2,6 +2,7 @@ package fi.jakojaannos.konna.engine.view.ui;
 
 import java.util.Collection;
 import java.util.function.Consumer;
+import javax.annotation.Nullable;
 
 @SuppressWarnings("UnusedReturnValue")
 public interface UiElement {
@@ -98,6 +99,7 @@ public interface UiElement {
         return offset(Sides.TOP, value);
     }
 
+    @Nullable
     default UiUnit top() {
         return offset(Sides.TOP);
     }
@@ -106,6 +108,7 @@ public interface UiElement {
         return offset(Sides.BOTTOM, value);
     }
 
+    @Nullable
     default UiUnit bottom() {
         return offset(Sides.BOTTOM);
     }
@@ -114,6 +117,7 @@ public interface UiElement {
         return offset(Sides.RIGHT, value);
     }
 
+    @Nullable
     default UiUnit right() {
         return offset(Sides.RIGHT);
     }
@@ -122,6 +126,7 @@ public interface UiElement {
         return offset(Sides.LEFT, value);
     }
 
+    @Nullable
     default UiUnit left() {
         return offset(Sides.LEFT);
     }
@@ -136,11 +141,18 @@ public interface UiElement {
      */
     UiElement offset(Sides sides, UiUnit value);
 
+    @Nullable
     UiUnit offset(Sides side);
 
     UiElement height(UiUnit value);
 
+    @Nullable
+    UiUnit height();
+
     UiElement width(UiUnit value);
+
+    @Nullable
+    UiUnit width();
 
     UiElement text(String format);
 
