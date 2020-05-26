@@ -10,30 +10,35 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import fi.jakojaannos.konna.engine.assets.AssetManager;
+import fi.jakojaannos.konna.engine.view.GameModeRenderers;
 import fi.jakojaannos.konna.engine.view.RenderDispatcher;
 import fi.jakojaannos.konna.engine.view.renderer.RendererRecorder;
-import fi.jakojaannos.konna.view.adapters.CharacterHealthbarRenderAdapter;
 import fi.jakojaannos.konna.view.adapters.EntityTransformRenderAdapter;
 import fi.jakojaannos.konna.view.adapters.PlayerCharacterRenderAdapter;
+import fi.jakojaannos.konna.view.adapters.SessionStatsHudRenderAdapter;
 import fi.jakojaannos.roguelite.engine.GameMode;
 import fi.jakojaannos.roguelite.engine.GameRunnerTimeManager;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.engine.input.InputProvider;
+import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;
 
 public class SimulationThread implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(SimulationThread.class);
 
-    private final RendererRecorder renderer;
+    private final GameModeRenderers gameModeRenderers = new GameModeRenderers();
+    private final RendererRecorder renderRecorder;
 
     private final ScheduledExecutorService executor;
     private final GameRunnerTimeManager timeManager;
     private final Runnable onTerminate;
 
     private final GameTicker ticker;
-    private final RenderDispatcher renderDispatcher;
     private final PresentableStateQueue presentableStateQueue;
 
     private final Consumer<CameraProperties> cameraPropertiesUpdater;
+
+    private RenderDispatcher renderDispatcher;
+    private int oldModeId = -1;
 
     private Runnable simulatorTerminateCallback = () -> LOG.warn("Simulation terminated before initialization was done!");
 
@@ -43,11 +48,11 @@ public class SimulationThread implements AutoCloseable {
             final String threadName,
             final InputProvider inputProvider,
             final GameRunnerTimeManager timeManager,
-            final RendererRecorder renderer,
+            final RendererRecorder renderRecorder,
             final Runnable onTerminate,
             final Consumer<CameraProperties> cameraPropertiesUpdater
     ) {
-        this.renderer = renderer;
+        this.renderRecorder = renderRecorder;
         this.cameraPropertiesUpdater = cameraPropertiesUpdater;
 
         final var threadFactory = createThreadFactory(threadName);
@@ -58,12 +63,21 @@ public class SimulationThread implements AutoCloseable {
         this.onTerminate = onTerminate;
 
         this.ticker = new GameTicker(this.timeManager, inputProvider, initialGameMode);
-        this.renderDispatcher = RenderDispatcher
+
+        // FIXME: Standardize constructor arguments and load adapters from .json?
+        //  - constructor args should be something like (assetManager, config)
+        //  - config can be generic object of type TConfig which is _optionally_ populated if system
+        //    overrides method getConfigClass to return non-null values. The parameter value can
+        //    then be nullable
+        //  - the config object is then consumed in the constructor to set values for the actual
+        //    configuration fields (which should be final) on the adapter
+        this.gameModeRenderers.register(GameplayGameMode.GAME_MODE_ID, () -> RenderDispatcher
                 .builder()
                 .withAdapter(new EntityTransformRenderAdapter())
                 .withAdapter(new PlayerCharacterRenderAdapter(assetManager))
-                .withAdapter(new CharacterHealthbarRenderAdapter(timeManager.convertToTicks(5.0)))
-                .build();
+                //.withAdapter(new CharacterHealthbarRenderAdapter(timeManager.convertToTicks(5.0)))
+                .withAdapter(new SessionStatsHudRenderAdapter(assetManager))
+                .build());
 
         startSimulation();
     }
@@ -93,12 +107,26 @@ public class SimulationThread implements AutoCloseable {
 
         try {
             final var state = this.presentableStateQueue.swapWriting();
-            state.clear(this.timeManager, cameraProperties.getPosition(), cameraProperties.getViewMatrix());
+            final var modeId = this.ticker.getMode().id();
 
-            this.renderer.setWriteState(state);
-            this.renderDispatcher.dispatch(this.renderer,
-                                           this.ticker.getState(),
-                                           0L);
+            final var modeHasChanged = modeId != this.oldModeId;
+            if (modeHasChanged) {
+                this.renderDispatcher = this.gameModeRenderers.get(modeId)
+                                                              .orElse(null);
+                this.oldModeId = modeId;
+            }
+
+            if (this.renderDispatcher != null) {
+                state.clear(modeId,
+                            this.timeManager,
+                            cameraProperties.getPosition(),
+                            cameraProperties.getViewMatrix());
+
+                this.renderRecorder.setWriteState(state);
+                this.renderDispatcher.dispatch(this.renderRecorder,
+                                               this.ticker.getState(),
+                                               0L);
+            }
         } catch (final Throwable t) {
             LOG.error("Render adapter dispatcher encountered an error:", t);
         }

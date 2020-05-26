@@ -1,4 +1,4 @@
-package fi.jakojaannos.konna.engine.assets.mesh;
+package fi.jakojaannos.konna.engine.assets.mesh.staticmesh;
 
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -16,6 +16,8 @@ import fi.jakojaannos.konna.engine.assets.Material;
 import fi.jakojaannos.konna.engine.assets.Mesh;
 import fi.jakojaannos.konna.engine.assets.StaticMesh;
 import fi.jakojaannos.konna.engine.assets.material.MaterialImpl;
+import fi.jakojaannos.konna.engine.assets.mesh.AssimpProcess;
+import fi.jakojaannos.konna.engine.assets.mesh.MeshLoader;
 import fi.jakojaannos.konna.engine.util.BitMask;
 import fi.jakojaannos.konna.engine.vulkan.LogCategories;
 import fi.jakojaannos.konna.engine.vulkan.RenderingBackend;

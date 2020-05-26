@@ -45,6 +45,10 @@ public class GameTicker implements MainThread {
         return this.currentState;
     }
 
+    public GameMode getMode() {
+        return this.activeGameMode;
+    }
+
     public GameTicker(
             final TimeManager timeManager,
             final InputProvider inputProvider,
@@ -105,12 +109,9 @@ public class GameTicker implements MainThread {
                                  this.currentState.systems(),
                                  systemEventsFromLastTick);
 
-        var stateHasChanged = false;
-        var modeHasChanged = false;
         for (final var stateEvent : this.stateEvents) {
             if (stateEvent instanceof StateEvent.ChangeState changeState) {
                 this.currentState = changeState.gameState();
-                stateHasChanged = true;
             } else if (stateEvent instanceof StateEvent.ChangeMode changeMode) {
                 if (this.activeGameMode != null) {
                     try {
@@ -121,23 +122,9 @@ public class GameTicker implements MainThread {
                 }
 
                 changeActiveGameMode(changeMode.gameMode());
-                modeHasChanged = true;
             } else if (stateEvent instanceof StateEvent.Shutdown) {
                 terminateCallback.run();
             }
-        }
-
-        if (modeHasChanged) {
-            // TODO: is this required anymore?
-            //   -> just subclass the runner and change the `GameModeRenderer/Adapter` in `changeGameState`
-            //onModeChange(this.activeGameMode);
-        }
-
-        if (stateHasChanged) {
-            // TODO: is this required anymore?
-            //  (no, I don't think this is. Figure out how networking can be done without hacks involving
-            //   this thing and remove)
-            //onStateChange();
         }
     }
 }

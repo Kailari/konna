@@ -1,9 +1,12 @@
 package fi.jakojaannos.konna.engine.view.ui;
 
+import java.util.Collection;
 import java.util.function.Consumer;
 
 @SuppressWarnings("UnusedReturnValue")
 public interface UiElement {
+    String name();
+
     /**
      * Gets a child with given name from this element. Only immediate children of this element are queried. If such
      * child is not found, one is created and the given initializer applied on the newly created child. The initializer
@@ -14,7 +17,7 @@ public interface UiElement {
      *
      * @return the child if one exists. Newly created child element otherwise.
      */
-    UiElement getOrCreate(String name, Consumer<UiElement> initializer);
+    UiElement getOrCreateChild(String name, Consumer<UiElement> initializer);
 
     /**
      * Sets the border type and width for given sides.
@@ -89,13 +92,37 @@ public interface UiElement {
 
     UiElement color(Color color);
 
-    UiElement top(UiUnit value);
+    default UiElement top(final UiUnit value) {
+        return offset(Sides.TOP, value);
+    }
 
-    UiElement bottom(UiUnit value);
+    default UiUnit top() {
+        return offset(Sides.TOP);
+    }
 
-    UiElement right(UiUnit value);
+    default UiElement bottom(final UiUnit value) {
+        return offset(Sides.BOTTOM, value);
+    }
 
-    UiElement left(UiUnit value);
+    default UiUnit bottom() {
+        return offset(Sides.BOTTOM);
+    }
+
+    default UiElement right(final UiUnit value) {
+        return offset(Sides.RIGHT, value);
+    }
+
+    default UiUnit right() {
+        return offset(Sides.RIGHT);
+    }
+
+    default UiElement left(final UiUnit value) {
+        return offset(Sides.LEFT, value);
+    }
+
+    default UiUnit left() {
+        return offset(Sides.LEFT);
+    }
 
     /**
      * Sets the offset for the given side. Equivalent of calling e.g. {@link #top(UiUnit) top}.
@@ -105,20 +132,19 @@ public interface UiElement {
      *
      * @return self
      */
-    default UiElement offset(final Sides sides, final UiUnit value) {
-        for (final var side : sides) {
-            switch (side) {
-                case LEFT -> left(value);
-                case RIGHT -> right(value);
-                case TOP -> top(value);
-                case BOTTOM -> bottom(value);
-            }
-        }
+    UiElement offset(Sides sides, UiUnit value);
 
-        return this;
-    }
+    UiUnit offset(Sides side);
 
     UiElement height(UiUnit value);
 
     UiElement width(UiUnit value);
+
+    UiElement text(String format);
+
+    default UiElement text(final String format, final Object... args) {
+        return text(String.format(format, args));
+    }
+
+    Collection<UiElement> children();
 }

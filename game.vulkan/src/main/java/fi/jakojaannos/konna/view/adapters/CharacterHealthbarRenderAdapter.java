@@ -8,6 +8,7 @@ import fi.jakojaannos.konna.engine.view.Renderer;
 import fi.jakojaannos.konna.engine.view.ui.Border;
 import fi.jakojaannos.konna.engine.view.ui.Colors;
 import fi.jakojaannos.konna.engine.view.ui.Sides;
+import fi.jakojaannos.konna.engine.view.ui.UiElement;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
@@ -33,7 +34,9 @@ public class CharacterHealthbarRenderAdapter implements EcsRenderAdapter<Charact
     ) {
         entities.filter(shouldRender(resources.timeManager))
                 .forEach(entity -> {
-                    final var root = renderer.ui().getElementForEntity(entity.getHandle());
+                    // FIXME: Load layout from .json and call .draw() on all entities' elements
+                    //  - provide some overload for "attaching" the given UI to the entity
+                    final var root = (UiElement) null;//renderer.ui().getElementForEntity(entity.getHandle());
                     // TODO: entity element should have scree-space bounds derived from its AABB
                     //  - not all entities have AABBs
                     //  - where AABB exists, read the entity boundaries, multiply by MVP matrix and
@@ -43,17 +46,17 @@ public class CharacterHealthbarRenderAdapter implements EcsRenderAdapter<Charact
 
 
                     if (!entity.hasComponent(PlayerTag.class)) {
-                        root.getOrCreate("bounds-outline",
-                                         child -> child.border(Sides.HORIZONTAL, Border.FULL, pixels(2))
-                                                       .border(Sides.VERTICAL, Border.CORNERS, pixels(2))
-                                                       .borderCornerSize(Sides.VERTICAL, percent(10))
-                                                       .color(Colors.RED));
+                        root.getOrCreateChild("bounds-outline",
+                                              child -> child.border(Sides.HORIZONTAL, Border.FULL, pixels(2))
+                                                            .border(Sides.VERTICAL, Border.CORNERS, pixels(2))
+                                                            .borderCornerSize(Sides.VERTICAL, percent(10))
+                                                            .color(Colors.RED));
                     }
 
                     // FIXME: Healthbar width is currently dependent of entity orientation
                     //  - create centered parent element for the healthbar (with fixed `width`)
                     //  - apply the `right`-property trick to child element
-                    final var healthbarElement = root.getOrCreate(
+                    final var healthbarElement = root.getOrCreateChild(
                             "health-bar",
                             child -> child.top(percent(100))
                                           .height(pixels(10)));

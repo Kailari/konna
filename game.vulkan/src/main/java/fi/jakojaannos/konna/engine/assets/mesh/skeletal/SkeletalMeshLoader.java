@@ -1,4 +1,4 @@
-package fi.jakojaannos.konna.engine.assets.mesh;
+package fi.jakojaannos.konna.engine.assets.mesh.skeletal;
 
 import org.joml.*;
 import org.lwjgl.assimp.*;
@@ -14,12 +14,11 @@ import fi.jakojaannos.konna.engine.assets.Material;
 import fi.jakojaannos.konna.engine.assets.Mesh;
 import fi.jakojaannos.konna.engine.assets.SkeletalMesh;
 import fi.jakojaannos.konna.engine.assets.material.MaterialImpl;
+import fi.jakojaannos.konna.engine.assets.mesh.AssimpProcess;
+import fi.jakojaannos.konna.engine.assets.mesh.MeshLoader;
 import fi.jakojaannos.konna.engine.util.BitMask;
 import fi.jakojaannos.konna.engine.vulkan.LogCategories;
 import fi.jakojaannos.konna.engine.vulkan.RenderingBackend;
-import fi.jakojaannos.konna.engine.vulkan.TextureSampler;
-import fi.jakojaannos.konna.engine.vulkan.descriptor.DescriptorPool;
-import fi.jakojaannos.konna.engine.vulkan.descriptor.DescriptorSetLayout;
 
 import static fi.jakojaannos.konna.engine.util.BitMask.bitMask;
 import static org.lwjgl.assimp.Assimp.aiGetErrorString;

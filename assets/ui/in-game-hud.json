@@ -1,0 +1,46 @@
+{
+  "name": "root",
+  "children": [
+    {
+      "name": "time-played-timer",
+      "anchor": {
+        "x": "50%"
+      },
+      "bounds": {
+        "top": 5,
+        "left": -200,
+        "right": 200
+      },
+      "text": {
+        "size": 48,
+        "format": "%02d:%02d:%02d",
+        "args": [
+          "TIME_PLAYED_HOURS",
+          "TIME_PLAYED_MINUTES",
+          "TIME_PLAYED_SECONDS"
+        ],
+        "align": "center"
+      }
+    },
+    {
+      "name": "score-kills",
+      "bounds": {
+        "left": 5,
+        "bottom": 5
+      },
+      "text": {
+        "size": 24,
+        "format": "Kills: %02d",
+        "args": [
+          "KILLS[PLAYER_LOCAL]"
+        ]
+      }
+    },
+    {
+      "name": "horde-message"
+    },
+    {
+      "name": "game-over-container"
+    }
+  ]
+}

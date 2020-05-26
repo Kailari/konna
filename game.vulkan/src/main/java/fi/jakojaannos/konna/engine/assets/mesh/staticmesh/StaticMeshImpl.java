@@ -1,4 +1,4 @@
-package fi.jakojaannos.konna.engine.assets.mesh;
+package fi.jakojaannos.konna.engine.assets.mesh.staticmesh;
 
 import java.util.Collection;
 import java.util.Iterator;

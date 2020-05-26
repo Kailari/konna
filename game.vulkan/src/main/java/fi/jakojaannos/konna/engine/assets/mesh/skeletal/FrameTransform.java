@@ -1,4 +1,4 @@
-package fi.jakojaannos.konna.engine.assets.mesh;
+package fi.jakojaannos.konna.engine.assets.mesh.skeletal;
 
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;

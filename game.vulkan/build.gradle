@@ -25,6 +25,7 @@ dependencies {
     implementation project(":game")
 
     implementation "org.joml:joml:${jomlVersion}"
+    implementation "com.google.code.gson:gson:${gsonVersion}"
 
     // LWJGL 3 (Minimal Vulkan)
     implementation platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")

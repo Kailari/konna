@@ -2,6 +2,7 @@ module konna.vulkan {
     requires org.slf4j;
     requires org.apache.logging.log4j;
     requires org.joml;
+    requires com.google.gson;
     requires jsr305;
 
     requires roguelite.game;
@@ -23,6 +24,11 @@ module konna.vulkan {
     requires org.lwjgl.stb.natives;
     requires org.lwjgl.glfw.natives;
     requires org.lwjgl.assimp.natives;
+
+    exports fi.jakojaannos.konna.engine.view.ui;
+
+    opens fi.jakojaannos.konna.engine.view.ui to com.google.gson;
+    opens fi.jakojaannos.konna.engine.view.ui.impl to com.google.gson;
 
     opens fi.jakojaannos.konna.view.adapters to roguelite.engine.ecs;
 }

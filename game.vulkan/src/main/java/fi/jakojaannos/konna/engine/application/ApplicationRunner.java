@@ -94,6 +94,7 @@ public class ApplicationRunner implements AutoCloseable {
 
             var timestamp = System.currentTimeMillis();
             final var deltaBuffer = new double[120];
+            var gameModeId = -1;
             while (this.application.window().isOpen()) {
                 final var currentTime = System.currentTimeMillis();
                 final var delta = (currentTime - timestamp) / 1000.0;
@@ -125,6 +126,10 @@ public class ApplicationRunner implements AutoCloseable {
                               String.format("%.2f", deltaBuffer.length / Arrays.stream(deltaBuffer).sum()));
                 }
 
+                if (state.gameModeId() != gameModeId) {
+                    gameModeId = state.gameModeId();
+                    onGameModeChanged(gameModeId);
+                }
                 this.renderer.recordFrame(state, imageIndex);
                 this.renderer.submit(imageIndex,
                                      this.inFlightFences[this.frameIndex],
@@ -163,6 +168,10 @@ public class ApplicationRunner implements AutoCloseable {
         LOG.info("\tFrames:\t\t{}", frameCounter);
         LOG.info("\tAvg. TPF:\t{}", avgTimePerFrame);
         LOG.info("\tAvg. FPS:\t{}", avgFramesPerSecond);
+    }
+
+    private void onGameModeChanged(final int gameModeId) {
+
     }
 
     private int acquireNextImage() {

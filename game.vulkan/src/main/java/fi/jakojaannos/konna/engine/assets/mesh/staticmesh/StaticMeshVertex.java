@@ -1,4 +1,4 @@
-package fi.jakojaannos.konna.engine.assets.mesh;
+package fi.jakojaannos.konna.engine.assets.mesh.staticmesh;
 
 import org.joml.Vector2f;
 import org.joml.Vector3f;

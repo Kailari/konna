@@ -1,5 +1,9 @@
 package fi.jakojaannos.konna.engine.view.ui;
 
+import fi.jakojaannos.konna.engine.view.ui.impl.UiPercentUnit;
+import fi.jakojaannos.konna.engine.view.ui.impl.UiPixelUnit;
+import fi.jakojaannos.konna.engine.view.ui.impl.UiZeroUnit;
+
 public interface UiUnit {
     /**
      * Creates new unit value with the given absolute pixel size.
@@ -9,7 +13,11 @@ public interface UiUnit {
      * @return the value
      */
     static UiUnit pixels(final double value) {
-        throw new UnsupportedOperationException("Not implemented");
+        return new UiPixelUnit(value);
+    }
+
+    static UiUnit zero() {
+        return new UiZeroUnit();
     }
 
     /**
@@ -36,6 +44,8 @@ public interface UiUnit {
      * @return the value
      */
     static UiUnit multiple(final double value) {
-        throw new UnsupportedOperationException("Not implemented");
+        return new UiPercentUnit(value);
     }
+
+    double calculate(UiElement element, final double parentValue);
 }

@@ -11,9 +11,11 @@ import javax.annotation.Nullable;
 import fi.jakojaannos.konna.engine.assets.*;
 import fi.jakojaannos.konna.engine.assets.internal.Shader;
 import fi.jakojaannos.konna.engine.assets.internal.ShaderLoader;
-import fi.jakojaannos.konna.engine.assets.mesh.SkeletalMeshLoader;
-import fi.jakojaannos.konna.engine.assets.mesh.StaticMeshLoader;
+import fi.jakojaannos.konna.engine.assets.mesh.skeletal.SkeletalMeshLoader;
+import fi.jakojaannos.konna.engine.assets.mesh.staticmesh.StaticMeshLoader;
 import fi.jakojaannos.konna.engine.assets.texture.TextureLoader;
+import fi.jakojaannos.konna.engine.assets.ui.UiLoader;
+import fi.jakojaannos.konna.engine.view.ui.UiElement;
 import fi.jakojaannos.konna.engine.vulkan.RenderingBackend;
 
 public class AssetManagerImpl implements AssetManager {
@@ -38,6 +40,7 @@ public class AssetManagerImpl implements AssetManager {
         register(Texture.class, new TextureLoader(backend), "textures/vulkan/texture.jpg");
         register(StaticMesh.class, new StaticMeshLoader(backend, this));
         register(SkeletalMesh.class, new SkeletalMeshLoader(backend, this));
+        register(UiElement.class, new UiLoader());
     }
 
     private <TAsset> void register(
