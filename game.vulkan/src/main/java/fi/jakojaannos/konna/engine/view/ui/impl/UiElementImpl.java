@@ -12,6 +12,7 @@ public class UiElementImpl implements UiElement {
     private Anchor anchor = new Anchor();
     private Bounds bounds = new Bounds();
     private UiText text;
+    private Color color = Colors.TRANSPARENT_BLACK;
 
     private String name;
 
@@ -58,7 +59,13 @@ public class UiElementImpl implements UiElement {
 
     @Override
     public UiElement color(final Color color) {
-        return null;
+        this.color = color;
+        return this;
+    }
+
+    @Override
+    public Color color() {
+        return this.color;
     }
 
     @Override
@@ -102,5 +109,15 @@ public class UiElementImpl implements UiElement {
     @Override
     public UiElement text(final String format) {
         return null;
+    }
+
+    @Override
+    public UiUnit anchorX() {
+        return this.anchor.x();
+    }
+
+    @Override
+    public UiUnit anchorY() {
+        return this.anchor.y();
     }
 }

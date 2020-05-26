@@ -85,7 +85,7 @@ public class ApplicationRunner implements AutoCloseable {
                                                                "riista-tick-thread",
                                                                inputProvider,
                                                                this.timeManager,
-                                                               new RendererRecorder(),
+                                                               new RendererRecorder(this.application.backend().swapchain()::getExtent),
                                                                this.application.window()::setShouldClose,
                                                                this.renderer::updateCameraProperties)
         ) {

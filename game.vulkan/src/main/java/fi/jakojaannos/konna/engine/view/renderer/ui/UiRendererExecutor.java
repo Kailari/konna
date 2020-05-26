@@ -1,0 +1,116 @@
+package fi.jakojaannos.konna.engine.view.renderer.ui;
+
+import org.joml.Matrix4f;
+import org.joml.Vector2f;
+
+import fi.jakojaannos.konna.engine.application.PresentableState;
+import fi.jakojaannos.konna.engine.assets.AssetManager;
+import fi.jakojaannos.konna.engine.assets.Mesh;
+import fi.jakojaannos.konna.engine.util.RecreateCloseable;
+import fi.jakojaannos.konna.engine.vulkan.RenderingBackend;
+import fi.jakojaannos.konna.engine.vulkan.command.CommandBuffer;
+import fi.jakojaannos.konna.engine.vulkan.rendering.GraphicsPipeline;
+import fi.jakojaannos.konna.engine.vulkan.rendering.RenderPass;
+import fi.jakojaannos.konna.engine.vulkan.types.VkPrimitiveTopology;
+
+import static org.lwjgl.system.MemoryStack.stackPush;
+import static org.lwjgl.vulkan.VK10.*;
+
+public class UiRendererExecutor extends RecreateCloseable {
+    private final Mesh quadMesh;
+    private final GraphicsPipeline<UiQuadVertex> quadPipeline;
+
+    public UiRendererExecutor(
+            final RenderingBackend backend,
+            final RenderPass renderPass,
+            final AssetManager assetManager
+    ) {
+        final var quadVertices = new UiQuadVertex[]{
+                new UiQuadVertex(new Vector2f(0, 0)),
+                new UiQuadVertex(new Vector2f(1, 0)),
+                new UiQuadVertex(new Vector2f(1, 1)),
+                new UiQuadVertex(new Vector2f(0, 1))
+        };
+        final var quadIndices = new Integer[]{
+                2, 1, 0,
+                0, 3, 2
+        };
+
+
+        this.quadMesh = Mesh.from(backend,
+                                  UiQuadVertex.FORMAT,
+                                  quadVertices,
+                                  quadIndices,
+                                  null);
+
+        this.quadPipeline = new GraphicsPipeline<>(backend.deviceContext(),
+                                                   backend.swapchain(),
+                                                   renderPass,
+                                                   assetManager,
+                                                   "shaders/vulkan/ui/quad.vert",
+                                                   "shaders/vulkan/ui/quad.frag",
+                                                   VkPrimitiveTopology.TRIANGLE_LIST,
+                                                   UiQuadVertex.FORMAT);
+    }
+
+    public void flush(
+            final PresentableState state,
+            final CommandBuffer commandBuffer
+    ) {
+        try (final var stack = stackPush()) {
+            final var pushConstantData = stack.malloc((16 + 4) * Float.BYTES);
+            final var modelMatrix = new Matrix4f();
+
+            vkCmdBindPipeline(commandBuffer.getHandle(),
+                              VK_PIPELINE_BIND_POINT_GRAPHICS,
+                              this.quadPipeline.getHandle());
+
+            vkCmdBindVertexBuffers(commandBuffer.getHandle(),
+                                   0,
+                                   stack.longs(this.quadMesh.getVertexBuffer().getHandle()),
+                                   stack.longs(0L));
+            vkCmdBindIndexBuffer(commandBuffer.getHandle(),
+                                 this.quadMesh.getIndexBuffer().getHandle(),
+                                 0L,
+                                 VK_INDEX_TYPE_UINT32);
+
+            for (final var entry : state.quadEntries()) {
+                modelMatrix.identity()
+                           .translate((float) entry.x, (float) entry.y, (100.0f - entry.z) / 100.0f)
+                           .scale((float) entry.w, (float) entry.h, 1.0f);
+
+                modelMatrix.get(0, pushConstantData);
+                entry.color.getRGBA(16 * Float.BYTES, pushConstantData);
+
+                vkCmdPushConstants(commandBuffer.getHandle(),
+                                   this.quadPipeline.getLayout(),
+                                   VK_SHADER_STAGE_VERTEX_BIT,
+                                   0,
+                                   pushConstantData);
+
+                vkCmdDrawIndexed(commandBuffer.getHandle(),
+                                 this.quadMesh.getIndexCount(),
+                                 1,
+                                 0,
+                                 0,
+                                 0);
+            }
+        }
+    }
+
+    @Override
+    protected void recreate() {
+        this.quadPipeline.tryRecreate();
+    }
+
+    @Override
+    protected void cleanup() {
+    }
+
+    @Override
+    public void close() {
+        super.close();
+        this.quadPipeline.close();
+        this.quadMesh.close();
+    }
+}

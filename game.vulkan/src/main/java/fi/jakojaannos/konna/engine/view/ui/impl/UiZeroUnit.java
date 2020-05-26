@@ -5,7 +5,7 @@ import fi.jakojaannos.konna.engine.view.ui.UiUnit;
 
 public class UiZeroUnit implements UiUnit {
     @Override
-    public double calculate(final UiElement element, final double parentValue) {
+    public double calculate(final UiElement element, final double parentValue, final double framebufferSize) {
         return 0;
     }
 }

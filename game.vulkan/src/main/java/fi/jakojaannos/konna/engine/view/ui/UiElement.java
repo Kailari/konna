@@ -92,6 +92,8 @@ public interface UiElement {
 
     UiElement color(Color color);
 
+    Color color();
+
     default UiElement top(final UiUnit value) {
         return offset(Sides.TOP, value);
     }
@@ -147,4 +149,8 @@ public interface UiElement {
     }
 
     Collection<UiElement> children();
+
+    UiUnit anchorX();
+
+    UiUnit anchorY();
 }

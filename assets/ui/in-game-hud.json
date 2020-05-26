@@ -9,7 +9,14 @@
       "bounds": {
         "top": 5,
         "left": -200,
-        "right": 200
+        "right": 200,
+        "bottom": 500
+      },
+      "color": {
+        "r": 1.0,
+        "g": 0.0,
+        "b": 1.0,
+        "a": 0.75
       },
       "text": {
         "size": 48,

@@ -47,5 +47,5 @@ public interface UiUnit {
         return new UiPercentUnit(value);
     }
 
-    double calculate(UiElement element, final double parentValue);
+    double calculate(UiElement element, final double parentValue, final double framebufferSize);
 }

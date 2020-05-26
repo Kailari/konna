@@ -6,6 +6,7 @@ import fi.jakojaannos.konna.engine.assets.AssetManager;
 import fi.jakojaannos.konna.engine.util.RecreateCloseable;
 import fi.jakojaannos.konna.engine.view.renderer.debug.DebugRendererExecutor;
 import fi.jakojaannos.konna.engine.view.renderer.mesh.MeshRendererExecutor;
+import fi.jakojaannos.konna.engine.view.renderer.ui.UiRendererExecutor;
 import fi.jakojaannos.konna.engine.vulkan.DepthTexture;
 import fi.jakojaannos.konna.engine.vulkan.RenderingBackend;
 import fi.jakojaannos.konna.engine.vulkan.command.CommandBuffer;
@@ -38,6 +39,7 @@ public class RendererExecutor extends RecreateCloseable {
 
     private final DebugRendererExecutor debugRenderer;
     private final MeshRendererExecutor meshRenderer;
+    private final UiRendererExecutor uiRenderer;
 
     private CommandBuffer[] commandBuffers;
 
@@ -80,6 +82,9 @@ public class RendererExecutor extends RecreateCloseable {
                                                      this.renderPass,
                                                      assetManager,
                                                      this.cameraDescriptorLayout);
+        this.uiRenderer = new UiRendererExecutor(backend,
+                                                 this.renderPass,
+                                                 assetManager);
 
         tryRecreate();
     }
@@ -107,6 +112,7 @@ public class RendererExecutor extends RecreateCloseable {
         ) {
             this.debugRenderer.flush(presentableState, this.cameraDescriptor, commandBuffer, imageIndex);
             this.meshRenderer.flush(presentableState, this.cameraDescriptor, commandBuffer, imageIndex);
+            this.uiRenderer.flush(presentableState, commandBuffer);
         }
     }
 
@@ -140,6 +146,7 @@ public class RendererExecutor extends RecreateCloseable {
 
         this.debugRenderer.tryRecreate();
         this.meshRenderer.tryRecreate();
+        this.uiRenderer.tryRecreate();
     }
 
     private void freeCommandBuffers() {
@@ -174,6 +181,7 @@ public class RendererExecutor extends RecreateCloseable {
 
         this.debugRenderer.close();
         this.meshRenderer.close();
+        this.uiRenderer.close();
 
         this.cameraDescriptorLayout.close();
         super.close();
