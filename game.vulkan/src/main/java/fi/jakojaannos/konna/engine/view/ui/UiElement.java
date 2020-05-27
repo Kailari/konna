@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 
+import fi.jakojaannos.konna.engine.view.ui.impl.UiElementImpl;
+
 @SuppressWarnings("UnusedReturnValue")
 public interface UiElement {
     String name();

@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
-
 import javax.annotation.Nullable;
 
 import fi.jakojaannos.konna.engine.view.ui.*;
@@ -13,12 +12,19 @@ import fi.jakojaannos.konna.engine.view.ui.*;
 @SuppressWarnings("FieldMayBeFinal")
 public class UiElementImpl implements UiElement {
     private Collection<UiElementImpl> children = List.of();
-    private Anchor anchor = new Anchor();
+    @Nullable private transient UiElementImpl parent;
+
     private Bounds bounds = new Bounds();
-    private UiText text;
-    private Color color = Colors.TRANSPARENT_BLACK;
+    private Anchor anchor = new Anchor();
+
+    @Nullable private UiText text;
+    @Nullable private Color color;
 
     private String name;
+
+    public void setParent(@Nullable final UiElementImpl parent) {
+        this.parent = parent;
+    }
 
     @Override
     public Collection<UiElement> children() {
@@ -69,7 +75,14 @@ public class UiElementImpl implements UiElement {
 
     @Override
     public Color color() {
-        return this.color;
+        var element = this;
+        while (element != null && element.color == null) {
+            element = element.parent;
+        }
+
+        return element == null
+                ? Colors.TRANSPARENT_BLACK
+                : element.color;
     }
 
     @Override
