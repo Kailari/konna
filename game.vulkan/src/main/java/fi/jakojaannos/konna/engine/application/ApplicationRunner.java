@@ -56,7 +56,7 @@ public class ApplicationRunner implements AutoCloseable {
 
         final var deviceContext = application.backend().deviceContext();
         final var swapchain = application.backend().swapchain();
-        this.renderer = new RendererExecutor(application.backend(), assetManager);
+        this.renderer = new RendererExecutor(application.backend(), application.window(), assetManager);
 
         this.timeManager = new GameRunnerTimeManager(20L);
 

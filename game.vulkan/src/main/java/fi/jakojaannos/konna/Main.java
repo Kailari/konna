@@ -17,6 +17,7 @@ public class Main {
         try (final var app = Application.initialize(800,
                                                     600);
              final var assetManager = new AssetManagerImpl(app.backend(),
+                                                           app.window(),
                                                            Path.of("../assets"));
              final var runner = new ApplicationRunner(app, assetManager)
         ) {

@@ -18,6 +18,7 @@ import fi.jakojaannos.konna.engine.vulkan.rendering.Framebuffers;
 import fi.jakojaannos.konna.engine.vulkan.rendering.RenderPass;
 import fi.jakojaannos.konna.engine.vulkan.rendering.Swapchain;
 import fi.jakojaannos.konna.engine.vulkan.types.VkDescriptorPoolCreateFlags;
+import fi.jakojaannos.konna.engine.vulkan.window.Window;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 
 import static fi.jakojaannos.konna.engine.util.BitMask.bitMask;
@@ -45,6 +46,7 @@ public class RendererExecutor extends RecreateCloseable {
 
     public RendererExecutor(
             final RenderingBackend backend,
+            final Window window,
             final AssetManager assetManager
     ) {
         this.deviceContext = backend.deviceContext();
@@ -83,6 +85,7 @@ public class RendererExecutor extends RecreateCloseable {
                                                      assetManager,
                                                      this.cameraDescriptorLayout);
         this.uiRenderer = new UiRendererExecutor(backend,
+                                                 window,
                                                  this.renderPass,
                                                  assetManager);
 

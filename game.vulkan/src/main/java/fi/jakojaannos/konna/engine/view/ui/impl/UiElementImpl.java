@@ -136,7 +136,29 @@ public class UiElementImpl implements UiElement {
 
     @Override
     public UiElement text(final String format) {
-        return null;
+        if (this.text == null) {
+            this.text = new UiText();
+        }
+
+        this.text.format(format);
+        return this;
+    }
+
+    @Override
+    public UiElement text(final String format, final String... argKeys) {
+        if (this.text == null) {
+            this.text = new UiText();
+        }
+
+        this.text.format(format);
+        this.text.args(argKeys);
+        return this;
+    }
+
+    @Nullable
+    @Override
+    public UiText text() {
+        return this.text;
     }
 
     @Override

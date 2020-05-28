@@ -16,6 +16,8 @@ public class PresentableState {
                                                                                                             MeshRendererRecorder.SkeletalEntry[]::new);
     private final RenderBuffer<UiRendererRecorder.QuadEntry> quadEntries = new RenderBuffer<>(UiRendererRecorder.QuadEntry::new,
                                                                                               UiRendererRecorder.QuadEntry[]::new);
+    private final RenderBuffer<UiRendererRecorder.TextEntry> textEntries = new RenderBuffer<>(UiRendererRecorder.TextEntry::new,
+                                                                                              UiRendererRecorder.TextEntry[]::new);
 
     private final Matrix4f viewMatrix = new Matrix4f();
     private final Vector3f eyePosition = new Vector3f();
@@ -46,6 +48,7 @@ public class PresentableState {
         this.transformEntries.reset();
         this.skeletalMeshEntries.reset();
         this.quadEntries.reset();
+        this.textEntries.reset();
 
         this.uiVariables.clear();
 
@@ -66,11 +69,15 @@ public class PresentableState {
         return this.gameModeId;
     }
 
-    public UiVariables uiVariables() {
-        return this.uiVariables;
-    }
-
     public RenderBuffer<UiRendererRecorder.QuadEntry> quadEntries() {
         return this.quadEntries;
+    }
+
+    public RenderBuffer<UiRendererRecorder.TextEntry> textEntries() {
+        return this.textEntries;
+    }
+
+    public UiVariables uiVariables() {
+        return this.uiVariables;
     }
 }

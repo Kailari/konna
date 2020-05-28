@@ -22,11 +22,16 @@ public class TextureImpl implements Texture {
     }
 
     public TextureImpl(final DeviceContext deviceContext, final Path path) {
-        this.image = new GPUImage(deviceContext,
-                                  path,
-                                  VkImageTiling.OPTIMAL,
-                                  bitMask(VkImageUsageFlags.SAMPLED_BIT),
-                                  bitMask(VkMemoryPropertyFlags.DEVICE_LOCAL_BIT));
+        this(deviceContext,
+             new GPUImage(deviceContext,
+                          path,
+                          VkImageTiling.OPTIMAL,
+                          bitMask(VkImageUsageFlags.SAMPLED_BIT),
+                          bitMask(VkMemoryPropertyFlags.DEVICE_LOCAL_BIT)));
+    }
+
+    public TextureImpl(final DeviceContext deviceContext, final GPUImage image) {
+        this.image = image;
         this.imageView = new ImageView(deviceContext,
                                        this.image,
                                        bitMask(VkImageAspectFlags.COLOR_BIT));

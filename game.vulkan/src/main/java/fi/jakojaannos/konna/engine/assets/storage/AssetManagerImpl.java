@@ -14,9 +14,11 @@ import fi.jakojaannos.konna.engine.assets.internal.ShaderLoader;
 import fi.jakojaannos.konna.engine.assets.mesh.skeletal.SkeletalMeshLoader;
 import fi.jakojaannos.konna.engine.assets.mesh.staticmesh.StaticMeshLoader;
 import fi.jakojaannos.konna.engine.assets.texture.TextureLoader;
+import fi.jakojaannos.konna.engine.assets.ui.FontLoader;
 import fi.jakojaannos.konna.engine.assets.ui.UiLoader;
 import fi.jakojaannos.konna.engine.view.ui.UiElement;
 import fi.jakojaannos.konna.engine.vulkan.RenderingBackend;
+import fi.jakojaannos.konna.engine.vulkan.window.Window;
 
 public class AssetManagerImpl implements AssetManager {
     private static final Logger LOG = LoggerFactory.getLogger(AssetManager.class);
@@ -32,6 +34,7 @@ public class AssetManagerImpl implements AssetManager {
 
     public AssetManagerImpl(
             final RenderingBackend backend,
+            final Window window,
             final Path assetRoot
     ) {
         this.assetRoot = assetRoot;
@@ -41,6 +44,7 @@ public class AssetManagerImpl implements AssetManager {
         register(StaticMesh.class, new StaticMeshLoader(backend, this));
         register(SkeletalMesh.class, new SkeletalMeshLoader(backend, this));
         register(UiElement.class, new UiLoader());
+        register(Font.class, new FontLoader(backend, window), "fonts/VCR_OSD_MONO.ttf");
     }
 
     private <TAsset> void register(

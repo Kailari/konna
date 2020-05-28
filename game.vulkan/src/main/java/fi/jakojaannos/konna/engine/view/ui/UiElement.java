@@ -4,8 +4,6 @@ import java.util.Collection;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 
-import fi.jakojaannos.konna.engine.view.ui.impl.UiElementImpl;
-
 @SuppressWarnings("UnusedReturnValue")
 public interface UiElement {
     String name();
@@ -158,9 +156,10 @@ public interface UiElement {
 
     UiElement text(String format);
 
-    default UiElement text(final String format, final Object... args) {
-        return text(String.format(format, args));
-    }
+    UiElement text(String format, String... argKeys);
+
+    @Nullable
+    UiText text();
 
     Collection<UiElement> children();
 

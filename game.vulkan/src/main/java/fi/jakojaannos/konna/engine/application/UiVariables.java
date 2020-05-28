@@ -13,4 +13,8 @@ public class UiVariables {
     public void clear() {
         this.values.clear();
     }
+
+    public Object get(final String key) {
+        return this.values.getOrDefault(key, 0);
+    }
 }

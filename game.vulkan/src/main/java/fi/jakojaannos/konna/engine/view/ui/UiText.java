@@ -4,7 +4,7 @@ public class UiText {
     private String format;
     private String[] args;
     private int size;
-    private Alignment align;
+    private Alignment align = Alignment.LEFT;
 
     public String format() {
         return this.format;

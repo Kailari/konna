@@ -9,6 +9,8 @@ import fi.jakojaannos.konna.engine.view.ui.UiElement;
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
+import fi.jakojaannos.roguelite.game.data.resources.Players;
 import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
 
 public class SessionStatsHudRenderAdapter implements EcsRenderAdapter<SessionStatsHudRenderAdapter.Resources, EcsSystem.NoEntities> {
@@ -29,6 +31,11 @@ public class SessionStatsHudRenderAdapter implements EcsRenderAdapter<SessionSta
         final var timeManager = resources.timeManager;
         final var sessionStats = resources.sessionStats;
 
+        resources.players.getLocalPlayer()
+                         .flatMap(player -> player.getComponent(AttackAbility.class))
+                         .map(attackAbility -> sessionStats.getKillsOf(attackAbility.damageSource))
+                         .ifPresent(kills -> renderer.ui().setValue("KILLS[LOCAL_PLAYER]", kills));
+
         final var ticks = sessionStats.endTimeStamp - sessionStats.beginTimeStamp;
         final var secondsRaw = ticks / (1000 / timeManager.getTimeStep());
         final var hours = secondsRaw / 3600;
@@ -44,6 +51,7 @@ public class SessionStatsHudRenderAdapter implements EcsRenderAdapter<SessionSta
 
     public static record Resources(
             TimeManager timeManager,
-            SessionStats sessionStats
+            SessionStats sessionStats,
+            Players players
     ) {}
 }

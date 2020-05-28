@@ -3,16 +3,13 @@ package fi.jakojaannos.konna.engine.view.renderer.ui;
 import org.lwjgl.vulkan.VkExtent2D;
 
 import java.util.function.Supplier;
-
 import javax.annotation.Nullable;
 
 import fi.jakojaannos.konna.engine.application.PresentableState;
+import fi.jakojaannos.konna.engine.application.UiVariables;
 import fi.jakojaannos.konna.engine.view.Presentable;
 import fi.jakojaannos.konna.engine.view.UiRenderer;
-import fi.jakojaannos.konna.engine.view.ui.Color;
-import fi.jakojaannos.konna.engine.view.ui.Colors;
-import fi.jakojaannos.konna.engine.view.ui.UiElement;
-import fi.jakojaannos.konna.engine.view.ui.UiUnit;
+import fi.jakojaannos.konna.engine.view.ui.*;
 
 import static fi.jakojaannos.konna.engine.view.ui.UiUnit.zero;
 
@@ -91,6 +88,19 @@ public class UiRendererRecorder implements UiRenderer {
         entry.z = depth;
         entry.color = element.color();
 
+        final var text = element.text();
+        if (text != null) {
+            final var textEntry = this.state.textEntries().get();
+            textEntry.format = text.format();
+            textEntry.argKeys = text.args();
+            textEntry.alignment = text.align();
+            textEntry.size = text.size();
+            textEntry.quad = entry;
+
+            // FIXME: allow setting text color per-element (add field to UiText)
+            textEntry.color = Colors.WHITE;
+        }
+
         for (final var child : element.children()) {
             draw(child, depth + 1, entry.x, entry.y, entry.w, entry.h);
         }
@@ -163,6 +173,41 @@ public class UiRendererRecorder implements UiRenderer {
 
             this.z = 0;
             this.color = Colors.TRANSPARENT_BLACK;
+        }
+    }
+
+    public static class TextEntry implements Presentable {
+        private static final QuadEntry NULL_QUAD = new QuadEntry();
+
+        static {
+            NULL_QUAD.reset();
+        }
+
+        public String format;
+        public String[] argKeys;
+        public Color color;
+        public Alignment alignment;
+        public int size;
+
+        public QuadEntry quad;
+
+        @Override
+        public void reset() {
+            this.format = "";
+            this.argKeys = new String[0];
+            this.color = Colors.TRANSPARENT_BLACK;
+            this.alignment = Alignment.LEFT;
+
+            this.quad = NULL_QUAD;
+        }
+
+        public String compileString(final UiVariables variables) {
+            final var args = new Object[this.argKeys.length];
+            for (int i = 0; i < args.length; i++) {
+                args[i] = variables.get(this.argKeys[i]);
+            }
+
+            return String.format(this.format, args);
         }
     }
 

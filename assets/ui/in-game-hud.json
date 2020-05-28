@@ -21,7 +21,7 @@
           "TIME_PLAYED_MINUTES",
           "TIME_PLAYED_SECONDS"
         ],
-        "align": "center"
+        "align": "CENTER"
       }
     },
     {
@@ -37,7 +37,7 @@
         "size": 24,
         "format": "Kills: %02d",
         "args": [
-          "KILLS[PLAYER_LOCAL]"
+          "KILLS[LOCAL_PLAYER]"
         ]
       }
     },
