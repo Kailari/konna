@@ -63,8 +63,7 @@ public class MeshRendererExecutor extends RecreateCloseable {
         // Buffers:     1 for material, 1 for scene, 1 for mesh
         // samplers:    1 for material
         this.descriptorPool = new SwapchainImageDependentDescriptorPool(
-                backend.deviceContext(),
-                backend.swapchain(),
+                backend,
                 SETS_PER_IMAGE,
                 bitMask(),
                 new DescriptorPool.Pool(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,

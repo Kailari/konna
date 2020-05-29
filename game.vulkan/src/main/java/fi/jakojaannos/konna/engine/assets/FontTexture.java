@@ -3,7 +3,9 @@ package fi.jakojaannos.konna.engine.assets;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
-public interface FontTexture extends AutoCloseable {
+import fi.jakojaannos.konna.engine.vulkan.rendering.ImageView;
+
+public interface FontTexture extends Texture {
     float getPixelHeightScale();
 
     float calculateStringWidthInPixels(String string);
@@ -20,6 +22,5 @@ public interface FontTexture extends AutoCloseable {
             float factorX
     );
 
-    @Override
-    void close();
+    ImageView getImageView();
 }

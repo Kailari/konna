@@ -145,7 +145,7 @@ public class GraphicsPipeline<TVertex> extends RecreateCloseable {
             final var constantRanges = VkPushConstantRange
                     .callocStack(1)
                     .offset(0)
-                    .size((16 + 4) * Float.BYTES)
+                    .size((16 + 4 + 4) * Float.BYTES)
                     .stageFlags(VK_SHADER_STAGE_VERTEX_BIT);
 
             final var createInfo = VkPipelineLayoutCreateInfo

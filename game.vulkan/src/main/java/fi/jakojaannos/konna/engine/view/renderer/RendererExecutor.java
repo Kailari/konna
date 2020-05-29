@@ -60,12 +60,10 @@ public class RendererExecutor extends RecreateCloseable {
                                              this.depthTexture,
                                              this.renderPass);
 
-        this.descriptorPool = new SwapchainImageDependentDescriptorPool(
-                this.deviceContext,
-                this.swapchain,
-                1,
-                bitMask(VkDescriptorPoolCreateFlags.FREE_DESCRIPTOR_SET_BIT),
-                new DescriptorPool.Pool(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this.swapchain::getImageCount));
+        this.descriptorPool = new SwapchainImageDependentDescriptorPool(backend,
+                                                                        1,
+                                                                        bitMask(VkDescriptorPoolCreateFlags.FREE_DESCRIPTOR_SET_BIT),
+                                                                        new DescriptorPool.Pool(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, this.swapchain::getImageCount));
 
         this.cameraDescriptorLayout = new DescriptorSetLayout(this.deviceContext,
                                                               CameraDescriptor.CAMERA_DESCRIPTOR_BINDING);
@@ -115,7 +113,7 @@ public class RendererExecutor extends RecreateCloseable {
         ) {
             this.debugRenderer.flush(presentableState, this.cameraDescriptor, commandBuffer, imageIndex);
             this.meshRenderer.flush(presentableState, this.cameraDescriptor, commandBuffer, imageIndex);
-            this.uiRenderer.flush(presentableState, commandBuffer);
+            this.uiRenderer.flush(presentableState, commandBuffer, imageIndex);
         }
     }
 

@@ -4,9 +4,11 @@ import org.lwjgl.vulkan.VkDescriptorBufferInfo;
 import org.lwjgl.vulkan.VkDescriptorImageInfo;
 import org.lwjgl.vulkan.VkWriteDescriptorSet;
 
+import fi.jakojaannos.konna.engine.assets.Texture;
 import fi.jakojaannos.konna.engine.util.RecreateCloseable;
 import fi.jakojaannos.konna.engine.vulkan.GPUBuffer;
 import fi.jakojaannos.konna.engine.vulkan.device.DeviceContext;
+import fi.jakojaannos.konna.engine.vulkan.rendering.ImageView;
 import fi.jakojaannos.konna.engine.vulkan.rendering.Swapchain;
 import fi.jakojaannos.konna.engine.vulkan.types.VkDescriptorType;
 import fi.jakojaannos.konna.engine.vulkan.types.VkMemoryPropertyFlags;
@@ -125,7 +127,11 @@ public abstract class DescriptorObject extends RecreateCloseable {
 
     @Override
     protected void recreate() {
-        this.buffers = new GPUBuffer[this.swapchain.getImageCount()];
+        if (this.bufferSizeInBytes > 0) {
+            this.buffers = new GPUBuffer[this.swapchain.getImageCount()];
+        } else {
+            this.buffers = new GPUBuffer[0];
+        }
 
         for (int imageIndex = 0; imageIndex < this.buffers.length; imageIndex++) {
             this.buffers[imageIndex] = new GPUBuffer(this.deviceContext,

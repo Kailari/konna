@@ -8,25 +8,39 @@ import org.lwjgl.vulkan.VkExtent2D;
 import java.nio.IntBuffer;
 
 import fi.jakojaannos.konna.engine.application.PresentableState;
-import fi.jakojaannos.konna.engine.assets.AssetManager;
-import fi.jakojaannos.konna.engine.assets.Font;
-import fi.jakojaannos.konna.engine.assets.FontTexture;
-import fi.jakojaannos.konna.engine.assets.Mesh;
+import fi.jakojaannos.konna.engine.assets.*;
 import fi.jakojaannos.konna.engine.util.RecreateCloseable;
 import fi.jakojaannos.konna.engine.view.ui.Alignment;
 import fi.jakojaannos.konna.engine.vulkan.RenderingBackend;
+import fi.jakojaannos.konna.engine.vulkan.TextureSampler;
 import fi.jakojaannos.konna.engine.vulkan.command.CommandBuffer;
+import fi.jakojaannos.konna.engine.vulkan.descriptor.DescriptorPool;
+import fi.jakojaannos.konna.engine.vulkan.descriptor.DescriptorSetLayout;
+import fi.jakojaannos.konna.engine.vulkan.descriptor.SwapchainImageDependentDescriptorPool;
 import fi.jakojaannos.konna.engine.vulkan.rendering.GraphicsPipeline;
 import fi.jakojaannos.konna.engine.vulkan.rendering.RenderPass;
+import fi.jakojaannos.konna.engine.vulkan.types.VkDescriptorPoolCreateFlags;
 import fi.jakojaannos.konna.engine.vulkan.types.VkPrimitiveTopology;
 import fi.jakojaannos.konna.engine.vulkan.window.Window;
 
+import static fi.jakojaannos.konna.engine.util.BitMask.bitMask;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.VK10.*;
 
 public class UiRendererExecutor extends RecreateCloseable {
-    private final Mesh quadMesh;
+    private static final int MAX_TEXT_ENTRIES = 16;
+
     private final GraphicsPipeline<UiQuadVertex> quadPipeline;
+    private final Mesh quadMesh;
+
+    private final DescriptorSetLayout fontTextureDescriptorLayout;
+    private final DescriptorPool descriptorPool;
+
+    private final TextureSampler textureSampler;
+
+    private final GraphicsPipeline<TextVertex> textPipeline;
+    private final FontDescriptor[] fontTextureDescriptors;
+    private final Mesh textMesh;
 
     private final float contentScaleX;
     private final float contentScaleY;
@@ -50,6 +64,12 @@ public class UiRendererExecutor extends RecreateCloseable {
                 new UiQuadVertex(new Vector2f(1, 1)),
                 new UiQuadVertex(new Vector2f(0, 1))
         };
+        final var textQuadVertices = new TextVertex[]{
+                new TextVertex(new Vector2f(0, 0), new Vector2f(0, 0), 0),
+                new TextVertex(new Vector2f(1, 0), new Vector2f(1, 0), 1),
+                new TextVertex(new Vector2f(1, 1), new Vector2f(1, 1), 2),
+                new TextVertex(new Vector2f(0, 1), new Vector2f(0, 1), 3)
+        };
         final var quadIndices = new Integer[]{
                 2, 1, 0,
                 0, 3, 2
@@ -61,6 +81,11 @@ public class UiRendererExecutor extends RecreateCloseable {
                                   quadVertices,
                                   quadIndices,
                                   null);
+        this.textMesh = Mesh.from(backend,
+                                  TextVertex.FORMAT,
+                                  textQuadVertices,
+                                  quadIndices,
+                                  null);
 
         this.quadPipeline = new GraphicsPipeline<>(backend.deviceContext(),
                                                    backend.swapchain(),
@@ -70,6 +95,37 @@ public class UiRendererExecutor extends RecreateCloseable {
                                                    "shaders/vulkan/ui/quad.frag",
                                                    VkPrimitiveTopology.TRIANGLE_LIST,
                                                    UiQuadVertex.FORMAT);
+
+        this.descriptorPool = new SwapchainImageDependentDescriptorPool(
+                backend,
+                MAX_TEXT_ENTRIES,
+                bitMask(VkDescriptorPoolCreateFlags.FREE_DESCRIPTOR_SET_BIT),
+                new DescriptorPool.Pool(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                                        () -> backend.swapchain().getImageCount() * MAX_TEXT_ENTRIES));
+        this.textureSampler = new TextureSampler(backend.deviceContext());
+
+        this.fontTextureDescriptorLayout = new DescriptorSetLayout(backend.deviceContext(),
+                                                                   FontDescriptor.FONT_TEXTURE_DESCRIPTOR_BINDING);
+        final var defaultTexture = assetManager.getStorage(Texture.class)
+                                               .getOrDefault("textures/vulkan/texture.jpg");
+
+        this.fontTextureDescriptors = new FontDescriptor[MAX_TEXT_ENTRIES];
+        for (int i = 0; i < this.fontTextureDescriptors.length; i++) {
+            this.fontTextureDescriptors[i] = new FontDescriptor(backend,
+                                                                defaultTexture,
+                                                                this.descriptorPool,
+                                                                this.fontTextureDescriptorLayout,
+                                                                this.textureSampler);
+        }
+        this.textPipeline = new GraphicsPipeline<>(backend.deviceContext(),
+                                                   backend.swapchain(),
+                                                   renderPass,
+                                                   assetManager,
+                                                   "shaders/vulkan/ui/text.vert",
+                                                   "shaders/vulkan/ui/text.frag",
+                                                   VkPrimitiveTopology.TRIANGLE_LIST,
+                                                   TextVertex.FORMAT,
+                                                   this.fontTextureDescriptorLayout);
 
         try (final var stack = stackPush()) {
             final var pX = stack.mallocFloat(1);
@@ -102,18 +158,34 @@ public class UiRendererExecutor extends RecreateCloseable {
 
     public void flush(
             final PresentableState state,
-            final CommandBuffer commandBuffer
+            final CommandBuffer commandBuffer,
+            final int imageIndex
     ) {
         drawQuads(state, commandBuffer);
-        drawText(state, commandBuffer);
+        drawText(state, commandBuffer, imageIndex);
     }
 
-    private void drawText(final PresentableState state, final CommandBuffer commandBuffer) {
+    private void drawText(
+            final PresentableState state,
+            final CommandBuffer commandBuffer,
+            final int imageIndex
+    ) {
         try (final var stack = stackPush()) {
-            final var pushConstantData = stack.malloc((16 + 4) * Float.BYTES);
+            final var pushConstantData = stack.malloc((16 + 4 + 4) * Float.BYTES);
             final var modelMatrix = new Matrix4f();
 
-            // TODO: Bind font rendering pipeline
+            vkCmdBindPipeline(commandBuffer.getHandle(),
+                              VK_PIPELINE_BIND_POINT_GRAPHICS,
+                              this.textPipeline.getHandle());
+
+            vkCmdBindVertexBuffers(commandBuffer.getHandle(),
+                                   0,
+                                   stack.longs(this.textMesh.getVertexBuffer().getHandle()),
+                                   stack.longs(0L));
+            vkCmdBindIndexBuffer(commandBuffer.getHandle(),
+                                 this.textMesh.getIndexBuffer().getHandle(),
+                                 0L,
+                                 VK_INDEX_TYPE_UINT32);
 
             final var pCodePoint = stack.mallocInt(1);
             final var pX = stack.floats(0.0f);
@@ -122,6 +194,12 @@ public class UiRendererExecutor extends RecreateCloseable {
             final var factorX = 1.0f / this.contentScaleX;
             final var factorY = 1.0f / this.contentScaleY;
 
+            // FIXME: Re-implement using batching to dynamic vertex buffer
+            //  - Use instanced rendering? Use single quad mesh and load vertex offsets from instance buffer
+            //  - Can use gl_vertexIndex (or whatever it was) for offsetting the vertices instead of transform matrix
+            //  - alternatively just upload 4 verts per quad, GPU memory bandwidth impact is negligible with this low
+            //    vertex counts
+            var entryIndex = 0;
             for (final var entry : state.textEntries()) {
                 pX.put(0, 0.0f);
                 pY.put(0, 0.0f);
@@ -136,7 +214,16 @@ public class UiRendererExecutor extends RecreateCloseable {
                 final var fontTexture = font.getForSize(fontSize);
                 final var fontPixelHeightScale = fontTexture.getPixelHeightScale();
 
-                // TODO: Update and bind the font texture descriptor
+                final var fontTextureDescriptor = this.fontTextureDescriptors[entryIndex];
+                ++entryIndex;
+
+                fontTextureDescriptor.update(fontTexture, imageIndex);
+                vkCmdBindDescriptorSets(commandBuffer.getHandle(),
+                                        VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                        this.textPipeline.getLayout(),
+                                        0,
+                                        stack.longs(fontTextureDescriptor.getDescriptorSet(imageIndex)),
+                                        null);
 
                 final var string = entry.compileString(state.uiVariables());
                 final var x = align(entry.quad, string, entry.alignment, fontTexture, this.swapchainExtent.width());
@@ -186,16 +273,19 @@ public class UiRendererExecutor extends RecreateCloseable {
 
                     modelMatrix.get(0, pushConstantData);
                     entry.color.getRGBA(16 * Float.BYTES, pushConstantData);
+                    pushConstantData.putFloat(20 * Float.BYTES, renderableCharacter.u0());
+                    pushConstantData.putFloat(21 * Float.BYTES, renderableCharacter.v0());
+                    pushConstantData.putFloat(22 * Float.BYTES, renderableCharacter.u1());
+                    pushConstantData.putFloat(23 * Float.BYTES, renderableCharacter.v1());
 
-                    // TODO: Use actual text pipeline and push UVs too
                     vkCmdPushConstants(commandBuffer.getHandle(),
-                                       this.quadPipeline.getLayout(),
+                                       this.textPipeline.getLayout(),
                                        VK_SHADER_STAGE_VERTEX_BIT,
                                        0,
                                        pushConstantData);
 
                     vkCmdDrawIndexed(commandBuffer.getHandle(),
-                                     this.quadMesh.getIndexCount(),
+                                     this.textMesh.getIndexCount(),
                                      1,
                                      0,
                                      0,
@@ -249,7 +339,13 @@ public class UiRendererExecutor extends RecreateCloseable {
 
     @Override
     protected void recreate() {
+        this.descriptorPool.tryRecreate();
+        for (final var descriptor : this.fontTextureDescriptors) {
+            descriptor.tryRecreate();
+        }
+
         this.quadPipeline.tryRecreate();
+        this.textPipeline.tryRecreate();
     }
 
     @Override
@@ -259,8 +355,20 @@ public class UiRendererExecutor extends RecreateCloseable {
     @Override
     public void close() {
         super.close();
-        this.quadPipeline.close();
+        this.textMesh.close();
         this.quadMesh.close();
+
+        this.descriptorPool.close();
+        this.textureSampler.close();
+
+        for (final var descriptor : this.fontTextureDescriptors) {
+            descriptor.close();
+        }
+
+        this.fontTextureDescriptorLayout.close();
+
+        this.textPipeline.close();
+        this.quadPipeline.close();
     }
 
     private static float align(

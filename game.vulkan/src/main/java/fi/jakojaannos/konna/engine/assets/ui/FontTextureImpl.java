@@ -4,8 +4,6 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.stb.STBTTAlignedQuad;
 import org.lwjgl.stb.STBTTBakedChar;
 import org.lwjgl.stb.STBTTFontinfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -19,6 +17,7 @@ import fi.jakojaannos.konna.engine.assets.texture.TextureImpl;
 import fi.jakojaannos.konna.engine.vulkan.GPUBuffer;
 import fi.jakojaannos.konna.engine.vulkan.GPUImage;
 import fi.jakojaannos.konna.engine.vulkan.device.DeviceContext;
+import fi.jakojaannos.konna.engine.vulkan.rendering.ImageView;
 import fi.jakojaannos.konna.engine.vulkan.types.VkFormat;
 import fi.jakojaannos.konna.engine.vulkan.types.VkImageTiling;
 import fi.jakojaannos.konna.engine.vulkan.types.VkImageUsageFlags;
@@ -31,8 +30,6 @@ import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.VK10.*;
 
 public class FontTextureImpl implements FontTexture {
-    private static final Logger LOG = LoggerFactory.getLogger(FontTextureImpl.class);
-
     private static final int FIRST_CHAR = 32;
 
     private final Font font;
@@ -50,7 +47,12 @@ public class FontTextureImpl implements FontTexture {
 
     @Override
     public float getPixelHeightScale() {
-        return 0;
+        return this.pixelHeightScale;
+    }
+
+    @Override
+    public ImageView getImageView() {
+        return this.texture.getImageView();
     }
 
     public FontTextureImpl(
@@ -93,7 +95,7 @@ public class FontTextureImpl implements FontTexture {
                                        bitMask(VkMemoryPropertyFlags.DEVICE_LOCAL_BIT));
 
         try (final var stagingBuffer = new GPUBuffer(deviceContext,
-                                                     pixelCount,
+                                                     pixelCount * format.getSize(),
                                                      VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
                                                      bitMask(VkMemoryPropertyFlags.HOST_VISIBLE_BIT,
                                                              VkMemoryPropertyFlags.HOST_COHERENT_BIT))
@@ -184,7 +186,7 @@ public class FontTextureImpl implements FontTexture {
                            pX,
                            pY,
                            this.alignedQuad,
-                           true);
+                           false);
         pX.put(0, (float) scale(cpX, pX.get(0), factorX));
         if (this.font.isKerningEnabled() && i < to) {
             getCP(string, to, i, pCodePoint);
