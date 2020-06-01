@@ -7,8 +7,6 @@ const uint U1 = 2;
 const uint V1 = 3;
 
 layout(location = 0) in vec2 inPosition;
-layout(location = 1) in vec2 inTextureCoordinates;
-layout(location = 2) in uint inUVIndex;
 
 layout(location = 0) out vec4 vColor;
 layout(location = 1) out vec2 vTextureCoordinates;

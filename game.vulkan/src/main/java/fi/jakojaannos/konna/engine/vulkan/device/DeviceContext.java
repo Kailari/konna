@@ -127,7 +127,7 @@ public class DeviceContext implements AutoCloseable {
                                                    bitMask(VkCommandPoolCreateFlags.RESET_COMMAND_BUFFER_BIT));
     }
 
-    public VkDeviceQueueCreateInfo.Buffer createQueueCreateInfos(final QueueFamilies queueFamilies) {
+    private VkDeviceQueueCreateInfo.Buffer createQueueCreateInfos(final QueueFamilies queueFamilies) {
         final var stack = stackGet();
 
         final var uniqueIndices = queueFamilies.getUniqueIndices();
@@ -153,5 +153,9 @@ public class DeviceContext implements AutoCloseable {
         this.transferCommandPool.close();
         this.graphicsCommandPool.close();
         vkDestroyDevice(this.device, null);
+    }
+
+    public VKCapabilitiesDevice getDeviceCapabilities() {
+        return this.device.getCapabilities();
     }
 }

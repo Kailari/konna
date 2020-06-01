@@ -3,11 +3,11 @@ package fi.jakojaannos.konna.engine.vulkan;
 import org.lwjgl.vulkan.VkSamplerCreateInfo;
 
 import fi.jakojaannos.konna.engine.vulkan.device.DeviceContext;
+import fi.jakojaannos.konna.engine.vulkan.types.VkFilter;
 
 import static fi.jakojaannos.konna.engine.util.VkUtil.ensureSuccess;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.VK10.*;
-import static org.lwjgl.vulkan.VK10.vkCreateSampler;
 
 public class TextureSampler implements AutoCloseable {
     private final DeviceContext deviceContext;
@@ -19,6 +19,14 @@ public class TextureSampler implements AutoCloseable {
     }
 
     public TextureSampler(final DeviceContext deviceContext) {
+        this(deviceContext, VkFilter.LINEAR, VkFilter.LINEAR);
+    }
+
+    public TextureSampler(
+            final DeviceContext deviceContext,
+            final VkFilter minFilter,
+            final VkFilter magFilter
+    ) {
         this.deviceContext = deviceContext;
 
         try (final var stack = stackPush()) {
@@ -26,8 +34,8 @@ public class TextureSampler implements AutoCloseable {
             final var createInfo = VkSamplerCreateInfo
                     .callocStack()
                     .sType(VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO)
-                    .magFilter(VK_FILTER_LINEAR)
-                    .minFilter(VK_FILTER_LINEAR)
+                    .magFilter(minFilter.safeAsInt(deviceContext))
+                    .minFilter(magFilter.safeAsInt(deviceContext))
                     .addressModeU(VK_SAMPLER_ADDRESS_MODE_REPEAT)
                     .addressModeV(VK_SAMPLER_ADDRESS_MODE_REPEAT)
                     .addressModeW(VK_SAMPLER_ADDRESS_MODE_REPEAT)

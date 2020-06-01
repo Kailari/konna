@@ -68,8 +68,8 @@ public class FontTextureImpl implements FontTexture {
         this.fontInfo = fontInfo;
         this.fontSize = fontSize;
 
-        this.scaledBitmapW = Math.round(512 * contentScaleX);
-        this.scaledBitmapH = Math.round(512 * contentScaleY);
+        this.scaledBitmapW = (int) Math.ceil(512 * contentScaleX);
+        this.scaledBitmapH = (int) Math.ceil(512 * contentScaleY);
         this.pixelHeightScale = stbtt_ScaleForPixelHeight(this.fontInfo, this.fontSize);
         this.alignedQuad = STBTTAlignedQuad.malloc();
 
@@ -187,7 +187,7 @@ public class FontTextureImpl implements FontTexture {
                            pY,
                            this.alignedQuad,
                            false);
-        pX.put(0, (float) scale(cpX, pX.get(0), factorX));
+        pX.put(0, scale(cpX, pX.get(0), factorX));
         if (this.font.isKerningEnabled() && i < to) {
             getCP(string, to, i, pCodePoint);
             final int kernAdvance = stbtt_GetCodepointKernAdvance(this.fontInfo,
@@ -214,10 +214,10 @@ public class FontTextureImpl implements FontTexture {
     }
 
     // FIXME: Duplicate method, one exists in the renderer executor, too
-    private double scale(
-            final double center,
-            final double offset,
-            final double factor
+    private float scale(
+            final float center,
+            final float offset,
+            final float factor
     ) {
         return (offset - center) * factor + center;
     }

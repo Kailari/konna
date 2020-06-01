@@ -20,6 +20,7 @@ import fi.jakojaannos.konna.engine.vulkan.descriptor.SwapchainImageDependentDesc
 import fi.jakojaannos.konna.engine.vulkan.rendering.GraphicsPipeline;
 import fi.jakojaannos.konna.engine.vulkan.rendering.RenderPass;
 import fi.jakojaannos.konna.engine.vulkan.types.VkDescriptorPoolCreateFlags;
+import fi.jakojaannos.konna.engine.vulkan.types.VkFilter;
 import fi.jakojaannos.konna.engine.vulkan.types.VkPrimitiveTopology;
 import fi.jakojaannos.konna.engine.vulkan.window.Window;
 
@@ -65,10 +66,10 @@ public class UiRendererExecutor extends RecreateCloseable {
                 new UiQuadVertex(new Vector2f(0, 1))
         };
         final var textQuadVertices = new TextVertex[]{
-                new TextVertex(new Vector2f(0, 0), new Vector2f(0, 0), 0),
-                new TextVertex(new Vector2f(1, 0), new Vector2f(1, 0), 1),
-                new TextVertex(new Vector2f(1, 1), new Vector2f(1, 1), 2),
-                new TextVertex(new Vector2f(0, 1), new Vector2f(0, 1), 3)
+                new TextVertex(new Vector2f(0, 0)),
+                new TextVertex(new Vector2f(1, 0)),
+                new TextVertex(new Vector2f(1, 1)),
+                new TextVertex(new Vector2f(0, 1))
         };
         final var quadIndices = new Integer[]{
                 2, 1, 0,
