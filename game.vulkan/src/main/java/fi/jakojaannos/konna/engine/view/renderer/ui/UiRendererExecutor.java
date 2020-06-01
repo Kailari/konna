@@ -9,6 +9,7 @@ import java.nio.IntBuffer;
 
 import fi.jakojaannos.konna.engine.application.PresentableState;
 import fi.jakojaannos.konna.engine.assets.*;
+import fi.jakojaannos.konna.engine.assets.ui.FontImpl;
 import fi.jakojaannos.konna.engine.util.RecreateCloseable;
 import fi.jakojaannos.konna.engine.view.ui.Alignment;
 import fi.jakojaannos.konna.engine.vulkan.RenderingBackend;
@@ -20,11 +21,11 @@ import fi.jakojaannos.konna.engine.vulkan.descriptor.SwapchainImageDependentDesc
 import fi.jakojaannos.konna.engine.vulkan.rendering.GraphicsPipeline;
 import fi.jakojaannos.konna.engine.vulkan.rendering.RenderPass;
 import fi.jakojaannos.konna.engine.vulkan.types.VkDescriptorPoolCreateFlags;
-import fi.jakojaannos.konna.engine.vulkan.types.VkFilter;
 import fi.jakojaannos.konna.engine.vulkan.types.VkPrimitiveTopology;
 import fi.jakojaannos.konna.engine.vulkan.window.Window;
 
 import static fi.jakojaannos.konna.engine.util.BitMask.bitMask;
+import static org.lwjgl.stb.STBTruetype.stbtt_GetCodepointKernAdvance;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.VK10.*;
 
@@ -45,7 +46,7 @@ public class UiRendererExecutor extends RecreateCloseable {
 
     private final float contentScaleX;
     private final float contentScaleY;
-    private final Font font;
+    private final FontImpl font;
 
     private final VkExtent2D swapchainExtent;
 
@@ -56,8 +57,8 @@ public class UiRendererExecutor extends RecreateCloseable {
             final AssetManager assetManager
     ) {
         this.swapchainExtent = backend.swapchain().getExtent();
-        this.font = assetManager.getStorage(Font.class)
-                                .getOrDefault("fonts/VCR_OSD_MONO.ttf");
+        this.font = (FontImpl) assetManager.getStorage(Font.class)
+                                           .getOrDefault("fonts/VCR_OSD_MONO.ttf");
 
         final var quadVertices = new UiQuadVertex[]{
                 new UiQuadVertex(new Vector2f(0, 0)),
@@ -249,19 +250,26 @@ public class UiRendererExecutor extends RecreateCloseable {
                     }
 
                     final var cpX = pX.get(0);
-                    final var renderableCharacter = fontTexture.getNextCharacterAndAdvance(codePoint,
-                                                                                           pCodePoint,
-                                                                                           pX, pY,
-                                                                                           i, to,
-                                                                                           string,
-                                                                                           factorX);
+
+                    final var quad = fontTexture.getQuadForCharacter(codePoint, pX, pY);
+
+                    pX.put(0, scale(cpX, pX.get(0), factorX));
+                    if (this.font.isKerningEnabled() && i < to) {
+                        // FIXME: is this necessary?
+                        getCP(string, to, i, pCodePoint);
+                        final int kernAdvance = stbtt_GetCodepointKernAdvance(font.getFontInfo(),
+                                                                              codePoint,
+                                                                              pCodePoint.get(0));
+                        pX.put(0, pX.get(0) + kernAdvance * fontTexture.getPixelHeightScale());
+                    }
+
                     final var framebufferHalfW = this.swapchainExtent.width() / 2.0;
                     final var framebufferHalfH = this.swapchainExtent.height() / 2.0;
 
-                    final var x0 = x + scale(cpX, renderableCharacter.x0(), factorX) / framebufferHalfW;
-                    final var x1 = x + scale(cpX, renderableCharacter.x1(), factorX) / framebufferHalfW;
-                    final var y0 = y + (fontSize + scale(lineY, renderableCharacter.y0(), factorY)) / framebufferHalfH;
-                    final var y1 = y + (fontSize + scale(lineY, renderableCharacter.y1(), factorY)) / framebufferHalfH;
+                    final var x0 = x + scale(cpX, quad.x0(), factorX) / framebufferHalfW;
+                    final var x1 = x + scale(cpX, quad.x1(), factorX) / framebufferHalfW;
+                    final var y0 = y + (fontSize + scale(lineY, quad.y0(), factorY)) / framebufferHalfH;
+                    final var y1 = y + (fontSize + scale(lineY, quad.y1(), factorY)) / framebufferHalfH;
 
                     final var w = (float) (x1 - x0);
                     final var h = (float) (y1 - y0);
@@ -274,10 +282,10 @@ public class UiRendererExecutor extends RecreateCloseable {
 
                     modelMatrix.get(0, pushConstantData);
                     entry.color.getRGBA(16 * Float.BYTES, pushConstantData);
-                    pushConstantData.putFloat(20 * Float.BYTES, renderableCharacter.u0());
-                    pushConstantData.putFloat(21 * Float.BYTES, renderableCharacter.v0());
-                    pushConstantData.putFloat(22 * Float.BYTES, renderableCharacter.u1());
-                    pushConstantData.putFloat(23 * Float.BYTES, renderableCharacter.v1());
+                    pushConstantData.putFloat(20 * Float.BYTES, quad.u0());
+                    pushConstantData.putFloat(21 * Float.BYTES, quad.v0());
+                    pushConstantData.putFloat(22 * Float.BYTES, quad.u1());
+                    pushConstantData.putFloat(23 * Float.BYTES, quad.v1());
 
                     vkCmdPushConstants(commandBuffer.getHandle(),
                                        this.textPipeline.getLayout(),
@@ -394,10 +402,10 @@ public class UiRendererExecutor extends RecreateCloseable {
         return fontTexture.calculateStringWidthInPixels(string) / (framebufferWidth / 2.0f);
     }
 
-    private static double scale(
-            final double center,
-            final double offset,
-            final double factor
+    private static float scale(
+            final float center,
+            final float offset,
+            final float factor
     ) {
         return (offset - center) * factor + center;
     }

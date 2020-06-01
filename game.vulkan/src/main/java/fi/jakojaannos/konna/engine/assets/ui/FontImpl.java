@@ -30,8 +30,12 @@ public class FontImpl implements Font {
 
     @Override
     public boolean isKerningEnabled() {
-        // FIXME: Allow kerning
-        return false;
+        // FIXME: Allow configuring kerning
+        return true;
+    }
+
+    public STBTTFontinfo getFontInfo() {
+        return this.fontInfo;
     }
 
     public FontImpl(
@@ -57,6 +61,17 @@ public class FontImpl implements Font {
 
     @Override
     public FontTexture getForSize(final int fontSize) {
+        // FIXME: STBTT supports packing multiple font sizes within a single texture
+        //  - instead of having individual font textures for each font size, pre-determine required
+        //    sizes and generate textures based on that. This allows smarter batching in the text
+        //    renderer, potentially allowing all glyphs for a given font to be rendered in a single
+        //    batch.
+        //  - Current approach: Generate a new font texture when a new size is requested
+        //  - Naive approach: Re-generate font texture atlas with all font sizes when new size is requested
+        //  - Improvements:
+        //      A. Pre-determine what font sizes are needed and pre-generate texture atlas
+        //      B. Do texture generation after all render commands are recorded to avoid generating
+        //         multiple times for a single frame
         return this.sizes.computeIfAbsent(fontSize,
                                           key -> new FontTextureImpl(this.deviceContext,
                                                                      this.rawTTF,

@@ -1,19 +1,18 @@
 package fi.jakojaannos.konna.engine.assets.ui;
 
 import org.lwjgl.BufferUtils;
-import org.lwjgl.stb.STBTTAlignedQuad;
-import org.lwjgl.stb.STBTTBakedChar;
 import org.lwjgl.stb.STBTTFontinfo;
+import org.lwjgl.stb.STBTTPackContext;
+import org.lwjgl.stb.STBTTPackedchar;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 
 import fi.jakojaannos.konna.engine.assets.Font;
 import fi.jakojaannos.konna.engine.assets.FontTexture;
-import fi.jakojaannos.konna.engine.assets.RenderableCharacter;
 import fi.jakojaannos.konna.engine.assets.Texture;
 import fi.jakojaannos.konna.engine.assets.texture.TextureImpl;
+import fi.jakojaannos.konna.engine.view.TexturedQuad;
 import fi.jakojaannos.konna.engine.vulkan.GPUBuffer;
 import fi.jakojaannos.konna.engine.vulkan.GPUImage;
 import fi.jakojaannos.konna.engine.vulkan.device.DeviceContext;
@@ -27,6 +26,7 @@ import static fi.jakojaannos.konna.engine.util.BitMask.bitMask;
 import static fi.jakojaannos.konna.engine.view.renderer.ui.UiRendererExecutor.getCP;
 import static org.lwjgl.stb.STBTruetype.*;
 import static org.lwjgl.system.MemoryStack.stackPush;
+import static org.lwjgl.system.MemoryUtil.NULL;
 import static org.lwjgl.vulkan.VK10.*;
 
 public class FontTextureImpl implements FontTexture {
@@ -41,9 +41,8 @@ public class FontTextureImpl implements FontTexture {
     private final int scaledBitmapH;
     private final Texture texture;
 
-    // FIXME: This should likely be part of the renderer, not the font
-    private final STBTTAlignedQuad alignedQuad;
-    private final STBTTBakedChar.Buffer bakedCharacters;
+    private final RenderableCharacter alignedQuad;
+    private final STBTTPackedchar.Buffer packedCharacters;
 
     @Override
     public float getPixelHeightScale() {
@@ -71,18 +70,31 @@ public class FontTextureImpl implements FontTexture {
         this.scaledBitmapW = (int) Math.ceil(512 * contentScaleX);
         this.scaledBitmapH = (int) Math.ceil(512 * contentScaleY);
         this.pixelHeightScale = stbtt_ScaleForPixelHeight(this.fontInfo, this.fontSize);
-        this.alignedQuad = STBTTAlignedQuad.malloc();
+        this.alignedQuad = RenderableCharacter.malloc();
 
-        this.bakedCharacters = STBTTBakedChar.malloc(96); // 96 ???
+        this.packedCharacters = STBTTPackedchar.malloc(128);
+
         final var pixelCount = this.scaledBitmapW * this.scaledBitmapH;
         final var bitmap = BufferUtils.createByteBuffer(pixelCount);
-        stbtt_BakeFontBitmap(rawTTF,
-                             this.fontSize * contentScaleY,
-                             bitmap,
-                             this.scaledBitmapW,
-                             this.scaledBitmapH,
-                             FIRST_CHAR,
-                             this.bakedCharacters);
+
+        try (final var context = STBTTPackContext.malloc()) {
+            if (!stbtt_PackBegin(context, bitmap, this.scaledBitmapW, this.scaledBitmapH, 0, 1, NULL)) {
+                throw new IllegalStateException("Starting font packing failed!");
+            }
+
+            this.packedCharacters.limit(127);
+            this.packedCharacters.position(FIRST_CHAR);
+            stbtt_PackSetOversampling(context, 1, 1);
+            stbtt_PackFontRange(context,
+                                rawTTF,
+                                0,
+                                this.fontSize,
+                                FIRST_CHAR,
+                                this.packedCharacters);
+
+            this.packedCharacters.clear();
+            stbtt_PackEnd(context);
+        }
 
         final var format = VkFormat.R8_UINT;
         final var image = new GPUImage(deviceContext,
@@ -166,59 +178,29 @@ public class FontTextureImpl implements FontTexture {
     }
 
     @Override
-    // FIXME: This should be in the renderer
-    public RenderableCharacter getNextCharacterAndAdvance(
-            final int codePoint,
-            final IntBuffer pCodePoint,
+    public TexturedQuad getQuadForCharacter(
+            final int character,
             final FloatBuffer pX,
-            final FloatBuffer pY,
-            final int i,
-            final int to,
-            final String string,
-            final float factorX
+            final FloatBuffer pY
     ) {
-        final var cpX = pX.get(0);
         this.alignedQuad.clear();
-        stbtt_GetBakedQuad(this.bakedCharacters,
-                           this.scaledBitmapW,
-                           this.scaledBitmapH,
-                           codePoint - FIRST_CHAR,
-                           pX,
-                           pY,
-                           this.alignedQuad,
-                           false);
-        pX.put(0, scale(cpX, pX.get(0), factorX));
-        if (this.font.isKerningEnabled() && i < to) {
-            getCP(string, to, i, pCodePoint);
-            final int kernAdvance = stbtt_GetCodepointKernAdvance(this.fontInfo,
-                                                                  codePoint,
-                                                                  pCodePoint.get(0));
-            pX.put(0, pX.get(0) + kernAdvance * this.pixelHeightScale);
-        }
+        this.packedCharacters.position(0);
 
-        return new RenderableCharacter(this.alignedQuad.x0(),
-                                       this.alignedQuad.x1(),
-                                       this.alignedQuad.y0(),
-                                       this.alignedQuad.y1(),
-                                       this.alignedQuad.s0(),
-                                       this.alignedQuad.s1(),
-                                       this.alignedQuad.t0(),
-                                       this.alignedQuad.t1());
+        stbtt_GetPackedQuad(this.packedCharacters,
+                            this.scaledBitmapW,
+                            this.scaledBitmapH,
+                            character,
+                            pX,
+                            pY,
+                            this.alignedQuad,
+                            false);
+        return this.alignedQuad;
     }
 
     @Override
     public void close() {
         this.texture.close();
         this.alignedQuad.free();
-        this.bakedCharacters.free();
-    }
-
-    // FIXME: Duplicate method, one exists in the renderer executor, too
-    private float scale(
-            final float center,
-            final float offset,
-            final float factor
-    ) {
-        return (offset - center) * factor + center;
+        this.packedCharacters.free();
     }
 }
