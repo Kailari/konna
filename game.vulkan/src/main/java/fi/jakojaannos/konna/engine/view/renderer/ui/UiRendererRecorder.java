@@ -1,6 +1,8 @@
 package fi.jakojaannos.konna.engine.view.renderer.ui;
 
 import org.lwjgl.vulkan.VkExtent2D;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
@@ -14,6 +16,8 @@ import fi.jakojaannos.konna.engine.view.ui.*;
 import static fi.jakojaannos.konna.engine.view.ui.UiUnit.zero;
 
 public class UiRendererRecorder implements UiRenderer {
+    private static final Logger LOG = LoggerFactory.getLogger(UiRendererRecorder.class);
+
     private final Supplier<VkExtent2D> framebufferSizeSupplier;
 
     private PresentableState state;
@@ -121,7 +125,6 @@ public class UiRendererRecorder implements UiRenderer {
 
         final var sizeIsNotSet = actualSizeValue == null;
         final double min;
-        final double max;
         final double size;
         if (sizeIsNotSet) {
             // Case A/C: figure out min/max and calculate the size
@@ -131,28 +134,26 @@ public class UiRendererRecorder implements UiRenderer {
                 min = zero().calculate(element, parentSize, framebufferSize);
             }
 
-            if (maxOffset != null) {
-                max = maxOffset.calculate(element, parentSize, framebufferSize);
-            } else {
-                max = zero().calculate(element, parentSize, framebufferSize);
-            }
+            final var max = maxOffset != null
+                    ? maxOffset.calculate(element, parentSize, framebufferSize)
+                    : zero().calculate(element, parentSize, framebufferSize);
 
             size = parentSize - (max + min);
         } else {
-            // Case B: use pre-defined size to calculate missing min or max
+            // Case B: calculate min
+
             size = actualSizeValue.calculate(element, parentSize, framebufferSize);
             if (minOffset != null) {
                 min = minOffset.calculate(element, parentSize, framebufferSize);
-                max = parentSize - (min + size);
-            } else /* if (maxOffset != null) */ {
-                assert maxOffset != null;
-
-                max = maxOffset.calculate(element, parentSize, framebufferSize);
+            } else if (maxOffset != null) {
+                final var max = maxOffset.calculate(element, parentSize, framebufferSize);
                 min = parentSize - (max + size);
+            } else /* if maxOffset == null && minOffset == null */ {
+                min = zero().calculate(element, parentSize, framebufferSize);
             }
         }
 
-        return new SizeInfo(min, max, size);
+        return new SizeInfo(min, size);
     }
 
     public static class QuadEntry implements Presentable {
@@ -202,6 +203,10 @@ public class UiRendererRecorder implements UiRenderer {
         }
 
         public String compileString(final UiVariables variables) {
+            if (this.argKeys == null) {
+                return this.format == null ? "" : this.format;
+            }
+
             final var args = new Object[this.argKeys.length];
             for (int i = 0; i < args.length; i++) {
                 args[i] = variables.get(this.argKeys[i]);
@@ -211,5 +216,5 @@ public class UiRendererRecorder implements UiRenderer {
         }
     }
 
-    private static record SizeInfo(double min, double max, double size) {}
+    private static record SizeInfo(double min, double size) {}
 }

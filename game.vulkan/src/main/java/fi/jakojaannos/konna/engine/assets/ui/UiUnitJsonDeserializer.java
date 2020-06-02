@@ -10,8 +10,7 @@ import java.util.regex.Pattern;
 
 import fi.jakojaannos.konna.engine.view.ui.UiUnit;
 
-import static fi.jakojaannos.konna.engine.view.ui.UiUnit.percent;
-import static fi.jakojaannos.konna.engine.view.ui.UiUnit.pixels;
+import static fi.jakojaannos.konna.engine.view.ui.UiUnit.*;
 
 public class UiUnitJsonDeserializer implements JsonDeserializer<UiUnit> {
     @Override
@@ -53,12 +52,13 @@ public class UiUnitJsonDeserializer implements JsonDeserializer<UiUnit> {
         return switch (postfix) {
             case "" -> pixels(numberValue);
             case "%" -> percent(numberValue);
+            case "%m" -> multiple(numberValue);
             case "em" -> throw new UnsupportedOperationException("Not implemented");
             default -> throw new JsonParseException("Malformed UI unit: Unknown unit type \"" + postfix + "\"");
         };
     }
 
-    private String defaultIfEmpty(final String string, final String defaultValue) {
+    private static String defaultIfEmpty(final String string, final String defaultValue) {
         return string.isBlank()
                 ? defaultValue
                 : string;

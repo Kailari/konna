@@ -5,4 +5,11 @@ public class Horde {
     public long endTimestamp;
     public long hordeIndex;
     public long changeTimestamp;
+    public Status status = Status.INACTIVE;
+
+    public enum Status {
+        ACTIVE,
+        ENDING,
+        INACTIVE
+    }
 }

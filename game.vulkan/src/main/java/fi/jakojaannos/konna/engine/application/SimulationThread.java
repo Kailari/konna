@@ -13,9 +13,7 @@ import fi.jakojaannos.konna.engine.assets.AssetManager;
 import fi.jakojaannos.konna.engine.view.GameModeRenderers;
 import fi.jakojaannos.konna.engine.view.RenderDispatcher;
 import fi.jakojaannos.konna.engine.view.renderer.RendererRecorder;
-import fi.jakojaannos.konna.view.adapters.EntityTransformRenderAdapter;
-import fi.jakojaannos.konna.view.adapters.PlayerCharacterRenderAdapter;
-import fi.jakojaannos.konna.view.adapters.SessionStatsHudRenderAdapter;
+import fi.jakojaannos.konna.view.adapters.*;
 import fi.jakojaannos.roguelite.engine.GameMode;
 import fi.jakojaannos.roguelite.engine.GameRunnerTimeManager;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
@@ -77,6 +75,9 @@ public class SimulationThread implements AutoCloseable {
                 .withAdapter(new PlayerCharacterRenderAdapter(assetManager))
                 //.withAdapter(new CharacterHealthbarRenderAdapter(timeManager.convertToTicks(5.0)))
                 .withAdapter(new SessionStatsHudRenderAdapter(assetManager))
+                .withAdapter(new GameOverSplashHudRenderAdapter(assetManager))
+                .withAdapter(new HordeMessageHudRenderAdapter(assetManager,
+                                                              timeManager.convertToTicks(4.0)))
                 .build());
 
         startSimulation();

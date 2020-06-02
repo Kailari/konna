@@ -30,7 +30,7 @@
         "left": 5,
         "bottom": 5,
         "width": 150,
-        "height": 75
+        "height": 30
       },
       "color": [ 0.01, 0.01, 0.01, 0.75 ],
       "text": {
@@ -38,14 +38,9 @@
         "format": "Kills: %02d",
         "args": [
           "KILLS[LOCAL_PLAYER]"
-        ]
+        ],
+        "align": "CENTER"
       }
-    },
-    {
-      "name": "horde-message"
-    },
-    {
-      "name": "game-over-container"
     }
   ]
 }

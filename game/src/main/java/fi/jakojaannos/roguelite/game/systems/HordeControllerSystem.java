@@ -73,6 +73,7 @@ public class HordeControllerSystem implements EcsSystem<HordeControllerSystem.Re
     }
 
     private static void startHorde(final Resources resources, final long currentTime) {
+        resources.horde.status = Horde.Status.ACTIVE;
         resources.horde.startTimestamp = currentTime;
         resources.horde.changeTimestamp = currentTime;
         ++resources.horde.hordeIndex;
@@ -82,6 +83,7 @@ public class HordeControllerSystem implements EcsSystem<HordeControllerSystem.Re
     }
 
     private static void stopHordeSpawns(final Resources resources, final long currentTime) {
+        resources.horde.status = Horde.Status.ENDING;
         resources.horde.changeTimestamp = currentTime;
 
         resources.events.system().fire(new HordeStopEvent());
@@ -89,6 +91,7 @@ public class HordeControllerSystem implements EcsSystem<HordeControllerSystem.Re
     }
 
     private static void endHorde(final Resources resources, final long currentTime) {
+        resources.horde.status = Horde.Status.INACTIVE;
         resources.horde.endTimestamp = currentTime;
         resources.horde.changeTimestamp = currentTime;
 
