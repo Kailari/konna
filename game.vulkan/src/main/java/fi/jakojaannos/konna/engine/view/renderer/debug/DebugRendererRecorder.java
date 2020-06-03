@@ -1,5 +1,6 @@
 package fi.jakojaannos.konna.engine.view.renderer.debug;
 
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 import fi.jakojaannos.konna.engine.application.PresentableState;
@@ -23,14 +24,42 @@ public class DebugRendererRecorder implements DebugRenderer {
         entry.rotation = (float) transform.rotation;
     }
 
+    @Override
+    public void drawBox(final Transform transform, final Vector2f offset, final Vector2f size) {
+        final var entry = this.writeState.boxes().get();
+        entry.position.set(transform.position.x,
+                           transform.position.y,
+                           0.0d);
+        entry.rotation = (float) transform.rotation;
+
+        entry.offset.set(offset);
+        entry.size.set(size);
+    }
+
     public static final class TransformEntry implements Presentable {
-        public Vector3f position = new Vector3f();
+        public final Vector3f position = new Vector3f();
         public float rotation;
 
         @Override
         public void reset() {
             this.position.set(0.0f);
             this.rotation = 0.0f;
+        }
+    }
+
+    public static final class AABBEntry implements Presentable {
+        public final Vector3f position = new Vector3f();
+        public final Vector2f offset = new Vector2f();
+        public final Vector2f size = new Vector2f();
+        public float rotation;
+
+        @Override
+        public void reset() {
+            this.position.set(0.0f);
+            this.rotation = 0.0f;
+
+            this.offset.set(0.0f);
+            this.size.set(0.0f);
         }
     }
 }

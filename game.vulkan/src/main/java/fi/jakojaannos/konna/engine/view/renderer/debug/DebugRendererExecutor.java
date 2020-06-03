@@ -20,6 +20,7 @@ import static org.lwjgl.vulkan.VK10.*;
 
 public class DebugRendererExecutor extends RecreateCloseable {
     private final Mesh transformMesh;
+    private final Mesh cubeMesh;
     private final GraphicsPipeline<DebugLineVertex> linePipeline;
 
     public DebugRendererExecutor(
@@ -38,11 +39,26 @@ public class DebugRendererExecutor extends RecreateCloseable {
                 new DebugLineVertex(new Vector3f(0, 0, 0), new Vector3f(0.0f, 0.0f, 1.0f)),
                 new DebugLineVertex(new Vector3f(0, 0, 1), new Vector3f(0.0f, 0.0f, 1.0f)),
         };
+        final var cubeVertices = new DebugLineVertex[]{
+                new DebugLineVertex(new Vector3f(0, 0, 0), new Vector3f(1, 1, 1)),
+                new DebugLineVertex(new Vector3f(1, 0, 0), new Vector3f(1, 1, 1)),
+                new DebugLineVertex(new Vector3f(1, 1, 0), new Vector3f(1, 1, 1)),
+                new DebugLineVertex(new Vector3f(0, 1, 0), new Vector3f(1, 1, 1)),
+
+                new DebugLineVertex(new Vector3f(0, 0, 1), new Vector3f(1, 1, 1)),
+                new DebugLineVertex(new Vector3f(1, 0, 1), new Vector3f(1, 1, 1)),
+                new DebugLineVertex(new Vector3f(1, 1, 1), new Vector3f(1, 1, 1)),
+                new DebugLineVertex(new Vector3f(0, 1, 1), new Vector3f(1, 1, 1)),
+        };
+        final var cubeIndices = new Integer[]{
+                0, 1, 1, 2, 2, 3, 3, 0,
+                4, 5, 5, 6, 6, 7, 7, 4,
+                0, 4, 1, 5, 2, 6, 3, 7
+        };
 
 
-        this.transformMesh = Mesh.from(backend,
-                                       DebugLineVertex.FORMAT,
-                                       transformVertices);
+        this.transformMesh = Mesh.from(backend, DebugLineVertex.FORMAT, transformVertices);
+        this.cubeMesh = Mesh.from(backend, DebugLineVertex.FORMAT, cubeVertices, cubeIndices, null);
 
         this.linePipeline = new GraphicsPipeline<>(backend.deviceContext(),
                                                    backend.swapchain(),
@@ -99,6 +115,36 @@ public class DebugRendererExecutor extends RecreateCloseable {
                           0,
                           0);
             }
+
+            vkCmdBindVertexBuffers(commandBuffer.getHandle(),
+                                   0,
+                                   stack.longs(this.cubeMesh.getVertexBuffer().getHandle()),
+                                   stack.longs(0L));
+            vkCmdBindIndexBuffer(commandBuffer.getHandle(),
+                                 this.cubeMesh.getIndexBuffer().getHandle(),
+                                 0,
+                                 VK_INDEX_TYPE_UINT32);
+            for (final var box : state.boxes()) {
+                modelMatrix.identity()
+                           .translate(box.position)
+                           .rotateZ(box.rotation)
+                           .translate(-box.offset.x, -box.offset.y, 0)
+                           .scale(box.size.x, box.size.y, 1.0f);
+                modelMatrix.get(0, pushConstantData);
+
+                vkCmdPushConstants(commandBuffer.getHandle(),
+                                   this.linePipeline.getLayout(),
+                                   VK_SHADER_STAGE_VERTEX_BIT,
+                                   0,
+                                   pushConstantData);
+
+                vkCmdDrawIndexed(commandBuffer.getHandle(),
+                                 this.cubeMesh.getIndexCount(),
+                                 1,
+                                 0,
+                                 0,
+                                 0);
+            }
         }
     }
 
@@ -114,7 +160,8 @@ public class DebugRendererExecutor extends RecreateCloseable {
     @Override
     public void close() {
         super.close();
-        this.linePipeline.close();
         this.transformMesh.close();
+        this.cubeMesh.close();
+        this.linePipeline.close();
     }
 }

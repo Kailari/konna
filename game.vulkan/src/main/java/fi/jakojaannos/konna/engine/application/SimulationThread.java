@@ -72,6 +72,7 @@ public class SimulationThread implements AutoCloseable {
         this.gameModeRenderers.register(GameplayGameMode.GAME_MODE_ID, () -> RenderDispatcher
                 .builder()
                 .withAdapter(new EntityTransformRenderAdapter())
+                .withAdapter(new EntityColliderRenderAdapter())
                 .withAdapter(new PlayerCharacterRenderAdapter(assetManager))
                 //.withAdapter(new CharacterHealthbarRenderAdapter(timeManager.convertToTicks(5.0)))
                 .withAdapter(new SessionStatsHudRenderAdapter(assetManager))

@@ -12,6 +12,8 @@ import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 public class PresentableState {
     private final RenderBuffer<DebugRendererRecorder.TransformEntry> transformEntries = new RenderBuffer<>(DebugRendererRecorder.TransformEntry::new,
                                                                                                            DebugRendererRecorder.TransformEntry[]::new);
+    private final RenderBuffer<DebugRendererRecorder.AABBEntry> aabbEntries = new RenderBuffer<>(DebugRendererRecorder.AABBEntry::new,
+                                                                                                 DebugRendererRecorder.AABBEntry[]::new);
     private final RenderBuffer<MeshRendererRecorder.SkeletalEntry> skeletalMeshEntries = new RenderBuffer<>(MeshRendererRecorder.SkeletalEntry::new,
                                                                                                             MeshRendererRecorder.SkeletalEntry[]::new);
     private final RenderBuffer<UiRendererRecorder.QuadEntry> quadEntries = new RenderBuffer<>(UiRendererRecorder.QuadEntry::new,
@@ -49,6 +51,7 @@ public class PresentableState {
         this.skeletalMeshEntries.reset();
         this.quadEntries.reset();
         this.textEntries.reset();
+        this.aabbEntries.reset();
 
         this.uiVariables.clear();
 
@@ -75,6 +78,10 @@ public class PresentableState {
 
     public RenderBuffer<UiRendererRecorder.TextEntry> textEntries() {
         return this.textEntries;
+    }
+
+    public RenderBuffer<DebugRendererRecorder.AABBEntry> boxes() {
+        return this.aabbEntries;
     }
 
     public UiVariables uiVariables() {
