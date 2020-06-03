@@ -47,4 +47,14 @@ public class ResourceStorage {
 
         return paramResources;
     }
+
+    public <TResource> void registerOrReplace(final Class<? super TResource> resourceClass, final TResource resource) {
+        if (Class.class.isAssignableFrom(resourceClass)) {
+            throw new IllegalArgumentException(
+                    "Tried registering resource with class \"" + resourceClass.getSimpleName()
+                    + "\" are you passing Resource.class by accident?");
+        }
+
+        this.resources.put(resourceClass, resource);
+    }
 }

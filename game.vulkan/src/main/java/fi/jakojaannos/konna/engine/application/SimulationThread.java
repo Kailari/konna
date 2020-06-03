@@ -11,12 +11,13 @@ import java.util.function.Consumer;
 
 import fi.jakojaannos.konna.engine.assets.AssetManager;
 import fi.jakojaannos.konna.engine.view.GameModeRenderers;
-import fi.jakojaannos.konna.engine.view.RenderDispatcher;
+import fi.jakojaannos.konna.engine.view.Renderer;
 import fi.jakojaannos.konna.engine.view.renderer.RendererRecorder;
 import fi.jakojaannos.konna.view.adapters.*;
 import fi.jakojaannos.roguelite.engine.GameMode;
 import fi.jakojaannos.roguelite.engine.GameRunnerTimeManager;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
+import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.input.InputProvider;
 import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;
 
@@ -35,8 +36,7 @@ public class SimulationThread implements AutoCloseable {
 
     private final Consumer<CameraProperties> cameraPropertiesUpdater;
 
-    private RenderDispatcher renderDispatcher;
-    private int oldModeId = -1;
+    private SystemDispatcher renderDispatcher;
 
     private Runnable simulatorTerminateCallback = () -> LOG.warn("Simulation terminated before initialization was done!");
 
@@ -69,17 +69,24 @@ public class SimulationThread implements AutoCloseable {
         //    then be nullable
         //  - the config object is then consumed in the constructor to set values for the actual
         //    configuration fields (which should be final) on the adapter
-        this.gameModeRenderers.register(GameplayGameMode.GAME_MODE_ID, () -> RenderDispatcher
-                .builder()
-                .withAdapter(new EntityTransformRenderAdapter())
-                .withAdapter(new EntityColliderRenderAdapter())
-                .withAdapter(new PlayerCharacterRenderAdapter(assetManager))
-                //.withAdapter(new CharacterHealthbarRenderAdapter(timeManager.convertToTicks(5.0)))
-                .withAdapter(new SessionStatsHudRenderAdapter(assetManager))
-                .withAdapter(new GameOverSplashHudRenderAdapter(assetManager))
-                .withAdapter(new HordeMessageHudRenderAdapter(assetManager,
-                                                              timeManager.convertToTicks(4.0)))
-                .build());
+        this.gameModeRenderers.register(GameplayGameMode.GAME_MODE_ID, () -> {
+            final var builder = SystemDispatcher.builder();
+            builder.group("debug")
+                   .withSystem(new EntityTransformRenderAdapter())
+                   .withSystem(new EntityColliderRenderAdapter())
+                   .buildGroup();
+            builder.group("entities")
+                   .withSystem(new PlayerCharacterRenderAdapter(assetManager))
+                   .buildGroup();
+            builder.group("ui")
+                   //.withAdapter(new CharacterHealthbarRenderAdapter(timeManager.convertToTicks(5.0)))
+                   .withSystem(new SessionStatsHudRenderAdapter(assetManager))
+                   .withSystem(new GameOverSplashHudRenderAdapter(assetManager))
+                   .withSystem(new HordeMessageHudRenderAdapter(assetManager, timeManager.convertToTicks(4.0)))
+                   .buildGroup();
+
+            return builder.build();
+        });
 
         startSimulation();
     }
@@ -97,9 +104,10 @@ public class SimulationThread implements AutoCloseable {
     }
 
     private void tick() {
-        final var cameraProperties = this.ticker.getState().world()
-                                                .fetchResource(CameraProperties.class);
+        final var oldMode = this.ticker.getMode();
         try {
+            final var cameraProperties = this.ticker.getState().world()
+                                                    .fetchResource(CameraProperties.class);
             this.cameraPropertiesUpdater.accept(cameraProperties);
 
             this.ticker.simulateTick(this.simulatorTerminateCallback);
@@ -108,26 +116,43 @@ public class SimulationThread implements AutoCloseable {
         }
 
         try {
-            final var state = this.presentableStateQueue.swapWriting();
-            final var modeId = this.ticker.getMode().id();
+            final var presentableState = this.presentableStateQueue.swapWriting();
+            final var currentState = this.ticker.getState();
+            final var currentMode = this.ticker.getMode();
 
-            final var modeHasChanged = modeId != this.oldModeId;
-            if (modeHasChanged) {
-                this.renderDispatcher = this.gameModeRenderers.get(modeId)
-                                                              .orElse(null);
-                this.oldModeId = modeId;
+            final var modeHasChanged = currentMode != oldMode;
+            if (modeHasChanged || this.renderDispatcher == null) {
+                if (this.renderDispatcher != null) {
+                    this.renderDispatcher.close();
+                }
+
+                final var maybeRenderDispatcher = this.gameModeRenderers.get(currentMode.id());
+                maybeRenderDispatcher.ifPresent(dispatcher -> {
+                    currentState.systems().resetToDefaultState(dispatcher.getSystems());
+                    currentState.systems().resetGroupsToDefaultState(dispatcher.getGroups());
+                });
+
+                this.renderDispatcher = maybeRenderDispatcher.orElse(null);
             }
 
             if (this.renderDispatcher != null) {
-                state.clear(modeId,
-                            this.timeManager,
-                            cameraProperties.getPosition(),
-                            cameraProperties.getViewMatrix());
+                final var cameraProperties = this.ticker.getState().world()
+                                                        .fetchResource(CameraProperties.class);
 
-                this.renderRecorder.setWriteState(state);
-                this.renderDispatcher.dispatch(this.renderRecorder,
-                                               this.ticker.getState(),
-                                               0L);
+                // FIXME: Clear the buffers BEFORE ticking the simulation, update only camera etc. post-tick
+                //  - still avoids camera lag
+                //  - allows debug rendering from regular systems (!!)
+                presentableState.clear(currentMode.id(),
+                                       this.timeManager,
+                                       cameraProperties.getPosition(),
+                                       cameraProperties.getViewMatrix());
+
+                currentState.world().replaceResource(Renderer.class, this.renderRecorder);
+                this.renderRecorder.setWriteState(presentableState);
+
+                final var systemEvents = this.ticker.getSystemEvents();
+                //currentState.systems() drops the states added in resetToDefaultState or they are not added in the first place
+                this.renderDispatcher.tick(currentState.world(), currentState.systems(), systemEvents);
             }
         } catch (final Throwable t) {
             LOG.error("Render adapter dispatcher encountered an error:", t);

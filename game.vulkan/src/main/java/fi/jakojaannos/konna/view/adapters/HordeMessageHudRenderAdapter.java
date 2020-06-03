@@ -3,7 +3,6 @@ package fi.jakojaannos.konna.view.adapters;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.konna.engine.assets.AssetManager;
-import fi.jakojaannos.konna.engine.view.EcsRenderAdapter;
 import fi.jakojaannos.konna.engine.view.Renderer;
 import fi.jakojaannos.konna.engine.view.ui.UiElement;
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
@@ -11,7 +10,7 @@ import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.resources.Horde;
 
-public class HordeMessageHudRenderAdapter implements EcsRenderAdapter<HordeMessageHudRenderAdapter.Resources, EcsSystem.NoEntities> {
+public class HordeMessageHudRenderAdapter implements EcsSystem<HordeMessageHudRenderAdapter.Resources, EcsSystem.NoEntities, EcsSystem.NoEvents> {
     private final UiElement splash;
     private final long messageDuration;
 
@@ -22,15 +21,16 @@ public class HordeMessageHudRenderAdapter implements EcsRenderAdapter<HordeMessa
     }
 
     @Override
-    public void draw(
-            final Renderer renderer,
+    public void tick(
             final Resources resources,
             final Stream<EntityDataHandle<EcsSystem.NoEntities>> noEntities,
-            final long accumulator
+            final EcsSystem.NoEvents noEvents
     ) {
+        final var renderer = resources.renderer;
+
         final var currentTime = resources.timeManager.getCurrentGameTime();
         final var elapsed = currentTime - resources.horde.changeTimestamp;
-        if (elapsed <= this.messageDuration) {
+        if (elapsed <= this.messageDuration && resources.horde.hordeIndex > 0) {
             renderer.ui().setValue("HORDE_MESSAGE", switch (resources.horde.status) {
                 case ACTIVE -> "Wave #" + resources.horde.hordeIndex + " incoming";
                 case ENDING -> "Kill all remaining enemies";
@@ -42,6 +42,7 @@ public class HordeMessageHudRenderAdapter implements EcsRenderAdapter<HordeMessa
     }
 
     public static record Resources(
+            Renderer renderer,
             TimeManager timeManager,
             Horde horde
     ) {}

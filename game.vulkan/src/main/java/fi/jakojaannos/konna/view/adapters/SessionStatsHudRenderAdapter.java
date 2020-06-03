@@ -3,7 +3,6 @@ package fi.jakojaannos.konna.view.adapters;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.konna.engine.assets.AssetManager;
-import fi.jakojaannos.konna.engine.view.EcsRenderAdapter;
 import fi.jakojaannos.konna.engine.view.Renderer;
 import fi.jakojaannos.konna.engine.view.ui.UiElement;
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
@@ -13,7 +12,7 @@ import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
 
-public class SessionStatsHudRenderAdapter implements EcsRenderAdapter<SessionStatsHudRenderAdapter.Resources, EcsSystem.NoEntities> {
+public class SessionStatsHudRenderAdapter implements EcsSystem<SessionStatsHudRenderAdapter.Resources, EcsSystem.NoEntities, EcsSystem.NoEvents> {
     private final UiElement hud;
 
     public SessionStatsHudRenderAdapter(final AssetManager assetManager) {
@@ -22,12 +21,12 @@ public class SessionStatsHudRenderAdapter implements EcsRenderAdapter<SessionSta
     }
 
     @Override
-    public void draw(
-            final Renderer renderer,
+    public void tick(
             final Resources resources,
             final Stream<EntityDataHandle<EcsSystem.NoEntities>> entities,
-            final long accumulator
+            final EcsSystem.NoEvents noEvents
     ) {
+        final var renderer = resources.renderer;
         final var timeManager = resources.timeManager;
         final var sessionStats = resources.sessionStats;
 
@@ -50,6 +49,7 @@ public class SessionStatsHudRenderAdapter implements EcsRenderAdapter<SessionSta
     }
 
     public static record Resources(
+            Renderer renderer,
             TimeManager timeManager,
             SessionStats sessionStats,
             Players players

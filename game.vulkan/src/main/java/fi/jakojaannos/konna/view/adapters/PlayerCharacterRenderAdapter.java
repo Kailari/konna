@@ -7,13 +7,14 @@ import fi.jakojaannos.konna.engine.assets.SkeletalMesh;
 import fi.jakojaannos.konna.engine.view.EcsRenderAdapter;
 import fi.jakojaannos.konna.engine.view.Renderer;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.ecs.annotation.Without;
 import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.NoDrawTag;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
 
-public class PlayerCharacterRenderAdapter implements EcsRenderAdapter<PlayerCharacterRenderAdapter.Resources, PlayerCharacterRenderAdapter.EntityData> {
+public class PlayerCharacterRenderAdapter implements EcsSystem<PlayerCharacterRenderAdapter.Resources, PlayerCharacterRenderAdapter.EntityData, EcsSystem.NoEvents> {
     private final SkeletalMesh mesh;
 
     public PlayerCharacterRenderAdapter(final AssetManager assetManager) {
@@ -22,12 +23,12 @@ public class PlayerCharacterRenderAdapter implements EcsRenderAdapter<PlayerChar
     }
 
     @Override
-    public void draw(
-            final Renderer renderer,
+    public void tick(
             final Resources resources,
             final Stream<EntityDataHandle<EntityData>> entities,
-            final long accumulator
+            final NoEvents noEvents
     ) {
+        final var renderer = resources.renderer;
         final var timeManager = resources.timeManager;
 
         entities.forEach(entity -> {
@@ -47,6 +48,7 @@ public class PlayerCharacterRenderAdapter implements EcsRenderAdapter<PlayerChar
     ) {}
 
     public static record Resources(
+            Renderer renderer,
             TimeManager timeManager
     ) {}
 }

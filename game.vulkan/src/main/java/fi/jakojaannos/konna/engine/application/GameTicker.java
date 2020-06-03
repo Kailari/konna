@@ -3,10 +3,7 @@ package fi.jakojaannos.konna.engine.application;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import fi.jakojaannos.roguelite.engine.GameMode;
@@ -47,6 +44,10 @@ public class GameTicker implements MainThread {
 
     public GameMode getMode() {
         return this.activeGameMode;
+    }
+
+    public Collection<Object> getSystemEvents() {
+        return Collections.unmodifiableList(this.systemEvents);
     }
 
     public GameTicker(
@@ -110,9 +111,7 @@ public class GameTicker implements MainThread {
                                  systemEventsFromLastTick);
 
         for (final var stateEvent : this.stateEvents) {
-            if (stateEvent instanceof StateEvent.ChangeState changeState) {
-                this.currentState = changeState.gameState();
-            } else if (stateEvent instanceof StateEvent.ChangeMode changeMode) {
+            if (stateEvent instanceof StateEvent.ChangeMode changeMode) {
                 if (this.activeGameMode != null) {
                     try {
                         this.activeGameMode.close();
@@ -121,10 +120,12 @@ public class GameTicker implements MainThread {
                     }
                 }
 
+                this.systemEvents.clear();
                 changeActiveGameMode(changeMode.gameMode());
             } else if (stateEvent instanceof StateEvent.Shutdown) {
                 terminateCallback.run();
             }
         }
+        this.stateEvents.clear();
     }
 }

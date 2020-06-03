@@ -33,7 +33,7 @@ public class WorldImpl implements World {
         this.resourceStorage = new ResourceStorage();
         this.entityStorage = new EntityStorage();
 
-        this.registerResource(Entities.class, this::createEntity);
+        this.registerResource(Entities.class, this);
 
         this.legacyCompatibilityEntityManager = new LegacyCompat(this);
     }
@@ -41,6 +41,11 @@ public class WorldImpl implements World {
     @Override
     public void registerResource(final Object resource) {
         this.resourceStorage.register(resource);
+    }
+
+    @Override
+    public <TResource> void replaceResource(final Class<? super TResource> resourceClass, final TResource resource) {
+        this.resourceStorage.registerOrReplace(resourceClass, resource);
     }
 
     @Override

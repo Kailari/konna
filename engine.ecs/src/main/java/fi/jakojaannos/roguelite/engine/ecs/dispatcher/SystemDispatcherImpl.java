@@ -40,6 +40,14 @@ public class SystemDispatcherImpl implements SystemDispatcher {
         @Override
         public void setState(final SystemGroup systemGroup, final boolean state) {
         }
+
+        @Override
+        public void resetToDefaultState(final Collection<Class<?>> system) {
+        }
+
+        @Override
+        public void resetGroupsToDefaultState(final Collection<SystemGroup> systemGroups) {
+        }
     };
 
 
@@ -52,6 +60,18 @@ public class SystemDispatcherImpl implements SystemDispatcher {
     private final Map<Class<? extends EcsSystem>, ParsedRequirements> systemRequirements;
     private boolean parallel;
     private int tick;
+
+    @Override
+    public Collection<Class<?>> getSystems() {
+        return this.allSystems.stream()
+                              .map(Object::getClass)
+                              .collect(Collectors.toUnmodifiableList());
+    }
+
+    @Override
+    public Collection<SystemGroup> getGroups() {
+        return Collections.unmodifiableCollection(this.systemGroups);
+    }
 
     @Override
     public void setParallel(final boolean state) {

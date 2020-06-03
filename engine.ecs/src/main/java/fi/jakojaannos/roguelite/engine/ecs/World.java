@@ -123,4 +123,6 @@ public interface World extends Entities {
      * Clears all entities from this world.
      */
     void clearAllEntities();
+
+    <TResource> void replaceResource(Class<? super TResource> resourceClass, TResource resource);
 }

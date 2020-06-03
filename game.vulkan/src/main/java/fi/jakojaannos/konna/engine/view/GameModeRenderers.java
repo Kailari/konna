@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
+
 public class GameModeRenderers {
     private final Map<Integer, Factory> factories;
 
@@ -15,7 +17,7 @@ public class GameModeRenderers {
         this.factories.put(modeId, factory);
     }
 
-    public Optional<RenderDispatcher> get(final int modeId) {
+    public Optional<SystemDispatcher> get(final int modeId) {
         if (!this.factories.containsKey(modeId)) {
             return Optional.empty();
         }
@@ -25,6 +27,6 @@ public class GameModeRenderers {
     }
 
     public interface Factory {
-        RenderDispatcher get();
+        SystemDispatcher get();
     }
 }

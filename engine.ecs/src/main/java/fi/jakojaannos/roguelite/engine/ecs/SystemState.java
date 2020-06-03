@@ -1,5 +1,7 @@
 package fi.jakojaannos.roguelite.engine.ecs;
 
+import java.util.Collection;
+
 /**
  * State of the systems. Handles enabling/disabling systems and groups and querying their respective states.
  */
@@ -38,4 +40,8 @@ public interface SystemState {
      * @param state       new state
      */
     void setState(SystemGroup systemGroup, boolean state);
+
+    void resetToDefaultState(Collection<Class<?>> systems);
+
+    void resetGroupsToDefaultState(Collection<SystemGroup> systemGroups);
 }

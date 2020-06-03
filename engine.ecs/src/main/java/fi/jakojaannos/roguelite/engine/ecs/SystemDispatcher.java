@@ -54,6 +54,10 @@ public interface SystemDispatcher extends AutoCloseable {
      */
     void tick(World world, final Collection<Object> systemEvents);
 
+    Collection<Class<?>> getSystems();
+
+    Collection<SystemGroup> getGroups();
+
     /**
      * System dispatcher builder, for registering systems and groups for the dispatcher.
      */

@@ -178,10 +178,10 @@ public abstract class GameRunner implements MainThread {
 
             while (this.stateBus.hasEvents()) {
                 final var stateEvent = this.stateBus.pollEvent();
-                if (stateEvent instanceof StateEvent.ChangeState changeState) {
+                /*if (stateEvent instanceof StateEvent.ChangeState changeState) {
                     activeState = changeState.gameState();
                     stateHasChanged = true;
-                } else if (stateEvent instanceof StateEvent.ChangeMode changeMode) {
+                } else*/ if (stateEvent instanceof StateEvent.ChangeMode changeMode) {
                     if (this.activeGameMode != null) {
                         try {
                             this.activeGameMode.close();
