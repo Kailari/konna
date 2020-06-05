@@ -76,6 +76,30 @@
             "align": "CENTER",
             "verticalAlign": "CENTER"
           }
+        },
+        {
+          "name": "hover:play-button",
+          "color": [ 0.025, 0.05, 0.025, 1.0 ],
+          "bounds": {
+            "left": -10,
+            "right": -10
+          }
+        },
+        {
+          "name": "hover:connect-button",
+          "color": [ 0.025, 0.05, 0.025, 1.0 ],
+          "bounds": {
+            "left": -10,
+            "right": -10
+          }
+        },
+        {
+          "name": "hover:quit-button",
+          "color": [ 0.025, 0.05, 0.025, 1.0 ],
+          "bounds": {
+            "left": -10,
+            "right": -10
+          }
         }
       ]
     }

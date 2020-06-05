@@ -3,9 +3,9 @@ package fi.jakojaannos.konna.engine.view.ui;
 public class UiText {
     private String format;
     private String[] args;
-    private int size;
-    private Alignment align = Alignment.START;
-    private Alignment verticalAlign = Alignment.START;
+    private Integer size;
+    private Alignment align;
+    private Alignment verticalAlign;
 
     public String format() {
         return this.format;

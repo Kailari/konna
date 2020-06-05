@@ -1,34 +1,23 @@
 package fi.jakojaannos.konna.engine.view.renderer.ui;
 
-import org.lwjgl.vulkan.VkExtent2D;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.function.Supplier;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import javax.annotation.Nullable;
 
 import fi.jakojaannos.konna.engine.application.PresentableState;
 import fi.jakojaannos.konna.engine.application.UiVariables;
 import fi.jakojaannos.konna.engine.view.Presentable;
-import fi.jakojaannos.konna.engine.view.ui.UiRenderer;
 import fi.jakojaannos.konna.engine.view.ui.*;
+import fi.jakojaannos.roguelite.engine.ui.UIEvent;
 
 import static fi.jakojaannos.konna.engine.view.ui.UiUnit.zero;
 
 public class UiRendererRecorder implements UiRenderer {
-    private static final Logger LOG = LoggerFactory.getLogger(UiRendererRecorder.class);
-
-    private final Supplier<VkExtent2D> framebufferSizeSupplier;
-
     private PresentableState state;
 
     public void setWriteState(final PresentableState state) {
         this.state = state;
-    }
-
-    public UiRendererRecorder(final Supplier<VkExtent2D> framebufferSizeSupplier) {
-
-        this.framebufferSizeSupplier = framebufferSizeSupplier;
     }
 
     @Override
@@ -37,11 +26,15 @@ public class UiRendererRecorder implements UiRenderer {
     }
 
     @Override
-    public void draw(final UiElement element) {
-        draw(element, 0, -1, -1, 2, 2);
+    public List<UIEvent> draw(final UiElement element) {
+        final var events = new ArrayList<UIEvent>();
+        draw(events, element, 0, -1, -1, 2, 2);
+
+        return events;
     }
 
     private void draw(
+            final List<UIEvent> events,
             final UiElement element,
             final int depth,
             final double parentX,
@@ -49,9 +42,8 @@ public class UiRendererRecorder implements UiRenderer {
             final double parentW,
             final double parentH
     ) {
-        final var framebufferExtent = this.framebufferSizeSupplier.get();
-        final var framebufferWidth = framebufferExtent.width();
-        final var framebufferHeight = framebufferExtent.height();
+        final var framebufferWidth = this.state.framebufferWidth();
+        final var framebufferHeight = this.state.framebufferHeight();
 
         // Here, we need to convert element bounds into actual coordinates. There are a few possible
         // cases which need to be handled separately:
@@ -83,16 +75,67 @@ public class UiRendererRecorder implements UiRenderer {
         final var anchorX = element.anchorX().calculate(element, parentW, framebufferWidth);
         final var anchorY = element.anchorY().calculate(element, parentH, framebufferHeight);
 
+        final var x = parentX + anchorX + horizontal.min;
+        final var y = parentY + anchorY + vertical.min;
+        final var width = horizontal.size;
+        final var height = vertical.size;
+
+        final var mouseX = this.state.mousePosition().x;
+        final var mouseY = this.state.mousePosition().y;
+        final var isHorizontallyIn = mouseX >= x && mouseX <= x + width;
+        final var isVerticallyIn = mouseY >= y && mouseY <= y + height;
+
+        final var isHovering = isHorizontallyIn && isVerticallyIn;
+        final var maybeHoverElement = element.hoverElement();
+
         final var entry = this.state.quadEntries().get();
-        entry.x = parentX + anchorX + horizontal.min;
-        entry.y = parentY + anchorY + vertical.min;
-        entry.w = horizontal.size;
-        entry.h = vertical.size;
-
         entry.z = depth;
-        entry.color = element.color();
 
-        final var text = element.text();
+        final UiText text;
+        if (isHovering && maybeHoverElement.isPresent()) {
+            final var hoverElement = maybeHoverElement.get();
+            final var hoverHorizontal = resolveSize(hoverElement,
+                                                    parentW,
+                                                    framebufferWidth,
+                                                    Optional.ofNullable(hoverElement.left())
+                                                            .orElse(element.left()),
+                                                    Optional.ofNullable(hoverElement.right())
+                                                            .orElse(element.right()),
+                                                    Optional.ofNullable(hoverElement.width())
+                                                            .orElse(element.width()));
+            final var hoverVertical = resolveSize(hoverElement,
+                                                  parentH,
+                                                  framebufferHeight,
+                                                  Optional.ofNullable(hoverElement.top())
+                                                          .orElse(element.top()),
+                                                  Optional.ofNullable(hoverElement.bottom())
+                                                          .orElse(element.bottom()),
+                                                  Optional.ofNullable(hoverElement.height())
+                                                          .orElse(element.height()));
+            entry.x = parentX + anchorX + hoverHorizontal.min;
+            entry.y = parentY + anchorY + hoverVertical.min;
+            entry.w = hoverHorizontal.size;
+            entry.h = hoverVertical.size;
+
+            entry.color = Optional.ofNullable(hoverElement.color())
+                                  .orElse(element.color());
+            text = Optional.ofNullable(hoverElement.text())
+                           .orElse(element.text());
+
+            if (this.state.mouseClicked()) {
+                events.add(new UIEvent(element.name(), UIEvent.Type.CLICK));
+            }
+        } else {
+            entry.x = x;
+            entry.y = y;
+            entry.w = width;
+            entry.h = height;
+
+            entry.color = element.color();
+
+            text = element.text();
+        }
+
         if (text != null) {
             final var textEntry = this.state.textEntries().get();
             textEntry.format = text.format();
@@ -107,7 +150,7 @@ public class UiRendererRecorder implements UiRenderer {
         }
 
         for (final var child : element.children()) {
-            draw(child, depth + 1, entry.x, entry.y, entry.w, entry.h);
+            draw(events, child, depth + 1, entry.x, entry.y, entry.w, entry.h);
         }
     }
 
@@ -198,9 +241,9 @@ public class UiRendererRecorder implements UiRenderer {
         public void reset() {
             this.format = "";
             this.argKeys = new String[0];
-            this.color = Colors.TRANSPARENT_BLACK;
-            this.alignment = Alignment.START;
-            this.verticalAlignment = Alignment.START;
+            this.color = Colors.WHITE;
+            this.alignment = null;
+            this.verticalAlignment = null;
 
             this.quad = NULL_QUAD;
         }

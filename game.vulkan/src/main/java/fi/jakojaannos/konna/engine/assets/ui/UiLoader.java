@@ -10,7 +10,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Optional;
+import java.util.*;
 
 import fi.jakojaannos.konna.engine.assets.AssetLoader;
 import fi.jakojaannos.konna.engine.view.ui.Color;
@@ -34,7 +34,12 @@ public class UiLoader implements AssetLoader<UiElement> {
     public Optional<UiElement> load(final Path path) {
         try (final var reader = new InputStreamReader(Files.newInputStream(path, StandardOpenOption.READ))) {
             final var maybeRoot = Optional.ofNullable(this.gson.fromJson(reader, UiElementImpl.class));
-            maybeRoot.ifPresent(UiLoader::updateParents);
+
+            final var lookup = new HashMap<String, UiElementImpl>();
+            final var variants = new ArrayList<UiElementImpl>();
+            maybeRoot.ifPresent(root -> postProcessHierarchy(root, lookup, variants));
+            updateVariants(lookup, variants);
+
             return maybeRoot.map(UiElement.class::cast);
         } catch (final IOException e) {
             LOG.error("Reading UI from path \"{}\" failed!", path);
@@ -43,13 +48,45 @@ public class UiLoader implements AssetLoader<UiElement> {
         }
     }
 
-    private static void updateParents(final UiElementImpl element) {
-        element.children().forEach(c -> {
-            if (c instanceof UiElementImpl child) {
-                child.setParent(element);
-                updateParents(child);
+    private static void updateVariants(
+            final Map<String, UiElementImpl> lookup,
+            final List<UiElementImpl> variants
+    ) {
+        variants.forEach(variant -> {
+            if (variant.name().startsWith("hover:")) {
+                // Name without `hover:`
+                final var targetName = variant.name().substring(6);
+                if (!lookup.containsKey(targetName)) {
+                    LOG.warn("UI element variant \"{}\" missing the base element \"{}\"!",
+                             variant.name(),
+                             targetName);
+                    return;
+                }
+
+                lookup.get(targetName)
+                      .hoverElement(variant);
             }
         });
     }
 
+    private static void postProcessHierarchy(
+            final UiElementImpl element,
+            final Map<String, UiElementImpl> lookup,
+            final List<UiElementImpl> variants
+    ) {
+        if (element.name().startsWith("hover:")) {
+            variants.add(element);
+        } else {
+            lookup.put(element.name(), element);
+        }
+
+        element.children().forEach(c -> {
+            if (c instanceof UiElementImpl child) {
+                child.setParent(element);
+                postProcessHierarchy(child, lookup, variants);
+            }
+        });
+
+        element.clearVariantChildren();
+    }
 }

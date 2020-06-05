@@ -1,6 +1,8 @@
 package fi.jakojaannos.konna.engine.view.ui;
 
-import fi.jakojaannos.konna.engine.view.ui.UiElement;
+import java.util.Collection;
+
+import fi.jakojaannos.roguelite.engine.ui.UIEvent;
 
 public interface UiRenderer {
     /**
@@ -12,5 +14,5 @@ public interface UiRenderer {
      */
     void setValue(String key, Object value);
 
-    void draw(UiElement element);
+    Collection<UIEvent> draw(UiElement element);
 }

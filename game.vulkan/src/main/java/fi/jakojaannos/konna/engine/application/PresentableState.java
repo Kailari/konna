@@ -1,7 +1,9 @@
 package fi.jakojaannos.konna.engine.application;
 
 import org.joml.Matrix4f;
+import org.joml.Vector2d;
 import org.joml.Vector3f;
+import org.lwjgl.vulkan.VkExtent2D;
 
 import fi.jakojaannos.konna.engine.view.renderer.RenderBuffer;
 import fi.jakojaannos.konna.engine.view.renderer.debug.DebugRendererRecorder;
@@ -25,7 +27,12 @@ public class PresentableState {
     private final Vector3f eyePosition = new Vector3f();
     private final UiVariables uiVariables = new UiVariables();
 
+    private final Vector2d mousePosition = new Vector2d();
+    private int framebufferWidth;
+    private int framebufferHeight;
+
     private int gameModeId;
+    private boolean mouseClicked;
     private long timestamp;
 
     public RenderBuffer<DebugRendererRecorder.TransformEntry> transforms() {
@@ -40,24 +47,12 @@ public class PresentableState {
         return this.timestamp;
     }
 
-    public void clear(
-            final int gameModeId,
-            final TimeManager timeManager,
-            final Vector3f eyePosition,
-            final Matrix4f viewMatrix
-    ) {
-        this.gameModeId = gameModeId;
-        this.transformEntries.reset();
-        this.skeletalMeshEntries.reset();
-        this.quadEntries.reset();
-        this.textEntries.reset();
-        this.aabbEntries.reset();
+    public int framebufferWidth() {
+        return this.framebufferWidth;
+    }
 
-        this.uiVariables.clear();
-
-        this.timestamp = timeManager.getCurrentGameTime();
-        this.viewMatrix.set(viewMatrix);
-        this.eyePosition.set(eyePosition);
+    public int framebufferHeight() {
+        return this.framebufferHeight;
     }
 
     public Matrix4f viewMatrix() {
@@ -86,5 +81,40 @@ public class PresentableState {
 
     public UiVariables uiVariables() {
         return this.uiVariables;
+    }
+
+    public Vector2d mousePosition() {
+        return this.mousePosition;
+    }
+
+    public boolean mouseClicked() {
+        return this.mouseClicked;
+    }
+
+    public void clear(
+            final int gameModeId,
+            final TimeManager timeManager,
+            final Vector2d mousePosition,
+            final boolean mouseClicked,
+            final VkExtent2D swapchainExtent,
+            final Vector3f eyePosition,
+            final Matrix4f viewMatrix
+    ) {
+        this.gameModeId = gameModeId;
+        this.mouseClicked = mouseClicked;
+        this.transformEntries.reset();
+        this.skeletalMeshEntries.reset();
+        this.quadEntries.reset();
+        this.textEntries.reset();
+        this.aabbEntries.reset();
+
+        this.uiVariables.clear();
+
+        this.framebufferWidth = swapchainExtent.width();
+        this.framebufferHeight = swapchainExtent.height();
+        this.mousePosition.set(mousePosition);
+        this.timestamp = timeManager.getCurrentGameTime();
+        this.viewMatrix.set(viewMatrix);
+        this.eyePosition.set(eyePosition);
     }
 }

@@ -1,5 +1,6 @@
 package fi.jakojaannos.konna.engine.application;
 
+import org.lwjgl.vulkan.VkExtent2D;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,6 +9,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import fi.jakojaannos.konna.engine.assets.AssetManager;
 import fi.jakojaannos.konna.engine.view.GameModeRenderers;
@@ -18,6 +20,7 @@ import fi.jakojaannos.konna.view.adapters.menu.MainMenuRenderAdapter;
 import fi.jakojaannos.roguelite.engine.GameMode;
 import fi.jakojaannos.roguelite.engine.GameRunnerTimeManager;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
+import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.input.InputProvider;
 import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;
@@ -36,6 +39,7 @@ public class SimulationThread implements AutoCloseable {
     private final GameTicker ticker;
     private final PresentableStateQueue presentableStateQueue;
 
+    private final Supplier<VkExtent2D> swapchainExtentSupplier;
     private final Consumer<CameraProperties> cameraPropertiesUpdater;
 
     private SystemDispatcher renderDispatcher;
@@ -50,9 +54,11 @@ public class SimulationThread implements AutoCloseable {
             final GameRunnerTimeManager timeManager,
             final RendererRecorder renderRecorder,
             final Runnable onTerminate,
+            final Supplier<VkExtent2D> swapchainExtentSupplier,
             final Consumer<CameraProperties> cameraPropertiesUpdater
     ) {
         this.renderRecorder = renderRecorder;
+        this.swapchainExtentSupplier = swapchainExtentSupplier;
         this.cameraPropertiesUpdater = cameraPropertiesUpdater;
 
         final var threadFactory = createThreadFactory(threadName);
@@ -148,12 +154,17 @@ public class SimulationThread implements AutoCloseable {
             if (this.renderDispatcher != null) {
                 final var cameraProperties = this.ticker.getState().world()
                                                         .fetchResource(CameraProperties.class);
+                final var mouse = this.ticker.getState().world()
+                                             .fetchResource(Mouse.class);
 
                 // FIXME: Clear the buffers BEFORE ticking the simulation, update only camera etc. post-tick
                 //  - still avoids camera lag
                 //  - allows debug rendering from regular systems (!!)
                 presentableState.clear(currentMode.id(),
                                        this.timeManager,
+                                       mouse.position,
+                                       mouse.clicked,
+                                       this.swapchainExtentSupplier.get(),
                                        cameraProperties.getPosition(),
                                        cameraProperties.getViewMatrix());
 

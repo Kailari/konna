@@ -3,10 +3,14 @@ package fi.jakojaannos.konna.engine.view.ui.impl;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 import fi.jakojaannos.konna.engine.view.ui.*;
+
+import static java.util.function.Predicate.not;
 
 // Fields may NOT be final here; GSON does not always work properly if things are `final`
 @SuppressWarnings("FieldMayBeFinal")
@@ -22,6 +26,8 @@ public class UiElementImpl implements UiElement {
 
     private String name;
 
+    @Nullable private UiElement hoverElement;
+
     public void setParent(@Nullable final UiElementImpl parent) {
         this.parent = parent;
     }
@@ -29,6 +35,12 @@ public class UiElementImpl implements UiElement {
     @Override
     public Collection<UiElement> children() {
         return Collections.unmodifiableCollection(this.children);
+    }
+
+    public void clearVariantChildren() {
+        this.children = this.children.stream()
+                                     .filter(not(UiElementImpl::isVariant))
+                                     .collect(Collectors.toUnmodifiableList());
     }
 
     @Override
@@ -169,5 +181,19 @@ public class UiElementImpl implements UiElement {
     @Override
     public UiUnit anchorY() {
         return this.anchor.y();
+    }
+
+    @Override
+    public Optional<UiElement> hoverElement() {
+        return Optional.ofNullable(this.hoverElement);
+    }
+
+    @Override
+    public void hoverElement(@Nullable final UiElement element) {
+        this.hoverElement = element;
+    }
+
+    private static boolean isVariant(final UiElementImpl child) {
+        return child.name.startsWith("hover:");
     }
 }

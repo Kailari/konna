@@ -1,6 +1,7 @@
 package fi.jakojaannos.konna.engine.view.ui;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 
@@ -166,4 +167,8 @@ public interface UiElement {
     UiUnit anchorX();
 
     UiUnit anchorY();
+
+    Optional<UiElement> hoverElement();
+
+    void hoverElement(@Nullable UiElement element);
 }

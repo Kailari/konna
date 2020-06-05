@@ -233,12 +233,16 @@ public class UiRendererExecutor extends RecreateCloseable {
                 final var string = entry.compileString(state.uiVariables());
                 final var x = horizontalAlign(entry.quad,
                                               string,
-                                              entry.alignment,
+                                              entry.alignment != null
+                                                      ? entry.alignment
+                                                      : Alignment.START,
                                               fontTexture,
                                               this.swapchainExtent.width());
                 final var y = verticalAlign(entry.quad,
                                             string,
-                                            entry.verticalAlignment,
+                                            entry.verticalAlignment != null
+                                                    ? entry.verticalAlignment
+                                                    : Alignment.START,
                                             fontTexture,
                                             this.swapchainExtent.height());
 
