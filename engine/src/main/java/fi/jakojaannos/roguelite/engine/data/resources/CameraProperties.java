@@ -53,6 +53,11 @@ public class CameraProperties {
         this.position.set(position);
     }
 
+    public void setPosition(final Vector2d position) {
+        this.viewDirty = true;
+        this.position.set(position.x, position.y, this.position.z);
+    }
+
     public void setRotation(final Quaternionf rotation) {
         this.viewDirty = true;
         this.rotation.set(rotation);

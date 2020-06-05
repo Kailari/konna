@@ -151,7 +151,6 @@ public class SimulationThread implements AutoCloseable {
                 this.renderRecorder.setWriteState(presentableState);
 
                 final var systemEvents = this.ticker.getSystemEvents();
-                //currentState.systems() drops the states added in resetToDefaultState or they are not added in the first place
                 this.renderDispatcher.tick(currentState.world(), currentState.systems(), systemEvents);
             }
         } catch (final Throwable t) {
