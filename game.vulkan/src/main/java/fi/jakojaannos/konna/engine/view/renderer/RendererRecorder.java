@@ -8,7 +8,7 @@ import fi.jakojaannos.konna.engine.application.PresentableState;
 import fi.jakojaannos.konna.engine.view.DebugRenderer;
 import fi.jakojaannos.konna.engine.view.MeshRenderer;
 import fi.jakojaannos.konna.engine.view.Renderer;
-import fi.jakojaannos.konna.engine.view.UiRenderer;
+import fi.jakojaannos.konna.engine.view.ui.UiRenderer;
 import fi.jakojaannos.konna.engine.view.renderer.debug.DebugRendererRecorder;
 import fi.jakojaannos.konna.engine.view.renderer.mesh.MeshRendererRecorder;
 import fi.jakojaannos.konna.engine.view.renderer.ui.UiRendererRecorder;

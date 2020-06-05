@@ -30,5 +30,6 @@ module konna.vulkan {
     opens fi.jakojaannos.konna.engine.view.ui to com.google.gson;
     opens fi.jakojaannos.konna.engine.view.ui.impl to com.google.gson;
 
-    opens fi.jakojaannos.konna.view.adapters to roguelite.engine.ecs;
+    opens fi.jakojaannos.konna.view.adapters.menu to roguelite.engine.ecs;
+    opens fi.jakojaannos.konna.view.adapters.gameplay to roguelite.engine.ecs;
 }

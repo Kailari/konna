@@ -11,6 +11,7 @@ import fi.jakojaannos.konna.engine.input.GLFWInputProvider;
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.input.InputProvider;
 import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;
+import fi.jakojaannos.roguelite.game.gamemode.MainMenuGameMode;
 
 public class Main {
     public static void main(final String[] args) {
@@ -29,8 +30,7 @@ public class Main {
              */
             final var inputProvider = new GLFWInputProvider(app.window());
 
-            runner.run(inputProvider,
-                       GameplayGameMode.create(420, runner.getTimeManager()));
+            runner.run(inputProvider, MainMenuGameMode.create());
         }
     }
 }

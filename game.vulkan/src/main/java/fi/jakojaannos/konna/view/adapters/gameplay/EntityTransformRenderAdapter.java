@@ -1,6 +1,4 @@
-package fi.jakojaannos.konna.view.adapters;
-
-import org.joml.Vector2f;
+package fi.jakojaannos.konna.view.adapters.gameplay;
 
 import java.util.stream.Stream;
 
@@ -9,13 +7,12 @@ import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.ecs.annotation.Without;
-import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.NoDrawTag;
 
 /**
  * Renders any entities with transform as debug transform handles.
  */
-public class EntityColliderRenderAdapter implements EcsSystem<EntityColliderRenderAdapter.Resources, EntityColliderRenderAdapter.EntityData, EcsSystem.NoEvents> {
+public class EntityTransformRenderAdapter implements EcsSystem<EntityTransformRenderAdapter.Resources, EntityTransformRenderAdapter.EntityData, EcsSystem.NoEvents> {
     @Override
     public void tick(
             final Resources resources,
@@ -26,10 +23,7 @@ public class EntityColliderRenderAdapter implements EcsSystem<EntityColliderRend
 
         entities.forEach(entity -> {
             final var transform = entity.getData().transform;
-            final var collider = entity.getData().collider;
-            renderer.debug().drawBox(transform,
-                                     new Vector2f((float) collider.origin.x, (float) collider.origin.y),
-                                     new Vector2f((float) collider.width, (float) collider.height));
+            renderer.debug().drawTransform(transform);
         });
     }
 
@@ -37,7 +31,6 @@ public class EntityColliderRenderAdapter implements EcsSystem<EntityColliderRend
 
     public static record EntityData(
             Transform transform,
-            Collider collider,
             @Without NoDrawTag noDraw
     ) {}
 }

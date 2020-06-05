@@ -54,6 +54,11 @@ public class FontTextureImpl implements FontTexture {
         return this.texture.getImageView();
     }
 
+    @Override
+    public int getFontSize() {
+        return this.fontSize;
+    }
+
     public FontTextureImpl(
             final DeviceContext deviceContext,
             final ByteBuffer rawTTF,
@@ -67,8 +72,8 @@ public class FontTextureImpl implements FontTexture {
         this.fontInfo = fontInfo;
         this.fontSize = fontSize;
 
-        this.scaledBitmapW = (int) Math.ceil(512 * contentScaleX);
-        this.scaledBitmapH = (int) Math.ceil(512 * contentScaleY);
+        this.scaledBitmapW = (int) Math.ceil(1024 * contentScaleX);
+        this.scaledBitmapH = (int) Math.ceil(1024 * contentScaleY);
         this.pixelHeightScale = stbtt_ScaleForPixelHeight(this.fontInfo, this.fontSize);
         this.alignedQuad = RenderableCharacter.malloc();
 

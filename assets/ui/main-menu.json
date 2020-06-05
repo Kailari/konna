@@ -1,0 +1,83 @@
+{
+  "name": "root",
+  "children": [
+    {
+      "name": "background-panel",
+      "anchor": {
+        "x": "50%"
+      },
+      "bounds": {
+        "top": "10%",
+        "left": "-25%",
+        "width": "50%",
+        "height": "80%"
+      },
+      "color": [ 0.01, 0.01, 0.01, 0.75 ],
+      "children": [
+        {
+          "name": "title",
+          "bounds": {
+            "left": 10,
+            "right": 10,
+            "top": "5%",
+            "height": "20%"
+          },
+          "color": [ 0.0, 0.0, 0.0, 0.0 ],
+          "text": {
+            "size": 48,
+            "format": "Konna",
+            "align": "CENTER"
+          }
+        },
+        {
+          "name": "play-button",
+          "bounds": {
+            "left": 10,
+            "right": 10,
+            "top": "25%",
+            "height": "20%"
+          },
+          "color": [ 0.025, 0.025, 0.025, 1.0 ],
+          "text": {
+            "size": 36,
+            "format": "Start Game",
+            "align": "CENTER",
+            "verticalAlign": "CENTER"
+          }
+        },
+        {
+          "name": "connect-button",
+          "bounds": {
+            "left": 10,
+            "right": 10,
+            "top": "50%",
+            "height": "20%"
+          },
+          "color": [ 0.025, 0.025, 0.025, 1.0 ],
+          "text": {
+            "size": 36,
+            "format": "Connect",
+            "align": "CENTER",
+            "verticalAlign": "CENTER"
+          }
+        },
+        {
+          "name": "quit-button",
+          "bounds": {
+            "left": 10,
+            "right": 10,
+            "top": "75%",
+            "height": "20%"
+          },
+          "color": [ 0.025, 0.025, 0.025, 1.0 ],
+          "text": {
+            "size": 36,
+            "format": "Quit Game",
+            "align": "CENTER",
+            "verticalAlign": "CENTER"
+          }
+        }
+      ]
+    }
+  ]
+}

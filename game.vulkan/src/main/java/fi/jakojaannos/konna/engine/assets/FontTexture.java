@@ -13,4 +13,6 @@ public interface FontTexture extends Texture {
     float calculateStringWidthInPixels(String string);
 
     TexturedQuad getQuadForCharacter(int character, FloatBuffer pX, FloatBuffer pY);
+
+    int getFontSize();
 }

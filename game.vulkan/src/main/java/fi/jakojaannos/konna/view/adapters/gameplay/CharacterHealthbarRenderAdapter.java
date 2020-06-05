@@ -1,4 +1,4 @@
-package fi.jakojaannos.konna.view.adapters;
+package fi.jakojaannos.konna.view.adapters.gameplay;
 
 import java.util.function.Predicate;
 import java.util.stream.Stream;

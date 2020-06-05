@@ -1,10 +1,9 @@
-package fi.jakojaannos.konna.view.adapters;
+package fi.jakojaannos.konna.view.adapters.gameplay;
 
 import java.util.stream.Stream;
 
 import fi.jakojaannos.konna.engine.assets.AssetManager;
 import fi.jakojaannos.konna.engine.assets.SkeletalMesh;
-import fi.jakojaannos.konna.engine.view.EcsRenderAdapter;
 import fi.jakojaannos.konna.engine.view.Renderer;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;

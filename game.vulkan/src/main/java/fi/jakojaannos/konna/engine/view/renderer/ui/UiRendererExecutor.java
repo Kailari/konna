@@ -21,6 +21,7 @@ import fi.jakojaannos.konna.engine.vulkan.descriptor.SwapchainImageDependentDesc
 import fi.jakojaannos.konna.engine.vulkan.rendering.GraphicsPipeline;
 import fi.jakojaannos.konna.engine.vulkan.rendering.RenderPass;
 import fi.jakojaannos.konna.engine.vulkan.types.VkDescriptorPoolCreateFlags;
+import fi.jakojaannos.konna.engine.vulkan.types.VkFilter;
 import fi.jakojaannos.konna.engine.vulkan.types.VkPrimitiveTopology;
 import fi.jakojaannos.konna.engine.vulkan.window.Window;
 
@@ -104,7 +105,9 @@ public class UiRendererExecutor extends RecreateCloseable {
                 bitMask(VkDescriptorPoolCreateFlags.FREE_DESCRIPTOR_SET_BIT),
                 new DescriptorPool.Pool(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                                         () -> backend.swapchain().getImageCount() * MAX_TEXT_ENTRIES));
-        this.textureSampler = new TextureSampler(backend.deviceContext());
+        this.textureSampler = new TextureSampler(backend.deviceContext(),
+                                                 VkFilter.NEAREST,
+                                                 VkFilter.NEAREST);
 
         this.fontTextureDescriptorLayout = new DescriptorSetLayout(backend.deviceContext(),
                                                                    FontDescriptor.FONT_TEXTURE_DESCRIPTOR_BINDING);
@@ -228,8 +231,16 @@ public class UiRendererExecutor extends RecreateCloseable {
                                         null);
 
                 final var string = entry.compileString(state.uiVariables());
-                final var x = align(entry.quad, string, entry.alignment, fontTexture, this.swapchainExtent.width());
-                final var y = entry.quad.y;
+                final var x = horizontalAlign(entry.quad,
+                                              string,
+                                              entry.alignment,
+                                              fontTexture,
+                                              this.swapchainExtent.width());
+                final var y = verticalAlign(entry.quad,
+                                            string,
+                                            entry.verticalAlignment,
+                                            fontTexture,
+                                            this.swapchainExtent.height());
 
                 for (int i = 0, to = string.length(); i < to; ) {
                     i += getCP(string, to, i, pCodePoint);
@@ -380,7 +391,7 @@ public class UiRendererExecutor extends RecreateCloseable {
         this.quadPipeline.close();
     }
 
-    private static float align(
+    private static float horizontalAlign(
             final UiRendererRecorder.QuadEntry quad,
             final String string,
             final Alignment alignment,
@@ -388,9 +399,23 @@ public class UiRendererExecutor extends RecreateCloseable {
             final int framebufferWidth
     ) {
         return (float) switch (alignment) {
-            case LEFT -> quad.x;
-            case RIGHT -> quad.x + quad.w - scaledStringWidth(string, fontTexture, framebufferWidth);
+            case START -> quad.x;
+            case END -> quad.x + quad.w - scaledStringWidth(string, fontTexture, framebufferWidth);
             case CENTER -> quad.x + (quad.w - scaledStringWidth(string, fontTexture, framebufferWidth)) / 2.0f;
+        };
+    }
+
+    private static float verticalAlign(
+            final UiRendererRecorder.QuadEntry quad,
+            final String string,
+            final Alignment alignment,
+            final FontTexture fontTexture,
+            final int framebufferHeight
+    ) {
+        return (float) switch (alignment) {
+            case START -> quad.y;
+            case END -> quad.y + quad.h - scaledStringHeight(string, fontTexture, framebufferHeight);
+            case CENTER -> quad.y + (quad.h - scaledStringHeight(string, fontTexture, framebufferHeight)) / 2.0f;
         };
     }
 
@@ -400,6 +425,14 @@ public class UiRendererExecutor extends RecreateCloseable {
             final int framebufferWidth
     ) {
         return fontTexture.calculateStringWidthInPixels(string) / (framebufferWidth / 2.0f);
+    }
+
+    private static float scaledStringHeight(
+            final String string,
+            final FontTexture fontTexture,
+            final int framebufferHeight
+    ) {
+        return fontTexture.getFontSize() / (framebufferHeight / 2.0f);
     }
 
     private static float scale(

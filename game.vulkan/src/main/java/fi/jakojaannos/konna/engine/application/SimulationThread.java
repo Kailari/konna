@@ -13,13 +13,15 @@ import fi.jakojaannos.konna.engine.assets.AssetManager;
 import fi.jakojaannos.konna.engine.view.GameModeRenderers;
 import fi.jakojaannos.konna.engine.view.Renderer;
 import fi.jakojaannos.konna.engine.view.renderer.RendererRecorder;
-import fi.jakojaannos.konna.view.adapters.*;
+import fi.jakojaannos.konna.view.adapters.gameplay.*;
+import fi.jakojaannos.konna.view.adapters.menu.MainMenuRenderAdapter;
 import fi.jakojaannos.roguelite.engine.GameMode;
 import fi.jakojaannos.roguelite.engine.GameRunnerTimeManager;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.input.InputProvider;
 import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;
+import fi.jakojaannos.roguelite.game.gamemode.MainMenuGameMode;
 
 public class SimulationThread implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(SimulationThread.class);
@@ -83,6 +85,14 @@ public class SimulationThread implements AutoCloseable {
                    .withSystem(new SessionStatsHudRenderAdapter(assetManager))
                    .withSystem(new GameOverSplashHudRenderAdapter(assetManager))
                    .withSystem(new HordeMessageHudRenderAdapter(assetManager, timeManager.convertToTicks(4.0)))
+                   .buildGroup();
+
+            return builder.build();
+        });
+        this.gameModeRenderers.register(MainMenuGameMode.GAME_MODE_ID, () -> {
+            final var builder = SystemDispatcher.builder();
+            builder.group("ui")
+                   .withSystem(new MainMenuRenderAdapter(assetManager))
                    .buildGroup();
 
             return builder.build();

@@ -4,7 +4,8 @@ public class UiText {
     private String format;
     private String[] args;
     private int size;
-    private Alignment align = Alignment.LEFT;
+    private Alignment align = Alignment.START;
+    private Alignment verticalAlign = Alignment.START;
 
     public String format() {
         return this.format;
@@ -36,5 +37,13 @@ public class UiText {
 
     public void align(final Alignment align) {
         this.align = align;
+    }
+
+    public Alignment verticalAlign() {
+        return this.verticalAlign;
+    }
+
+    public void verticalAlign(final Alignment align) {
+        this.verticalAlign = align;
     }
 }

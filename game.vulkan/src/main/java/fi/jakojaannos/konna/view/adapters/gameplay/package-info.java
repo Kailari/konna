@@ -1,7 +1,7 @@
 @FieldsAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-package fi.jakojaannos.konna.view.adapters;
+package fi.jakojaannos.konna.view.adapters.gameplay;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 

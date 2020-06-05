@@ -1,4 +1,4 @@
-package fi.jakojaannos.konna.engine.view;
+package fi.jakojaannos.konna.engine.view.ui;
 
 import fi.jakojaannos.konna.engine.view.ui.UiElement;
 

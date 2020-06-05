@@ -10,7 +10,7 @@ import javax.annotation.Nullable;
 import fi.jakojaannos.konna.engine.application.PresentableState;
 import fi.jakojaannos.konna.engine.application.UiVariables;
 import fi.jakojaannos.konna.engine.view.Presentable;
-import fi.jakojaannos.konna.engine.view.UiRenderer;
+import fi.jakojaannos.konna.engine.view.ui.UiRenderer;
 import fi.jakojaannos.konna.engine.view.ui.*;
 
 import static fi.jakojaannos.konna.engine.view.ui.UiUnit.zero;
@@ -98,6 +98,7 @@ public class UiRendererRecorder implements UiRenderer {
             textEntry.format = text.format();
             textEntry.argKeys = text.args();
             textEntry.alignment = text.align();
+            textEntry.verticalAlignment = text.verticalAlign();
             textEntry.size = text.size();
             textEntry.quad = entry;
 
@@ -188,6 +189,7 @@ public class UiRendererRecorder implements UiRenderer {
         public String[] argKeys;
         public Color color;
         public Alignment alignment;
+        public Alignment verticalAlignment;
         public int size;
 
         public QuadEntry quad;
@@ -197,7 +199,8 @@ public class UiRendererRecorder implements UiRenderer {
             this.format = "";
             this.argKeys = new String[0];
             this.color = Colors.TRANSPARENT_BLACK;
-            this.alignment = Alignment.LEFT;
+            this.alignment = Alignment.START;
+            this.verticalAlignment = Alignment.START;
 
             this.quad = NULL_QUAD;
         }
