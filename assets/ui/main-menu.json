@@ -2,6 +2,38 @@
   "name": "root",
   "children": [
     {
+      "name": "network-connection-status",
+      "bounds": {
+        "left": 5,
+        "top": 5,
+        "height": 40
+      },
+      "text": {
+        "size": 24,
+        "format": "%s",
+        "args": [ "NETWORK_CONNECTION_STATUS" ]
+      },
+      "children": [
+        {
+          "name": "connection-error",
+          "anchor": {
+            "y": 24
+          },
+          "bounds": {
+            "left": 0,
+            "top": 0,
+            "height": 12
+          },
+          "text": {
+            "size": 12,
+            "format": "%s",
+            "args": [ "NETWORK_CONNECTION_ERROR" ],
+            "color": [0.545, 0.0, 0.0, 1.0]
+          }
+        }
+      ]
+    },
+    {
       "name": "background-panel",
       "anchor": {
         "x": "50%"

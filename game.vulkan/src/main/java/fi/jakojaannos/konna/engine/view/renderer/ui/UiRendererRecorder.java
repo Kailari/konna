@@ -143,10 +143,9 @@ public class UiRendererRecorder implements UiRenderer {
             textEntry.alignment = text.align();
             textEntry.verticalAlignment = text.verticalAlign();
             textEntry.size = text.size();
-            textEntry.quad = entry;
+            textEntry.color = text.color();
 
-            // FIXME: allow setting text color per-element (add field to UiText)
-            textEntry.color = Colors.WHITE;
+            textEntry.quad = entry;
         }
 
         for (final var child : element.children()) {

@@ -14,6 +14,7 @@ import fi.jakojaannos.roguelite.engine.data.resources.Network;
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.event.Events;
+import fi.jakojaannos.roguelite.engine.network.NetworkManager;
 import fi.jakojaannos.roguelite.engine.network.client.ClientNetworkManager;
 import fi.jakojaannos.roguelite.engine.state.StateEvent;
 import fi.jakojaannos.roguelite.engine.ui.UIEvent;
@@ -36,7 +37,19 @@ public class MainMenuRenderAdapter implements EcsSystem<MainMenuRenderAdapter.Re
             final Stream<EntityDataHandle<NoEntities>> noEntities,
             final NoEvents noEvents
     ) {
-        final var uiEvents = resources.renderer.ui().draw(this.mainMenu);
+        final var renderer = resources.renderer;
+        final var network = resources.network;
+
+        renderer.ui().setValue("NETWORK_CONNECTION_ERROR",
+                               network.getConnectionError()
+                                      .orElse(""));
+        renderer.ui().setValue("NETWORK_CONNECTION_STATUS",
+                               network.getNetworkManager()
+                                      .filter(NetworkManager::isConnected)
+                                      .map(ignored -> "Connected")
+                                      .orElse("No connection"));
+
+        final var uiEvents = renderer.ui().draw(this.mainMenu);
 
         final var stateEventBus = resources.events.state();
         uiEvents.forEach(event -> {
@@ -47,15 +60,26 @@ public class MainMenuRenderAdapter implements EcsSystem<MainMenuRenderAdapter.Re
                 } else if (event.element().equalsIgnoreCase("quit-button")) {
                     stateEventBus.fire(new StateEvent.Shutdown());
                 } else if (event.element().equalsIgnoreCase("connect-button")) {
+                    network.setConnectionError("");
                     try {
                         // FIXME: Fetch host/port from somewhere
+                        //  -> should the `ui().draw(...)` construct the UI hierarchy/"state" so that
+                        //     it could be queried here?
+                        //  -> ^ Might be a bit overkill?
+                        //  -> For now, just fetch using something like `ui().getValue(KEY)` and add
+                        //     separate UI state (stored in a resource) or sth.
+                        //  -> One option for first iteration is to make text fields labels with text
+                        //     set via `ui().setValue(KEY)`. Then, when input occurs and the field
+                        //     is active (which might be hard if UI is non-stateful? Click events
+                        //     + something is required), relevant UI event is generated and characters
+                        //     appended to the relevant string
                         final var networkManager = new ClientNetworkManager("127.0.0.1",
                                                                             18181,
                                                                             resources.mainThread);
-                        resources.network.setNetworkManager(networkManager);
+                        network.setNetworkManager(networkManager);
                     } catch (final IOException e) {
                         LOG.error("Error connecting to server:", e);
-                        resources.network.setConnectionError(e.getMessage());
+                        network.setConnectionError(e.getMessage());
                     }
                 }
             }

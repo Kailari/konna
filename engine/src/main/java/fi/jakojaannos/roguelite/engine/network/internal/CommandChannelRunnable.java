@@ -94,6 +94,7 @@ public abstract class CommandChannelRunnable implements Runnable, AutoCloseable 
         final ByteBuffer readBuffer = resolveReadBufferFromKey(selectionKey);
         final Consumer<TypedNetworkMessage<?>> messageConsumer = resolveMessageConsumerFromKey(selectionKey);
 
+        // FIXME: Connection reset (client loses connection) here crashes the server
         final var readCount = channel.read(readBuffer);
         final var endOfStream = readCount < 0;
         if (!endOfStream) {

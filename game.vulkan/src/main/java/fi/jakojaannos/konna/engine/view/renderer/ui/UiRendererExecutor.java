@@ -12,6 +12,7 @@ import fi.jakojaannos.konna.engine.assets.*;
 import fi.jakojaannos.konna.engine.assets.ui.FontImpl;
 import fi.jakojaannos.konna.engine.util.RecreateCloseable;
 import fi.jakojaannos.konna.engine.view.ui.Alignment;
+import fi.jakojaannos.konna.engine.view.ui.Colors;
 import fi.jakojaannos.konna.engine.vulkan.RenderingBackend;
 import fi.jakojaannos.konna.engine.vulkan.TextureSampler;
 import fi.jakojaannos.konna.engine.vulkan.command.CommandBuffer;
@@ -296,7 +297,11 @@ public class UiRendererExecutor extends RecreateCloseable {
                                .scale(w, h, 1.0f);
 
                     modelMatrix.get(0, pushConstantData);
-                    entry.color.getRGBA(16 * Float.BYTES, pushConstantData);
+                    // FIXME: Get text color from hierarchy if null; do something like with quad colors
+                    final var color = entry.color != null
+                            ? entry.color
+                            : Colors.WHITE;
+                    color.getRGBA(16 * Float.BYTES, pushConstantData);
                     pushConstantData.putFloat(20 * Float.BYTES, quad.u0());
                     pushConstantData.putFloat(21 * Float.BYTES, quad.v0());
                     pushConstantData.putFloat(22 * Float.BYTES, quad.u1());

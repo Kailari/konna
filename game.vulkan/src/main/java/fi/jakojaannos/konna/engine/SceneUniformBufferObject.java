@@ -62,13 +62,10 @@ public class SceneUniformBufferObject extends DescriptorObject {
                       lightCount,
               });
 
-        lightCount.count = 2;
-        lights.colors[0] = new Vector3f(1.0f, 0.05f, 0.0f);
-        lights.positions[0] = new Vector3f(0.0f, 0.0f, 2.0f);
-        lights.radius[0] = 6.5f;
-        lights.colors[1] = new Vector3f(1.0f, 1.00f, 1.0f);
-        lights.positions[1] = new Vector3f(5.5f, 0.0f, 2.0f);
-        lights.radius[1] = 3.5f;
+        lightCount.count = 1;
+        lights.colors[0] = new Vector3f(1.0f, 1.0f, 1.0f);
+        lights.positions[0] = new Vector3f(0.0f, 0.0f, 20.0f);
+        lights.radius[0] = 60.0f;
     }
 
     private static class LightsBinding implements UniformBufferBinding {

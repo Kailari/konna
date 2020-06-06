@@ -6,6 +6,7 @@ public class UiText {
     private Integer size;
     private Alignment align;
     private Alignment verticalAlign;
+    private Color color;
 
     public String format() {
         return this.format;
@@ -45,5 +46,13 @@ public class UiText {
 
     public void verticalAlign(final Alignment align) {
         this.verticalAlign = align;
+    }
+
+    public void color(final Color color) {
+        this.color = color;
+    }
+
+    public Color color() {
+        return this.color;
     }
 }
