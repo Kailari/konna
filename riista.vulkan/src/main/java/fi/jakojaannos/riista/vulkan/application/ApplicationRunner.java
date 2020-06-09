@@ -10,14 +10,16 @@ import java.util.Arrays;
 import java.util.Objects;
 
 import fi.jakojaannos.riista.assets.AssetManager;
+import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.riista.view.GameModeRenderers;
+import fi.jakojaannos.riista.view.audio.AudioContext;
+import fi.jakojaannos.riista.vulkan.audio.LWJGLAudioContext;
+import fi.jakojaannos.riista.vulkan.internal.device.DeviceContext;
 import fi.jakojaannos.riista.vulkan.renderer.RendererExecutor;
 import fi.jakojaannos.riista.vulkan.renderer.RendererRecorder;
-import fi.jakojaannos.riista.vulkan.internal.device.DeviceContext;
 import fi.jakojaannos.roguelite.engine.GameMode;
 import fi.jakojaannos.roguelite.engine.GameRunnerTimeManager;
 import fi.jakojaannos.roguelite.engine.input.InputProvider;
-import fi.jakojaannos.riista.utilities.TimeManager;
 
 import static fi.jakojaannos.riista.vulkan.util.VkUtil.ensureSuccess;
 import static fi.jakojaannos.riista.vulkan.util.VkUtil.translateVulkanResult;
@@ -40,6 +42,7 @@ public class ApplicationRunner implements AutoCloseable {
     private final VulkanApplication application;
     private final AssetManager assetManager;
 
+    private final AudioContext audioContext;
     private final RendererExecutor renderer;
 
     private final GameRunnerTimeManager timeManager;
@@ -51,9 +54,16 @@ public class ApplicationRunner implements AutoCloseable {
         return this.timeManager;
     }
 
+    public AudioContext getAudioContext() {
+        return this.audioContext;
+    }
+
     public ApplicationRunner(final VulkanApplication application, final AssetManager assetManager) {
         this.application = application;
         this.assetManager = assetManager;
+
+        // FIXME: Get more sensible source count from AL device props or sth.
+        this.audioContext = new LWJGLAudioContext(16);
 
         final var deviceContext = application.backend().deviceContext();
         final var swapchain = application.backend().swapchain();
@@ -273,6 +283,7 @@ public class ApplicationRunner implements AutoCloseable {
         }
 
         this.renderer.close();
+        this.audioContext.close();
     }
 
     private static long createSemaphore(final DeviceContext deviceContext) {

@@ -1,7 +1,5 @@
 package fi.jakojaannos.roguelite.engine.view.rendering.ui;
 
-import org.lwjgl.system.MemoryUtil;
-
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.util.stream.IntStream;
@@ -44,7 +42,7 @@ public class ProgressBarRenderer implements AutoCloseable {
                                         .withAttribute(VertexAttribute.Type.FLOAT, 1, false)
                                         .build();
         this.mesh = backend.createMesh(vertexFormat);
-        this.vertexDataBuffer = MemoryUtil.memAlloc(MAX_PER_BATCH * vertexFormat.getSizeInBytes());
+        this.vertexDataBuffer = null;//MemoryUtil.memAlloc(MAX_PER_BATCH * vertexFormat.getSizeInBytes());
         this.mesh.setElements(IntStream.range(0, MAX_PER_BATCH)
                                        .toArray());
 
@@ -84,6 +82,6 @@ public class ProgressBarRenderer implements AutoCloseable {
     public void close() throws Exception {
         this.mesh.close();
         this.shader.close();
-        MemoryUtil.memFree(this.vertexDataBuffer);
+        //MemoryUtil.memFree(this.vertexDataBuffer);
     }
 }

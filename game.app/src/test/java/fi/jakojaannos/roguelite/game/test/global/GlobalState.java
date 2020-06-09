@@ -19,14 +19,7 @@ import fi.jakojaannos.roguelite.engine.GameState;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
-import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLAssetManager;
-import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLRenderingBackend;
-import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLWindow;
 import fi.jakojaannos.roguelite.engine.view.Window;
-import fi.jakojaannos.roguelite.game.test.content.TestAssetManager;
-import fi.jakojaannos.roguelite.game.test.view.TestRenderingBackend;
-import fi.jakojaannos.roguelite.game.test.view.TestWindow;
-import fi.jakojaannos.roguelite.game.view.RogueliteGameRenderer;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -43,7 +36,7 @@ public class GlobalState {
     public static GameState state;
     public static Events events;
     public static Queue<InputEvent> inputEvents;
-    public static RogueliteGameRenderer gameRenderer;
+    //public static RogueliteGameRenderer gameRenderer;
     public static Window window;
     public static TestTimeManager timeManager;
 
@@ -108,6 +101,7 @@ public class GlobalState {
             }
         };
         Path assetRoot = Paths.get("../assets");
+        /*
         gameRenderer = Optional.ofNullable(System.getenv("VISUALIZE_TESTS"))
                                .map(Boolean::valueOf)
                                .filter(Boolean::booleanValue)
@@ -132,6 +126,8 @@ public class GlobalState {
                                                                           window = new TestWindow(800, 600),
                                                                           new TestRenderingBackend(),
                                                                           new TestAssetManager(assetRoot)));
+
+         */
         events = gameRunner.getEvents();
         inputEvents = new ArrayDeque<>();
     }

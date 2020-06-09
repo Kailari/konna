@@ -9,8 +9,6 @@ import java.nio.file.Path;
 import java.util.*;
 import javax.annotation.Nullable;
 
-import fi.jakojaannos.riista.vulkan.internal.LogCategories;
-import fi.jakojaannos.riista.vulkan.internal.RenderingBackend;
 import fi.jakojaannos.riista.assets.AssetManager;
 import fi.jakojaannos.riista.utilities.BitMask;
 import fi.jakojaannos.riista.view.assets.Material;
@@ -19,6 +17,8 @@ import fi.jakojaannos.riista.vulkan.assets.material.MaterialImpl;
 import fi.jakojaannos.riista.vulkan.assets.mesh.AssimpProcess;
 import fi.jakojaannos.riista.vulkan.assets.mesh.MeshImpl;
 import fi.jakojaannos.riista.vulkan.assets.mesh.MeshLoader;
+import fi.jakojaannos.riista.vulkan.internal.LogCategories;
+import fi.jakojaannos.riista.vulkan.internal.RenderingBackend;
 
 import static fi.jakojaannos.riista.utilities.BitMask.bitMask;
 import static org.lwjgl.assimp.Assimp.aiGetErrorString;
@@ -45,10 +45,7 @@ public class SkeletalMeshLoader extends MeshLoader<SkeletalMesh> {
     public Optional<SkeletalMesh> load(final Path path, final BitMask<AssimpProcess> flags) {
         LOG.debug(LogCategories.MESH_LOADING, "Importing skeletal mesh \"{}\"",
                   path);
-        final var scene = aiImportFile(this.assetManager.getRootPath()
-                                                        .resolve(path)
-                                                        .toString(),
-                                       flags.mask());
+        final var scene = aiImportFile(path.toString(), flags.mask());
         if (scene == null) {
             LOG.error("Error importing model: " + aiGetErrorString());
             return Optional.empty();

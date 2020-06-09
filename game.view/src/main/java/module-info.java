@@ -10,12 +10,12 @@ module roguelite.game.view {
     requires riista.utilities;
 
     requires riista.view;
+    requires riista.vulkan;
 
     requires roguelite.game;
 
-    opens fi.jakojaannos.roguelite.game.view.adapters to riista.ecs;
-    opens fi.jakojaannos.roguelite.game.view.systems to riista.ecs;
-    opens fi.jakojaannos.roguelite.game.view.systems.audio to riista.ecs;
+    opens fi.jakojaannos.konna.view.adapters.menu to riista.ecs;
+    opens fi.jakojaannos.konna.view.adapters.gameplay to riista.ecs;
 
-    exports fi.jakojaannos.roguelite.game.view;
+    exports fi.jakojaannos.konna.view;
 }

@@ -4,12 +4,14 @@ import org.lwjgl.vulkan.VkExtent2D;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import javax.annotation.Nullable;
 
 import fi.jakojaannos.riista.assets.AssetManager;
 import fi.jakojaannos.riista.view.GameModeRenderers;
@@ -38,6 +40,7 @@ public class SimulationThread implements AutoCloseable {
     private final Supplier<VkExtent2D> swapchainExtentSupplier;
     private final Consumer<CameraProperties> cameraPropertiesUpdater;
 
+    @Nullable
     private SystemDispatcher renderDispatcher;
 
     private Runnable simulatorTerminateCallback = () -> LOG.warn("Simulation terminated before initialization was done!");
@@ -136,7 +139,13 @@ public class SimulationThread implements AutoCloseable {
                 this.renderRecorder.setWriteState(presentableState);
 
                 final var systemEvents = this.ticker.getSystemEvents();
-                this.renderDispatcher.tick(currentState.world(), currentState.systems(), systemEvents);
+                final var legacyRenderEvents = this.ticker.pollLegacyRenderEvents().events();
+                final var allEvents = new ArrayList<>(systemEvents.size() + legacyRenderEvents.size());
+                allEvents.addAll(systemEvents);
+                allEvents.addAll(legacyRenderEvents);
+                legacyRenderEvents.clear();
+
+                this.renderDispatcher.tick(currentState.world(), currentState.systems(), allEvents);
             }
         } catch (final Throwable t) {
             LOG.error("Render adapter dispatcher encountered an error:", t);
@@ -148,6 +157,19 @@ public class SimulationThread implements AutoCloseable {
     @Override
     public void close() {
         LOG.info("Simulation thread shutting down");
+
+        if (this.renderDispatcher != null) {
+            try {
+                LOG.debug("Render dispatcher closing");
+                this.renderDispatcher.close();
+            } catch (final Throwable t) {
+                LOG.error("Disposing render dispatcher failed", t);
+            }
+        } else {
+            LOG.warn("No render dispatcher present.");
+        }
+
+        LOG.debug("Killing executor service");
         this.executor.shutdown();
         try {
             if (!this.executor.awaitTermination(5L, TimeUnit.SECONDS)) {

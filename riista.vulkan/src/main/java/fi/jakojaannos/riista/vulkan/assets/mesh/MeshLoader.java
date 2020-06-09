@@ -78,7 +78,8 @@ public abstract class MeshLoader<TMesh> implements AssetLoader<TMesh> {
                                      null) == aiReturn_SUCCESS
             ) {
                 hasTexture = true;
-                texture = tryGetTexture(path.dataString());
+                texture = this.assetManager.getStorage(Texture.class)
+                                           .getOrDefault(path.dataString());
             } else {
                 hasTexture = false;
                 texture = null;
@@ -149,10 +150,5 @@ public abstract class MeshLoader<TMesh> implements AssetLoader<TMesh> {
         }
 
         return indices;
-    }
-
-    private Texture tryGetTexture(final String path) {
-        return this.assetManager.getStorage(Texture.class)
-                                .getOrDefault(path);
     }
 }

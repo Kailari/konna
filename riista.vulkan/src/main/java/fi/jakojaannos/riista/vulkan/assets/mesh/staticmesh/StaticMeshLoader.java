@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 import fi.jakojaannos.riista.assets.AssetManager;
+import fi.jakojaannos.riista.utilities.BitMask;
 import fi.jakojaannos.riista.view.assets.Material;
 import fi.jakojaannos.riista.view.assets.Mesh;
 import fi.jakojaannos.riista.view.assets.StaticMesh;
@@ -19,7 +20,6 @@ import fi.jakojaannos.riista.vulkan.assets.material.MaterialImpl;
 import fi.jakojaannos.riista.vulkan.assets.mesh.AssimpProcess;
 import fi.jakojaannos.riista.vulkan.assets.mesh.MeshImpl;
 import fi.jakojaannos.riista.vulkan.assets.mesh.MeshLoader;
-import fi.jakojaannos.riista.utilities.BitMask;
 import fi.jakojaannos.riista.vulkan.internal.LogCategories;
 import fi.jakojaannos.riista.vulkan.internal.RenderingBackend;
 
@@ -40,10 +40,7 @@ public class StaticMeshLoader extends MeshLoader<StaticMesh> {
     ) {
         LOG.debug(LogCategories.MESH_LOADING, "Importing static mesh \"{}\"",
                   path);
-        final var scene = aiImportFile(this.assetManager.getRootPath()
-                                                        .resolve(path)
-                                                        .toString(),
-                                       flags.mask());
+        final var scene = aiImportFile(path.toString(), flags.mask());
         if (scene == null) {
             throw new IllegalStateException("Error importing model: " + aiGetErrorString());
         }

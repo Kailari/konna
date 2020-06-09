@@ -1,5 +1,0 @@
---add-modules
-    org.junit.jupiter.api,org.junit.jupiter.params,org.mockito
-
---add-reads
-    konna.vulkan=org.junit.jupiter.api,org.junit.jupiter.params,org.mockito

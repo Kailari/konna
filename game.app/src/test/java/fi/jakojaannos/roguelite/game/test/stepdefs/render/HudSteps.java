@@ -14,7 +14,6 @@ import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 import fi.jakojaannos.roguelite.game.data.components.character.Health;
-import fi.jakojaannos.roguelite.game.view.gamemode.GameplayGameModeRenderer;
 
 import static fi.jakojaannos.roguelite.engine.utilities.assertions.ui.AssertUI.assertUI;
 import static fi.jakojaannos.roguelite.engine.utilities.assertions.ui.PositionMatcherBuilder.isHorizontallyIn;
@@ -24,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class HudSteps {
     public static final String GAME_OVER_CONTAINER_NAME = "game-over-container";
-    private static final String TIMER_LABEL_NAME = GameplayGameModeRenderer.TIME_PLAYED_LABEL_NAME;
     private static final double HEALTHBAR_NEAR_THRESHOLD = 2.0; // World units
 
     @Given("no enemies have taken damage")
@@ -67,7 +65,7 @@ public class HudSteps {
     public void thereIsATimerLabelOnTheTopMiddleOfTheScreen() {
         final var ui = gameRenderer.getCurrentUserInterface();
         assertUI(ui)
-                .hasExactlyOneElement(that -> that.hasName().equalTo(TIMER_LABEL_NAME)
+                .hasExactlyOneElement(that -> that.hasName().equalTo("time-played-timer")
                                                   .matching(isVerticallyIn(ui).min())
                                                   .matching(isHorizontallyIn(ui).middle())
                                                   .isLabel());
@@ -76,7 +74,7 @@ public class HudSteps {
     @And("the timer label reads {string}")
     public void theTimerLabelReads(String expected) {
         assertUI(gameRenderer.getCurrentUserInterface())
-                .hasExactlyOneElement(that -> that.hasName().equalTo(TIMER_LABEL_NAME)
+                .hasExactlyOneElement(that -> that.hasName().equalTo("time-played-timer")
                                                   .isLabel()
                                                   .hasText().equalTo(expected));
     }
@@ -166,7 +164,10 @@ public class HudSteps {
                     .getEntitiesWith(Health.class)
                     .filter(pair -> pair.component().currentHealth < pair.component().maxHealth)
                     .map(EntityManager.EntityComponentPair::entity)
-                    .map(entity -> state.world().getEntityManager().getComponentOf(entity, Transform.class).orElseThrow().position)
+                    .map(entity -> state.world()
+                                        .getEntityManager()
+                                        .getComponentOf(entity, Transform.class)
+                                        .orElseThrow().position)
                     .anyMatch(enemyPosition -> isNearPosition(element, enemyPosition, HEALTHBAR_NEAR_THRESHOLD));
     }
 

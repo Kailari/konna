@@ -12,17 +12,16 @@ module riista.vulkan {
     requires riista.view;
 
     requires org.lwjgl;
+    requires org.lwjgl.openal;
     requires org.lwjgl.shaderc;
     requires org.lwjgl.vulkan;
     requires org.lwjgl.stb;
     requires org.lwjgl.glfw;
     requires org.lwjgl.assimp;
 
-    requires org.lwjgl.natives;
-    requires org.lwjgl.shaderc.natives;
-    requires org.lwjgl.stb.natives;
-    requires org.lwjgl.glfw.natives;
-    requires org.lwjgl.assimp.natives;
+    // Allows gson to construct UI elements
+    exports fi.jakojaannos.riista.vulkan.assets.ui to com.google.gson;
+    opens fi.jakojaannos.riista.vulkan.assets.ui to com.google.gson;
 
     exports fi.jakojaannos.riista.vulkan.application;
     exports fi.jakojaannos.riista.vulkan.assets.storage;

@@ -14,5 +14,3 @@ include 'koetus.assert'
 include 'game'
 include 'game.view'
 include 'game.app'
-
-include 'game.vulkan'

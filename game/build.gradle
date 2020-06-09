@@ -11,9 +11,3 @@ dependencies {
 
     testImplementation project(':koetus.assert')
 }
-
-test {
-    moduleOptions {
-        runOnClasspath = true
-    }
-}

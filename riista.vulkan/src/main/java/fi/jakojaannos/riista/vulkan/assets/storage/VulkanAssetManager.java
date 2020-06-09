@@ -13,7 +13,7 @@ import fi.jakojaannos.riista.view.assets.Font;
 import fi.jakojaannos.riista.view.assets.SkeletalMesh;
 import fi.jakojaannos.riista.view.assets.StaticMesh;
 import fi.jakojaannos.riista.view.assets.Texture;
-import fi.jakojaannos.riista.view.assets.ui.UiLoader;
+import fi.jakojaannos.riista.vulkan.assets.ui.UiLoader;
 import fi.jakojaannos.riista.vulkan.assets.internal.Shader;
 import fi.jakojaannos.riista.vulkan.assets.internal.ShaderLoader;
 import fi.jakojaannos.riista.vulkan.assets.mesh.skeletal.SkeletalMeshLoader;

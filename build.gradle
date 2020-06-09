@@ -67,6 +67,11 @@ subprojects {
             events "passed", "skipped", "failed"
             stackTraceFilters = []
         }
+
+        // TODO: Does this work?
+        moduleOptions {
+            runOnClasspath = true
+        }
     }
 
     jacocoTestReport {

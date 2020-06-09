@@ -14,7 +14,7 @@ import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.RenderingBackend;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.Window;
-import fi.jakojaannos.roguelite.engine.view.audio.AudioContext;
+import fi.jakojaannos.riista.view.audio.AudioContext;
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.Mesh;
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexFormat;
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexFormatBuilder;

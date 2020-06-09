@@ -10,7 +10,6 @@ module roguelite.game.app {
     requires roguelite.game;
 
     requires roguelite.game.view;
-    requires konna.vulkan;
 
     exports fi.jakojaannos.roguelite.game.app;
 }

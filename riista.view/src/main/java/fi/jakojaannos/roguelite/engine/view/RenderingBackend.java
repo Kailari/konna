@@ -2,7 +2,7 @@ package fi.jakojaannos.roguelite.engine.view;
 
 import java.nio.file.Path;
 
-import fi.jakojaannos.roguelite.engine.view.audio.AudioContext;
+import fi.jakojaannos.riista.view.audio.AudioContext;
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.Mesh;
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexFormat;
 import fi.jakojaannos.roguelite.engine.view.rendering.mesh.VertexFormatBuilder;

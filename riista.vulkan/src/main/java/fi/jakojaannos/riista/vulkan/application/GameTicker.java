@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.GameMode;
 import fi.jakojaannos.roguelite.engine.GameState;
 import fi.jakojaannos.roguelite.engine.MainThread;
@@ -19,7 +20,6 @@ import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.input.InputProvider;
 import fi.jakojaannos.roguelite.engine.network.NetworkImpl;
 import fi.jakojaannos.roguelite.engine.state.StateEvent;
-import fi.jakojaannos.riista.utilities.TimeManager;
 
 public class GameTicker implements MainThread {
     private static final Logger LOG = LoggerFactory.getLogger(GameTicker.class);
@@ -48,6 +48,11 @@ public class GameTicker implements MainThread {
 
     public Collection<Object> getSystemEvents() {
         return Collections.unmodifiableList(this.systemEvents);
+    }
+
+    @Deprecated
+    public RenderEvents pollLegacyRenderEvents() {
+        return this.renderEvents;
     }
 
     public GameTicker(
