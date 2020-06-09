@@ -1,15 +1,19 @@
-module roguelite.engine {
+module riista {
     requires jsr305;
     requires org.slf4j;
     requires org.joml;
     requires com.google.gson;
 
     requires roguelite.engine.ecs;
-    requires roguelite.engine.utilities;
+
+    requires riista.utilities;
 
     requires transitive java.desktop;
 
     opens fi.jakojaannos.roguelite.engine.data.resources to roguelite.engine.ecs;
+
+    exports fi.jakojaannos.riista.assets;
+    exports fi.jakojaannos.riista.application;
 
     exports fi.jakojaannos.roguelite.engine;
     exports fi.jakojaannos.roguelite.engine.event;

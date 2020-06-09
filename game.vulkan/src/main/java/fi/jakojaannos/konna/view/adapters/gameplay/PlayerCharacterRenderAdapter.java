@@ -2,14 +2,14 @@ package fi.jakojaannos.konna.view.adapters.gameplay;
 
 import java.util.stream.Stream;
 
-import fi.jakojaannos.konna.engine.assets.AssetManager;
-import fi.jakojaannos.konna.engine.assets.SkeletalMesh;
-import fi.jakojaannos.konna.engine.view.Renderer;
+import fi.jakojaannos.riista.view.Renderer;
+import fi.jakojaannos.riista.assets.AssetManager;
+import fi.jakojaannos.riista.view.assets.SkeletalMesh;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.ecs.annotation.Without;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.NoDrawTag;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
 

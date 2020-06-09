@@ -5,7 +5,7 @@ import java.util.stream.Stream;
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.ecs.annotation.EnableOn;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;

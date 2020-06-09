@@ -9,7 +9,7 @@ import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
 import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.archetypes.SlimeArchetype;
 import fi.jakojaannos.roguelite.game.data.components.character.DeadTag;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.SplitOnDeath;

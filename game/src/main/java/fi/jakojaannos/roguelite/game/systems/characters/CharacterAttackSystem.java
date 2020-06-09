@@ -7,7 +7,7 @@ import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.ecs.data.resources.Entities;
 import fi.jakojaannos.roguelite.engine.event.RenderEvents;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.WeaponInput;
 import fi.jakojaannos.roguelite.game.weapons.ActionInfo;

@@ -17,7 +17,7 @@ import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.network.client.ClientNetworkManager;
 import fi.jakojaannos.roguelite.engine.state.StateEvent;
 import fi.jakojaannos.roguelite.engine.ui.UIEvent;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;
 
 public class HandleMainMenuUIEventsSystem implements ECSSystem {

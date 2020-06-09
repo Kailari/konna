@@ -11,7 +11,7 @@ import fi.jakojaannos.roguelite.engine.content.AssetRegistry;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.ecs.annotation.Without;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.view.Camera;
 import fi.jakojaannos.roguelite.engine.view.EcsRenderAdapter;
 import fi.jakojaannos.roguelite.engine.view.EntityWriter;

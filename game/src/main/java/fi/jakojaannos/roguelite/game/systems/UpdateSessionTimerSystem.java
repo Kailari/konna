@@ -5,7 +5,7 @@ import java.util.stream.Stream;
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.ecs.annotation.DisableOn;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.events.GameLostEvent;
 import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
 

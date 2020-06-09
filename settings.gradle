@@ -6,7 +6,7 @@ include 'engine'
 include 'engine.ecs'
 include 'engine.view'
 include 'engine.assert'
-include 'engine.lwjgl'
+include 'engine.vulkan'
 include 'engine.utilities'
 
 include 'game'

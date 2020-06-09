@@ -6,9 +6,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.stream.Stream;
 
-import fi.jakojaannos.konna.engine.assets.AssetManager;
-import fi.jakojaannos.konna.engine.view.Renderer;
-import fi.jakojaannos.konna.engine.view.ui.UiElement;
+import fi.jakojaannos.riista.assets.AssetManager;
+import fi.jakojaannos.riista.view.Renderer;
+import fi.jakojaannos.riista.view.ui.UiElement;
 import fi.jakojaannos.roguelite.engine.MainThread;
 import fi.jakojaannos.roguelite.engine.data.resources.Network;
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
@@ -18,7 +18,7 @@ import fi.jakojaannos.roguelite.engine.network.NetworkManager;
 import fi.jakojaannos.roguelite.engine.network.client.ClientNetworkManager;
 import fi.jakojaannos.roguelite.engine.state.StateEvent;
 import fi.jakojaannos.roguelite.engine.ui.UIEvent;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;
 
 public class MainMenuRenderAdapter implements EcsSystem<MainMenuRenderAdapter.Resources, EcsSystem.NoEntities, EcsSystem.NoEvents> {

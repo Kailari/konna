@@ -2,7 +2,7 @@ package fi.jakojaannos.roguelite.game.weapons.modules;
 
 import org.joml.Vector2d;
 
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.archetypes.GrenadeArchetype;
 import fi.jakojaannos.roguelite.game.data.components.weapon.GrenadeStats;
 import fi.jakojaannos.roguelite.game.weapons.*;

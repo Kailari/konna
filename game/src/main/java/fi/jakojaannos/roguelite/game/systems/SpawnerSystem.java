@@ -9,7 +9,7 @@ import fi.jakojaannos.roguelite.engine.ecs.annotation.DisableOn;
 import fi.jakojaannos.roguelite.engine.ecs.annotation.DisabledByDefault;
 import fi.jakojaannos.roguelite.engine.ecs.annotation.EnableOn;
 import fi.jakojaannos.roguelite.engine.ecs.data.resources.Entities;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.SpawnerComponent;
 import fi.jakojaannos.roguelite.game.data.events.HordeStartEvent;
 import fi.jakojaannos.roguelite.game.data.events.HordeStopEvent;

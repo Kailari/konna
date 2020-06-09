@@ -10,7 +10,7 @@ import fi.jakojaannos.roguelite.engine.event.EventBus;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.ui.TextSizeProvider;
 import fi.jakojaannos.roguelite.engine.ui.UIEvent;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.view.Viewport;
 import fi.jakojaannos.roguelite.engine.view.ui.*;
 import fi.jakojaannos.roguelite.engine.view.ui.builder.UIElementBuilderImpl;

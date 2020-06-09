@@ -1,6 +1,6 @@
 package fi.jakojaannos.roguelite.engine;
 
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.riista.utilities.TimeManager;
 
 public class GameRunnerTimeManager implements TimeManager {
     private final long timeStep;

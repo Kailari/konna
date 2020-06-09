@@ -1,6 +1,6 @@
 package fi.jakojaannos.roguelite.engine.state;
 
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.riista.utilities.TimeManager;
 
 public interface TimeProvider {
     TimeManager getTime();

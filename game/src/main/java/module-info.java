@@ -3,8 +3,8 @@ module roguelite.game {
     requires org.slf4j;
     requires jsr305;
 
-    requires transitive roguelite.engine;
-    requires transitive roguelite.engine.utilities;
+    requires transitive riista;
+    requires transitive riista.utilities;
     requires transitive roguelite.engine.ecs;
 
     opens fi.jakojaannos.roguelite.game.systems to roguelite.engine.ecs;

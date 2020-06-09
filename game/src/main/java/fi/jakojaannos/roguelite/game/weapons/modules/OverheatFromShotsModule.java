@@ -1,6 +1,6 @@
 package fi.jakojaannos.roguelite.game.weapons.modules;
 
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.weapons.*;
 import fi.jakojaannos.roguelite.game.weapons.events.WeaponFireEvent;
 

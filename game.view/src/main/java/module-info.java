@@ -5,11 +5,10 @@ module roguelite.game.view {
     requires org.joml;
     requires jsr305;
 
-    requires roguelite.engine;
-    requires roguelite.engine.utilities;
+    requires riista;
+    requires riista.utilities;
     requires roguelite.engine.ecs;
 
-    requires transitive roguelite.engine.lwjgl;
     requires roguelite.engine.view;
 
     requires roguelite.game;

@@ -7,7 +7,7 @@ import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.weapon.Fuse;
 import fi.jakojaannos.roguelite.game.data.components.weapon.GrenadeStats;
 import fi.jakojaannos.roguelite.game.data.resources.Explosions;

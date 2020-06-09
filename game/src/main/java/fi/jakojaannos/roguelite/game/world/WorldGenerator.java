@@ -8,7 +8,7 @@ import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.data.resources.Entities;
 import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.archetypes.FollowerArchetype;
 import fi.jakojaannos.roguelite.game.data.archetypes.ObstacleArchetype;
 import fi.jakojaannos.roguelite.game.data.archetypes.SlimeArchetype;

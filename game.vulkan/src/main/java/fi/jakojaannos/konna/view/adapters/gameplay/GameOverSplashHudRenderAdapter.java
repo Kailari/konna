@@ -2,9 +2,9 @@ package fi.jakojaannos.konna.view.adapters.gameplay;
 
 import java.util.stream.Stream;
 
-import fi.jakojaannos.konna.engine.assets.AssetManager;
-import fi.jakojaannos.konna.engine.view.Renderer;
-import fi.jakojaannos.konna.engine.view.ui.UiElement;
+import fi.jakojaannos.riista.assets.AssetManager;
+import fi.jakojaannos.riista.view.Renderer;
+import fi.jakojaannos.riista.view.ui.UiElement;
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.ecs.annotation.DisabledByDefault;

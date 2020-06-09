@@ -3,7 +3,6 @@ dependencies {
     implementation project(':game')
     implementation project(':engine.ecs')
     implementation project(':engine.view')
-    implementation project(':engine.lwjgl')
     implementation project(':engine.utilities')
 
     // LWJGL and its components

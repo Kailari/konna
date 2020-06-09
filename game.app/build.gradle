@@ -1,45 +1,44 @@
 import org.gradle.internal.os.OperatingSystem
 
 
-def buildPlatformName = System.getenv("TARGET_PLATFORM")
+final def buildPlatformName = System.getenv("TARGET_PLATFORM")
 def buildPlatform = buildPlatformName != null ? OperatingSystem.forName(buildPlatformName) : null
 if (buildPlatform == null) {
     buildPlatform = OperatingSystem.current()
 }
 
-switch (buildPlatform) {
-    case OperatingSystem.LINUX:
-        project.ext.lwjglNatives = "natives-linux"
-        break
-    case OperatingSystem.MAC_OS:
-        project.ext.lwjglNatives = "natives-macos"
-        break
-    case OperatingSystem.WINDOWS:
-        project.ext.lwjglNatives = "natives-windows"
-        break
-}
+def final implementationModules = ['', '-glfw', '-vulkan', '-shaderc', '-stb', '-assimp']
+def final runtimeModules = ['', '-glfw', '-shaderc', '-stb', '-assimp']
 
 dependencies {
+    // FIXME: Rename engine modules to 'riista'
     implementation project(':engine')
+    implementation project(':engine.vulkan')
     implementation project(':engine.ecs')
     implementation project(':engine.utilities')
+
     implementation project(':engine.view')
-    implementation project(':engine.lwjgl')
-    testImplementation project(':engine.assert')
 
     implementation project(':game')
     implementation project(':game.view')
+    implementation project(':game.vulkan')
 
     implementation "org.joml:joml:${jomlVersion}"
+    implementation "com.google.code.gson:gson:${gsonVersion}"
 
+    // LWJGL 3 (Minimal Vulkan)
     // "org.lwjgl:lwjgl" is required for MemoryUtil and MemoryStack
     // other lwjgl modules are there just for running tests with the full renderer
-    implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
-    implementation "org.lwjgl:lwjgl"
-    for (lwjglModule in ["", "-assimp", "-glfw", "-openal", "-opengl", "-stb", "-opengl"]) {
-        testImplementation "org.lwjgl:lwjgl${lwjglModule}"
-        testRuntimeOnly "org.lwjgl:lwjgl${lwjglModule}::${lwjglNatives}"
-    }
+    implementation platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")
+    final def lwjglNatives = selectNatives(buildPlatform)
+    for (final modulePostfix in implementationModules) { implementation "org.lwjgl:lwjgl${modulePostfix}" }
+
+    // FIXME: This should be `runtimeOnly` instead of `implementation` but that breaks `module-info.java`
+    for (final modulePostfix in runtimeModules) { implementation "org.lwjgl:lwjgl${modulePostfix}::${lwjglNatives}" }
+    if (lwjglNatives == "natives-macos") runtimeOnly "org.lwjgl:lwjgl-vulkan::${lwjglNatives}"
+
+    // Test dependencies
+    testImplementation project(':engine.assert')
 
     // Cucumber for fancy tests
     testImplementation "io.cucumber:cucumber-java:${cucumberVersion}"
@@ -50,5 +49,18 @@ dependencies {
 test {
     moduleOptions {
         runOnClasspath = true
+    }
+}
+
+static String selectNatives(final OperatingSystem platform) {
+    switch (platform) {
+        case OperatingSystem.LINUX:
+            return "natives-linux"
+        case OperatingSystem.MAC_OS:
+            return "natives-macos"
+        case OperatingSystem.WINDOWS:
+            return "natives-windows"
+        default:
+            throw new UnsupportedOperationException("Unknown build platform: \"${platform}\"")
     }
 }

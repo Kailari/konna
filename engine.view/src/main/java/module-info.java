@@ -7,9 +7,15 @@ module roguelite.engine.view {
 
     requires java.desktop;
 
-    requires roguelite.engine;
+    requires riista;
+    requires riista.utilities;
+
     requires roguelite.engine.ecs;
-    requires roguelite.engine.utilities;
+
+    exports fi.jakojaannos.riista.view;
+    exports fi.jakojaannos.riista.view.ui;
+    exports fi.jakojaannos.riista.view.assets;
+    exports fi.jakojaannos.riista.view.assets.ui to riista.vulkan;
 
     exports fi.jakojaannos.roguelite.engine.view;
     exports fi.jakojaannos.roguelite.engine.view.audio;
@@ -22,4 +28,7 @@ module roguelite.engine.view {
     exports fi.jakojaannos.roguelite.engine.view.rendering.shader;
     exports fi.jakojaannos.roguelite.engine.view.rendering.sprite;
     exports fi.jakojaannos.roguelite.engine.view.rendering.ui;
+
+    opens fi.jakojaannos.riista.view.ui to com.google.gson;
+    opens fi.jakojaannos.riista.view.ui.impl to com.google.gson;
 }

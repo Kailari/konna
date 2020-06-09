@@ -1,8 +1,10 @@
-module roguelite.engine.utilities {
+module riista.utilities {
     requires org.joml;
     requires com.google.gson;
     requires jsr305;
     requires org.slf4j;
+
+    exports fi.jakojaannos.riista.utilities;
 
     exports fi.jakojaannos.roguelite.engine.utilities;
     exports fi.jakojaannos.roguelite.engine.utilities.json;

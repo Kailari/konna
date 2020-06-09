@@ -3,7 +3,7 @@ package fi.jakojaannos.roguelite.game.weapons.modules;
 import java.util.ArrayList;
 import java.util.List;
 
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.weapons.*;
 
 /**

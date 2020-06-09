@@ -1,0 +1,52 @@
+import org.gradle.internal.os.OperatingSystem
+
+plugins {
+    id "application"
+    id "java"
+}
+
+repositories {
+    mavenCentral()
+}
+
+def final implementationModules = ['', '-glfw', '-vulkan', '-shaderc', '-stb', '-assimp']
+def final runtimeModules = ['', '-glfw', '-shaderc', '-stb', '-assimp']
+
+dependencies {
+    implementation project(":engine")
+    implementation project(":engine.ecs")
+    implementation project(":engine.utilities")
+
+    implementation project(":engine.view")
+
+    implementation "org.joml:joml:${jomlVersion}"
+    implementation "com.google.code.gson:gson:${gsonVersion}"
+
+    // LWJGL 3 (Minimal Vulkan)
+    implementation platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")
+    final def lwjglNatives = selectNatives(OperatingSystem.current())
+    for (final modulePostfix in implementationModules) { implementation "org.lwjgl:lwjgl${modulePostfix}" }
+
+    // FIXME: This should be `runtimeOnly` instead of `implementation` but that breaks `module-info.java`
+    for (final modulePostfix in runtimeModules) { implementation "org.lwjgl:lwjgl${modulePostfix}::${lwjglNatives}" }
+    if (lwjglNatives == "natives-macos") runtimeOnly "org.lwjgl:lwjgl-vulkan::${lwjglNatives}"
+}
+
+test {
+    moduleOptions {
+        runOnClasspath = true
+    }
+}
+
+static String selectNatives(final OperatingSystem platform) {
+    switch (platform) {
+        case OperatingSystem.LINUX:
+            return "natives-linux"
+        case OperatingSystem.MAC_OS:
+            return "natives-macos"
+        case OperatingSystem.WINDOWS:
+            return "natives-windows"
+        default:
+            throw new UnsupportedOperationException("Unknown build platform: \"${platform}\"")
+    }
+}

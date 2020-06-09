@@ -14,7 +14,7 @@ import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.event.RenderEvents;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.view.*;
 import fi.jakojaannos.roguelite.engine.view.audio.AudioContext;
 import fi.jakojaannos.roguelite.engine.view.ui.UserInterface;

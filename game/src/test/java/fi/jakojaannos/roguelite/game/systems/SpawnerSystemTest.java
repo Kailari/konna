@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.data.resources.Entities;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.SpawnerComponent;
 import fi.jakojaannos.roguelite.game.data.resources.Horde;
 

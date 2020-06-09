@@ -6,7 +6,7 @@ import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.event.RenderEvents;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.EnemyTag;
 import fi.jakojaannos.roguelite.game.data.events.HordeEndEvent;
 import fi.jakojaannos.roguelite.game.data.events.HordeStartEvent;
