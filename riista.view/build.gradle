@@ -1,0 +1,21 @@
+dependencies {
+    implementation project(":riista")
+    implementation project(":riista.ecs")
+    implementation project(":riista.utilities")
+
+    // Google Gson
+    implementation "com.google.code.gson:gson:${gsonVersion}"
+
+    // JOML
+    implementation "org.joml:joml:${jomlVersion}"
+
+    // lwjgl for MemoryUtil
+    implementation "org.lwjgl:lwjgl:${lwjglVersion}"
+}
+
+
+test {
+    moduleOptions {
+        runOnClasspath = true
+    }
+}

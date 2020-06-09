@@ -6,13 +6,13 @@ module konna.vulkan {
     requires jsr305;
 
     requires riista;
-    requires riista.vulkan;
+    requires riista.ecs;
     requires riista.utilities;
 
-    requires roguelite.game;
+    requires riista.view;
+    requires riista.vulkan;
 
-    requires roguelite.engine.view;
-    requires roguelite.engine.ecs;
+    requires roguelite.game;
 
     requires org.lwjgl;
     requires org.lwjgl.shaderc;
@@ -27,8 +27,8 @@ module konna.vulkan {
     requires org.lwjgl.glfw.natives;
     requires org.lwjgl.assimp.natives;
 
-    opens fi.jakojaannos.konna.view.adapters.menu to roguelite.engine.ecs;
-    opens fi.jakojaannos.konna.view.adapters.gameplay to roguelite.engine.ecs;
+    opens fi.jakojaannos.konna.view.adapters.menu to riista.ecs;
+    opens fi.jakojaannos.konna.view.adapters.gameplay to riista.ecs;
 
     exports fi.jakojaannos.konna.view;
 }

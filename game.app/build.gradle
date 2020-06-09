@@ -11,13 +11,12 @@ def final implementationModules = ['', '-glfw', '-vulkan', '-shaderc', '-stb', '
 def final runtimeModules = ['', '-glfw', '-shaderc', '-stb', '-assimp']
 
 dependencies {
-    // FIXME: Rename engine modules to 'riista'
-    implementation project(':engine')
-    implementation project(':engine.vulkan')
-    implementation project(':engine.ecs')
-    implementation project(':engine.utilities')
+    implementation project(':riista')
+    implementation project(':riista.ecs')
+    implementation project(':riista.utilities')
 
-    implementation project(':engine.view')
+    implementation project(':riista.view')
+    implementation project(':riista.vulkan')
 
     implementation project(':game')
     implementation project(':game.view')
@@ -38,7 +37,7 @@ dependencies {
     if (lwjglNatives == "natives-macos") runtimeOnly "org.lwjgl:lwjgl-vulkan::${lwjglNatives}"
 
     // Test dependencies
-    testImplementation project(':engine.assert')
+    testImplementation project(':koetus.assert')
 
     // Cucumber for fancy tests
     testImplementation "io.cucumber:cucumber-java:${cucumberVersion}"

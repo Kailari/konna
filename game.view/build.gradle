@@ -1,9 +1,10 @@
 dependencies {
-    implementation project(':engine')
+    implementation project(':riista')
+    implementation project(':riista.ecs')
+    implementation project(':riista.utilities')
+    implementation project(':riista.view')
+
     implementation project(':game')
-    implementation project(':engine.ecs')
-    implementation project(':engine.view')
-    implementation project(':engine.utilities')
 
     // LWJGL and its components
     implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")

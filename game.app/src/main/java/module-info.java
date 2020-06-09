@@ -3,13 +3,13 @@ module roguelite.game.app {
     requires jsr305;
 
     requires riista;
+
+    requires riista.view;
     requires riista.vulkan;
 
-    requires roguelite.engine.view;
-
     requires roguelite.game;
-    requires roguelite.game.view;
 
+    requires roguelite.game.view;
     requires konna.vulkan;
 
     exports fi.jakojaannos.roguelite.game.app;

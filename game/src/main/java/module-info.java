@@ -4,19 +4,19 @@ module roguelite.game {
     requires jsr305;
 
     requires transitive riista;
+    requires transitive riista.ecs;
     requires transitive riista.utilities;
-    requires transitive roguelite.engine.ecs;
 
-    opens fi.jakojaannos.roguelite.game.systems to roguelite.engine.ecs;
-    opens fi.jakojaannos.roguelite.game.systems.characters to roguelite.engine.ecs;
-    opens fi.jakojaannos.roguelite.game.systems.cleanup to roguelite.engine.ecs;
-    opens fi.jakojaannos.roguelite.game.systems.collision to roguelite.engine.ecs;
-    opens fi.jakojaannos.roguelite.game.systems.menu to roguelite.engine.ecs;
-    opens fi.jakojaannos.roguelite.game.systems.physics to roguelite.engine.ecs;
-    opens fi.jakojaannos.roguelite.game.systems.characters.ai to roguelite.engine.ecs;
-    opens fi.jakojaannos.roguelite.game.systems.characters.movement to roguelite.engine.ecs;
-    opens fi.jakojaannos.roguelite.game.data.resources to roguelite.engine.ecs;
-    opens fi.jakojaannos.roguelite.game.data.resources.collision to roguelite.engine.ecs;
+    opens fi.jakojaannos.roguelite.game.systems to riista.ecs;
+    opens fi.jakojaannos.roguelite.game.systems.characters to riista.ecs;
+    opens fi.jakojaannos.roguelite.game.systems.cleanup to riista.ecs;
+    opens fi.jakojaannos.roguelite.game.systems.collision to riista.ecs;
+    opens fi.jakojaannos.roguelite.game.systems.menu to riista.ecs;
+    opens fi.jakojaannos.roguelite.game.systems.physics to riista.ecs;
+    opens fi.jakojaannos.roguelite.game.systems.characters.ai to riista.ecs;
+    opens fi.jakojaannos.roguelite.game.systems.characters.movement to riista.ecs;
+    opens fi.jakojaannos.roguelite.game.data.resources to riista.ecs;
+    opens fi.jakojaannos.roguelite.game.data.resources.collision to riista.ecs;
 
     exports fi.jakojaannos.roguelite.game;
     exports fi.jakojaannos.roguelite.game.weapons;

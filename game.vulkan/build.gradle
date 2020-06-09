@@ -15,12 +15,12 @@ def final implementationModules = ['', '-glfw', '-vulkan', '-shaderc', '-stb', '
 def final runtimeModules = ['', '-glfw', '-shaderc', '-stb', '-assimp']
 
 dependencies {
-    implementation project(":engine")
-    implementation project(":engine.ecs")
-    implementation project(":engine.utilities")
+    implementation project(":riista")
+    implementation project(":riista.ecs")
+    implementation project(":riista.utilities")
 
-    implementation project(":engine.view")
-    implementation project(":engine.vulkan")
+    implementation project(":riista.view")
+    implementation project(":riista.vulkan")
 
     implementation project(":game")
 

@@ -5,8 +5,8 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 
-import fi.jakojaannos.konna.engine.vulkan.application.ApplicationRunner;
-import fi.jakojaannos.konna.engine.vulkan.application.VulkanApplication;
+import fi.jakojaannos.riista.vulkan.application.ApplicationRunner;
+import fi.jakojaannos.riista.vulkan.application.VulkanApplication;
 import fi.jakojaannos.konna.view.KonnaGameModeRenderers;
 import fi.jakojaannos.riista.vulkan.assets.storage.VulkanAssetManager;
 import fi.jakojaannos.riista.vulkan.input.GLFWInputProvider;
