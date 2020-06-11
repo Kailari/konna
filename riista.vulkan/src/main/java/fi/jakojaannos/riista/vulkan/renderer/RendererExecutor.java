@@ -1,12 +1,8 @@
 package fi.jakojaannos.riista.vulkan.renderer;
 
-import fi.jakojaannos.riista.vulkan.application.PresentableState;
 import fi.jakojaannos.riista.assets.AssetManager;
-import fi.jakojaannos.riista.vulkan.util.RecreateCloseable;
 import fi.jakojaannos.riista.vulkan.CameraDescriptor;
-import fi.jakojaannos.riista.vulkan.renderer.debug.DebugRendererExecutor;
-import fi.jakojaannos.riista.vulkan.renderer.mesh.MeshRendererExecutor;
-import fi.jakojaannos.riista.vulkan.renderer.ui.UiRendererExecutor;
+import fi.jakojaannos.riista.vulkan.application.PresentableState;
 import fi.jakojaannos.riista.vulkan.internal.DepthTexture;
 import fi.jakojaannos.riista.vulkan.internal.RenderingBackend;
 import fi.jakojaannos.riista.vulkan.internal.command.CommandBuffer;
@@ -14,11 +10,18 @@ import fi.jakojaannos.riista.vulkan.internal.descriptor.DescriptorPool;
 import fi.jakojaannos.riista.vulkan.internal.descriptor.DescriptorSetLayout;
 import fi.jakojaannos.riista.vulkan.internal.descriptor.SwapchainImageDependentDescriptorPool;
 import fi.jakojaannos.riista.vulkan.internal.device.DeviceContext;
+import fi.jakojaannos.riista.vulkan.internal.types.VkAccessFlagBits;
+import fi.jakojaannos.riista.vulkan.internal.types.VkDescriptorPoolCreateFlags;
+import fi.jakojaannos.riista.vulkan.internal.types.VkPipelineStageFlagBits;
+import fi.jakojaannos.riista.vulkan.internal.window.Window;
+import fi.jakojaannos.riista.vulkan.renderer.debug.DebugRendererExecutor;
+import fi.jakojaannos.riista.vulkan.renderer.mesh.MeshRendererExecutor;
+import fi.jakojaannos.riista.vulkan.renderer.ui.UiRendererExecutor;
 import fi.jakojaannos.riista.vulkan.rendering.Framebuffers;
+import fi.jakojaannos.riista.vulkan.rendering.PresentColorAttachment;
 import fi.jakojaannos.riista.vulkan.rendering.RenderPass;
 import fi.jakojaannos.riista.vulkan.rendering.Swapchain;
-import fi.jakojaannos.riista.vulkan.internal.types.VkDescriptorPoolCreateFlags;
-import fi.jakojaannos.riista.vulkan.internal.window.Window;
+import fi.jakojaannos.riista.vulkan.util.RecreateCloseable;
 import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
 
 import static fi.jakojaannos.riista.utilities.BitMask.bitMask;
@@ -54,7 +57,49 @@ public class RendererExecutor extends RecreateCloseable {
 
         this.depthTexture = new DepthTexture(this.deviceContext, this.swapchain);
 
-        this.renderPass = new RenderPass(this.deviceContext, this.swapchain);
+        final var colorAttachment = new PresentColorAttachment(this.swapchain);
+        final var mainRenderPass = RenderSubpass.builder()
+                                                .colorAttachments(colorAttachment)
+                                                .withDepthAttachment()
+                                                .build();
+        final var uiRenderPass = RenderSubpass.builder()
+                                              .colorAttachments(colorAttachment)
+                                              .build();
+        this.renderPass = RenderPass.builder(backend)
+                                    .colorAttachment(0, colorAttachment)
+                                    .withDepthAttachment(1)
+                                    .subpass(mainRenderPass)
+                                    .subpass(uiRenderPass)
+                                    // Makes sure we do not try to start writing until any previous frames have finished
+                                    // rendering to the attachment. The "external pass" here effectively means "any
+                                    // previously submitted commands"
+                                    .subpassDependency(VK_SUBPASS_EXTERNAL,
+                                                       mainRenderPass,
+                                                       bitMask(VkPipelineStageFlagBits.COLOR_ATTACHMENT_OUTPUT_BIT),
+                                                       bitMask(),
+                                                       bitMask(VkPipelineStageFlagBits.COLOR_ATTACHMENT_OUTPUT_BIT),
+                                                       bitMask(VkAccessFlagBits.COLOR_ATTACHMENT_WRITE_BIT))
+                                    // Make UI pass depend on main. What we would like to achieve is to get UI always
+                                    // render on top of the main render pass.
+                                    //
+                                    // Naive approach would be to prevent the UI from starting the rendering until
+                                    // the main pass has finished, but that is very inefficient.
+                                    //
+                                    // Instead, we can run UI rendering in parallel with the main pass and only prevent
+                                    // the UI pass from writing to the color attachment until the main pass finishes.
+                                    // This way, everything but writing to the color attachment can be prepared while
+                                    // waiting for the main pass to finish and when the main pass finishes, we just
+                                    // output the color data on-screen.
+                                    //
+                                    // This works because the only shared GPU resource between the two is the color
+                                    // attachment.
+                                    .subpassDependency(mainRenderPass,
+                                                       uiRenderPass,
+                                                       bitMask(VkPipelineStageFlagBits.COLOR_ATTACHMENT_OUTPUT_BIT),
+                                                       bitMask(),
+                                                       bitMask(VkPipelineStageFlagBits.COLOR_ATTACHMENT_OUTPUT_BIT),
+                                                       bitMask(VkAccessFlagBits.COLOR_ATTACHMENT_WRITE_BIT))
+                                    .build();
         this.framebuffers = new Framebuffers(this.deviceContext,
                                              this.swapchain,
                                              this.depthTexture,
@@ -76,15 +121,18 @@ public class RendererExecutor extends RecreateCloseable {
 
         this.debugRenderer = new DebugRendererExecutor(backend,
                                                        this.renderPass,
+                                                       mainRenderPass,
                                                        assetManager,
                                                        this.cameraDescriptorLayout);
         this.meshRenderer = new MeshRendererExecutor(backend,
                                                      this.renderPass,
+                                                     mainRenderPass,
                                                      assetManager,
                                                      this.cameraDescriptorLayout);
         this.uiRenderer = new UiRendererExecutor(backend,
                                                  window,
                                                  this.renderPass,
+                                                 uiRenderPass,
                                                  assetManager);
 
         tryRecreate();
@@ -113,6 +161,8 @@ public class RendererExecutor extends RecreateCloseable {
         ) {
             this.debugRenderer.flush(presentableState, this.cameraDescriptor, commandBuffer, imageIndex);
             this.meshRenderer.flush(presentableState, this.cameraDescriptor, commandBuffer, imageIndex);
+
+            vkCmdNextSubpass(commandBuffer.getHandle(), VK_SUBPASS_CONTENTS_INLINE);
             this.uiRenderer.flush(presentableState, commandBuffer, imageIndex);
         }
     }

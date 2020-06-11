@@ -28,7 +28,7 @@ public class UiRendererRecorder implements UiRenderer {
     @Override
     public List<UIEvent> draw(final UiElement element) {
         final var events = new ArrayList<UIEvent>();
-        draw(events, element, 0, -1, -1, 2, 2);
+        draw(events, element, 1, -1, -1, 2, 2);
 
         return events;
     }

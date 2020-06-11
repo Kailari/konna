@@ -7,10 +7,17 @@ import org.lwjgl.vulkan.VkExtent2D;
 
 import java.nio.IntBuffer;
 
-import fi.jakojaannos.riista.vulkan.util.RecreateCloseable;
+import fi.jakojaannos.riista.assets.AssetManager;
+import fi.jakojaannos.riista.view.assets.Font;
+import fi.jakojaannos.riista.view.assets.FontTexture;
+import fi.jakojaannos.riista.view.assets.Texture;
+import fi.jakojaannos.riista.view.ui.Alignment;
+import fi.jakojaannos.riista.view.ui.Colors;
+import fi.jakojaannos.riista.vulkan.application.PresentableState;
+import fi.jakojaannos.riista.vulkan.assets.mesh.MeshImpl;
+import fi.jakojaannos.riista.vulkan.assets.ui.FontImpl;
 import fi.jakojaannos.riista.vulkan.internal.RenderingBackend;
 import fi.jakojaannos.riista.vulkan.internal.TextureSampler;
-import fi.jakojaannos.riista.vulkan.application.PresentableState;
 import fi.jakojaannos.riista.vulkan.internal.command.CommandBuffer;
 import fi.jakojaannos.riista.vulkan.internal.descriptor.DescriptorPool;
 import fi.jakojaannos.riista.vulkan.internal.descriptor.DescriptorSetLayout;
@@ -19,16 +26,10 @@ import fi.jakojaannos.riista.vulkan.internal.types.VkDescriptorPoolCreateFlags;
 import fi.jakojaannos.riista.vulkan.internal.types.VkFilter;
 import fi.jakojaannos.riista.vulkan.internal.types.VkPrimitiveTopology;
 import fi.jakojaannos.riista.vulkan.internal.window.Window;
-import fi.jakojaannos.riista.assets.AssetManager;
-import fi.jakojaannos.riista.view.assets.Font;
-import fi.jakojaannos.riista.view.assets.FontTexture;
-import fi.jakojaannos.riista.view.assets.Texture;
-import fi.jakojaannos.riista.view.ui.Alignment;
-import fi.jakojaannos.riista.view.ui.Colors;
-import fi.jakojaannos.riista.vulkan.assets.mesh.MeshImpl;
-import fi.jakojaannos.riista.vulkan.assets.ui.FontImpl;
+import fi.jakojaannos.riista.vulkan.renderer.RenderSubpass;
 import fi.jakojaannos.riista.vulkan.rendering.GraphicsPipeline;
 import fi.jakojaannos.riista.vulkan.rendering.RenderPass;
+import fi.jakojaannos.riista.vulkan.util.RecreateCloseable;
 
 import static fi.jakojaannos.riista.utilities.BitMask.bitMask;
 import static org.lwjgl.stb.STBTruetype.stbtt_GetCodepointKernAdvance;
@@ -60,6 +61,7 @@ public class UiRendererExecutor extends RecreateCloseable {
             final RenderingBackend backend,
             final Window window,
             final RenderPass renderPass,
+            final RenderSubpass uiSubpass,
             final AssetManager assetManager
     ) {
         this.swapchainExtent = backend.swapchain().getExtent();
@@ -98,6 +100,7 @@ public class UiRendererExecutor extends RecreateCloseable {
         this.quadPipeline = new GraphicsPipeline<>(backend.deviceContext(),
                                                    backend.swapchain(),
                                                    renderPass,
+                                                   uiSubpass,
                                                    assetManager,
                                                    "shaders/vulkan/ui/quad.vert",
                                                    "shaders/vulkan/ui/quad.frag",
@@ -130,6 +133,7 @@ public class UiRendererExecutor extends RecreateCloseable {
         this.textPipeline = new GraphicsPipeline<>(backend.deviceContext(),
                                                    backend.swapchain(),
                                                    renderPass,
+                                                   uiSubpass,
                                                    assetManager,
                                                    "shaders/vulkan/ui/text.vert",
                                                    "shaders/vulkan/ui/text.frag",

@@ -3,6 +3,7 @@ package fi.jakojaannos.riista.vulkan.renderer.debug;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
+import fi.jakojaannos.riista.vulkan.renderer.RenderSubpass;
 import fi.jakojaannos.riista.vulkan.util.RecreateCloseable;
 import fi.jakojaannos.riista.vulkan.internal.RenderingBackend;
 import fi.jakojaannos.riista.vulkan.application.PresentableState;
@@ -26,6 +27,7 @@ public class DebugRendererExecutor extends RecreateCloseable {
     public DebugRendererExecutor(
             final RenderingBackend backend,
             final RenderPass renderPass,
+            final RenderSubpass mainSubpass,
             final AssetManager assetManager,
             final DescriptorSetLayout cameraDescriptorLayout
     ) {
@@ -63,6 +65,7 @@ public class DebugRendererExecutor extends RecreateCloseable {
         this.linePipeline = new GraphicsPipeline<>(backend.deviceContext(),
                                                    backend.swapchain(),
                                                    renderPass,
+                                                   mainSubpass,
                                                    assetManager,
                                                    "shaders/vulkan/debug/line.vert",
                                                    "shaders/vulkan/debug/line.frag",

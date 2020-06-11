@@ -7,11 +7,12 @@ import java.util.Arrays;
 
 import fi.jakojaannos.riista.assets.AssetManager;
 import fi.jakojaannos.riista.vulkan.assets.internal.Shader;
-import fi.jakojaannos.riista.vulkan.util.RecreateCloseable;
 import fi.jakojaannos.riista.vulkan.internal.VertexFormat;
 import fi.jakojaannos.riista.vulkan.internal.descriptor.DescriptorSetLayout;
 import fi.jakojaannos.riista.vulkan.internal.device.DeviceContext;
 import fi.jakojaannos.riista.vulkan.internal.types.VkPrimitiveTopology;
+import fi.jakojaannos.riista.vulkan.renderer.RenderSubpass;
+import fi.jakojaannos.riista.vulkan.util.RecreateCloseable;
 
 import static fi.jakojaannos.riista.vulkan.util.VkUtil.ensureSuccess;
 import static fi.jakojaannos.riista.vulkan.util.VkUtil.translateVulkanResult;
@@ -24,6 +25,7 @@ public class GraphicsPipeline<TVertex> extends RecreateCloseable {
     private final DeviceContext deviceContext;
     private final Swapchain swapchain;
     private final RenderPass renderPass;
+    private final RenderSubpass subpass;
 
     private final VkPrimitiveTopology topology;
 
@@ -52,6 +54,7 @@ public class GraphicsPipeline<TVertex> extends RecreateCloseable {
             final DeviceContext deviceContext,
             final Swapchain swapchain,
             final RenderPass renderPass,
+            final RenderSubpass subpass,
             final AssetManager assetManager,
             final String vertexShaderAsset,
             final String fragmentShaderAsset,
@@ -62,6 +65,7 @@ public class GraphicsPipeline<TVertex> extends RecreateCloseable {
         this.deviceContext = deviceContext;
         this.swapchain = swapchain;
         this.renderPass = renderPass;
+        this.subpass = subpass;
 
         this.topology = topology;
         this.vertexFormat = vertexFormat;
@@ -93,7 +97,7 @@ public class GraphicsPipeline<TVertex> extends RecreateCloseable {
             final var viewportState = createViewportState(this.swapchain.getExtent());
             final var rasterizer = createRasterizer();
             final var multisampling = createMultisamplingStateInfo();
-            final var depthStencil = createDepthStencilState();
+            final var depthStencil = this.renderPass.hasDepthAttachment() ? createDepthStencilState() : null;
             final var colorBlendAttachments = createColorBlendAttachment();
             //final var dynamicState = createDynamicState();
 
@@ -112,7 +116,7 @@ public class GraphicsPipeline<TVertex> extends RecreateCloseable {
                     .pColorBlendState(colorBlendAttachments)
                     .layout(this.pipelineLayout)
                     .renderPass(this.renderPass.getHandle())
-                    .subpass(0);
+                    .subpass(this.renderPass.indexOf(this.subpass));
 
             final var pPipeline = stack.mallocLong(1);
             final var result = vkCreateGraphicsPipelines(this.deviceContext.getDevice(),
@@ -126,17 +130,6 @@ public class GraphicsPipeline<TVertex> extends RecreateCloseable {
             }
             this.handle = pPipeline.get(0);
         }
-    }
-
-    private VkPipelineDepthStencilStateCreateInfo createDepthStencilState() {
-        return VkPipelineDepthStencilStateCreateInfo
-                .callocStack()
-                .sType(VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO)
-                .depthTestEnable(true)
-                .depthWriteEnable(true)
-                .depthCompareOp(VK_COMPARE_OP_LESS)
-                .depthBoundsTestEnable(false)
-                .stencilTestEnable(false);
     }
 
     private long createPipelineLayout() {
@@ -164,6 +157,17 @@ public class GraphicsPipeline<TVertex> extends RecreateCloseable {
                           "Creating pipeline layout failed");
             return pLayout.get(0);
         }
+    }
+
+    private VkPipelineDepthStencilStateCreateInfo createDepthStencilState() {
+        return VkPipelineDepthStencilStateCreateInfo
+                .callocStack()
+                .sType(VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO)
+                .depthTestEnable(true)
+                .depthWriteEnable(true)
+                .depthCompareOp(VK_COMPARE_OP_LESS)
+                .depthBoundsTestEnable(false)
+                .stencilTestEnable(false);
     }
 
     private VkPipelineColorBlendStateCreateInfo createColorBlendAttachment() {

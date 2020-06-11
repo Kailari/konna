@@ -1,5 +1,6 @@
 package fi.jakojaannos.riista.vulkan.renderer.mesh;
 
+import fi.jakojaannos.riista.vulkan.renderer.RenderSubpass;
 import fi.jakojaannos.riista.vulkan.util.RecreateCloseable;
 import fi.jakojaannos.riista.vulkan.internal.RenderingBackend;
 import fi.jakojaannos.riista.vulkan.internal.TextureSampler;
@@ -58,6 +59,7 @@ public class MeshRendererExecutor extends RecreateCloseable {
     public MeshRendererExecutor(
             final RenderingBackend backend,
             final RenderPass renderPass,
+            final RenderSubpass mainSubpass,
             final AssetManager assetManager,
             final DescriptorSetLayout cameraDescriptorLayout
     ) {
@@ -105,6 +107,7 @@ public class MeshRendererExecutor extends RecreateCloseable {
         this.skeletalPipeline = new GraphicsPipeline<>(backend.deviceContext(),
                                                        backend.swapchain(),
                                                        renderPass,
+                                                       mainSubpass,
                                                        assetManager,
                                                        "shaders/vulkan/skeletalMesh.vert",
                                                        "shaders/vulkan/shader.frag",

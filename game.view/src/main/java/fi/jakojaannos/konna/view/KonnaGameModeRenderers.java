@@ -35,10 +35,11 @@ public class KonnaGameModeRenderers {
                    .withSystem(new PlayerCharacterRenderAdapter(assetManager))
                    .buildGroup();
             builder.group("ui")
-                   //.withAdapter(new CharacterHealthbarRenderAdapter(timeManager.convertToTicks(5.0)))
+                   //.withSystem(new CharacterHealthbarRenderAdapter(timeManager.convertToTicks(5.0)))
                    .withSystem(new SessionStatsHudRenderAdapter(assetManager))
                    .withSystem(new GameOverSplashHudRenderAdapter(assetManager))
                    .withSystem(new HordeMessageHudRenderAdapter(assetManager, timeManager.convertToTicks(4.0)))
+                   .withSystem(new WeaponHudRenderAdapter(assetManager))
                    .buildGroup();
             builder.group("audio")
                    .withSystem(new BackgroundMusicAdapter(assetManager.getRootPath(), audioContext))
