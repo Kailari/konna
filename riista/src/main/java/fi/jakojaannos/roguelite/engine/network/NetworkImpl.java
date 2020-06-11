@@ -3,7 +3,7 @@ package fi.jakojaannos.roguelite.engine.network;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
-import fi.jakojaannos.roguelite.engine.data.resources.Network;
+import fi.jakojaannos.riista.data.resources.Network;
 
 public class NetworkImpl implements Network {
     @Nullable

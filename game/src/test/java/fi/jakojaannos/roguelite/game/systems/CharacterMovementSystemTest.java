@@ -4,7 +4,7 @@ import org.joml.Vector2d;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.riista.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.game.data.components.character.MovementInput;

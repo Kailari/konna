@@ -10,7 +10,7 @@ module riista {
 
     requires transitive java.desktop;
 
-    opens fi.jakojaannos.roguelite.engine.data.resources to riista.ecs;
+    opens fi.jakojaannos.riista.data.resources to riista.ecs;
 
     exports fi.jakojaannos.riista.assets;
     exports fi.jakojaannos.riista.application;
@@ -18,12 +18,12 @@ module riista {
     exports fi.jakojaannos.roguelite.engine;
     exports fi.jakojaannos.roguelite.engine.event;
     exports fi.jakojaannos.roguelite.engine.ui;
-    exports fi.jakojaannos.roguelite.engine.data.resources;
+    exports fi.jakojaannos.riista.data.resources;
     exports fi.jakojaannos.roguelite.engine.state;
     exports fi.jakojaannos.roguelite.engine.tilemap;
     exports fi.jakojaannos.roguelite.engine.input;
     exports fi.jakojaannos.roguelite.engine.content;
-    exports fi.jakojaannos.roguelite.engine.data.components;
+    exports fi.jakojaannos.riista.data.components;
     exports fi.jakojaannos.roguelite.engine.network;
     exports fi.jakojaannos.roguelite.engine.network.client;
     exports fi.jakojaannos.roguelite.engine.network.message;

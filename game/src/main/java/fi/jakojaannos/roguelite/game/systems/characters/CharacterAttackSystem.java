@@ -2,17 +2,17 @@ package fi.jakojaannos.roguelite.game.systems.characters;
 
 import java.util.stream.Stream;
 
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.riista.data.components.Transform;
+import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.ecs.data.resources.Entities;
-import fi.jakojaannos.roguelite.engine.event.RenderEvents;
-import fi.jakojaannos.riista.utilities.TimeManager;
+import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.WeaponInput;
+import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponInventory;
 import fi.jakojaannos.roguelite.game.weapons.ActionInfo;
 import fi.jakojaannos.roguelite.game.weapons.InventoryWeapon;
-import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponInventory;
 
 public class CharacterAttackSystem implements EcsSystem<CharacterAttackSystem.Resources, CharacterAttackSystem.EntityData, EcsSystem.NoEvents> {
     @Override
@@ -33,7 +33,7 @@ public class CharacterAttackSystem implements EcsSystem<CharacterAttackSystem.Re
                                                   resources.entities,
                                                   shooterPos,
                                                   attackAbility,
-                                                  resources.events);
+                                                  resources.events.system());
 
             if (attackAbility.equippedSlot != attackAbility.previousEquippedSlot) {
                 inventory.slots[attackAbility.previousEquippedSlot].unequip(actionInfo);
@@ -65,5 +65,9 @@ public class CharacterAttackSystem implements EcsSystem<CharacterAttackSystem.Re
             WeaponInventory inventory
     ) {}
 
-    public static record Resources(TimeManager timeManager, Entities entities, RenderEvents events) {}
+    public static record Resources(
+            TimeManager timeManager,
+            Entities entities,
+            Events events
+    ) {}
 }

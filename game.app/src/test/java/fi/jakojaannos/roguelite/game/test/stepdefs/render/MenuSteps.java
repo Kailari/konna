@@ -4,7 +4,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
-import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
+import fi.jakojaannos.riista.data.resources.Mouse;
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
 import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;
 import fi.jakojaannos.roguelite.game.gamemode.MainMenuGameMode;

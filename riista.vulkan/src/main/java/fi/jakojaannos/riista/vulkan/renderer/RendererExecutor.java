@@ -22,7 +22,7 @@ import fi.jakojaannos.riista.vulkan.rendering.PresentColorAttachment;
 import fi.jakojaannos.riista.vulkan.rendering.RenderPass;
 import fi.jakojaannos.riista.vulkan.rendering.Swapchain;
 import fi.jakojaannos.riista.vulkan.util.RecreateCloseable;
-import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
+import fi.jakojaannos.riista.data.resources.CameraProperties;
 
 import static fi.jakojaannos.riista.utilities.BitMask.bitMask;
 import static org.lwjgl.system.MemoryStack.stackPush;

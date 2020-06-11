@@ -3,7 +3,7 @@ package fi.jakojaannos.roguelite.game.systems;
 
 import org.junit.jupiter.api.Test;
 
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.riista.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.data.resources.Entities;
 import fi.jakojaannos.riista.utilities.TimeManager;

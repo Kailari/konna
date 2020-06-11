@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.engine.data.components;
+package fi.jakojaannos.riista.data.components;
 
 import org.joml.Vector2d;
 

@@ -9,7 +9,7 @@ import org.joml.Vector2i;
 import java.util.Collections;
 import java.util.stream.Collectors;
 
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.riista.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
 import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;

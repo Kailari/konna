@@ -4,18 +4,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
+import fi.jakojaannos.riista.data.resources.Network;
 import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.GameMode;
 import fi.jakojaannos.roguelite.engine.GameState;
 import fi.jakojaannos.roguelite.engine.MainThread;
 import fi.jakojaannos.roguelite.engine.MainThreadTask;
-import fi.jakojaannos.roguelite.engine.data.resources.Network;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.event.EventBus;
 import fi.jakojaannos.roguelite.engine.event.Events;
-import fi.jakojaannos.roguelite.engine.event.RenderEvents;
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.input.InputProvider;
 import fi.jakojaannos.roguelite.engine.network.NetworkImpl;
@@ -23,8 +21,7 @@ import fi.jakojaannos.roguelite.engine.state.StateEvent;
 
 public class GameTicker implements MainThread {
     private static final Logger LOG = LoggerFactory.getLogger(GameTicker.class);
-    @Deprecated
-    protected final RenderEvents renderEvents;
+
     private final TimeManager timeManager;
     private final InputProvider inputProvider;
     private final EventBus<InputEvent> inputBus;
@@ -50,11 +47,6 @@ public class GameTicker implements MainThread {
         return Collections.unmodifiableList(this.systemEvents);
     }
 
-    @Deprecated
-    public RenderEvents pollLegacyRenderEvents() {
-        return this.renderEvents;
-    }
-
     public GameTicker(
             final TimeManager timeManager,
             final InputProvider inputProvider,
@@ -70,7 +62,6 @@ public class GameTicker implements MainThread {
                                  this.inputBus,
                                  this.stateEvents::add,
                                  this.systemEvents::add);
-        this.renderEvents = new RenderEvents(new ConcurrentLinkedQueue<>());
 
         this.network = new NetworkImpl();
 
@@ -82,7 +73,6 @@ public class GameTicker implements MainThread {
 
         final var world = World.createNew();
         world.registerResource(Events.class, this.events);
-        world.registerResource(RenderEvents.class, this.renderEvents);
         world.registerResource(TimeManager.class, this.timeManager);
         world.registerResource(MainThread.class, this);
         world.registerResource(Network.class, this.network);

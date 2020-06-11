@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 import fi.jakojaannos.roguelite.engine.MainThread;
-import fi.jakojaannos.roguelite.engine.data.resources.Network;
+import fi.jakojaannos.riista.data.resources.Network;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;

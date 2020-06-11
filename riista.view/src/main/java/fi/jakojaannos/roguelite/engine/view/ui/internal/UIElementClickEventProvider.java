@@ -2,7 +2,7 @@ package fi.jakojaannos.roguelite.engine.view.ui.internal;
 
 import java.util.stream.Stream;
 
-import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
+import fi.jakojaannos.riista.data.resources.Mouse;
 import fi.jakojaannos.roguelite.engine.ui.UIEvent;
 import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.view.ui.UIElement;

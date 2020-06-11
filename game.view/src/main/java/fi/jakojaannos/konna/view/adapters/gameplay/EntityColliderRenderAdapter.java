@@ -5,7 +5,7 @@ import org.joml.Vector2f;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.riista.view.Renderer;
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.riista.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.ecs.annotation.Without;

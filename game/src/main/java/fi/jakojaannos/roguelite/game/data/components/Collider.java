@@ -2,7 +2,7 @@ package fi.jakojaannos.roguelite.game.data.components;
 
 import org.joml.Vector2d;
 
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.riista.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.utilities.math.RotatedRectangle;
 import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 

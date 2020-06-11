@@ -4,7 +4,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.When;
 import org.joml.Vector2d;
 
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.riista.data.components.Transform;
 import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;
 
 import static fi.jakojaannos.roguelite.game.test.global.GlobalGameState.*;

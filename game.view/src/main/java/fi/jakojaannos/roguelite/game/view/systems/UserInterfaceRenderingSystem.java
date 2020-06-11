@@ -4,7 +4,7 @@ import java.nio.file.Path;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.roguelite.engine.content.AssetRegistry;
-import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
+import fi.jakojaannos.riista.data.resources.Mouse;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;

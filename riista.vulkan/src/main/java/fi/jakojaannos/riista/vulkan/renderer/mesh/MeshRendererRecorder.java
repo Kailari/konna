@@ -7,7 +7,7 @@ import fi.jakojaannos.riista.view.assets.SkeletalMesh;
 import fi.jakojaannos.riista.view.MeshRenderer;
 import fi.jakojaannos.riista.view.Presentable;
 import fi.jakojaannos.riista.vulkan.assets.mesh.skeletal.SkeletalMeshImpl;
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.riista.data.components.Transform;
 
 public class MeshRendererRecorder implements MeshRenderer {
     private PresentableState state;

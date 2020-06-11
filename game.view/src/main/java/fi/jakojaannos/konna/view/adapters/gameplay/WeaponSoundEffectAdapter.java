@@ -3,14 +3,13 @@ package fi.jakojaannos.konna.view.adapters.gameplay;
 import java.nio.file.Path;
 import java.util.stream.Stream;
 
+import fi.jakojaannos.riista.view.assets.SoundEffect;
+import fi.jakojaannos.riista.view.audio.AudioContext;
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
-import fi.jakojaannos.roguelite.engine.event.RenderEvents;
-import fi.jakojaannos.riista.view.audio.AudioContext;
-import fi.jakojaannos.riista.view.assets.SoundEffect;
 import fi.jakojaannos.roguelite.game.data.events.render.GunshotEvent;
 
-public class WeaponSoundEffectAdapter implements EcsSystem<WeaponSoundEffectAdapter.Resources, EcsSystem.NoEntities, WeaponSoundEffectAdapter.EventData>, AutoCloseable {
+public class WeaponSoundEffectAdapter implements EcsSystem<EcsSystem.NoResources, EcsSystem.NoEntities, WeaponSoundEffectAdapter.EventData>, AutoCloseable {
     private final SoundEffect shotgun;
     private final SoundEffect melee;
     private final SoundEffect gatling;
@@ -36,7 +35,7 @@ public class WeaponSoundEffectAdapter implements EcsSystem<WeaponSoundEffectAdap
 
     @Override
     public void tick(
-            final Resources resources,
+            final NoResources resources,
             final Stream<EntityDataHandle<NoEntities>> noEntities,
             final EventData eventData
     ) {
@@ -62,8 +61,6 @@ public class WeaponSoundEffectAdapter implements EcsSystem<WeaponSoundEffectAdap
         this.click.close();
         this.pump.close();
     }
-
-    public static record Resources(RenderEvents events) {}
 
     public static record EventData(Iterable<GunshotEvent>gunshot) {}
 }

@@ -2,11 +2,10 @@ package fi.jakojaannos.roguelite.game.systems;
 
 import java.util.stream.Stream;
 
+import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.event.Events;
-import fi.jakojaannos.roguelite.engine.event.RenderEvents;
-import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.EnemyTag;
 import fi.jakojaannos.roguelite.game.data.events.HordeEndEvent;
 import fi.jakojaannos.roguelite.game.data.events.HordeStartEvent;
@@ -79,7 +78,6 @@ public class HordeControllerSystem implements EcsSystem<HordeControllerSystem.Re
         ++resources.horde.hordeIndex;
 
         resources.events.system().fire(new HordeStartEvent());
-        resources.renderEvents.fire(new HordeStartEvent());
     }
 
     private static void stopHordeSpawns(final Resources resources, final long currentTime) {
@@ -87,7 +85,6 @@ public class HordeControllerSystem implements EcsSystem<HordeControllerSystem.Re
         resources.horde.changeTimestamp = currentTime;
 
         resources.events.system().fire(new HordeStopEvent());
-        resources.renderEvents.fire(new HordeStopEvent());
     }
 
     private static void endHorde(final Resources resources, final long currentTime) {
@@ -96,7 +93,6 @@ public class HordeControllerSystem implements EcsSystem<HordeControllerSystem.Re
         resources.horde.changeTimestamp = currentTime;
 
         resources.events.system().fire(new HordeEndEvent());
-        resources.renderEvents.fire(new HordeEndEvent());
     }
 
     public static record EntityData(
@@ -107,7 +103,6 @@ public class HordeControllerSystem implements EcsSystem<HordeControllerSystem.Re
             TimeManager timeManager,
             SessionStats sessionStats,
             Horde horde,
-            RenderEvents renderEvents,
             Events events
     ) {}
 }

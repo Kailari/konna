@@ -2,7 +2,7 @@ package fi.jakojaannos.riista.view;
 
 import org.joml.Vector2f;
 
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.riista.data.components.Transform;
 
 public interface DebugRenderer {
     void drawTransform(Transform transform);

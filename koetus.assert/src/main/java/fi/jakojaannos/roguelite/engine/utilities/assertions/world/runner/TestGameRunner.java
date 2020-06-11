@@ -8,6 +8,7 @@ import fi.jakojaannos.roguelite.engine.GameState;
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.input.InputProvider;
 
+// FIXME: Convert to GameTicker
 public class TestGameRunner extends GameRunner {
     private final ArrayDeque<InputEvent> inputEvents = new ArrayDeque<>();
     private GameState state;

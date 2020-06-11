@@ -19,8 +19,8 @@ import fi.jakojaannos.riista.view.Renderer;
 import fi.jakojaannos.riista.vulkan.renderer.RendererRecorder;
 import fi.jakojaannos.roguelite.engine.GameMode;
 import fi.jakojaannos.roguelite.engine.GameRunnerTimeManager;
-import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
-import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
+import fi.jakojaannos.riista.data.resources.CameraProperties;
+import fi.jakojaannos.riista.data.resources.Mouse;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.input.InputProvider;
 
@@ -139,13 +139,7 @@ public class SimulationThread implements AutoCloseable {
                 this.renderRecorder.setWriteState(presentableState);
 
                 final var systemEvents = this.ticker.getSystemEvents();
-                final var legacyRenderEvents = this.ticker.pollLegacyRenderEvents().events();
-                final var allEvents = new ArrayList<>(systemEvents.size() + legacyRenderEvents.size());
-                allEvents.addAll(systemEvents);
-                allEvents.addAll(legacyRenderEvents);
-                legacyRenderEvents.clear();
-
-                this.renderDispatcher.tick(currentState.world(), currentState.systems(), allEvents);
+                this.renderDispatcher.tick(currentState.world(), currentState.systems(), systemEvents);
             }
         } catch (final Throwable t) {
             LOG.error("Render adapter dispatcher encountered an error:", t);

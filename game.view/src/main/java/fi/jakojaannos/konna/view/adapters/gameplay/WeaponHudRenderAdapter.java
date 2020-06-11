@@ -3,14 +3,14 @@ package fi.jakojaannos.konna.view.adapters.gameplay;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.riista.assets.AssetManager;
+import fi.jakojaannos.riista.data.components.Transform;
 import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.riista.view.Renderer;
 import fi.jakojaannos.riista.view.ui.UiElement;
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.ecs.data.resources.Entities;
-import fi.jakojaannos.roguelite.engine.event.RenderEvents;
+import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.view.ui.Color;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponInventory;
@@ -46,13 +46,16 @@ public class WeaponHudRenderAdapter implements EcsSystem<WeaponHudRenderAdapter.
                                             resources.entities,
                                             playerPos,
                                             localPlayerAbilities,
-                                            resources.events);
+                                            resources.events.system());
             final var query = inventory.slots[localPlayerAbilities.equippedSlot]
                     .doStateQuery(info);
             final int ammo = query.currentAmmo;
             final int maxAmmo = query.maxAmmo;
             final var maxAmmoString = maxAmmo == 666 ? "REL" : String.format("%03d", maxAmmo);
             renderer.ui().setValue("AMMO[LOCAL_PLAYER]", String.format("%03d/%s", ammo, maxAmmoString));
+            // FIXME: allow further programmatic manipulation of the UI
+            //  - Requires some definition of "linked fields" for the UI
+            //  - Idea is to allow setting ANY field value using any "compatible" UI variable
             //this.ammoCounter.setProperty(UIProperty.COLOR, ammo == 0 ? COLOR_NEGATIVE : COLOR_POSITIVE);
 
             final double heat = query.heat;
@@ -72,6 +75,6 @@ public class WeaponHudRenderAdapter implements EcsSystem<WeaponHudRenderAdapter.
             TimeManager timeManager,
             Players players,
             Entities entities,
-            RenderEvents events
+            Events events
     ) {}
 }

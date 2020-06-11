@@ -7,7 +7,7 @@ import java.util.Queue;
 import fi.jakojaannos.roguelite.engine.GameMode;
 import fi.jakojaannos.roguelite.engine.GameRunner;
 import fi.jakojaannos.roguelite.engine.GameState;
-import fi.jakojaannos.roguelite.engine.data.resources.Network;
+import fi.jakojaannos.riista.data.resources.Network;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.input.InputProvider;

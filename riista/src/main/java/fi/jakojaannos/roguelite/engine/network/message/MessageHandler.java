@@ -3,7 +3,7 @@ package fi.jakojaannos.roguelite.engine.network.message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fi.jakojaannos.roguelite.engine.data.resources.Network;
+import fi.jakojaannos.riista.data.resources.Network;
 import fi.jakojaannos.roguelite.engine.network.ServerNetworkManager;
 import fi.jakojaannos.roguelite.engine.network.client.ClientNetworkManager;
 

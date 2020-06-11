@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.engine.data.resources;
+package fi.jakojaannos.riista.data.resources;
 
 import java.util.Optional;
 import javax.annotation.Nullable;

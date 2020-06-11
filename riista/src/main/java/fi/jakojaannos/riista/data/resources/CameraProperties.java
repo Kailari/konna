@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.engine.data.resources;
+package fi.jakojaannos.riista.data.resources;
 
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -8,7 +8,7 @@ import org.joml.Vector3f;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.riista.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 

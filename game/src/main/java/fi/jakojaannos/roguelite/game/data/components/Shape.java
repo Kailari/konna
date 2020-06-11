@@ -3,7 +3,7 @@ package fi.jakojaannos.roguelite.game.data.components;
 import org.joml.Rectangled;
 import org.joml.Vector2d;
 
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.riista.data.components.Transform;
 
 public interface Shape {
     Vector2d[] getVerticesInLocalSpace(

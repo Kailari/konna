@@ -1,11 +1,10 @@
 package fi.jakojaannos.roguelite.game.systems;
 
 import org.joml.Vector2d;
-import org.joml.Vector2dc;
 
 import java.util.stream.Stream;
 
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.riista.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;

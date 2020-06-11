@@ -3,7 +3,7 @@ package fi.jakojaannos.roguelite.engine.view;
 import org.joml.Vector2d;
 
 import fi.jakojaannos.roguelite.engine.GameState;
-import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
+import fi.jakojaannos.riista.data.resources.CameraProperties;
 
 // TODO: Move anything that can be abstracted from LWJGLCamera here
 //  (allows better testing matrices etc. producing correct coordinates)

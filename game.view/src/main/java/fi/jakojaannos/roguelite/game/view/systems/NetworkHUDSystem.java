@@ -2,7 +2,7 @@ package fi.jakojaannos.roguelite.game.view.systems;
 
 import java.util.stream.Stream;
 
-import fi.jakojaannos.roguelite.engine.data.resources.Network;
+import fi.jakojaannos.riista.data.resources.Network;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;

@@ -6,7 +6,7 @@ import org.joml.Vector3f;
 import fi.jakojaannos.riista.vulkan.application.PresentableState;
 import fi.jakojaannos.riista.view.DebugRenderer;
 import fi.jakojaannos.riista.view.Presentable;
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.riista.data.components.Transform;
 
 public class DebugRendererRecorder implements DebugRenderer {
     private PresentableState writeState;
