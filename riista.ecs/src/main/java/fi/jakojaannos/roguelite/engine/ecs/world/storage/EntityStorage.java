@@ -3,12 +3,17 @@ package fi.jakojaannos.roguelite.engine.ecs.world.storage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import fi.jakojaannos.roguelite.engine.ecs.ComponentFactory;
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
 import fi.jakojaannos.roguelite.engine.ecs.LogCategories;
@@ -30,7 +35,7 @@ public class EntityStorage {
     ) {
         // Filter by available components and flatten per-archetype streams to a single stream
         // FIXME: Figure out how to avoid having to take immutable copy for iteration
-        //  - custom list collection with support for spliterator might be the easisest solution
+        //  - custom list collection with support for spliterator might be the easiest solution
         final Stream<Archetype> baseStream;
         final var immutableArchetypes = List.copyOf(this.archetypes);
         if (parallel) {
@@ -171,19 +176,31 @@ public class EntityStorage {
 
     public EntityHandle createEntity(final Object... components) {
         final var id = this.idCounter.getAndIncrement();
-
         LOG.debug(LogCategories.ENTITY_LIFECYCLE, "Creating entity with id {}", id);
 
-        final var componentClasses = Arrays.stream(components)
+        // TODO: Change to EntityHandleImpl once legacy is finally booted
+        final var entity = new LegacyEntityHandleImpl(id, this);
+
+        // Some of the given components may actually be factories. Execute those factories and
+        // create an array with the factories replaced by their end product components
+        final var actualComponents = Stream.concat(Arrays.stream(components)
+                                                         .filter(Predicate.not(EntityStorage::isComponentFactory)),
+                                                   Arrays.stream(components)
+                                                         .filter(EntityStorage::isComponentFactory)
+                                                         .map(ComponentFactory.class::cast)
+                                                         .map(factory -> factory.construct(entity)))
+                                           .toArray();
+
+        // Figure out what the component classes are. These are used to validate that the given set of components is
+        // valid (e.g. no duplicate components) and re-used later to select the archetype for the entity
+        final var componentClasses = Arrays.stream(actualComponents)
                                            .map(Object::getClass)
                                            .distinct()
                                            .toArray(Class[]::new);
-        validateComponents(componentClasses, components);
+        validateComponents(componentClasses, actualComponents);
 
-        // TODO: Change to EntityHandleImpl
-        final var entity = new LegacyEntityHandleImpl(id, this);
         final var archetype = findOrCreateArchetype(componentClasses);
-        archetype.addEntity(entity, componentClasses, components);
+        archetype.addEntity(entity, componentClasses, actualComponents);
 
         return entity;
     }
@@ -210,5 +227,9 @@ public class EntityStorage {
         //      garbage, but as clearing is rare thing to happen, this should not have adverse
         //      effects on performance.
         this.archetypes.clear();
+    }
+
+    private static boolean isComponentFactory(final Object componentOrFactory) {
+        return ComponentFactory.class.isAssignableFrom(componentOrFactory.getClass());
     }
 }

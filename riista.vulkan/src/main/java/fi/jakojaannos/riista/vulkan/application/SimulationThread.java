@@ -4,7 +4,6 @@ import org.lwjgl.vulkan.VkExtent2D;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -13,6 +12,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
+import fi.jakojaannos.riista.application.GameTicker;
 import fi.jakojaannos.riista.assets.AssetManager;
 import fi.jakojaannos.riista.view.GameModeRenderers;
 import fi.jakojaannos.riista.view.Renderer;

@@ -11,7 +11,6 @@ import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.utilities.assertions.world.SimulationBuilder;
 import fi.jakojaannos.roguelite.engine.utilities.assertions.world.SimulationInspector;
 import fi.jakojaannos.roguelite.engine.utilities.assertions.world.runner.SimulationRunnerImpl;
-import fi.jakojaannos.roguelite.engine.utilities.assertions.world.runner.TestGameRunner;
 
 public class SimulationBuilderImpl implements SimulationBuilder {
     private final SystemDispatcher.Builder dispatcherBuilder = SystemDispatcher.builder();
@@ -65,7 +64,7 @@ public class SimulationBuilderImpl implements SimulationBuilder {
                                           dispatcher,
                                           this.initialStateFactory,
                                           systemStateFactory);
-        return new SimulationRunnerImpl(new TestGameRunner(gameMode));
+        return new SimulationRunnerImpl(gameMode);
     }
 
     private SystemState buildSystemState(final SystemDispatcher dispatcher) {

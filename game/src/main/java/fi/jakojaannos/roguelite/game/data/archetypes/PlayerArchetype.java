@@ -1,9 +1,9 @@
 package fi.jakojaannos.roguelite.game.data.archetypes;
 
 import fi.jakojaannos.riista.data.components.Transform;
+import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
 import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.DamageSource;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
@@ -14,6 +14,8 @@ import fi.jakojaannos.roguelite.game.data.components.character.*;
 import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponInventory;
 import fi.jakojaannos.roguelite.game.data.resources.Weapons;
 import fi.jakojaannos.roguelite.game.weapons.InventoryWeapon;
+
+import static fi.jakojaannos.roguelite.engine.ecs.ComponentFactory.factory;
 
 public class PlayerArchetype {
     private static final boolean GRENADE_ENABLED = false;
@@ -36,7 +38,7 @@ public class PlayerArchetype {
             weaponInventory.slots[6] = new InventoryWeapon(Weapons.PLAYER_GRENADE_LAUNCHER);
         }
 
-        final var player = world.createEntity(
+        return world.createEntity(
                 new Transform(transform),
                 new Velocity(),
                 Physics.builder().friction(42.0 * 2).build(),
@@ -48,16 +50,11 @@ public class PlayerArchetype {
                 new WalkingMovementAbility(10.0f, 69.0f * 1.5),
                 weaponInventory,
                 new SpriteInfo("sprites/player"),
-                new Health(10));
-
-        final var attackAbility = new AttackAbility(new DamageSource.Entity(player),
+                new Health(10),
+                factory(entity -> new AttackAbility(new DamageSource.Entity(entity),
                                                     CollisionLayer.PLAYER_PROJECTILE,
                                                     0.25,
-                                                    -0.5);
-        attackAbility.equippedSlot = 1;
-        attackAbility.previousEquippedSlot = 1;
-        player.addComponent(attackAbility);
-
-        return player;
+                                                    -0.5,
+                                                    1)));
     }
 }

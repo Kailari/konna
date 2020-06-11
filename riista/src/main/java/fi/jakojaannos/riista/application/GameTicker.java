@@ -1,4 +1,4 @@
-package fi.jakojaannos.riista.vulkan.application;
+package fi.jakojaannos.riista.application;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +45,10 @@ public class GameTicker implements MainThread {
 
     public Collection<Object> getSystemEvents() {
         return Collections.unmodifiableList(this.systemEvents);
+    }
+
+    public TimeManager getTimeManager() {
+        return this.timeManager;
     }
 
     public GameTicker(
