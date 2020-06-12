@@ -114,7 +114,7 @@ class ApplyVelocitySystemTest {
                   .withState(world -> {
                       world.createEntity(new Transform(1.0, 0.0),
                                          new Collider(CollisionLayer.COLLIDE_ALL));
-                      velocity.set(1.0, 0.0);
+                      velocity.set(1.0, 0.01);
                   })
                   .runsForTicks(50)
                   .expect(state -> assertEquals(0.0, transform.position.x, 0.05));

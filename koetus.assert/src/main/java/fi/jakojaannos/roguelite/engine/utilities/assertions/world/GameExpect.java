@@ -1,8 +1,10 @@
 package fi.jakojaannos.roguelite.engine.utilities.assertions.world;
 
+import fi.jakojaannos.roguelite.engine.GameMode;
 import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
 import fi.jakojaannos.roguelite.engine.utilities.assertions.world.builder.SimulationBuilderImpl;
 import fi.jakojaannos.roguelite.engine.utilities.assertions.world.entity.EntityExpectImpl;
+import fi.jakojaannos.roguelite.engine.utilities.assertions.world.runner.SimulationRunnerImpl;
 
 /**
  * Utilities for creating test game simulators and performing assertions on Game/ECS worlds.
@@ -19,6 +21,15 @@ public final class GameExpect {
      */
     public static SimulationBuilder whenGame() {
         return new SimulationBuilderImpl();
+    }
+
+    /**
+     * Creates a new simulation inspector for the given pre-built game mode.
+     *
+     * @return the inspector
+     */
+    public static SimulationInspector whenGameWithGameMode(final GameMode gameMode) {
+        return new SimulationRunnerImpl(gameMode);
     }
 
     /**

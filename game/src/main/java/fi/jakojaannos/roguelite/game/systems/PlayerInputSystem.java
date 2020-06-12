@@ -47,8 +47,7 @@ public class PlayerInputSystem implements ECSSystem {
             final var attackInput = world.getEntityManager().getComponentOf(entity, WeaponInput.class).orElseThrow();
             final var attackAbility = world.getEntityManager().getComponentOf(entity, AttackAbility.class)
                                            .orElseThrow();
-            moveInput.move.set(inputHorizontal,
-                               inputVertical);
+            moveInput.move.set(inputHorizontal, inputVertical);
             attackInput.attack = inputAttack;
             attackAbility.targetPosition.set(cursorPosition);
 

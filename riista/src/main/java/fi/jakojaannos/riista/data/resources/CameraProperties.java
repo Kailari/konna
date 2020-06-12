@@ -5,10 +5,8 @@ import org.joml.Quaternionf;
 import org.joml.Vector2d;
 import org.joml.Vector3f;
 
-import java.util.Optional;
 import javax.annotation.Nullable;
 
-import fi.jakojaannos.riista.data.components.Transform;
 import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
 import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
 
@@ -25,10 +23,6 @@ public class CameraProperties {
     public double viewportWidthInWorldUnits = 1.0;
     @Deprecated
     public double viewportHeightInWorldUnits = 1.0;
-    @Deprecated
-    public double targetViewportSizeInWorldUnits = 24;
-    @Deprecated
-    public boolean targetViewportSizeRespectiveToMinorAxis = true;
     @Deprecated
     public EntityHandle cameraEntity;
 
@@ -73,6 +67,9 @@ public class CameraProperties {
         this.cameraEntity = cameraEntity;
     }
 
+    public CameraProperties() {
+    }
+
     private void updateView() {
         if (this.viewDirty) {
             this.viewMatrix.identity()
@@ -109,9 +106,6 @@ public class CameraProperties {
 
     @Deprecated
     private Vector2d cameraPositionOrZero() {
-        return Optional.ofNullable(this.cameraEntity)
-                       .flatMap(entity -> entity.getComponent(Transform.class)
-                                                .map(transform -> transform.position))
-                       .orElse(new Vector2d(0.0, 0.0));
+        return new Vector2d(this.position.x, this.position.y);
     }
 }

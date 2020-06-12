@@ -2,7 +2,6 @@ package fi.jakojaannos.roguelite.game.test.global;
 
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
-import org.lwjgl.opengl.GL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,16 +12,9 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.Random;
 
-import fi.jakojaannos.roguelite.engine.GameMode;
-import fi.jakojaannos.roguelite.engine.GameRunner;
-import fi.jakojaannos.roguelite.engine.GameState;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
+import fi.jakojaannos.roguelite.engine.utilities.assertions.world.SimulationInspector;
 import fi.jakojaannos.roguelite.engine.view.Window;
-
-import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.*;
 
 /**
  * Singleton game state to be used by step definitions. Note that this effectively prevents the E2E tests from running
@@ -31,76 +23,34 @@ import static org.lwjgl.opengl.GL11.*;
 public class GlobalState {
     private static final Logger LOG = LoggerFactory.getLogger(GlobalState.class);
 
-    public static GameRunner gameRunner;
-    public static GameMode mode;
-    public static GameState state;
-    public static Events events;
-    public static Queue<InputEvent> inputEvents;
+    public static SimulationInspector simulation;
+
     //public static RogueliteGameRenderer gameRenderer;
     public static Window window;
     public static TestTimeManager timeManager;
 
     public static Random random;
 
-    public static <T> Optional<T> getComponentOf(
-            Entity player,
-            Class<T> componentClass
-    ) {
-        return state.world()
-                    .getEntityManager()
-                    .getComponentOf(player, componentClass);
-    }
-
     public static void renderTick() {
-        if (window instanceof LWJGLWindow) {
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        }
-
-        gameRenderer.render(state, 0);
-
-        if (window instanceof LWJGLWindow) {
-            glfwSwapBuffers(((LWJGLWindow) window).getId());
-            glfwPollEvents();
-        }
+        // TODO: Figure out some way of doing presentable state copy here (use code from SimulationThread)
     }
 
-    public static void simulateTick() {
-        final var accumulator = new GameRunner.Accumulator();
-        accumulator.accumulate(timeManager.getTimeStep());
-        state = gameRunner.simulateFrame(state, accumulator, () -> inputEvents);
-        inputEvents.clear();
-    }
-
-    public static void simulateSeconds(double seconds) {
-        final var accumulator = new GameRunner.Accumulator();
-        final var ticks = timeManager.convertToTicks(seconds);
-        accumulator.accumulate(ticks * timeManager.getTimeStep());
-        state = gameRunner.simulateFrame(state, accumulator, () -> inputEvents);
-        inputEvents.clear();
-    }
 
     @Before
     public void before() {
         random = new Random(13376969);
 
         timeManager = new TestTimeManager(20L);
-        gameRunner = new GameRunner(timeManager) {
-            @Override
-            protected boolean shouldContinueLoop() {
-                return false;
-            }
 
-            @Override
-            protected void onStateChange(final GameState state) {
-            }
+        // TODO: Create render adapters for UI/render testing (?)
 
-            @Override
-            protected void onModeChange(final GameMode gameMode) {
-                gameRenderer.changeGameMode(gameMode);
-                mode = gameMode;
-            }
-        };
-        Path assetRoot = Paths.get("../assets");
+        final var shouldVisualizeTests = Optional.ofNullable(System.getenv("VISUALIZE_TESTS"))
+                                                 .map(Boolean::valueOf)
+                                                 .orElse(false);
+        if (shouldVisualizeTests) {
+            Path assetRoot = Paths.get("../assets");
+            // TODO: Launch renderer thread
+        }
         /*
         gameRenderer = Optional.ofNullable(System.getenv("VISUALIZE_TESTS"))
                                .map(Boolean::valueOf)
@@ -128,13 +78,14 @@ public class GlobalState {
                                                                           new TestAssetManager(assetRoot)));
 
          */
-        events = gameRunner.getEvents();
-        inputEvents = new ArrayDeque<>();
     }
 
     @After
     public void after() {
-        if (window instanceof LWJGLWindow) {
+        // TODO: cleanup
+        // TODO: shut down renderer if one is active (?)
+        //  - only shutdown after everything has finished? (can be done by moving the renderer to runner class and using JUnit annotations)
+        /*if (window instanceof LWJGLWindow) {
             renderTick();
             try {
                 Thread.sleep(500L);
@@ -150,6 +101,6 @@ public class GlobalState {
                 glfwTerminate();
             }
         } catch (Exception ignored) {
-        }
+        }*/
     }
 }

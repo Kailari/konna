@@ -1,18 +1,17 @@
 package fi.jakojaannos.roguelite.game.test.view;
 
-import org.joml.Vector2d;
-
 import fi.jakojaannos.roguelite.engine.view.Camera;
-import fi.jakojaannos.roguelite.engine.view.Viewport;
 
+@Deprecated
 public class TestCamera extends Camera {
-    public TestCamera(final Viewport viewport) {
-        super(new Vector2d(0), viewport);
+    @Override
+    public double getVisibleAreaWidth() {
+        return 24;
     }
 
     @Override
-    public void resize(final int width, final int height) {
-
+    public double getVisibleAreaHeight() {
+        return 20;
     }
 
     @Override
@@ -23,16 +22,6 @@ public class TestCamera extends Camera {
     @Override
     public void useScreenCoordinates() {
 
-    }
-
-    @Override
-    public double getVisibleAreaWidth() {
-        return 24;
-    }
-
-    @Override
-    public double getVisibleAreaHeight() {
-        return 20;
     }
 
     @Override

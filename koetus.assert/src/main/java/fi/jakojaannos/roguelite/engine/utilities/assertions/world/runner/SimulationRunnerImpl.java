@@ -14,12 +14,33 @@ import fi.jakojaannos.roguelite.engine.utilities.assertions.world.SimulationInsp
 public class SimulationRunnerImpl implements SimulationInspector {
     private final GameTicker ticker;
     private final Queue<InputEvent> inputQueue = new ArrayDeque<>();
+    private final GameRunnerTimeManager timeManager;
 
     private boolean terminateTriggered;
 
+    @Override
+    public boolean isTerminated() {
+        return this.terminateTriggered;
+    }
+
     public SimulationRunnerImpl(final GameMode gameMode) {
-        final var timeManager = new GameRunnerTimeManager(20L);
-        this.ticker = new GameTicker(timeManager, () -> this.inputQueue, gameMode);
+        this.timeManager = new GameRunnerTimeManager(20L);
+        this.ticker = new GameTicker(this.timeManager, () -> this.inputQueue, gameMode);
+    }
+
+    @Override
+    public GameState state() {
+        return this.ticker.getState();
+    }
+
+    @Override
+    public GameMode mode() {
+        return this.ticker.getMode();
+    }
+
+    @Override
+    public Queue<InputEvent> inputQueue() {
+        return this.inputQueue;
     }
 
     @Override
@@ -32,13 +53,13 @@ public class SimulationRunnerImpl implements SimulationInspector {
     public SimulationInspector runsForTicks(final long n) {
         this.ticker.getState().world().commitEntityModifications();
 
-        this.terminateTriggered = false;
         for (int i = 0; i < n; i++) {
-            this.ticker.simulateTick(() -> this.terminateTriggered = true);
-
             if (this.terminateTriggered) {
                 break;
             }
+
+            this.ticker.simulateTick(() -> this.terminateTriggered = true);
+            this.timeManager.nextTick();
         }
 
         return this;

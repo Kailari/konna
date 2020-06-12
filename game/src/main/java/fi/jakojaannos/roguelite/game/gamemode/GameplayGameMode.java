@@ -5,14 +5,14 @@ import org.joml.Vector3f;
 
 import java.util.Random;
 
-import fi.jakojaannos.roguelite.engine.GameMode;
 import fi.jakojaannos.riista.data.components.Transform;
 import fi.jakojaannos.riista.data.resources.CameraProperties;
 import fi.jakojaannos.riista.data.resources.Mouse;
+import fi.jakojaannos.riista.utilities.TimeManager;
+import fi.jakojaannos.roguelite.engine.GameMode;
 import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.ecs.World;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
-import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.archetypes.PlayerArchetype;
 import fi.jakojaannos.roguelite.game.data.archetypes.TurretArchetype;
@@ -54,8 +54,7 @@ public final class GameplayGameMode {
         world.registerResource(new Collisions());
         world.registerResource(new Weapons());
 
-        final var cameraProperties = new CameraProperties(world.createEntity(new Transform(),
-                                                                             new NoDrawTag()));
+        final var cameraProperties = new CameraProperties();
         cameraProperties.setPosition(new Vector3f(0.0f, 0.0f, 25.0f));
         // FIXME: why on earth does identity quaternion point downwards?
         cameraProperties.setRotation(new Quaternionf());

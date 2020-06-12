@@ -22,12 +22,11 @@ public class GrenadeFuseUpdateSystemTest {
     private Explosions explosions;
     private EntityHandle entity;
 
-    void beforeEach(final World world) {
+    void initialState(final World world) {
         explosions = new Explosions();
         world.registerResource(explosions);
 
-        TimeManager timeManager = new SimpleTimeManager(20);
-        world.registerResource(timeManager);
+        final var timeManager = world.fetchResource(TimeManager.class);
 
         entity = world.createEntity(
                 new Transform(location),
@@ -43,7 +42,7 @@ public class GrenadeFuseUpdateSystemTest {
     @Test
     void explosionEntryIsAddedAfterFuseTimeIsUp() {
         whenGame().withSystems(new GrenadeFuseUpdateSystem())
-                  .withState(this::beforeEach)
+                  .withState(this::initialState)
                   .runsForTicks(25)
                   .expect(state -> assertAll(
                           () -> assertEquals(1, explosions.getExplosions().size()),
@@ -56,7 +55,7 @@ public class GrenadeFuseUpdateSystemTest {
     @Test
     void explodingEntityIsRemovedAfterFuseTimeIsUp() {
         whenGame().withSystems(new GrenadeFuseUpdateSystem())
-                  .withState(this::beforeEach)
+                  .withState(this::initialState)
                   .runsForTicks(25)
                   .expect(state -> assertTrue(entity.isPendingRemoval()));
     }
@@ -64,7 +63,7 @@ public class GrenadeFuseUpdateSystemTest {
     @Test
     void explosionEntryIsNotAddedPrematurely() {
         whenGame().withSystems(new GrenadeFuseUpdateSystem())
-                  .withState(this::beforeEach)
+                  .withState(this::initialState)
                   .runsForTicks(15)
                   .expect(state -> assertTrue(explosions.getExplosions().isEmpty()));
     }
@@ -72,7 +71,7 @@ public class GrenadeFuseUpdateSystemTest {
     @Test
     void explodingEntityIsNotRemovedPrematurely() {
         whenGame().withSystems(new GrenadeFuseUpdateSystem())
-                  .withState(this::beforeEach)
+                  .withState(this::initialState)
                   .runsForTicks(15)
                   .expect(state -> assertFalse(entity.isPendingRemoval()));
     }

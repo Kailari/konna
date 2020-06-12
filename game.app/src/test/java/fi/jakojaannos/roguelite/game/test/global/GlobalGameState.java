@@ -13,9 +13,10 @@ public class GlobalGameState {
     public static Vector2d playerPositionBeforeRun;
 
     public static Optional<EntityHandle> getLocalPlayer() {
-        return GlobalState.state.world()
-                                .fetchResource(Players.class)
-                                .getLocalPlayer();
+        return GlobalState.simulation.state()
+                                     .world()
+                                     .fetchResource(Players.class)
+                                     .getLocalPlayer();
     }
 
     public static void updatePlayerPositionBeforeRun() {

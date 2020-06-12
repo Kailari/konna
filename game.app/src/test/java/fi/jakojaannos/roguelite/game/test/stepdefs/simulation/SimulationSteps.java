@@ -7,15 +7,14 @@ import org.joml.Vector2d;
 import fi.jakojaannos.riista.data.components.Transform;
 import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;
 
+import static fi.jakojaannos.roguelite.engine.utilities.assertions.world.GameExpect.whenGameWithGameMode;
 import static fi.jakojaannos.roguelite.game.test.global.GlobalGameState.*;
 import static fi.jakojaannos.roguelite.game.test.global.GlobalState.*;
 
 public class SimulationSteps {
     @Given("the game world just finished loading")
     public void the_game_world_just_finished_loading() {
-        mode = GameplayGameMode.create(6969, gameRunner.getTimeManager());
-        state = gameRunner.setActiveGameMode(mode);
-        gameRenderer.changeGameMode(mode);
+        simulation = whenGameWithGameMode(GameplayGameMode.create(6969, timeManager));
 
         playerInitialPosition = getLocalPlayer().flatMap(player -> player.getComponent(Transform.class))
                                                 .map(transform -> new Vector2d(transform.position))
@@ -31,32 +30,33 @@ public class SimulationSteps {
     @Given("the game has run for {double} seconds")
     public void the_game_has_run_for_seconds(double seconds) {
         updatePlayerPositionBeforeRun();
-        simulateSeconds(seconds);
+        simulation.runsForSeconds(seconds);
         renderTick();
     }
 
     @Given("the game has run for a single tick")
     public void the_game_has_run_for_tick() {
         updatePlayerPositionBeforeRun();
-        simulateTick();
+        simulation.runsSingleTick();
         renderTick();
     }
 
     @When("the game runs for a/1 second")
     public void the_game_runs_for_a_second() {
         updatePlayerPositionBeforeRun();
-        simulateSeconds(1);
+        simulation.runsForSeconds(1);
+        renderTick();
     }
 
     @When("the game runs for {double} seconds")
     public void the_game_runs_for_x_seconds(double seconds) {
         updatePlayerPositionBeforeRun();
-        simulateSeconds(seconds);
+        simulation.runsForSeconds(seconds);
     }
 
     @When("the game runs for a single tick")
     public void the_game_runs_for_a_single_tick() {
         updatePlayerPositionBeforeRun();
-        simulateTick();
+        simulation.runsSingleTick();
     }
 }

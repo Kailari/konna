@@ -21,6 +21,7 @@ import static fi.jakojaannos.roguelite.engine.utilities.assertions.ui.PositionMa
 import static fi.jakojaannos.roguelite.game.test.global.GlobalState.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/*
 public class HudSteps {
     public static final String GAME_OVER_CONTAINER_NAME = "game-over-container";
     private static final double HEALTHBAR_NEAR_THRESHOLD = 2.0; // World units
@@ -189,3 +190,4 @@ public class HudSteps {
                             ((position.y / (double) viewport.getHeightInPixels()) * camera.getVisibleAreaHeight()) - camera.getVisibleAreaHeight() / 2.0);
     }
 }
+ */
