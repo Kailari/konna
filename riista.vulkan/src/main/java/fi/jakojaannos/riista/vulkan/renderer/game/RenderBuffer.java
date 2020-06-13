@@ -1,4 +1,4 @@
-package fi.jakojaannos.riista.vulkan.renderer;
+package fi.jakojaannos.riista.vulkan.renderer.game;
 
 import java.util.Arrays;
 import java.util.Iterator;

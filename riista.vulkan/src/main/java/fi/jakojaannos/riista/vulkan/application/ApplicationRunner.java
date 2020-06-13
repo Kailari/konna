@@ -9,14 +9,14 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.Objects;
 
+import fi.jakojaannos.riista.application.SimulationThread;
 import fi.jakojaannos.riista.assets.AssetManager;
 import fi.jakojaannos.riista.utilities.TimeManager;
-import fi.jakojaannos.riista.view.GameModeRenderers;
+import fi.jakojaannos.riista.GameRenderAdapter;
 import fi.jakojaannos.riista.view.audio.AudioContext;
 import fi.jakojaannos.riista.vulkan.audio.LWJGLAudioContext;
 import fi.jakojaannos.riista.vulkan.internal.device.DeviceContext;
-import fi.jakojaannos.riista.vulkan.renderer.RendererExecutor;
-import fi.jakojaannos.riista.vulkan.renderer.RendererRecorder;
+import fi.jakojaannos.riista.vulkan.renderer.game.RendererExecutor;
 import fi.jakojaannos.roguelite.engine.GameMode;
 import fi.jakojaannos.roguelite.engine.GameRunnerTimeManager;
 import fi.jakojaannos.roguelite.engine.input.InputProvider;
@@ -40,7 +40,6 @@ public class ApplicationRunner implements AutoCloseable {
     private final long[] imagesInFlight;
 
     private final VulkanApplication application;
-    private final AssetManager assetManager;
 
     private final AudioContext audioContext;
     private final RendererExecutor renderer;
@@ -60,7 +59,6 @@ public class ApplicationRunner implements AutoCloseable {
 
     public ApplicationRunner(final VulkanApplication application, final AssetManager assetManager) {
         this.application = application;
-        this.assetManager = assetManager;
 
         // FIXME: Get more sensible source count from AL device props or sth.
         this.audioContext = new LWJGLAudioContext(16);
@@ -90,28 +88,26 @@ public class ApplicationRunner implements AutoCloseable {
     public void run(
             final InputProvider inputProvider,
             final GameMode initialGameMode,
-            final GameModeRenderers gameModeRenderers
+            final GameRenderAdapter<PresentableState> renderAdapter
     ) {
         final var startTime = System.currentTimeMillis();
 
         var frameCounter = 0;
-        try (final var simulationRunner = new SimulationThread(this.assetManager,
-                                                               initialGameMode,
+        try (final var simulationRunner = new SimulationThread(initialGameMode,
                                                                "riista-tick-thread",
                                                                inputProvider,
                                                                this.timeManager,
-                                                               new RendererRecorder(),
                                                                this.application.window()::setShouldClose,
-                                                               this.application.backend().swapchain()::getExtent,
                                                                this.renderer::updateCameraProperties,
-                                                               gameModeRenderers)
+                                                               renderAdapter)
         ) {
+            simulationRunner.startSimulation();
+
             this.application.window().show();
             this.frameIndex = -1;
 
             var timestamp = System.currentTimeMillis();
             final var deltaBuffer = new double[120];
-            var gameModeId = -1;
             while (this.application.window().isOpen()) {
                 final var currentTime = System.currentTimeMillis();
                 final var delta = (currentTime - timestamp) / 1000.0;
@@ -132,7 +128,7 @@ public class ApplicationRunner implements AutoCloseable {
                     continue;
                 }
 
-                final var state = simulationRunner.fetchPresentableState();
+                final var state = renderAdapter.fetchPresentableState();
 
                 final var deltaIndex = frameCounter % deltaBuffer.length;
                 deltaBuffer[deltaIndex] = delta;
@@ -143,10 +139,6 @@ public class ApplicationRunner implements AutoCloseable {
                               String.format("%.2f", deltaBuffer.length / Arrays.stream(deltaBuffer).sum()));
                 }
 
-                if (state.gameModeId() != gameModeId) {
-                    gameModeId = state.gameModeId();
-                    onGameModeChanged(gameModeId);
-                }
                 this.renderer.recordFrame(state, imageIndex);
                 this.renderer.submit(imageIndex,
                                      this.inFlightFences[this.frameIndex],
@@ -185,10 +177,6 @@ public class ApplicationRunner implements AutoCloseable {
         LOG.info("\tFrames:\t\t{}", frameCounter);
         LOG.info("\tAvg. TPF:\t{}", avgTimePerFrame);
         LOG.info("\tAvg. FPS:\t{}", avgFramesPerSecond);
-    }
-
-    private void onGameModeChanged(final int gameModeId) {
-
     }
 
     private int acquireNextImage() {

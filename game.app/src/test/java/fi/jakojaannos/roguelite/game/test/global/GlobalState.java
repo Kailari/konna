@@ -2,31 +2,22 @@ package fi.jakojaannos.roguelite.game.test.global;
 
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayDeque;
 import java.util.Optional;
-import java.util.Queue;
 import java.util.Random;
 
-import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.utilities.assertions.world.SimulationInspector;
-import fi.jakojaannos.roguelite.engine.view.Window;
 
 /**
  * Singleton game state to be used by step definitions. Note that this effectively prevents the E2E tests from running
  * from parallel in single test runner instance.
  */
 public class GlobalState {
-    private static final Logger LOG = LoggerFactory.getLogger(GlobalState.class);
-
     public static SimulationInspector simulation;
 
     //public static RogueliteGameRenderer gameRenderer;
-    public static Window window;
     public static TestTimeManager timeManager;
 
     public static Random random;

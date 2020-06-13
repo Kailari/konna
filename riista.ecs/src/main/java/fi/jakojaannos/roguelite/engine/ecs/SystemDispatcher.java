@@ -9,14 +9,9 @@ import fi.jakojaannos.roguelite.engine.ecs.dispatcher.SystemDispatcherBuilderImp
  * defined dependencies and constraints.
  */
 public interface SystemDispatcher extends AutoCloseable {
-    /**
-     * Creates a new dispatcher builder for creating a system dispatcher.
-     *
-     * @return the builder
-     */
-    static Builder builder() {
-        return new SystemDispatcherBuilderImpl();
-    }
+    Collection<Class<?>> getSystems();
+
+    Collection<SystemGroup> getGroups();
 
     /**
      * Sets the per-system parallelism on/off. Defaults to <code>true</code>. When enabled, the entity stream passed to
@@ -25,6 +20,15 @@ public interface SystemDispatcher extends AutoCloseable {
      * @param state whether or not to enable parallel entity stream
      */
     void setParallel(boolean state);
+
+    /**
+     * Creates a new dispatcher builder for creating a system dispatcher.
+     *
+     * @return the builder
+     */
+    static Builder builder() {
+        return new SystemDispatcherBuilderImpl();
+    }
 
     /**
      * Constructs a default state for this dispatcher. Generally this enables all systems by default and disables
@@ -49,14 +53,13 @@ public interface SystemDispatcher extends AutoCloseable {
      * Ticks the registered systems, with everything defined to be enabled by default enabled. Events are not
      * processed.
      *
-     * @param world world to manipulate
+     * @param world        world to manipulate
      * @param systemEvents
      */
     void tick(World world, final Collection<Object> systemEvents);
 
-    Collection<Class<?>> getSystems();
-
-    Collection<SystemGroup> getGroups();
+    @Override
+    void close();
 
     /**
      * System dispatcher builder, for registering systems and groups for the dispatcher.

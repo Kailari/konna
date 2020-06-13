@@ -10,8 +10,6 @@ import fi.jakojaannos.riista.vulkan.internal.RenderingBackend;
 import fi.jakojaannos.riista.vulkan.internal.command.CommandBuffer;
 import fi.jakojaannos.riista.vulkan.internal.types.VkAccessFlagBits;
 import fi.jakojaannos.riista.vulkan.internal.types.VkPipelineStageFlagBits;
-import fi.jakojaannos.riista.vulkan.renderer.DepthAttachment;
-import fi.jakojaannos.riista.vulkan.renderer.RenderSubpass;
 import fi.jakojaannos.riista.vulkan.util.RecreateCloseable;
 
 import static fi.jakojaannos.riista.vulkan.util.VkUtil.ensureSuccess;

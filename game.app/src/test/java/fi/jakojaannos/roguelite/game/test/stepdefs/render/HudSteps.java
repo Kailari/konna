@@ -1,28 +1,14 @@
 package fi.jakojaannos.roguelite.game.test.stepdefs.render;
 
-import io.cucumber.java.en.And;
-import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
-import org.joml.Vector2d;
-import org.joml.Vector2i;
 
-import java.util.Collections;
-import java.util.stream.Collectors;
+public class HudSteps {
+    @Then("the game over splash should be hidden.")
+    public void theGameOverSplashShouldBeHidden() {
 
-import fi.jakojaannos.riista.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
-import fi.jakojaannos.roguelite.engine.view.ui.UIElement;
-import fi.jakojaannos.roguelite.engine.view.ui.UIProperty;
-import fi.jakojaannos.roguelite.game.data.components.character.Health;
-
-import static fi.jakojaannos.roguelite.engine.utilities.assertions.ui.AssertUI.assertUI;
-import static fi.jakojaannos.roguelite.engine.utilities.assertions.ui.PositionMatcherBuilder.isHorizontallyIn;
-import static fi.jakojaannos.roguelite.engine.utilities.assertions.ui.PositionMatcherBuilder.isVerticallyIn;
-import static fi.jakojaannos.roguelite.game.test.global.GlobalState.*;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+    }
 
 /*
-public class HudSteps {
     public static final String GAME_OVER_CONTAINER_NAME = "game-over-container";
     private static final double HEALTHBAR_NEAR_THRESHOLD = 2.0; // World units
 
@@ -78,13 +64,6 @@ public class HudSteps {
                 .hasExactlyOneElement(that -> that.hasName().equalTo("time-played-timer")
                                                   .isLabel()
                                                   .hasText().equalTo(expected));
-    }
-
-    @Then("the game over splash should be hidden.")
-    public void theGameOverSplashShouldBeHidden() {
-        assertUI(gameRenderer.getCurrentUserInterface())
-                .hasExactlyOneElement(that -> that.hasName().equalTo(GAME_OVER_CONTAINER_NAME)
-                                                  .isHidden());
     }
 
     @Then("the game over splash should be visible")
@@ -189,5 +168,5 @@ public class HudSteps {
         return new Vector2d(((position.x / (double) viewport.getWidthInPixels()) * camera.getVisibleAreaWidth()) - camera.getVisibleAreaWidth() / 2.0,
                             ((position.y / (double) viewport.getHeightInPixels()) * camera.getVisibleAreaHeight()) - camera.getVisibleAreaHeight() / 2.0);
     }
+*/
 }
- */

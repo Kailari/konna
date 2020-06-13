@@ -1,4 +1,4 @@
-package fi.jakojaannos.riista.vulkan.renderer;
+package fi.jakojaannos.riista.vulkan.renderer.game;
 
 import fi.jakojaannos.riista.assets.AssetManager;
 import fi.jakojaannos.riista.vulkan.CameraDescriptor;
@@ -17,10 +17,7 @@ import fi.jakojaannos.riista.vulkan.internal.window.Window;
 import fi.jakojaannos.riista.vulkan.renderer.debug.DebugRendererExecutor;
 import fi.jakojaannos.riista.vulkan.renderer.mesh.MeshRendererExecutor;
 import fi.jakojaannos.riista.vulkan.renderer.ui.UiRendererExecutor;
-import fi.jakojaannos.riista.vulkan.rendering.Framebuffers;
-import fi.jakojaannos.riista.vulkan.rendering.PresentColorAttachment;
-import fi.jakojaannos.riista.vulkan.rendering.RenderPass;
-import fi.jakojaannos.riista.vulkan.rendering.Swapchain;
+import fi.jakojaannos.riista.vulkan.rendering.*;
 import fi.jakojaannos.riista.vulkan.util.RecreateCloseable;
 import fi.jakojaannos.riista.data.resources.CameraProperties;
 

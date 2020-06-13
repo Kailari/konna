@@ -1,8 +1,6 @@
-package fi.jakojaannos.riista.vulkan.renderer;
+package fi.jakojaannos.riista.vulkan.rendering;
 
 import javax.annotation.Nullable;
-
-import fi.jakojaannos.riista.vulkan.rendering.Attachment;
 
 public record RenderSubpass(
         Attachment[]colorAttachments,

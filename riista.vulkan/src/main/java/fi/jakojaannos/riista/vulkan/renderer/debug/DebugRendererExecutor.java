@@ -3,7 +3,7 @@ package fi.jakojaannos.riista.vulkan.renderer.debug;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-import fi.jakojaannos.riista.vulkan.renderer.RenderSubpass;
+import fi.jakojaannos.riista.vulkan.rendering.RenderSubpass;
 import fi.jakojaannos.riista.vulkan.util.RecreateCloseable;
 import fi.jakojaannos.riista.vulkan.internal.RenderingBackend;
 import fi.jakojaannos.riista.vulkan.application.PresentableState;

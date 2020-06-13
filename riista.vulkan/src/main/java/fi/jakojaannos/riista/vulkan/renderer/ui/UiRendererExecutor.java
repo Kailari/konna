@@ -26,7 +26,7 @@ import fi.jakojaannos.riista.vulkan.internal.types.VkDescriptorPoolCreateFlags;
 import fi.jakojaannos.riista.vulkan.internal.types.VkFilter;
 import fi.jakojaannos.riista.vulkan.internal.types.VkPrimitiveTopology;
 import fi.jakojaannos.riista.vulkan.internal.window.Window;
-import fi.jakojaannos.riista.vulkan.renderer.RenderSubpass;
+import fi.jakojaannos.riista.vulkan.rendering.RenderSubpass;
 import fi.jakojaannos.riista.vulkan.rendering.GraphicsPipeline;
 import fi.jakojaannos.riista.vulkan.rendering.RenderPass;
 import fi.jakojaannos.riista.vulkan.util.RecreateCloseable;

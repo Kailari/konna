@@ -11,7 +11,6 @@ import fi.jakojaannos.riista.vulkan.internal.VertexFormat;
 import fi.jakojaannos.riista.vulkan.internal.descriptor.DescriptorSetLayout;
 import fi.jakojaannos.riista.vulkan.internal.device.DeviceContext;
 import fi.jakojaannos.riista.vulkan.internal.types.VkPrimitiveTopology;
-import fi.jakojaannos.riista.vulkan.renderer.RenderSubpass;
 import fi.jakojaannos.riista.vulkan.util.RecreateCloseable;
 
 import static fi.jakojaannos.riista.vulkan.util.VkUtil.ensureSuccess;

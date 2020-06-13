@@ -1,4 +1,4 @@
-package fi.jakojaannos.riista.vulkan.renderer;
+package fi.jakojaannos.riista.vulkan.rendering;
 
 import org.lwjgl.vulkan.VkClearValue;
 

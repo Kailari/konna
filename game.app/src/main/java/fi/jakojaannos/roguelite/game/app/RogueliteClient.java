@@ -5,11 +5,12 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 
+import fi.jakojaannos.konna.view.KonnaGameModeRenderers;
 import fi.jakojaannos.riista.vulkan.application.ApplicationRunner;
 import fi.jakojaannos.riista.vulkan.application.VulkanApplication;
-import fi.jakojaannos.konna.view.KonnaGameModeRenderers;
 import fi.jakojaannos.riista.vulkan.assets.storage.VulkanAssetManager;
 import fi.jakojaannos.riista.vulkan.input.GLFWInputProvider;
+import fi.jakojaannos.riista.vulkan.renderer.VulkanGameRenderAdapter;
 import fi.jakojaannos.roguelite.game.gamemode.MainMenuGameMode;
 
 public class RogueliteClient {
@@ -34,9 +35,14 @@ public class RogueliteClient {
         ) {
             final var timeManager = runner.getTimeManager();
             final var inputProvider = new GLFWInputProvider(app.window());
+            final var gameModeRenderers = KonnaGameModeRenderers.create(assetManager,
+                                                                        timeManager,
+                                                                        runner.getAudioContext());
+            final var renderer = new VulkanGameRenderAdapter(gameModeRenderers, app);
+
             runner.run(inputProvider,
                        MainMenuGameMode.create(host, port),
-                       KonnaGameModeRenderers.create(assetManager, timeManager, runner.getAudioContext()));
+                       renderer);
         }
     }
 }

@@ -26,4 +26,5 @@ module riista.vulkan {
     exports fi.jakojaannos.riista.vulkan.application;
     exports fi.jakojaannos.riista.vulkan.assets.storage;
     exports fi.jakojaannos.riista.vulkan.input;
+    exports fi.jakojaannos.riista.vulkan.renderer;
 }

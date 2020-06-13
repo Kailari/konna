@@ -5,7 +5,7 @@ import org.joml.Vector2d;
 import org.joml.Vector3f;
 import org.lwjgl.vulkan.VkExtent2D;
 
-import fi.jakojaannos.riista.vulkan.renderer.RenderBuffer;
+import fi.jakojaannos.riista.vulkan.renderer.game.RenderBuffer;
 import fi.jakojaannos.riista.vulkan.renderer.debug.DebugRendererRecorder;
 import fi.jakojaannos.riista.vulkan.renderer.mesh.MeshRendererRecorder;
 import fi.jakojaannos.riista.vulkan.renderer.ui.UiRendererRecorder;
@@ -31,7 +31,6 @@ public class PresentableState {
     private int framebufferWidth;
     private int framebufferHeight;
 
-    private int gameModeId;
     private boolean mouseClicked;
     private long timestamp;
 
@@ -63,10 +62,6 @@ public class PresentableState {
         return this.eyePosition;
     }
 
-    public int gameModeId() {
-        return this.gameModeId;
-    }
-
     public RenderBuffer<UiRendererRecorder.QuadEntry> quadEntries() {
         return this.quadEntries;
     }
@@ -92,7 +87,6 @@ public class PresentableState {
     }
 
     public void clear(
-            final int gameModeId,
             final TimeManager timeManager,
             final Vector2d mousePosition,
             final boolean mouseClicked,
@@ -100,7 +94,6 @@ public class PresentableState {
             final Vector3f eyePosition,
             final Matrix4f viewMatrix
     ) {
-        this.gameModeId = gameModeId;
         this.mouseClicked = mouseClicked;
         this.transformEntries.reset();
         this.skeletalMeshEntries.reset();

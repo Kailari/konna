@@ -265,7 +265,7 @@ public class SystemDispatcherImpl implements SystemDispatcher {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         final var exceptions = this.systemGroups.stream()
                                                 .flatMap(g -> g.getSystems().stream())
                                                 .filter(AutoCloseable.class::isInstance)
@@ -401,7 +401,7 @@ public class SystemDispatcherImpl implements SystemDispatcher {
         }
     }
 
-    public static class SystemDisposeException extends Exception {
+    public static class SystemDisposeException extends RuntimeException {
         SystemDisposeException(final Exception[] exceptions) {
             super(Arrays.stream(exceptions)
                         .map(Exception::toString)

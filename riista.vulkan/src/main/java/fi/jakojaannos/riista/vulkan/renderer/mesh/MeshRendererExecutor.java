@@ -1,6 +1,6 @@
 package fi.jakojaannos.riista.vulkan.renderer.mesh;
 
-import fi.jakojaannos.riista.vulkan.renderer.RenderSubpass;
+import fi.jakojaannos.riista.vulkan.rendering.RenderSubpass;
 import fi.jakojaannos.riista.vulkan.util.RecreateCloseable;
 import fi.jakojaannos.riista.vulkan.internal.RenderingBackend;
 import fi.jakojaannos.riista.vulkan.internal.TextureSampler;

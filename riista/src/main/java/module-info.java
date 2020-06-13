@@ -12,6 +12,7 @@ module riista {
 
     opens fi.jakojaannos.riista.data.resources to riista.ecs;
 
+    exports fi.jakojaannos.riista;
     exports fi.jakojaannos.riista.assets;
     exports fi.jakojaannos.riista.application;
 
