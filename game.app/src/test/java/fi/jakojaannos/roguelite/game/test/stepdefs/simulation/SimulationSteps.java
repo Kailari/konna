@@ -37,14 +37,12 @@ public class SimulationSteps {
     public void the_game_has_run_for_tick() {
         updatePlayerPositionBeforeRun();
         simulation.runsSingleTick();
-        renderTick();
     }
 
     @When("the game runs for a/1 second")
     public void the_game_runs_for_a_second() {
         updatePlayerPositionBeforeRun();
         simulation.runsForSeconds(1);
-        renderTick();
     }
 
     @When("the game runs for {double} seconds")

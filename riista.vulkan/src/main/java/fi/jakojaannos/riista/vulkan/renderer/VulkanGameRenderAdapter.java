@@ -1,13 +1,8 @@
 package fi.jakojaannos.riista.vulkan.renderer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Collection;
 import java.util.function.Consumer;
-import javax.annotation.Nullable;
 
-import fi.jakojaannos.riista.GameRenderAdapter;
 import fi.jakojaannos.riista.data.resources.CameraProperties;
 import fi.jakojaannos.riista.data.resources.Mouse;
 import fi.jakojaannos.riista.utilities.TimeManager;
@@ -18,54 +13,21 @@ import fi.jakojaannos.riista.vulkan.application.PresentableStateQueue;
 import fi.jakojaannos.riista.vulkan.application.VulkanApplication;
 import fi.jakojaannos.riista.vulkan.renderer.game.RendererRecorder;
 import fi.jakojaannos.riista.vulkan.rendering.Swapchain;
-import fi.jakojaannos.roguelite.engine.GameMode;
 import fi.jakojaannos.roguelite.engine.GameState;
-import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
 
-public class VulkanGameRenderAdapter implements GameRenderAdapter<PresentableState> {
-    private static final Logger LOG = LoggerFactory.getLogger(VulkanGameRenderAdapter.class);
-
+public class VulkanGameRenderAdapter extends GameRenderAdapterBase<PresentableState> {
     private final PresentableStateQueue presentableStateQueue = new PresentableStateQueue();
     private final RendererRecorder renderRecorder = new RendererRecorder();
 
-    private final Consumer<CameraProperties> cameraPropertiesUpdater;
-
-    private final GameModeRenderers gameModeRenderers;
     private final Swapchain swapchain;
-
-    @Nullable
-    private SystemDispatcher renderDispatcher;
 
     public VulkanGameRenderAdapter(
             final GameModeRenderers gameModeRenderers,
             final VulkanApplication application,
             final Consumer<CameraProperties> cameraPropertiesUpdater
     ) {
-        this.gameModeRenderers = gameModeRenderers;
+        super(gameModeRenderers, cameraPropertiesUpdater);
         this.swapchain = application.backend().swapchain();
-        this.cameraPropertiesUpdater = cameraPropertiesUpdater;
-    }
-
-    @Override
-    public void onGameModeChange(final GameMode gameMode, final GameState gameState) {
-        if (this.renderDispatcher != null) {
-            this.renderDispatcher.close();
-        }
-
-        final var maybeRenderDispatcher = this.gameModeRenderers.get(gameMode.id());
-        maybeRenderDispatcher.ifPresent(dispatcher -> {
-            gameState.systems().resetToDefaultState(dispatcher.getSystems());
-            gameState.systems().resetGroupsToDefaultState(dispatcher.getGroups());
-        });
-
-        this.renderDispatcher = maybeRenderDispatcher.orElse(null);
-    }
-
-    @Override
-    public void preTick(final GameState gameState) {
-        final var cameraProperties = gameState.world()
-                                              .fetchResource(CameraProperties.class);
-        this.cameraPropertiesUpdater.accept(cameraProperties);
     }
 
     @Override
@@ -73,7 +35,7 @@ public class VulkanGameRenderAdapter implements GameRenderAdapter<PresentableSta
             final GameState gameState,
             final Collection<Object> events
     ) {
-        if (this.renderDispatcher != null) {
+        if (this.hasActiveRenderDispatcher()) {
             final var cameraProperties = gameState.world().fetchResource(CameraProperties.class);
             final var mouse = gameState.world().fetchResource(Mouse.class);
             final var timeManager = gameState.world().fetchResource(TimeManager.class);
@@ -92,26 +54,12 @@ public class VulkanGameRenderAdapter implements GameRenderAdapter<PresentableSta
             gameState.world().replaceResource(Renderer.class, this.renderRecorder);
             this.renderRecorder.setWriteState(presentableState);
 
-            this.renderDispatcher.tick(gameState.world(), gameState.systems(), events);
+            super.writePresentableState(gameState, events);
         }
     }
 
     @Override
     public PresentableState fetchPresentableState() {
         return this.presentableStateQueue.swapReading();
-    }
-
-    @Override
-    public void close() {
-        if (this.renderDispatcher != null) {
-            try {
-                LOG.debug("Render dispatcher closing");
-                this.renderDispatcher.close();
-            } catch (final Throwable t) {
-                LOG.error("Disposing render dispatcher failed", t);
-            }
-        } else {
-            LOG.warn("No render dispatcher present.");
-        }
     }
 }

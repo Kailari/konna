@@ -9,6 +9,7 @@ Feature: When the game initially starts, player is greeted with a Title Screen.
     And there is a button with text "Quit"
     And there is a button with text "Play"
 
+    @problem
   Scenario: The user no longer wishes to play and clicks "Quit" button. The game shuts down.
     Given the main menu has just loaded
     And the player clicks the "Quit" button

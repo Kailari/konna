@@ -5,4 +5,4 @@
     roguelite.game.app=org.junit.jupiter.api,org.junit.jupiter.params,org.lwjgl.glfw,koetus.assertions
 
 --add-exports
-    roguelite.game.view/fi.jakojaannos.roguelite.game.view.gamemode=roguelite.game.app
+    riista.vulkan/fi.jakojaannos.riista.vulkan.renderer.game=roguelite.game.app,roguelite.game.view/fi.jakojaannos.roguelite.game.view.gamemode=roguelite.game.app

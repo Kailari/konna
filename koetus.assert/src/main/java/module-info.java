@@ -8,7 +8,6 @@ module koetus.assertions {
     requires riista.utilities;
     requires riista.view;
 
-    exports fi.jakojaannos.roguelite.engine.utilities.assertions.ui;
     exports fi.jakojaannos.roguelite.engine.utilities.assertions.world;
     exports fi.jakojaannos.roguelite.engine.utilities.assertions.junitextension;
 }

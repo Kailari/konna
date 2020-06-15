@@ -24,7 +24,7 @@ public class SimulationThread implements AutoCloseable {
     @Nullable
     private final GameRenderAdapter<?> renderAdapter;
 
-    private Runnable simulatorTerminateCallback = () -> LOG.warn("Simulation terminated before initialization was done!");
+    private Runnable simulatorTerminateCallback;
 
     public SimulationThread(
             final GameTicker ticker,
@@ -41,6 +41,10 @@ public class SimulationThread implements AutoCloseable {
 
         this.timeManager = timeManager;
         this.onTerminate = onTerminate;
+        this.simulatorTerminateCallback = () -> {
+            LOG.warn("Simulation terminated before initialization was done!");
+            onTerminate.run();
+        };
     }
 
     public void start() {

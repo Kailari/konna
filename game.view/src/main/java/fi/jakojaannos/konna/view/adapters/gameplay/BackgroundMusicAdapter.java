@@ -15,6 +15,7 @@ public class BackgroundMusicAdapter implements EcsSystem<EcsSystem.NoResources, 
     private final MusicPlayer musicPlayer;
 
     public BackgroundMusicAdapter(final Path assetRoot, final AudioContext audioContext) {
+        // FIXME: Load using asset manager
         this.background = audioContext.createTrack(assetRoot.resolve("music/Desolation1_noperc.ogg"));
         this.backgroundIntense = audioContext.createTrack(assetRoot.resolve("music/Desolation1.ogg"));
         this.musicPlayer = audioContext.createMusicPlayer();

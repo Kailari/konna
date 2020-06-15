@@ -4,10 +4,13 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
+import fi.jakojaannos.riista.data.events.UiEvent;
+import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;
 import fi.jakojaannos.roguelite.game.gamemode.MainMenuGameMode;
 
-import static fi.jakojaannos.roguelite.engine.utilities.assertions.world.GameExpect.whenGameWithGameMode;
+import static fi.jakojaannos.roguelite.engine.utilities.assertions.world.GameExpect.whenGameWithGameModeAndRenderer;
+import static fi.jakojaannos.roguelite.game.test.global.GlobalState.renderer;
 import static fi.jakojaannos.roguelite.game.test.global.GlobalState.simulation;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -16,38 +19,21 @@ public class MenuSteps {
 
     @Given("the main menu has just loaded")
     public void the_main_menu_has_just_loaded() {
-        simulation = whenGameWithGameMode(MainMenuGameMode.create());
+        simulation = whenGameWithGameModeAndRenderer(MainMenuGameMode.create(), renderer);
 
         simulation.runsSingleTick();
     }
 
     @When("the player clicks the {string} button")
     public void the_player_clicks_the_button(String string) {
-        //final var event = switch (string) {
-        //    case "Quit" -> new
-        //}
+        final var event = switch (string) {
+            case "Quit" -> new UiEvent("quit-button", UiEvent.Type.CLICK);
+            case "Play" -> new UiEvent("play-button", UiEvent.Type.CLICK);
+            default -> throw new AssertionError("Test-case for button \"" + string + "\" is not implemented!");
+        };
 
-        /*final var userInterface = gameRenderer.getCurrentUserInterface();
-        final var buttonCenter = userInterface.findElements(that -> that.hasText().equalTo(string))
-                                              .findFirst()
-                                              .flatMap(element -> element.getProperty(UIProperty.CENTER))
-                                              .orElseThrow();
-
-        final var mouse = state.world().fetchResource(Mouse.class);
-        mouse.position.set(buttonCenter)
-                      .mul(1.0 / gameRenderer.getCamera().getViewport().getWidthInPixels(),
-                           1.0 / gameRenderer.getCamera().getViewport().getHeightInPixels());
-        mouse.clicked = false;
-        simulateTick();
-        renderTick();
-
-        mouse.clicked = true;
-        simulateTick();
-        renderTick();
-
-        mouse.clicked = false;
-        simulateTick();
-        renderTick();*/
+        simulation.state().world().fetchResource(Events.class).system().fire(event);
+        simulation.runsSingleTick();
     }
 
     @Then("there is a title with text {string}")

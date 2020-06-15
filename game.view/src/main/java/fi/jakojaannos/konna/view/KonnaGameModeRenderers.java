@@ -25,7 +25,31 @@ public class KonnaGameModeRenderers {
         //    then be nullable
         //  - the config object is then consumed in the constructor to set values for the actual
         //    configuration fields (which should be final) on the adapter
-        gameModeRenderers.register(GameplayGameMode.GAME_MODE_ID, () -> {
+        gameModeRenderers.register(GameplayGameMode.GAME_MODE_ID, gamePlay(assetManager, audioContext, timeManager));
+        gameModeRenderers.register(MainMenuGameMode.GAME_MODE_ID, mainMenu(assetManager));
+
+        return gameModeRenderers;
+    }
+
+    public static GameModeRenderers.Factory mainMenu(
+            final AssetManager assetManager
+    ) {
+        return () -> {
+            final var builder = SystemDispatcher.builder();
+            builder.group("ui")
+                   .withSystem(new MainMenuRenderAdapter(assetManager))
+                   .buildGroup();
+
+            return builder.build();
+        };
+    }
+
+    public static GameModeRenderers.Factory gamePlay(
+            final AssetManager assetManager,
+            final AudioContext audioContext,
+            final TimeManager timeManager
+    ) {
+        return () -> {
             final var builder = SystemDispatcher.builder();
             builder.group("debug")
                    .withSystem(new EntityTransformRenderAdapter())
@@ -47,16 +71,6 @@ public class KonnaGameModeRenderers {
                    .buildGroup();
 
             return builder.build();
-        });
-        gameModeRenderers.register(MainMenuGameMode.GAME_MODE_ID, () -> {
-            final var builder = SystemDispatcher.builder();
-            builder.group("ui")
-                   .withSystem(new MainMenuRenderAdapter(assetManager))
-                   .buildGroup();
-
-            return builder.build();
-        });
-
-        return gameModeRenderers;
+        };
     }
 }

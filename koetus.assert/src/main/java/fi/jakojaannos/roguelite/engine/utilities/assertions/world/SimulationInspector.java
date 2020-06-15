@@ -1,6 +1,5 @@
 package fi.jakojaannos.roguelite.engine.utilities.assertions.world;
 
-import java.util.Map;
 import java.util.Queue;
 import java.util.function.Consumer;
 
