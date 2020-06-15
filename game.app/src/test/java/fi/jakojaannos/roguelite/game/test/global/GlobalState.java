@@ -26,7 +26,6 @@ public class GlobalState {
         // TODO: Figure out some way of doing presentable state copy here (use code from SimulationThread)
     }
 
-
     @Before
     public void before() {
         random = new Random(13376969);

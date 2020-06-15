@@ -6,20 +6,20 @@ import fi.jakojaannos.riista.assets.AssetManager;
 import fi.jakojaannos.riista.data.components.Transform;
 import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.riista.view.Renderer;
+import fi.jakojaannos.riista.view.ui.Color;
 import fi.jakojaannos.riista.view.ui.UiElement;
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.ecs.data.resources.Entities;
 import fi.jakojaannos.roguelite.engine.event.Events;
-import fi.jakojaannos.roguelite.engine.view.ui.Color;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponInventory;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 import fi.jakojaannos.roguelite.game.weapons.ActionInfo;
 
 public class WeaponHudRenderAdapter implements EcsSystem<WeaponHudRenderAdapter.Resources, EcsSystem.NoEntities, EcsSystem.NoEvents> {
-    private static final Color COLOR_NEGATIVE = new Color(0.75, 0.15, 0.15);
-    private static final Color COLOR_POSITIVE = new Color(0.95, 0.95, 0.95);
+    //private static final Color COLOR_NEGATIVE = new Color(0.75f, 0.15f, 0.15f);
+    //private static final Color COLOR_POSITIVE = new Color(0.95f, 0.95f, 0.95f);
 
     private final UiElement hud;
 

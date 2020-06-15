@@ -7,7 +7,7 @@ import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.ecs.annotation.DisabledByDefault;
 import fi.jakojaannos.roguelite.engine.ecs.annotation.EnableOn;
 import fi.jakojaannos.roguelite.engine.event.Events;
-import fi.jakojaannos.roguelite.engine.state.StateEvent;
+import fi.jakojaannos.riista.data.events.StateEvent;
 import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.events.GameLostEvent;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;

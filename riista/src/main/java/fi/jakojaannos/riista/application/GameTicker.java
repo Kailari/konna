@@ -17,7 +17,7 @@ import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.input.InputProvider;
 import fi.jakojaannos.roguelite.engine.network.NetworkImpl;
-import fi.jakojaannos.roguelite.engine.state.StateEvent;
+import fi.jakojaannos.riista.data.events.StateEvent;
 
 public class GameTicker implements MainThread {
     private static final Logger LOG = LoggerFactory.getLogger(GameTicker.class);

@@ -2,6 +2,9 @@ package fi.jakojaannos.roguelite.engine.utilities.math;
 
 import org.joml.Vector2d;
 
+// Should either be updated for 3D or removed. If transforms are converted to matrices, this becomes
+// obsolete.
+@Deprecated
 public class CoordinateHelper {
     public static Vector2d transformCoordinate(
             final double centerX,

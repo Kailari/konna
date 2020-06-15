@@ -3,7 +3,7 @@ package fi.jakojaannos.roguelite.engine.tilemap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import fi.jakojaannos.roguelite.engine.utilities.GenerateStream;
+import fi.jakojaannos.riista.utilities.GenerateStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

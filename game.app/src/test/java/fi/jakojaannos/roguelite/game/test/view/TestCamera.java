@@ -20,11 +20,6 @@ public class TestCamera extends Camera {
     }
 
     @Override
-    public void useScreenCoordinates() {
-
-    }
-
-    @Override
     public void close() {
     }
 }

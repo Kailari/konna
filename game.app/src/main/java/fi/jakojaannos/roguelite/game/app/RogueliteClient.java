@@ -31,16 +31,14 @@ public class RogueliteClient {
              final var assetManager = new VulkanAssetManager(app.backend(),
                                                              app.window(),
                                                              assetRoot);
-             final var runner = new ApplicationRunner(app, assetManager)
+             final var runner = new ApplicationRunner(app, assetManager);
+             final var renderer = new VulkanGameRenderAdapter(KonnaGameModeRenderers.create(assetManager,
+                                                                                            runner.getTimeManager(),
+                                                                                            runner.getAudioContext()),
+                                                              app,
+                                                              runner::updateCameraProperties)
         ) {
-            final var timeManager = runner.getTimeManager();
-            final var inputProvider = new GLFWInputProvider(app.window());
-            final var gameModeRenderers = KonnaGameModeRenderers.create(assetManager,
-                                                                        timeManager,
-                                                                        runner.getAudioContext());
-            final var renderer = new VulkanGameRenderAdapter(gameModeRenderers, app);
-
-            runner.run(inputProvider,
+            runner.run(new GLFWInputProvider(app.window()),
                        MainMenuGameMode.create(host, port),
                        renderer);
         }

@@ -2,6 +2,8 @@ package fi.jakojaannos.roguelite.engine.utilities.math;
 
 import org.joml.Vector2d;
 
+// This was an inefficient hack to begin with. Scrap this and implement 3D collision resolver
+@Deprecated
 public final class RotatedRectangle {
     public double width;
     public double height;

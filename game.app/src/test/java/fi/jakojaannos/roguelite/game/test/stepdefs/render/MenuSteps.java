@@ -23,6 +23,10 @@ public class MenuSteps {
 
     @When("the player clicks the {string} button")
     public void the_player_clicks_the_button(String string) {
+        //final var event = switch (string) {
+        //    case "Quit" -> new
+        //}
+
         /*final var userInterface = gameRenderer.getCurrentUserInterface();
         final var buttonCenter = userInterface.findElements(that -> that.hasText().equalTo(string))
                                               .findFirst()

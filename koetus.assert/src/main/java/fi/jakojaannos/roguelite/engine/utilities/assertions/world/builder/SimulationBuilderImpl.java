@@ -64,7 +64,7 @@ public class SimulationBuilderImpl implements SimulationBuilder {
                                           dispatcher,
                                           this.initialStateFactory,
                                           systemStateFactory);
-        return new SimulationRunnerImpl(gameMode);
+        return new SimulationRunnerImpl<>(gameMode, null);
     }
 
     private SystemState buildSystemState(final SystemDispatcher dispatcher) {

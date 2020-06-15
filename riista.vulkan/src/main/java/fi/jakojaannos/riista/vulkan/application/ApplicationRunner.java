@@ -9,10 +9,12 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.Objects;
 
+import fi.jakojaannos.riista.GameRenderAdapter;
+import fi.jakojaannos.riista.application.GameTicker;
 import fi.jakojaannos.riista.application.SimulationThread;
 import fi.jakojaannos.riista.assets.AssetManager;
+import fi.jakojaannos.riista.data.resources.CameraProperties;
 import fi.jakojaannos.riista.utilities.TimeManager;
-import fi.jakojaannos.riista.GameRenderAdapter;
 import fi.jakojaannos.riista.view.audio.AudioContext;
 import fi.jakojaannos.riista.vulkan.audio.LWJGLAudioContext;
 import fi.jakojaannos.riista.vulkan.internal.device.DeviceContext;
@@ -46,6 +48,7 @@ public class ApplicationRunner implements AutoCloseable {
 
     private final GameRunnerTimeManager timeManager;
 
+    private GameTicker ticker;
     private boolean framebufferResized;
     private int frameIndex;
 
@@ -85,6 +88,12 @@ public class ApplicationRunner implements AutoCloseable {
                         .onResize((width, height) -> this.framebufferResized = true);
     }
 
+    // FIXME: Try to get rid of this method. This is an implementation detail of the renderer and should be hidden in
+    //        somewhere there.
+    public void updateCameraProperties(final CameraProperties cameraProperties) {
+        this.renderer.updateCameraProperties(cameraProperties);
+    }
+
     public void run(
             final InputProvider inputProvider,
             final GameMode initialGameMode,
@@ -93,15 +102,17 @@ public class ApplicationRunner implements AutoCloseable {
         final var startTime = System.currentTimeMillis();
 
         var frameCounter = 0;
-        try (final var simulationRunner = new SimulationThread(initialGameMode,
-                                                               "riista-tick-thread",
-                                                               inputProvider,
-                                                               this.timeManager,
-                                                               this.application.window()::setShouldClose,
-                                                               this.renderer::updateCameraProperties,
-                                                               renderAdapter)
+        this.ticker = new GameTicker(this.timeManager,
+                                     inputProvider,
+                                     initialGameMode);
+        try (final var simulation = new SimulationThread(this.ticker,
+                                                         "riista-tick-thread",
+                                                         this.timeManager,
+                                                         this.application.window()::setShouldClose,
+                                                         renderAdapter)
         ) {
-            simulationRunner.startSimulation();
+            renderAdapter.onGameModeChange(initialGameMode, this.ticker.getState());
+            simulation.start();
 
             this.application.window().show();
             this.frameIndex = -1;

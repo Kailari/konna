@@ -2,7 +2,7 @@ package fi.jakojaannos.riista.view.ui;
 
 import java.util.Collection;
 
-import fi.jakojaannos.roguelite.engine.ui.UIEvent;
+import fi.jakojaannos.riista.data.events.UiEvent;
 
 public interface UiRenderer {
     /**
@@ -14,5 +14,5 @@ public interface UiRenderer {
      */
     void setValue(String key, Object value);
 
-    Collection<UIEvent> draw(UiElement element);
+    Collection<UiEvent> draw(UiElement element);
 }

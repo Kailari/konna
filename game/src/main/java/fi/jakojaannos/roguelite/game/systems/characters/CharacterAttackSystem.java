@@ -54,6 +54,11 @@ public class CharacterAttackSystem implements EcsSystem<CharacterAttackSystem.Re
 
             equippedWeapon.fireIfReady(actionInfo);
 
+            // HACK: Fixes shotgun reload sounds by forcing a state query each tick. The sound effect check is done
+            //       as ugly hack in the stateQuery and after Vulkan renderer we can no longer fire the event on
+            //       the render adapter (the event won't propagate over to the next tick like it used to)
+            equippedWeapon.doStateQuery(actionInfo);
+
             input.previousAttack = input.attack;
         });
     }

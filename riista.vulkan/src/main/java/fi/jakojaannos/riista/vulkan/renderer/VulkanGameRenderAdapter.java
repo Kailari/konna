@@ -4,13 +4,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
+import java.util.function.Consumer;
 import javax.annotation.Nullable;
 
+import fi.jakojaannos.riista.GameRenderAdapter;
 import fi.jakojaannos.riista.data.resources.CameraProperties;
 import fi.jakojaannos.riista.data.resources.Mouse;
 import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.riista.view.GameModeRenderers;
-import fi.jakojaannos.riista.GameRenderAdapter;
 import fi.jakojaannos.riista.view.Renderer;
 import fi.jakojaannos.riista.vulkan.application.PresentableState;
 import fi.jakojaannos.riista.vulkan.application.PresentableStateQueue;
@@ -27,6 +28,8 @@ public class VulkanGameRenderAdapter implements GameRenderAdapter<PresentableSta
     private final PresentableStateQueue presentableStateQueue = new PresentableStateQueue();
     private final RendererRecorder renderRecorder = new RendererRecorder();
 
+    private final Consumer<CameraProperties> cameraPropertiesUpdater;
+
     private final GameModeRenderers gameModeRenderers;
     private final Swapchain swapchain;
 
@@ -35,10 +38,12 @@ public class VulkanGameRenderAdapter implements GameRenderAdapter<PresentableSta
 
     public VulkanGameRenderAdapter(
             final GameModeRenderers gameModeRenderers,
-            final VulkanApplication application
+            final VulkanApplication application,
+            final Consumer<CameraProperties> cameraPropertiesUpdater
     ) {
         this.gameModeRenderers = gameModeRenderers;
         this.swapchain = application.backend().swapchain();
+        this.cameraPropertiesUpdater = cameraPropertiesUpdater;
     }
 
     @Override
@@ -54,6 +59,13 @@ public class VulkanGameRenderAdapter implements GameRenderAdapter<PresentableSta
         });
 
         this.renderDispatcher = maybeRenderDispatcher.orElse(null);
+    }
+
+    @Override
+    public void preTick(final GameState gameState) {
+        final var cameraProperties = gameState.world()
+                                              .fetchResource(CameraProperties.class);
+        this.cameraPropertiesUpdater.accept(cameraProperties);
     }
 
     @Override

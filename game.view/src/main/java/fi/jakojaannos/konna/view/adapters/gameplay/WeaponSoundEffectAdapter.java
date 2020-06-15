@@ -7,7 +7,7 @@ import fi.jakojaannos.riista.view.assets.SoundEffect;
 import fi.jakojaannos.riista.view.audio.AudioContext;
 import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
 import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
-import fi.jakojaannos.roguelite.game.data.events.render.GunshotEvent;
+import fi.jakojaannos.roguelite.game.data.events.GunshotEvent;
 
 public class WeaponSoundEffectAdapter implements EcsSystem<EcsSystem.NoResources, EcsSystem.NoEntities, WeaponSoundEffectAdapter.EventData>, AutoCloseable {
     private final SoundEffect shotgun;

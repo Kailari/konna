@@ -6,6 +6,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import java.nio.ByteBuffer;
 
+import fi.jakojaannos.riista.utilities.BitMaskUtils;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class BitMaskUtilsTest {

@@ -7,14 +7,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 import javax.annotation.Nullable;
 
-import fi.jakojaannos.riista.data.resources.CameraProperties;
 import fi.jakojaannos.riista.GameRenderAdapter;
-import fi.jakojaannos.roguelite.engine.GameMode;
 import fi.jakojaannos.roguelite.engine.GameRunnerTimeManager;
-import fi.jakojaannos.roguelite.engine.input.InputProvider;
 
 public class SimulationThread implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(SimulationThread.class);
@@ -25,23 +21,19 @@ public class SimulationThread implements AutoCloseable {
 
     private final GameTicker ticker;
 
-    private final Consumer<CameraProperties> cameraPropertiesUpdater;
-
     @Nullable
     private final GameRenderAdapter<?> renderAdapter;
 
     private Runnable simulatorTerminateCallback = () -> LOG.warn("Simulation terminated before initialization was done!");
 
     public SimulationThread(
-            final GameMode initialGameMode,
+            final GameTicker ticker,
             final String threadName,
-            final InputProvider inputProvider,
             final GameRunnerTimeManager timeManager,
             final Runnable onTerminate,
-            final Consumer<CameraProperties> cameraPropertiesUpdater,
             @Nullable final GameRenderAdapter<?> renderAdapter
     ) {
-        this.cameraPropertiesUpdater = cameraPropertiesUpdater;
+        this.ticker = ticker;
         this.renderAdapter = renderAdapter;
 
         final var threadFactory = createThreadFactory(threadName);
@@ -49,14 +41,9 @@ public class SimulationThread implements AutoCloseable {
 
         this.timeManager = timeManager;
         this.onTerminate = onTerminate;
-
-        this.ticker = new GameTicker(this.timeManager, inputProvider, initialGameMode);
-        if (this.renderAdapter != null) {
-            this.renderAdapter.onGameModeChange(initialGameMode, this.ticker.getState());
-        }
     }
 
-    public void startSimulation() {
+    public void start() {
         final var runnerFuture = this.executor.scheduleAtFixedRate(this::tick,
                                                                    0L,
                                                                    this.timeManager.getTimeStep(),
@@ -71,9 +58,9 @@ public class SimulationThread implements AutoCloseable {
     public void tick() {
         final var oldMode = this.ticker.getMode();
         try {
-            final var cameraProperties = this.ticker.getState().world()
-                                                    .fetchResource(CameraProperties.class);
-            this.cameraPropertiesUpdater.accept(cameraProperties);
+            if (this.renderAdapter != null) {
+                this.renderAdapter.preTick(this.ticker.getState());
+            }
 
             this.ticker.simulateTick(this.simulatorTerminateCallback);
         } catch (final Throwable t) {
@@ -93,7 +80,7 @@ public class SimulationThread implements AutoCloseable {
                 final var systemEvents = this.ticker.getSystemEvents();
                 this.renderAdapter.writePresentableState(currentState, systemEvents);
             } catch (final Throwable t) {
-                LOG.error("Render adapter dispatcher encountered an error:", t);
+                LOG.error("Error creating presentable state:", t);
             }
         }
 
@@ -104,11 +91,6 @@ public class SimulationThread implements AutoCloseable {
     public void close() {
         LOG.info("Simulation thread shutting down");
 
-        if (this.renderAdapter != null) {
-            this.renderAdapter.close();
-        }
-
-        LOG.debug("Killing executor service");
         this.executor.shutdown();
         try {
             if (!this.executor.awaitTermination(5L, TimeUnit.SECONDS)) {

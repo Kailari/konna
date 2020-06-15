@@ -14,7 +14,7 @@ import org.junit.runner.RunWith;
                          "fi.jakojaannos.roguelite.game.test.stepdefs.input",
                          "fi.jakojaannos.roguelite.game.test.stepdefs.gameplay",
                  }
-                 ,tags = {"@problem"}
+                 //,tags = {"@problem"}
                  )
 public class RunGameplayCucumberTests {
 }

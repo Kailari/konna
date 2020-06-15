@@ -79,8 +79,8 @@ public class WorldSteps {
     public void the_player_is_surrounded_by_follower_enemies() {
         final var world = simulation.state().world();
         world.iterateEntities(new Class[]{Transform.class, PlayerTag.class},
-                              new boolean[]{false},
-                              new boolean[]{false},
+                              new boolean[]{false, false},
+                              new boolean[]{false, false},
                               objects -> null,
                               false)
              .map(dataHandle -> dataHandle.getComponent(Transform.class).orElseThrow().position)

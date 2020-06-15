@@ -1,5 +1,6 @@
 package fi.jakojaannos.roguelite.engine.utilities.assertions.world;
 
+import fi.jakojaannos.riista.GameRenderAdapter;
 import fi.jakojaannos.roguelite.engine.GameMode;
 import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
 import fi.jakojaannos.roguelite.engine.utilities.assertions.world.builder.SimulationBuilderImpl;
@@ -29,7 +30,19 @@ public final class GameExpect {
      * @return the inspector
      */
     public static SimulationInspector whenGameWithGameMode(final GameMode gameMode) {
-        return new SimulationRunnerImpl(gameMode);
+        return new SimulationRunnerImpl<>(gameMode, null);
+    }
+
+    /**
+     * Creates a new simulation inspector for the given pre-built game mode.
+     *
+     * @return the inspector
+     */
+    public static <TPresentState> PresentationInspector<TPresentState> whenGameWithGameModeAndRenderer(
+            final GameMode gameMode,
+            final GameRenderAdapter<TPresentState> renderAdapter
+    ) {
+        return new SimulationRunnerImpl<TPresentState>(gameMode, renderAdapter);
     }
 
     /**

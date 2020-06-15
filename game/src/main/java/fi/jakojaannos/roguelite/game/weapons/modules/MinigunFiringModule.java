@@ -6,7 +6,7 @@ import java.util.Random;
 
 import fi.jakojaannos.roguelite.engine.utilities.math.CoordinateHelper;
 import fi.jakojaannos.roguelite.game.data.archetypes.ProjectileArchetype;
-import fi.jakojaannos.roguelite.game.data.events.render.GunshotEvent;
+import fi.jakojaannos.roguelite.game.data.events.GunshotEvent;
 import fi.jakojaannos.roguelite.game.weapons.*;
 import fi.jakojaannos.roguelite.game.weapons.events.ReloadEvent;
 import fi.jakojaannos.roguelite.game.weapons.events.TriggerPullEvent;

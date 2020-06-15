@@ -17,4 +17,6 @@ public interface GameRenderAdapter<TPresentState> extends AutoCloseable {
     );
 
     TPresentState fetchPresentableState();
+
+    void preTick(GameState gameState);
 }

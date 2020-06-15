@@ -6,14 +6,6 @@ public class Mouse {
     public final Vector2d position = new Vector2d(-999.0, -999.0);
     public boolean clicked;
 
-    public final Vector2d calculateCursorPositionRelativeToCamera(
-            final CameraProperties cameraProperties,
-            final Vector2d outResult
-    ) {
-        return cameraProperties.offsetByCameraPosition(this.position.negate(new Vector2d()),
-                                                       outResult);
-    }
-
     /**
      * Finds the point under the cursor, projected on to the ground plane. Ground plane is xy-plane with z coordinate
      * zero.

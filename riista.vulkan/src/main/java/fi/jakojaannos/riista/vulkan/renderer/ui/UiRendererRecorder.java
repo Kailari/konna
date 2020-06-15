@@ -9,7 +9,7 @@ import fi.jakojaannos.riista.vulkan.application.PresentableState;
 import fi.jakojaannos.riista.vulkan.application.UiVariables;
 import fi.jakojaannos.riista.view.Presentable;
 import fi.jakojaannos.riista.view.ui.*;
-import fi.jakojaannos.roguelite.engine.ui.UIEvent;
+import fi.jakojaannos.riista.data.events.UiEvent;
 
 import static fi.jakojaannos.riista.view.ui.UiUnit.zero;
 
@@ -26,15 +26,15 @@ public class UiRendererRecorder implements UiRenderer {
     }
 
     @Override
-    public List<UIEvent> draw(final UiElement element) {
-        final var events = new ArrayList<UIEvent>();
+    public List<UiEvent> draw(final UiElement element) {
+        final var events = new ArrayList<UiEvent>();
         draw(events, element, 1, -1, -1, 2, 2);
 
         return events;
     }
 
     private void draw(
-            final List<UIEvent> events,
+            final List<UiEvent> events,
             final UiElement element,
             final int depth,
             final double parentX,
@@ -123,7 +123,7 @@ public class UiRendererRecorder implements UiRenderer {
                            .orElse(element.text());
 
             if (this.state.mouseClicked()) {
-                events.add(new UIEvent(element.name(), UIEvent.Type.CLICK));
+                events.add(new UiEvent(element.name(), UiEvent.Type.CLICK));
             }
         } else {
             entry.x = x;

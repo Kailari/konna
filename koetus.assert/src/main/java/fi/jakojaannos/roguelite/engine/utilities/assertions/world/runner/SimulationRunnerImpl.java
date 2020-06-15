@@ -3,18 +3,21 @@ package fi.jakojaannos.roguelite.engine.utilities.assertions.world.runner;
 import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.function.Consumer;
+import javax.annotation.Nullable;
 
+import fi.jakojaannos.riista.GameRenderAdapter;
 import fi.jakojaannos.riista.application.GameTicker;
+import fi.jakojaannos.riista.application.SimulationThread;
 import fi.jakojaannos.roguelite.engine.GameMode;
 import fi.jakojaannos.roguelite.engine.GameRunnerTimeManager;
 import fi.jakojaannos.roguelite.engine.GameState;
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
-import fi.jakojaannos.roguelite.engine.utilities.assertions.world.SimulationInspector;
+import fi.jakojaannos.roguelite.engine.utilities.assertions.world.PresentationInspector;
 
-public class SimulationRunnerImpl implements SimulationInspector {
+public class SimulationRunnerImpl<TPresentState> implements PresentationInspector<TPresentState> {
     private final GameTicker ticker;
     private final Queue<InputEvent> inputQueue = new ArrayDeque<>();
-    private final GameRunnerTimeManager timeManager;
+    private final SimulationThread simulationThread;
 
     private boolean terminateTriggered;
 
@@ -23,9 +26,19 @@ public class SimulationRunnerImpl implements SimulationInspector {
         return this.terminateTriggered;
     }
 
-    public SimulationRunnerImpl(final GameMode gameMode) {
-        this.timeManager = new GameRunnerTimeManager(20L);
-        this.ticker = new GameTicker(this.timeManager, () -> this.inputQueue, gameMode);
+    public SimulationRunnerImpl(
+            final GameMode gameMode,
+            @Nullable final GameRenderAdapter<TPresentState> renderAdapter
+    ) {
+        final var timeManager = new GameRunnerTimeManager(20L);
+        this.ticker = new GameTicker(timeManager, () -> this.inputQueue, gameMode);
+
+        this.simulationThread = new SimulationThread(this.ticker,
+                                                     "simulation-runner",
+                                                     timeManager,
+                                                     () -> this.terminateTriggered = true,
+                                                     renderAdapter);
+        this.ticker.getState().world().commitEntityModifications();
     }
 
     @Override
@@ -44,13 +57,13 @@ public class SimulationRunnerImpl implements SimulationInspector {
     }
 
     @Override
-    public SimulationInspector expect(final Consumer<GameState> expectation) {
+    public PresentationInspector<TPresentState> expect(final Consumer<GameState> expectation) {
         expectation.accept(this.ticker.getState());
         return this;
     }
 
     @Override
-    public SimulationInspector runsForTicks(final long n) {
+    public PresentationInspector<TPresentState> runsForTicks(final long n) {
         this.ticker.getState().world().commitEntityModifications();
 
         for (int i = 0; i < n; i++) {
@@ -58,15 +71,14 @@ public class SimulationRunnerImpl implements SimulationInspector {
                 break;
             }
 
-            this.ticker.simulateTick(() -> this.terminateTriggered = true);
-            this.timeManager.nextTick();
+            this.simulationThread.tick();
         }
 
         return this;
     }
 
     @Override
-    public SimulationInspector runsForSeconds(final double seconds) {
+    public PresentationInspector<TPresentState> runsForSeconds(final double seconds) {
         final var ticks = this.ticker.getTimeManager().convertToTicks(seconds);
         return runsForTicks(ticks);
     }

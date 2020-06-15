@@ -1,5 +1,6 @@
 package fi.jakojaannos.roguelite.engine.utilities;
 
+@Deprecated
 public class SimpleTimeManager implements UpdateableTimeManager {
     private final long timestep;
     private final double timestepInSeconds;

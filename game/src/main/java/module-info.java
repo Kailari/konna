@@ -25,7 +25,6 @@ module roguelite.game {
     exports fi.jakojaannos.roguelite.game.gamemode;
     exports fi.jakojaannos.roguelite.game.data;
     exports fi.jakojaannos.roguelite.game.data.events;
-    exports fi.jakojaannos.roguelite.game.data.events.render;
     exports fi.jakojaannos.roguelite.game.data.archetypes;
     exports fi.jakojaannos.roguelite.game.data.resources;
     exports fi.jakojaannos.roguelite.game.data.components;

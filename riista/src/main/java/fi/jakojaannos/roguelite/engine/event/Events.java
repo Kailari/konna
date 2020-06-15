@@ -1,20 +1,14 @@
 package fi.jakojaannos.roguelite.engine.event;
 
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
-import fi.jakojaannos.roguelite.engine.state.StateEvent;
-import fi.jakojaannos.roguelite.engine.ui.UIEvent;
+import fi.jakojaannos.riista.data.events.StateEvent;
+import fi.jakojaannos.riista.data.events.UiEvent;
 
-/**
- * TODO: IDEA does not recognize record javadoc properly. Remove whitespace once it is fixed
- *
- * @ param ui       Event bus for receiving events <strong>from</strong> the UI for the game
- * @ param input    Event bus for receiving input events for the game
- * @ param state    Event bus for receiving/sending game state events for the game
- */
+// FIXME: Move everything to a single system event bus and receive all events via system events
+@Deprecated
 public record Events(
-        EventReceiver<UIEvent>ui,
+        EventReceiver<UiEvent>ui,
         EventReceiver<InputEvent>input,
         EventSender<StateEvent>state,
         EventSender<Object>system
-) {
-}
+) {}

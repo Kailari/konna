@@ -17,7 +17,7 @@ import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.input.InputProvider;
 import fi.jakojaannos.roguelite.engine.network.NetworkImpl;
 import fi.jakojaannos.roguelite.engine.network.NetworkManager;
-import fi.jakojaannos.roguelite.engine.state.StateEvent;
+import fi.jakojaannos.riista.data.events.StateEvent;
 
 /**
  * Game simulation runner. Utility for running the main simulation loop.
