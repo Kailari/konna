@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.engine.utilities;
+package fi.jakojaannos.riista.utilities;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
