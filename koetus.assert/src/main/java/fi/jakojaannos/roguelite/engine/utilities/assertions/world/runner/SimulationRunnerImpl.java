@@ -38,6 +38,9 @@ public class SimulationRunnerImpl<TPresentState> implements PresentationInspecto
                                                      timeManager,
                                                      () -> this.terminateTriggered = true,
                                                      renderAdapter);
+        if (renderAdapter != null) {
+            renderAdapter.onGameModeChange(gameMode, this.ticker.getState());
+        }
         this.ticker.getState().world().commitEntityModifications();
     }
 

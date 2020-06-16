@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 
 import fi.jakojaannos.riista.assets.AssetManager;
 import fi.jakojaannos.riista.utilities.BitMask;
+import fi.jakojaannos.riista.view.assets.Animation;
 import fi.jakojaannos.riista.view.assets.Material;
 import fi.jakojaannos.riista.view.assets.SkeletalMesh;
 import fi.jakojaannos.riista.vulkan.assets.material.MaterialImpl;

@@ -42,7 +42,7 @@ public final class GameExpect {
             final GameMode gameMode,
             final GameRenderAdapter<TPresentState> renderAdapter
     ) {
-        return new SimulationRunnerImpl<TPresentState>(gameMode, renderAdapter);
+        return new SimulationRunnerImpl<>(gameMode, renderAdapter);
     }
 
     /**

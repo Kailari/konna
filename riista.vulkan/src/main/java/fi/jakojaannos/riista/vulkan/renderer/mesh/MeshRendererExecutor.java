@@ -148,7 +148,10 @@ public class MeshRendererExecutor extends RecreateCloseable {
                                    0,
                                    pushConstantData);
 
-                entry.mesh.setFrame(this.animationDescriptor, imageIndex, entry.animation, entry.frame);
+
+                this.animationDescriptor.setFrame(imageIndex,
+                                                  entry.mesh.getAnimation(entry.animation),
+                                                  entry.frame);
                 vkCmdBindDescriptorSets(commandBuffer.getHandle(),
                                         VK_PIPELINE_BIND_POINT_GRAPHICS,
                                         this.skeletalPipeline.getLayout(),

@@ -2,6 +2,7 @@ package fi.jakojaannos.riista.vulkan.assets.mesh.skeletal;
 
 import java.util.*;
 
+import fi.jakojaannos.riista.view.assets.Animation;
 import fi.jakojaannos.riista.vulkan.internal.descriptor.DescriptorBinding;
 import fi.jakojaannos.riista.view.assets.Mesh;
 import fi.jakojaannos.riista.view.assets.SkeletalMesh;
@@ -27,15 +28,9 @@ public class SkeletalMeshImpl implements SkeletalMesh {
         this.animations = Collections.unmodifiableMap(animations);
     }
 
-    public void setFrame(
-            final AnimationDescriptor animationDescriptor,
-            final int imageIndex,
-            final String animation,
-            final int frame
-    ) {
-        animationDescriptor.setFrame(imageIndex,
-                                     this.animations.get(animation),
-                                     frame);
+    @Override
+    public Animation getAnimation(final String name) {
+        return this.animations.get(name);
     }
 
     @Override

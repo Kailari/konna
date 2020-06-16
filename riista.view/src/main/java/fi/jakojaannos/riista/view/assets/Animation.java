@@ -1,4 +1,4 @@
-package fi.jakojaannos.riista.vulkan.assets.mesh.skeletal;
+package fi.jakojaannos.riista.view.assets;
 
 import org.joml.Matrix4f;
 

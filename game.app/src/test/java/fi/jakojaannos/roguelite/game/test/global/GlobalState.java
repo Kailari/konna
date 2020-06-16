@@ -2,30 +2,26 @@ package fi.jakojaannos.roguelite.game.test.global;
 
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
-import org.joml.Vector2f;
+import org.lwjgl.vulkan.VkExtent2D;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.Random;
 
 import fi.jakojaannos.konna.view.KonnaGameModeRenderers;
 import fi.jakojaannos.riista.GameRenderAdapter;
-import fi.jakojaannos.riista.data.components.Transform;
-import fi.jakojaannos.riista.data.events.UiEvent;
-import fi.jakojaannos.riista.view.DebugRenderer;
-import fi.jakojaannos.riista.view.MeshRenderer;
+import fi.jakojaannos.riista.data.resources.CameraProperties;
+import fi.jakojaannos.riista.data.resources.Mouse;
+import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.riista.view.Renderer;
 import fi.jakojaannos.riista.view.assets.MusicTrack;
-import fi.jakojaannos.riista.view.assets.SkeletalMesh;
 import fi.jakojaannos.riista.view.assets.SoundEffect;
 import fi.jakojaannos.riista.view.audio.AudioContext;
 import fi.jakojaannos.riista.view.audio.MusicPlayer;
-import fi.jakojaannos.riista.view.ui.UiElement;
-import fi.jakojaannos.riista.view.ui.UiRenderer;
 import fi.jakojaannos.riista.vulkan.application.PresentableState;
+import fi.jakojaannos.riista.vulkan.assets.storage.VulkanAssetManager;
 import fi.jakojaannos.riista.vulkan.renderer.GameRenderAdapterBase;
 import fi.jakojaannos.riista.vulkan.renderer.game.RendererRecorder;
 import fi.jakojaannos.roguelite.engine.GameState;
@@ -84,57 +80,42 @@ public class GlobalState {
         renderer = new GameRenderAdapterBase<>(KonnaGameModeRenderers.create(assetManager, timeManager, audioContext),
                                                cameraProperties -> {}
         ) {
+            private final PresentableState presentableState = new PresentableState();
+            private final RendererRecorder recorder = new RendererRecorder();
+            private final VkExtent2D extent = VkExtent2D.calloc();
+
             @Override
             public void writePresentableState(
                     final GameState gameState,
                     final Collection<Object> events
             ) {
-                if (this.hasActiveRenderDispatcher()) {
-                    gameState.world().replaceResource(Renderer.class, new RendererRecorder(
-                            new DebugRenderer() {
-                                @Override
-                                public void drawTransform(final Transform transform) {
-                                }
+                if (hasActiveRenderDispatcher()) {
+                    final var cameraProperties = gameState.world().fetchResource(CameraProperties.class);
+                    final var mouse = gameState.world().fetchResource(Mouse.class);
+                    final var timeManager = gameState.world().fetchResource(TimeManager.class);
 
-                                @Override
-                                public void drawBox(
-                                        final Transform transform, final Vector2f offset, final Vector2f size
-                                ) {
-                                }
-                            },
-                            new MeshRenderer() {
-                                @Override
-                                public void drawSkeletal(
-                                        final Transform transform,
-                                        final SkeletalMesh mesh,
-                                        final String animation,
-                                        final int frame
-                                ) {
-                                }
-                            },
-                            new UiRenderer() {
-                                @Override
-                                public void setValue(final String key, final Object value) {
-                                }
+                    this.presentableState.clear(timeManager,
+                                                mouse.position,
+                                                mouse.clicked,
+                                                this.extent,
+                                                cameraProperties.getPosition(),
+                                                cameraProperties.getViewMatrix());
 
-                                @Override
-                                public Collection<UiEvent> draw(final UiElement element) {
-                                    return Collections.emptyList();
-                                }
-                            }
-                    ));
+                    gameState.world().replaceResource(Renderer.class, this.recorder);
+                    this.recorder.setWriteState(this.presentableState);
 
+                    if (gameState == null || events == null) {
+                        throw new IllegalStateException();
+                    }
                     super.writePresentableState(gameState, events);
                 }
             }
 
             @Override
             public PresentableState fetchPresentableState() {
-                return new PresentableState();
+                return this.presentableState;
             }
         };
-
-        // TODO: Create render adapters for UI/render testing (?)
 
         final var shouldVisualizeTests = Optional.ofNullable(System.getenv("VISUALIZE_TESTS"))
                                                  .map(Boolean::valueOf)

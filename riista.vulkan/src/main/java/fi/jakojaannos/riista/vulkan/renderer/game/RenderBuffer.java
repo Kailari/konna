@@ -2,6 +2,8 @@ package fi.jakojaannos.riista.vulkan.renderer.game;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
@@ -69,5 +71,10 @@ public class RenderBuffer<TOutput extends Presentable> implements Iterable<TOutp
                 return next;
             }
         };
+    }
+
+    @Override
+    public Spliterator<TOutput> spliterator() {
+        return Spliterators.spliterator(this.elements, 0, this.position, 0);
     }
 }
