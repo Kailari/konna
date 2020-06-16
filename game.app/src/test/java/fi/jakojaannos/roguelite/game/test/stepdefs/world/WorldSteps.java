@@ -9,7 +9,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.riista.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
+import fi.jakojaannos.riista.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.game.data.archetypes.FollowerArchetype;
 import fi.jakojaannos.roguelite.game.data.components.ObstacleTag;
 import fi.jakojaannos.roguelite.game.data.components.SpawnerComponent;

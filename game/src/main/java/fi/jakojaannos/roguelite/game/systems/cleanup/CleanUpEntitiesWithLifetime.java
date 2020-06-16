@@ -7,11 +7,11 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
+import fi.jakojaannos.riista.ecs.World;
+import fi.jakojaannos.riista.ecs.legacy.ECSSystem;
+import fi.jakojaannos.riista.ecs.legacy.Entity;
+import fi.jakojaannos.riista.ecs.legacy.EntityManager;
+import fi.jakojaannos.riista.ecs.legacy.RequirementsBuilder;
 import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.Lifetime;
 import fi.jakojaannos.roguelite.game.systems.SystemGroups;

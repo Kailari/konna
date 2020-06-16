@@ -4,10 +4,10 @@ import java.util.stream.Stream;
 
 import fi.jakojaannos.riista.data.resources.CameraProperties;
 import fi.jakojaannos.riista.data.resources.Mouse;
-import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
+import fi.jakojaannos.riista.ecs.World;
+import fi.jakojaannos.riista.ecs.legacy.ECSSystem;
+import fi.jakojaannos.riista.ecs.legacy.Entity;
+import fi.jakojaannos.riista.ecs.legacy.RequirementsBuilder;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.MovementInput;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;

@@ -2,7 +2,7 @@ package fi.jakojaannos.roguelite.game.data;
 
 import javax.annotation.Nullable;
 
-import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
+import fi.jakojaannos.riista.ecs.EntityHandle;
 
 public interface DamageSource<TKiller> {
     /**
@@ -30,15 +30,15 @@ public interface DamageSource<TKiller> {
         }
     }
 
-    class LegacyEntity implements DamageSource<fi.jakojaannos.roguelite.engine.ecs.legacy.Entity> {
-        private final fi.jakojaannos.roguelite.engine.ecs.legacy.Entity player;
+    class LegacyEntity implements DamageSource<fi.jakojaannos.riista.ecs.legacy.Entity> {
+        private final fi.jakojaannos.riista.ecs.legacy.Entity player;
 
         @Override
-        public fi.jakojaannos.roguelite.engine.ecs.legacy.Entity getKiller() {
+        public fi.jakojaannos.riista.ecs.legacy.Entity getKiller() {
             return this.player;
         }
 
-        public LegacyEntity(final fi.jakojaannos.roguelite.engine.ecs.legacy.Entity player) {
+        public LegacyEntity(final fi.jakojaannos.riista.ecs.legacy.Entity player) {
             this.player = player;
         }
     }

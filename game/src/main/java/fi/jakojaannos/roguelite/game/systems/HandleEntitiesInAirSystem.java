@@ -2,10 +2,10 @@ package fi.jakojaannos.roguelite.game.systems;
 
 import java.util.stream.Stream;
 
-import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
+import fi.jakojaannos.riista.ecs.World;
+import fi.jakojaannos.riista.ecs.legacy.ECSSystem;
+import fi.jakojaannos.riista.ecs.legacy.Entity;
+import fi.jakojaannos.riista.ecs.legacy.RequirementsBuilder;
 import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.InAir;
 

@@ -4,7 +4,7 @@ import org.joml.Vector2d;
 import org.junit.jupiter.api.Test;
 
 import fi.jakojaannos.riista.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.riista.ecs.World;
 import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
 import fi.jakojaannos.roguelite.game.data.CollisionLayer;

@@ -6,8 +6,8 @@ import fi.jakojaannos.riista.assets.AssetManager;
 import fi.jakojaannos.riista.data.resources.Network;
 import fi.jakojaannos.riista.view.Renderer;
 import fi.jakojaannos.riista.view.ui.UiElement;
-import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
-import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
+import fi.jakojaannos.riista.ecs.EcsSystem;
+import fi.jakojaannos.riista.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.network.NetworkManager;
 

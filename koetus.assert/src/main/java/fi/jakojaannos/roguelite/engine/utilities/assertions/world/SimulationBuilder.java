@@ -3,11 +3,11 @@ package fi.jakojaannos.roguelite.engine.utilities.assertions.world;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
-import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
-import fi.jakojaannos.roguelite.engine.ecs.SystemGroup;
-import fi.jakojaannos.roguelite.engine.ecs.SystemState;
-import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
+import fi.jakojaannos.riista.ecs.EcsSystem;
+import fi.jakojaannos.riista.ecs.SystemGroup;
+import fi.jakojaannos.riista.ecs.SystemState;
+import fi.jakojaannos.riista.ecs.World;
+import fi.jakojaannos.riista.ecs.legacy.ECSSystem;
 
 public interface SimulationBuilder extends SimulationRunner<SimulationInspector> {
     SimulationBuilder withState(Consumer<World> builder);

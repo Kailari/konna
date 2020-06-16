@@ -5,7 +5,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
+import fi.jakojaannos.riista.ecs.EntityHandle;
 import fi.jakojaannos.roguelite.game.systems.collision.CollisionEvent;
 
 /**

@@ -1,6 +1,6 @@
 package fi.jakojaannos.roguelite.engine.utilities.assertions.world.entity;
 
-import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
+import fi.jakojaannos.riista.ecs.EntityHandle;
 import fi.jakojaannos.roguelite.engine.utilities.assertions.world.ComponentMatcher;
 import fi.jakojaannos.roguelite.engine.utilities.assertions.world.EntityExpect;
 

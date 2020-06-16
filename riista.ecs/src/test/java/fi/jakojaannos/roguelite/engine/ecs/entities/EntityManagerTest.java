@@ -3,11 +3,11 @@ package fi.jakojaannos.roguelite.engine.ecs.entities;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.world.LegacyCompat;
-import fi.jakojaannos.roguelite.engine.ecs.world.WorldImpl;
+import fi.jakojaannos.riista.ecs.legacy.Entity;
+import fi.jakojaannos.riista.ecs.legacy.EntityManager;
+import fi.jakojaannos.riista.ecs.World;
+import fi.jakojaannos.riista.ecs.world.LegacyCompat;
+import fi.jakojaannos.riista.ecs.world.WorldImpl;
 
 import static org.junit.jupiter.api.Assertions.*;
 

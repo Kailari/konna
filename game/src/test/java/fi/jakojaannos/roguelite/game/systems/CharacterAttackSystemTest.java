@@ -3,7 +3,7 @@ package fi.jakojaannos.roguelite.game.systems;
 import org.junit.jupiter.api.Test;
 
 import fi.jakojaannos.riista.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.riista.ecs.World;
 import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.DamageSource;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;

@@ -1,7 +1,6 @@
 package fi.jakojaannos.roguelite.game.systems.collision;
 
-import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
+import fi.jakojaannos.riista.ecs.EntityHandle;
 
 public abstract class Collision {
     private final Type type;

@@ -11,7 +11,7 @@ import fi.jakojaannos.roguelite.engine.GameMode;
 import fi.jakojaannos.roguelite.engine.GameState;
 import fi.jakojaannos.roguelite.engine.MainThread;
 import fi.jakojaannos.roguelite.engine.MainThreadTask;
-import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.riista.ecs.World;
 import fi.jakojaannos.roguelite.engine.event.EventBus;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.roguelite.engine.input.InputEvent;

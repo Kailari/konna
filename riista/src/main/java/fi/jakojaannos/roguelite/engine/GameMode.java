@@ -3,9 +3,9 @@ package fi.jakojaannos.roguelite.engine;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
-import fi.jakojaannos.roguelite.engine.ecs.SystemState;
-import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.riista.ecs.SystemDispatcher;
+import fi.jakojaannos.riista.ecs.SystemState;
+import fi.jakojaannos.riista.ecs.World;
 
 public record GameMode(
         int id,

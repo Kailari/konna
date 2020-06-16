@@ -2,10 +2,10 @@ package fi.jakojaannos.roguelite.game.systems;
 
 import java.util.stream.Stream;
 
-import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
-import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
-import fi.jakojaannos.roguelite.engine.ecs.annotation.DisabledByDefault;
-import fi.jakojaannos.roguelite.engine.ecs.annotation.EnableOn;
+import fi.jakojaannos.riista.ecs.EcsSystem;
+import fi.jakojaannos.riista.ecs.EntityDataHandle;
+import fi.jakojaannos.riista.ecs.annotation.DisabledByDefault;
+import fi.jakojaannos.riista.ecs.annotation.EnableOn;
 import fi.jakojaannos.roguelite.engine.event.Events;
 import fi.jakojaannos.riista.data.events.StateEvent;
 import fi.jakojaannos.riista.utilities.TimeManager;

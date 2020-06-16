@@ -12,7 +12,7 @@ import fi.jakojaannos.riista.data.resources.CameraProperties;
 import fi.jakojaannos.riista.view.GameModeRenderers;
 import fi.jakojaannos.roguelite.engine.GameMode;
 import fi.jakojaannos.roguelite.engine.GameState;
-import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
+import fi.jakojaannos.riista.ecs.SystemDispatcher;
 
 public abstract class GameRenderAdapterBase<TPresentState> implements GameRenderAdapter<TPresentState> {
     private static final Logger LOG = LoggerFactory.getLogger(GameRenderAdapter.class);

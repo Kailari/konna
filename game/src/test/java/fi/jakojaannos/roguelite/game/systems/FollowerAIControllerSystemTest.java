@@ -7,8 +7,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.riista.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
+import fi.jakojaannos.riista.ecs.World;
+import fi.jakojaannos.riista.ecs.legacy.Entity;
 import fi.jakojaannos.roguelite.game.data.components.character.MovementInput;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.FollowerAI;

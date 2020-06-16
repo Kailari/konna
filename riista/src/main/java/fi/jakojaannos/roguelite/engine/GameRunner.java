@@ -9,7 +9,7 @@ import java.util.Queue;
 
 import fi.jakojaannos.riista.data.resources.Network;
 import fi.jakojaannos.riista.utilities.TimeManager;
-import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.riista.ecs.World;
 import fi.jakojaannos.roguelite.engine.event.EventBus;
 import fi.jakojaannos.roguelite.engine.event.EventSender;
 import fi.jakojaannos.roguelite.engine.event.Events;

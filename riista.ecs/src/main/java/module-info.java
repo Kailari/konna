@@ -4,10 +4,10 @@ module riista.ecs {
 
     requires riista.utilities;
 
-    exports fi.jakojaannos.roguelite.engine.ecs;
-    exports fi.jakojaannos.roguelite.engine.ecs.data.resources;
-    exports fi.jakojaannos.roguelite.engine.ecs.annotation;
-    exports fi.jakojaannos.roguelite.engine.ecs.legacy;
+    exports fi.jakojaannos.riista.ecs;
+    exports fi.jakojaannos.riista.ecs.resources;
+    exports fi.jakojaannos.riista.ecs.annotation;
+    exports fi.jakojaannos.riista.ecs.legacy;
 
-    exports fi.jakojaannos.roguelite.engine.ecs.systemdata to riista.view;
+    exports fi.jakojaannos.riista.ecs.systemdata to riista.view;
 }

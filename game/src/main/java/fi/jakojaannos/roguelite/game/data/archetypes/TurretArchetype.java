@@ -1,8 +1,8 @@
 package fi.jakojaannos.roguelite.game.data.archetypes;
 
 import fi.jakojaannos.riista.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
-import fi.jakojaannos.roguelite.engine.ecs.data.resources.Entities;
+import fi.jakojaannos.riista.ecs.EntityHandle;
+import fi.jakojaannos.riista.ecs.resources.Entities;
 import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.DamageSource;

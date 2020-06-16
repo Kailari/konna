@@ -1,8 +1,8 @@
 package fi.jakojaannos.roguelite.game.data.archetypes;
 
 import fi.jakojaannos.riista.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
+import fi.jakojaannos.riista.ecs.legacy.Entity;
+import fi.jakojaannos.riista.ecs.legacy.EntityManager;
 import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
 import fi.jakojaannos.roguelite.game.data.components.character.Health;

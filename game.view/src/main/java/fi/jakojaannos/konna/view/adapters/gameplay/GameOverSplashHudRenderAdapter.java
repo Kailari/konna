@@ -5,10 +5,10 @@ import java.util.stream.Stream;
 import fi.jakojaannos.riista.assets.AssetManager;
 import fi.jakojaannos.riista.view.Renderer;
 import fi.jakojaannos.riista.view.ui.UiElement;
-import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
-import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
-import fi.jakojaannos.roguelite.engine.ecs.annotation.DisabledByDefault;
-import fi.jakojaannos.roguelite.engine.ecs.annotation.EnableOn;
+import fi.jakojaannos.riista.ecs.EcsSystem;
+import fi.jakojaannos.riista.ecs.EntityDataHandle;
+import fi.jakojaannos.riista.ecs.annotation.DisabledByDefault;
+import fi.jakojaannos.riista.ecs.annotation.EnableOn;
 import fi.jakojaannos.roguelite.game.data.events.GameLostEvent;
 
 @DisabledByDefault

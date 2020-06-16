@@ -5,8 +5,8 @@ import org.joml.Vector2d;
 import java.util.Random;
 
 import fi.jakojaannos.riista.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.data.resources.Entities;
+import fi.jakojaannos.riista.ecs.World;
+import fi.jakojaannos.riista.ecs.resources.Entities;
 import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
 import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.archetypes.FollowerArchetype;

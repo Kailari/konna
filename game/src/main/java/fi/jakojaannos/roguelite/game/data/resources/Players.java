@@ -3,7 +3,7 @@ package fi.jakojaannos.roguelite.game.data.resources;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
-import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
+import fi.jakojaannos.riista.ecs.EntityHandle;
 
 public class Players {
     @Nullable private EntityHandle localPlayer;

@@ -6,8 +6,8 @@ import java.util.stream.Stream;
 import fi.jakojaannos.riista.view.assets.MusicTrack;
 import fi.jakojaannos.riista.view.audio.AudioContext;
 import fi.jakojaannos.riista.view.audio.MusicPlayer;
-import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
-import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
+import fi.jakojaannos.riista.ecs.EcsSystem;
+import fi.jakojaannos.riista.ecs.EntityDataHandle;
 
 public class BackgroundMusicAdapter implements EcsSystem<EcsSystem.NoResources, EcsSystem.NoEntities, EcsSystem.NoEvents>, AutoCloseable {
     private final MusicTrack background;

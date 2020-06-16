@@ -9,7 +9,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import fi.jakojaannos.riista.data.resources.CameraProperties;
 import fi.jakojaannos.riista.data.resources.Mouse;
-import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.riista.ecs.World;
 import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.DamageSource;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
@@ -18,7 +18,7 @@ import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
 import fi.jakojaannos.roguelite.game.data.components.character.WeaponInput;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
 
-import static fi.jakojaannos.roguelite.engine.ecs.ComponentFactory.factory;
+import static fi.jakojaannos.riista.ecs.ComponentFactory.factory;
 import static fi.jakojaannos.roguelite.engine.utilities.assertions.world.GameExpect.whenGame;
 import static org.junit.jupiter.api.Assertions.*;
 

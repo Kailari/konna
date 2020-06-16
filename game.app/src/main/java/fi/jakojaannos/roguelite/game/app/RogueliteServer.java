@@ -8,7 +8,7 @@ import fi.jakojaannos.roguelite.engine.GameMode;
 import fi.jakojaannos.roguelite.engine.GameRunner;
 import fi.jakojaannos.roguelite.engine.GameState;
 import fi.jakojaannos.riista.data.resources.Network;
-import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
+import fi.jakojaannos.riista.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.engine.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.input.InputProvider;
 import fi.jakojaannos.roguelite.engine.network.ServerNetworkManager;

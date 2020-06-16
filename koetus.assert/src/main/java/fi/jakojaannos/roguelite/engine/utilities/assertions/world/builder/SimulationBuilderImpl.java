@@ -4,10 +4,10 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import fi.jakojaannos.roguelite.engine.GameMode;
-import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
-import fi.jakojaannos.roguelite.engine.ecs.SystemGroup;
-import fi.jakojaannos.roguelite.engine.ecs.SystemState;
-import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.riista.ecs.SystemDispatcher;
+import fi.jakojaannos.riista.ecs.SystemGroup;
+import fi.jakojaannos.riista.ecs.SystemState;
+import fi.jakojaannos.riista.ecs.World;
 import fi.jakojaannos.roguelite.engine.utilities.assertions.world.SimulationBuilder;
 import fi.jakojaannos.roguelite.engine.utilities.assertions.world.SimulationInspector;
 import fi.jakojaannos.roguelite.engine.utilities.assertions.world.runner.SimulationRunnerImpl;

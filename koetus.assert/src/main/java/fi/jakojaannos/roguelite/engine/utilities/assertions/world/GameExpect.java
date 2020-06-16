@@ -2,7 +2,7 @@ package fi.jakojaannos.roguelite.engine.utilities.assertions.world;
 
 import fi.jakojaannos.riista.GameRenderAdapter;
 import fi.jakojaannos.roguelite.engine.GameMode;
-import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
+import fi.jakojaannos.riista.ecs.EntityHandle;
 import fi.jakojaannos.roguelite.engine.utilities.assertions.world.builder.SimulationBuilderImpl;
 import fi.jakojaannos.roguelite.engine.utilities.assertions.world.entity.EntityExpectImpl;
 import fi.jakojaannos.roguelite.engine.utilities.assertions.world.runner.SimulationRunnerImpl;

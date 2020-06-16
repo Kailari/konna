@@ -6,7 +6,7 @@ import fi.jakojaannos.riista.assets.AssetManager;
 import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.riista.view.GameModeRenderers;
 import fi.jakojaannos.riista.view.audio.AudioContext;
-import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
+import fi.jakojaannos.riista.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;
 import fi.jakojaannos.roguelite.game.gamemode.MainMenuGameMode;
 

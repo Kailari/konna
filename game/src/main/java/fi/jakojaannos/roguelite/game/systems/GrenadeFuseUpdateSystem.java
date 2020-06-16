@@ -3,8 +3,8 @@ package fi.jakojaannos.roguelite.game.systems;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.riista.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
-import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
+import fi.jakojaannos.riista.ecs.EcsSystem;
+import fi.jakojaannos.riista.ecs.EntityDataHandle;
 import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.weapon.Fuse;
 import fi.jakojaannos.roguelite.game.data.components.weapon.GrenadeStats;

@@ -2,8 +2,8 @@ package fi.jakojaannos.roguelite.game.data.archetypes;
 
 import fi.jakojaannos.riista.data.components.Transform;
 import fi.jakojaannos.riista.utilities.TimeManager;
-import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
-import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.riista.ecs.EntityHandle;
+import fi.jakojaannos.riista.ecs.World;
 import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.DamageSource;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
@@ -15,7 +15,7 @@ import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponInventory;
 import fi.jakojaannos.roguelite.game.data.resources.Weapons;
 import fi.jakojaannos.roguelite.game.weapons.InventoryWeapon;
 
-import static fi.jakojaannos.roguelite.engine.ecs.ComponentFactory.factory;
+import static fi.jakojaannos.riista.ecs.ComponentFactory.factory;
 
 public class PlayerArchetype {
     private static final boolean GRENADE_ENABLED = false;

@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import fi.jakojaannos.roguelite.engine.ecs.SystemDispatcher;
+import fi.jakojaannos.riista.ecs.SystemDispatcher;
 
 public class GameModeRenderers {
     private final Map<Integer, Factory> factories;

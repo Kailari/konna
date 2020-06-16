@@ -5,7 +5,7 @@ import org.joml.Vector2d;
 import java.util.ArrayList;
 import java.util.List;
 
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
+import fi.jakojaannos.riista.ecs.legacy.Entity;
 
 public class SlimeSharedAI {
 
