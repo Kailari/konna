@@ -23,6 +23,10 @@ public class GameRunnerTimeManager implements TimeManager {
         return this.currentTick;
     }
 
+    public void setCurrentTick(final long tick) {
+        this.currentTick = tick;
+    }
+
     public GameRunnerTimeManager(final long timeStep) {
         this.timeStep = timeStep;
         this.timeStepInSeconds = timeStep / 1000.0;

@@ -30,4 +30,7 @@ public interface PresentationInspector<TPresentState> extends SimulationInspecto
 
     @Override
     PresentationInspector<TPresentState> receivesInput(InputEvent button);
+
+    @Override
+    PresentationInspector<TPresentState> setCurrentTickAsSeconds(double seconds);
 }

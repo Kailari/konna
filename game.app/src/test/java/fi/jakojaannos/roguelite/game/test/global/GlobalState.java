@@ -12,6 +12,7 @@ import java.util.Random;
 
 import fi.jakojaannos.konna.view.KonnaGameModeRenderers;
 import fi.jakojaannos.riista.GameRenderAdapter;
+import fi.jakojaannos.riista.GameRunnerTimeManager;
 import fi.jakojaannos.riista.data.resources.CameraProperties;
 import fi.jakojaannos.riista.data.resources.Mouse;
 import fi.jakojaannos.riista.utilities.TimeManager;
@@ -34,9 +35,6 @@ import static org.mockito.Mockito.mock;
  */
 public class GlobalState {
     public static SimulationInspector simulation;
-
-    //public static RogueliteGameRenderer gameRenderer;
-    public static TestTimeManager timeManager;
     public static GameRenderAdapter<PresentableState> renderer;
 
     public static Random random;
@@ -72,11 +70,9 @@ public class GlobalState {
 
         random = new Random(13376969);
 
-        timeManager = new TestTimeManager(20L);
-
         // FIXME: dummy camera props updater
         // TODO: Actual VulkanRenderAdapter for visualized tests
-        renderer = new GameRenderAdapterBase<>(KonnaGameModeRenderers.create(assetManager, timeManager, audioContext),
+        renderer = new GameRenderAdapterBase<>(KonnaGameModeRenderers.create(assetManager, new GameRunnerTimeManager(20L), audioContext),
                                                cameraProperties -> {}
         ) {
             private final PresentableState presentableState = new PresentableState();
@@ -103,9 +99,6 @@ public class GlobalState {
                     gameState.world().replaceResource(Renderer.class, this.recorder);
                     this.recorder.setWriteState(this.presentableState);
 
-                    if (gameState == null || events == null) {
-                        throw new IllegalStateException();
-                    }
                     super.writePresentableState(gameState, events);
                 }
             }
@@ -123,33 +116,6 @@ public class GlobalState {
             Path assetRoot = Paths.get("../assets");
             // TODO: Launch renderer thread
         }
-        /*
-        gameRenderer = Optional.ofNullable(System.getenv("VISUALIZE_TESTS"))
-                               .map(Boolean::valueOf)
-                               .filter(Boolean::booleanValue)
-                               .map(ignored -> {
-                                   glfwInit();
-                                   LWJGLWindow lwjglWindow = new LWJGLWindow(800, 600);
-                                   window = lwjglWindow;
-                                   lwjglWindow.show();
-                                   glfwMakeContextCurrent(lwjglWindow.getId());
-                                   GL.createCapabilities();
-                                   glfwSwapInterval(0);
-                                   return new RogueliteGameRenderer(gameRunner.getEvents(),
-                                                                    gameRunner.getTimeManager(),
-                                                                    assetRoot,
-                                                                    window,
-                                                                    new LWJGLRenderingBackend(assetRoot),
-                                                                    new LWJGLAssetManager(assetRoot));
-                               })
-                               .orElseGet(() -> new RogueliteGameRenderer(gameRunner.getEvents(),
-                                                                          gameRunner.getTimeManager(),
-                                                                          assetRoot,
-                                                                          window = new TestWindow(800, 600),
-                                                                          new TestRenderingBackend(),
-                                                                          new TestAssetManager(assetRoot)));
-
-         */
     }
 
     @After

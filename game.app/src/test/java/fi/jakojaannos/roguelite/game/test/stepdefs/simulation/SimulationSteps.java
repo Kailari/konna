@@ -4,17 +4,19 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.When;
 import org.joml.Vector2d;
 
+import fi.jakojaannos.riista.GameRunnerTimeManager;
 import fi.jakojaannos.riista.data.components.Transform;
 import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;
 
 import static fi.jakojaannos.roguelite.engine.utilities.assertions.world.GameExpect.whenGameWithGameModeAndRenderer;
 import static fi.jakojaannos.roguelite.game.test.global.GlobalGameState.*;
-import static fi.jakojaannos.roguelite.game.test.global.GlobalState.*;
+import static fi.jakojaannos.roguelite.game.test.global.GlobalState.renderer;
+import static fi.jakojaannos.roguelite.game.test.global.GlobalState.simulation;
 
 public class SimulationSteps {
     @Given("the game world just finished loading")
     public void the_game_world_just_finished_loading() {
-        simulation = whenGameWithGameModeAndRenderer(GameplayGameMode.create(6969, timeManager),
+        simulation = whenGameWithGameModeAndRenderer(GameplayGameMode.create(6969, new GameRunnerTimeManager(20L)),
                                                      renderer);
 
         playerInitialPosition = getLocalPlayer().flatMap(player -> player.getComponent(Transform.class))
@@ -25,7 +27,7 @@ public class SimulationSteps {
 
     @Given("the current game time is at {double} seconds")
     public void theCurrentGameTimeIsAtSeconds(double seconds) {
-        timeManager.setCurrentTickAsSeconds(seconds);
+        simulation.setCurrentTickAsSeconds(seconds);
     }
 
     @Given("the game has run for {double} seconds")

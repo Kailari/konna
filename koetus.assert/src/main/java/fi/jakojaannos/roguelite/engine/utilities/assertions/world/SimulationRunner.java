@@ -22,4 +22,6 @@ public interface SimulationRunner<TRunner> {
     TRunner skipsTicks(int n);
 
     TRunner receivesInput(InputEvent button);
+
+    TRunner setCurrentTickAsSeconds(double seconds);
 }

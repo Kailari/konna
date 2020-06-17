@@ -53,4 +53,9 @@ public interface SimulationBuilder extends SimulationRunner<SimulationInspector>
     default SimulationInspector receivesInput(final InputEvent button) {
         return build().receivesInput(button);
     }
+
+    @Override
+    default SimulationInspector setCurrentTickAsSeconds(final double seconds) {
+        return build().setCurrentTickAsSeconds(seconds);
+    }
 }

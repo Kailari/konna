@@ -9,19 +9,12 @@ Feature: The player can see how long they have survived on the HUD
 
   Scenario: The game starts. There is timer with text "00:00:00" on the top of the screen.
     Given the current game time is at 0 seconds
-    When the game runs for a single tick
-    And the game is rendered
-    Then there is a timer label on the top-middle of the screen
-    And the timer label reads "00:00:00"
+    Then the timer label reads "00:00:00"
 
   Scenario: The player plays for a few seconds. The timer reads "00:00:42".
     Given the current game time is at 42 seconds
-    When the game runs for a single tick
-    And the game is rendered
     Then the timer label reads "00:00:42"
 
   Scenario: The survives for a long time. The timer reads "69:12:34".
     Given the current game time is at 249154 seconds
-    When the game runs for a single tick
-    And the game is rendered
     Then the timer label reads "69:12:34"

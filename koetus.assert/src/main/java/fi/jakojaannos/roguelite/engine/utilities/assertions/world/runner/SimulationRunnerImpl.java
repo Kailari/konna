@@ -115,4 +115,11 @@ public class SimulationRunnerImpl<TPresentState> implements PresentationInspecto
 
         return this;
     }
+
+    @Override
+    public PresentationInspector<TPresentState> setCurrentTickAsSeconds(final double seconds) {
+        this.timeManager.setCurrentTick(this.timeManager.convertToTicks(seconds));
+
+        return this;
+    }
 }

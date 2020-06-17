@@ -54,142 +54,25 @@ public class HudSteps {
                                                         .contains(b.toLowerCase())));
     }
 
-/*
-    public static final String GAME_OVER_CONTAINER_NAME = "game-over-container";
-    private static final double HEALTHBAR_NEAR_THRESHOLD = 2.0; // World units
-
-    @Given("no enemies have taken damage")
-    public void noEnemiesHaveTakenDamage() {
-        // NO-OP
-    }
-
-    @Given("one enemy has taken damage recently")
-    public void oneEnemyHasTakenDamageRecently() {
-        dealDamageToNumberOfEnemies(1, timeManager.convertToTicks(0.5));
-    }
-
-    @Given("{int} enemies have taken damage {int} seconds ago")
-    public void enemiesHaveTakenDamageSecondsAgo(int n, int seconds) {
-        dealDamageToNumberOfEnemies(n, timeManager.convertToTicks(seconds));
-    }
-
-    @Given("{int} enemies have taken damage recently")
-    public void enemiesHaveTakenDamageRecently(int n) {
-        dealDamageToNumberOfEnemies(n, timeManager.convertToTicks(0.5));
-    }
-
-    protected void dealDamageToNumberOfEnemies(final int n, final long ticksSinceDamaged) {
-        final var healths = state.world()
-                                 .getEntityManager()
-                                 .getEntitiesWith(Health.class)
-                                 .map(EntityManager.EntityComponentPair::component)
-                                 .collect(Collectors.toList());
-
-        Collections.shuffle(healths, random);
-        healths.stream()
-               .limit(n)
-               .forEach(health -> {
-                   health.currentHealth -= 1.0;
-                   health.lastDamageInstanceTimeStamp = timeManager.getCurrentGameTime() - ticksSinceDamaged;
-               });
-    }
-
-    @Then("there is a timer label on the top-middle of the screen")
-    public void thereIsATimerLabelOnTheTopMiddleOfTheScreen() {
-        final var ui = gameRenderer.getCurrentUserInterface();
-        assertUI(ui)
-                .hasExactlyOneElement(that -> that.hasName().equalTo("time-played-timer")
-                                                  .matching(isVerticallyIn(ui).min())
-                                                  .matching(isHorizontallyIn(ui).middle())
-                                                  .isLabel());
-    }
-
-    @And("the timer label reads {string}")
-    public void theTimerLabelReads(String expected) {
-        assertUI(gameRenderer.getCurrentUserInterface())
-                .hasExactlyOneElement(that -> that.hasName().equalTo("time-played-timer")
-                                                  .isLabel()
-                                                  .hasText().equalTo(expected));
-    }
-
     @Then("the kill counter has text {string}")
     public void theKillCounterHasText(String text) {
-        assertUI(gameRenderer.getCurrentUserInterface())
-                .hasExactlyOneElement(that -> that.hasName().equalTo("score-kills")
-                                                  .isLabel()
-                                                  .hasText().whichContains(text));
+        simulation.runsSingleTick();
+
+        final var state = GlobalState.renderer.fetchPresentableState();
+        assertTrue(StreamSupport.stream(state.textEntries().spliterator(), false)
+                                .anyMatch(entry -> entry.compileString(state.uiVariables())
+                                                        .toLowerCase()
+                                                        .contains(text.toLowerCase())));
     }
 
-    @Then("there should be no health-bars rendered")
-    public void thereShouldBeNoHealthBarsRendered() {
-        assertUI(gameRenderer.getCurrentUserInterface())
-                .hasNoElementMatching(that -> that.hasName().whichStartsWith("healthbar")
-                                                  .isProgressBar());
-    }
+    @Then("the timer label reads {string}")
+    public void theTimerLabelReads(String expected) {
+        simulation.runsSingleTick();
 
-    @Then("there should be one health-bar visible")
-    public void thereShouldBeOneHealthBarVisible() {
-        assertUI(gameRenderer.getCurrentUserInterface())
-                .hasExactlyOneElement(that -> that.hasName().whichStartsWith("healthbar")
-                                                  .isVisible()
-                                                  .isProgressBar());
+        final var state = GlobalState.renderer.fetchPresentableState();
+        assertTrue(StreamSupport.stream(state.textEntries().spliterator(), false)
+                                .anyMatch(entry -> entry.compileString(state.uiVariables())
+                                                        .toLowerCase()
+                                                        .contains(expected.toLowerCase())));
     }
-
-    @Then("there should be {int} health-bars visible")
-    public void thereShouldBeHealthBarsVisible(int n) {
-        assertUI(gameRenderer.getCurrentUserInterface())
-                .hasElements(n, that -> that.hasName().whichStartsWith("healthbar")
-                                            .isVisible()
-                                            .isProgressBar());
-    }
-
-    @Then("the health-bar should be close to the damaged enemy")
-    public void theHealthBarShouldBeCloseToTheDamagedEnemy() {
-        assertTrue(gameRenderer.getCurrentUserInterface()
-                               .findElements(that -> that.hasName().whichStartsWith("healthbar")
-                                                         .isVisible()
-                                                         .isProgressBar())
-                               .allMatch(this::projectedPositionIsNearDamagedEnemy));
-    }
-
-    @Then("each health-bar should be close to a damaged enemy")
-    public void eachHealthBarShouldBeCloseToADamagedEnemy() {
-        assertTrue(gameRenderer.getCurrentUserInterface()
-                               .findElements(that -> that.hasName().whichStartsWith("healthbar")
-                                                         .isVisible()
-                                                         .isProgressBar())
-                               .allMatch(this::projectedPositionIsNearDamagedEnemy));
-    }
-
-    private boolean projectedPositionIsNearDamagedEnemy(final UIElement element) {
-        return state.world()
-                    .getEntityManager()
-                    .getEntitiesWith(Health.class)
-                    .filter(pair -> pair.component().currentHealth < pair.component().maxHealth)
-                    .map(EntityManager.EntityComponentPair::entity)
-                    .map(entity -> state.world()
-                                        .getEntityManager()
-                                        .getComponentOf(entity, Transform.class)
-                                        .orElseThrow().position)
-                    .anyMatch(enemyPosition -> isNearPosition(element, enemyPosition, HEALTHBAR_NEAR_THRESHOLD));
-    }
-
-    private boolean isNearPosition(
-            final UIElement uiElement,
-            final Vector2d enemyPosition,
-            final double epsilon
-    ) {
-        return uiElement.getProperty(UIProperty.CENTER)
-                        .map(this::projectScreenToWorld)
-                        .orElseThrow()
-                        .distance(enemyPosition) < epsilon;
-    }
-
-    private Vector2d projectScreenToWorld(final Vector2i position) {
-        final var camera = gameRenderer.getCamera();
-        final var viewport = camera.getViewport();
-        return new Vector2d(((position.x / (double) viewport.getWidthInPixels()) * camera.getVisibleAreaWidth()) - camera.getVisibleAreaWidth() / 2.0,
-                            ((position.y / (double) viewport.getHeightInPixels()) * camera.getVisibleAreaHeight()) - camera.getVisibleAreaHeight() / 2.0);
-    }
-*/
 }
