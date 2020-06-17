@@ -1,15 +1,16 @@
 package fi.jakojaannos.riista.vulkan.renderer.ui;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
-import fi.jakojaannos.riista.vulkan.application.PresentableState;
-import fi.jakojaannos.riista.vulkan.application.UiVariables;
+import fi.jakojaannos.riista.data.events.UiEvent;
 import fi.jakojaannos.riista.view.Presentable;
 import fi.jakojaannos.riista.view.ui.*;
-import fi.jakojaannos.riista.data.events.UiEvent;
+import fi.jakojaannos.riista.vulkan.application.PresentableState;
+import fi.jakojaannos.riista.vulkan.application.UiVariables;
 
 import static fi.jakojaannos.riista.view.ui.UiUnit.zero;
 
@@ -29,6 +30,20 @@ public class UiRendererRecorder implements UiRenderer {
     public List<UiEvent> draw(final UiElement element) {
         final var events = new ArrayList<UiEvent>();
         draw(events, element, 1, -1, -1, 2, 2);
+
+        return events;
+    }
+
+    @Override
+    public Collection<UiEvent> draw(
+            final UiElement element,
+            final float x,
+            final float y,
+            final float w,
+            final float h
+    ) {
+        final var events = new ArrayList<UiEvent>();
+        draw(events, element, 1, x, y, w, h);
 
         return events;
     }

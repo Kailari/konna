@@ -15,4 +15,6 @@ public interface UiRenderer {
     void setValue(String key, Object value);
 
     Collection<UiEvent> draw(UiElement element);
+
+    Collection<UiEvent> draw(UiElement element, float x, float y, float w, float h);
 }

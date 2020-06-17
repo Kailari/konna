@@ -59,7 +59,7 @@ public class KonnaGameModeRenderers {
                    .withSystem(new PlayerCharacterRenderAdapter(assetManager))
                    .buildGroup();
             builder.group("ui")
-                   //.withSystem(new CharacterHealthbarRenderAdapter(timeManager.convertToTicks(5.0)))
+                   .withSystem(new CharacterHealthbarRenderAdapter(assetManager, timeManager.convertToTicks(5.0)))
                    .withSystem(new SessionStatsHudRenderAdapter(assetManager))
                    .withSystem(new GameOverSplashHudRenderAdapter(assetManager))
                    .withSystem(new HordeMessageHudRenderAdapter(assetManager, timeManager.convertToTicks(4.0)))
