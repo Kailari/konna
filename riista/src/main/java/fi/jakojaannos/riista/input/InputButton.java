@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.engine.input;
+package fi.jakojaannos.riista.input;
 
 import java.util.Arrays;
 import java.util.Map;

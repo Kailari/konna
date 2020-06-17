@@ -19,9 +19,9 @@ import fi.jakojaannos.riista.view.audio.AudioContext;
 import fi.jakojaannos.riista.vulkan.audio.LWJGLAudioContext;
 import fi.jakojaannos.riista.vulkan.internal.device.DeviceContext;
 import fi.jakojaannos.riista.vulkan.renderer.game.RendererExecutor;
-import fi.jakojaannos.roguelite.engine.GameMode;
-import fi.jakojaannos.roguelite.engine.GameRunnerTimeManager;
-import fi.jakojaannos.roguelite.engine.input.InputProvider;
+import fi.jakojaannos.riista.GameMode;
+import fi.jakojaannos.riista.GameRunnerTimeManager;
+import fi.jakojaannos.riista.input.InputProvider;
 
 import static fi.jakojaannos.riista.vulkan.util.VkUtil.ensureSuccess;
 import static fi.jakojaannos.riista.vulkan.util.VkUtil.translateVulkanResult;

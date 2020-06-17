@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Queue;
 
 import fi.jakojaannos.riista.vulkan.internal.window.Window;
-import fi.jakojaannos.roguelite.engine.input.*;
+import fi.jakojaannos.riista.input.*;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.system.MemoryStack.stackPush;

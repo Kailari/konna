@@ -6,10 +6,9 @@ import java.util.Random;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.riista.data.components.Transform;
-import fi.jakojaannos.riista.ecs.World;
-import fi.jakojaannos.riista.ecs.legacy.ECSSystem;
-import fi.jakojaannos.riista.ecs.legacy.Entity;
-import fi.jakojaannos.riista.ecs.legacy.RequirementsBuilder;
+import fi.jakojaannos.riista.ecs.EcsSystem;
+import fi.jakojaannos.riista.ecs.EntityDataHandle;
+import fi.jakojaannos.riista.ecs.resources.Entities;
 import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.archetypes.SlimeArchetype;
 import fi.jakojaannos.roguelite.game.data.components.InAir;
@@ -17,40 +16,26 @@ import fi.jakojaannos.roguelite.game.data.components.Physics;
 import fi.jakojaannos.roguelite.game.data.components.character.DeadTag;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.SlimeSharedAI;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.SplitOnDeath;
-import fi.jakojaannos.roguelite.game.systems.cleanup.ReaperSystem;
 
-public class SplitOnDeathSystem implements ECSSystem {
+public class SplitOnDeathSystem implements EcsSystem<SplitOnDeathSystem.Resources, SplitOnDeathSystem.EntityData, EcsSystem.NoEvents> {
     private final Random random = new Random(System.nanoTime());
-    private final Vector2d tempDir = new Vector2d();
-
-    @Override
-    public void declareRequirements(final RequirementsBuilder requirements) {
-        requirements.tickAfter(HealthUpdateSystem.class)
-                    .tickBefore(ReaperSystem.class)
-                    .withComponent(DeadTag.class)
-                    .withComponent(SplitOnDeath.class)
-                    .withComponent(Transform.class);
-
-    }
 
     @Override
     public void tick(
-            final Stream<Entity> entities,
-            final World world
+            final Resources resources,
+            final Stream<EntityDataHandle<EntityData>> entities,
+            final NoEvents noEvents
     ) {
-        final var entityManager = world.getEntityManager();
-        final var timeManager = world.fetchResource(TimeManager.class);
+        final var timeManager = resources.timeManager;
 
         entities.forEach(entity -> {
-            final var split = entityManager.getComponentOf(entity, SplitOnDeath.class).orElseThrow();
-            final var myPos = entityManager.getComponentOf(entity, Transform.class).orElseThrow();
-            final var maybeSharedAi = entityManager.getComponentOf(entity, SlimeSharedAI.class);
-
-            if (maybeSharedAi.isPresent()) {
-                final var sharedAi = maybeSharedAi.get();
-                sharedAi.slimes.remove(entity);
-                entityManager.removeComponentIfPresent(entity, SlimeSharedAI.class);
-            }
+            final var split = entity.getData().splitOnDeath;
+            final var transform = entity.getData().transform;
+            entity.getComponent(SlimeSharedAI.class)
+                  .ifPresent(sharedAi -> {
+                      sharedAi.slimes.remove(entity.getHandle());
+                      entity.removeComponent(SlimeSharedAI.class);
+                  });
 
             if (split.offspringAmount <= 1) {
                 return;
@@ -67,23 +52,22 @@ public class SplitOnDeathSystem implements ECSSystem {
                 final var xSpread = this.random.nextDouble() * 2.0 - 1.0;
                 final var ySpread = this.random.nextDouble() * 2.0 - 1.0;
                 final var force = getSpawnForce(split);
-                final var flightDur = getFlightDuration(split);
+                final var flightDuration = getFlightDuration(split);
 
-                this.tempDir.set(xSpread, ySpread);
-                if (this.tempDir.lengthSquared() != 0.0) {
-                    this.tempDir.normalize(force);
+                final var direction = new Vector2d(xSpread, ySpread);
+                if (direction.lengthSquared() != 0.0) {
+                    direction.normalize(force);
                 }
 
                 // FIXME: Add field to component for defining the factory
-                final Entity child = SlimeArchetype.createSlimeOfSize(entityManager,
-                                                                      myPos,
-                                                                      childSize)
-                                                   .asLegacyEntity();
+                final var child = SlimeArchetype.createSlimeOfSize(resources.entities,
+                                                                   transform,
+                                                                   childSize);
 
-                entityManager.getComponentOf(child, Physics.class)
-                             .ifPresent(physics -> physics.applyForce(this.tempDir.mul(physics.mass)));
+                child.getComponent(Physics.class)
+                     .ifPresent(physics -> physics.applyForce(direction.mul(physics.mass)));
 
-                entityManager.addComponentTo(child, new InAir(timeManager.getCurrentGameTime(), flightDur));
+                child.addComponent(new InAir(timeManager.getCurrentGameTime(), flightDuration));
             }
         });
     }
@@ -96,4 +80,15 @@ public class SplitOnDeathSystem implements ECSSystem {
         final var bound = split.maxSpawnFlightDurationInTicks - split.minSpawnFlightDurationInTicks;
         return this.random.nextInt(bound) + split.minSpawnFlightDurationInTicks;
     }
+
+    public static record Resources(
+            Entities entities,
+            TimeManager timeManager
+    ) {}
+
+    public static record EntityData(
+            Transform transform,
+            SplitOnDeath splitOnDeath,
+            DeadTag deadTag
+    ) {}
 }

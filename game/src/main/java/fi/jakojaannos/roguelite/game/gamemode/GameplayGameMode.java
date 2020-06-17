@@ -9,7 +9,7 @@ import fi.jakojaannos.riista.data.components.Transform;
 import fi.jakojaannos.riista.data.resources.CameraProperties;
 import fi.jakojaannos.riista.data.resources.Mouse;
 import fi.jakojaannos.riista.utilities.TimeManager;
-import fi.jakojaannos.roguelite.engine.GameMode;
+import fi.jakojaannos.riista.GameMode;
 import fi.jakojaannos.riista.ecs.SystemDispatcher;
 import fi.jakojaannos.riista.ecs.World;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;

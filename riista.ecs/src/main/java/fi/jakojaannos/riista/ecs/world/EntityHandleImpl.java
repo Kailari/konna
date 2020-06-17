@@ -92,7 +92,7 @@ public class EntityHandleImpl implements EntityHandle {
             return Optional.empty();
         }
 
-        return Optional.ofNullable(this.chunk.getComponent(this.storageIndex, componentClass));
+        return Optional.of(this.chunk.getComponent(this.storageIndex, componentClass));
     }
 
     @Override
@@ -141,5 +141,10 @@ public class EntityHandleImpl implements EntityHandle {
     @Override
     public int hashCode() {
         return Objects.hash(this.stableId);
+    }
+
+    @Override
+    public String toString() {
+        return "EntityHandle[id=" + this.stableId + "]";
     }
 }

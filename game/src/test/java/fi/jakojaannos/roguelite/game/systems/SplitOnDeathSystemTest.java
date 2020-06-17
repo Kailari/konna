@@ -2,40 +2,43 @@ package fi.jakojaannos.roguelite.game.systems;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.stream.Stream;
-
 import fi.jakojaannos.riista.data.components.Transform;
-import fi.jakojaannos.riista.ecs.World;
-import fi.jakojaannos.riista.ecs.legacy.Entity;
-import fi.jakojaannos.riista.ecs.legacy.EntityManager;
-import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
-import fi.jakojaannos.riista.utilities.TimeManager;
+import fi.jakojaannos.riista.ecs.EntityHandle;
+import fi.jakojaannos.riista.GameState;
 import fi.jakojaannos.roguelite.game.data.archetypes.SlimeArchetype;
 import fi.jakojaannos.roguelite.game.data.components.character.DeadTag;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.SplitOnDeath;
 
+import static fi.jakojaannos.roguelite.engine.utilities.assertions.world.GameExpect.whenGame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SplitOnDeathSystemTest {
+    private EntityHandle slime;
+
     @Test
     void largeSlimeSpawnsMultipleSlimesOnDeath() {
-        SplitOnDeathSystem system = new SplitOnDeathSystem();
-        World world = World.createNew();
-        EntityManager entityManager = world.getEntityManager();
+        whenGame().withSystems(new SplitOnDeathSystem())
+                  .withState(world -> {
+                      slime = SlimeArchetype.createLargeSlime(world, new Transform(0.0, 0.0));
+                  })
+                  .runsSingleTick()
+                  // There was exactly one slime at the beginning and it was not dead. Assert it has not split
+                  .expect(state -> assertEquals(1, countSlimesInWorld(state)))
+                  // Kill the slime
+                  .then(state -> slime.addComponent(new DeadTag()))
+                  .runsSingleTick()
+                  // There was exactly one slime at the beginning. Assert that it has split.
+                  .expect(state -> assertTrue(countSlimesInWorld(state) > 1));
+    }
 
-        world.registerResource(TimeManager.class, new SimpleTimeManager(20));
-
-        Entity slime = SlimeArchetype.createLargeSlime(entityManager, new Transform(0.0, 0.0))
-                                     .asLegacyEntity();
-        entityManager.addComponentTo(slime, new DeadTag());
-
-        entityManager.applyModifications();
-
-        long amountBefore = entityManager.getEntitiesWith(SplitOnDeath.class).count();
-        system.tick(Stream.of(slime), world);
-        entityManager.applyModifications();
-        long amountAfter = entityManager.getEntitiesWith(SplitOnDeath.class).count();
-
-        assertTrue(amountAfter > amountBefore);
+    private long countSlimesInWorld(final GameState state) {
+        return state.world()
+                    .iterateEntities(new Class[]{SplitOnDeath.class},
+                                     new boolean[]{false},
+                                     new boolean[]{false},
+                                     objects -> null,
+                                     false)
+                    .count();
     }
 }

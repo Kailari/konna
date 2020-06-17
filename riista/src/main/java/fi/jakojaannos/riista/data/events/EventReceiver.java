@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.engine.event;
+package fi.jakojaannos.riista.data.events;
 
 public interface EventReceiver<TEvent> {
     boolean hasEvents();

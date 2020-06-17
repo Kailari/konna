@@ -6,48 +6,33 @@ import java.util.Random;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.riista.data.components.Transform;
-import fi.jakojaannos.riista.ecs.World;
-import fi.jakojaannos.riista.ecs.legacy.ECSSystem;
-import fi.jakojaannos.riista.ecs.legacy.Entity;
-import fi.jakojaannos.riista.ecs.legacy.RequirementsBuilder;
+import fi.jakojaannos.riista.ecs.EcsSystem;
+import fi.jakojaannos.riista.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.game.data.components.character.MovementInput;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.FollowerAI;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
-import fi.jakojaannos.roguelite.game.systems.SystemGroups;
 
-public class FollowerAIControllerSystem implements ECSSystem {
+public class FollowerAIControllerSystem implements EcsSystem<FollowerAIControllerSystem.Resources, FollowerAIControllerSystem.EntityData, EcsSystem.NoEvents> {
     private final Random random = new Random(123456);
 
     @Override
-    public void declareRequirements(final RequirementsBuilder requirements) {
-        requirements.addToGroup(SystemGroups.INPUT)
-                    .requireResource(Players.class)
-                    .withComponent(FollowerAI.class)
-                    .withComponent(MovementInput.class)
-                    .withComponent(Transform.class);
-    }
-
-    @Override
     public void tick(
-            final Stream<Entity> entities,
-            final World world
+            final Resources resources,
+            final Stream<EntityDataHandle<EntityData>> entities,
+            final NoEvents noEvents
     ) {
-        final var entityManager = world.getEntityManager();
-        final var maybePlayer = world.fetchResource(Players.class).getLocalPlayer();
-        final var playerPos = maybePlayer.flatMap(player -> player.getComponent(Transform.class))
-                                         .map(transform -> transform.position)
-                                         .orElse(new Vector2d(0.0));
+        final var maybePlayer = resources.players.getLocalPlayer();
+        final var playerPosition = maybePlayer.flatMap(player -> player.getComponent(Transform.class))
+                                              .map(transform -> transform.position)
+                                              .orElse(new Vector2d(0.0));
 
         entities.forEach(entity -> {
-            final var ai = entityManager.getComponentOf(entity, FollowerAI.class)
-                                        .orElseThrow();
-            final var input = entityManager.getComponentOf(entity, MovementInput.class)
-                                           .orElseThrow();
-            final var entityPosition = entityManager.getComponentOf(entity, Transform.class)
-                                                    .orElseThrow().position;
+            final var ai = entity.getData().ai;
+            final var input = entity.getData().input;
+            final var entityPosition = entity.getData().transform.position;
 
-            if (maybePlayer.isPresent() && wantsMoveTowardsTarget(ai, playerPos, entityPosition)) {
-                input.move.set(playerPos)
+            if (maybePlayer.isPresent() && wantsMoveTowardsTarget(ai, playerPosition, entityPosition)) {
+                input.move.set(playerPosition)
                           .sub(entityPosition);
 
             } else {
@@ -75,4 +60,11 @@ public class FollowerAIControllerSystem implements ECSSystem {
         return isWithinAggroRadius && isOutsideTargetRadius;
     }
 
+    public static record Resources(Players players) {}
+
+    public static record EntityData(
+            FollowerAI ai,
+            MovementInput input,
+            Transform transform
+    ) {}
 }

@@ -1,48 +1,32 @@
 package fi.jakojaannos.roguelite.game.systems;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import java.util.stream.Stream;
-
 import fi.jakojaannos.riista.ecs.World;
-import fi.jakojaannos.riista.ecs.legacy.Entity;
-import fi.jakojaannos.riista.ecs.legacy.EntityManager;
-import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
-import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
+import fi.jakojaannos.roguelite.game.data.resources.collision.Colliders;
+import fi.jakojaannos.roguelite.game.data.resources.collision.Collisions;
 import fi.jakojaannos.roguelite.game.systems.physics.ApplyFrictionSystem;
 
+import static fi.jakojaannos.roguelite.engine.utilities.assertions.world.GameExpect.whenGame;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ApplyFrictionSystemTest {
 
     private static final double EPSILON = 0.01;
 
-    private EntityManager entityManager;
-    private World world;
-    private ApplyFrictionSystem system;
-    private Entity entity;
     private Velocity velocity;
     private Physics physics;
 
-    @BeforeEach
-    void beforeEach() {
-        world = World.createNew();
-        entityManager = world.getEntityManager();
-        system = new ApplyFrictionSystem();
+    void initialState(final World world) {
+        world.registerResource(new Collisions());
+        world.registerResource(new Colliders());
 
-        world.registerResource(TimeManager.class, new SimpleTimeManager(20));
-
-        entity = entityManager.createEntity();
-        entityManager.addComponentTo(entity, physics = Physics.builder().build());
-        entityManager.addComponentTo(entity, velocity = new Velocity());
-        physics.friction = 5.0;
-
-        entityManager.applyModifications();
+        world.createEntity(physics = Physics.builder().friction(5.0).build(),
+                           velocity = new Velocity());
     }
 
     @ParameterizedTest
@@ -61,43 +45,46 @@ public class ApplyFrictionSystemTest {
             final double expectedX,
             final double expectedY
     ) {
-        physics.friction = friction;
-        velocity.set(startX, startY);
-
-        entityManager.applyModifications();
-        for (int i = 0; i < 50; i++) {
-            system.tick(Stream.of(entity), world);
-        }
-
-        assertEquals(expectedX, velocity.x, EPSILON);
-        assertEquals(expectedY, velocity.y, EPSILON);
+        whenGame().withSystems(new ApplyFrictionSystem())
+                  .withState(this::initialState)
+                  .withState(world -> {
+                      physics.friction = friction;
+                      velocity.set(startX, startY);
+                  })
+                  .runsForSeconds(1)
+                  .expect(state -> {
+                      assertEquals(expectedX, velocity.x, EPSILON);
+                      assertEquals(expectedY, velocity.y, EPSILON);
+                  });
     }
 
     @Test
     void zeroFrictionDoesNotSlowEntities() {
-        physics.friction = 0;
-        velocity.set(12.34, 34.56);
-
-        entityManager.applyModifications();
-        for (int i = 0; i < 10; i++) {
-            system.tick(Stream.of(entity), world);
-        }
-
-        assertEquals(12.34, velocity.x);
-        assertEquals(34.56, velocity.y);
+        whenGame().withSystems(new ApplyFrictionSystem())
+                  .withState(this::initialState)
+                  .withState(world -> {
+                      physics.friction = 0;
+                      velocity.set(12.34, 34.56);
+                  })
+                  .runsForTicks(10)
+                  .expect(state -> {
+                      assertEquals(12.34, velocity.x);
+                      assertEquals(34.56, velocity.y);
+                  });
     }
 
     @Test
     void frictionStopsEntityAfterAWhile() {
-        velocity.set(12.34, 34.56);
-        physics.friction = 10.0f;
-
-        entityManager.applyModifications();
-        for (int i = 0; i < 200; i++) {
-            system.tick(Stream.of(entity), world);
-        }
-
-        assertEquals(0.0, velocity.x);
-        assertEquals(0.0, velocity.y);
+        whenGame().withSystems(new ApplyFrictionSystem())
+                  .withState(this::initialState)
+                  .withState(world -> {
+                      velocity.set(12.34, 34.56);
+                      physics.friction = 10.0f;
+                  })
+                  .runsForSeconds(5)
+                  .expect(state -> {
+                      assertEquals(0.0, velocity.x);
+                      assertEquals(0.0, velocity.y);
+                  });
     }
 }

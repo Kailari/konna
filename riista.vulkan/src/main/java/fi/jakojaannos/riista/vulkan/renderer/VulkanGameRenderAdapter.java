@@ -13,7 +13,7 @@ import fi.jakojaannos.riista.vulkan.application.PresentableStateQueue;
 import fi.jakojaannos.riista.vulkan.application.VulkanApplication;
 import fi.jakojaannos.riista.vulkan.renderer.game.RendererRecorder;
 import fi.jakojaannos.riista.vulkan.rendering.Swapchain;
-import fi.jakojaannos.roguelite.engine.GameState;
+import fi.jakojaannos.riista.GameState;
 
 public class VulkanGameRenderAdapter extends GameRenderAdapterBase<PresentableState> {
     private final PresentableStateQueue presentableStateQueue = new PresentableStateQueue();

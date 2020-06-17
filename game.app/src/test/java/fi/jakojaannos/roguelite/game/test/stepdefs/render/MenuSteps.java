@@ -5,7 +5,7 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
 import fi.jakojaannos.riista.data.events.UiEvent;
-import fi.jakojaannos.roguelite.engine.event.Events;
+import fi.jakojaannos.riista.data.resources.Events;
 import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;
 import fi.jakojaannos.roguelite.game.gamemode.MainMenuGameMode;
 

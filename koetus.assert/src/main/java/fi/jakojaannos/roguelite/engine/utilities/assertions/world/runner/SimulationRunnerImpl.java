@@ -1,23 +1,26 @@
 package fi.jakojaannos.roguelite.engine.utilities.assertions.world.runner;
 
 import java.util.ArrayDeque;
+import java.util.List;
 import java.util.Queue;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 
 import fi.jakojaannos.riista.GameRenderAdapter;
+import fi.jakojaannos.riista.GameRunnerTimeManager;
 import fi.jakojaannos.riista.application.GameTicker;
 import fi.jakojaannos.riista.application.SimulationThread;
-import fi.jakojaannos.roguelite.engine.GameMode;
-import fi.jakojaannos.roguelite.engine.GameRunnerTimeManager;
-import fi.jakojaannos.roguelite.engine.GameState;
-import fi.jakojaannos.roguelite.engine.input.InputEvent;
+import fi.jakojaannos.riista.GameMode;
+import fi.jakojaannos.riista.GameState;
+import fi.jakojaannos.riista.input.InputEvent;
 import fi.jakojaannos.roguelite.engine.utilities.assertions.world.PresentationInspector;
 
 public class SimulationRunnerImpl<TPresentState> implements PresentationInspector<TPresentState> {
     private final GameTicker ticker;
     private final Queue<InputEvent> inputQueue = new ArrayDeque<>();
     private final SimulationThread simulationThread;
+
+    private final GameRunnerTimeManager timeManager;
 
     private boolean terminateTriggered;
 
@@ -30,12 +33,18 @@ public class SimulationRunnerImpl<TPresentState> implements PresentationInspecto
             final GameMode gameMode,
             @Nullable final GameRenderAdapter<TPresentState> renderAdapter
     ) {
-        final var timeManager = new GameRunnerTimeManager(20L);
-        this.ticker = new GameTicker(timeManager, () -> this.inputQueue, gameMode);
+        this.timeManager = new GameRunnerTimeManager(20L);
+        this.ticker = new GameTicker(this.timeManager,
+                                     () -> {
+                                         final var inputs = List.copyOf(this.inputQueue);
+                                         this.inputQueue.clear();
+                                         return inputs;
+                                     },
+                                     gameMode);
 
         this.simulationThread = new SimulationThread(this.ticker,
                                                      "simulation-runner",
-                                                     timeManager,
+                                                     this.timeManager,
                                                      () -> this.terminateTriggered = true,
                                                      renderAdapter);
         if (renderAdapter != null) {
@@ -57,6 +66,12 @@ public class SimulationRunnerImpl<TPresentState> implements PresentationInspecto
     @Override
     public Queue<InputEvent> inputQueue() {
         return this.inputQueue;
+    }
+
+    @Override
+    public PresentationInspector<TPresentState> receivesInput(final InputEvent inputEvent) {
+        this.inputQueue.offer(inputEvent);
+        return this;
     }
 
     @Override
@@ -84,5 +99,20 @@ public class SimulationRunnerImpl<TPresentState> implements PresentationInspecto
     public PresentationInspector<TPresentState> runsForSeconds(final double seconds) {
         final var ticks = this.ticker.getTimeManager().convertToTicks(seconds);
         return runsForTicks(ticks);
+    }
+
+    @Override
+    public PresentationInspector<TPresentState> skipsTicks(final int n) {
+        this.ticker.getState().world().commitEntityModifications();
+
+        for (int i = 0; i < n; i++) {
+            if (this.terminateTriggered) {
+                break;
+            }
+
+            this.timeManager.nextTick();
+        }
+
+        return this;
     }
 }

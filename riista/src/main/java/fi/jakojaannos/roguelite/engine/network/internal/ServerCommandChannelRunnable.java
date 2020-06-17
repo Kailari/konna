@@ -17,7 +17,7 @@ import java.util.Queue;
 import java.util.concurrent.Semaphore;
 import java.util.function.Consumer;
 
-import fi.jakojaannos.roguelite.engine.LogCategories;
+import fi.jakojaannos.riista.LogCategories;
 import fi.jakojaannos.roguelite.engine.MainThread;
 import fi.jakojaannos.roguelite.engine.network.NetworkConnection;
 import fi.jakojaannos.roguelite.engine.network.message.MessageHandlingContext;
@@ -186,8 +186,7 @@ public class ServerCommandChannelRunnable extends CommandChannelRunnable {
         clientChannel.configureBlocking(false);
 
         final var clientConnection = new NetworkConnection(clientId);
-        final var clientInfo = new ClientInfo(clientChannel,
-                                              new MessageHandlingContext(this.mainThread, clientConnection));
+        final var clientInfo = new ClientInfo(clientChannel, new MessageHandlingContext(this.mainThread, clientConnection));
 
         clientChannel.register(selector, SelectionKey.OP_READ, clientConnection);
         this.clients.put(clientConnection, clientInfo);

@@ -1,53 +1,37 @@
 package fi.jakojaannos.roguelite.game.systems.cleanup;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import fi.jakojaannos.riista.ecs.World;
-import fi.jakojaannos.riista.ecs.legacy.ECSSystem;
-import fi.jakojaannos.riista.ecs.legacy.Entity;
-import fi.jakojaannos.riista.ecs.legacy.EntityManager;
-import fi.jakojaannos.riista.ecs.legacy.RequirementsBuilder;
+import fi.jakojaannos.riista.ecs.EcsSystem;
+import fi.jakojaannos.riista.ecs.EntityDataHandle;
 import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.Lifetime;
-import fi.jakojaannos.roguelite.game.systems.SystemGroups;
 
-public class CleanUpEntitiesWithLifetime implements ECSSystem {
-    private static final Logger LOG = LoggerFactory.getLogger(CleanUpEntitiesWithLifetime.class);
-
-    @Override
-    public void declareRequirements(final RequirementsBuilder requirements) {
-        requirements.addToGroup(SystemGroups.CLEANUP)
-                    .requireProvidedResource(TimeManager.class)
-                    .withComponent(Lifetime.class)
-                    .tickBefore(ReaperSystem.class);
-    }
-
+public class CleanUpEntitiesWithLifetime implements EcsSystem<CleanUpEntitiesWithLifetime.Resources, CleanUpEntitiesWithLifetime.EntityData, EcsSystem.NoEvents> {
     @Override
     public void tick(
-            final Stream<Entity> entities,
-            final World world
+            final Resources resources,
+            final Stream<EntityDataHandle<EntityData>> entities,
+            final NoEvents noEvents
     ) {
-        final var entityManager = world.getEntityManager();
-        final var timeManager = world.fetchResource(TimeManager.class);
-
-        entities.filter(onlyExpired(entityManager, timeManager))
-                .forEach(entityManager::destroyEntity);
+        entities.filter(onlyExpired(resources.timeManager))
+                .forEach(EntityDataHandle::destroy);
     }
 
-    private Predicate<Entity> onlyExpired(final EntityManager entityManager, final TimeManager timeManager) {
-        final var currentTick = timeManager.getCurrentGameTime();
-        return entity -> entityManager.getComponentOf(entity, Lifetime.class)
-                                      .map(toLifetimeRemainingOn(currentTick))
-                                      .map(remainingLifetime -> remainingLifetime <= 0)
-                                      .orElse(false);
+    private Predicate<EntityDataHandle<EntityData>> onlyExpired(final TimeManager timeManager) {
+        return entity -> {
+            final var currentTick = timeManager.getCurrentGameTime();
+            final var remaining = lifetimeRemainingOn(currentTick, entity.getData().lifetime);
+            return remaining <= 0;
+        };
     }
 
-    private static Function<Lifetime, Long> toLifetimeRemainingOn(final long tick) {
-        return lifetime -> (lifetime.timestamp + lifetime.duration) - tick;
+    private static long lifetimeRemainingOn(final long tick, final Lifetime lifetime) {
+        return (lifetime.timestamp + lifetime.duration) - tick;
     }
+
+    public static record Resources(TimeManager timeManager) {}
+
+    public static record EntityData(Lifetime lifetime) {}
 }

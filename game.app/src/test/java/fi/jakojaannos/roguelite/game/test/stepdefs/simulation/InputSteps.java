@@ -3,8 +3,9 @@ package fi.jakojaannos.roguelite.game.test.stepdefs.simulation;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.When;
 
-import fi.jakojaannos.roguelite.engine.input.ButtonInput;
-import fi.jakojaannos.roguelite.engine.input.InputButton;
+import fi.jakojaannos.riista.input.ButtonInput;
+import fi.jakojaannos.riista.input.InputButton;
+import fi.jakojaannos.riista.input.InputEvent;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
 import fi.jakojaannos.roguelite.game.test.global.GlobalGameState;
 
@@ -47,11 +48,13 @@ public class InputSteps {
 
     private void pressKey(String key) {
         simulation.inputQueue()
-                  .offer(ButtonInput.pressed(InputButton.Keyboard.valueOf("KEY_" + key.toUpperCase())));
+                  .offer(InputEvent.button(InputButton.Keyboard.valueOf("KEY_" + key.toUpperCase()),
+                                           ButtonInput.Action.PRESS));
     }
 
     private void releaseKey(String key) {
         simulation.inputQueue()
-                  .offer(ButtonInput.released(InputButton.Keyboard.valueOf("KEY_" + key.toUpperCase())));
+                  .offer(InputEvent.button(InputButton.Keyboard.valueOf("KEY_" + key.toUpperCase()),
+                                           ButtonInput.Action.RELEASE));
     }
 }

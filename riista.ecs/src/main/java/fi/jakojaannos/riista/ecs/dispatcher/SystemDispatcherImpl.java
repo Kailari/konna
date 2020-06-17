@@ -11,8 +11,6 @@ import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.stream.Collectors;
 
 import fi.jakojaannos.riista.ecs.*;
-import fi.jakojaannos.riista.ecs.annotation.DisabledByDefault;
-import fi.jakojaannos.riista.ecs.legacy.ECSSystem;
 import fi.jakojaannos.riista.ecs.systemdata.ParsedRequirements;
 import fi.jakojaannos.riista.ecs.systemdata.SystemInputRecord;
 
@@ -22,38 +20,12 @@ public class SystemDispatcherImpl implements SystemDispatcher {
     /**
      * Immutable system state with everything which is hinted to be enabled by default is set to enabled.
      */
-    private static final SystemState EVERYTHING_ENABLED_BY_DEFAULT_ENABLED = new SystemState() {
-        @Override
-        public boolean isEnabled(final Class<?> systemClass) {
-            return !systemClass.isAnnotationPresent(DisabledByDefault.class);
-        }
-
-        @Override
-        public boolean isEnabled(final SystemGroup systemGroup) {
-            return systemGroup.isEnabledByDefault();
-        }
-
-        @Override
-        public void setState(final Class<?> systemClass, final boolean state) {
-        }
-
-        @Override
-        public void setState(final SystemGroup systemGroup, final boolean state) {
-        }
-
-        @Override
-        public void resetToDefaultState(final Collection<Class<?>> system) {
-        }
-
-        @Override
-        public void resetGroupsToDefaultState(final Collection<SystemGroup> systemGroups) {
-        }
-    };
+    private static final SystemState EVERYTHING_ENABLED_BY_DEFAULT_ENABLED = new PermanentDefaultsSystemState();
 
 
     private final ForkJoinPool threadPool;
     private final List<SystemGroup> systemGroups;
-    private final List<Object> allSystems;
+    private final List<EcsSystem<?, ?, ?>> allSystems;
     // TODO: Move to SystemContext which contains the requirements and enabled status
     //       - possibly move the system there, too, and make groups rely on SystemIds
     @SuppressWarnings("rawtypes")
@@ -95,8 +67,6 @@ public class SystemDispatcherImpl implements SystemDispatcher {
                 .stream()
                 .flatMap(group -> group.getSystems().stream())
                 .filter(system -> EcsSystem.class.isAssignableFrom(system.getClass()))
-                // XXX: This map should not be necessary once getSystems() returns EcsSystems
-                .map(system -> (EcsSystem<?, ?, ?>) system)
                 .collect(Collectors.toMap(EcsSystem::getClass, SystemDispatcherImpl::resolveRequirements));
     }
 
@@ -192,24 +162,13 @@ public class SystemDispatcherImpl implements SystemDispatcher {
 
         // XXX: This has to be sequential by the spec: (do not use parallel streams etc.)
         //      "The system execution order within the group must match the registration order"
-        for (final var systemObj : group.getSystems()) {
-            LOG.trace(LogCategories.DISPATCHER_SYSTEM, "Ticking system \"{}\"", systemObj.getClass().getSimpleName());
-            if (systemObj instanceof ECSSystem legacySystem) {
-                final var requirements = new ComponentOnlyRequirementsBuilder();
-                legacySystem.declareRequirements(requirements);
-                final var entities = world.getEntityManager()
-                                          .getEntitiesWith(requirements.required(),
-                                                           requirements.excluded(),
-                                                           this.parallel);
-                legacySystem.tick(entities, world);
-            } else if (systemObj instanceof EcsSystem<?, ?, ?> system) {
-                // XXX: This cannot be filter as that would possibly prevent tick in situations where previous
-                //      system enables the next system
-                if (systemState.isEnabled(system.getClass())) {
-                    dispatch(world, system, this.threadPool, events);
-                }
-            } else {
-                throw new IllegalStateException("Invalid system type: " + systemObj.getClass().getSimpleName());
+        for (final var system : group.getSystems()) {
+            LOG.trace(LogCategories.DISPATCHER_SYSTEM, "Ticking system \"{}\"", system.getClass().getSimpleName());
+
+            // XXX: This cannot be filter as that would possibly prevent tick in situations where previous
+            //      system enables the next system
+            if (systemState.isEnabled(system.getClass())) {
+                dispatch(world, system, this.threadPool, events);
             }
             world.commitEntityModifications();
         }
@@ -351,54 +310,6 @@ public class SystemDispatcherImpl implements SystemDispatcher {
         final var worker = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool);
         worker.setName("ecs-worker-" + worker.getPoolIndex());
         return worker;
-    }
-
-    @Deprecated
-    private static record ComponentOnlyRequirementsBuilder(
-            List<Class<?>>required,
-            List<Class<?>>excluded
-    ) implements fi.jakojaannos.riista.ecs.legacy.RequirementsBuilder {
-
-        public ComponentOnlyRequirementsBuilder() {
-            this(new ArrayList<>(), new ArrayList<>());
-        }
-
-        @Override
-        public fi.jakojaannos.riista.ecs.legacy.RequirementsBuilder withComponent(final Class<?> componentClass) {
-            this.required.add(componentClass);
-            return this;
-        }
-
-        @Override
-        public fi.jakojaannos.riista.ecs.legacy.RequirementsBuilder withoutComponent(final Class<?> componentClass) {
-            this.excluded.add(componentClass);
-            return this;
-        }
-
-        @Override
-        public fi.jakojaannos.riista.ecs.legacy.RequirementsBuilder tickAfter(final Class<? extends ECSSystem> ignored) {
-            return this;
-        }
-
-        @Override
-        public fi.jakojaannos.riista.ecs.legacy.RequirementsBuilder tickBefore(final Class<? extends ECSSystem> ignored) {
-            return this;
-        }
-
-        @Override
-        public fi.jakojaannos.riista.ecs.legacy.RequirementsBuilder addToGroup(final Object ignored) {
-            return this;
-        }
-
-        @Override
-        public fi.jakojaannos.riista.ecs.legacy.RequirementsBuilder requireResource(final Class<?> ignored) {
-            return this;
-        }
-
-        @Override
-        public fi.jakojaannos.riista.ecs.legacy.RequirementsBuilder requireProvidedResource(final Class<?> ignored) {
-            return this;
-        }
     }
 
     public static class SystemDisposeException extends RuntimeException {

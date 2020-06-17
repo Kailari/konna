@@ -30,19 +30,6 @@ public interface DamageSource<TKiller> {
         }
     }
 
-    class LegacyEntity implements DamageSource<fi.jakojaannos.riista.ecs.legacy.Entity> {
-        private final fi.jakojaannos.riista.ecs.legacy.Entity player;
-
-        @Override
-        public fi.jakojaannos.riista.ecs.legacy.Entity getKiller() {
-            return this.player;
-        }
-
-        public LegacyEntity(final fi.jakojaannos.riista.ecs.legacy.Entity player) {
-            this.player = player;
-        }
-    }
-
     class Entity implements DamageSource<EntityHandle> {
         private final EntityHandle entityHandle;
 

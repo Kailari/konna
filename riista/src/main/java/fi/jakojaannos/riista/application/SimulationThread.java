@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 
 import fi.jakojaannos.riista.GameRenderAdapter;
-import fi.jakojaannos.roguelite.engine.GameRunnerTimeManager;
+import fi.jakojaannos.riista.GameRunnerTimeManager;
 
 public class SimulationThread implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(SimulationThread.class);

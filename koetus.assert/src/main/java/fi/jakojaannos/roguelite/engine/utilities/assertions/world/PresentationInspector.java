@@ -2,7 +2,8 @@ package fi.jakojaannos.roguelite.engine.utilities.assertions.world;
 
 import java.util.function.Consumer;
 
-import fi.jakojaannos.roguelite.engine.GameState;
+import fi.jakojaannos.riista.GameState;
+import fi.jakojaannos.riista.input.InputEvent;
 
 public interface PresentationInspector<TPresentState> extends SimulationInspector {
     @Override
@@ -23,4 +24,10 @@ public interface PresentationInspector<TPresentState> extends SimulationInspecto
     default PresentationInspector<TPresentState> runsSingleTick() {
         return runsForTicks(1);
     }
+
+    @Override
+    PresentationInspector<TPresentState> skipsTicks(int n);
+
+    @Override
+    PresentationInspector<TPresentState> receivesInput(InputEvent button);
 }

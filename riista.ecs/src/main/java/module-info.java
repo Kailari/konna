@@ -7,7 +7,6 @@ module riista.ecs {
     exports fi.jakojaannos.riista.ecs;
     exports fi.jakojaannos.riista.ecs.resources;
     exports fi.jakojaannos.riista.ecs.annotation;
-    exports fi.jakojaannos.riista.ecs.legacy;
 
     exports fi.jakojaannos.riista.ecs.systemdata to riista.view;
 }

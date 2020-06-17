@@ -3,9 +3,9 @@ package fi.jakojaannos.roguelite.engine.utilities.assertions.world;
 import java.util.Queue;
 import java.util.function.Consumer;
 
-import fi.jakojaannos.roguelite.engine.GameMode;
-import fi.jakojaannos.roguelite.engine.GameState;
-import fi.jakojaannos.roguelite.engine.input.InputEvent;
+import fi.jakojaannos.riista.GameMode;
+import fi.jakojaannos.riista.GameState;
+import fi.jakojaannos.riista.input.InputEvent;
 
 /**
  * Allows <i>inspecting</i> the simulation state. E.g. performing assertions over the game state or performing manual

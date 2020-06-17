@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.engine.input;
+package fi.jakojaannos.riista.input;
 
 public interface InputAxis {
     enum Mouse implements InputAxis {

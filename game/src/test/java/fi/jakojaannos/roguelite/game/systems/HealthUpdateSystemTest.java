@@ -3,21 +3,18 @@ package fi.jakojaannos.roguelite.game.systems;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import java.util.stream.Stream;
-
-import fi.jakojaannos.riista.ecs.World;
-import fi.jakojaannos.riista.ecs.legacy.Entity;
-import fi.jakojaannos.riista.ecs.legacy.EntityManager;
+import fi.jakojaannos.riista.ecs.EntityHandle;
 import fi.jakojaannos.roguelite.game.data.DamageInstance;
 import fi.jakojaannos.roguelite.game.data.DamageSource;
 import fi.jakojaannos.roguelite.game.data.components.character.DeadTag;
 import fi.jakojaannos.roguelite.game.data.components.character.Health;
 import fi.jakojaannos.roguelite.game.data.resources.SessionStats;
 
+import static fi.jakojaannos.roguelite.engine.utilities.assertions.world.GameExpect.whenGame;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class HealthUpdateSystemTest {
-
+    private EntityHandle entity;
 
     @ParameterizedTest
     @CsvSource({
@@ -36,21 +33,18 @@ public class HealthUpdateSystemTest {
             double damage,
             boolean shouldBeRemoved
     ) {
-        World world = World.createNew();
-        world.registerResource(new SessionStats(0));
-        EntityManager entityManager = world.getEntityManager();
-        HealthUpdateSystem system = new HealthUpdateSystem();
+        whenGame().withSystems(new HealthUpdateSystem())
+                  .withState(world -> {
+                      world.registerResource(new SessionStats(0));
 
-        Entity entity = entityManager.createEntity();
-        Health hp = new Health(maxHp, currentHp);
-        entityManager.addComponentTo(entity, hp);
-        hp.addDamageInstance(new DamageInstance(damage, DamageSource.Generic.UNDEFINED), 0);
-
-        system.tick(Stream.of(entity), world);
-
-        boolean hasDeadTag = entityManager.getComponentOf(entity, DeadTag.class).isPresent();
-        assertEquals(shouldBeRemoved, hasDeadTag);
+                      Health hp = new Health(maxHp, currentHp);
+                      entity = world.createEntity(hp);
+                      hp.addDamageInstance(new DamageInstance(damage, DamageSource.Generic.UNDEFINED), 0);
+                  })
+                  .runsSingleTick()
+                  .expect(state -> {
+                      final var hasDeadTag = entity.hasComponent(DeadTag.class);
+                      assertEquals(shouldBeRemoved, hasDeadTag);
+                  });
     }
-
-
 }

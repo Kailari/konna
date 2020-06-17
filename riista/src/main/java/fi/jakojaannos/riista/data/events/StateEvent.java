@@ -1,6 +1,6 @@
 package fi.jakojaannos.riista.data.events;
 
-import fi.jakojaannos.roguelite.engine.GameMode;
+import fi.jakojaannos.riista.GameMode;
 
 public interface StateEvent {
     record ChangeMode(GameMode gameMode) implements StateEvent {}

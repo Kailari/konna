@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.engine;
+package fi.jakojaannos.riista;
 
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;

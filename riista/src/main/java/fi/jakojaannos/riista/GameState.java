@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.engine;
+package fi.jakojaannos.riista;
 
 import fi.jakojaannos.riista.ecs.SystemState;
 import fi.jakojaannos.riista.ecs.World;

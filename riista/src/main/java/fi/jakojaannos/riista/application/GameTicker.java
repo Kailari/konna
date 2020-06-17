@@ -5,17 +5,17 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+import fi.jakojaannos.riista.application.impl.EventBus;
 import fi.jakojaannos.riista.data.resources.Network;
 import fi.jakojaannos.riista.utilities.TimeManager;
-import fi.jakojaannos.roguelite.engine.GameMode;
-import fi.jakojaannos.roguelite.engine.GameState;
+import fi.jakojaannos.riista.GameMode;
+import fi.jakojaannos.riista.GameState;
 import fi.jakojaannos.roguelite.engine.MainThread;
 import fi.jakojaannos.roguelite.engine.MainThreadTask;
 import fi.jakojaannos.riista.ecs.World;
-import fi.jakojaannos.roguelite.engine.event.EventBus;
-import fi.jakojaannos.roguelite.engine.event.Events;
-import fi.jakojaannos.roguelite.engine.input.InputEvent;
-import fi.jakojaannos.roguelite.engine.input.InputProvider;
+import fi.jakojaannos.riista.data.resources.Events;
+import fi.jakojaannos.riista.input.InputEvent;
+import fi.jakojaannos.riista.input.InputProvider;
 import fi.jakojaannos.roguelite.engine.network.NetworkImpl;
 import fi.jakojaannos.riista.data.events.StateEvent;
 
@@ -62,8 +62,7 @@ public class GameTicker implements MainThread {
         this.inputBus = new EventBus<>();
         this.systemEvents = new ArrayList<>();
         this.stateEvents = new ArrayList<>();
-        this.events = new Events(new EventBus<>(),
-                                 this.inputBus,
+        this.events = new Events(this.inputBus,
                                  this.stateEvents::add,
                                  this.systemEvents::add);
 

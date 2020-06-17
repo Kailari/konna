@@ -1,9 +1,0 @@
-@MethodsReturnNonnullByDefault
-@ParametersAreNonnullByDefault
-@FieldsAreNonnullByDefault
-package fi.jakojaannos.roguelite.engine.content;
-
-import javax.annotation.ParametersAreNonnullByDefault;
-
-import fi.jakojaannos.riista.utilities.annotation.FieldsAreNonnullByDefault;
-import fi.jakojaannos.riista.utilities.annotation.MethodsReturnNonnullByDefault;

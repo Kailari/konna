@@ -5,10 +5,10 @@ import java.util.stream.Stream;
 import fi.jakojaannos.riista.data.resources.Mouse;
 import fi.jakojaannos.riista.ecs.EcsSystem;
 import fi.jakojaannos.riista.ecs.EntityDataHandle;
-import fi.jakojaannos.roguelite.engine.event.Events;
-import fi.jakojaannos.roguelite.engine.input.ButtonInput;
-import fi.jakojaannos.roguelite.engine.input.InputAxis;
-import fi.jakojaannos.roguelite.engine.input.InputButton;
+import fi.jakojaannos.riista.data.resources.Events;
+import fi.jakojaannos.riista.input.ButtonInput;
+import fi.jakojaannos.riista.input.InputAxis;
+import fi.jakojaannos.riista.input.InputButton;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
 
 /**

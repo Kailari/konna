@@ -1,10 +1,6 @@
 package fi.jakojaannos.riista.ecs;
 
-import java.util.function.Function;
-import java.util.stream.Stream;
-
 import fi.jakojaannos.riista.ecs.resources.Entities;
-import fi.jakojaannos.riista.ecs.legacy.EntityManager;
 import fi.jakojaannos.riista.ecs.world.WorldImpl;
 
 /**
@@ -19,13 +15,6 @@ import fi.jakojaannos.riista.ecs.world.WorldImpl;
  * @see EcsSystem
  */
 public interface World extends Entities {
-    /**
-     * @deprecated Getter for legacy-compatible entity manager for this world. Due for removal once legacy systems are
-     *         refactored to the new ECS.
-     */
-    @Deprecated
-    EntityManager getEntityManager();
-
     /**
      * Creates a new world instance.
      *
@@ -93,26 +82,6 @@ public interface World extends Entities {
      * @return an array containing the requested resources
      */
     Object[] fetchResources(Class<?>[] resourceClasses);
-
-    /**
-     * Creates a spliterator for iterating over the entities with specified components pre-fetched.
-     *
-     * @param componentClasses required component classes
-     * @param excluded         inversion table for component classes. Must have exact same length as
-     *                         <code>componentClasses</code>
-     * @param optional         lookup table for checking if components are optional
-     * @param dataFactory      factory for producing entity data instances
-     * @param <TEntityData>    entity data container type. Structure for containing the pre-fetched components
-     *
-     * @return spliterator for iterating entities matching the specified requirements
-     */
-    <TEntityData> Stream<EntityDataHandle<TEntityData>> iterateEntities(
-            Class<?>[] componentClasses,
-            boolean[] excluded,
-            boolean[] optional,
-            Function<Object[], TEntityData> dataFactory,
-            boolean parallel
-    );
 
     /**
      * Flushes all pending add/destroy entity operations.

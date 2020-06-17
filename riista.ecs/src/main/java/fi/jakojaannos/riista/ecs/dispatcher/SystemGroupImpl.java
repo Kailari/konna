@@ -11,13 +11,12 @@ import javax.annotation.Nullable;
 
 import fi.jakojaannos.riista.ecs.EcsSystem;
 import fi.jakojaannos.riista.ecs.SystemGroup;
-import fi.jakojaannos.riista.ecs.legacy.ECSSystem;
 
 public class SystemGroupImpl implements SystemGroup {
     private static final Logger LOG = LoggerFactory.getLogger(SystemGroupImpl.class);
 
     private final Collection<SystemGroup> dependencies;
-    private final Collection<Object> systems;
+    private final Collection<EcsSystem<?, ?, ?>> systems;
     private final String name;
     private final boolean enabledByDefault;
     private final int id;
@@ -28,7 +27,7 @@ public class SystemGroupImpl implements SystemGroup {
     }
 
     @Override
-    public Collection<Object> getSystems() {
+    public Collection<EcsSystem<?, ?, ?>> getSystems() {
         return this.systems;
     }
 
@@ -44,7 +43,7 @@ public class SystemGroupImpl implements SystemGroup {
 
     private SystemGroupImpl(
             final Collection<SystemGroup> dependencies,
-            final Collection<Object> systems,
+            final Collection<EcsSystem<?, ?, ?>> systems,
             final String name,
             final boolean enabledByDefault,
             final int id
@@ -74,7 +73,7 @@ public class SystemGroupImpl implements SystemGroup {
 
     public static final class Builder implements SystemGroup.Builder {
         private final Collection<SystemGroup> dependencies = new ArrayList<>();
-        private final Collection<Object> systems = new ArrayList<>();
+        private final Collection<EcsSystem<?, ?, ?>> systems = new ArrayList<>();
         private final String name;
         private final int id;
         private boolean enabledByDefault;
@@ -99,12 +98,6 @@ public class SystemGroupImpl implements SystemGroup {
                 LOG.warn("buildGroup() called multiple times! Offending group: \"{}\"", this.name);
             }
             return this.built;
-        }
-
-        @Override
-        public SystemGroup.Builder withSystem(final ECSSystem system) {
-            this.systems.add(system);
-            return this;
         }
 
         @Override

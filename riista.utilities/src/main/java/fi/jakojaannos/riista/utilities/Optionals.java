@@ -5,8 +5,8 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-public final class OptionalUtil {
-    private OptionalUtil() {
+public final class Optionals {
+    private Optionals() {
     }
 
     /**
@@ -17,7 +17,7 @@ public final class OptionalUtil {
      * @param <T>        Type of the value to return
      *
      * @return <code>Optional.empty()</code> if any of the conditions are empty, otherwise
-     * <code>value</code> wrapped in an optional
+     *         <code>value</code> wrapped in an optional
      */
     public static <T> Optional<T> ifAllPresent(
             final T value,
@@ -38,7 +38,7 @@ public final class OptionalUtil {
      * @param <T>        Type of the value to return
      *
      * @return <code>Optional.empty()</code> if any of the conditions are empty, otherwise
-     * <code>value</code>
+     *         <code>value</code>
      */
     public static <T> Optional<T> ifAllPresentOptional(
             final Optional<T> value,
@@ -59,7 +59,7 @@ public final class OptionalUtil {
      * @param <T>        Type of the value to return
      *
      * @return <code>Optional.empty()</code> if any of the conditions are present, otherwise
-     * <code>value</code> wrapped in an optional
+     *         <code>value</code> wrapped in an optional
      */
     public static <T> Optional<T> ifNonePresent(
             final T value,
@@ -80,7 +80,7 @@ public final class OptionalUtil {
      * @param <T>        Type of the value to return
      *
      * @return <code>Optional.empty()</code> if any of the conditions are present, otherwise
-     * <code>value</code>
+     *         <code>value</code>
      */
     public static <T> Optional<T> ifNonePresentOptional(
             final Optional<T> value,
@@ -101,7 +101,7 @@ public final class OptionalUtil {
      * @param <T>        Type of the value to return
      *
      * @return <code>Optional.empty()</code> if none of the conditions are empty, otherwise
-     * <code>value</code> wrapped in an optional
+     *         <code>value</code> wrapped in an optional
      */
     public static <T> Optional<T> ifAnyEmpty(
             final T value,
@@ -124,7 +124,7 @@ public final class OptionalUtil {
      * @param <T>        Type of the value to return
      *
      * @return <code>Optional.empty()</code> if none of the conditions are empty, otherwise
-     * <code>value</code> wrapped in an optional
+     *         <code>value</code> wrapped in an optional
      */
     public static <T> Optional<T> ifAnyEmptyOptional(
             final Optional<T> value,
@@ -150,7 +150,7 @@ public final class OptionalUtil {
      * @param <R>      Type of the result
      *
      * @return <code>Optional.empty()</code> if either of the arguments is not present. Output from
-     * the <code>operator</code> applied on the arguments otherwise.
+     *         the <code>operator</code> applied on the arguments otherwise.
      */
     public static <T1, T2, R> Optional<R> applyIfBothArePresent(
             final Optional<T1> a,
@@ -160,5 +160,10 @@ public final class OptionalUtil {
         return (a.isPresent() && b.isPresent())
                 ? Optional.ofNullable(operator.apply(a.get(), b.get()))
                 : Optional.empty();
+    }
+
+    public static boolean anyPresent(final Optional<?>... optionals) {
+        return Arrays.stream(optionals)
+                     .anyMatch(Optional::isPresent);
     }
 }

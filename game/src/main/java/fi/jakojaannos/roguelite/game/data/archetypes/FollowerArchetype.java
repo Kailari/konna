@@ -42,7 +42,8 @@ public class FollowerArchetype {
         entity.addComponent(new AttackAbility(new DamageSource.Entity(entity),
                                               CollisionLayer.ENEMY,
                                               0.0,
-                                              0.0));
+                                              0.0,
+                                              0));
 
         return entity;
     }

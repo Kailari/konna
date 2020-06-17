@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.engine.input;
+package fi.jakojaannos.riista.input;
 
 public class MouseInfo {
     public final int x;

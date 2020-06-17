@@ -1,7 +1,7 @@
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 @FieldsAreNonnullByDefault
-package fi.jakojaannos.roguelite.engine.input;
+package fi.jakojaannos.riista.input;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 

@@ -19,8 +19,7 @@ public interface SystemGroup {
      *
      * @return systems in this group
      */
-    // TODO: Change to EcsSystem
-    Collection<Object> getSystems();
+    Collection<EcsSystem<?, ?, ?>> getSystems();
 
     /**
      * Gets the name of this system group.
@@ -52,13 +51,6 @@ public interface SystemGroup {
          * @return a system group handle for this group
          */
         SystemGroup buildGroup();
-
-        /**
-         * @see #withSystem(EcsSystem)
-         * @deprecated Legacy compatibility, removed once all old systems are converted
-         */
-        @Deprecated
-        Builder withSystem(fi.jakojaannos.riista.ecs.legacy.ECSSystem system);
 
         /**
          * Registers a system to this group. Registration order determines the execution order. All systems in a group

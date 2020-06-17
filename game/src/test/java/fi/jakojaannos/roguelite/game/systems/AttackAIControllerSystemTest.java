@@ -1,18 +1,13 @@
 package fi.jakojaannos.roguelite.game.systems;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
 
 import fi.jakojaannos.riista.data.components.Transform;
+import fi.jakojaannos.riista.ecs.EntityHandle;
 import fi.jakojaannos.riista.ecs.World;
-import fi.jakojaannos.riista.ecs.legacy.Entity;
-import fi.jakojaannos.riista.ecs.legacy.EntityManager;
-import fi.jakojaannos.roguelite.engine.utilities.SimpleTimeManager;
-import fi.jakojaannos.riista.utilities.TimeManager;
+import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.DamageSource;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.WeaponInput;
@@ -21,132 +16,112 @@ import fi.jakojaannos.roguelite.game.data.components.character.enemy.EnemyTag;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
 import fi.jakojaannos.roguelite.game.systems.characters.ai.AttackAIControllerSystem;
 
+import static fi.jakojaannos.roguelite.engine.utilities.assertions.world.GameExpect.whenGame;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AttackAIControllerSystemTest {
-    private EntityManager entityManager;
-    private World world;
-    private AttackAIControllerSystem system;
-    private Entity turret;
     private AttackAI attackAi;
+    private EntityHandle target;
 
-    @BeforeEach
-    void beforeEach() {
-        world = World.createNew();
-        entityManager = world.getEntityManager();
+    void initialState(final World world) {
         world.registerResource(new Players());
-        world.registerResource(TimeManager.class, new SimpleTimeManager(20));
 
-        system = new AttackAIControllerSystem();
-        turret = entityManager.createEntity();
-        entityManager.addComponentTo(turret, new Transform(0.0, 0.0));
-        entityManager.addComponentTo(turret, new AttackAbility(DamageSource.Generic.UNDEFINED));
-        entityManager.addComponentTo(turret, attackAi = new AttackAI(EnemyTag.class, 7.0));
-        entityManager.addComponentTo(turret, new WeaponInput());
+        world.createEntity(new Transform(),
+                           new AttackAbility(DamageSource.Generic.UNDEFINED,
+                                             CollisionLayer.PLAYER_PROJECTILE,
+                                             0,
+                                             0,
+                                             0),
+                           new WeaponInput(),
+                           attackAi = new AttackAI(EnemyTag.class, 7.0));
     }
 
     @Test
     void nearbyValidEntityIsTargeted() {
-        Entity target = entityManager.createEntity();
-        entityManager.addComponentTo(target, new EnemyTag());
-        entityManager.addComponentTo(target, new Transform(4.0, 4.0));
-
-        entityManager.applyModifications();
-        system.tick(Stream.of(turret), world);
-
-        assertEquals(target, attackAi.getAttackTarget().orElseThrow());
+        whenGame().withSystems(new AttackAIControllerSystem())
+                  .withState(this::initialState)
+                  .withState(world -> target = world.createEntity(new EnemyTag(), new Transform(4.0, 4.0)))
+                  .runsSingleTick()
+                  .expect(state -> assertEquals(target, attackAi.getAttackTarget().orElseThrow()));
     }
 
     @Test
     void entitiesTooFarAreNotTargeted() {
-        Entity target = entityManager.createEntity();
-        entityManager.addComponentTo(target, new EnemyTag());
-        entityManager.addComponentTo(target, new Transform(420.0, 666.0));
-
-        entityManager.applyModifications();
-        system.tick(Stream.of(turret), world);
-
-        assertTrue(attackAi.getAttackTarget().isEmpty());
+        whenGame().withSystems(new AttackAIControllerSystem())
+                  .withState(this::initialState)
+                  .withState(world -> target = world.createEntity(new EnemyTag(), new Transform(420.0, 666.0)))
+                  .runsSingleTick()
+                  .expect(state -> assertTrue(attackAi.getAttackTarget().isEmpty()));
     }
 
     @Test
     void entitiesWithoutEnemyTagAreNotTargeted() {
-        Entity target = entityManager.createEntity();
-        entityManager.addComponentTo(target, new Transform(0.0, 0.0));
-
-        entityManager.applyModifications();
-        system.tick(Stream.of(turret), world);
-
-        assertTrue(attackAi.getAttackTarget().isEmpty());
+        whenGame().withSystems(new AttackAIControllerSystem())
+                  .withState(this::initialState)
+                  .withState(world -> target = world.createEntity(new Transform(420.0, 666.0)))
+                  .runsSingleTick()
+                  .expect(state -> assertTrue(attackAi.getAttackTarget().isEmpty()));
     }
 
     @Test
     void targetIsRemovedAfterBecomingInvalid() {
-        Entity target = entityManager.createEntity();
-        entityManager.addComponentTo(target, new EnemyTag());
-        entityManager.addComponentTo(target, new Transform(4.0, 4.0));
-        attackAi.setAttackTarget(target);
+        whenGame().withSystems(new AttackAIControllerSystem())
+                  .withState(this::initialState)
+                  .withState(world -> {
+                      target = world.createEntity(new EnemyTag(), new Transform(420.0, 666.0));
+                      attackAi.setAttackTarget(target);
 
-        entityManager.removeComponentFrom(target, EnemyTag.class);
-
-        entityManager.applyModifications();
-        system.tick(Stream.of(turret), world);
-
-        assertTrue(attackAi.getAttackTarget().isEmpty());
+                      target.removeComponent(EnemyTag.class);
+                  })
+                  .runsSingleTick()
+                  .expect(state -> assertTrue(attackAi.getAttackTarget().isEmpty()));
     }
 
     @Test
     void newTargetIsNotSetWhenPreviousOneIsValid() {
-        Entity originalTarget = entityManager.createEntity();
-        entityManager.addComponentTo(originalTarget, new EnemyTag());
-        entityManager.addComponentTo(originalTarget, new Transform(4.0, 4.0));
-        attackAi.setAttackTarget(originalTarget);
+        whenGame().withSystems(new AttackAIControllerSystem())
+                  .withState(this::initialState)
+                  .withState(world -> {
+                      target = world.createEntity(new EnemyTag(), new Transform(4.0, 4.0));
+                      attackAi.setAttackTarget(target);
 
-        for (int i = 0; i < 10; i++) {
-            Entity newTarget = entityManager.createEntity();
-            entityManager.addComponentTo(newTarget, new EnemyTag());
-            entityManager.addComponentTo(newTarget, new Transform(1.0, 1.0));
-        }
-
-        entityManager.applyModifications();
-        system.tick(Stream.of(turret), world);
-
-        assertEquals(originalTarget, attackAi.getAttackTarget().orElseThrow());
+                      for (int i = 0; i < 10; i++) {
+                          world.createEntity(new EnemyTag(), new Transform(i / 10.0, 1.0));
+                      }
+                  })
+                  .runsSingleTick()
+                  .expect(state -> assertEquals(target, attackAi.getAttackTarget().orElseThrow()));
     }
 
     @Test
     void attackTargetIsClearedIfTargetGoesOutOfRange() {
-        Entity target = entityManager.createEntity();
-        entityManager.addComponentTo(target, new EnemyTag());
-        entityManager.addComponentTo(target, new Transform(666.6, 666.6));
-        attackAi.setAttackTarget(target);
-
-        entityManager.applyModifications();
-        system.tick(Stream.of(turret), world);
-
-        assertTrue(attackAi.getAttackTarget().isEmpty());
+        whenGame().withSystems(new AttackAIControllerSystem())
+                  .withState(this::initialState)
+                  .withState(world -> {
+                      target = world.createEntity(new Transform(420.0, 666.0));
+                      attackAi.setAttackTarget(target);
+                  })
+                  .runsSingleTick()
+                  .expect(state -> assertTrue(attackAi.getAttackTarget().isEmpty()));
     }
 
     @Test
     void inCaseThereAreManyTargetsNearbyOneIsChosen() {
-        List<Entity> insideRange = new ArrayList<>();
-        for (int i = 0; i < 5; i++) {
-            Entity target = entityManager.createEntity();
-            entityManager.addComponentTo(target, new EnemyTag());
-            entityManager.addComponentTo(target, new Transform(1.0, 1.0));
-            insideRange.add(target);
-        }
+        final var insideRange = new ArrayList<EntityHandle>();
+        whenGame().withSystems(new AttackAIControllerSystem())
+                  .withState(this::initialState)
+                  .withState(world -> {
+                      for (int i = 0; i < 5; i++) {
+                          final var entity = world.createEntity(new EnemyTag(), new Transform(1.0, 1.0));
+                          insideRange.add(entity);
+                      }
 
-        for (int i = 0; i < 5; i++) {
-            Entity target = entityManager.createEntity();
-            entityManager.addComponentTo(target, new EnemyTag());
-            entityManager.addComponentTo(target, new Transform(333.0, 333.0));
-        }
-
-        entityManager.applyModifications();
-        system.tick(Stream.of(turret), world);
-
-        assertTrue(insideRange.contains(attackAi.getAttackTarget().orElseThrow()));
+                      for (int i = 0; i < 5; i++) {
+                          world.createEntity(new EnemyTag(), new Transform(333.0, 333.0));
+                      }
+                  })
+                  .runsSingleTick()
+                  .expect(state -> assertTrue(insideRange.contains(attackAi.getAttackTarget().orElseThrow())));
     }
 }

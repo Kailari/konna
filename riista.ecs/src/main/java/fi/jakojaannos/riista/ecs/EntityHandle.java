@@ -3,9 +3,6 @@ package fi.jakojaannos.riista.ecs;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import fi.jakojaannos.riista.ecs.legacy.Entity;
-import fi.jakojaannos.riista.ecs.world.LegacyEntityHandleImpl;
-
 public interface EntityHandle {
     /**
      * Gets the unique identifier for this entity. These are not guaranteed to be stable and e.g. may change between
@@ -108,17 +105,5 @@ public interface EntityHandle {
 
             return component;
         });
-    }
-
-    /**
-     * Converts this handle into a legacy entity.
-     *
-     * @return a legacy entity for this handle
-     *
-     * @deprecated Due to removal as soon as we get rid of the {@link fi.jakojaannos.riista.ecs.legacy.EntityManager}
-     */
-    @Deprecated
-    default Entity asLegacyEntity() {
-        return (LegacyEntityHandleImpl) this;
     }
 }

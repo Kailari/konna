@@ -13,7 +13,7 @@ import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.engine.MainThread;
 import fi.jakojaannos.riista.ecs.EcsSystem;
 import fi.jakojaannos.riista.ecs.EntityDataHandle;
-import fi.jakojaannos.roguelite.engine.event.Events;
+import fi.jakojaannos.riista.data.resources.Events;
 import fi.jakojaannos.roguelite.engine.network.client.ClientNetworkManager;
 import fi.jakojaannos.riista.data.events.StateEvent;
 import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;

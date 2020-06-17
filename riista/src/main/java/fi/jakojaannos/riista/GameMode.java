@@ -1,4 +1,4 @@
-package fi.jakojaannos.roguelite.engine;
+package fi.jakojaannos.riista;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;

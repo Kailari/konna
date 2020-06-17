@@ -4,36 +4,26 @@ import org.joml.Vector2d;
 
 import java.util.stream.Stream;
 
-import fi.jakojaannos.riista.ecs.World;
-import fi.jakojaannos.riista.ecs.legacy.ECSSystem;
-import fi.jakojaannos.riista.ecs.legacy.Entity;
-import fi.jakojaannos.riista.ecs.legacy.RequirementsBuilder;
+import fi.jakojaannos.riista.ecs.EcsSystem;
+import fi.jakojaannos.riista.ecs.EntityDataHandle;
+import fi.jakojaannos.riista.ecs.annotation.Without;
 import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.InAir;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
-import fi.jakojaannos.roguelite.game.systems.SystemGroups;
 
-public class ApplyFrictionSystem implements ECSSystem {
-    @Override
-    public void declareRequirements(final RequirementsBuilder requirements) {
-        requirements.addToGroup(SystemGroups.CHARACTER_TICK)
-                    .withComponent(Physics.class)
-                    .withComponent(Velocity.class)
-                    .withoutComponent(InAir.class);
-    }
-
+public class ApplyFrictionSystem implements EcsSystem<ApplyFrictionSystem.Resources, ApplyFrictionSystem.EntityData, EcsSystem.NoEvents> {
     @Override
     public void tick(
-            final Stream<Entity> entities,
-            final World world
+            final Resources resources,
+            final Stream<EntityDataHandle<EntityData>> entities,
+            final NoEvents noEvents
     ) {
-        final var entityManager = world.getEntityManager();
-        final var delta = world.fetchResource(TimeManager.class).getTimeStepInSeconds();
+        final var delta = resources.timeManager.getTimeStepInSeconds();
 
         entities.forEach(entity -> {
-            final var physics = entityManager.getComponentOf(entity, Physics.class).orElseThrow();
-            final var velocity = entityManager.getComponentOf(entity, Velocity.class).orElseThrow();
+            final var physics = entity.getData().physics;
+            final var velocity = entity.getData().velocity;
 
             if (velocity.lengthSquared() == 0.0) {
                 return;
@@ -47,4 +37,12 @@ public class ApplyFrictionSystem implements ECSSystem {
                          Math.signum(velocity.y) * magnitudeY);
         });
     }
+
+    public static record Resources(TimeManager timeManager) {}
+
+    public static record EntityData(
+            Physics physics,
+            Velocity velocity,
+            @Without InAir noInAir
+    ) {}
 }

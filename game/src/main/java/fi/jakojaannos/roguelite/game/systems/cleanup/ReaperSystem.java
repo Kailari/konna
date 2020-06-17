@@ -5,32 +5,25 @@ import org.slf4j.LoggerFactory;
 
 import java.util.stream.Stream;
 
-import fi.jakojaannos.riista.ecs.World;
-import fi.jakojaannos.riista.ecs.legacy.ECSSystem;
-import fi.jakojaannos.riista.ecs.legacy.Entity;
-import fi.jakojaannos.riista.ecs.legacy.RequirementsBuilder;
+import fi.jakojaannos.riista.ecs.EcsSystem;
+import fi.jakojaannos.riista.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.game.LogCategories;
 import fi.jakojaannos.roguelite.game.data.components.character.DeadTag;
-import fi.jakojaannos.roguelite.game.systems.SystemGroups;
 
-public class ReaperSystem implements ECSSystem {
+public class ReaperSystem implements EcsSystem<EcsSystem.NoResources, ReaperSystem.EntityData, EcsSystem.NoEvents> {
     private static final Logger LOG = LoggerFactory.getLogger(ReaperSystem.class);
 
     @Override
-    public void declareRequirements(final RequirementsBuilder requirements) {
-        requirements.addToGroup(SystemGroups.CLEANUP)
-                    .withComponent(DeadTag.class);
-    }
-
-    @Override
     public void tick(
-            final Stream<Entity> entities,
-            final World world
+            final NoResources noResources,
+            final Stream<EntityDataHandle<EntityData>> entities,
+            final NoEvents noEvents
     ) {
-        final var entityManager = world.getEntityManager();
         entities.forEach(entity -> {
-            entityManager.destroyEntity(entity);
+            entity.destroy();
             LOG.trace(LogCategories.HEALTH, "Destroyed a dead entity {}", entity.getId());
         });
     }
+
+    public static record EntityData(DeadTag deadTag) {}
 }

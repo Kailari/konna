@@ -1,7 +1,10 @@
-package fi.jakojaannos.roguelite.engine.event;
+package fi.jakojaannos.riista.application.impl;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
+
+import fi.jakojaannos.riista.data.events.EventReceiver;
+import fi.jakojaannos.riista.data.events.EventSender;
 
 public class EventBus<TEvent> implements EventReceiver<TEvent>, EventSender<TEvent> {
     private final Queue<TEvent> events = new ArrayDeque<>();

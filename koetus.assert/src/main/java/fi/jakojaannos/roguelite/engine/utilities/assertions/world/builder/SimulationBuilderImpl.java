@@ -3,7 +3,7 @@ package fi.jakojaannos.roguelite.engine.utilities.assertions.world.builder;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import fi.jakojaannos.roguelite.engine.GameMode;
+import fi.jakojaannos.riista.GameMode;
 import fi.jakojaannos.riista.ecs.SystemDispatcher;
 import fi.jakojaannos.riista.ecs.SystemGroup;
 import fi.jakojaannos.riista.ecs.SystemState;
@@ -41,21 +41,7 @@ public class SimulationBuilderImpl implements SimulationBuilder {
     }
 
     @Override
-    public SimulationInspector runsSingleTick() {
-        return build().runsSingleTick();
-    }
-
-    @Override
-    public SimulationInspector runsForTicks(final long n) {
-        return build().runsForTicks(n);
-    }
-
-    @Override
-    public SimulationInspector runsForSeconds(final double seconds) {
-        return build().runsForSeconds(seconds);
-    }
-
-    private SimulationInspector build() {
+    public SimulationInspector build() {
         final var dispatcher = this.dispatcherBuilder.build();
         final Supplier<SystemState> systemStateFactory = this.systemStateFactory == null
                 ? dispatcher::createDefaultState

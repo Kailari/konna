@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import fi.jakojaannos.riista.ecs.EcsSystem;
 import fi.jakojaannos.riista.ecs.SystemGroup;
 import fi.jakojaannos.riista.ecs.SystemState;
 import fi.jakojaannos.riista.ecs.annotation.DisabledByDefault;
@@ -12,6 +13,16 @@ import fi.jakojaannos.riista.ecs.annotation.DisabledByDefault;
 public class SystemStateImpl implements SystemState {
     private final Map<Class<?>, Boolean> enabled;
     private final Map<SystemGroup, Boolean> groups;
+
+    public SystemStateImpl(
+            final Iterable<EcsSystem<?, ?, ?>> systems,
+            final Iterable<SystemGroup> systemGroups
+    ) {
+        this.enabled = StreamSupport.stream(systems.spliterator(), false)
+                                    .collect(Collectors.toMap(Object::getClass, system -> isEnabledByDefault(system.getClass())));
+        this.groups = StreamSupport.stream(systemGroups.spliterator(), false)
+                                   .collect(Collectors.toMap(group -> group, SystemGroup::isEnabledByDefault));
+    }
 
     @Override
     public void resetToDefaultState(final Collection<Class<?>> systems) {
@@ -25,16 +36,6 @@ public class SystemStateImpl implements SystemState {
         for (final var group : systemGroups) {
             this.groups.put(group, group.isEnabledByDefault());
         }
-    }
-
-    public SystemStateImpl(
-            final Iterable<Object> systems,
-            final Iterable<SystemGroup> systemGroups
-    ) {
-        this.enabled = StreamSupport.stream(systems.spliterator(), false)
-                                    .collect(Collectors.toMap(Object::getClass, system -> isEnabledByDefault(system.getClass())));
-        this.groups = StreamSupport.stream(systemGroups.spliterator(), false)
-                                   .collect(Collectors.toMap(group -> group, SystemGroup::isEnabledByDefault));
     }
 
     @Override

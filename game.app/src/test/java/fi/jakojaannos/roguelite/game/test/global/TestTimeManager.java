@@ -1,6 +1,6 @@
 package fi.jakojaannos.roguelite.game.test.global;
 
-import fi.jakojaannos.roguelite.engine.GameRunnerTimeManager;
+import fi.jakojaannos.riista.GameRunnerTimeManager;
 
 public class TestTimeManager extends GameRunnerTimeManager {
     public TestTimeManager(final long timeStep) {

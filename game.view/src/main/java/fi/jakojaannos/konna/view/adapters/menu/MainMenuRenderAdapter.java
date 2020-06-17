@@ -8,7 +8,7 @@ import fi.jakojaannos.riista.view.Renderer;
 import fi.jakojaannos.riista.view.ui.UiElement;
 import fi.jakojaannos.riista.ecs.EcsSystem;
 import fi.jakojaannos.riista.ecs.EntityDataHandle;
-import fi.jakojaannos.roguelite.engine.event.Events;
+import fi.jakojaannos.riista.data.resources.Events;
 import fi.jakojaannos.roguelite.engine.network.NetworkManager;
 
 public class MainMenuRenderAdapter implements EcsSystem<MainMenuRenderAdapter.Resources, EcsSystem.NoEntities, EcsSystem.NoEvents> {

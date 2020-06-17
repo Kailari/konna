@@ -2,37 +2,27 @@ package fi.jakojaannos.roguelite.game.systems.physics;
 
 import java.util.stream.Stream;
 
-import fi.jakojaannos.riista.ecs.World;
-import fi.jakojaannos.riista.ecs.legacy.ECSSystem;
-import fi.jakojaannos.riista.ecs.legacy.Entity;
-import fi.jakojaannos.riista.ecs.legacy.RequirementsBuilder;
+import fi.jakojaannos.riista.ecs.EcsSystem;
+import fi.jakojaannos.riista.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
-import fi.jakojaannos.roguelite.game.systems.SystemGroups;
 
-public class ApplyForceSystem implements ECSSystem {
-    @Override
-    public void declareRequirements(final RequirementsBuilder requirements) {
-        requirements.addToGroup(SystemGroups.PHYSICS_TICK)
-                    //.tickBefore(ApplyVelocitySystem.class)
-                    .withComponent(Physics.class)
-                    .withComponent(Velocity.class);
-    }
-
+public class ApplyForceSystem implements EcsSystem<EcsSystem.NoResources, ApplyForceSystem.EntityData, EcsSystem.NoEvents> {
     @Override
     public void tick(
-            final Stream<Entity> entities,
-            final World world
+            final NoResources noResources,
+            final Stream<EntityDataHandle<EntityData>> entities,
+            final NoEvents noEvents
     ) {
-        final var entityManager = world.getEntityManager();
-
         entities.forEach(entity -> {
-            final var physics = entityManager.getComponentOf(entity, Physics.class).orElseThrow();
-            final var velocity = entityManager.getComponentOf(entity, Velocity.class).orElseThrow();
+            final var physics = entity.getData().physics;
+            final var velocity = entity.getData().velocity;
             if (physics.acceleration.lengthSquared() > 0) {
                 velocity.add(physics.acceleration);
             }
             physics.acceleration.set(0.0);
         });
     }
+
+    public static record EntityData(Physics physics, Velocity velocity) {}
 }

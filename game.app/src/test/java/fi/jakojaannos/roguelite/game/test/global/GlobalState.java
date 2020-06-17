@@ -21,10 +21,9 @@ import fi.jakojaannos.riista.view.assets.SoundEffect;
 import fi.jakojaannos.riista.view.audio.AudioContext;
 import fi.jakojaannos.riista.view.audio.MusicPlayer;
 import fi.jakojaannos.riista.vulkan.application.PresentableState;
-import fi.jakojaannos.riista.vulkan.assets.storage.VulkanAssetManager;
 import fi.jakojaannos.riista.vulkan.renderer.GameRenderAdapterBase;
 import fi.jakojaannos.riista.vulkan.renderer.game.RendererRecorder;
-import fi.jakojaannos.roguelite.engine.GameState;
+import fi.jakojaannos.riista.GameState;
 import fi.jakojaannos.roguelite.engine.utilities.assertions.world.SimulationInspector;
 
 import static org.mockito.Mockito.mock;

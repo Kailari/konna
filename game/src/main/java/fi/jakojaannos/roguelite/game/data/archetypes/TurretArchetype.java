@@ -34,7 +34,8 @@ public class TurretArchetype {
                 new AttackAbility(DamageSource.Generic.UNDEFINED,
                                   CollisionLayer.PLAYER_PROJECTILE,
                                   0.375,
-                                  -1.0),
+                                  -1.0,
+                                  0),
                 new WeaponInventory(Weapons.TURRET_GATLING));
     }
 }

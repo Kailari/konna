@@ -18,7 +18,6 @@ import fi.jakojaannos.riista.ecs.EntityDataHandle;
 import fi.jakojaannos.riista.ecs.EntityHandle;
 import fi.jakojaannos.riista.ecs.LogCategories;
 import fi.jakojaannos.riista.ecs.world.EntityHandleImpl;
-import fi.jakojaannos.riista.ecs.world.LegacyEntityHandleImpl;
 
 public class EntityStorage {
     private static final Logger LOG = LoggerFactory.getLogger(EntityStorage.class);
@@ -178,8 +177,7 @@ public class EntityStorage {
         final var id = this.idCounter.getAndIncrement();
         LOG.debug(LogCategories.ENTITY_LIFECYCLE, "Creating entity with id {}", id);
 
-        // TODO: Change to EntityHandleImpl once legacy is finally booted
-        final var entity = new LegacyEntityHandleImpl(id, this);
+        final var entity = new EntityHandleImpl(id, this);
 
         // Some of the given components may actually be factories. Execute those factories and
         // create an array with the factories replaced by their end product components

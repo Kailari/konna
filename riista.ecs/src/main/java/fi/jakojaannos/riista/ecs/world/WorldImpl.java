@@ -11,31 +11,20 @@ import fi.jakojaannos.riista.ecs.EntityHandle;
 import fi.jakojaannos.riista.ecs.LogCategories;
 import fi.jakojaannos.riista.ecs.World;
 import fi.jakojaannos.riista.ecs.resources.Entities;
-import fi.jakojaannos.riista.ecs.legacy.EntityManager;
 import fi.jakojaannos.riista.ecs.world.storage.EntityStorage;
 import fi.jakojaannos.riista.ecs.world.storage.ResourceStorage;
 
 public class WorldImpl implements World {
     private static final Logger LOG = LoggerFactory.getLogger(World.class);
 
-    @Deprecated
-    private final LegacyCompat legacyCompatibilityEntityManager;
-
     private final ResourceStorage resourceStorage;
     private final EntityStorage entityStorage;
-
-    @Override
-    public EntityManager getEntityManager() {
-        return this.legacyCompatibilityEntityManager;
-    }
 
     public WorldImpl() {
         this.resourceStorage = new ResourceStorage();
         this.entityStorage = new EntityStorage();
 
         this.registerResource(Entities.class, this);
-
-        this.legacyCompatibilityEntityManager = new LegacyCompat(this);
     }
 
     @Override
