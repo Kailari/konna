@@ -33,7 +33,7 @@ public class CharacterAttackSystem implements EcsSystem<CharacterAttackSystem.Re
                                                   resources.entities,
                                                   shooterPos,
                                                   attackAbility,
-                                                  resources.events.system());
+                                                  resources.events);
 
             if (attackAbility.equippedSlot != attackAbility.previousEquippedSlot) {
                 inventory.slots[attackAbility.previousEquippedSlot].unequip(actionInfo);

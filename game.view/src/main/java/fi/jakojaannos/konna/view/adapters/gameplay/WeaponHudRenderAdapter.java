@@ -45,7 +45,7 @@ public class WeaponHudRenderAdapter implements EcsSystem<WeaponHudRenderAdapter.
                                             resources.entities,
                                             playerPos,
                                             localPlayerAbilities,
-                                            resources.events.system());
+                                            resources.events);
             final var query = inventory.slots[localPlayerAbilities.equippedSlot]
                     .doStateQuery(info);
             final int ammo = query.currentAmmo;

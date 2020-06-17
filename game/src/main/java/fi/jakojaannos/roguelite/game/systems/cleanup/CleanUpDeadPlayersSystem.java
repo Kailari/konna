@@ -18,7 +18,7 @@ public class CleanUpDeadPlayersSystem implements EcsSystem<CleanUpDeadPlayersSys
             final NoEvents noEvents
     ) {
         entities.forEach(entity -> {
-            resources.events.system().fire(new PlayerDeadEvent());
+            resources.events.fire(new PlayerDeadEvent());
             resources.players.removePlayer(entity.getHandle());
         });
     }

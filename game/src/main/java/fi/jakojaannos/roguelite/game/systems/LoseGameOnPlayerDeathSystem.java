@@ -15,7 +15,7 @@ public class LoseGameOnPlayerDeathSystem implements EcsSystem<LoseGameOnPlayerDe
             final Stream<EntityDataHandle<NoEntities>> entities,
             final EventData eventData
     ) {
-        resources.events.system().fire(new GameLostEvent());
+        resources.events.fire(new GameLostEvent());
     }
 
     public static record Resources(Events events) {}

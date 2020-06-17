@@ -7,7 +7,7 @@ Feature: When the game initially starts, player is greeted with a Title Screen.
     When the game runs for a single tick
     Then there is a title with text "Konna"
     And there is a button with text "Quit"
-    And there is a button with text "Play"
+    And there is a button with text "Start"
 
     @problem
   Scenario: The user no longer wishes to play and clicks "Quit" button. The game shuts down.

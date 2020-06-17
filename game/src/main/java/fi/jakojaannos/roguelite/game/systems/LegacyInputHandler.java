@@ -2,36 +2,32 @@ package fi.jakojaannos.roguelite.game.systems;
 
 import java.util.stream.Stream;
 
+import fi.jakojaannos.riista.data.resources.Events;
 import fi.jakojaannos.riista.data.resources.Mouse;
 import fi.jakojaannos.riista.ecs.EcsSystem;
 import fi.jakojaannos.riista.ecs.EntityDataHandle;
-import fi.jakojaannos.riista.data.resources.Events;
 import fi.jakojaannos.riista.input.ButtonInput;
 import fi.jakojaannos.riista.input.InputAxis;
 import fi.jakojaannos.riista.input.InputButton;
+import fi.jakojaannos.riista.input.InputEvent;
 import fi.jakojaannos.roguelite.game.data.resources.Inputs;
 
 /**
- * @deprecated Leftover legacy input handling. Used to be in <code>RogueliteGame.java</code>
+ * @deprecated Leftover legacy input handling. Used to be in <code>RogueliteGame.java</code>. New implementation should
+ *         do something fancier, involving some way of handling key bindings, input contexts etc.
  */
 @Deprecated
-public class LegacyInputHandler implements EcsSystem<LegacyInputHandler.Resources, EcsSystem.NoEntities, EcsSystem.NoEvents> {
+public class LegacyInputHandler implements EcsSystem<LegacyInputHandler.Resources, EcsSystem.NoEntities, LegacyInputHandler.EventData> {
     @Override
     public void tick(
             final Resources resources,
-            final Stream<EntityDataHandle<NoEntities>> entities,
-            final NoEvents noEvents
+            final Stream<EntityDataHandle<NoEntities>> noEntities,
+            final EventData eventData
     ) {
         final var inputs = resources.inputs;
         final var mouse = resources.mouse;
-        final var events = resources.events;
-        final var inputEvents = events.input();
 
-        // FIXME: Input handling should happen in some engine-level system and provide actual inputs
-        //  via system events (once they are implemented) and/or through a resource.
-        while (inputEvents.hasEvents()) {
-            final var event = inputEvents.pollEvent();
-
+        eventData.inputEvents.forEach(event -> {
             event.asAxis().ifPresent(input -> {
                 if (input.axis() == InputAxis.Mouse.X_POS) {
                     mouse.position.x = input.value();
@@ -84,8 +80,10 @@ public class LegacyInputHandler implements EcsSystem<LegacyInputHandler.Resource
                     inputs.inputReload = input.action() != ButtonInput.Action.RELEASE;
                 }
             });
-        }
+        });
     }
+
+    public static record EventData(Iterable<InputEvent>inputEvents) {}
 
     public static record Resources(
             Inputs inputs,

@@ -4,10 +4,13 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
+import java.util.stream.StreamSupport;
+
 import fi.jakojaannos.riista.data.events.UiEvent;
 import fi.jakojaannos.riista.data.resources.Events;
 import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;
 import fi.jakojaannos.roguelite.game.gamemode.MainMenuGameMode;
+import fi.jakojaannos.roguelite.game.test.global.GlobalState;
 
 import static fi.jakojaannos.roguelite.engine.utilities.assertions.world.GameExpect.whenGameWithGameModeAndRenderer;
 import static fi.jakojaannos.roguelite.game.test.global.GlobalState.renderer;
@@ -15,8 +18,6 @@ import static fi.jakojaannos.roguelite.game.test.global.GlobalState.simulation;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MenuSteps {
-    public static final String TITLE_LABEL_NAME = "title_label";
-
     @Given("the main menu has just loaded")
     public void the_main_menu_has_just_loaded() {
         simulation = whenGameWithGameModeAndRenderer(MainMenuGameMode.create(), renderer);
@@ -32,24 +33,30 @@ public class MenuSteps {
             default -> throw new AssertionError("Test-case for button \"" + string + "\" is not implemented!");
         };
 
-        simulation.state().world().fetchResource(Events.class).system().fire(event);
+        simulation.state().world().fetchResource(Events.class).fire(event);
         simulation.runsSingleTick();
     }
 
     @Then("there is a title with text {string}")
     public void there_is_a_title_with_text(String string) {
-        //assertUI(gameRenderer.getCurrentUserInterface())
-        //        .hasExactlyOneElement(that -> that.hasName().equalTo(TITLE_LABEL_NAME)
-        //                                          .isLabel()
-        //                                          .hasText().equalTo(string));
+        simulation.runsSingleTick();
+
+        final var state = GlobalState.renderer.fetchPresentableState();
+        assertTrue(StreamSupport.stream(state.textEntries().spliterator(), false)
+                                .anyMatch(entry -> entry.compileString(state.uiVariables())
+                                                        .toLowerCase()
+                                                        .contains(string.toLowerCase())));
     }
 
     @Then("there is a button with text {string}")
     public void there_is_a_button_with_text(String string) {
-        // TODO: Re-write the UI assertions to use presentable state or sth.
-        //assertUI(presentableState)
-        //        .hasExactlyOneElement(that -> that.hasChildMatching(child -> child.isLabel()
-        //                                                                          .hasText().equalTo(string)));
+        simulation.runsSingleTick();
+
+        final var state = GlobalState.renderer.fetchPresentableState();
+        assertTrue(StreamSupport.stream(state.textEntries().spliterator(), false)
+                                .anyMatch(entry -> entry.compileString(state.uiVariables())
+                                                        .toLowerCase()
+                                                        .contains(string.toLowerCase())));
     }
 
     @Then("the game should close")

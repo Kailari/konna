@@ -7,15 +7,15 @@ import java.io.IOException;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
+import fi.jakojaannos.riista.data.events.StateEvent;
 import fi.jakojaannos.riista.data.events.UiEvent;
 import fi.jakojaannos.riista.data.resources.Network;
-import fi.jakojaannos.riista.utilities.TimeManager;
-import fi.jakojaannos.roguelite.engine.MainThread;
+import fi.jakojaannos.riista.data.resources.StateEvents;
 import fi.jakojaannos.riista.ecs.EcsSystem;
 import fi.jakojaannos.riista.ecs.EntityDataHandle;
-import fi.jakojaannos.riista.data.resources.Events;
+import fi.jakojaannos.riista.utilities.TimeManager;
+import fi.jakojaannos.roguelite.engine.MainThread;
 import fi.jakojaannos.roguelite.engine.network.client.ClientNetworkManager;
-import fi.jakojaannos.riista.data.events.StateEvent;
 import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;
 
 public class HandleMainMenuUiEventsSystem implements EcsSystem<HandleMainMenuUiEventsSystem.Resources, EcsSystem.NoEntities, HandleMainMenuUiEventsSystem.EventData> {
@@ -31,7 +31,7 @@ public class HandleMainMenuUiEventsSystem implements EcsSystem<HandleMainMenuUiE
             final EventData eventData
     ) {
         final var timeManager = resources.timeManager;
-        final var stateEvents = resources.events.state();
+        final var stateEvents = resources.stateEvents;
 
         eventData.events.forEach(event -> {
             if (event.type() == UiEvent.Type.CLICK) {
@@ -63,7 +63,7 @@ public class HandleMainMenuUiEventsSystem implements EcsSystem<HandleMainMenuUiE
             TimeManager timeManager,
             MainThread mainThread,
             Network network,
-            Events events
+            StateEvents stateEvents
     ) {}
 
     public static record EventData(Iterable<UiEvent>events) {}

@@ -38,7 +38,7 @@ public class MainMenuRenderAdapter implements EcsSystem<MainMenuRenderAdapter.Re
                                       .orElse("No connection"));
 
         final var uiEvents = renderer.ui().draw(this.mainMenu);
-        uiEvents.forEach(resources.events.system()::fire);
+        uiEvents.forEach(resources.events::fire);
     }
 
     public static record Resources(

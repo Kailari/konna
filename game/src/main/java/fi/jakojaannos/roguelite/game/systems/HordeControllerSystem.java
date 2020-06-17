@@ -77,14 +77,14 @@ public class HordeControllerSystem implements EcsSystem<HordeControllerSystem.Re
         resources.horde.changeTimestamp = currentTime;
         ++resources.horde.hordeIndex;
 
-        resources.events.system().fire(new HordeStartEvent());
+        resources.events.fire(new HordeStartEvent());
     }
 
     private static void stopHordeSpawns(final Resources resources, final long currentTime) {
         resources.horde.status = Horde.Status.ENDING;
         resources.horde.changeTimestamp = currentTime;
 
-        resources.events.system().fire(new HordeStopEvent());
+        resources.events.fire(new HordeStopEvent());
     }
 
     private static void endHorde(final Resources resources, final long currentTime) {
@@ -92,7 +92,7 @@ public class HordeControllerSystem implements EcsSystem<HordeControllerSystem.Re
         resources.horde.endTimestamp = currentTime;
         resources.horde.changeTimestamp = currentTime;
 
-        resources.events.system().fire(new HordeEndEvent());
+        resources.events.fire(new HordeEndEvent());
     }
 
     public static record EntityData(
