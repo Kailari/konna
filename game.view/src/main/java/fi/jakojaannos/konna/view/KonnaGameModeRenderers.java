@@ -3,10 +3,10 @@ package fi.jakojaannos.konna.view;
 import fi.jakojaannos.konna.view.adapters.gameplay.*;
 import fi.jakojaannos.konna.view.adapters.menu.MainMenuRenderAdapter;
 import fi.jakojaannos.riista.assets.AssetManager;
+import fi.jakojaannos.riista.ecs.SystemDispatcher;
 import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.riista.view.GameModeRenderers;
 import fi.jakojaannos.riista.view.audio.AudioContext;
-import fi.jakojaannos.riista.ecs.SystemDispatcher;
 import fi.jakojaannos.roguelite.game.gamemode.GameplayGameMode;
 import fi.jakojaannos.roguelite.game.gamemode.MainMenuGameMode;
 
@@ -57,6 +57,9 @@ public class KonnaGameModeRenderers {
                    .buildGroup();
             builder.group("entities")
                    .withSystem(new PlayerCharacterRenderAdapter(assetManager))
+                   .buildGroup();
+            builder.group("level")
+                   .withSystem(new TileMapRenderAdapter(assetManager))
                    .buildGroup();
             builder.group("ui")
                    .withSystem(new CharacterHealthbarRenderAdapter(assetManager, timeManager.convertToTicks(5.0)))

@@ -5,11 +5,11 @@ import org.joml.Vector2d;
 import org.joml.Vector3f;
 import org.lwjgl.vulkan.VkExtent2D;
 
-import fi.jakojaannos.riista.vulkan.renderer.game.RenderBuffer;
+import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.riista.vulkan.renderer.debug.DebugRendererRecorder;
+import fi.jakojaannos.riista.vulkan.renderer.game.RenderBuffer;
 import fi.jakojaannos.riista.vulkan.renderer.mesh.MeshRendererRecorder;
 import fi.jakojaannos.riista.vulkan.renderer.ui.UiRendererRecorder;
-import fi.jakojaannos.riista.utilities.TimeManager;
 
 public class PresentableState {
     private final RenderBuffer<DebugRendererRecorder.TransformEntry> transformEntries = new RenderBuffer<>(DebugRendererRecorder.TransformEntry::new,
@@ -18,6 +18,8 @@ public class PresentableState {
                                                                                                  DebugRendererRecorder.AABBEntry[]::new);
     private final RenderBuffer<MeshRendererRecorder.SkeletalEntry> skeletalMeshEntries = new RenderBuffer<>(MeshRendererRecorder.SkeletalEntry::new,
                                                                                                             MeshRendererRecorder.SkeletalEntry[]::new);
+    private final RenderBuffer<MeshRendererRecorder.StaticEntry> staticMeshEntries = new RenderBuffer<>(MeshRendererRecorder.StaticEntry::new,
+                                                                                                        MeshRendererRecorder.StaticEntry[]::new);
     private final RenderBuffer<UiRendererRecorder.QuadEntry> quadEntries = new RenderBuffer<>(UiRendererRecorder.QuadEntry::new,
                                                                                               UiRendererRecorder.QuadEntry[]::new);
     private final RenderBuffer<UiRendererRecorder.TextEntry> textEntries = new RenderBuffer<>(UiRendererRecorder.TextEntry::new,
@@ -40,6 +42,10 @@ public class PresentableState {
 
     public RenderBuffer<MeshRendererRecorder.SkeletalEntry> skeletalMeshEntries() {
         return this.skeletalMeshEntries;
+    }
+
+    public RenderBuffer<MeshRendererRecorder.StaticEntry> staticMeshEntries() {
+        return this.staticMeshEntries;
     }
 
     public long timestamp() {
@@ -97,6 +103,7 @@ public class PresentableState {
         this.mouseClicked = mouseClicked;
         this.transformEntries.reset();
         this.skeletalMeshEntries.reset();
+        this.staticMeshEntries.reset();
         this.quadEntries.reset();
         this.textEntries.reset();
         this.aabbEntries.reset();

@@ -6,6 +6,7 @@ import fi.jakojaannos.riista.data.components.Transform;
 import fi.jakojaannos.riista.view.MeshRenderer;
 import fi.jakojaannos.riista.view.Presentable;
 import fi.jakojaannos.riista.view.assets.SkeletalMesh;
+import fi.jakojaannos.riista.view.assets.StaticMesh;
 import fi.jakojaannos.riista.vulkan.application.PresentableState;
 
 public class MeshRendererRecorder implements MeshRenderer {
@@ -33,6 +34,17 @@ public class MeshRendererRecorder implements MeshRenderer {
         entry.frame = frame;
     }
 
+    @Override
+    public void drawStatic(final Transform transform, final StaticMesh mesh) {
+        final var entry = this.state.staticMeshEntries().get();
+
+        entry.transform.translate((float) transform.position.x,
+                                  (float) transform.position.y,
+                                  0.0f)
+                       .rotateZ((float) transform.rotation);
+        entry.mesh = mesh;
+    }
+
     public static final class SkeletalEntry implements Presentable {
         public Matrix4f transform = new Matrix4f();
         public SkeletalMesh mesh;
@@ -45,6 +57,17 @@ public class MeshRendererRecorder implements MeshRenderer {
             this.mesh = null;
             this.frame = 0;
             this.animation = "idle";
+        }
+    }
+
+    public static final class StaticEntry implements Presentable {
+        public Matrix4f transform = new Matrix4f();
+        public StaticMesh mesh;
+
+        @Override
+        public void reset() {
+            this.transform.identity();
+            this.mesh = null;
         }
     }
 }

@@ -1,26 +1,28 @@
 package fi.jakojaannos.riista.vulkan.renderer.mesh;
 
-import fi.jakojaannos.riista.vulkan.rendering.RenderSubpass;
-import fi.jakojaannos.riista.vulkan.util.RecreateCloseable;
-import fi.jakojaannos.riista.vulkan.internal.RenderingBackend;
-import fi.jakojaannos.riista.vulkan.internal.TextureSampler;
-import fi.jakojaannos.riista.vulkan.application.PresentableState;
-import fi.jakojaannos.riista.vulkan.internal.command.CommandBuffer;
-import fi.jakojaannos.riista.vulkan.internal.descriptor.DescriptorPool;
-import fi.jakojaannos.riista.vulkan.internal.descriptor.DescriptorSetLayout;
-import fi.jakojaannos.riista.vulkan.internal.descriptor.SwapchainImageDependentDescriptorPool;
-import fi.jakojaannos.riista.vulkan.internal.types.VkPrimitiveTopology;
 import fi.jakojaannos.riista.assets.AssetManager;
 import fi.jakojaannos.riista.view.assets.Texture;
 import fi.jakojaannos.riista.vulkan.CameraDescriptor;
 import fi.jakojaannos.riista.vulkan.SceneUniformBufferObject;
+import fi.jakojaannos.riista.vulkan.application.PresentableState;
 import fi.jakojaannos.riista.vulkan.assets.material.MaterialDescriptor;
 import fi.jakojaannos.riista.vulkan.assets.mesh.MeshImpl;
 import fi.jakojaannos.riista.vulkan.assets.mesh.skeletal.AnimationDescriptor;
 import fi.jakojaannos.riista.vulkan.assets.mesh.skeletal.SkeletalMeshImpl;
 import fi.jakojaannos.riista.vulkan.assets.mesh.skeletal.SkeletalMeshVertex;
+import fi.jakojaannos.riista.vulkan.assets.mesh.staticmesh.StaticMeshVertex;
+import fi.jakojaannos.riista.vulkan.internal.RenderingBackend;
+import fi.jakojaannos.riista.vulkan.internal.TextureSampler;
+import fi.jakojaannos.riista.vulkan.internal.command.CommandBuffer;
+import fi.jakojaannos.riista.vulkan.internal.descriptor.DescriptorPool;
+import fi.jakojaannos.riista.vulkan.internal.descriptor.DescriptorSetLayout;
+import fi.jakojaannos.riista.vulkan.internal.descriptor.SwapchainImageDependentDescriptorPool;
+import fi.jakojaannos.riista.vulkan.internal.types.VkDescriptorPoolCreateFlags;
+import fi.jakojaannos.riista.vulkan.internal.types.VkPrimitiveTopology;
 import fi.jakojaannos.riista.vulkan.rendering.GraphicsPipeline;
 import fi.jakojaannos.riista.vulkan.rendering.RenderPass;
+import fi.jakojaannos.riista.vulkan.rendering.RenderSubpass;
+import fi.jakojaannos.riista.vulkan.util.RecreateCloseable;
 
 import static fi.jakojaannos.riista.utilities.BitMask.bitMask;
 import static org.lwjgl.system.MemoryStack.stackPush;
@@ -51,10 +53,12 @@ public class MeshRendererExecutor extends RecreateCloseable {
 
     private final TextureSampler textureSampler;
     private final MaterialDescriptor materialDescriptor;
+    private final MaterialDescriptor staticMaterialDescriptor;
     private final AnimationDescriptor animationDescriptor;
     private final SceneUniformBufferObject sceneUBO;
 
     private final GraphicsPipeline<SkeletalMeshVertex> skeletalPipeline;
+    private final GraphicsPipeline<StaticMeshVertex> staticPipeline;
 
     public MeshRendererExecutor(
             final RenderingBackend backend,
@@ -63,17 +67,18 @@ public class MeshRendererExecutor extends RecreateCloseable {
             final AssetManager assetManager,
             final DescriptorSetLayout cameraDescriptorLayout
     ) {
-        // Buffers:     1 for material, 1 for scene, 1 for mesh
-        // samplers:    1 for material
+        // Buffers:     2 for materials, 1 for scene, 1 for mesh
+        // samplers:    2 for material
         this.descriptorPool = new SwapchainImageDependentDescriptorPool(
                 backend,
                 SETS_PER_IMAGE,
-                bitMask(),
+                bitMask(VkDescriptorPoolCreateFlags.FREE_DESCRIPTOR_SET_BIT),
                 new DescriptorPool.Pool(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                                         () -> backend.swapchain()
-                                                     .getImageCount() * (1 + 1 + 1)),
+                                                     .getImageCount() * (2 + 1 + 1)),
                 new DescriptorPool.Pool(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                                        backend.swapchain()::getImageCount));
+                                        () -> backend.swapchain()
+                                                     .getImageCount() * 2));
 
         this.materialDescriptorLayout = new DescriptorSetLayout(backend.deviceContext(),
                                                                 MaterialDescriptor.TEXTURE_DESCRIPTOR_BINDING,
@@ -100,6 +105,12 @@ public class MeshRendererExecutor extends RecreateCloseable {
                                                          this.descriptorPool,
                                                          this.materialDescriptorLayout,
                                                          this.textureSampler);
+        this.staticMaterialDescriptor = new MaterialDescriptor(backend.deviceContext(),
+                                                               backend.swapchain(),
+                                                               defaultTexture,
+                                                               this.descriptorPool,
+                                                               this.materialDescriptorLayout,
+                                                               this.textureSampler);
         this.animationDescriptor = new AnimationDescriptor(backend,
                                                            this.descriptorPool,
                                                            this.boneDescriptorLayout);
@@ -117,6 +128,18 @@ public class MeshRendererExecutor extends RecreateCloseable {
                                                        this.sceneUBO.getLayout(),
                                                        this.materialDescriptorLayout,
                                                        this.boneDescriptorLayout);
+        this.staticPipeline = new GraphicsPipeline<>(backend.deviceContext(),
+                                                     backend.swapchain(),
+                                                     renderPass,
+                                                     mainSubpass,
+                                                     assetManager,
+                                                     "shaders/vulkan/staticMesh.vert",
+                                                     "shaders/vulkan/shader.frag",
+                                                     VkPrimitiveTopology.TRIANGLE_LIST,
+                                                     StaticMeshVertex.FORMAT,
+                                                     cameraDescriptorLayout,
+                                                     this.sceneUBO.getLayout(),
+                                                     this.materialDescriptorLayout);
     }
 
     public void flush(
@@ -160,11 +183,63 @@ public class MeshRendererExecutor extends RecreateCloseable {
                                         null);
 
                 for (final var subMesh : entry.mesh) {
+                    // FIXME: This is wrong. If material changes, this causes the descriptor to update mid-frame, which
+                    //        is something we really do not want to do. Instead, allocate large number of descriptors
+                    //        and use them as needed (or just allocate one descriptor per material for now)
+
                     this.materialDescriptor.update(subMesh.getMaterial(), imageIndex);
 
                     vkCmdBindDescriptorSets(commandBuffer.getHandle(),
                                             VK_PIPELINE_BIND_POINT_GRAPHICS,
                                             this.skeletalPipeline.getLayout(),
+                                            2,
+                                            stack.longs(this.materialDescriptor.getDescriptorSet(imageIndex)),
+                                            null);
+
+                    vkCmdBindVertexBuffers(commandBuffer.getHandle(),
+                                           0,
+                                           stack.longs(((MeshImpl) subMesh).getVertexBuffer().getHandle()),
+                                           stack.longs(0L));
+                    vkCmdBindIndexBuffer(commandBuffer.getHandle(),
+                                         ((MeshImpl) subMesh).getIndexBuffer().getHandle(),
+                                         0,
+                                         VK_INDEX_TYPE_UINT32);
+
+                    vkCmdDrawIndexed(commandBuffer.getHandle(),
+                                     subMesh.getIndexCount(),
+                                     1,
+                                     0,
+                                     0,
+                                     0);
+                }
+            }
+
+            vkCmdBindPipeline(commandBuffer.getHandle(),
+                              VK_PIPELINE_BIND_POINT_GRAPHICS,
+                              this.staticPipeline.getHandle());
+
+            vkCmdBindDescriptorSets(commandBuffer.getHandle(),
+                                    VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                    this.staticPipeline.getLayout(),
+                                    0,
+                                    stack.longs(cameraUBO.getDescriptorSet(imageIndex),
+                                                this.sceneUBO.getDescriptorSet(imageIndex)),
+                                    null);
+
+            for (final var entry : state.staticMeshEntries()) {
+                entry.transform.get(0, pushConstantData);
+                vkCmdPushConstants(commandBuffer.getHandle(),
+                                   this.staticPipeline.getLayout(),
+                                   VK_SHADER_STAGE_VERTEX_BIT,
+                                   0,
+                                   pushConstantData);
+
+                for (final var subMesh : entry.mesh) {
+                    this.staticMaterialDescriptor.update(subMesh.getMaterial(), imageIndex);
+
+                    vkCmdBindDescriptorSets(commandBuffer.getHandle(),
+                                            VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                            this.staticPipeline.getLayout(),
                                             2,
                                             stack.longs(this.materialDescriptor.getDescriptorSet(imageIndex)),
                                             null);
@@ -193,10 +268,12 @@ public class MeshRendererExecutor extends RecreateCloseable {
     protected void recreate() {
         this.descriptorPool.tryRecreate();
         this.materialDescriptor.tryRecreate();
+        this.staticMaterialDescriptor.tryRecreate();
         this.animationDescriptor.tryRecreate();
         this.sceneUBO.tryRecreate();
 
         this.skeletalPipeline.tryRecreate();
+        this.staticPipeline.tryRecreate();
     }
 
     @Override
@@ -211,6 +288,7 @@ public class MeshRendererExecutor extends RecreateCloseable {
 
         this.textureSampler.close();
         this.materialDescriptor.close();
+        this.staticMaterialDescriptor.close();
         this.sceneUBO.close();
         this.animationDescriptor.close();
 
@@ -219,5 +297,6 @@ public class MeshRendererExecutor extends RecreateCloseable {
         this.sceneDescriptorLayout.close();
 
         this.skeletalPipeline.close();
+        this.staticPipeline.close();
     }
 }
