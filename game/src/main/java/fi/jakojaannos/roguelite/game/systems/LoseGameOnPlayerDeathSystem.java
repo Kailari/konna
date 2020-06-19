@@ -2,9 +2,9 @@ package fi.jakojaannos.roguelite.game.systems;
 
 import java.util.stream.Stream;
 
-import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
-import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
-import fi.jakojaannos.roguelite.engine.event.Events;
+import fi.jakojaannos.riista.ecs.EcsSystem;
+import fi.jakojaannos.riista.ecs.EntityDataHandle;
+import fi.jakojaannos.riista.data.resources.Events;
 import fi.jakojaannos.roguelite.game.data.events.GameLostEvent;
 import fi.jakojaannos.roguelite.game.data.events.PlayerDeadEvent;
 
@@ -15,7 +15,7 @@ public class LoseGameOnPlayerDeathSystem implements EcsSystem<LoseGameOnPlayerDe
             final Stream<EntityDataHandle<NoEntities>> entities,
             final EventData eventData
     ) {
-        resources.events.system().fire(new GameLostEvent());
+        resources.events.fire(new GameLostEvent());
     }
 
     public static record Resources(Events events) {}

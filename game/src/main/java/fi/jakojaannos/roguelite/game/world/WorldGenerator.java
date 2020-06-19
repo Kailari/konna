@@ -4,11 +4,11 @@ import org.joml.Vector2d;
 
 import java.util.Random;
 
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.data.resources.Entities;
+import fi.jakojaannos.riista.data.components.Transform;
+import fi.jakojaannos.riista.ecs.World;
+import fi.jakojaannos.riista.ecs.resources.Entities;
 import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.archetypes.FollowerArchetype;
 import fi.jakojaannos.roguelite.game.data.archetypes.ObstacleArchetype;
 import fi.jakojaannos.roguelite.game.data.archetypes.SlimeArchetype;
@@ -78,7 +78,6 @@ public class WorldGenerator<TTile> {
         }
 
         // Generate hallways
-        final Entities entities = world::createEntity;
         final var timeManager = world.fetchResource(TimeManager.class);
         for (int i = 0; i < hallwaysPerWall; ++i) {
             final var hallwayStartX = startX + hallwaySize + i * unitsPerHallwayHorizontal;
@@ -106,19 +105,19 @@ public class WorldGenerator<TTile> {
             final var stalkerFactory =
                     SpawnerComponent.EntityFactory.withRandomDistance(StalkerArchetype::spawnStalker);
 
-            createSpawner(spawnerXH - 1, startY - spawnerYH - 1, stalkerFreq, entities, stalkerFactory, timeManager);
-            createSpawner(spawnerXH + 1, startY - spawnerYH - 1, followerFreq, entities, followerFactory, timeManager);
-            createSpawner(spawnerXH - 1, startY + mainRoomHeight + spawnerYH, stalkerFreq, entities, stalkerFactory, timeManager);
-            createSpawner(spawnerXH + 1, startY + mainRoomHeight + spawnerYH, followerFreq, entities, followerFactory, timeManager);
-            createSpawner(spawnerXH, startY - spawnerYH, slimeFrequency, entities, SlimeArchetype::createLargeSlime, timeManager);
+            createSpawner(spawnerXH - 1, startY - spawnerYH - 1, stalkerFreq, world, stalkerFactory, timeManager);
+            createSpawner(spawnerXH + 1, startY - spawnerYH - 1, followerFreq, world, followerFactory, timeManager);
+            createSpawner(spawnerXH - 1, startY + mainRoomHeight + spawnerYH, stalkerFreq, world, stalkerFactory, timeManager);
+            createSpawner(spawnerXH + 1, startY + mainRoomHeight + spawnerYH, followerFreq, world, followerFactory, timeManager);
+            createSpawner(spawnerXH, startY - spawnerYH, slimeFrequency, world, SlimeArchetype::createLargeSlime, timeManager);
 
             final var spawnerXV = hallwayLength - 2;
             final var spawnerYV = hallwayStartY + hallwaySize / 2;
 
-            createSpawner(startX - spawnerXV - 1, spawnerYV - 1, stalkerFreq, entities, stalkerFactory, timeManager);
-            createSpawner(startX - spawnerXV - 1, spawnerYV + 1, followerFreq, entities, followerFactory, timeManager);
-            createSpawner(startX + mainRoomWidth + spawnerXV, spawnerYV - 1, stalkerFreq, entities, stalkerFactory, timeManager);
-            createSpawner(startX + mainRoomWidth + spawnerXV, spawnerYV + 1, followerFreq, entities, followerFactory, timeManager);
+            createSpawner(startX - spawnerXV - 1, spawnerYV - 1, stalkerFreq, world, stalkerFactory, timeManager);
+            createSpawner(startX - spawnerXV - 1, spawnerYV + 1, followerFreq, world, followerFactory, timeManager);
+            createSpawner(startX + mainRoomWidth + spawnerXV, spawnerYV - 1, stalkerFreq, world, stalkerFactory, timeManager);
+            createSpawner(startX + mainRoomWidth + spawnerXV, spawnerYV + 1, followerFreq, world, followerFactory, timeManager);
         }
 
         final var nObstacles = 10;
@@ -131,7 +130,7 @@ public class WorldGenerator<TTile> {
                 x = startX + this.random.nextDouble() * (mainRoomWidth - size);
                 y = startY + this.random.nextDouble() * (mainRoomHeight - size);
             } while (Vector2d.distance(0, 0, x, y) < 4.0);
-            ObstacleArchetype.create(entities, new Transform(x, y), size);
+            ObstacleArchetype.create(world, new Transform(x, y), size);
         }
     }
 

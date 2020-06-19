@@ -1,5 +1,5 @@
 --add-modules
-    org.junit.jupiter.api,org.junit.jupiter.params,roguelite.engine.assertions
+    org.junit.jupiter.api,org.junit.jupiter.params,koetus.assertions
 
 --add-reads
-    roguelite.game=org.junit.jupiter.api,org.junit.jupiter.params,roguelite.engine.assertions
+    roguelite.game=org.junit.jupiter.api,org.junit.jupiter.params,koetus.assertions

@@ -2,17 +2,17 @@ package fi.jakojaannos.roguelite.game.systems.characters;
 
 import java.util.stream.Stream;
 
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
-import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
-import fi.jakojaannos.roguelite.engine.ecs.data.resources.Entities;
-import fi.jakojaannos.roguelite.engine.event.RenderEvents;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.riista.data.components.Transform;
+import fi.jakojaannos.riista.utilities.TimeManager;
+import fi.jakojaannos.riista.ecs.EcsSystem;
+import fi.jakojaannos.riista.ecs.EntityDataHandle;
+import fi.jakojaannos.riista.ecs.resources.Entities;
+import fi.jakojaannos.riista.data.resources.Events;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.WeaponInput;
+import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponInventory;
 import fi.jakojaannos.roguelite.game.weapons.ActionInfo;
 import fi.jakojaannos.roguelite.game.weapons.InventoryWeapon;
-import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponInventory;
 
 public class CharacterAttackSystem implements EcsSystem<CharacterAttackSystem.Resources, CharacterAttackSystem.EntityData, EcsSystem.NoEvents> {
     @Override
@@ -54,6 +54,11 @@ public class CharacterAttackSystem implements EcsSystem<CharacterAttackSystem.Re
 
             equippedWeapon.fireIfReady(actionInfo);
 
+            // HACK: Fixes shotgun reload sounds by forcing a state query each tick. The sound effect check is done
+            //       as ugly hack in the stateQuery and after Vulkan renderer we can no longer fire the event on
+            //       the render adapter (the event won't propagate over to the next tick like it used to)
+            equippedWeapon.doStateQuery(actionInfo);
+
             input.previousAttack = input.attack;
         });
     }
@@ -65,5 +70,9 @@ public class CharacterAttackSystem implements EcsSystem<CharacterAttackSystem.Re
             WeaponInventory inventory
     ) {}
 
-    public static record Resources(TimeManager timeManager, Entities entities, RenderEvents events) {}
+    public static record Resources(
+            TimeManager timeManager,
+            Entities entities,
+            Events events
+    ) {}
 }

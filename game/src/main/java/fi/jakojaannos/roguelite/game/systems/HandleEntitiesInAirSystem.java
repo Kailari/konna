@@ -2,34 +2,30 @@ package fi.jakojaannos.roguelite.game.systems;
 
 import java.util.stream.Stream;
 
-import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.riista.ecs.EcsSystem;
+import fi.jakojaannos.riista.ecs.EntityDataHandle;
+import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.InAir;
 
-public class HandleEntitiesInAirSystem implements ECSSystem {
-    @Override
-    public void declareRequirements(final RequirementsBuilder requirements) {
-        requirements.addToGroup(SystemGroups.CLEANUP)
-                    .withComponent(InAir.class);
-    }
-
+public class HandleEntitiesInAirSystem implements EcsSystem<HandleEntitiesInAirSystem.Resources, HandleEntitiesInAirSystem.EntityData, EcsSystem.NoEvents> {
     @Override
     public void tick(
-            final Stream<Entity> entities,
-            final World world
+            final Resources resources,
+            final Stream<EntityDataHandle<EntityData>> entities,
+            final NoEvents noEvents
     ) {
-        final var entityManager = world.getEntityManager();
-        final var time = world.fetchResource(TimeManager.class);
+        final var timeManager = resources.timeManager;
 
-        entities.forEach(entity -> {
-            final var inAir = entityManager.getComponentOf(entity, InAir.class).orElseThrow();
-
-            if (time.getCurrentGameTime() > inAir.flightStartTimeStamp + inAir.flightDuration) {
-                entityManager.removeComponentFrom(entity, InAir.class);
-            }
-        });
+        entities.filter(entity -> airtimeEnding(timeManager.getCurrentGameTime(), entity))
+                .forEach(entity -> entity.removeComponent(InAir.class));
     }
+
+    private boolean airtimeEnding(final long currentGameTime, final EntityDataHandle<EntityData> entity) {
+        final var inAir = entity.getData().inAir;
+        return currentGameTime > inAir.flightStartTimeStamp + inAir.flightDuration;
+    }
+
+    public static record Resources(TimeManager timeManager) {}
+
+    public static record EntityData(InAir inAir) {}
 }

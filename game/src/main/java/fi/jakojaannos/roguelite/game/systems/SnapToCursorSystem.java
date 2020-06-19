@@ -1,42 +1,28 @@
 package fi.jakojaannos.roguelite.game.systems;
 
-import org.joml.Vector2d;
-
 import java.util.stream.Stream;
 
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.data.resources.CameraProperties;
-import fi.jakojaannos.roguelite.engine.data.resources.Mouse;
-import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
+import fi.jakojaannos.riista.data.components.Transform;
+import fi.jakojaannos.riista.data.resources.CameraProperties;
+import fi.jakojaannos.riista.data.resources.Mouse;
+import fi.jakojaannos.riista.ecs.EcsSystem;
+import fi.jakojaannos.riista.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.game.data.components.CrosshairTag;
 
-public class SnapToCursorSystem implements ECSSystem {
-    private final Vector2d tmpCursorPosition = new Vector2d();
-
-    @Override
-    public void declareRequirements(final RequirementsBuilder requirements) {
-        requirements.addToGroup(SystemGroups.PHYSICS_TICK)
-                    .requireResource(Mouse.class)
-                    .requireResource(CameraProperties.class)
-                    .withComponent(Transform.class)
-                    .withComponent(CrosshairTag.class);
-    }
-
+public class SnapToCursorSystem implements EcsSystem<SnapToCursorSystem.Resources, SnapToCursorSystem.EntityData, EcsSystem.NoEvents> {
     @Override
     public void tick(
-            final Stream<Entity> entities,
-            final World world
+            final Resources resources,
+            final Stream<EntityDataHandle<EntityData>> entities,
+            final NoEvents noEvents
     ) {
-        final var mouse = world.fetchResource(Mouse.class);
-        final var camProps = world.fetchResource(CameraProperties.class);
+        final var cursorPosition = resources.mouse.calculatePositionUnderCursor(resources.cameraProperties);
 
-        final var entityManager = world.getEntityManager();
-        mouse.calculateCursorPositionRelativeToCamera(camProps, this.tmpCursorPosition);
-
-        entities.map(entity -> entityManager.getComponentOf(entity, Transform.class).orElseThrow().position)
-                .forEach(entityPosition -> entityPosition.set(this.tmpCursorPosition));
+        entities.map(entity -> entity.getData().transform.position)
+                .forEach(entityPosition -> entityPosition.set(cursorPosition));
     }
+
+    public static record Resources(Mouse mouse, CameraProperties cameraProperties) {}
+
+    public static record EntityData(Transform transform, CrosshairTag crosshairTag) {}
 }

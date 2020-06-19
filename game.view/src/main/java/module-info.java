@@ -5,18 +5,17 @@ module roguelite.game.view {
     requires org.joml;
     requires jsr305;
 
-    requires roguelite.engine;
-    requires roguelite.engine.utilities;
-    requires roguelite.engine.ecs;
+    requires riista;
+    requires riista.ecs;
+    requires riista.utilities;
 
-    requires transitive roguelite.engine.lwjgl;
-    requires roguelite.engine.view;
+    requires riista.view;
+    requires riista.vulkan;
 
     requires roguelite.game;
 
-    opens fi.jakojaannos.roguelite.game.view.adapters to roguelite.engine.ecs;
-    opens fi.jakojaannos.roguelite.game.view.systems to roguelite.engine.ecs;
-    opens fi.jakojaannos.roguelite.game.view.systems.audio to roguelite.engine.ecs;
+    opens fi.jakojaannos.konna.view.adapters.menu to riista.ecs;
+    opens fi.jakojaannos.konna.view.adapters.gameplay to riista.ecs;
 
-    exports fi.jakojaannos.roguelite.game.view;
+    exports fi.jakojaannos.konna.view;
 }

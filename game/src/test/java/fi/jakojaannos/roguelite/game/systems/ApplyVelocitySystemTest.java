@@ -3,8 +3,8 @@ package fi.jakojaannos.roguelite.game.systems;
 import org.joml.Vector2d;
 import org.junit.jupiter.api.Test;
 
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.riista.data.components.Transform;
+import fi.jakojaannos.riista.ecs.World;
 import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
 import fi.jakojaannos.roguelite.game.data.CollisionLayer;
@@ -114,7 +114,7 @@ class ApplyVelocitySystemTest {
                   .withState(world -> {
                       world.createEntity(new Transform(1.0, 0.0),
                                          new Collider(CollisionLayer.COLLIDE_ALL));
-                      velocity.set(1.0, 0.0);
+                      velocity.set(1.0, 0.01);
                   })
                   .runsForTicks(50)
                   .expect(state -> assertEquals(0.0, transform.position.x, 0.05));

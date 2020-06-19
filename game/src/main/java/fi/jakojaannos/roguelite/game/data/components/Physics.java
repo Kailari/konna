@@ -5,19 +5,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Physics {
-    private static final Logger LOG = LoggerFactory.getLogger(Physics.class);
     public final Vector2d acceleration = new Vector2d(0.0, 0.0);
     public double mass;
     public double friction;
-
-    /**
-     * @deprecated Use component builder instead
-     */
-    @Deprecated
-    public Physics(final double mass) {
-        this.mass = mass;
-        this.friction = 2.0;
-    }
 
     private Physics(final double mass, final double friction) {
         this.mass = mass;

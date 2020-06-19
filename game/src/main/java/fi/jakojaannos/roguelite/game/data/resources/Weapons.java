@@ -3,7 +3,7 @@ package fi.jakojaannos.roguelite.game.data.resources;
 import org.joml.Vector2d;
 
 import fi.jakojaannos.roguelite.game.data.components.weapon.GrenadeStats;
-import fi.jakojaannos.roguelite.game.data.events.render.GunshotEvent;
+import fi.jakojaannos.roguelite.game.data.events.GunshotEvent;
 import fi.jakojaannos.roguelite.game.weapons.ModularWeapon;
 import fi.jakojaannos.roguelite.game.weapons.NoAttributes;
 import fi.jakojaannos.roguelite.game.weapons.modules.*;

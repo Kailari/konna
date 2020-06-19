@@ -1,0 +1,44 @@
+{
+  "name": "root",
+  "bounds": {
+    "right": 5,
+    "bottom": 5,
+    "width": 150,
+    "height": 70
+  },
+  "color": [ 0.01, 0.01, 0.01, 1.0 ],
+  "children": [
+    {
+      "name": "weapon-ammo",
+      "bounds": {
+        "left": 5,
+        "bottom": 5,
+        "height": 30
+      },
+      "text": {
+        "size": 24,
+        "format": "%s",
+        "args": [
+          "AMMO[LOCAL_PLAYER]"
+        ],
+        "align": "LEFT"
+      }
+    },
+    {
+      "name": "weapon-heat",
+      "bounds": {
+        "left": 5,
+        "bottom": 35,
+        "height": 30
+      },
+      "text": {
+        "size": 24,
+        "format": "%s",
+        "args": [
+          "HEAT[LOCAL_PLAYER]"
+        ],
+        "align": "LEFT"
+      }
+    }
+  ]
+}

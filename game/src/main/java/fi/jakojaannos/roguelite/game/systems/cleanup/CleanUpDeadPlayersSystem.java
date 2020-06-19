@@ -2,9 +2,9 @@ package fi.jakojaannos.roguelite.game.systems.cleanup;
 
 import java.util.stream.Stream;
 
-import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
-import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
-import fi.jakojaannos.roguelite.engine.event.Events;
+import fi.jakojaannos.riista.ecs.EcsSystem;
+import fi.jakojaannos.riista.ecs.EntityDataHandle;
+import fi.jakojaannos.riista.data.resources.Events;
 import fi.jakojaannos.roguelite.game.data.components.character.DeadTag;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
 import fi.jakojaannos.roguelite.game.data.events.PlayerDeadEvent;
@@ -18,7 +18,7 @@ public class CleanUpDeadPlayersSystem implements EcsSystem<CleanUpDeadPlayersSys
             final NoEvents noEvents
     ) {
         entities.forEach(entity -> {
-            resources.events.system().fire(new PlayerDeadEvent());
+            resources.events.fire(new PlayerDeadEvent());
             resources.players.removePlayer(entity.getHandle());
         });
     }

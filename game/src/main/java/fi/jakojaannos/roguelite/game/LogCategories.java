@@ -3,7 +3,7 @@ package fi.jakojaannos.roguelite.game;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
-import fi.jakojaannos.roguelite.engine.utilities.logging.EnumMarker;
+import fi.jakojaannos.riista.utilities.logging.EnumMarker;
 
 public enum LogCategories implements EnumMarker {
     HEALTH,

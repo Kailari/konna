@@ -2,39 +2,32 @@ package fi.jakojaannos.roguelite.game.systems.collision;
 
 import java.util.stream.Stream;
 
-import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
+import fi.jakojaannos.riista.ecs.EcsSystem;
+import fi.jakojaannos.riista.ecs.EntityDataHandle;
 import fi.jakojaannos.roguelite.game.data.components.RecentCollisionTag;
 import fi.jakojaannos.roguelite.game.data.components.weapon.ProjectileStats;
 import fi.jakojaannos.roguelite.game.data.resources.collision.Collisions;
-import fi.jakojaannos.roguelite.game.systems.SystemGroups;
 
-public class DestroyProjectilesOnCollisionSystem implements ECSSystem {
-    @Override
-    public void declareRequirements(final RequirementsBuilder requirements) {
-        requirements.addToGroup(SystemGroups.COLLISION_HANDLER)
-                    .tickAfter(ProjectileToCharacterCollisionHandlerSystem.class)
-                    .requireResource(Collisions.class)
-                    .withComponent(ProjectileStats.class)
-                    .withComponent(RecentCollisionTag.class);
-    }
-
+public class DestroyProjectilesOnCollisionSystem implements EcsSystem<DestroyProjectilesOnCollisionSystem.Resources, DestroyProjectilesOnCollisionSystem.EntityData, EcsSystem.NoEvents> {
     @Override
     public void tick(
-            final Stream<Entity> entities,
-            final World world
+            final Resources resources,
+            final Stream<EntityDataHandle<EntityData>> entities,
+            final NoEvents noEvents
     ) {
-        final var collisions = world.fetchResource(Collisions.class);
+        final var collisions = resources.collisions;
 
         entities.forEach(entity -> {
-            if (collisions.getEventsFor(entity.asHandle())
+            if (collisions.getEventsFor(entity.getHandle())
                           .stream()
                           .map(CollisionEvent::collision)
                           .anyMatch(c -> c.getMode() == Collision.Mode.COLLISION)) {
-                world.getEntityManager().destroyEntity(entity);
+                entity.destroy();
             }
         });
     }
+
+    public static record Resources(Collisions collisions) {}
+
+    public static record EntityData(ProjectileStats projectile, RecentCollisionTag recentCollisionTag) {}
 }

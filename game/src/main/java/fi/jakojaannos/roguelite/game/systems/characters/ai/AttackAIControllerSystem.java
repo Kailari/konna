@@ -1,77 +1,57 @@
 package fi.jakojaannos.roguelite.game.systems.characters.ai;
 
 import org.joml.Vector2d;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
-import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.EntityManager;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
+import fi.jakojaannos.riista.data.components.Transform;
+import fi.jakojaannos.riista.ecs.EcsSystem;
+import fi.jakojaannos.riista.ecs.EntityDataHandle;
+import fi.jakojaannos.riista.ecs.EntityHandle;
+import fi.jakojaannos.riista.ecs.resources.Entities;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.PlayerTag;
 import fi.jakojaannos.roguelite.game.data.components.character.WeaponInput;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.AttackAI;
 import fi.jakojaannos.roguelite.game.data.resources.Players;
-import fi.jakojaannos.roguelite.game.systems.SystemGroups;
 
-public class AttackAIControllerSystem implements ECSSystem {
-    @Override
-    public void declareRequirements(final RequirementsBuilder requirements) {
-        requirements.addToGroup(SystemGroups.INPUT)
-                    .requireResource(Players.class)
-                    .withComponent(AttackAI.class)
-                    .withComponent(WeaponInput.class)
-                    .withComponent(AttackAbility.class)
-                    .withComponent(Transform.class);
-    }
-
+public class AttackAIControllerSystem implements EcsSystem<AttackAIControllerSystem.Resources, AttackAIControllerSystem.EntityData, EcsSystem.NoEvents> {
     @Override
     public void tick(
-            final Stream<Entity> entities,
-            final World world
+            final Resources resources,
+            final Stream<EntityDataHandle<EntityData>> entities,
+            final NoEvents noEvents
     ) {
-        final var entityManager = world.getEntityManager();
-
-        final var maybeLocalPlayer = world.fetchResource(Players.class).getLocalPlayer();
+        final var maybeLocalPlayer = resources.players.getLocalPlayer();
         entities.forEach(entity -> {
-            final var ai = entityManager.getComponentOf(entity, AttackAI.class).orElseThrow();
-            final var position = entityManager.getComponentOf(entity, Transform.class)
-                                              .orElseThrow().position;
+            final var ai = entity.getData().attackAI;
+            final var position = entity.getData().transform.position;
 
             if (ai.targetTagClass.equals(PlayerTag.class)) {
-                maybeLocalPlayer.map(EntityHandle::asLegacyEntity)
-                                .filter(player -> isTargetValid(entityManager, player, position, ai))
+                maybeLocalPlayer.filter(player -> isTargetValid(player, position, ai))
                                 .ifPresentOrElse(ai::setAttackTarget, ai::clearAttackTarget);
             } else {
-                findOrUpdateTarget(entityManager, ai, position);
+                findOrUpdateTarget(resources.entities, ai, position);
             }
 
-            updateAttackInput(entityManager, entity, ai, position);
+            updateAttackInput(entity, ai, position);
         });
     }
 
     private void updateAttackInput(
-            final EntityManager entityManager,
-            final Entity entity,
+            final EntityDataHandle<EntityData> entity,
             final AttackAI ai,
             final Vector2d position
     ) {
-        final var input = entityManager.getComponentOf(entity, WeaponInput.class).orElseThrow();
-        final var attackAbility = entityManager.getComponentOf(entity, AttackAbility.class).orElseThrow();
+        final var input = entity.getData().weaponInput;
+        final var attackAbility = entity.getData().attackAbility;
 
         final var maybeTarget = ai.getAttackTarget();
 
         if (maybeTarget.isPresent()) {
             final var target = maybeTarget.get();
-            final var targetPosition = entityManager.getComponentOf(target, Transform.class)
-                                                    .orElseThrow().position;
+            final var targetPosition = target.getComponent(Transform.class).orElseThrow().position;
 
             if (wantsAttackTarget(ai, position, targetPosition)) {
                 input.attack = true;
@@ -95,47 +75,57 @@ public class AttackAIControllerSystem implements ECSSystem {
     }
 
     private static void findOrUpdateTarget(
-            final EntityManager entityManager,
+            final Entities entities,
             final AttackAI ai,
             final Vector2d position
     ) {
         final var maybeTarget = ai.getAttackTarget();
-        if (maybeTarget.isEmpty() || !isTargetValid(entityManager, maybeTarget.get(), position, ai)) {
-            final var maybeNewTarget = findNewTarget(entityManager, ai, position);
+        if (maybeTarget.isEmpty() || !isTargetValid(maybeTarget.get(), position, ai)) {
+            final var maybeNewTarget = findNewTarget(entities, ai, position);
             maybeNewTarget.ifPresentOrElse(ai::setAttackTarget, ai::clearAttackTarget);
         }
     }
 
     private static boolean isTargetValid(
-            final EntityManager entityManager,
-            final Entity target,
+            final EntityHandle target,
             final Vector2d position,
             final AttackAI ai
     ) {
-        if (target.isMarkedForRemoval()) {
+        if (target.isPendingRemoval() || target.isDestroyed()) {
             return false;
         }
-        if (!entityManager.hasComponent(target, Transform.class)) {
+        if (!target.hasComponent(Transform.class)) {
             return false;
         }
-        if (!entityManager.hasComponent(target, ai.targetTagClass)) {
+        if (!target.hasComponent(ai.targetTagClass)) {
             return false;
         }
 
-        final var targetPosition = entityManager.getComponentOf(target, Transform.class)
-                                                .orElseThrow().position;
+        final var targetPosition = target.getComponent(Transform.class).orElseThrow().position;
         return position.distanceSquared(targetPosition) <= ai.attackRange * ai.attackRange;
     }
 
-    private static Optional<Entity> findNewTarget(
-            final EntityManager entityManager,
+    private static Optional<EntityHandle> findNewTarget(
+            final Entities entities,
             final AttackAI ai,
             final Vector2d position
     ) {
-        return entityManager
-                .getEntitiesWith(ai.targetTagClass)
-                .map(EntityManager.EntityComponentPair::entity)
-                .filter(entity -> isTargetValid(entityManager, entity, position, ai))
-                .findAny();
+        return entities.iterateEntities(new Class[]{ai.targetTagClass, Transform.class},
+                                        new boolean[]{false, false},
+                                        new boolean[]{false, false},
+                                        objects -> null,
+                                        false)
+                       .map(EntityDataHandle::getHandle)
+                       .filter(entity -> isTargetValid(entity, position, ai))
+                       .findAny();
     }
+
+    public static record Resources(Players players, Entities entities) {}
+
+    public static record EntityData(
+            AttackAI attackAI,
+            WeaponInput weaponInput,
+            AttackAbility attackAbility,
+            Transform transform
+    ) {}
 }

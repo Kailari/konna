@@ -1,0 +1,46 @@
+{
+  "name": "root",
+  "children": [
+    {
+      "name": "time-played-timer",
+      "anchor": {
+        "x": "50%"
+      },
+      "bounds": {
+        "top": 5,
+        "left": -150,
+        "width": 300,
+        "height": 75
+      },
+      "color": [ 0.01, 0.01, 0.01, 0.75 ],
+      "text": {
+        "size": 48,
+        "format": "%02d:%02d:%02d",
+        "args": [
+          "TIME_PLAYED_HOURS",
+          "TIME_PLAYED_MINUTES",
+          "TIME_PLAYED_SECONDS"
+        ],
+        "align": "CENTER"
+      }
+    },
+    {
+      "name": "score-kills",
+      "bounds": {
+        "left": 5,
+        "bottom": 5,
+        "width": 150,
+        "height": 30
+      },
+      "color": [ 0.01, 0.01, 0.01, 0.75 ],
+      "text": {
+        "size": 24,
+        "format": "Kills: %02d",
+        "args": [
+          "KILLS[LOCAL_PLAYER]"
+        ],
+        "align": "CENTER"
+      }
+    }
+  ]
+}

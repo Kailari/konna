@@ -4,63 +4,48 @@ import org.joml.Vector2d;
 
 import java.util.stream.Stream;
 
-import fi.jakojaannos.roguelite.engine.ecs.World;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.ECSSystem;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.RequirementsBuilder;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.riista.ecs.EcsSystem;
+import fi.jakojaannos.riista.ecs.EntityDataHandle;
+import fi.jakojaannos.riista.utilities.Optionals;
+import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.DamageInstance;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
-import fi.jakojaannos.roguelite.game.data.components.RecentCollisionTag;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.game.data.components.character.Health;
 import fi.jakojaannos.roguelite.game.data.components.weapon.ProjectileStats;
 import fi.jakojaannos.roguelite.game.data.resources.collision.Collisions;
-import fi.jakojaannos.roguelite.game.systems.SystemGroups;
 
-public class ProjectileToCharacterCollisionHandlerSystem implements ECSSystem {
+public class ProjectileToCharacterCollisionHandlerSystem implements EcsSystem<ProjectileToCharacterCollisionHandlerSystem.Resources, ProjectileToCharacterCollisionHandlerSystem.EntityData, EcsSystem.NoEvents> {
     private final Vector2d temp = new Vector2d();
 
     @Override
-    public void declareRequirements(final RequirementsBuilder requirements) {
-        requirements.addToGroup(SystemGroups.COLLISION_HANDLER)
-                    .requireResource(Collisions.class)
-                    .withComponent(RecentCollisionTag.class)
-                    .withComponent(ProjectileStats.class)
-                    .withComponent(Velocity.class);
-    }
-
-    @Override
     public void tick(
-            final Stream<Entity> entities,
-            final World world
+            final Resources resources,
+            final Stream<EntityDataHandle<EntityData>> entities,
+            final NoEvents noEvents
     ) {
-        final var timeManager = world.fetchResource(TimeManager.class);
-        final var entityManager = world.getEntityManager();
-        final var collisions = world.fetchResource(Collisions.class);
+        final var timeManager = resources.timeManager;
+        final var collisions = resources.collisions;
 
         entities.forEach(entity -> {
-            final var stats = entityManager.getComponentOf(entity, ProjectileStats.class)
-                                           .orElseThrow();
-            final var velocity = entityManager.getComponentOf(entity, Velocity.class).orElseThrow();
+            final var stats = entity.getData().projectileStats;
+            final var velocity = entity.getData().velocity;
 
-            final var entityCollisions = collisions.getEventsFor(entity.asHandle())
+            final var entityCollisions = collisions.getEventsFor(entity.getHandle())
                                                    .stream()
                                                    .map(CollisionEvent::collision)
                                                    .filter(Collision::isEntity)
                                                    .map(Collision::getAsEntityCollision);
 
             for (final var collision : (Iterable<Collision.EntityCollision>) entityCollisions::iterator) {
-                final boolean hasHealth = entityManager.hasComponent(collision.getOther().asLegacyEntity(), Health.class);
-                final boolean hasPhysics = entityManager.hasComponent(collision.getOther().asLegacyEntity(), Physics.class);
-                if (hasHealth || hasPhysics) {
-                    entityManager.getComponentOf(collision.getOther().asLegacyEntity(), Physics.class)
-                                 .ifPresent(physics -> applyKnockback(stats, velocity, physics));
+                final var maybeHealth = collision.getOther().getComponent(Health.class);
+                final var maybePhysics = collision.getOther().getComponent(Physics.class);
 
-                    entityManager.getComponentOf(collision.getOther().asLegacyEntity(), Health.class)
-                                 .ifPresent(health -> dealDamage(timeManager, stats, health));
+                if (Optionals.anyPresent(maybeHealth, maybePhysics)) {
+                    maybePhysics.ifPresent(physics -> applyKnockback(stats, velocity, physics));
+                    maybeHealth.ifPresent(health -> dealDamage(timeManager, stats, health));
 
-                    entityManager.destroyEntity(entity);
+                    entity.destroy();
                     break;
                 }
             }
@@ -88,4 +73,14 @@ public class ProjectileToCharacterCollisionHandlerSystem implements ECSSystem {
         this.temp.set(velocity).normalize(stats.pushForce);
         physics.applyForce(this.temp);
     }
+
+    public static record Resources(
+            Collisions collisions,
+            TimeManager timeManager
+    ) {}
+
+    public static record EntityData(
+            ProjectileStats projectileStats,
+            Velocity velocity
+    ) {}
 }

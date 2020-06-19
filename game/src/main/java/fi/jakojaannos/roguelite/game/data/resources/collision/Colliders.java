@@ -5,8 +5,8 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
+import fi.jakojaannos.riista.data.components.Transform;
+import fi.jakojaannos.riista.ecs.EntityHandle;
 import fi.jakojaannos.roguelite.engine.tilemap.TileMap;
 import fi.jakojaannos.roguelite.engine.tilemap.TileType;
 import fi.jakojaannos.roguelite.game.data.CollisionLayer;

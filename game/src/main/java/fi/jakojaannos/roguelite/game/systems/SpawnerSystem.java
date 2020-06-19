@@ -2,14 +2,14 @@ package fi.jakojaannos.roguelite.game.systems;
 
 import java.util.stream.Stream;
 
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
-import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
-import fi.jakojaannos.roguelite.engine.ecs.annotation.DisableOn;
-import fi.jakojaannos.roguelite.engine.ecs.annotation.DisabledByDefault;
-import fi.jakojaannos.roguelite.engine.ecs.annotation.EnableOn;
-import fi.jakojaannos.roguelite.engine.ecs.data.resources.Entities;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.riista.data.components.Transform;
+import fi.jakojaannos.riista.ecs.EcsSystem;
+import fi.jakojaannos.riista.ecs.EntityDataHandle;
+import fi.jakojaannos.riista.ecs.annotation.DisableOn;
+import fi.jakojaannos.riista.ecs.annotation.DisabledByDefault;
+import fi.jakojaannos.riista.ecs.annotation.EnableOn;
+import fi.jakojaannos.riista.ecs.resources.Entities;
+import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.SpawnerComponent;
 import fi.jakojaannos.roguelite.game.data.events.HordeStartEvent;
 import fi.jakojaannos.roguelite.game.data.events.HordeStopEvent;

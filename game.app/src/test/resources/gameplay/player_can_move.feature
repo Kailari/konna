@@ -6,10 +6,9 @@ Feature: The player can move around the game world.
     And there are no obstacles
     And the player max speed is 10.0, acceleration is 50.0 and friction is 10.0
 
-
   Scenario Outline: The player presses input towards a direction. They should move.
     When player presses key "<key>"
-    And the game runs for 1 seconds
+    And the game runs for a second
     Then the player should have moved approximately 9 units total on the "<axis>" axis
     But the player should not have moved at all on the axis "<otherAxis>"
 

@@ -1,0 +1,42 @@
+{
+  "name": "root",
+  "children": [
+    {
+      "name": "game-over-container",
+      "anchor": {
+        "y": "50%"
+      },
+      "bounds": {
+        "height": 75,
+        "width": "100%"
+      },
+      "color": [ 0.01, 0.01, 0.01, 0.75 ],
+      "children": [
+        {
+          "name": "game-over-label",
+          "bounds": {
+            "top": 0
+          },
+          "text": {
+            "size": 48,
+            "format": "Game Over",
+            "align": "CENTER"
+          }
+        },
+        {
+          "name": "game-over-help-label",
+          "bounds": {
+            "bottom": 0,
+            "height": 30
+          },
+          "color": [ 0.0, 0.0, 0.0, 0.0 ],
+          "text": {
+            "size": 24,
+            "format": "Press <SPACE> to restart, <ESC> to return to menu",
+            "align": "CENTER"
+          }
+        }
+      ]
+    }
+  ]
+}

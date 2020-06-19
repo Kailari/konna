@@ -1,6 +1,0 @@
-@ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
-@FieldsAreNonnullByDefault
-package fi.jakojaannos.roguelite.engine.utilities.annotation;
-
-import javax.annotation.ParametersAreNonnullByDefault;

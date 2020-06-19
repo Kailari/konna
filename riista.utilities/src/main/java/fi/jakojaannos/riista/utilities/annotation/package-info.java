@@ -1,0 +1,6 @@
+@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
+@FieldsAreNonnullByDefault
+package fi.jakojaannos.riista.utilities.annotation;
+
+import javax.annotation.ParametersAreNonnullByDefault;

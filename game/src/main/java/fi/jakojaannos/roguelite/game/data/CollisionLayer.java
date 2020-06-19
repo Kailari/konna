@@ -3,7 +3,7 @@ package fi.jakojaannos.roguelite.game.data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fi.jakojaannos.roguelite.engine.utilities.BitMaskUtils;
+import fi.jakojaannos.riista.utilities.BitMaskUtils;
 import fi.jakojaannos.roguelite.game.LogCategories;
 
 public enum CollisionLayer {

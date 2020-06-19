@@ -1,7 +1,7 @@
 package fi.jakojaannos.roguelite.game.weapons.modules;
 
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
-import fi.jakojaannos.roguelite.game.data.events.render.GunshotEvent;
+import fi.jakojaannos.riista.utilities.TimeManager;
+import fi.jakojaannos.roguelite.game.data.events.GunshotEvent;
 import fi.jakojaannos.roguelite.game.weapons.*;
 import fi.jakojaannos.roguelite.game.weapons.events.ReloadEvent;
 import fi.jakojaannos.roguelite.game.weapons.events.TriggerPullEvent;

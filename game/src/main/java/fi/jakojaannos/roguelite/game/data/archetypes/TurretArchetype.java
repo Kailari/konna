@@ -1,9 +1,9 @@
 package fi.jakojaannos.roguelite.game.data.archetypes;
 
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
-import fi.jakojaannos.roguelite.engine.ecs.data.resources.Entities;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.riista.data.components.Transform;
+import fi.jakojaannos.riista.ecs.EntityHandle;
+import fi.jakojaannos.riista.ecs.resources.Entities;
+import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.DamageSource;
 import fi.jakojaannos.roguelite.game.data.components.Collider;
@@ -34,7 +34,8 @@ public class TurretArchetype {
                 new AttackAbility(DamageSource.Generic.UNDEFINED,
                                   CollisionLayer.PLAYER_PROJECTILE,
                                   0.375,
-                                  -1.0),
+                                  -1.0,
+                                  0),
                 new WeaponInventory(Weapons.TURRET_GATLING));
     }
 }

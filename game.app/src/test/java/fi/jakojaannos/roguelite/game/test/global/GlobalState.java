@@ -2,143 +2,128 @@ package fi.jakojaannos.roguelite.game.test.global;
 
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
-import org.lwjgl.opengl.GL;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.lwjgl.vulkan.VkExtent2D;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayDeque;
+import java.util.Collection;
 import java.util.Optional;
-import java.util.Queue;
 import java.util.Random;
 
-import fi.jakojaannos.roguelite.engine.GameMode;
-import fi.jakojaannos.roguelite.engine.GameRunner;
-import fi.jakojaannos.roguelite.engine.GameState;
-import fi.jakojaannos.roguelite.engine.ecs.legacy.Entity;
-import fi.jakojaannos.roguelite.engine.event.Events;
-import fi.jakojaannos.roguelite.engine.input.InputEvent;
-import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLAssetManager;
-import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLRenderingBackend;
-import fi.jakojaannos.roguelite.engine.lwjgl.LWJGLWindow;
-import fi.jakojaannos.roguelite.engine.view.Window;
-import fi.jakojaannos.roguelite.game.test.content.TestAssetManager;
-import fi.jakojaannos.roguelite.game.test.view.TestRenderingBackend;
-import fi.jakojaannos.roguelite.game.test.view.TestWindow;
-import fi.jakojaannos.roguelite.game.view.RogueliteGameRenderer;
+import fi.jakojaannos.konna.view.KonnaGameModeRenderers;
+import fi.jakojaannos.riista.GameRenderAdapter;
+import fi.jakojaannos.riista.GameRunnerTimeManager;
+import fi.jakojaannos.riista.data.resources.CameraProperties;
+import fi.jakojaannos.riista.data.resources.Mouse;
+import fi.jakojaannos.riista.utilities.TimeManager;
+import fi.jakojaannos.riista.view.Renderer;
+import fi.jakojaannos.riista.view.assets.MusicTrack;
+import fi.jakojaannos.riista.view.assets.SoundEffect;
+import fi.jakojaannos.riista.view.audio.AudioContext;
+import fi.jakojaannos.riista.view.audio.MusicPlayer;
+import fi.jakojaannos.riista.vulkan.application.PresentableState;
+import fi.jakojaannos.riista.vulkan.renderer.GameRenderAdapterBase;
+import fi.jakojaannos.riista.vulkan.renderer.game.RendererRecorder;
+import fi.jakojaannos.riista.GameState;
+import fi.jakojaannos.roguelite.engine.utilities.assertions.world.SimulationInspector;
 
-import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.*;
+import static org.mockito.Mockito.mock;
 
 /**
  * Singleton game state to be used by step definitions. Note that this effectively prevents the E2E tests from running
  * from parallel in single test runner instance.
  */
 public class GlobalState {
-    private static final Logger LOG = LoggerFactory.getLogger(GlobalState.class);
-
-    public static GameRunner gameRunner;
-    public static GameMode mode;
-    public static GameState state;
-    public static Events events;
-    public static Queue<InputEvent> inputEvents;
-    public static RogueliteGameRenderer gameRenderer;
-    public static Window window;
-    public static TestTimeManager timeManager;
+    public static SimulationInspector simulation;
+    public static GameRenderAdapter<PresentableState> renderer;
 
     public static Random random;
 
-    public static <T> Optional<T> getComponentOf(
-            Entity player,
-            Class<T> componentClass
-    ) {
-        return state.world()
-                    .getEntityManager()
-                    .getComponentOf(player, componentClass);
-    }
-
-    public static void renderTick() {
-        if (window instanceof LWJGLWindow) {
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        }
-
-        gameRenderer.render(state, 0);
-
-        if (window instanceof LWJGLWindow) {
-            glfwSwapBuffers(((LWJGLWindow) window).getId());
-            glfwPollEvents();
-        }
-    }
-
-    public static void simulateTick() {
-        final var accumulator = new GameRunner.Accumulator();
-        accumulator.accumulate(timeManager.getTimeStep());
-        state = gameRunner.simulateFrame(state, accumulator, () -> inputEvents);
-        inputEvents.clear();
-    }
-
-    public static void simulateSeconds(double seconds) {
-        final var accumulator = new GameRunner.Accumulator();
-        final var ticks = timeManager.convertToTicks(seconds);
-        accumulator.accumulate(ticks * timeManager.getTimeStep());
-        state = gameRunner.simulateFrame(state, accumulator, () -> inputEvents);
-        inputEvents.clear();
-    }
-
     @Before
     public void before() {
-        random = new Random(13376969);
-
-        timeManager = new TestTimeManager(20L);
-        gameRunner = new GameRunner(timeManager) {
+        final var assetManager = new TestAssetManager();
+        final var audioContext = new AudioContext() {
             @Override
-            protected boolean shouldContinueLoop() {
-                return false;
+            public Optional<Integer> nextSource(final int priority) {
+                return Optional.empty();
             }
 
             @Override
-            protected void onStateChange(final GameState state) {
+            public SoundEffect createEffect(final Path assetRoot, final String filename) {
+                return mock(SoundEffect.class);
             }
 
             @Override
-            protected void onModeChange(final GameMode gameMode) {
-                gameRenderer.changeGameMode(gameMode);
-                mode = gameMode;
+            public MusicPlayer createMusicPlayer() {
+                return mock(MusicPlayer.class);
+            }
+
+            @Override
+            public MusicTrack createTrack(final Path path) {
+                return mock(MusicTrack.class);
+            }
+
+            @Override
+            public void close() {
             }
         };
-        Path assetRoot = Paths.get("../assets");
-        gameRenderer = Optional.ofNullable(System.getenv("VISUALIZE_TESTS"))
-                               .map(Boolean::valueOf)
-                               .filter(Boolean::booleanValue)
-                               .map(ignored -> {
-                                   glfwInit();
-                                   LWJGLWindow lwjglWindow = new LWJGLWindow(800, 600);
-                                   window = lwjglWindow;
-                                   lwjglWindow.show();
-                                   glfwMakeContextCurrent(lwjglWindow.getId());
-                                   GL.createCapabilities();
-                                   glfwSwapInterval(0);
-                                   return new RogueliteGameRenderer(gameRunner.getEvents(),
-                                                                    gameRunner.getTimeManager(),
-                                                                    assetRoot,
-                                                                    window,
-                                                                    new LWJGLRenderingBackend(assetRoot),
-                                                                    new LWJGLAssetManager(assetRoot));
-                               })
-                               .orElseGet(() -> new RogueliteGameRenderer(gameRunner.getEvents(),
-                                                                          gameRunner.getTimeManager(),
-                                                                          assetRoot,
-                                                                          window = new TestWindow(800, 600),
-                                                                          new TestRenderingBackend(),
-                                                                          new TestAssetManager(assetRoot)));
-        events = gameRunner.getEvents();
-        inputEvents = new ArrayDeque<>();
+
+        random = new Random(13376969);
+
+        // FIXME: dummy camera props updater
+        // TODO: Actual VulkanRenderAdapter for visualized tests
+        renderer = new GameRenderAdapterBase<>(KonnaGameModeRenderers.create(assetManager, new GameRunnerTimeManager(20L), audioContext),
+                                               cameraProperties -> {}
+        ) {
+            private final PresentableState presentableState = new PresentableState();
+            private final RendererRecorder recorder = new RendererRecorder();
+            private final VkExtent2D extent = VkExtent2D.calloc();
+
+            @Override
+            public void writePresentableState(
+                    final GameState gameState,
+                    final Collection<Object> events
+            ) {
+                if (hasActiveRenderDispatcher()) {
+                    final var cameraProperties = gameState.world().fetchResource(CameraProperties.class);
+                    final var mouse = gameState.world().fetchResource(Mouse.class);
+                    final var timeManager = gameState.world().fetchResource(TimeManager.class);
+
+                    this.presentableState.clear(timeManager,
+                                                mouse.position,
+                                                mouse.clicked,
+                                                this.extent,
+                                                cameraProperties.getPosition(),
+                                                cameraProperties.getViewMatrix());
+
+                    gameState.world().replaceResource(Renderer.class, this.recorder);
+                    this.recorder.setWriteState(this.presentableState);
+
+                    super.writePresentableState(gameState, events);
+                }
+            }
+
+            @Override
+            public PresentableState fetchPresentableState() {
+                return this.presentableState;
+            }
+        };
+
+        final var shouldVisualizeTests = Optional.ofNullable(System.getenv("VISUALIZE_TESTS"))
+                                                 .map(Boolean::valueOf)
+                                                 .orElse(false);
+        if (shouldVisualizeTests) {
+            Path assetRoot = Paths.get("../assets");
+            // TODO: Launch renderer thread
+        }
     }
 
     @After
     public void after() {
-        if (window instanceof LWJGLWindow) {
+        // TODO: cleanup
+        // TODO: shut down renderer if one is active (?)
+        //  - only shutdown after everything has finished? (can be done by moving the renderer to runner class and using JUnit annotations)
+        /*if (window instanceof LWJGLWindow) {
             renderTick();
             try {
                 Thread.sleep(500L);
@@ -154,6 +139,6 @@ public class GlobalState {
                 glfwTerminate();
             }
         } catch (Exception ignored) {
-        }
+        }*/
     }
 }

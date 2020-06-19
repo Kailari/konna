@@ -2,12 +2,14 @@ rootProject.name = 'roguelite'
 
 include 'launcher'
 
-include 'engine'
-include 'engine.ecs'
-include 'engine.view'
-include 'engine.assert'
-include 'engine.lwjgl'
-include 'engine.utilities'
+include 'riista'
+include 'riista.ecs'
+include 'riista.utilities'
+
+include 'riista.view'
+include 'riista.vulkan'
+
+include 'koetus.assert'
 
 include 'game'
 include 'game.view'

@@ -14,24 +14,18 @@ public class AttackAbility {
     public int equippedSlot;
     public int previousEquippedSlot;
 
-    @Deprecated
-    public AttackAbility(final DamageSource<?> damageSource) {
-        this(damageSource, CollisionLayer.PLAYER_PROJECTILE);
-    }
-
-    @Deprecated
-    public AttackAbility(final DamageSource<?> damageSource, final CollisionLayer projectileLayer) {
-        this(damageSource, projectileLayer, 0.0, 0.0);
-    }
-
     public AttackAbility(
             final DamageSource<?> damageSource,
             final CollisionLayer projectileLayer,
             final double weaponOffsetX,
-            final double weaponOffsetY
+            final double weaponOffsetY,
+            final int equippedSlot
     ) {
         this.damageSource = damageSource;
         this.projectileLayer = projectileLayer;
         this.weaponOffset.set(weaponOffsetX, weaponOffsetY);
+
+        this.equippedSlot = equippedSlot;
+        this.previousEquippedSlot = equippedSlot;
     }
 }

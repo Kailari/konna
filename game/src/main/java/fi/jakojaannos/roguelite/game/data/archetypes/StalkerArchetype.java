@@ -1,8 +1,8 @@
 package fi.jakojaannos.roguelite.game.data.archetypes;
 
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.EntityHandle;
-import fi.jakojaannos.roguelite.engine.ecs.data.resources.Entities;
+import fi.jakojaannos.riista.data.components.Transform;
+import fi.jakojaannos.riista.ecs.EntityHandle;
+import fi.jakojaannos.riista.ecs.resources.Entities;
 import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.DamageSource;
 import fi.jakojaannos.roguelite.game.data.components.*;
@@ -12,7 +12,6 @@ import fi.jakojaannos.roguelite.game.data.components.character.enemy.EnemyTag;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.StalkerAI;
 import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponInventory;
 import fi.jakojaannos.roguelite.game.data.resources.Weapons;
-import fi.jakojaannos.roguelite.game.weapons.InventoryWeapon;
 
 public class StalkerArchetype {
     public static EntityHandle spawnStalker(
@@ -40,7 +39,8 @@ public class StalkerArchetype {
         entity.addComponent(new AttackAbility(new DamageSource.Entity(entity),
                                               CollisionLayer.ENEMY,
                                               0.0,
-                                              0.0));
+                                              0.0,
+                                              0));
 
         return entity;
     }

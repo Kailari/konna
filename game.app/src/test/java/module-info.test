@@ -1,8 +1,12 @@
 --add-modules
-    org.junit.jupiter.api,org.junit.jupiter.params,org.lwjgl.glfw,org.lwjgl.opengl,roguelite.engine.assertions
+    org.junit.jupiter.api,org.junit.jupiter.params,org.lwjgl.glfw,koetus.assertions
 
 --add-reads
-    roguelite.game.app=org.junit.jupiter.api,org.junit.jupiter.params,org.lwjgl.glfw,org.lwjgl.opengl,roguelite.engine.assertions
+    roguelite.game.app=org.junit.jupiter.api,org.junit.jupiter.params,org.lwjgl.glfw,koetus.assertions,riista.vulkan,org.lwjgl.vulkan
 
 --add-exports
-    roguelite.game.view/fi.jakojaannos.roguelite.game.view.gamemode=roguelite.game.app
+    riista.vulkan/fi.jakojaannos.riista.vulkan.renderer.game=roguelite.game.app
+--add-exports
+    riista.vulkan/fi.jakojaannos.riista.vulkan.renderer.ui=roguelite.game.app
+--add-exports
+    riista.vulkan/fi.jakojaannos.riista.vulkan.assets.ui=roguelite.game.app

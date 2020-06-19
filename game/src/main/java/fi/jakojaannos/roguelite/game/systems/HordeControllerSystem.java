@@ -2,11 +2,10 @@ package fi.jakojaannos.roguelite.game.systems;
 
 import java.util.stream.Stream;
 
-import fi.jakojaannos.roguelite.engine.ecs.EcsSystem;
-import fi.jakojaannos.roguelite.engine.ecs.EntityDataHandle;
-import fi.jakojaannos.roguelite.engine.event.Events;
-import fi.jakojaannos.roguelite.engine.event.RenderEvents;
-import fi.jakojaannos.roguelite.engine.utilities.TimeManager;
+import fi.jakojaannos.riista.utilities.TimeManager;
+import fi.jakojaannos.riista.ecs.EcsSystem;
+import fi.jakojaannos.riista.ecs.EntityDataHandle;
+import fi.jakojaannos.riista.data.resources.Events;
 import fi.jakojaannos.roguelite.game.data.components.character.enemy.EnemyTag;
 import fi.jakojaannos.roguelite.game.data.events.HordeEndEvent;
 import fi.jakojaannos.roguelite.game.data.events.HordeStartEvent;
@@ -73,27 +72,27 @@ public class HordeControllerSystem implements EcsSystem<HordeControllerSystem.Re
     }
 
     private static void startHorde(final Resources resources, final long currentTime) {
+        resources.horde.status = Horde.Status.ACTIVE;
         resources.horde.startTimestamp = currentTime;
         resources.horde.changeTimestamp = currentTime;
         ++resources.horde.hordeIndex;
 
-        resources.events.system().fire(new HordeStartEvent());
-        resources.renderEvents.fire(new HordeStartEvent());
+        resources.events.fire(new HordeStartEvent());
     }
 
     private static void stopHordeSpawns(final Resources resources, final long currentTime) {
+        resources.horde.status = Horde.Status.ENDING;
         resources.horde.changeTimestamp = currentTime;
 
-        resources.events.system().fire(new HordeStopEvent());
-        resources.renderEvents.fire(new HordeStopEvent());
+        resources.events.fire(new HordeStopEvent());
     }
 
     private static void endHorde(final Resources resources, final long currentTime) {
+        resources.horde.status = Horde.Status.INACTIVE;
         resources.horde.endTimestamp = currentTime;
         resources.horde.changeTimestamp = currentTime;
 
-        resources.events.system().fire(new HordeEndEvent());
-        resources.renderEvents.fire(new HordeEndEvent());
+        resources.events.fire(new HordeEndEvent());
     }
 
     public static record EntityData(
@@ -104,7 +103,6 @@ public class HordeControllerSystem implements EcsSystem<HordeControllerSystem.Re
             TimeManager timeManager,
             SessionStats sessionStats,
             Horde horde,
-            RenderEvents renderEvents,
             Events events
     ) {}
 }

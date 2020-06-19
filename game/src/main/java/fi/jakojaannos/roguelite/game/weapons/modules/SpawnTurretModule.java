@@ -4,7 +4,7 @@ import org.joml.Vector2d;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
+import fi.jakojaannos.riista.data.components.Transform;
 import fi.jakojaannos.roguelite.game.data.archetypes.TurretArchetype;
 import fi.jakojaannos.roguelite.game.weapons.*;
 import fi.jakojaannos.roguelite.game.weapons.events.WeaponFireEvent;

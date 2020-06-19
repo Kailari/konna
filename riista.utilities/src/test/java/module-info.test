@@ -1,0 +1,5 @@
+--add-modules
+    org.junit.jupiter.api,org.junit.jupiter.params
+
+--add-reads
+    riista.utilities=org.junit.jupiter.api,org.junit.jupiter.params

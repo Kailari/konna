@@ -2,17 +2,17 @@ package fi.jakojaannos.roguelite.game.systems;
 
 import org.junit.jupiter.api.Test;
 
-import fi.jakojaannos.roguelite.engine.data.components.Transform;
-import fi.jakojaannos.roguelite.engine.ecs.World;
+import fi.jakojaannos.riista.data.components.Transform;
+import fi.jakojaannos.riista.ecs.World;
 import fi.jakojaannos.roguelite.game.data.CollisionLayer;
 import fi.jakojaannos.roguelite.game.data.DamageSource;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.game.data.components.character.AttackAbility;
 import fi.jakojaannos.roguelite.game.data.components.character.WeaponInput;
+import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponInventory;
 import fi.jakojaannos.roguelite.game.systems.characters.CharacterAttackSystem;
 import fi.jakojaannos.roguelite.game.weapons.ActionInfo;
 import fi.jakojaannos.roguelite.game.weapons.InventoryWeapon;
-import fi.jakojaannos.roguelite.game.data.components.weapon.WeaponInventory;
 
 import static fi.jakojaannos.roguelite.engine.utilities.assertions.world.GameExpect.whenGame;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,11 +34,11 @@ class CharacterAttackSystemTest {
                                               new Velocity(),
                                               weaponInput,
                                               wepInv);
-        this.attackAbility = new AttackAbility(
-                new DamageSource.Entity(entity),
-                CollisionLayer.PLAYER,
-                0.0,
-                0.0);
+        this.attackAbility = new AttackAbility(new DamageSource.Entity(entity),
+                                               CollisionLayer.PLAYER,
+                                               0.0,
+                                               0.0,
+                                               0);
         entity.addComponent(attackAbility);
 
         slot0 = mock(InventoryWeapon.class);
