@@ -21,6 +21,7 @@ public class CameraDescriptor extends DescriptorObject {
     private final CameraMatrices cameraMatrices;
 
     private final VkExtent2D oldSwapchainExtent;
+    private final Swapchain swapchain;
 
     @Override
     protected boolean isRecreateRequired() {
@@ -35,15 +36,13 @@ public class CameraDescriptor extends DescriptorObject {
             final DeviceContext deviceContext,
             final Swapchain swapchain,
             final DescriptorPool descriptorPool,
-            final DescriptorSetLayout layout,
-            final float lookAtDistance
+            final DescriptorSetLayout layout
     ) {
         this(deviceContext,
              swapchain,
              descriptorPool,
              layout,
-             new CameraMatrices(),
-             lookAtDistance);
+             new CameraMatrices());
     }
 
     private CameraDescriptor(
@@ -51,31 +50,31 @@ public class CameraDescriptor extends DescriptorObject {
             final Swapchain swapchain,
             final DescriptorPool descriptorPool,
             final DescriptorSetLayout layout,
-            final CameraMatrices cameraMatrices,
-            final float lookAtDistance
+            final CameraMatrices cameraMatrices
     ) {
         super(deviceContext,
-              swapchain,
+              swapchain::getImageCount,
               descriptorPool,
               layout,
               new CombinedImageSamplerBinding[0],
               new UniformBufferBinding[]{cameraMatrices});
 
+        this.swapchain = swapchain;
         this.oldSwapchainExtent = VkExtent2D.calloc();
         this.cameraMatrices = cameraMatrices;
     }
 
     private boolean widthHasChanged() {
-        return this.oldSwapchainExtent.width() != getSwapchain().getExtent().width();
+        return this.oldSwapchainExtent.width() != this.swapchain.getExtent().width();
     }
 
     private boolean heightHasChanged() {
-        return this.oldSwapchainExtent.height() != getSwapchain().getExtent().height();
+        return this.oldSwapchainExtent.height() != this.swapchain.getExtent().height();
     }
 
     @Override
     protected void recreate() {
-        this.oldSwapchainExtent.set(getSwapchain().getExtent());
+        this.oldSwapchainExtent.set(this.swapchain.getExtent());
         super.recreate();
     }
 
@@ -86,7 +85,7 @@ public class CameraDescriptor extends DescriptorObject {
     }
 
     public void update(final int imageIndex, final Vector3f position, final Matrix4f view) {
-        final var swapchainExtent = getSwapchain().getExtent();
+        final var swapchainExtent = this.swapchain.getExtent();
         final var aspectRatio = swapchainExtent.width() / (float) swapchainExtent.height();
 
         // Create right-handed perspective projection matrix with Y-axis flipped

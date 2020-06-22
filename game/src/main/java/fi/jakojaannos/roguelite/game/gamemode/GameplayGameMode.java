@@ -109,7 +109,7 @@ public final class GameplayGameMode {
                                  .buildGroup();
 
         final var earlyTick = builder.group("early-tick")
-                                     .withSystem(new HordeControllerSystem(timeManager.convertToTicks(5.0),
+                                     .withSystem(new HordeControllerSystem(timeManager.convertToTicks(1.0),
                                                                            timeManager.convertToTicks(5.0),
                                                                            timeManager.convertToTicks(10.0),
                                                                            0.25))

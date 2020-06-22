@@ -5,14 +5,14 @@ import org.joml.Vector4f;
 import java.nio.ByteBuffer;
 import javax.annotation.Nullable;
 
-import fi.jakojaannos.riista.vulkan.internal.TextureSampler;
-import fi.jakojaannos.riista.vulkan.internal.descriptor.*;
-import fi.jakojaannos.riista.vulkan.internal.device.DeviceContext;
 import fi.jakojaannos.riista.view.assets.Material;
 import fi.jakojaannos.riista.view.assets.Texture;
 import fi.jakojaannos.riista.vulkan.assets.texture.TextureImpl;
+import fi.jakojaannos.riista.vulkan.internal.RenderingBackend;
+import fi.jakojaannos.riista.vulkan.internal.TextureSampler;
+import fi.jakojaannos.riista.vulkan.internal.descriptor.*;
+import fi.jakojaannos.riista.vulkan.internal.device.DeviceContext;
 import fi.jakojaannos.riista.vulkan.rendering.ImageView;
-import fi.jakojaannos.riista.vulkan.rendering.Swapchain;
 
 import static org.lwjgl.vulkan.VK10.*;
 
@@ -34,15 +34,13 @@ public class MaterialDescriptor extends DescriptorObject {
     private final MaterialBinding materialBinding;
 
     public MaterialDescriptor(
-            final DeviceContext deviceContext,
-            final Swapchain swapchain,
+            final RenderingBackend backend,
             final Texture defaultTexture,
             final DescriptorPool descriptorPool,
             final DescriptorSetLayout layout,
             final TextureSampler sampler
     ) {
-        this(deviceContext,
-             swapchain,
+        this(backend.deviceContext(),
              descriptorPool,
              layout,
              new TextureBinding(TEXTURE_DESCRIPTOR_BINDING.slot(), sampler, defaultTexture),
@@ -51,14 +49,13 @@ public class MaterialDescriptor extends DescriptorObject {
 
     private MaterialDescriptor(
             final DeviceContext deviceContext,
-            final Swapchain swapchain,
             final DescriptorPool descriptorPool,
             final DescriptorSetLayout layout,
             final TextureBinding textureBinding,
             final MaterialBinding materialBinding
     ) {
         super(deviceContext,
-              swapchain,
+              () -> 1,
               descriptorPool,
               layout,
               new CombinedImageSamplerBinding[]{
@@ -72,7 +69,7 @@ public class MaterialDescriptor extends DescriptorObject {
         this.materialBinding = materialBinding;
     }
 
-    public void update(final Material material, final int imageIndex) {
+    public void update(final Material material) {
         this.materialBinding.ambient.set(material.ambient());
         this.materialBinding.diffuse.set(material.diffuse());
         this.materialBinding.specular.set(material.specular());
@@ -81,8 +78,8 @@ public class MaterialDescriptor extends DescriptorObject {
         this.materialBinding.hasTexture = material.texture() != null;
         this.textureBinding.texture = (TextureImpl) material.texture();
 
-        flushAllUniformBufferBindings(imageIndex);
-        flushAllCombinedImageSamplerBindings(imageIndex);
+        flushAllUniformBufferBindings(0);
+        flushAllCombinedImageSamplerBindings(0);
     }
 
     public static class MaterialBinding implements UniformBufferBinding {

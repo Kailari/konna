@@ -5,7 +5,10 @@ import org.joml.Vector2i;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-public class GenerateStream {
+public final class Streams {
+    private Streams() {
+    }
+
     /**
      * Generates a stream containing all integer coordinates of the given region. The stream will have exactly <code>w *
      * h</code> elements.

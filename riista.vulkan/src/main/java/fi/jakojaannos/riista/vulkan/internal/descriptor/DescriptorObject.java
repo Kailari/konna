@@ -4,12 +4,13 @@ import org.lwjgl.vulkan.VkDescriptorBufferInfo;
 import org.lwjgl.vulkan.VkDescriptorImageInfo;
 import org.lwjgl.vulkan.VkWriteDescriptorSet;
 
-import fi.jakojaannos.riista.vulkan.util.RecreateCloseable;
+import java.util.function.IntSupplier;
+
 import fi.jakojaannos.riista.vulkan.internal.GPUBuffer;
 import fi.jakojaannos.riista.vulkan.internal.device.DeviceContext;
-import fi.jakojaannos.riista.vulkan.rendering.Swapchain;
 import fi.jakojaannos.riista.vulkan.internal.types.VkDescriptorType;
 import fi.jakojaannos.riista.vulkan.internal.types.VkMemoryPropertyFlags;
+import fi.jakojaannos.riista.vulkan.util.RecreateCloseable;
 
 import static fi.jakojaannos.riista.utilities.BitMask.bitMask;
 import static org.lwjgl.system.MemoryStack.stackPush;
@@ -20,7 +21,7 @@ import static org.lwjgl.vulkan.VK10.*;
  */
 public abstract class DescriptorObject extends RecreateCloseable {
     private final DeviceContext deviceContext;
-    private final Swapchain swapchain;
+    private final IntSupplier descriptorCountSupplier;
     private final DescriptorPool descriptorPool;
 
     private final DescriptorSetLayout layout;
@@ -33,10 +34,6 @@ public abstract class DescriptorObject extends RecreateCloseable {
     private GPUBuffer[] buffers;
     private long[] descriptorSets;
 
-    protected Swapchain getSwapchain() {
-        return this.swapchain;
-    }
-
     public DescriptorSetLayout getLayout() {
         return this.layout;
     }
@@ -48,14 +45,14 @@ public abstract class DescriptorObject extends RecreateCloseable {
 
     public DescriptorObject(
             final DeviceContext deviceContext,
-            final Swapchain swapchain,
+            final IntSupplier descriptorCountSupplier,
             final DescriptorPool descriptorPool,
             final DescriptorSetLayout layout,
             final CombinedImageSamplerBinding[] imageSamplerBindings,
             final UniformBufferBinding[] uniformBindings
     ) {
         this.deviceContext = deviceContext;
-        this.swapchain = swapchain;
+        this.descriptorCountSupplier = descriptorCountSupplier;
         this.descriptorPool = descriptorPool;
         this.layout = layout;
 
@@ -89,13 +86,13 @@ public abstract class DescriptorObject extends RecreateCloseable {
         this.bufferSizeInBytes = accumulatedSize;
     }
 
-    public long getDescriptorSet(final int imageIndex) {
-        return this.descriptorSets[imageIndex];
+    public long getDescriptorSet(final int index) {
+        return this.descriptorSets[index];
     }
 
-    protected void flushAllUniformBufferBindings(final int imageIndex) {
+    protected void flushAllUniformBufferBindings(final int index) {
         try (final var stack = stackPush()) {
-            final var buffer = this.buffers[imageIndex];
+            final var buffer = this.buffers[index];
             final var data = stack.malloc((int) buffer.getSize());
 
             for (int i = 0; i < this.uniformBindings.length; i++) {
@@ -106,7 +103,7 @@ public abstract class DescriptorObject extends RecreateCloseable {
         }
     }
 
-    protected void flushAllCombinedImageSamplerBindings(final int imageIndex) {
+    protected void flushAllCombinedImageSamplerBindings(final int index) {
         try (final var ignored = stackPush()) {
             final var writes = VkWriteDescriptorSet
                     .callocStack(this.imageSamplerBindings.length);
@@ -114,7 +111,7 @@ public abstract class DescriptorObject extends RecreateCloseable {
             var writeIndex = 0;
             for (final var imageSamplerBinding : this.imageSamplerBindings) {
                 writeCombinedImageSampler(imageSamplerBinding,
-                                          this.descriptorSets[imageIndex],
+                                          this.descriptorSets[index],
                                           writes.get(writeIndex));
                 ++writeIndex;
             }
@@ -125,8 +122,9 @@ public abstract class DescriptorObject extends RecreateCloseable {
 
     @Override
     protected void recreate() {
+        final var descriptorCount = this.descriptorCountSupplier.getAsInt();
         if (this.bufferSizeInBytes > 0) {
-            this.buffers = new GPUBuffer[this.swapchain.getImageCount()];
+            this.buffers = new GPUBuffer[descriptorCount];
         } else {
             this.buffers = new GPUBuffer[0];
         }
@@ -140,14 +138,14 @@ public abstract class DescriptorObject extends RecreateCloseable {
             flushAllUniformBufferBindings(imageIndex);
         }
 
-        this.descriptorSets = this.descriptorPool.allocate(this.layout, this.swapchain.getImageCount());
+        this.descriptorSets = this.descriptorPool.allocate(this.layout, descriptorCount);
 
         try (final var ignored = stackPush()) {
             final var bindingCount = this.uniformBindings.length + this.imageSamplerBindings.length;
-            final var writes = VkWriteDescriptorSet.callocStack(bindingCount * this.swapchain.getImageCount());
+            final var writes = VkWriteDescriptorSet.callocStack(bindingCount * descriptorCount);
 
             var writeIndex = 0;
-            for (int imageIndex = 0; imageIndex < this.swapchain.getImageCount(); ++imageIndex) {
+            for (int imageIndex = 0; imageIndex < descriptorCount; ++imageIndex) {
                 for (int bindingIndex = 0; bindingIndex < this.uniformBindings.length; ++bindingIndex) {
                     writeBuffer(this.uniformBindings[bindingIndex],
                                 this.buffers[imageIndex],

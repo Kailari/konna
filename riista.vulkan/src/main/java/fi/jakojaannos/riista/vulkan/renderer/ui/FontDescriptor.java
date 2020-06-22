@@ -2,11 +2,11 @@ package fi.jakojaannos.riista.vulkan.renderer.ui;
 
 import fi.jakojaannos.riista.view.assets.FontTexture;
 import fi.jakojaannos.riista.view.assets.Texture;
+import fi.jakojaannos.riista.vulkan.assets.texture.TextureImpl;
+import fi.jakojaannos.riista.vulkan.assets.ui.FontTextureImpl;
 import fi.jakojaannos.riista.vulkan.internal.RenderingBackend;
 import fi.jakojaannos.riista.vulkan.internal.TextureSampler;
 import fi.jakojaannos.riista.vulkan.internal.descriptor.*;
-import fi.jakojaannos.riista.vulkan.assets.texture.TextureImpl;
-import fi.jakojaannos.riista.vulkan.assets.ui.FontTextureImpl;
 import fi.jakojaannos.riista.vulkan.rendering.ImageView;
 
 import static org.lwjgl.vulkan.VK10.VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -42,7 +42,7 @@ public class FontDescriptor extends DescriptorObject {
             final TextureBinding textureBinding
     ) {
         super(backend.deviceContext(),
-              backend.swapchain(),
+              backend.swapchain()::getImageCount,
               descriptorPool,
               layout,
               new CombinedImageSamplerBinding[]{
