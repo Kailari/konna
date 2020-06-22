@@ -6,6 +6,7 @@ import fi.jakojaannos.riista.vulkan.CameraDescriptor;
 import fi.jakojaannos.riista.vulkan.SceneUniformBufferObject;
 import fi.jakojaannos.riista.vulkan.application.PresentableState;
 import fi.jakojaannos.riista.vulkan.assets.material.MaterialDescriptor;
+import fi.jakojaannos.riista.vulkan.assets.mesh.MaterialDescriptorPool;
 import fi.jakojaannos.riista.vulkan.assets.mesh.MeshImpl;
 import fi.jakojaannos.riista.vulkan.assets.mesh.skeletal.AnimationDescriptorPool;
 import fi.jakojaannos.riista.vulkan.assets.mesh.skeletal.SkeletalMeshImpl;
@@ -29,23 +30,6 @@ import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.VK10.*;
 
 public class MeshRendererExecutor extends RecreateCloseable {
-    /**
-     * Number of descriptor sets used for materials. e.g. material colors, textures, etc.
-     */
-    private static final int MATERIAL_SET_COUNT = 2;
-
-    /**
-     * Number of descriptor sets used for mesh information. e.g. bones etc.
-     */
-    private static final int MESH_SET_COUNT = 1;
-
-    /**
-     * Number of descriptor sets used for scene information. e.g. lighting etc.
-     */
-    private static final int SCENE_SET_COUNT = 1;
-
-    private static final int SETS_PER_IMAGE = MATERIAL_SET_COUNT + MESH_SET_COUNT + SCENE_SET_COUNT;
-
     private final RenderingBackend backend;
 
     private final DescriptorSetLayout materialDescriptorLayout;
@@ -53,16 +37,18 @@ public class MeshRendererExecutor extends RecreateCloseable {
     private final DescriptorSetLayout sceneDescriptorLayout;
     private final DescriptorPool descriptorPool;
 
-    private final TextureSampler textureSampler;
-    private final MaterialDescriptor materialDescriptor;
-    private final MaterialDescriptor staticMaterialDescriptor;
-    private final SceneUniformBufferObject sceneUBO;
-
     private final GraphicsPipeline<SkeletalMeshVertex> skeletalPipeline;
     private final GraphicsPipeline<StaticMeshVertex> staticPipeline;
 
+    private final TextureSampler textureSampler;
+    private final Texture defaultTexture;
+
+    private final SceneUniformBufferObject sceneUBO;
+
+
     private int swapchainImageCount;
     private AnimationDescriptorPool[] animationDescriptors;
+    private MaterialDescriptorPool[] materialDescriptors;
 
     public MeshRendererExecutor(
             final RenderingBackend backend,
@@ -77,14 +63,10 @@ public class MeshRendererExecutor extends RecreateCloseable {
         // samplers:    2 for material
         this.descriptorPool = new SwapchainImageDependentDescriptorPool(
                 backend,
-                SETS_PER_IMAGE,
+                1,
                 bitMask(VkDescriptorPoolCreateFlags.FREE_DESCRIPTOR_SET_BIT),
                 new DescriptorPool.Pool(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                                        () -> backend.swapchain()
-                                                     .getImageCount() * (2 + 1 + 1)),
-                new DescriptorPool.Pool(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                                        () -> backend.swapchain()
-                                                     .getImageCount() * 2));
+                                        () -> backend.swapchain().getImageCount()));
 
         this.materialDescriptorLayout = new DescriptorSetLayout(backend.deviceContext(),
                                                                 MaterialDescriptor.TEXTURE_DESCRIPTOR_BINDING,
@@ -103,20 +85,9 @@ public class MeshRendererExecutor extends RecreateCloseable {
 
         this.textureSampler = new TextureSampler(backend.deviceContext());
 
-        final var defaultTexture = assetManager.getStorage(Texture.class)
-                                               .getOrDefault("textures/vulkan/texture.jpg");
-        this.materialDescriptor = new MaterialDescriptor(backend.deviceContext(),
-                                                         backend.swapchain(),
-                                                         defaultTexture,
-                                                         this.descriptorPool,
-                                                         this.materialDescriptorLayout,
-                                                         this.textureSampler);
-        this.staticMaterialDescriptor = new MaterialDescriptor(backend.deviceContext(),
-                                                               backend.swapchain(),
-                                                               defaultTexture,
-                                                               this.descriptorPool,
-                                                               this.materialDescriptorLayout,
-                                                               this.textureSampler);
+        this.defaultTexture = assetManager.getStorage(Texture.class)
+                                          .getOrDefault("textures/vulkan/texture.jpg");
+
 
         this.skeletalPipeline = new GraphicsPipeline<>(backend.deviceContext(),
                                                        backend.swapchain(),
@@ -152,6 +123,7 @@ public class MeshRendererExecutor extends RecreateCloseable {
             final int imageIndex
     ) {
         this.animationDescriptors[imageIndex].reset();
+        this.materialDescriptors[imageIndex].reset();
 
         try (final var stack = stackPush()) {
             final var pushConstantData = stack.malloc(16 * Float.BYTES);
@@ -167,8 +139,6 @@ public class MeshRendererExecutor extends RecreateCloseable {
                                     stack.longs(cameraUBO.getDescriptorSet(imageIndex),
                                                 this.sceneUBO.getDescriptorSet(imageIndex)),
                                     null);
-
-            var materialUpdated = false;
 
             for (final var entry : state.skeletalMeshEntries()) {
                 entry.transform.get(0, pushConstantData);
@@ -190,16 +160,12 @@ public class MeshRendererExecutor extends RecreateCloseable {
 
                 for (final var subMesh : entry.mesh) {
                     // FIXME: Do similar thing here that is done with bones/animations
-                    if (!materialUpdated) {
-                        this.materialDescriptor.update(subMesh.getMaterial(), imageIndex);
-                        materialUpdated = true;
-                    }
-
+                    final var materialDescriptor = this.materialDescriptors[imageIndex].get(subMesh.getMaterial());
                     vkCmdBindDescriptorSets(commandBuffer.getHandle(),
                                             VK_PIPELINE_BIND_POINT_GRAPHICS,
                                             this.skeletalPipeline.getLayout(),
                                             2,
-                                            stack.longs(this.materialDescriptor.getDescriptorSet(imageIndex)),
+                                            stack.longs(materialDescriptor.getDescriptorSet(0)),
                                             null);
 
                     vkCmdBindVertexBuffers(commandBuffer.getHandle(),
@@ -241,13 +207,13 @@ public class MeshRendererExecutor extends RecreateCloseable {
                                    pushConstantData);
 
                 for (final var subMesh : entry.mesh) {
-                    this.staticMaterialDescriptor.update(subMesh.getMaterial(), imageIndex);
+                    final var materialDescriptor = this.materialDescriptors[imageIndex].get(subMesh.getMaterial());
 
                     vkCmdBindDescriptorSets(commandBuffer.getHandle(),
                                             VK_PIPELINE_BIND_POINT_GRAPHICS,
                                             this.staticPipeline.getLayout(),
                                             2,
-                                            stack.longs(this.materialDescriptor.getDescriptorSet(imageIndex)),
+                                            stack.longs(materialDescriptor.getDescriptorSet(0)),
                                             null);
 
                     vkCmdBindVertexBuffers(commandBuffer.getHandle(),
@@ -276,20 +242,23 @@ public class MeshRendererExecutor extends RecreateCloseable {
             this.swapchainImageCount = this.backend.swapchain().getImageCount();
 
             this.animationDescriptors = new AnimationDescriptorPool[this.swapchainImageCount];
-            for (int i = 0; i < this.animationDescriptors.length; i++) {
+            this.materialDescriptors = new MaterialDescriptorPool[this.swapchainImageCount];
+            for (int i = 0; i < this.swapchainImageCount; i++) {
                 this.animationDescriptors[i] = new AnimationDescriptorPool(this.backend,
                                                                            this.boneDescriptorLayout);
+                this.materialDescriptors[i] = new MaterialDescriptorPool(this.backend,
+                                                                         this.defaultTexture,
+                                                                         this.textureSampler,
+                                                                         this.materialDescriptorLayout);
             }
         } else {
-            for (final var descriptor : this.animationDescriptors) {
-                descriptor.tryRecreate();
+            for (int i = 0; i < this.swapchainImageCount; i++) {
+                this.animationDescriptors[i].tryRecreate();
+                this.materialDescriptors[i].tryRecreate();
             }
         }
 
         this.descriptorPool.tryRecreate();
-        this.materialDescriptor.tryRecreate();
-        this.staticMaterialDescriptor.tryRecreate();
-
         this.sceneUBO.tryRecreate();
 
         this.skeletalPipeline.tryRecreate();
@@ -298,6 +267,12 @@ public class MeshRendererExecutor extends RecreateCloseable {
 
     @Override
     protected void cleanup() {
+        if (this.swapchainImageCount != this.backend.swapchain().getImageCount()) {
+            for (int i = 0; i < this.swapchainImageCount; i++) {
+                this.animationDescriptors[i].close();
+                this.materialDescriptors[i].close();
+            }
+        }
     }
 
     @Override
@@ -307,11 +282,10 @@ public class MeshRendererExecutor extends RecreateCloseable {
         this.descriptorPool.close();
 
         this.textureSampler.close();
-        this.materialDescriptor.close();
-        this.staticMaterialDescriptor.close();
         this.sceneUBO.close();
-        for (final var descriptors : this.animationDescriptors) {
-            descriptors.close();
+        for (int i = 0; i < this.swapchainImageCount; i++) {
+            this.animationDescriptors[i].close();
+            this.materialDescriptors[i].close();
         }
 
         this.boneDescriptorLayout.close();

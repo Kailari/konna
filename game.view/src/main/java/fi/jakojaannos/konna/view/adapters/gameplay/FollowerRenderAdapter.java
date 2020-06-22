@@ -46,7 +46,7 @@ public class FollowerRenderAdapter implements EcsSystem<FollowerRenderAdapter.Re
     public static record EntityData(
             Transform transform,
             EnemyTag player,
-            // Differentiate between stalkers and followers by AI components
+            // Differentiate between stalkers, slimes and followers by AI components
             FollowerAI ai,
             @Without StalkerAI stalkerAi,
             @Without JumpingMovementAbility jumpingAbility,
