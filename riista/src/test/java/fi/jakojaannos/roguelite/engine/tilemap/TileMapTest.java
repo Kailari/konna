@@ -3,7 +3,7 @@ package fi.jakojaannos.roguelite.engine.tilemap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import fi.jakojaannos.riista.utilities.GenerateStream;
+import fi.jakojaannos.riista.utilities.Streams;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -44,11 +44,11 @@ class TileMapTest {
         int startY = -20;
         int roomWidth = 50;
         int roomHeight = 40;
-        GenerateStream.ofCoordinates(startX, startY, roomWidth, roomHeight)
-                      .filter(pos -> pos.x == startX + roomWidth - 1 || pos.x == startX || pos.y == startY + roomHeight - 1 || pos.y == startY)
-                      .forEach(pos -> level.setTile(pos, "wall"));
-        GenerateStream.ofCoordinates(startX + 1, startY + 1, roomWidth - 2, roomHeight - 2)
-                      .forEach(pos -> level.setTile(pos, "floor"));
+        Streams.ofCoordinates(startX, startY, roomWidth, roomHeight)
+               .filter(pos -> pos.x == startX + roomWidth - 1 || pos.x == startX || pos.y == startY + roomHeight - 1 || pos.y == startY)
+               .forEach(pos -> level.setTile(pos, "wall"));
+        Streams.ofCoordinates(startX + 1, startY + 1, roomWidth - 2, roomHeight - 2)
+               .forEach(pos -> level.setTile(pos, "floor"));
 
         for (int x = -50; x < 50; ++x) {
             for (int y = -50; y < 50; ++y) {

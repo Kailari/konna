@@ -57,6 +57,7 @@ public class KonnaGameModeRenderers {
                    .buildGroup();
             builder.group("entities")
                    .withSystem(new PlayerCharacterRenderAdapter(assetManager))
+                   .withSystem(new FollowerRenderAdapter(assetManager))
                    .buildGroup();
             builder.group("level")
                    .withSystem(new TileMapRenderAdapter(assetManager))

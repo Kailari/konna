@@ -58,7 +58,7 @@ public class MaterialDescriptor extends DescriptorObject {
             final MaterialBinding materialBinding
     ) {
         super(deviceContext,
-              swapchain,
+              swapchain::getImageCount,
               descriptorPool,
               layout,
               new CombinedImageSamplerBinding[]{

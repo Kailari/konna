@@ -54,7 +54,7 @@ public class SceneUniformBufferObject extends DescriptorObject {
             final LightCountBinding lightCount
     ) {
         super(deviceContext,
-              swapchain,
+              swapchain::getImageCount,
               descriptorPool,
               layout,
               new CombinedImageSamplerBinding[0],

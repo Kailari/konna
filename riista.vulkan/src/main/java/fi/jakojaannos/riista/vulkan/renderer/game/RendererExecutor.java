@@ -1,6 +1,7 @@
 package fi.jakojaannos.riista.vulkan.renderer.game;
 
 import fi.jakojaannos.riista.assets.AssetManager;
+import fi.jakojaannos.riista.data.resources.CameraProperties;
 import fi.jakojaannos.riista.vulkan.CameraDescriptor;
 import fi.jakojaannos.riista.vulkan.application.PresentableState;
 import fi.jakojaannos.riista.vulkan.internal.DepthTexture;
@@ -19,7 +20,6 @@ import fi.jakojaannos.riista.vulkan.renderer.mesh.MeshRendererExecutor;
 import fi.jakojaannos.riista.vulkan.renderer.ui.UiRendererExecutor;
 import fi.jakojaannos.riista.vulkan.rendering.*;
 import fi.jakojaannos.riista.vulkan.util.RecreateCloseable;
-import fi.jakojaannos.riista.data.resources.CameraProperties;
 
 import static fi.jakojaannos.riista.utilities.BitMask.bitMask;
 import static org.lwjgl.system.MemoryStack.stackPush;
@@ -113,8 +113,7 @@ public class RendererExecutor extends RecreateCloseable {
         this.cameraDescriptor = new CameraDescriptor(this.deviceContext,
                                                      this.swapchain,
                                                      this.descriptorPool,
-                                                     this.cameraDescriptorLayout,
-                                                     25.0f);
+                                                     this.cameraDescriptorLayout);
 
         this.debugRenderer = new DebugRendererExecutor(backend,
                                                        this.renderPass,

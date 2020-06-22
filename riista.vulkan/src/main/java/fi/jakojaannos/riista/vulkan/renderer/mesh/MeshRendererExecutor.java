@@ -7,7 +7,7 @@ import fi.jakojaannos.riista.vulkan.SceneUniformBufferObject;
 import fi.jakojaannos.riista.vulkan.application.PresentableState;
 import fi.jakojaannos.riista.vulkan.assets.material.MaterialDescriptor;
 import fi.jakojaannos.riista.vulkan.assets.mesh.MeshImpl;
-import fi.jakojaannos.riista.vulkan.assets.mesh.skeletal.AnimationDescriptor;
+import fi.jakojaannos.riista.vulkan.assets.mesh.skeletal.AnimationDescriptorPool;
 import fi.jakojaannos.riista.vulkan.assets.mesh.skeletal.SkeletalMeshImpl;
 import fi.jakojaannos.riista.vulkan.assets.mesh.skeletal.SkeletalMeshVertex;
 import fi.jakojaannos.riista.vulkan.assets.mesh.staticmesh.StaticMeshVertex;
@@ -46,6 +46,8 @@ public class MeshRendererExecutor extends RecreateCloseable {
 
     private static final int SETS_PER_IMAGE = MATERIAL_SET_COUNT + MESH_SET_COUNT + SCENE_SET_COUNT;
 
+    private final RenderingBackend backend;
+
     private final DescriptorSetLayout materialDescriptorLayout;
     private final DescriptorSetLayout boneDescriptorLayout;
     private final DescriptorSetLayout sceneDescriptorLayout;
@@ -54,11 +56,13 @@ public class MeshRendererExecutor extends RecreateCloseable {
     private final TextureSampler textureSampler;
     private final MaterialDescriptor materialDescriptor;
     private final MaterialDescriptor staticMaterialDescriptor;
-    private final AnimationDescriptor animationDescriptor;
     private final SceneUniformBufferObject sceneUBO;
 
     private final GraphicsPipeline<SkeletalMeshVertex> skeletalPipeline;
     private final GraphicsPipeline<StaticMeshVertex> staticPipeline;
+
+    private int swapchainImageCount;
+    private AnimationDescriptorPool[] animationDescriptors;
 
     public MeshRendererExecutor(
             final RenderingBackend backend,
@@ -67,6 +71,8 @@ public class MeshRendererExecutor extends RecreateCloseable {
             final AssetManager assetManager,
             final DescriptorSetLayout cameraDescriptorLayout
     ) {
+        this.backend = backend;
+
         // Buffers:     2 for materials, 1 for scene, 1 for mesh
         // samplers:    2 for material
         this.descriptorPool = new SwapchainImageDependentDescriptorPool(
@@ -111,9 +117,6 @@ public class MeshRendererExecutor extends RecreateCloseable {
                                                                this.descriptorPool,
                                                                this.materialDescriptorLayout,
                                                                this.textureSampler);
-        this.animationDescriptor = new AnimationDescriptor(backend,
-                                                           this.descriptorPool,
-                                                           this.boneDescriptorLayout);
 
         this.skeletalPipeline = new GraphicsPipeline<>(backend.deviceContext(),
                                                        backend.swapchain(),
@@ -148,6 +151,8 @@ public class MeshRendererExecutor extends RecreateCloseable {
             final CommandBuffer commandBuffer,
             final int imageIndex
     ) {
+        this.animationDescriptors[imageIndex].reset();
+
         try (final var stack = stackPush()) {
             final var pushConstantData = stack.malloc(16 * Float.BYTES);
 
@@ -163,6 +168,8 @@ public class MeshRendererExecutor extends RecreateCloseable {
                                                 this.sceneUBO.getDescriptorSet(imageIndex)),
                                     null);
 
+            var materialUpdated = false;
+
             for (final var entry : state.skeletalMeshEntries()) {
                 entry.transform.get(0, pushConstantData);
                 vkCmdPushConstants(commandBuffer.getHandle(),
@@ -171,23 +178,22 @@ public class MeshRendererExecutor extends RecreateCloseable {
                                    0,
                                    pushConstantData);
 
-
-                this.animationDescriptor.setFrame(imageIndex,
-                                                  entry.mesh.getAnimation(entry.animation),
-                                                  entry.frame);
+                final var animationDescriptor = this.animationDescriptors[imageIndex].get(entry.mesh,
+                                                                                          entry.animation,
+                                                                                          entry.frame);
                 vkCmdBindDescriptorSets(commandBuffer.getHandle(),
                                         VK_PIPELINE_BIND_POINT_GRAPHICS,
                                         this.skeletalPipeline.getLayout(),
                                         3,
-                                        stack.longs(this.animationDescriptor.getDescriptorSet(imageIndex)),
+                                        stack.longs(animationDescriptor.getDescriptorSet(0)),
                                         null);
 
                 for (final var subMesh : entry.mesh) {
-                    // FIXME: This is wrong. If material changes, this causes the descriptor to update mid-frame, which
-                    //        is something we really do not want to do. Instead, allocate large number of descriptors
-                    //        and use them as needed (or just allocate one descriptor per material for now)
-
-                    this.materialDescriptor.update(subMesh.getMaterial(), imageIndex);
+                    // FIXME: Do similar thing here that is done with bones/animations
+                    if (!materialUpdated) {
+                        this.materialDescriptor.update(subMesh.getMaterial(), imageIndex);
+                        materialUpdated = true;
+                    }
 
                     vkCmdBindDescriptorSets(commandBuffer.getHandle(),
                                             VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -266,10 +272,24 @@ public class MeshRendererExecutor extends RecreateCloseable {
 
     @Override
     protected void recreate() {
+        if (this.swapchainImageCount != this.backend.swapchain().getImageCount()) {
+            this.swapchainImageCount = this.backend.swapchain().getImageCount();
+
+            this.animationDescriptors = new AnimationDescriptorPool[this.swapchainImageCount];
+            for (int i = 0; i < this.animationDescriptors.length; i++) {
+                this.animationDescriptors[i] = new AnimationDescriptorPool(this.backend,
+                                                                           this.boneDescriptorLayout);
+            }
+        } else {
+            for (final var descriptor : this.animationDescriptors) {
+                descriptor.tryRecreate();
+            }
+        }
+
         this.descriptorPool.tryRecreate();
         this.materialDescriptor.tryRecreate();
         this.staticMaterialDescriptor.tryRecreate();
-        this.animationDescriptor.tryRecreate();
+
         this.sceneUBO.tryRecreate();
 
         this.skeletalPipeline.tryRecreate();
@@ -290,7 +310,9 @@ public class MeshRendererExecutor extends RecreateCloseable {
         this.materialDescriptor.close();
         this.staticMaterialDescriptor.close();
         this.sceneUBO.close();
-        this.animationDescriptor.close();
+        for (final var descriptors : this.animationDescriptors) {
+            descriptors.close();
+        }
 
         this.boneDescriptorLayout.close();
         this.materialDescriptorLayout.close();

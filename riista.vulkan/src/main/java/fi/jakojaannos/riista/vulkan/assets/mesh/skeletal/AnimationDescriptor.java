@@ -8,6 +8,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import fi.jakojaannos.riista.view.assets.Animation;
+import fi.jakojaannos.riista.vulkan.internal.GPUBuffer;
 import fi.jakojaannos.riista.vulkan.internal.RenderingBackend;
 import fi.jakojaannos.riista.vulkan.internal.descriptor.*;
 import fi.jakojaannos.riista.vulkan.internal.device.DeviceContext;
@@ -26,7 +27,6 @@ public class AnimationDescriptor extends DescriptorObject {
             final DescriptorSetLayout layout
     ) {
         this(backend.deviceContext(),
-             backend.swapchain(),
              descriptorPool,
              layout,
              new BoneBinding());
@@ -34,13 +34,12 @@ public class AnimationDescriptor extends DescriptorObject {
 
     private AnimationDescriptor(
             final DeviceContext deviceContext,
-            final Swapchain swapchain,
             final DescriptorPool descriptorPool,
             final DescriptorSetLayout layout,
             final BoneBinding boneBinding
     ) {
         super(deviceContext,
-              swapchain,
+              () -> 1,
               descriptorPool,
               layout,
               new CombinedImageSamplerBinding[0],
@@ -52,7 +51,7 @@ public class AnimationDescriptor extends DescriptorObject {
         this.boneBinding = boneBinding;
     }
 
-    public void setFrame(final int imageIndex, @Nullable final Animation animation, final int frame) {
+    public void setFrame(@Nullable final Animation animation, final int frame) {
         if (animation != null) {
             this.boneBinding.active = animation;
             this.boneBinding.frame = frame % animation.frames().size();
@@ -61,7 +60,7 @@ public class AnimationDescriptor extends DescriptorObject {
             this.boneBinding.frame = 0;
         }
 
-        flushAllUniformBufferBindings(imageIndex);
+        flushAllUniformBufferBindings(0);
     }
 
     private static Animation createIdentityAnimation() {
