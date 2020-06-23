@@ -59,8 +59,6 @@ public class MeshRendererExecutor extends RecreateCloseable {
     ) {
         this.backend = backend;
 
-        // Buffers:     2 for materials, 1 for scene, 1 for mesh
-        // samplers:    2 for material
         this.descriptorPool = new SwapchainImageDependentDescriptorPool(
                 backend,
                 1,
@@ -89,8 +87,7 @@ public class MeshRendererExecutor extends RecreateCloseable {
                                           .getOrDefault("textures/vulkan/texture.jpg");
 
 
-        this.skeletalPipeline = new GraphicsPipeline<>(backend.deviceContext(),
-                                                       backend.swapchain(),
+        this.skeletalPipeline = new GraphicsPipeline<>(backend,
                                                        renderPass,
                                                        mainSubpass,
                                                        assetManager,
@@ -102,8 +99,7 @@ public class MeshRendererExecutor extends RecreateCloseable {
                                                        this.sceneUBO.getLayout(),
                                                        this.materialDescriptorLayout,
                                                        this.boneDescriptorLayout);
-        this.staticPipeline = new GraphicsPipeline<>(backend.deviceContext(),
-                                                     backend.swapchain(),
+        this.staticPipeline = new GraphicsPipeline<>(backend,
                                                      renderPass,
                                                      mainSubpass,
                                                      assetManager,
@@ -159,7 +155,6 @@ public class MeshRendererExecutor extends RecreateCloseable {
                                         null);
 
                 for (final var subMesh : entry.mesh) {
-                    // FIXME: Do similar thing here that is done with bones/animations
                     final var materialDescriptor = this.materialDescriptors[imageIndex].get(subMesh.getMaterial());
                     vkCmdBindDescriptorSets(commandBuffer.getHandle(),
                                             VK_PIPELINE_BIND_POINT_GRAPHICS,

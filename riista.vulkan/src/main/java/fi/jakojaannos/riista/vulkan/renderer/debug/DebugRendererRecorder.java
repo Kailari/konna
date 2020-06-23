@@ -17,7 +17,7 @@ public class DebugRendererRecorder implements DebugRenderer {
 
     @Override
     public void drawTransform(final Transform transform) {
-        final var entry = this.writeState.transforms().get();
+        final var entry = this.writeState.transformEntries().get();
         entry.position.set(transform.position.x,
                            transform.position.y,
                            0.0d);
@@ -26,7 +26,7 @@ public class DebugRendererRecorder implements DebugRenderer {
 
     @Override
     public void drawBox(final Transform transform, final Vector2f offset, final Vector2f size) {
-        final var entry = this.writeState.boxes().get();
+        final var entry = this.writeState.boxEntries().get();
         entry.position.set(transform.position.x,
                            transform.position.y,
                            0.0d);

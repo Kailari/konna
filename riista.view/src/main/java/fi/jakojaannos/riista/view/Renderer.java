@@ -8,4 +8,6 @@ public interface Renderer {
     MeshRenderer mesh();
 
     UiRenderer ui();
+
+    ParticleRenderer particles();
 }

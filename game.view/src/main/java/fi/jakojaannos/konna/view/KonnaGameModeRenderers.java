@@ -62,6 +62,9 @@ public class KonnaGameModeRenderers {
             builder.group("level")
                    .withSystem(new TileMapRenderAdapter(assetManager))
                    .buildGroup();
+            builder.group("level")
+                   .withSystem(new MuzzleFlashParticleRenderAdapter(assetManager))
+                   .buildGroup();
             builder.group("ui")
                    .withSystem(new CharacterHealthbarRenderAdapter(assetManager, timeManager.convertToTicks(5.0)))
                    .withSystem(new SessionStatsHudRenderAdapter(assetManager))

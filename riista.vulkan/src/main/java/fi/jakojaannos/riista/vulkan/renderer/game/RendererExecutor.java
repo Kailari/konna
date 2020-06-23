@@ -17,6 +17,7 @@ import fi.jakojaannos.riista.vulkan.internal.types.VkPipelineStageFlagBits;
 import fi.jakojaannos.riista.vulkan.internal.window.Window;
 import fi.jakojaannos.riista.vulkan.renderer.debug.DebugRendererExecutor;
 import fi.jakojaannos.riista.vulkan.renderer.mesh.MeshRendererExecutor;
+import fi.jakojaannos.riista.vulkan.renderer.particles.ParticleRendererExecutor;
 import fi.jakojaannos.riista.vulkan.renderer.ui.UiRendererExecutor;
 import fi.jakojaannos.riista.vulkan.rendering.*;
 import fi.jakojaannos.riista.vulkan.util.RecreateCloseable;
@@ -41,6 +42,7 @@ public class RendererExecutor extends RecreateCloseable {
     private final DebugRendererExecutor debugRenderer;
     private final MeshRendererExecutor meshRenderer;
     private final UiRendererExecutor uiRenderer;
+    private final ParticleRendererExecutor particleRenderer;
 
     private CommandBuffer[] commandBuffers;
 
@@ -131,6 +133,12 @@ public class RendererExecutor extends RecreateCloseable {
                                                  uiRenderPass,
                                                  assetManager);
 
+        this.particleRenderer = new ParticleRendererExecutor(backend,
+                                                             this.renderPass,
+                                                             mainRenderPass,
+                                                             assetManager,
+                                                             this.cameraDescriptorLayout);
+
         tryRecreate();
     }
 
@@ -157,6 +165,7 @@ public class RendererExecutor extends RecreateCloseable {
         ) {
             this.debugRenderer.flush(presentableState, this.cameraDescriptor, commandBuffer, imageIndex);
             this.meshRenderer.flush(presentableState, this.cameraDescriptor, commandBuffer, imageIndex);
+            this.particleRenderer.flush(presentableState, this.cameraDescriptor, commandBuffer, imageIndex);
 
             vkCmdNextSubpass(commandBuffer.getHandle(), VK_SUBPASS_CONTENTS_INLINE);
             this.uiRenderer.flush(presentableState, commandBuffer, imageIndex);
@@ -194,6 +203,7 @@ public class RendererExecutor extends RecreateCloseable {
         this.debugRenderer.tryRecreate();
         this.meshRenderer.tryRecreate();
         this.uiRenderer.tryRecreate();
+        this.particleRenderer.tryRecreate();
     }
 
     private void freeCommandBuffers() {
@@ -229,6 +239,7 @@ public class RendererExecutor extends RecreateCloseable {
         this.debugRenderer.close();
         this.meshRenderer.close();
         this.uiRenderer.close();
+        this.particleRenderer.close();
 
         this.cameraDescriptorLayout.close();
         super.close();

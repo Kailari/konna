@@ -7,6 +7,7 @@ import java.util.Arrays;
 
 import fi.jakojaannos.riista.assets.AssetManager;
 import fi.jakojaannos.riista.vulkan.assets.internal.Shader;
+import fi.jakojaannos.riista.vulkan.internal.RenderingBackend;
 import fi.jakojaannos.riista.vulkan.internal.VertexFormat;
 import fi.jakojaannos.riista.vulkan.internal.descriptor.DescriptorSetLayout;
 import fi.jakojaannos.riista.vulkan.internal.device.DeviceContext;
@@ -49,6 +50,30 @@ public class GraphicsPipeline<TVertex> extends RecreateCloseable {
         return this.pipelineLayout;
     }
 
+    public GraphicsPipeline(
+            final RenderingBackend backend,
+            final RenderPass renderPass,
+            final RenderSubpass subpass,
+            final AssetManager assetManager,
+            final String vertexShaderAsset,
+            final String fragmentShaderAsset,
+            final VkPrimitiveTopology topology,
+            final VertexFormat<TVertex> vertexFormat,
+            final DescriptorSetLayout... descriptorSetLayouts
+    ) {
+        this(backend.deviceContext(),
+             backend.swapchain(),
+             renderPass,
+             subpass,
+             assetManager,
+             vertexShaderAsset,
+             fragmentShaderAsset,
+             topology,
+             vertexFormat,
+             descriptorSetLayouts);
+    }
+
+    @Deprecated
     public GraphicsPipeline(
             final DeviceContext deviceContext,
             final Swapchain swapchain,

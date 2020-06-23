@@ -100,7 +100,7 @@ public class DebugRendererExecutor extends RecreateCloseable {
                                    stack.longs(this.transformMesh.getVertexBuffer().getHandle()),
                                    stack.longs(0L));
 
-            for (final var transform : state.transforms()) {
+            for (final var transform : state.transformEntries()) {
                 modelMatrix.identity()
                            .translate(transform.position)
                            .rotateZ(transform.rotation);
@@ -127,7 +127,7 @@ public class DebugRendererExecutor extends RecreateCloseable {
                                  this.cubeMesh.getIndexBuffer().getHandle(),
                                  0,
                                  VK_INDEX_TYPE_UINT32);
-            for (final var box : state.boxes()) {
+            for (final var box : state.boxEntries()) {
                 modelMatrix.identity()
                            .translate(box.position)
                            .rotateZ(box.rotation)

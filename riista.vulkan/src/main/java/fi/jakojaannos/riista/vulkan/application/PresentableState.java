@@ -9,6 +9,7 @@ import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.riista.vulkan.renderer.debug.DebugRendererRecorder;
 import fi.jakojaannos.riista.vulkan.renderer.game.RenderBuffer;
 import fi.jakojaannos.riista.vulkan.renderer.mesh.MeshRendererRecorder;
+import fi.jakojaannos.riista.vulkan.renderer.particles.ParticleRendererRecorder;
 import fi.jakojaannos.riista.vulkan.renderer.ui.UiRendererRecorder;
 
 public class PresentableState {
@@ -24,6 +25,9 @@ public class PresentableState {
                                                                                               UiRendererRecorder.QuadEntry[]::new);
     private final RenderBuffer<UiRendererRecorder.TextEntry> textEntries = new RenderBuffer<>(UiRendererRecorder.TextEntry::new,
                                                                                               UiRendererRecorder.TextEntry[]::new);
+    private final RenderBuffer<ParticleRendererRecorder.SystemEntry> particleSystemEntries = new RenderBuffer<>(ParticleRendererRecorder.SystemEntry::new,
+                                                                                                                ParticleRendererRecorder.SystemEntry[]::new);
+
 
     private final Matrix4f viewMatrix = new Matrix4f();
     private final Vector3f eyePosition = new Vector3f();
@@ -36,7 +40,7 @@ public class PresentableState {
     private boolean mouseClicked;
     private long timestamp;
 
-    public RenderBuffer<DebugRendererRecorder.TransformEntry> transforms() {
+    public RenderBuffer<DebugRendererRecorder.TransformEntry> transformEntries() {
         return this.transformEntries;
     }
 
@@ -46,6 +50,22 @@ public class PresentableState {
 
     public RenderBuffer<MeshRendererRecorder.StaticEntry> staticMeshEntries() {
         return this.staticMeshEntries;
+    }
+
+    public RenderBuffer<UiRendererRecorder.QuadEntry> quadEntries() {
+        return this.quadEntries;
+    }
+
+    public RenderBuffer<UiRendererRecorder.TextEntry> textEntries() {
+        return this.textEntries;
+    }
+
+    public RenderBuffer<ParticleRendererRecorder.SystemEntry> particleSystemEntries() {
+        return this.particleSystemEntries;
+    }
+
+    public RenderBuffer<DebugRendererRecorder.AABBEntry> boxEntries() {
+        return this.aabbEntries;
     }
 
     public long timestamp() {
@@ -66,18 +86,6 @@ public class PresentableState {
 
     public Vector3f eyePosition() {
         return this.eyePosition;
-    }
-
-    public RenderBuffer<UiRendererRecorder.QuadEntry> quadEntries() {
-        return this.quadEntries;
-    }
-
-    public RenderBuffer<UiRendererRecorder.TextEntry> textEntries() {
-        return this.textEntries;
-    }
-
-    public RenderBuffer<DebugRendererRecorder.AABBEntry> boxes() {
-        return this.aabbEntries;
     }
 
     public UiVariables uiVariables() {
@@ -107,6 +115,7 @@ public class PresentableState {
         this.quadEntries.reset();
         this.textEntries.reset();
         this.aabbEntries.reset();
+        this.particleSystemEntries.reset();
 
         this.uiVariables.clear();
 
