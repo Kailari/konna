@@ -15,13 +15,18 @@ public class ParticleRendererRecorder implements ParticleRenderer {
     }
 
     @Override
-    public void drawParticleSystem(final Vector3d position) {
+    public void drawParticleSystem(final Vector3d position, final double time, final int count) {
         final var entry = this.writeState.particleSystemEntries().get();
         entry.position.set(position);
+        entry.time = (float) time;
+        entry.count = count;
     }
 
     public static class SystemEntry implements Presentable {
         public final Vector3f position = new Vector3f();
+
+        public float time;
+        public int count;
 
         @Override
         public void reset() {

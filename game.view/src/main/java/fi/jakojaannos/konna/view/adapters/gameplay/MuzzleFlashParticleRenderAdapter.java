@@ -2,7 +2,6 @@ package fi.jakojaannos.konna.view.adapters.gameplay;
 
 import org.joml.Vector3d;
 
-import java.util.Random;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.riista.assets.AssetManager;
@@ -23,18 +22,11 @@ public class MuzzleFlashParticleRenderAdapter implements EcsSystem<MuzzleFlashPa
     ) {
         final var timeManager = resources.timeManager;
 
-        final var maxTranslation = 4.0;
-        final var duration = 40;
-        final var spread = 2.0;
-
-        final var random = new Random(1337L);
-        for (int i = 0; i < 10000; i++) {
-            final var x = random.nextDouble() * (timeManager.getCurrentGameTime() % duration) * maxTranslation;
-            resources.renderer.particles()
-                              .drawParticleSystem(new Vector3d(x,
-                                                               ((random.nextDouble() * 2.0) - 1.0) * spread,
-                                                               1.0));
-        }
+        final var time = timeManager.convertToSeconds(timeManager.getCurrentGameTime());
+        resources.renderer.particles()
+                          .drawParticleSystem(new Vector3d(0, 0, 1.0),
+                                              time,
+                                              10_000_000);
     }
 
     public static record Resources(

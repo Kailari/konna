@@ -1,11 +1,8 @@
 package fi.jakojaannos.riista.vulkan.renderer.particles;
 
-import org.joml.Vector3f;
-
 import fi.jakojaannos.riista.assets.AssetManager;
 import fi.jakojaannos.riista.vulkan.CameraDescriptor;
 import fi.jakojaannos.riista.vulkan.application.PresentableState;
-import fi.jakojaannos.riista.vulkan.assets.mesh.MeshImpl;
 import fi.jakojaannos.riista.vulkan.internal.RenderingBackend;
 import fi.jakojaannos.riista.vulkan.internal.command.CommandBuffer;
 import fi.jakojaannos.riista.vulkan.internal.descriptor.DescriptorSetLayout;
@@ -20,7 +17,6 @@ import static org.lwjgl.vulkan.VK10.*;
 
 public class ParticleRendererExecutor extends RecreateCloseable {
     private final GraphicsPipeline<ParticleVertex> pipeline;
-    private final MeshImpl mesh;
 
     public ParticleRendererExecutor(
             final RenderingBackend backend,
@@ -38,11 +34,6 @@ public class ParticleRendererExecutor extends RecreateCloseable {
                                                VkPrimitiveTopology.POINT_LIST,
                                                ParticleVertex.FORMAT,
                                                cameraDescriptorLayout);
-        this.mesh = new MeshImpl(backend,
-                                 ParticleVertex.FORMAT,
-                                 new ParticleVertex[]{new ParticleVertex(new Vector3f(0, 0, 1.0f))},
-                                 new Integer[]{0},
-                                 null);
     }
 
     public void flush(
@@ -66,30 +57,18 @@ public class ParticleRendererExecutor extends RecreateCloseable {
                                     null);
 
             for (final var particleSystem : state.particleSystemEntries()) {
-                try (final var stack2 = stackPush()) {
-                    particleSystem.position.get(0, pushConstantData);
-                    vkCmdPushConstants(commandBuffer.getHandle(),
-                                       this.pipeline.getLayout(),
-                                       VK_SHADER_STAGE_VERTEX_BIT,
-                                       0,
-                                       pushConstantData);
+                particleSystem.position.get(0, pushConstantData);
+                vkCmdPushConstants(commandBuffer.getHandle(),
+                                   this.pipeline.getLayout(),
+                                   VK_SHADER_STAGE_VERTEX_BIT,
+                                   0,
+                                   pushConstantData);
 
-                    vkCmdBindVertexBuffers(commandBuffer.getHandle(),
-                                           0,
-                                           stack2.longs(this.mesh.getVertexBuffer().getHandle()),
-                                           stack2.longs(0L));
-                    vkCmdBindIndexBuffer(commandBuffer.getHandle(),
-                                         this.mesh.getIndexBuffer().getHandle(),
-                                         0,
-                                         VK_INDEX_TYPE_UINT32);
-
-                    vkCmdDrawIndexed(commandBuffer.getHandle(),
-                                     this.mesh.getIndexCount(),
-                                     1,
-                                     0,
-                                     0,
-                                     0);
-                }
+                vkCmdDraw(commandBuffer.getHandle(),
+                          particleSystem.count,
+                          1,
+                          0,
+                          0);
             }
         }
     }
@@ -108,6 +87,5 @@ public class ParticleRendererExecutor extends RecreateCloseable {
         super.close();
 
         this.pipeline.close();
-        this.mesh.close();
     }
 }
