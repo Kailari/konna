@@ -1,5 +1,6 @@
 package fi.jakojaannos.roguelite.game.systems;
 
+import org.joml.Vector2d;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -12,7 +13,7 @@ import fi.jakojaannos.roguelite.game.data.resources.collision.Collisions;
 import fi.jakojaannos.roguelite.game.systems.physics.ApplyFrictionSystem;
 
 import static fi.jakojaannos.roguelite.engine.utilities.assertions.world.GameExpect.whenGame;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplyFrictionSystemTest {
 
@@ -87,4 +88,60 @@ public class ApplyFrictionSystemTest {
                       assertEquals(0.0, velocity.y);
                   });
     }
+
+    @Test
+    void dragSlowsEntity() {
+        whenGame().withSystems(new ApplyFrictionSystem())
+                  .withState(this::initialState)
+                  .withState(world -> {
+                      velocity.set(-69.69, 41.99);
+                      // TODO: physics.drag
+                      physics.friction = 0.0;
+                  })
+                  .runsSingleTick()
+                  .expect(state -> {
+                      assertTrue(velocity.length() < new Vector2d(-69.69, 41.99).length());
+                  });
+    }
+
+    @Test
+    void dragSlowsEntityInProportionToVelocity() {
+        Velocity faster = new Velocity();
+
+        whenGame().withSystems(new ApplyFrictionSystem())
+                  .withState(this::initialState)
+                  .withState(world -> {
+                      velocity.set(10, 10);
+                      physics.friction = 0.0;
+                      // TODO: physics.drag
+                  })
+                  .withState(world -> {
+                      faster.set(100, 100);
+                      world.createEntity(faster,
+                                         Physics.builder().friction(0.0).build());
+                      // TODO: physics.drag
+                  })
+                  .runsSingleTick()
+                  .expect(state -> {
+                      // assert: faster entity slowed down more
+                      final double velocityDeltaSlow = new Vector2d(10, 10).length() - velocity.length();
+                      final double velocityDeltaFast = new Vector2d(100, 100).length() - faster.length();
+
+                      assertTrue(velocityDeltaFast > velocityDeltaSlow);
+                  });
+    }
+
+    @Test
+    void dragNearlyStopsEntityAfterWhile() {
+        whenGame().withSystems(new ApplyFrictionSystem())
+                  .withState(this::initialState)
+                  .withState(world -> {
+                      velocity.set(33.33, -20.00);
+                      // TODO: physics.drag
+                      physics.friction = 0.0;
+                  })
+                  .runsForTicks(120)
+                  .expect(state -> assertEquals(0.0, velocity.length(), EPSILON));
+    }
+
 }
