@@ -5,7 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import fi.jakojaannos.riista.ecs.EntityHandle;
 import fi.jakojaannos.riista.ecs.World;
+import fi.jakojaannos.roguelite.game.data.components.InAir;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
 import fi.jakojaannos.roguelite.game.data.components.Velocity;
 import fi.jakojaannos.roguelite.game.data.resources.collision.Colliders;
@@ -19,6 +21,7 @@ public class ApplyFrictionSystemTest {
 
     private static final double EPSILON = 0.01;
 
+    private EntityHandle entity;
     private Velocity velocity;
     private Physics physics;
 
@@ -26,8 +29,8 @@ public class ApplyFrictionSystemTest {
         world.registerResource(new Collisions());
         world.registerResource(new Colliders());
 
-        world.createEntity(physics = Physics.builder().friction(5.0).build(),
-                           velocity = new Velocity());
+        entity = world.createEntity(physics = Physics.builder().friction(5.0).build(),
+                                    velocity = new Velocity());
     }
 
     @ParameterizedTest
@@ -95,13 +98,11 @@ public class ApplyFrictionSystemTest {
                   .withState(this::initialState)
                   .withState(world -> {
                       velocity.set(-69.69, 41.99);
-                      // TODO: physics.drag
+                      physics.drag = 10.0;
                       physics.friction = 0.0;
                   })
                   .runsSingleTick()
-                  .expect(state -> {
-                      assertTrue(velocity.length() < new Vector2d(-69.69, 41.99).length());
-                  });
+                  .expect(state -> assertTrue(velocity.length() < new Vector2d(-69.69, 41.99).length()));
     }
 
     @Test
@@ -113,13 +114,14 @@ public class ApplyFrictionSystemTest {
                   .withState(world -> {
                       velocity.set(10, 10);
                       physics.friction = 0.0;
-                      // TODO: physics.drag
+                      physics.drag = 10.0;
                   })
                   .withState(world -> {
                       faster.set(100, 100);
+                      final var phy2 = Physics.builder().friction(0.0).build();
+                      phy2.drag = 10.0;
                       world.createEntity(faster,
-                                         Physics.builder().friction(0.0).build());
-                      // TODO: physics.drag
+                                         phy2);
                   })
                   .runsSingleTick()
                   .expect(state -> {
@@ -137,11 +139,40 @@ public class ApplyFrictionSystemTest {
                   .withState(this::initialState)
                   .withState(world -> {
                       velocity.set(33.33, -20.00);
-                      // TODO: physics.drag
+                      physics.drag = 10.0;
                       physics.friction = 0.0;
                   })
                   .runsForTicks(120)
                   .expect(state -> assertEquals(0.0, velocity.length(), EPSILON));
     }
 
+    @Test
+    void groundFrictionDoesntAffectFlyingEntity() {
+        final double expectedLength = new Vector2d(11.11, 22.22).length();
+
+        whenGame().withSystems(new ApplyFrictionSystem())
+                  .withState(this::initialState)
+                  .withState(world -> {
+                      velocity.set(11.11, 22.22);
+                      physics.drag = 0.0;
+                      physics.friction = 100.0;
+                      entity.addComponent(new InAir(0, 1000));
+                  })
+                  .runsForTicks(10)
+                  .expect(state -> assertEquals(expectedLength, velocity.length(), EPSILON));
+    }
+
+    @Test
+    void airFrictionSlowsFlyingEntity() {
+        whenGame().withSystems(new ApplyFrictionSystem())
+                  .withState(this::initialState)
+                  .withState(world -> {
+                      velocity.set(11.11, 22.22);
+                      physics.drag = 10.0;
+                      physics.friction = 0.0;
+                      entity.addComponent(new InAir(0, 1000));
+                  })
+                  .runsForTicks(10)
+                  .expect(state -> assertTrue(velocity.length() < new Vector2d(11.11, 22.22).length()));
+    }
 }

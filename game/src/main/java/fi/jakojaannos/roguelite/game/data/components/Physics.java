@@ -8,6 +8,8 @@ public class Physics {
     public final Vector2d acceleration = new Vector2d(0.0, 0.0);
     public double mass;
     public double friction;
+    // TODO: add to builder
+    public double drag;
 
     private Physics(final double mass, final double friction) {
         this.mass = mass;

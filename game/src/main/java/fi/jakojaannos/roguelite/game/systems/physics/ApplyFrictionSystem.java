@@ -2,11 +2,11 @@ package fi.jakojaannos.roguelite.game.systems.physics;
 
 import org.joml.Vector2d;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import fi.jakojaannos.riista.ecs.EcsSystem;
 import fi.jakojaannos.riista.ecs.EntityDataHandle;
-import fi.jakojaannos.riista.ecs.annotation.Without;
 import fi.jakojaannos.riista.utilities.TimeManager;
 import fi.jakojaannos.roguelite.game.data.components.InAir;
 import fi.jakojaannos.roguelite.game.data.components.Physics;
@@ -29,13 +29,29 @@ public class ApplyFrictionSystem implements EcsSystem<ApplyFrictionSystem.Resour
                 return;
             }
 
-            final var frictionVector = new Vector2d(velocity).normalize(physics.friction * delta);
+            final double airFriction = velocity.lengthSquared() * physics.drag * delta;
+            final double groundFriction = entity.getData().inAir.isEmpty()
+                    ? physics.friction * delta
+                    : 0.0;
 
-            final var magnitudeX = Math.max(0, Math.abs(velocity.x) - Math.abs(frictionVector.x));
-            final var magnitudeY = Math.max(0, Math.abs(velocity.y) - Math.abs(frictionVector.y));
-            velocity.set(Math.signum(velocity.x) * magnitudeX,
-                         Math.signum(velocity.y) * magnitudeY);
+            applyFriction(velocity, airFriction + groundFriction);
         });
+    }
+
+    private static void applyFriction(
+            final Velocity velocity,
+            final double frictionAmount
+    ) {
+        if (frictionAmount == 0.0) {
+            return;
+        }
+        if (frictionAmount * frictionAmount >= velocity.lengthSquared()) {
+            velocity.set(0.0, 0.0);
+            return;
+        }
+
+        final var frictionVector = new Vector2d(velocity).normalize(frictionAmount);
+        velocity.sub(frictionVector);
     }
 
     public static record Resources(TimeManager timeManager) {}
@@ -43,6 +59,6 @@ public class ApplyFrictionSystem implements EcsSystem<ApplyFrictionSystem.Resour
     public static record EntityData(
             Physics physics,
             Velocity velocity,
-            @Without InAir noInAir
+            Optional<InAir>inAir
     ) {}
 }
